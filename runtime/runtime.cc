@@ -321,24 +321,24 @@ size_t ParseIntegerOrDie(const std::string& s) {
   return result;
 }
 
-void Runtime::ParsedOptions::InitMProfilerParser(Runtime::ParsedOptions* options){
-	options->mprofiler_options_.mprofile_type_=
+void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprofiler_opts){
+	mprofiler_opts->mprofile_type_=
 			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
-	options->mprofiler_options_.mprofile_grow_method_=
+	mprofiler_opts->mprofile_grow_method_=
 			art::mprofiler::MProfiler::kGCMMPDefaultGrowMethod;
 }
 
 
 bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
-		Runtime::ParsedOptions* parsed){
+		mprofiler::GCMMP_Options* mprofiler_opts){
 	if (StartsWith(option, "-Xgcmmp.")) {
 	    	LOG(INFO) << "XXXX Parsing -Xgcmmp option: " << option;
 	    	std::vector<std::string> mprofile_options;
 	    	Split(option.substr(strlen("-Xgcmmp.")), '.', mprofile_options);
 	      for (size_t i = 0; i < mprofile_options.size(); ++i) {
 	        if (mprofile_options[i] == "perftype") {
-	        	parsed->mprofiler_options_.mprofile_type_ = atoi(mprofile_options[++i].c_str());
-	          LOG(INFO) << "Parsing -Xgcmmp option: " << parsed->mprofiler_options_.mprofile_type_;
+	        	mprofiler_opts->mprofile_type_ = atoi(mprofile_options[++i].c_str());
+	          LOG(INFO) << "Parsing -Xgcmmp option: " << mprofiler_opts->mprofile_type_;
 	          return true;
 	        } else {
 	          LOG(INFO) << "Ignoring unknown -Xgcmmp option: " << mprofile_options[i];
@@ -415,7 +415,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->method_trace_file_ = "/data/method-trace-file.bin";
   parsed->method_trace_file_size_ = 10 * MB;
 
-  Runtime::ParsedOptions::InitMProfilerParser(parsed);
+  Runtime::ParsedOptions::InitMProfilerParser(&parsed->mprofiler_options_);
 
   for (size_t i = 0; i < options.size(); ++i) {
     const std::string option(options[i].first);
@@ -566,7 +566,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
           LOG(WARNING) << "Ignoring unknown -Xgc option: " << gc_options[i];
         }
       }
-    } else if (Runtime::ParsedOptions::ParseMProfileOption(option, parsed)) {
+    } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->mprofiler_options_)) {
     	LOG(INFO) << "XXXX Done Parsing -Xgcmmp option: " << option;
     } else if (option == "-XX:+DisableExplicitGC") {
       parsed->is_explicit_gc_disabled_ = true;

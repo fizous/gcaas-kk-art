@@ -138,9 +138,9 @@ class Runtime {
 
 
     mprofiler::GCMMP_Options mprofiler_options_;
-    static void InitMProfilerParser(Runtime::ParsedOptions*);
-    static bool ParseMProfileOption(const std::string& option,
-    		Runtime::ParsedOptions* parsed);
+    static void InitMProfilerParser(mprofiler::GCMMP_Options*);
+    static bool ParseMProfileOption(const std::string&,
+    		mprofiler::GCMMP_Options*);
    private:
     ParsedOptions() {}
   };
