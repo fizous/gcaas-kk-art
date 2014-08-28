@@ -11,6 +11,7 @@
 #include <string>
 #include "locks.h"
 
+#include "base/unix_file/fd_file.h"
 
 /**********************************************************************
  * 											Macros Definitions
@@ -166,8 +167,6 @@ private:
   void InitializeProfiler(void);
 
   void DumpProfData(void);
-
-  void InitDumpFile(void);
 
   const bool enabled_;
 
