@@ -186,7 +186,7 @@ public:
 	void PreForkPreparation(void);
 
   bool IsProfilingEnabled() const {
-    return false;
+    return true;
   }
 
   void GCMMProfPerfCounters(const char*);

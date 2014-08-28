@@ -67,12 +67,12 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
-				LOG(INFO) << "MProfiler found a target VM " << name;
+				LOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 				return;
 			}
 		}
 	}
-	LOG(INFO) << "MProfiler did not find a target VM for " << name;
+	LOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 }
 
 void MProfiler::PreForkPreparation() {
