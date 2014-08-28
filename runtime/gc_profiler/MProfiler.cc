@@ -44,8 +44,8 @@ MProfiler::MProfiler(void)
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		flags_(0),
-		dump_file_name_(NULL),
-		dump_file_(NULL),
+//		dump_file_name_(NULL),
+//		dump_file_(NULL),
 		thread_recs_(NULL)
 {
 	if(IsProfilingEnabled()) {
