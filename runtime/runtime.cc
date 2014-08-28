@@ -228,6 +228,7 @@ void Runtime::Abort() {
 
 bool Runtime::PreZygoteFork() {
   heap_->PreZygoteFork();
+  mprofiler_->PreForkPreparation();
   return true;
 }
 
@@ -888,6 +889,8 @@ bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
                        options->long_pause_log_threshold_,
                        options->long_gc_log_threshold_,
                        options->ignore_max_footprint_);
+
+  mprofiler_ = new mprofiler::MProfiler();
 
   BlockSignals();
   InitPlatformSignalHandlers();

@@ -39,6 +39,10 @@
 
 namespace art {
 
+namespace mprofiler {
+  class MProfiler;
+}
+
 namespace gc {
   class Heap;
 }
@@ -512,6 +516,8 @@ class Runtime {
 
   // As returned by ClassLoader.getSystemClassLoader().
   jobject system_class_loader_;
+
+  mprofiler::MProfiler* mprofiler_;
 
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };
