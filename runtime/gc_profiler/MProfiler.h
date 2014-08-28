@@ -170,7 +170,7 @@ private:
 
   const bool running_;
 
-  void* Run(void*);
+  static void* Run(void* arg);
 
 
   void OpenDumpFile(void);

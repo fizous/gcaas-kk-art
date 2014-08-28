@@ -8,18 +8,21 @@
 #include <string>
 #include <pthread.h>
 #include <fcntl.h>
-#include "runtime.h"
-#include "gc/heap.h"
-#include "os.h"
-#include "locks.h"
+
+
+#include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
 #include <cutils/trace.h>
-#include "base/unix_file/fd_file.h"
+#include "gc/heap.h"
+#include "gc_profiler/MProfiler.h"
+#include "locks.h"
+#include "os.h"
+#include "runtime.h"
 #include "thread_list.h"
 #include "thread.h"
 
-#include "gc_profiler/MProfiler.h"
+
 
 namespace art {
 namespace mprofiler {
@@ -86,7 +89,25 @@ MProfiler::~MProfiler() {
 
 }
 
+void* MProfiler::Run(void* arg) {
+  Runtime* runtime = Runtime::Current();
+  CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
+                                     !runtime->IsCompiler()));
 
+  Thread* self = Thread::Current();
+
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    MutexLock mu(self, *prof_thread_mutex_);
+    prof_thread_(self);
+
+    OpenDumpFile();
+
+    prof_thread_cond_->Broadcast(self);
+  }
+
+
+}
 
 void MProfiler::CreateProfilerDaemon(void){
   // Create a raw pthread; its start routine will attach to the runtime.
@@ -118,25 +139,7 @@ void MProfiler::OpenDumpFile(){
 	}
 }
 
-void* MProfiler::Run(void* arg) {
-  Runtime* runtime = Runtime::Current();
-  CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
-                                     !runtime->IsCompiler()));
 
-  Thread* self = Thread::Current();
-
-  DCHECK_NE(self->GetState(), kRunnable);
-  {
-    MutexLock mu(self, *prof_thread_mutex_);
-    prof_thread_(self);
-
-    OpenDumpFile();
-
-    prof_thread_cond_->Broadcast(self);
-  }
-
-
-}
 
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
