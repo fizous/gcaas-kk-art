@@ -17,7 +17,7 @@
 #include <cutils/trace.h>
 #include "base/unix_file/fd_file.h"
 #include "thread_list.h"
-
+#include "thread.h"
 
 #include "gc_profiler/MProfiler.h"
 
@@ -46,7 +46,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		flags_(0),
-//		dump_file_name_(NULL),
  		dump_file_name_("PERF.log"),
 //		dump_file_(NULL),
 		thread_recs_(NULL),
