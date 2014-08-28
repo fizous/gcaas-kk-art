@@ -45,6 +45,7 @@ MProfiler::MProfiler(void)
 		gc_daemon_(NULL),
 		flags_(0),
 		dump_file_name_(NULL),
+		dump_file_(NULL),
 		thread_recs_(NULL)
 {
 	if(IsProfilingEnabled()) {
@@ -60,7 +61,7 @@ MProfiler::MProfiler(void)
 
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
-		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
+		for (size_t i = 0; i < GetBenchmarksCount(); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name;
 				return;
