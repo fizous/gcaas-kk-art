@@ -566,7 +566,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
           LOG(WARNING) << "Ignoring unknown -Xgc option: " << gc_options[i];
         }
       }
-    } else if (ParseMProfileOption(option, parsed)) {
+    } else if (Runtime::ParsedOptions::ParseMProfileOption(option, parsed)) {
     	LOG(INFO) << "XXXX Done Parsing -Xgcmmp option: " << option;
     } else if (option == "-XX:+DisableExplicitGC") {
       parsed->is_explicit_gc_disabled_ = true;

@@ -137,9 +137,9 @@ class Runtime {
     bool sea_ir_mode_;
 
 
-    art::mprofiler::GCMMP_Options mprofiler_options_;
-    static void InitMProfilerParser(Runtime::ParsedOptions*);
-    static bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
+    mprofiler::GCMMP_Options mprofiler_options_;
+    static void InitMProfilerParser(ParsedOptions*);
+    static bool ParseMProfileOption(const std::string& option,
     		Runtime::ParsedOptions* parsed);
    private:
     ParsedOptions() {}
