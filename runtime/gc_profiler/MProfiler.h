@@ -162,9 +162,9 @@ private:
   void InitDumpFile(void);
 
   /* Utilities */
-  int GetBenchmarksCount() const {
-    return (GCMMP_ARRAY_SIZE(benchmarks));
-  }
+//  int GetBenchmarksCount() const {
+//    return (GCMMP_ARRAY_SIZE(benchmarks));
+//  }
 
   /* Utilities */
 
