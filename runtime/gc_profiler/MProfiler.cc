@@ -58,7 +58,10 @@ MProfiler::MProfiler(void)
 	LOG(INFO) << "MProfiler Created";
 }
 
+MProfiler::~MProfiler() {
+  delete prof_thread_mutex_;
 
+}
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
 		for (size_t i = 0; i < GetBenchmarksCount(); i++) {
