@@ -43,13 +43,12 @@ const char * MProfiler::gcMMPRootPath[] = {
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
-		prof_thread_(NULL),
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		flags_(0),
 		pthread_(NULL),
 		dump_file_name_(NULL),
-
+		prof_thread_(NULL),
 //		dump_file_name_(NULL),
 //		dump_file_(NULL),
 		thread_recs_(NULL)

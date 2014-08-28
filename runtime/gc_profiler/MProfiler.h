@@ -137,8 +137,6 @@ class MProfiler {
 private:
 	//Index of the profiler type we are running
 	const int index_;
-  // System thread used for the profiling (profileDaemon).
-	Thread* prof_thread_;
   // System thread used as main (thread id = 1).
 	Thread* main_thread_;
   // System thread used as GC Daemon (thread id = 1).
@@ -158,7 +156,8 @@ private:
   Mutex* prof_thread_mutex_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
-
+  // System thread used for the profiling (profileDaemon).
+	Thread* prof_thread_;
 	/* array of thread records used to keep the data per thread */
 	GCMMPThreadProf* thread_recs_;
 
