@@ -415,7 +415,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->method_trace_file_ = "/data/method-trace-file.bin";
   parsed->method_trace_file_size_ = 10 * MB;
 
-  InitMProfilerParser(parsed);
+  Runtime::ParsedOptions::InitMProfilerParser(parsed);
 
   for (size_t i = 0; i < options.size(); ++i) {
     const std::string option(options[i].first);
