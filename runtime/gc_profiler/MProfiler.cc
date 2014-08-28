@@ -60,7 +60,7 @@ MProfiler::MProfiler(void)
 
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
-		for (int i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
+		for (int i = 0; i < GetBenchmarksCount(); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name;
 				return;

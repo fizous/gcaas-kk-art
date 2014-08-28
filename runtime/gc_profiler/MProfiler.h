@@ -162,9 +162,9 @@ private:
   void InitDumpFile(void);
 
   /* Utilities */
-//  int GetBenchmarksCount() const {
-//    return (GCMMP_ARRAY_SIZE(benchmarks));
-//  }
+  size_t GetBenchmarksCount() const {
+    return (sizeof(benchmarks)/sizeof(char*));
+  }
 
   /* Utilities */
 
@@ -176,11 +176,11 @@ public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
 	// List of profiled benchmarks in our system
-	static const char *benchmarks[];
+	static const char* benchmarks[];
 	/*
 	 * list of the directory paths to save the logs
 	 */
-	static const char *gcMMPRootPath[];
+	static const char* gcMMPRootPath[];
 
 	MProfiler(void);
 
