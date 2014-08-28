@@ -156,11 +156,10 @@ private:
   Mutex* prof_thread_mutex_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
-  // System thread used for the profiling (profileDaemon).
-	Thread* prof_thread_;
 	/* array of thread records used to keep the data per thread */
 	GCMMPThreadProf* thread_recs_;
-
+  // System thread used for the profiling (profileDaemon).
+	Thread* prof_thread_;
   void CreateProfilerDaemon(void);
 
   void InitializeProfiler(void);
