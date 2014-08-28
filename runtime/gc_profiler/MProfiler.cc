@@ -47,7 +47,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		gc_daemon_(NULL),
 		flags_(0),
 //		dump_file_name_(NULL),
- 		dump_file_name_(NULL),
+ 		dump_file_name_("PERF.log"),
 //		dump_file_(NULL),
 		thread_recs_(NULL),
 		prof_thread_(NULL),
@@ -60,7 +60,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
-		dump_file_name_ = "PERF.log";
 
 	} else {
 		LOG(INFO) << "MProfiler Profiling is Disabled";

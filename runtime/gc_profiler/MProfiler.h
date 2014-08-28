@@ -147,7 +147,7 @@ private:
   const unsigned int flags_;
 
   /* file used to dump the profiling data */
-  char * dump_file_name_;
+  const char * dump_file_name_;
   art::File dump_file_;
   /*
    * Guards access to the state of the profiler daemon,
