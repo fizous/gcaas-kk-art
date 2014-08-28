@@ -61,7 +61,7 @@ MProfiler::MProfiler(void)
 }
 
 
-void MProfiler::dvmGCMMProfPerfCounters(const char* name) {
+void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
 		for (int i = 0; i < GetBenchmarksCount(); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
@@ -83,12 +83,5 @@ void MProfiler::PreForkPreparation() {
 void dvmGCMMProfPerfCounters(const char* vmName){
 	art::mprofiler::MProfiler* mProfiler =
 			art::Runtime::Current()->GetMProfiler();
-	if(mProfiler->IsProfilingEnabled()){
-		for (int i = 0; i < GetBenchmarksCount(); i++) {
-			if (strcmp(name, benchmarks[i]) == 0) {
-				LOG(INFO) << "MProfiler found a target VM " << name;
-				return;
-			}
-		}
-	}
+	mProfiler->GCMMProfPerfCounters(vmName);
 }

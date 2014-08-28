@@ -195,6 +195,8 @@ public:
   bool IsProfilingEnabled() const {
     return false;
   }
+
+  void MProfiler::GCMMProfPerfCounters(const char*);
 }; //class MProfiler
 
 }  // namespace mprofiler
