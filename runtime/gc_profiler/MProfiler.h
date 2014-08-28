@@ -15,6 +15,9 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
+#define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
+
+
 /** definitions for logging and error reporting  **/
 #define GCMMP_ALLOW_PROFILE 								0
 #define GCMMP_GCPAUSE_ARRAY_SIZE					  32
@@ -181,7 +184,7 @@ private:
 
   /* Utilities */
   int GetBenchmarksCount() const {
-    return (sizeof(benchmarks)/sizeof(*benchmarks));
+    return (GCMMP_ARRAY_SIZE(benchmarks));
   }
 
   /* Utilities */

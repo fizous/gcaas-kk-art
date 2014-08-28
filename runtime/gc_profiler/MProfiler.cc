@@ -50,7 +50,7 @@ MProfiler::MProfiler(void)
 		dump_file_name_(NULL),
 		thread_recs_(NULL)
 {
-	if(IsProfilingEnabled) {
+	if(IsProfilingEnabled()) {
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
@@ -63,7 +63,7 @@ MProfiler::MProfiler(void)
 
 void MProfiler::dvmGCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
-		for (u4 i = 0; i < GetBenchmarksCount(); i++) {
+		for (int i = 0; i < GetBenchmarksCount(); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name;
 				return;
@@ -76,9 +76,11 @@ void MProfiler::dvmGCMMProfPerfCounters(const char* name) {
 void MProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
+
 }// namespace mprofiler
 }// namespace art
 
 void dvmGCMMProfPerfCounters(const char* vmName){
-	art::mprofiler::MProfiler* mProfiler =  art::Runtime::Current()->GetMProfiler();
+	art::mprofiler::MProfiler* mProfiler =
+			art::Runtime::Current()->GetMProfiler();
 }
