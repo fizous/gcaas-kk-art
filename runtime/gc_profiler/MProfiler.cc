@@ -19,9 +19,7 @@
 
 #include "gc_profiler/MProfiler.h"
 
-void dvmGCMMProfPerfCounters(const char* vmName){
-	mprofiler::MProfiler* mProfiler =  Runtime::Current()->GetMProfiler();
-}
+
 
 
 namespace art {
@@ -81,3 +79,6 @@ void MProfiler::PreForkPreparation() {
 }// namespace mprofiler
 }// namespace art
 
+void dvmGCMMProfPerfCounters(const char* vmName){
+	art::mprofiler::MProfiler* mProfiler =  art::Runtime::Current()->GetMProfiler();
+}
