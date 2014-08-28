@@ -49,7 +49,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		flags_(0),
 		pthread_(NULL),
 		dump_file_name_(NULL),
-		dump_file_(NULL),
 
 //		dump_file_name_(NULL),
 //		dump_file_(NULL),
