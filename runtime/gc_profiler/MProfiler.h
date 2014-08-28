@@ -126,27 +126,6 @@ class GCMMPThreadProf {
 };
 
 class MProfiler {
-public:
-	static constexpr int kGCMMPDumpSignal = SIGUSR2;
-	static const unsigned int kGCMMPEnableProfiling = 0;
-	// List of profiled benchmarks in our system
-	static const char * const benchmarks[];
-	/*
-	 * list of the directory paths to save the logs
-	 */
-	static const char * const gcMMPRootPath[];
-
-	MProfiler(void);
-
-	~MProfiler();
-
-	//bool VerifyProcessName();
-
-	void ProcessSignal(int signal_number);
-
-	void PreForkPreparation();
-
-	void dvmGCMMProfPerfCounters(const char* name);
 private:
 	//Index of the profiler type we are running
 	const unsigned int index_;
@@ -188,10 +167,32 @@ private:
   }
 
   /* Utilities */
-  bool IsProfilingEnabled() const {
+
+  bool IsProfilingRunning() const {
     return false;
   }
-  bool IsProfilingRunning() const {
+
+public:
+	static constexpr int kGCMMPDumpSignal = SIGUSR2;
+	static const unsigned int kGCMMPEnableProfiling = 0;
+	// List of profiled benchmarks in our system
+	static const char * const benchmarks[];
+	/*
+	 * list of the directory paths to save the logs
+	 */
+	static const char * const gcMMPRootPath[];
+
+	MProfiler(void);
+
+	~MProfiler();
+
+	//bool VerifyProcessName();
+
+	void ProcessSignal(int);
+
+	void PreForkPreparation(void);
+
+  bool IsProfilingEnabled() const {
     return false;
   }
 }; //class MProfiler
