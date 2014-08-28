@@ -50,7 +50,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		gc_daemon_(NULL),
 		flags_(0),
  		dump_file_name_("PERF.log"),
-//		dump_file_(NULL),
 		thread_recs_(NULL),
 		prof_thread_(NULL),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
@@ -102,7 +101,7 @@ void* MProfiler::Run(void* arg) {
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    mProfiler->prof_thread_(self);
+    mProfiler->prof_thread_ = self;
 
     mProfiler->OpenDumpFile();
 
