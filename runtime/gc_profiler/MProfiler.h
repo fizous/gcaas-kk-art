@@ -118,17 +118,7 @@ public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
 	// List of profiled benchmarks in our system
-	static const char * const benchmarks[] = {
-			"com.aurorasoftworks.quadrant.ui.professional",
-			"purdue.specjvm98",
-			"purdue.dacapo",
-			"com.antutu.ABenchMark",
-			"com.android.cm3",
-			"purdue.gcbench",
-			"com.pandora.android"
-			//"com.android.systemui"  //we can add this to the profiled targets
-			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
-	};
+	static const char * const benchmarks[];
 	/*
 	 * list of the directory paths to save the logs
 	 */

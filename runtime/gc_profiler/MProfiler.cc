@@ -22,17 +22,17 @@
 namespace art {
 namespace mprofiler {
 
-//const char * const MProfiler::benchmarks[] = {
-//			"com.aurorasoftworks.quadrant.ui.professional",
-//			"purdue.specjvm98",
-//			"purdue.dacapo",
-//			"com.antutu.ABenchMark",
-//			"com.android.cm3",
-//			"purdue.gcbench",
-//			"com.pandora.android"
-//			//"com.android.systemui"  //we can add this to the profiled targets
-//			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
-//	};
+const char * const MProfiler::benchmarks[] = {
+			"com.aurorasoftworks.quadrant.ui.professional",
+			"purdue.specjvm98",
+			"purdue.dacapo",
+			"com.antutu.ABenchMark",
+			"com.android.cm3",
+			"purdue.gcbench",
+			"com.pandora.android"
+			//"com.android.systemui"  //we can add this to the profiled targets
+			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
+	};
 
 
 // Member functions definitions including constructor
