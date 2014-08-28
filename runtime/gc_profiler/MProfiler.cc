@@ -52,15 +52,16 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 //		dump_file_(NULL),
 		thread_recs_(NULL),
 		prof_thread_(NULL),
+		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
 {
-	enabled_ = (argOptions->mprofile_type_ != 999);
+	;
 	if(IsProfilingEnabled()) {
 		LOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
-		dump_file_name_("PERF.log");
+		dump_file_name_ = "PERF.log";
 
 	} else {
 		LOG(INFO) << "MProfiler Profiling is Disabled";
