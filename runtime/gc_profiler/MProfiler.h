@@ -42,7 +42,7 @@ namespace mprofiler {
 
 
 
-typedef struct GCMMP_Options_s{
+typedef struct GCMMP_Options_s {
 	int mprofile_type_;
 	int mprofile_grow_method_;
 }GCMMP_Options;
@@ -150,7 +150,7 @@ private:
 
   /* file used to dump the profiling data */
   const char * dump_file_name_;
-  const File dump_file_;
+  const art::File dump_file_;
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
