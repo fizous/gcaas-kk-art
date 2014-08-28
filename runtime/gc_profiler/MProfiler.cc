@@ -7,6 +7,7 @@
 
 #include <string>
 #include <pthread.h>
+#include <fcntl.h>
 #include "runtime.h"
 #include "gc/heap.h"
 #include "os.h"
@@ -14,7 +15,7 @@
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
 #include <cutils/trace.h>
-
+#include "base/unix_file/fd_file.h"
 #include "thread_list.h"
 
 
@@ -97,6 +98,25 @@ void MProfiler::CreateProfilerDaemon(void){
 
 }
 
+
+void MProfiler::OpenDumpFile(){
+	int fd = -1;
+	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
+		char str[256];
+		strcpy(str, gcMMPRootPath[i]);
+		strcat(str, dump_file_name_);
+
+
+		int fd = open(str, O_RDWR | O_APPEND | O_WRONLY, 0777);
+	  if (fd == -1) {
+	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
+	    continue;
+	  }
+    PLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+    dump_file_(new File(fd, std::string(dump_file_name_)));
+	}
+}
+
 void* MProfiler::Run(void* arg) {
   Runtime* runtime = Runtime::Current();
   CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
@@ -108,6 +128,9 @@ void* MProfiler::Run(void* arg) {
   {
     MutexLock mu(self, *prof_thread_mutex_);
     prof_thread_(self);
+
+    OpenDumpFile();
+
     prof_thread_cond_->Broadcast(self);
   }
 

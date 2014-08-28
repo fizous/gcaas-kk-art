@@ -148,8 +148,8 @@ private:
   const unsigned int flags_;
 
   /* file used to dump the profiling data */
-//  const char * dump_file_name_;
-//  UniquePtr<File> dump_file_;
+  const char * dump_file_name_;
+  const File dump_file_;
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
@@ -174,6 +174,9 @@ private:
   const bool running_;
 
   void* Run(void*);
+
+
+  void OpenDumpFile(void);
 
   bool IsCreateProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
