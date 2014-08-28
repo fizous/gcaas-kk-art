@@ -38,6 +38,9 @@ class Mutex;
 
 namespace mprofiler {
 
+
+
+
 typedef struct GCMMP_Options_s{
 	int mprofile_type_;
 	int mprofile_grow_method_;
@@ -132,7 +135,7 @@ class GCMMPThreadProf {
 class MProfiler {
 private:
 	//Index of the profiler type we are running
-	const unsigned int index_;
+	const int index_;
   // System thread used for the profiling (profileDaemon).
 	Thread* prof_thread_;
   // System thread used as main (thread id = 1).
@@ -153,6 +156,7 @@ private:
    */
   Mutex* prof_thread_mutex_;
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
+  pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 	/* array of thread records used to keep the data per thread */
 	GCMMPThreadProf* thread_recs_;
@@ -165,10 +169,18 @@ private:
 
   void InitDumpFile(void);
 
-  bool IsProfilingRunning() const {
-    return false;
-  }
+  const bool enabled_;
 
+  const bool running_;
+
+  void* Run(void*);
+
+  bool IsCreateProfDaemon() const {
+    return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
+  }
+  bool IsProfilingRunning() const {
+    return running_;
+  }
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
@@ -181,7 +193,7 @@ public:
 	 */
 	static const char * gcMMPRootPath[];
 
-	MProfiler(void);
+	MProfiler(GCMMP_Options*);
 
 	~MProfiler();
 
@@ -192,11 +204,13 @@ public:
 	void PreForkPreparation(void);
 
   bool IsProfilingEnabled() const {
-    return true;
+    return enabled_;
   }
 
   void GCMMProfPerfCounters(const char*);
 }; //class MProfiler
+
+
 
 }  // namespace mprofiler
 }  // namespace gc

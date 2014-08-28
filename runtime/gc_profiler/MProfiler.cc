@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <pthread.h>
 #include "runtime.h"
 #include "gc/heap.h"
 #include "os.h"
@@ -37,32 +38,82 @@ const char * MProfiler::benchmarks[] = {
 const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
+
 // Member functions definitions including constructor
-MProfiler::MProfiler(void)
-		: index_(0),
+MProfiler::MProfiler(GCMMP_Options* argOptions)
+		: index_(argOptions->mprofile_type_),
 		prof_thread_(NULL),
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		flags_(0),
+		pthread_(NULL),
 //		dump_file_name_(NULL),
 //		dump_file_(NULL),
 		thread_recs_(NULL)
 {
+	enabled_(index_ != 999);
 	if(IsProfilingEnabled()) {
+		LOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
 
+	} else {
 		LOG(INFO) << "MProfiler Profiling is Disabled";
 	}
 	LOG(INFO) << "MProfiler Created";
 }
+
+void MProfiler::InitializeProfiler(){
+	if(!IsProfilingEnabled())
+		return;
+	if(IsProfilingRunning())
+		return;
+	Thread* self = Thread::Current();
+	MutexLock mu(self, *prof_thread_mutex_);
+
+	if(IsCreateProfDaemon()){
+		CreateProfilerDaemon();
+	}
+}
+
 
 MProfiler::~MProfiler() {
 	if(prof_thread_mutex_ != NULL)
 		delete prof_thread_mutex_;
 
 }
+
+
+
+void MProfiler::CreateProfilerDaemon(void){
+  // Create a raw pthread; its start routine will attach to the runtime.
+
+  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this), "MProfiler Daemon thread");
+
+  while (prof_thread_ == NULL) {
+  	prof_thread_cond_->Wait(self);
+  }
+
+}
+
+void* MProfiler::Run(void* arg) {
+  Runtime* runtime = Runtime::Current();
+  CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
+                                     !runtime->IsCompiler()));
+
+  Thread* self = Thread::Current();
+
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    MutexLock mu(self, *prof_thread_mutex_);
+    prof_thread_(self);
+    prof_thread_cond_->Broadcast(self);
+  }
+
+
+}
+
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
