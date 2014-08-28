@@ -122,7 +122,7 @@ public:
 	/*
 	 * list of the directory paths to save the logs
 	 */
-	static const std::string gcMMPRootPath[] = { "/sdcard/gcperf/", "/data/anr/" };
+	static const char * const gcMMPRootPath[];
 
 	MProfiler(void);
 

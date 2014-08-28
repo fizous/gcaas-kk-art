@@ -32,9 +32,11 @@ const char * const MProfiler::benchmarks[] = {
 			"com.pandora.android"
 			//"com.android.systemui"  //we can add this to the profiled targets
 			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
-	};
+};
 
-
+const char * const MProfiler::gcMMPRootPath[] = {
+		"/sdcard/gcperf/", "/data/anr/"
+};
 // Member functions definitions including constructor
 MProfiler::MProfiler(void)
 		: index_(0),
