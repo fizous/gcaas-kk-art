@@ -116,7 +116,7 @@ class GCMMPThreadProf {
 class MProfiler {
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
-	static unsigned int kGCMMPEnableProfiling = 0;
+	static const unsigned int kGCMMPEnableProfiling = 0;
 	// List of profiled benchmarks in our system
 	static const std::string benchmarks[] = {
 			"com.aurorasoftworks.quadrant.ui.professional",
