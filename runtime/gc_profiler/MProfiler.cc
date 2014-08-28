@@ -43,7 +43,9 @@ MProfiler::MProfiler(void)
 		prof_thread_(NULL),
 		main_thread_(NULL),
 		gc_daemon_(NULL),
-		thread_recs_(NULL)
+		thread_recs_(NULL),
+		flags_(0),
+		dump_file_name_(NULL)
 {
 
 	prof_thread_mutex_ = new Mutex("MProfile Thread lock");
@@ -56,7 +58,7 @@ MProfiler::MProfiler(void)
 void MProfiler::dvmGCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
 		for (u4 i = 0; i < GetBenchmarksCount(); i++) {
-			if (std::strcmp(name, benchmarks[i].c_str()) == 0) {
+			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name;
 				return;
 			}

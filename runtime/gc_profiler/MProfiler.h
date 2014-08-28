@@ -144,15 +144,13 @@ private:
 	Thread* main_thread_;
   // System thread used as GC Daemon (thread id = 1).
 	Thread* gc_daemon_;
-  // Boolean for if we are in low memory mode.
-  const bool low_memory_mode_;
 
   // flags of the Profiler we are running
   // combines markAllocWindows, createProfDaemon, hasProfThread,
   const unsigned int flags_;
 
   /* file used to dump the profiling data */
-  std::string dump_file_name_;
+  const char * dump_file_name_;
   UniquePtr<File> dump_file_;
   /*
    * Guards access to the state of the profiler daemon,
