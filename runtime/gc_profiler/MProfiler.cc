@@ -22,6 +22,19 @@
 namespace art {
 namespace mprofiler {
 
+//const char * const MProfiler::benchmarks[] = {
+//			"com.aurorasoftworks.quadrant.ui.professional",
+//			"purdue.specjvm98",
+//			"purdue.dacapo",
+//			"com.antutu.ABenchMark",
+//			"com.android.cm3",
+//			"purdue.gcbench",
+//			"com.pandora.android"
+//			//"com.android.systemui"  //we can add this to the profiled targets
+//			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
+//	};
+
+
 // Member functions definitions including constructor
 MProfiler::MProfiler(void)
 		: index_(0),
@@ -30,6 +43,7 @@ MProfiler::MProfiler(void)
 		gc_daemon_(NULL),
 		thread_recs_(NULL)
 {
+
 	prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 	prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
                                                 *prof_thread_mutex_));

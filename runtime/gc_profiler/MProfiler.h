@@ -118,7 +118,7 @@ public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
 	// List of profiled benchmarks in our system
-	static const std::string benchmarks[] = {
+	static const char * const benchmarks[] = {
 			"com.aurorasoftworks.quadrant.ui.professional",
 			"purdue.specjvm98",
 			"purdue.dacapo",
