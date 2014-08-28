@@ -196,7 +196,7 @@ public:
     return false;
   }
 
-  void MProfiler::GCMMProfPerfCounters(const char*);
+  void GCMMProfPerfCounters(const char*);
 }; //class MProfiler
 
 }  // namespace mprofiler
