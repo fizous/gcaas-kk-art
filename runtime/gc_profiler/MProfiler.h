@@ -10,7 +10,7 @@
 
 #include <string>
 #include "locks.h"
-
+#include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
 /**********************************************************************
