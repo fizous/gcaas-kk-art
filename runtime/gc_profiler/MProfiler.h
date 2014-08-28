@@ -168,6 +168,7 @@ private:
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
+  static const int kGCMMPDisableMProfile = 999;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
 	/*

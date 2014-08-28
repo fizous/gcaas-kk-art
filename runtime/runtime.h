@@ -135,6 +135,9 @@ class Runtime {
     size_t num_dex_methods_threshold_;
     bool sea_ir_mode_;
 
+
+    int mprofile_type_;
+
    private:
     ParsedOptions() {}
   };
