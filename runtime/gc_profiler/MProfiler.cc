@@ -25,7 +25,7 @@
 namespace art {
 namespace mprofiler {
 
-const char * const MProfiler::benchmarks[] = {
+const char * MProfiler::benchmarks[] = {
 			"com.aurorasoftworks.quadrant.ui.professional",
 			"purdue.specjvm98",
 			"purdue.dacapo",
@@ -37,7 +37,7 @@ const char * const MProfiler::benchmarks[] = {
 			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
 };
 
-const char * const MProfiler::gcMMPRootPath[] = {
+const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
 // Member functions definitions including constructor

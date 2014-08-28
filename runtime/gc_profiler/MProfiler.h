@@ -176,11 +176,11 @@ public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
 	// List of profiled benchmarks in our system
-	static const char * const benchmarks[];
+	static const char *benchmarks[];
 	/*
 	 * list of the directory paths to save the logs
 	 */
-	static const char * const gcMMPRootPath[];
+	static const char *gcMMPRootPath[];
 
 	MProfiler(void);
 
