@@ -161,13 +161,6 @@ private:
 
   void InitDumpFile(void);
 
-  /* Utilities */
-  int GetBenchmarksCount() {
-    return (GCMMP_ARRAY_SIZE(benchmarks));
-  }
-
-  /* Utilities */
-
   bool IsProfilingRunning() const {
     return false;
   }

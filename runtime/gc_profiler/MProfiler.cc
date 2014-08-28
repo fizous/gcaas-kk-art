@@ -59,12 +59,13 @@ MProfiler::MProfiler(void)
 }
 
 MProfiler::~MProfiler() {
-  delete prof_thread_mutex_;
+	if(prof_thread_mutex_ != NULL)
+		delete prof_thread_mutex_;
 
 }
 void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()){
-		for (size_t i = 0; i < GetBenchmarksCount(); i++) {
+		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name;
 				return;
