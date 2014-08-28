@@ -47,13 +47,14 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		gc_daemon_(NULL),
 		flags_(0),
 		pthread_(NULL),
-		dump_file_name_(NULL),
+//		dump_file_name_(NULL),
 		prof_thread_(NULL),
 //		dump_file_name_(NULL),
 //		dump_file_(NULL),
-		thread_recs_(NULL)
+		thread_recs_(NULL),
+		running_(false)
 {
-	enabled_(index_ != 999);
+	enabled_ = (argOptions->mprofile_type_ != 999);
 	if(IsProfilingEnabled()) {
 		LOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
