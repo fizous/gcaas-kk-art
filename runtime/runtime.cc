@@ -36,6 +36,7 @@
 #include "debugger.h"
 #include "gc/accounting/card_table-inl.h"
 #include "gc/heap.h"
+#include "gc_profiler/MProfiler.h"
 #include "gc/space/space.h"
 #include "image.h"
 #include "instrumentation.h"
