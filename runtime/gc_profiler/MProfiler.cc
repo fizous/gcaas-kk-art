@@ -19,23 +19,8 @@
 
 #include "gc_profiler/MProfiler.h"
 
-
-
-
 namespace art {
 namespace mprofiler {
-
-const char * MProfiler::benchmarks[] = {
-			"com.aurorasoftworks.quadrant.ui.professional",
-			"purdue.specjvm98",
-			"purdue.dacapo",
-			"com.antutu.ABenchMark",
-			"com.android.cm3",
-			"purdue.gcbench",
-			"com.pandora.android"
-			//"com.android.systemui"  //we can add this to the profiled targets
-			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
-};
 
 const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
@@ -50,6 +35,17 @@ MProfiler::MProfiler(void)
 		dump_file_name_(NULL),
 		thread_recs_(NULL)
 {
+	static const char * benchmarks[] = {
+				"com.aurorasoftworks.quadrant.ui.professional",
+				"purdue.specjvm98",
+				"purdue.dacapo",
+				"com.antutu.ABenchMark",
+				"com.android.cm3",
+				"purdue.gcbench",
+				"com.pandora.android"
+				//"com.android.systemui"  //we can add this to the profiled targets
+				//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
+	};
 	if(IsProfilingEnabled()) {
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
