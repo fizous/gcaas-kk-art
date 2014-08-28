@@ -321,6 +321,14 @@ size_t ParseIntegerOrDie(const std::string& s) {
   return result;
 }
 
+void Runtime::ParsedOptions::InitMProfilerParser(Runtime::ParsedOptions* options){
+	options->mprofiler_options_.mprofile_type_=
+			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
+	options->mprofiler_options_.mprofile_grow_method_=
+			art::mprofiler::MProfiler::kGCMMPDefaultGrowMethod;
+}
+
+
 Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, bool ignore_unrecognized) {
   UniquePtr<ParsedOptions> parsed(new ParsedOptions());
   const char* boot_class_path_string = getenv("BOOTCLASSPATH");
@@ -388,8 +396,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->method_trace_file_ = "/data/method-trace-file.bin";
   parsed->method_trace_file_size_ = 10 * MB;
 
-
-  parsed->mprofile_type_=art::mprofiler::MProfiler::kGCMMPDisableMProfile;
+  InitMProfilerParser(parsed);
 
   for (size_t i = 0; i < options.size(); ++i) {
     const std::string option(options[i].first);

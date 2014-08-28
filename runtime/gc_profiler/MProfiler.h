@@ -38,6 +38,10 @@ class Mutex;
 
 namespace mprofiler {
 
+typedef struct GCMMP_Options_s{
+	int mprofile_type_;
+	int mprofile_grow_method_;
+}GCMMP_Options;
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
  * Make sure that GCMMP_GC_BRK_MAXIMUM always at the bottom of the definition
@@ -169,6 +173,7 @@ public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
   static const int kGCMMPDisableMProfile = 999;
+  static const int kGCMMPDefaultGrowMethod = 0;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
 	/*

@@ -28,6 +28,7 @@
 #include "base/macros.h"
 #include "base/stringpiece.h"
 #include "gc/heap.h"
+#include "gc_profiler/MProfiler.h"
 #include "globals.h"
 #include "instruction_set.h"
 #include "instrumentation.h"
@@ -136,8 +137,8 @@ class Runtime {
     bool sea_ir_mode_;
 
 
-    int mprofile_type_;
-
+    art::mprofiler::GCMMP_Options mprofiler_options_;
+    static void InitMProfilerParser(Runtime::ParsedOptions*);
    private:
     ParsedOptions() {}
   };
