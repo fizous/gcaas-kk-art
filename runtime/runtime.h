@@ -282,6 +282,10 @@ class Runtime {
     return heap_;
   }
 
+  mprofiler::MProfiler* GetMProfiler() const {
+    return mprofiler_;
+  }
+
   InternTable* GetInternTable() const {
     return intern_table_;
   }

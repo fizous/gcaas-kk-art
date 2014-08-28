@@ -19,6 +19,15 @@
 #define GCMMP_ALLOW_PROFILE 								0
 #define GCMMP_GCPAUSE_ARRAY_SIZE					  32
 
+
+
+/*
+ * Checks if the VM is one of the profiled Benchmarks.
+ *
+ * Note: found that the VM name was set multiple times. I have no idea
+ */
+void dvmGCMMProfPerfCounters(const char*);
+
 namespace art {
 class ConditionVariable;
 class Mutex;

@@ -6,7 +6,7 @@
  */
 
 #include <string>
-
+#include "runtime.h"
 #include "gc/heap.h"
 #include "os.h"
 #include "locks.h"
@@ -18,6 +18,11 @@
 
 
 #include "gc_profiler/MProfiler.h"
+
+void dvmGCMMProfPerfCounters(const char* vmName){
+	mprofiler::MProfiler* mProfiler =  Runtime::Current()->GetMProfiler();
+}
+
 
 namespace art {
 namespace mprofiler {
@@ -43,14 +48,17 @@ MProfiler::MProfiler(void)
 		prof_thread_(NULL),
 		main_thread_(NULL),
 		gc_daemon_(NULL),
-		thread_recs_(NULL),
 		flags_(0),
-		dump_file_name_(NULL)
+		dump_file_name_(NULL),
+		thread_recs_(NULL)
 {
+	if(IsProfilingEnabled) {
+		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
+		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
+																									*prof_thread_mutex_));
 
-	prof_thread_mutex_ = new Mutex("MProfile Thread lock");
-	prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
-                                                *prof_thread_mutex_));
+		LOG(INFO) << "MProfiler Profiling is Disabled";
+	}
 	LOG(INFO) << "MProfiler Created";
 }
 
