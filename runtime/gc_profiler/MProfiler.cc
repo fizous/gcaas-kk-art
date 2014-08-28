@@ -90,6 +90,9 @@ MProfiler::~MProfiler() {
 }
 
 void* MProfiler::Run(void* arg) {
+	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
+
+
   Runtime* runtime = Runtime::Current();
   CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
                                      !runtime->IsCompiler()));
@@ -98,12 +101,12 @@ void* MProfiler::Run(void* arg) {
 
   DCHECK_NE(self->GetState(), kRunnable);
   {
-    MutexLock mu(self, *prof_thread_mutex_);
-    prof_thread_(self);
+    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+    mProfiler->prof_thread_(self);
 
-    OpenDumpFile();
+    mProfiler->OpenDumpFile();
 
-    prof_thread_cond_->Broadcast(self);
+    mProfiler->prof_thread_cond_->Broadcast(self);
   }
 
 
