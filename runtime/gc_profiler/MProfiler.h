@@ -182,6 +182,8 @@ private:
   }
 
   void SetMProfileFlags(void);
+
+  void AttachThreads(void);
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;

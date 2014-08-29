@@ -93,6 +93,7 @@ void MProfiler::InitializeProfiler(){
 
 void MProfiler::SetMProfileFlags(void){
 	running_ = true;
+	AttachThreads();
 	OpenDumpFile();
 }
 
@@ -108,9 +109,13 @@ void* MProfiler::Run(void* arg) {
 
   Runtime* runtime = Runtime::Current();
 
-  CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
-                                     !runtime->IsCompiler()));
+  bool hasProfDaemon =
+  		runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
+      !runtime->IsCompiler());
+  CHECK(hasProfDaemon);
 
+  if(!hasProfDaemon)
+  	return NULL;
 
   Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
@@ -148,6 +153,25 @@ void MProfiler::CreateProfilerDaemon(void){
 
 }
 
+static void GCMMPAttachThread(Thread* t, void* arg){
+	 LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+}
+
+void MProfiler::AttachThreads(){
+//
+//	 thread_list->SuspendAll();
+//	 thread_list()->ForEach(GCMMPAttachThread, this);
+//
+//	 thread_list->ResumeAll();
+
+	Thread* self = Thread::Current();
+	LOG(INFO) << "MPRofiler: Attaching All threads " << self->GetTid();
+	ThreadList* thread_list = Runtime::Current()->GetThreadList();
+	MutexLock mu(self, *Locks::thread_list_lock_);
+	thread_list()->ForEach(GCMMPAttachThread, this);
+	LOG(INFO) << "MPRofiler: Done Attaching All threads ";
+
+}
 
 void MProfiler::OpenDumpFile(){
 	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
@@ -163,6 +187,7 @@ void MProfiler::OpenDumpFile(){
 	  }
     PLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
     dump_file_ = new File(fd, std::string(dump_file_name_));
+    return;
 	}
 }
 
@@ -184,7 +209,6 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 void MProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
-
 }// namespace mprofiler
 }// namespace art
 
