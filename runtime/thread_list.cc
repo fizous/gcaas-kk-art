@@ -23,6 +23,7 @@
 #include "base/mutex.h"
 #include "base/timing_logger.h"
 #include "debugger.h"
+#include "gc_profiler/MProfiler.h"
 #include "thread.h"
 #include "utils.h"
 
@@ -516,6 +517,9 @@ void ThreadList::Register(Thread* self) {
   }
   CHECK(!Contains(self));
   list_.push_back(self);
+	art::mprofiler::MProfiler* mProfiler =
+			art::Runtime::Current()->GetMProfiler();
+	mProfiler->AttachThread(self);
 }
 
 void ThreadList::Unregister(Thread* self) {

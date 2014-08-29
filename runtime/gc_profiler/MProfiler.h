@@ -209,7 +209,7 @@ public:
   bool IsProfilingEnabled() const {
     return enabled_;
   }
-
+  void AttachThread(Thread*);
   void GCMMProfPerfCounters(const char*);
 }; //class MProfiler
 
