@@ -30,6 +30,7 @@
 #include "entrypoints/jni/jni_entrypoints.h"
 #include "entrypoints/portable/portable_entrypoints.h"
 #include "entrypoints/quick/quick_entrypoints.h"
+#include "gc_profiler/MProfiler.h"
 #include "globals.h"
 #include "jvalue.h"
 #include "locks.h"
@@ -44,6 +45,9 @@
 
 namespace art {
 
+namespace mprofiler{
+	class GCMMPThreadProf;
+}  // namespace mprofiler
 namespace mirror {
   class ArtMethod;
   class Array;
@@ -753,6 +757,8 @@ class PACKED(4) Thread {
   Runtime* runtime_;
 
   RuntimeStats stats_;
+
+  GCMMPThreadProf* profRec_;
 
   // Needed to get the right ClassLoader in JNI_OnLoad, but also
   // useful for testing.
