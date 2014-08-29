@@ -758,9 +758,7 @@ class PACKED(4) Thread {
 
   mprofiler::GCMMPThreadProf* profRec_;
 
-  mprofiler::GCMMPThreadProf* GetProfRec(){
-  	return profRec_;
-  }
+
   // Needed to get the right ClassLoader in JNI_OnLoad, but also
   // useful for testing.
   mirror::ClassLoader* class_loader_override_;
@@ -814,6 +812,13 @@ class PACKED(4) Thread {
   JniEntryPoints jni_entrypoints_;
   PortableEntryPoints portable_entrypoints_;
   QuickEntryPoints quick_entrypoints_;
+
+  mprofiler::GCMMPThreadProf* GetProfRec(){
+  	return profRec_;
+  }
+  void SetProfRec(mprofiler::GCMMPThreadProf* profRec){
+  	profRec_ = profRec;
+  }
 
  private:
   // How many times has our pthread key's destructor been called?
