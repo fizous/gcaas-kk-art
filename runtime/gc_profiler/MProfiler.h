@@ -167,7 +167,7 @@ private:
 
   const bool enabled_;
 
-  const bool running_;
+  volatile bool running_;
 
   static void* Run(void* arg);
 
@@ -177,9 +177,11 @@ private:
   bool IsCreateProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
   }
-  bool IsProfilingRunning() const {
+  bool IsProfilingRunning() {
     return running_;
   }
+
+  void SetMProfileFlags(void);
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;

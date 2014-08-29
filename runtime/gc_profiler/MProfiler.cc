@@ -76,11 +76,25 @@ void MProfiler::InitializeProfiler(){
 
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
+	} else {
+		LOG(INFO) << "MProfiler: No Daemon Creation";
+		Thread* self = Thread::Current();
+		MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+		if(!running_) {
+			SetMProfileFlags();
+		} else {
+			LOG(INFO) << "MProfiler: was already running";
+		}
+		prof_thread_cond_->Broadcast(self);
 	}
 
 	LOG(INFO) << "MProfiler Is Initialized";
 }
 
+void MProfiler::SetMProfileFlags(void){
+	running_ = true;
+	OpenDumpFile();
+}
 
 MProfiler::~MProfiler() {
 	if(prof_thread_mutex_ != NULL)
@@ -102,9 +116,12 @@ void* MProfiler::Run(void* arg) {
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    mProfiler->prof_thread_ = self;
-
-    mProfiler->OpenDumpFile();
+    if(!mProfiler->running_) {
+    	mProfiler->prof_thread_ = self;
+    	SetMProfileFlags();
+    } else {
+    	 LOG(INFO) << "MPRofiler: Profiler was already created";
+    }
 
     mProfiler->prof_thread_cond_->Broadcast(self);
   }
