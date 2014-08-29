@@ -210,6 +210,7 @@ public:
     return enabled_;
   }
   void AttachThread(Thread*);
+  void DettachThread(Thread*);
   void GCMMProfPerfCounters(const char*);
 }; //class MProfiler
 

@@ -165,7 +165,13 @@ static void GCMMPAttachThread(Thread* t, void* arg){
 
 void MProfiler::AttachThread(Thread* thread){
 	if(IsProfilingRunning()) {
-		LOG(INFO) << "MPRofiler: Attaching thread Late " << self->GetTid() ;
+		LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid() ;
+	}
+}
+
+void MProfiler::DettachThread(Thread* thread){
+	if(IsProfilingRunning()) {
+		LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid() ;
 	}
 }
 
