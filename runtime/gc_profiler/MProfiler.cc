@@ -139,7 +139,7 @@ void MProfiler::OpenDumpFile(){
 	    continue;
 	  }
     PLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
-    dump_file_(new File(fd, std::string(dump_file_name_)));
+    dump_file_ = new File(fd, std::string(dump_file_name_));
 	}
 }
 
