@@ -116,6 +116,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 																									*prof_thread_mutex_));
 
 	} else {
+		flags_ = 0;
 		dump_file_name_ = NULL;
 		LOG(INFO) << "MProfiler Profiling is Disabled";
 	}
