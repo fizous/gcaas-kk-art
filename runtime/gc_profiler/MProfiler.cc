@@ -118,7 +118,7 @@ void* MProfiler::Run(void* arg) {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
     	mProfiler->prof_thread_ = self;
-    	SetMProfileFlags();
+    	mProfiler->SetMProfileFlags();
     } else {
     	 LOG(INFO) << "MPRofiler: Profiler was already created";
     }
