@@ -69,11 +69,9 @@ void GCMMPThreadProf::Destroy(MProfiler* mProfiler){
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec){
 	if(IsProfilingRunning()){
-		if(threadProflist_ != NULL) {
 			threadProflist_.remove(thProfRec);
 			thProfRec->Destroy(this);
 			delete thProfRec;
-		}
 	}
 }
 
