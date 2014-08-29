@@ -95,11 +95,12 @@ void* MProfiler::Run(void* arg) {
 
 
   Runtime* runtime = Runtime::Current();
+
   CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
                                      !runtime->IsCompiler()));
 
 
-
+  Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
@@ -126,7 +127,6 @@ void MProfiler::CreateProfilerDaemon(void){
 
 
 void MProfiler::OpenDumpFile(){
-	int fd = -1;
 	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
 		char str[256];
 		strcpy(str, gcMMPRootPath[i]);
@@ -150,6 +150,7 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+				InitializeProfiler();
 				return;
 			}
 		}
