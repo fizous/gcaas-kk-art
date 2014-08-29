@@ -43,6 +43,22 @@ const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
 
+
+
+GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
+	: pid(thread->GetTid()),
+	  suspendedGC(false),
+	  state(GCMMP_TH_STARTING),
+	  pauseManager(NULL) {
+
+	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+		memset(&timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+	}
+
+	state = GCMMP_TH_RUNNING;
+	LOG(INFO) << "MProfiler : ThreadProf is initialized";
+}
+
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
@@ -50,7 +66,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		gc_daemon_(NULL),
 		flags_(0),
  		dump_file_name_("PERF.log"),
-		thread_recs_(NULL),
 		prof_thread_(NULL),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
@@ -93,6 +108,9 @@ void MProfiler::InitializeProfiler(){
 
 void MProfiler::SetMProfileFlags(void){
 	running_ = true;
+//	size_t capacity = MProfiler::kGCMMPMAXThreadCount * sizeof(GCMMPThreadProf);
+//  UniquePtr<GCMMPThreadProf> mem_threads_allocated(MemMap::MapAnonymous(
+//  		"thredProfileRegion", NULL, capacity, PROT_READ | PROT_WRITE));
 	AttachThreads();
 	OpenDumpFile();
 }
@@ -155,17 +173,32 @@ void MProfiler::CreateProfilerDaemon(void){
 
 static void GCMMPAttachThread(Thread* t, void* arg){
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
-	LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
 	if(mProfiler->IsProfilingEnabled()){
-		LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+		mProfiler->AttachThread(t);
 	} else {
 		LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
 	}
 }
 
+bool MProfiler::ProfiledThreadsContain(Thread* thread){
+	pid_t tId = thread->GetTid();
+	for (const auto& GCMMPThreadProf : threadProflist_) {
+    if (thread->tid_ == tId) {
+      return true;
+    }
+	}
+	return false;
+}
+
 void MProfiler::AttachThread(Thread* thread){
 	if(IsProfilingRunning()) {
 		LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid() ;
+		if(ProfiledThreadsContain(thread)){
+			LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+			return;
+		}
+		GCMMPThreadProf* threadProf = new GCMMPThreadProf(this, thread);
+		threadProflist_.push_back(threadProf);
 	}
 }
 

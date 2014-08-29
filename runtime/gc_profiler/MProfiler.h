@@ -130,6 +130,7 @@ class GCMMPThreadProf {
 
 	GCPauseThreadManager* pauseManager;
 
+	GCMMPThreadProf(MProfiler*, Thread*);
 };
 
 class MProfiler {
@@ -156,7 +157,8 @@ private:
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 	/* array of thread records used to keep the data per thread */
-	GCMMPThreadProf* thread_recs_;
+  // The actual list of all threads.
+  std::list<GCMMPThreadProf*> threadProflist_;
   // System thread used for the profiling (profileDaemon).
 	Thread* prof_thread_;
   void CreateProfilerDaemon(void);
@@ -184,11 +186,14 @@ private:
   void SetMProfileFlags(void);
 
   void AttachThreads(void);
+
+  bool ProfiledThreadsContain(Thread*);
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;
   static const int kGCMMPDisableMProfile = 999;
   static const int kGCMMPDefaultGrowMethod = 0;
+  static const int kGCMMPMAXThreadCount = 64;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
 	/*
