@@ -120,7 +120,7 @@ class MProfiler;
 class GCMMPThreadProf {
 
 	/* system ID of the thread monitored */
-	pid_t pid;
+	const pid_t pid;
 
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
@@ -136,6 +136,10 @@ public:
 
 
   void Destroy(MProfiler*);
+
+  pid_t GetTid() const {
+    return pid;
+  }
 };
 
 class MProfiler {

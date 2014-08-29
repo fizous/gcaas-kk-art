@@ -198,8 +198,8 @@ static void GCMMPAttachThread(Thread* t, void* arg){
 
 bool MProfiler::ProfiledThreadsContain(Thread* thread){
 	pid_t tId = thread->GetTid();
-	for (const auto& GCMMPThreadProf : threadProflist_) {
-    if (thread->tid_ == tId) {
+	for (const auto& threadProf : threadProflist_) {
+    if (threadProf->GetTid() == tId) {
       return true;
     }
 	}
