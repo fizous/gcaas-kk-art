@@ -130,16 +130,18 @@ class GCMMPThreadProf {
 	volatile bool suspendedGC;
 
 	GCPauseThreadManager* pauseManager;
-	~GCMMPThreadProf(void);
+
 public:
 	GCMMPThreadProf(MProfiler*, Thread*);
-
+	~GCMMPThreadProf(void);
 
   void Destroy(MProfiler*);
 
   pid_t GetTid() const {
     return pid;
   }
+
+  void StopProfiling(void);
 };
 
 class MProfiler {

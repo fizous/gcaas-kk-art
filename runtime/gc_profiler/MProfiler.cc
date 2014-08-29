@@ -63,12 +63,23 @@ GCMMPThreadProf::~GCMMPThreadProf() {
 
 }
 
+bool GCMMPThreadProf::StopProfiling(void) {
+	if(state == GCMMP_TH_RUNNING) {
+		state = GCMMP_TH_STOPPED;
+		return true;
+	}
+	return false;
+}
+
 void GCMMPThreadProf::Destroy(MProfiler* mProfiler){
 
 }
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec){
 	if(IsProfilingRunning()){
+			if(!thProfRec->StopProfiling()){
+				LOG(ERROR) << "MProfiler : ThreadProf is initialized";
+			}
 			threadProflist_.remove(thProfRec);
 			thProfRec->Destroy(this);
 			delete thProfRec;
