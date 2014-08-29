@@ -46,7 +46,9 @@ const char * MProfiler::gcMMPRootPath[] = {
 
 const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
-				 0x0D, 0, "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
+				 0x0D,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
 		}//MMU
 };//profilTypes
 
@@ -96,20 +98,25 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
 		main_thread_(NULL),
 		gc_daemon_(NULL),
-		flags_(0),
- 		dump_file_name_("PERF.log"),
 		prof_thread_(NULL),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
 {
-	;
+
 	if(IsProfilingEnabled()) {
+		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[index_];
+		flags_ = profEntry->flags_;
+		dump_file_name_(profEntry->logFile_);
+
+
+
 		LOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
 
 	} else {
+		dump_file_name_(NULL);
 		LOG(INFO) << "MProfiler Profiling is Disabled";
 	}
 	LOG(INFO) << "MProfiler Created";
