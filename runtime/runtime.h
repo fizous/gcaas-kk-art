@@ -42,7 +42,7 @@ namespace art {
 
 namespace mprofiler {
   class MProfiler;
-  struct mprofiler::GCMMP_Options;
+  struct GCMMP_Options;
 }
 
 namespace gc {
