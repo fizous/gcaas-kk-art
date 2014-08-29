@@ -43,7 +43,8 @@ typedef enum GCMMPThreadProfStateT {
 	GCMMP_TH_ALLOC = 0,
 	GCMMP_TH_STARTING,
 	GCMMP_TH_RUNNING,
-	GCMMP_TH_STOPPED
+	GCMMP_TH_STOPPED,
+	GCMMP_TH_REMOVED
 } GCMMPThreadProfState;
 
 /*
@@ -101,13 +102,13 @@ class GCMMPThreadProf {
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 
-	volatile GCMMPThreadProfState state;
-
 	volatile bool suspendedGC;
 
 	GCPauseThreadManager* pauseManager;
 
 public:
+	volatile GCMMPThreadProfState state;
+
 	GCMMPThreadProf(MProfiler*, Thread*);
 	~GCMMPThreadProf(void);
 

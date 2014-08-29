@@ -974,6 +974,7 @@ Thread::Thread(bool daemon)
       monitor_enter_object_(NULL),
       top_sirt_(NULL),
       runtime_(NULL),
+      profRec_(NULL),
       class_loader_override_(NULL),
       long_jump_context_(NULL),
       throwing_OutOfMemoryError_(false),
