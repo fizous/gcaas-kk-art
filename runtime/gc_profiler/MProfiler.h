@@ -48,7 +48,7 @@ typedef void (*GCMMPDumpCurrentUsage)(bool);
 /* types of Profiling defined here */
 typedef struct GCMMPProfilingEntry_S {
 	const int 			id_;					/* id of the profiling */
-	const int 			flags_;				/* the flag vector used to specify the functionality*/
+	const unsigned int flags_;				/* the flag vector used to specify the functionality*/
 	const char			*name_;	     	/* event name */
 	const char			*desc_;	     	/* event description */
 	const char			*logFile_;	  /* log file name */

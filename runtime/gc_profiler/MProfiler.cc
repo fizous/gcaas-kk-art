@@ -106,7 +106,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 	if(IsProfilingEnabled()) {
 		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[index_];
 		flags_ = profEntry->flags_;
-		dump_file_name_(profEntry->logFile_);
+		dump_file_name_ = profEntry->logFile_;
 
 
 
@@ -116,7 +116,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 																									*prof_thread_mutex_));
 
 	} else {
-		dump_file_name_(NULL);
+		dump_file_name_ = NULL;
 		LOG(INFO) << "MProfiler Profiling is Disabled";
 	}
 	LOG(INFO) << "MProfiler Created";
