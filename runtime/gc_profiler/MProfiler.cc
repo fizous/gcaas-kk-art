@@ -47,8 +47,8 @@ const char * MProfiler::gcMMPRootPath[] = {
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),
-	  suspendedGC(false),
 	  state(GCMMP_TH_STARTING),
+	  suspendedGC(false),
 	  pauseManager(NULL) {
 
 	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
