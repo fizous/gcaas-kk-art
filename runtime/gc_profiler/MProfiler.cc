@@ -104,12 +104,17 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 {
 
 	if(IsProfilingEnabled()) {
-		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[index_];
+		int _loop = 0;
+		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
+			if(MProfiler::profilTypes[_loop].id_ == index_)
+				break; //found
+		}
+		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
+			LOG(ERROR) << "MProfiler : Performance type is not supported";
+		}
+		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
 		flags_ = profEntry->flags_;
 		dump_file_name_ = profEntry->logFile_;
-
-
-
 		LOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
