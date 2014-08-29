@@ -302,6 +302,7 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 void MProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
+
 }// namespace mprofiler
 }// namespace art
 
