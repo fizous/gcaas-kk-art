@@ -77,7 +77,7 @@ void MProfiler::InitializeProfiler(){
 	MutexLock mu(self, *prof_thread_mutex_);
 
 	if(IsCreateProfDaemon()){
-		CreateProfilerDaemon(self);
+		CreateProfilerDaemon();
 	}
 
 	LOG(INFO) << "MProfiler Is Initialized";
@@ -98,7 +98,7 @@ void* MProfiler::Run(void* arg) {
   CHECK(runtime->AttachCurrentThread("MProfile Daemon", true, runtime->GetSystemThreadGroup(),
                                      !runtime->IsCompiler()));
 
-  Thread* self = Thread::Current();
+
 
   DCHECK_NE(self->GetState(), kRunnable);
   {
@@ -113,9 +113,9 @@ void* MProfiler::Run(void* arg) {
 
 }
 
-void MProfiler::CreateProfilerDaemon(Thread* self){
+void MProfiler::CreateProfilerDaemon(void){
   // Create a raw pthread; its start routine will attach to the runtime.
-
+	Thread* self = Thread::Current();
   CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this), "MProfiler Daemon thread");
 
   while (prof_thread_ == NULL) {

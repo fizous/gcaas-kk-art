@@ -159,7 +159,7 @@ private:
 	GCMMPThreadProf* thread_recs_;
   // System thread used for the profiling (profileDaemon).
 	Thread* prof_thread_;
-  void CreateProfilerDaemon(Thread*);
+  void CreateProfilerDaemon(void);
 
   void InitializeProfiler(void);
 
