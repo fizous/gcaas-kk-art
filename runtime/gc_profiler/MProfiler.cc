@@ -243,7 +243,7 @@ void MProfiler::DettachThread(Thread* thread){
 	if(IsProfilingRunning()) {
 		GCMMPThreadProf* threadProf = thread->GetProfRec();
 		if(threadProf != NULL) {
-			thread->profRec_ = NULL;
+			thread->SetProfRec(NULL);
 			threadProf->StopProfiling();
 		}
 		LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid() ;
