@@ -108,6 +108,9 @@ void* MProfiler::Run(void* arg) {
 
     mProfiler->prof_thread_cond_->Broadcast(self);
   }
+
+
+  LOG(INFO) << "MPRofiler: Profiler Daemon Created";
   return NULL;
 
 }
@@ -122,6 +125,9 @@ void MProfiler::CreateProfilerDaemon(void){
   while (prof_thread_ == NULL) {
   	prof_thread_cond_->Wait(self);
   }
+  prof_thread_cond_->Broadcast(self);
+
+  LOG(INFO) << "MPRofiler: Caller is leaving now";
 
 }
 
