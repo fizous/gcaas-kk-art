@@ -9,6 +9,7 @@
 #define MPROFILER_H_
 
 #include <string>
+#include <list>
 #include "locks.h"
 #include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
@@ -129,8 +130,12 @@ class GCMMPThreadProf {
 	volatile bool suspendedGC;
 
 	GCPauseThreadManager* pauseManager;
+	~GCMMPThreadProf(void);
 public:
 	GCMMPThreadProf(MProfiler*, Thread*);
+
+
+  void Destroy(MProfiler*);
 };
 
 class MProfiler {
@@ -188,6 +193,7 @@ private:
   void AttachThreads(void);
 
   bool ProfiledThreadsContain(Thread*);
+  void RemoveThreadProfile(GCMMPThreadProf*);
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;

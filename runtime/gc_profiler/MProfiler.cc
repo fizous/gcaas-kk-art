@@ -59,6 +59,24 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	LOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
 
+GCMMPThreadProf::~GCMMPThreadProf() {
+
+}
+
+void GCMMPThreadProf::Destroy(MProfiler* mProfiler){
+
+}
+
+void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec){
+	if(IsProfilingRunning()){
+		if(threadProflist_ != NULL) {
+			threadProflist_.remove(thProfRec);
+			thProfRec->Destroy(this);
+			delete thProfRec;
+		}
+	}
+}
+
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
