@@ -41,7 +41,7 @@
 #include "thread_state.h"
 #include "throw_location.h"
 #include "UniquePtr.h"
-#include "gc_profiler/MProfilerTypes.h"
+
 
 namespace art {
 
