@@ -141,7 +141,7 @@ public:
     return pid;
   }
 
-  void StopProfiling(void);
+  bool StopProfiling(void);
 };
 
 class MProfiler {
