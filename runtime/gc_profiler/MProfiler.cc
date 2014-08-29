@@ -156,7 +156,7 @@ void MProfiler::OpenDumpFile(){
 		strcat(str, dump_file_name_);
 
 
-		int fd = open(str, O_RDWR | O_APPEND | O_WRONLY, 0777);
+		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
 	  if (fd == -1) {
 	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
 	    continue;
