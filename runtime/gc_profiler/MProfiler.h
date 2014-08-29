@@ -26,14 +26,15 @@
 #define GCMMP_ALLOW_PROFILE 								0
 
 
-
-
 /*
  * Checks if the VM is one of the profiled Benchmarks.
  *
  * Note: found that the VM name was set multiple times. I have no idea
  */
 void dvmGCMMProfPerfCounters(const char*);
+
+
+
 
 namespace art {
 class ConditionVariable;
@@ -42,9 +43,21 @@ class Mutex;
 
 namespace mprofiler {
 
+typedef void (*GCMMPDumpCurrentUsage)(bool);
+
+/* types of Profiling defined here */
+typedef struct GCMMPProfilingEntry_S {
+	const int 			id_;					/* id of the profiling */
+	const int 			flags_;				/* the flag vector used to specify the functionality*/
+	const char			*name_;	     	/* event name */
+	const char			*desc_;	     	/* event description */
+	const char			*logFile_;	  /* log file name */
+	GCMMPDumpCurrentUsage dumpMethod;
+}GCMMPProfilingEntry;
 
 class MProfiler {
 private:
+
 	//Index of the profiler type we are running
 	const int index_;
   // System thread used as main (thread id = 1).
@@ -112,6 +125,11 @@ public:
 	 */
 	static const char * gcMMPRootPath[];
 
+	/*
+	 * Predefined List of types
+	 */
+	static const GCMMPProfilingEntry profilTypes[];
+
 	MProfiler(GCMMP_Options*);
 
 	~MProfiler();
@@ -129,6 +147,7 @@ public:
   void DettachThread(Thread*);
   void GCMMProfPerfCounters(const char*);
 
+  GCMMPDumpCurrentUsage dumpCurrUsage;
 
   friend class GCMMPThreadProf;
 }; //class MProfiler

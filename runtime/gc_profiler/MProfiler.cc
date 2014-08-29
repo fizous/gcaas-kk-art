@@ -44,7 +44,11 @@ const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
 
-
+const GCMMPProfilingEntry MProfiler::profilTypes[] = {
+		{
+				 0x0D, 0, "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
+		}//MMU
+};//profilTypes
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),
