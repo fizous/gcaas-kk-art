@@ -111,7 +111,7 @@ class GCPauseThreadManager {
 	 int currEventsIndex;
 	 int eventsCount;
 };
-
+class MProfiler;
 /*
  * Holds the profiling data per thread . We do not keep a pointer to the thread
  * because threads may terminate before we collect the information
@@ -129,7 +129,7 @@ class GCMMPThreadProf {
 	volatile bool suspendedGC;
 
 	GCPauseThreadManager* pauseManager;
-
+public:
 	GCMMPThreadProf(MProfiler*, Thread*);
 };
 
