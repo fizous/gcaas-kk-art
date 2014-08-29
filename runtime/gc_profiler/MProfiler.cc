@@ -154,7 +154,13 @@ void MProfiler::CreateProfilerDaemon(void){
 }
 
 static void GCMMPAttachThread(Thread* t, void* arg){
-	 LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
+	LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+	if(mProfiler->IsProfilingEnabled()){
+		LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+	} else {
+		LOG(INFO) << "MPRofiler: Attaching thread: " << t->GetTid();
+	}
 }
 
 void MProfiler::AttachThreads(){
