@@ -104,7 +104,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 {
 
 	if(IsProfilingEnabled()) {
-		int _loop = 0;
+		size_t _loop = 0;
 		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
 			if(MProfiler::profilTypes[_loop].id_ == index_)
 				break; //found
