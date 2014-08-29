@@ -45,9 +45,6 @@
 
 namespace art {
 
-namespace mprofiler{
-	class GCMMPThreadProf;
-}  // namespace mprofiler
 namespace mirror {
   class ArtMethod;
   class Array;
