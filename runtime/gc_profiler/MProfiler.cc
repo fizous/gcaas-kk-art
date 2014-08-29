@@ -79,7 +79,7 @@ void MProfiler::InitializeProfiler(){
 	} else {
 		LOG(INFO) << "MProfiler: No Daemon Creation";
 		Thread* self = Thread::Current();
-		MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+		MutexLock mu(self, *prof_thread_mutex_);
 		if(!running_) {
 			SetMProfileFlags();
 		} else {
