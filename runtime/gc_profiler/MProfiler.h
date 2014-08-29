@@ -67,7 +67,7 @@ private:
 
   // flags of the Profiler we are running
   // combines markAllocWindows, createProfDaemon, hasProfThread,
-  const unsigned int flags_;
+  unsigned int flags_;
 
   /* file used to dump the profiling data */
   const char * dump_file_name_;
