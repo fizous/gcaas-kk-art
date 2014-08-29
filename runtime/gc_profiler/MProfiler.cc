@@ -233,7 +233,7 @@ void MProfiler::AttachThread(Thread* thread){
 //			return;
 //		}
 
-		GCMMPThreadProf* threadProf = new GCMMPThreadProf(this, thread);
+		threadProf = new GCMMPThreadProf(this, thread);
 		threadProflist_.push_back(threadProf);
 		thread->SetProfRec(threadProf);
 	}
