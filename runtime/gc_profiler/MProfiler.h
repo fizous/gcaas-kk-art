@@ -223,6 +223,9 @@ public:
   void AttachThread(Thread*);
   void DettachThread(Thread*);
   void GCMMProfPerfCounters(const char*);
+
+
+  friend class GCMMPThreadProf;
 }; //class MProfiler
 
 
