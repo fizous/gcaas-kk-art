@@ -168,7 +168,7 @@ void MProfiler::AttachThreads(){
 	LOG(INFO) << "MPRofiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
 	MutexLock mu(self, *Locks::thread_list_lock_);
-	thread_list()->ForEach(GCMMPAttachThread, this);
+	thread_list->ForEach(GCMMPAttachThread, this);
 	LOG(INFO) << "MPRofiler: Done Attaching All threads ";
 
 }
