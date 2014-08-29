@@ -13,6 +13,7 @@
 #include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
+#include "thread.h"
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -160,7 +161,7 @@ private:
 	GCMMPThreadProf* thread_recs_;
   // System thread used for the profiling (profileDaemon).
 	Thread* prof_thread_;
-  void CreateProfilerDaemon(void);
+  void CreateProfilerDaemon(Thread*);
 
   void InitializeProfiler(void);
 

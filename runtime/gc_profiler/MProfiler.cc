@@ -77,7 +77,7 @@ void MProfiler::InitializeProfiler(){
 	MutexLock mu(self, *prof_thread_mutex_);
 
 	if(IsCreateProfDaemon()){
-		CreateProfilerDaemon();
+		CreateProfilerDaemon(self);
 	}
 
 	LOG(INFO) << "MProfiler Is Initialized";
@@ -113,7 +113,7 @@ void* MProfiler::Run(void* arg) {
 
 }
 
-void MProfiler::CreateProfilerDaemon(void){
+void MProfiler::CreateProfilerDaemon(Thread* self){
   // Create a raw pthread; its start routine will attach to the runtime.
 
   CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this), "MProfiler Daemon thread");
