@@ -79,6 +79,8 @@ void MProfiler::InitializeProfiler(){
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	}
+
+	LOG(INFO) << "MProfiler Is Initialized";
 }
 
 
@@ -107,7 +109,7 @@ void* MProfiler::Run(void* arg) {
 
     mProfiler->prof_thread_cond_->Broadcast(self);
   }
-
+  return NULL;
 
 }
 
