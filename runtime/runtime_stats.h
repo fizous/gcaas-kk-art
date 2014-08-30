@@ -107,7 +107,7 @@ struct PACKED(4) RuntimeStats {
   // Cumulative time spent in class initialization.
   uint64_t class_init_time_ns;
 
-  mprofiler::GCMMPThreadProf* profRec_;
+//  mprofiler::GCMMPThreadProf* profRec_;
 
   DISALLOW_COPY_AND_ASSIGN(RuntimeStats);
 };
