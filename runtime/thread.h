@@ -756,7 +756,7 @@ class PACKED(4) Thread {
 
   RuntimeStats stats_;
 
-  mprofiler::GCMMPThreadProf* profRec_;
+  //mprofiler::GCMMPThreadProf* profRec_;
 
 
   // Needed to get the right ClassLoader in JNI_OnLoad, but also
