@@ -756,7 +756,7 @@ class PACKED(4) Thread {
 
   RuntimeStats stats_;
 
-  //mprofiler::GCMMPThreadProf* profRec_;
+  mprofiler::GCMMPThreadProf* profRec_;
 
 
   // Needed to get the right ClassLoader in JNI_OnLoad, but also
@@ -813,12 +813,12 @@ class PACKED(4) Thread {
   PortableEntryPoints portable_entrypoints_;
   QuickEntryPoints quick_entrypoints_;
 
-//  mprofiler::GCMMPThreadProf* GetProfRec(){
-//  	return profRec_;
-//  }
-//  void SetProfRec(mprofiler::GCMMPThreadProf* profRec){
-//  	profRec_ = profRec;
-//  }
+  mprofiler::GCMMPThreadProf* GetProfRec(){
+  	return profRec_;
+  }
+  void SetProfRec(mprofiler::GCMMPThreadProf* profRec){
+  	profRec_ = profRec;
+  }
 
  private:
   // How many times has our pthread key's destructor been called?
