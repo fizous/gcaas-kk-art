@@ -223,7 +223,7 @@ static void GCMMPAttachThread(Thread* t, void* arg){
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
 		if(mProfiler->IsProfilingEnabled()){
-			mProfiler->AttachThread(t);
+			//mProfiler->AttachThread(t);
 		}
 	}
 }
