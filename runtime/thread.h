@@ -801,6 +801,7 @@ class PACKED(4) Thread {
   // Pending checkpoint functions.
   Closure* checkpoint_function_;
 
+  void* profRec_;
  public:
   // Entrypoint function pointers
   // TODO: move this near the top, since changing its offset requires all oats to be recompiled!
