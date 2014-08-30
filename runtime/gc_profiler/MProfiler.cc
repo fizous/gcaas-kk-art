@@ -221,8 +221,10 @@ void MProfiler::CreateProfilerDaemon(void){
 
 static void GCMMPAttachThread(Thread* t, void* arg){
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
-	if(mProfiler->IsProfilingEnabled()){
-		mProfiler->AttachThread(t);
+	if(mProfiler != NULL) {
+		if(mProfiler->IsProfilingEnabled()){
+			mProfiler->AttachThread(t);
+		}
 	}
 }
 
