@@ -327,5 +327,8 @@ void MProfiler::PreForkPreparation() {
 void dvmGCMMProfPerfCounters(const char* vmName){
 	art::mprofiler::MProfiler* mProfiler =
 			art::Runtime::Current()->GetMProfiler();
-	mProfiler->GCMMProfPerfCounters(vmName);
+	if(mProfiler != NULL) {
+		mProfiler->GCMMProfPerfCounters(vmName);
+	}
+
 }
