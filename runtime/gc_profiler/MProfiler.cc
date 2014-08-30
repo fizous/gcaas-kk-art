@@ -267,7 +267,7 @@ void MProfiler::DettachThread(Thread* thread){
 //			threadProf->StopProfiling();
 //		}
 		LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid() ;
-	}
+//	}
 }
 
 void MProfiler::AttachThreads(){
