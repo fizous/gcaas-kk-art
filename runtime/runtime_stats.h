@@ -18,6 +18,7 @@
 #define ART_RUNTIME_RUNTIME_STATS_H_
 
 #include <stdint.h>
+#include "gc_profiler/MProfilerTypes.h"
 
 namespace art {
 
@@ -105,6 +106,8 @@ struct PACKED(4) RuntimeStats {
   int class_init_count;
   // Cumulative time spent in class initialization.
   uint64_t class_init_time_ns;
+
+  mprofiler::GCMMPThreadProf* profRec_;
 
   DISALLOW_COPY_AND_ASSIGN(RuntimeStats);
 };
