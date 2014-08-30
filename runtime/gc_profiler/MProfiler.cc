@@ -239,7 +239,7 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread){
 }
 
 void MProfiler::AttachThread(Thread* thread){
-	if(IsProfilingRunning()) {
+//	if(IsProfilingRunning()) {
 		LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid() ;
 //		GCMMPThreadProf* threadProf = thread->GetProfRec();
 //		if(threadProf != NULL) {
@@ -256,11 +256,11 @@ void MProfiler::AttachThread(Thread* thread){
 //		threadProf = new GCMMPThreadProf(this, thread);
 //		threadProflist_.push_back(threadProf);
 //		thread->SetProfRec(threadProf);
-	}
+//	}
 }
 
 void MProfiler::DettachThread(Thread* thread){
-	if(IsProfilingRunning()) {
+	//if(IsProfilingRunning()) {
 //		GCMMPThreadProf* threadProf = thread->GetProfRec();
 //		if(threadProf != NULL) {
 //			thread->SetProfRec(NULL);
