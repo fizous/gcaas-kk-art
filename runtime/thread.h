@@ -828,7 +828,7 @@ class PACKED(4) Thread {
 
   friend class ScopedThreadStateChange;
 
-  GCMMPThreadProf* profRec_;
+  mprofiler::GCMMPThreadProf* profRec_;
 
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
