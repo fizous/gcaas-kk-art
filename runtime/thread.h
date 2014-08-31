@@ -815,21 +815,20 @@ class PACKED(4) Thread {
   PortableEntryPoints portable_entrypoints_;
   QuickEntryPoints quick_entrypoints_;
 
-//  mprofiler::GCMMPThreadProf* GetProfRec(){
-//  	return profRec_;
-//  }
-//  void SetProfRec(mprofiler::GCMMPThreadProf* profRec){
-//  	profRec_ = profRec;
-//  }
-
  private:
   // How many times has our pthread key's destructor been called?
   uint32_t thread_exit_check_count_;
 
   friend class ScopedThreadStateChange;
-
   mprofiler::GCMMPThreadProf* profRec_;
-
+ public:
+  mprofiler::GCMMPThreadProf* GetProfRec() {
+  	return profRec_;
+  }
+  void SetProfRec(mprofiler::GCMMPThreadProf* profRec) {
+  	profRec_ = profRec;
+  }
+private:
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
