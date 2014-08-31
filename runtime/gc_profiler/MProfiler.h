@@ -132,10 +132,10 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static mprofiler::MProfiler* instance_;
+	static MProfiler* instance_;
 
-	static mprofiler::MProfiler* Current() {
-		return mprofiler::MProfiler::instance_;
+	static MProfiler* Current() {
+		return MProfiler::instance_;
 	}
 
 	MProfiler(GCMMP_Options*);
@@ -158,20 +158,20 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
 
   static bool IsMProfRunning() {
-  	if(Current() != NULL)
-  		return Current()->IsProfilingRunning();
+  	if(MProfiler::instance_ != NULL)
+  		return MProfiler::instance_->IsProfilingRunning();
   	return false;
   }
 
   static void MProfAttachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		Current()->AttachThread(th);
+  		MProfiler::instance_->AttachThread(th);
   	}
   }
 
   static void MProfDetachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		Current()->DettachThread(th);
+  		MProfiler::instance_->DettachThread(th);
   	}
   }
 
