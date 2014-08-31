@@ -72,6 +72,7 @@ private:
   /* file used to dump the profiling data */
   const char * dump_file_name_;
   art::File* dump_file_;
+
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
@@ -106,6 +107,7 @@ private:
     return running_;
   }
 
+
   void SetMProfileFlags(void);
 
   void AttachThreads(void);
@@ -130,6 +132,8 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
+	static MProfiler* MProfInstance;
+
 	MProfiler(GCMMP_Options*);
 
 	~MProfiler();
@@ -148,6 +152,24 @@ public:
   void GCMMProfPerfCounters(const char*);
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
+
+  static bool IsMProfRunning() {
+  	if(MProfInstance != NULL)
+  		return MProfInstance->IsProfilingRunning();
+  	return false;
+  }
+
+  static void MProfAttachThread(Thread* th) {
+  	if(IsMProfRunning()) {
+  		MProfInstance->AttachThread(th);
+  	}
+  }
+
+  static void MProfDetachThread(Thread* th) {
+  	if(IsMProfRunning()) {
+  		MProfInstance->DettachThread(th);
+  	}
+  }
 
   friend class GCMMPThreadProf;
 }; //class MProfiler

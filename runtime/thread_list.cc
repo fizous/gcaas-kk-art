@@ -517,15 +517,11 @@ void ThreadList::Register(Thread* self) {
   }
   CHECK(!Contains(self));
   list_.push_back(self);
-	art::mprofiler::MProfiler* mProfiler =
-			art::Runtime::Current()->GetMProfiler();
-	mProfiler->AttachThread(self);
+	art::mprofiler::MProfiler::MProfAttachThread(self);
 }
 
 void ThreadList::Unregister(Thread* self) {
   DCHECK_EQ(self, Thread::Current());
-	art::mprofiler::MProfiler* mProfiler =
-			art::Runtime::Current()->GetMProfiler();
   VLOG(threads) << "ThreadList::Unregister() " << *self;
 
   // Any time-consuming destruction, plus anything that can call back into managed code or
@@ -540,8 +536,7 @@ void ThreadList::Unregister(Thread* self) {
     // thread_suspend_count_lock_ so that the unregistering thread cannot be suspended.
     // Note: deliberately not using MutexLock that could hold a stale self pointer.
     Locks::thread_list_lock_->ExclusiveLock(self);
-    if(mProfiler != NULL)
-    	mProfiler->DettachThread(self);
+    art::mprofiler::MProfiler::MProfDetachThread(self);
     CHECK(Contains(self));
     // Note: we don't take the thread_suspend_count_lock_ here as to be suspending a thread other
     // than yourself you need to hold the thread_list_lock_ (see Thread::ModifySuspendCount).

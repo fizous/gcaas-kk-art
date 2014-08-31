@@ -102,6 +102,9 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
 {
+	if(MProfiler::MProfInstance != NULL) {
+		MProfiler::MProfInstance = this;
+	}
 
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
@@ -151,13 +154,13 @@ void MProfiler::InitializeProfiler(){
 	LOG(INFO) << "MProfiler Is Initialized";
 }
 
-void MProfiler::SetMProfileFlags(void){
+void MProfiler::SetMProfileFlags(void) {
+	OpenDumpFile();
 	running_ = true;
 //	size_t capacity = MProfiler::kGCMMPMAXThreadCount * sizeof(GCMMPThreadProf);
 //  UniquePtr<GCMMPThreadProf> mem_threads_allocated(MemMap::MapAnonymous(
 //  		"thredProfileRegion", NULL, capacity, PROT_READ | PROT_WRITE));
 	AttachThreads();
-	OpenDumpFile();
 }
 
 MProfiler::~MProfiler() {
@@ -222,9 +225,7 @@ void MProfiler::CreateProfilerDaemon(void){
 static void GCMMPAttachThread(Thread* t, void* arg){
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
-		if(mProfiler->IsProfilingEnabled()){
-			//mProfiler->AttachThread(t);
-		}
+		mProfiler->AttachThread(t);
 	}
 }
 
@@ -238,35 +239,44 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread){
 	return false;
 }
 
-void MProfiler::AttachThread(Thread* thread){
-//	if(IsProfilingRunning()) {
-		LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid() ;
-//		GCMMPThreadProf* threadProf = thread->GetProfRec();
-//		if(threadProf != NULL) {
-//			if(threadProf->state == GCMMP_TH_RUNNING) {
-//				LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
-//				return;
-//			}
+/*
+ * Attach the thread to the set of the profiled threads
+ * We assume that checks already done before we call this
+ */
+void MProfiler::AttachThread(Thread* thread) {
+	LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf != NULL) {
+		if(threadProf->state == GCMMP_TH_RUNNING) {
+			LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+			return;
+		}
+	}
+	threadProf = new GCMMPThreadProf(this, thread);
+	threadProflist_.push_back(threadProf);
+	thread->SetProfRec(threadProf);
+
+	if(IsProfilingRunning()) {
+//		if(ProfiledThreadsContain(thread)){
+//			LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+//			return;
 //		}
-////		if(ProfiledThreadsContain(thread)){
-////			LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
-////			return;
-////		}
-//
-//		threadProf = new GCMMPThreadProf(this, thread);
-//		threadProflist_.push_back(threadProf);
-//		thread->SetProfRec(threadProf);
-//	}
+	}
 }
 
-void MProfiler::DettachThread(Thread* thread){
+void MProfiler::DettachThread(Thread* thread) {
+	LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf != NULL) {
+		thread->SetProfRec(NULL);
+		threadProf->StopProfiling();
+	}
 	//if(IsProfilingRunning()) {
-//		GCMMPThreadProf* threadProf = thread->GetProfRec();
-//		if(threadProf != NULL) {
-//			thread->SetProfRec(NULL);
-//			threadProf->StopProfiling();
+//
+//
+//
+//
 //		}
-		LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid() ;
 //	}
 }
 
