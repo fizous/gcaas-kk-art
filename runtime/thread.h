@@ -42,6 +42,8 @@
 #include "throw_location.h"
 #include "UniquePtr.h"
 
+#include "gc_profiler/MProfilerTypes.h"
+
 namespace art {
 
 namespace mirror {
@@ -822,7 +824,7 @@ class PACKED(4) Thread {
 
   friend class ScopedThreadStateChange;
 
-  void* profRec_;
+  GCMMPThreadProf* profRec_;
 
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
