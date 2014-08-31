@@ -158,20 +158,20 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
 
   static bool IsMProfRunning() {
-  	if(instance_ != NULL)
-  		return instance_->IsProfilingRunning();
+  	if(Current() != NULL)
+  		return Current()->IsProfilingRunning();
   	return false;
   }
 
   static void MProfAttachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		instance_->AttachThread(th);
+  		Current()->AttachThread(th);
   	}
   }
 
   static void MProfDetachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		instance_->DettachThread(th);
+  		Current()->DettachThread(th);
   	}
   }
 
