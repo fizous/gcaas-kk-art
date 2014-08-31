@@ -132,10 +132,10 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static MProfiler* instance_;
+	static mprofiler::MProfiler* instance_;
 
-	static MProfiler* Current() {
-		return instance_;
+	static mprofiler::MProfiler* Current() {
+		return mprofiler::MProfiler::instance_;
 	}
 
 	MProfiler(GCMMP_Options*);
