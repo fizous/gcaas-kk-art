@@ -158,6 +158,7 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
 
   static bool IsMProfRunning() {
+  	MProfiler* mP = MProfiler::Current();
   	if(MProfiler::instance_ != NULL)
   		return MProfiler::instance_->IsProfilingRunning();
   	return false;
