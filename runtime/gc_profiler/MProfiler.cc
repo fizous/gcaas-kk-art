@@ -147,7 +147,7 @@ static void GCMMPKillThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
 		if(mProfiler->DettachThread(profRec)) {
-			ThreadList* thread_list = Runtime::Current()->GetThreadList();
+
 		}
 	}
 }
