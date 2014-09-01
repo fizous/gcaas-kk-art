@@ -102,10 +102,6 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
 {
-	if(MProfiler::instance_ != NULL) {
-		MProfiler::instance_ = this;
-	}
-
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
 		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
@@ -336,19 +332,19 @@ void MProfiler::PreForkPreparation() {
 
 void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		MProfiler::instance_->AttachThread(th);
+		Runtime::Current()->mprofiler_->AttachThread(th);
 	}
 }
 
 
 void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		MProfiler::instance_->DettachThread(th);
+		Runtime::Current()->mprofiler_->DettachThread(th);
 	}
 }
 
 bool MProfiler::IsMProfRunning() {
-	MProfiler* mP = MProfiler::instance_;
+	MProfiler* mP = Runtime::Current()->mprofiler_;
 	if(mP != NULL)
 		return mP->IsProfilingRunning();
 	return false;

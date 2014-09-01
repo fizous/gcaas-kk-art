@@ -132,8 +132,6 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static MProfiler* instance_;
-
 	MProfiler(GCMMP_Options*);
 
 	~MProfiler();
