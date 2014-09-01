@@ -188,15 +188,15 @@ void* MProfiler::Run(void* arg) {
 
   Thread* self = Thread::Current();
 
-  prof_thread_ = self;
+  mProfiler->prof_thread_ = self;
 
-  hasProfDaemon_ =
+  mProfiler->hasProfDaemon_ =
   		runtime->AttachCurrentThread("MProfile Daemon", true,
   				runtime->GetSystemThreadGroup(),
       !runtime->IsCompiler());
-  CHECK(hasProfDaemon_);
+  CHECK(mProfiler->hasProfDaemon_);
 
-  if(!hasProfDaemon_)
+  if(!mProfiler->hasProfDaemon_)
   	return NULL;
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
@@ -219,7 +219,7 @@ void* MProfiler::Run(void* arg) {
   LOG(INFO) << "MPRofiler: Profiler Daemon Created and Leaving";
 
 
-  ShutdownProfiling();
+  mProfiler->ShutdownProfiling();
 
   return NULL;
 
