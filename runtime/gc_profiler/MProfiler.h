@@ -55,7 +55,7 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	GCMMPDumpCurrentUsage dumpMethod;
 }GCMMPProfilingEntry;
 
-class PACKED(4) MProfiler {
+class MProfiler {
 private:
 
 	//Index of the profiler type we are running
