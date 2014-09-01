@@ -56,8 +56,19 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 
 
 
-void GCPauseThreadManager::AddEventTime(GCMMP_BREAK_DOWN_ENUM evType) {
-	IncrementIndices();
+void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
+	marker.startMarker = NanoTime();
+}
+
+void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
+	marker.finalMarker = NanoTime();
+	InsertEvent(evType);
+}
+
+void GCPauseThreadManager::InsertEvent(GCMMP_BREAK_DOWN_ENUM evType) {
+	pauseEvents[curr_bucket_ind_][curr_entry_].finalMarker = marker.finalMarker;
+	pauseEvents[curr_bucket_ind_][curr_entry_].startMarker = marker.startMarker;
+	pauseEvents[curr_bucket_ind_][curr_entry_].type = evType;
 }
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
@@ -464,6 +475,34 @@ void MProfiler::MProfDetachThread(art::Thread* th) {
 	}
 }
 
+void MProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec) {
+	if(profRec != NULL && profRec->state == GCMMP_TH_RUNNING) {
+		profRec->getPauseMgr()->MarkStartTimeEvent(GCMMP_GC_BRK_WAIT_CONC);
+	}
+}
+
+void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec) {
+	if(profRec != NULL && profRec->state == GCMMP_TH_RUNNING) {
+		profRec->getPauseMgr()->MarkEndTimeEvent(GCMMP_GC_BRK_WAIT_CONC);
+	}
+}
+
+/*
+ * Detach a thread from the MProfiler
+ */
+void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->MarkWaitTimeEvent(th->GetProfRec());
+	}
+}
+/*
+ * Detach a thread from the MProfiler
+ */
+void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(th->GetProfRec());
+	}
+}
 /*
  * Return true only when the MProfiler is Running
  */

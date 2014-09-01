@@ -170,7 +170,11 @@ public:
   static void MProfAttachThread(art::Thread*);
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
+  static void MProfMarkWaitTimeEvent(art::Thread*);
+  static void MProfMarkEndWaitTimeEvent(art::Thread*);
 
+  void MarkWaitTimeEvent(GCMMPThreadProf*);
+  void MarkEndWaitTimeEvent(GCMMPThreadProf*);
   void ProcessSignalCatcher(int);
 
 

@@ -88,14 +88,15 @@ class GCMMPThreadProf;
 class PACKED(4) GCPauseThreadManager {
 	 GCMMP_ProfileActivity marker;
 	 GCPauseThreadMarker* pauseEvents[GCMMP_GCPAUSE_ARRAY_SIZE];
+	 int curr_bucket_ind_;
 	 int curr_entry_;
-	 int curr_ev_ind_;
-	 int ev_Count_;
+	 int ev_count_;
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
+	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 
 	 GCPauseThreadManager(void) :
-		 curr_entry_(-1), curr_ev_ind_(kGCMMPMaxEventEntries), ev_Count_(-1) {
+		 curr_bucket_ind_(-1), curr_entry_(kGCMMPMaxEventEntries), ev_count_(-1) {
 		IncrementIndices();
 	 }
 
@@ -108,20 +109,22 @@ public:
 		} //InitPausesEntry
 
 	 void IncrementIndices(void) {
-			ev_Count_++;
-			curr_ev_ind_++;
-			if(curr_ev_ind_ >= kGCMMPMaxEventEntries) {
-				curr_ev_ind_ = 0;
-				curr_entry_ ++;
+			ev_count_++;
+			curr_entry_++;
+			if(curr_entry_ >= kGCMMPMaxEventEntries) {
+				curr_entry_ = 0;
+				curr_bucket_ind_ ++;
 				if(curr_entry_ >= GCMMP_GCPAUSE_ARRAY_SIZE) {
 					LOG(ERROR) << "MPRofiler: Exceeded maximum count of entries ";
 				}
+				LOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
 				InitPausesEntry(&pauseEvents[curr_entry_]);
-
 			}
 	 } //IncrementIndices
 
-	 void AddEventTime(GCMMP_BREAK_DOWN_ENUM);
+	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
+	 void MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM);
+	 void InsertEvent(GCMMP_BREAK_DOWN_ENUM);
 
 }; // Class GCPauseThreadManager
 
@@ -154,6 +157,9 @@ public:
     return pid;
   }
 
+  GCPauseThreadManager* getPauseMgr(void) const {
+  	return pauseManager;
+  }
   bool StopProfiling(void);
 };
 } // namespace mprofiler
