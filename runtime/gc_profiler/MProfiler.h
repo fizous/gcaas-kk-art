@@ -164,19 +164,9 @@ public:
   	return false;
   }
 
-  static void MProfAttachThread(Thread* th) {
-  	if(IsMProfRunning()) {
-  		MProfiler* mP = MProfiler::Current();
-  		mP->AttachThread(th);
-  	}
-  }
+  static void MProfAttachThread(Thread*);
 
-  static void MProfDetachThread(Thread* th) {
-  	if(IsMProfRunning()) {
-  		MProfiler* mP = MProfiler::Current();
-  		mP->DettachThread(th);
-  	}
-  }
+  static void MProfDetachThread(Thread*);
 
   friend class GCMMPThreadProf;
 }; //class MProfiler

@@ -333,6 +333,20 @@ void MProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
 
+
+static void MProfAttachThread(Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		MProfiler::Current()->AttachThread(th);
+	}
+}
+
+
+static void MProfDetachThread(Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		MProfiler::Current()->DettachThread(th);
+	}
+}
+
 }// namespace mprofiler
 }// namespace art
 
