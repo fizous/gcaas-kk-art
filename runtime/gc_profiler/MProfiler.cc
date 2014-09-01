@@ -71,6 +71,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
 	LOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
+	pauseManager = new GCPauseThreadManager(this);
 	state = GCMMP_TH_RUNNING;
 	LOG(INFO) << "MProfiler : ThreadProf is initialized";
 }

@@ -82,6 +82,9 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 	GCMMP_BREAK_DOWN_ENUM type;
 } GCPauseThreadMarker;
 
+class MProfiler;
+class GCMMPThreadProf;
+
 class PACKED(4) GCPauseThreadManager {
 	 GCMMP_ProfileActivity marker;
 	 GCPauseThreadMarker* pauseEvents[GCMMP_GCPAUSE_ARRAY_SIZE];
@@ -123,7 +126,7 @@ public:
 
 }; // Class GCPauseThreadManager
 
-class MProfiler;
+
 /*
  * Holds the profiling data per thread . We do not keep a pointer to the thread
  * because threads may terminate before we collect the information
