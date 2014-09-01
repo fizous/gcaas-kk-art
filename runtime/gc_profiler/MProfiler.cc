@@ -528,7 +528,7 @@ void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
  */
 void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		//Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(th->GetProfRec());
+		Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(th->GetProfRec());
 	}
 }
 /*
