@@ -146,7 +146,9 @@ void MProfiler::DumpCurrentOutpu(void){
 static void GCMMPKillThreadProf(Thread* t, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
-		mProfiler->DettachThread(t);
+		if(mProfiler->DettachThread(t->GetProfRec())) {
+			t->SetProfRec(NULL);
+		}
 	}
 }
 
@@ -360,20 +362,13 @@ void MProfiler::AttachThread(Thread* thread) {
 	}
 }
 
-void MProfiler::DettachThread(Thread* thread) {
-	LOG(INFO) << "MProfiler: Detaching thread from List " << thread->GetTid();
-	GCMMPThreadProf* threadProf = thread->GetProfRec();
+bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	if(threadProf != NULL) {
-		thread->SetProfRec(NULL);
 		threadProf->StopProfiling();
+		LOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
+		return true;
 	}
-	//if(IsProfilingRunning()) {
-//
-//
-//
-//
-//		}
-//	}
+	return false;
 }
 
 void MProfiler::AttachThreads(){
@@ -435,20 +430,29 @@ void MProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
 
-
+/*
+ * Attach a thread from the MProfiler
+ */
 void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		Runtime::Current()->mprofiler_->AttachThread(th);
 	}
 }
 
-
+/*
+ * Detach a thread from the MProfiler
+ */
 void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->DettachThread(th);
+		if(Runtime::Current()->mprofiler_->DettachThread(th->GetProfRec())) {
+			th->SetProfRec(NULL);
+		}
 	}
 }
 
+/*
+ * Return true only when the MProfiler is Running
+ */
 bool MProfiler::IsMProfRunning() {
 	MProfiler* mP = Runtime::Current()->mprofiler_;
 	if(mP != NULL)

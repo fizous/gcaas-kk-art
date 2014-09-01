@@ -160,7 +160,7 @@ public:
 
 
   void AttachThread(Thread*);
-  void DettachThread(Thread*);
+  bool DettachThread(GCMMPThreadProf*);
   void GCMMProfPerfCounters(const char*);
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
