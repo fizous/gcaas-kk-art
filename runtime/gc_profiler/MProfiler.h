@@ -135,7 +135,7 @@ public:
 	static MProfiler* instance_;
 
 	static MProfiler* Current() {
-		return MProfiler::instance_;
+		return instance_;
 	}
 
 	MProfiler(GCMMP_Options*);
