@@ -58,10 +58,11 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	  pauseManager(NULL),
 	  state(GCMMP_TH_STARTING) {
 
+	LOG(INFO) << "MPRofiler: Initializing arrayBreaks for " << thread->GetTid();
 	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
-
+	LOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	state = GCMMP_TH_RUNNING;
 	LOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
@@ -248,6 +249,7 @@ void MProfiler::AttachThread(Thread* thread) {
 			return;
 		}
 	}
+	LOG(INFO) << "MPRofiler: Initializing threadProf for " << thread->GetTid();
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);

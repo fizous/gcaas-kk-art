@@ -309,6 +309,7 @@ void Thread::Init(ThreadList* thread_list, JavaVMExt* java_vm) {
   InitStackHwm();
 
   jni_env_ = new JNIEnvExt(this, java_vm);
+  SetProfRec(NULL);
   thread_list->Register(this);
 }
 
