@@ -130,16 +130,17 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 
 
 void MProfiler::ShutdownProfiling(void){
-  Runtime* runtime = Runtime::Current();
 
-  running_ = false;
+	if(IsProfilingRunning()){
+		Runtime* runtime = Runtime::Current();
+		running_ = false;
 
-  if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
-  	runtime->DetachCurrentThread();
-  }
+		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
+			runtime->DetachCurrentThread();
+		}
 
-  LOG(INFO) << "Shutting Down";
-
+		LOG(INFO) << "Shutting Down";
+	}
 }
 
 void MProfiler::InitializeProfiler(){
@@ -187,7 +188,7 @@ void* MProfiler::Run(void* arg) {
   Runtime* runtime = Runtime::Current();
 
   Thread* self = Thread::Current();
-
+  LOG(INFO) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
   mProfiler->prof_thread_ = self;
 
   mProfiler->hasProfDaemon_ =
