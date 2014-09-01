@@ -187,14 +187,11 @@ void* MProfiler::Run(void* arg) {
 
   Runtime* runtime = Runtime::Current();
 
-  Thread* self = Thread::Current();
-  LOG(INFO) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
-  mProfiler->prof_thread_ = self;
-
   mProfiler->hasProfDaemon_ =
   		runtime->AttachCurrentThread("MProfile Daemon", true,
   				runtime->GetSystemThreadGroup(),
       !runtime->IsCompiler());
+
   CHECK(mProfiler->hasProfDaemon_);
 
   if(!mProfiler->hasProfDaemon_)
@@ -202,11 +199,13 @@ void* MProfiler::Run(void* arg) {
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
 
-
   DCHECK_NE(self->GetState(), kRunnable);
   {
+  	Thread* self = Thread::Current();
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
+
+      LOG(INFO) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
     	mProfiler->prof_thread_ = self;
     	mProfiler->SetMProfileFlags();
     } else {
