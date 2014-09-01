@@ -94,10 +94,9 @@ class PACKED(4) GCPauseThreadManager {
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
 
-	 GCPauseThreadManager(GCMMPThreadProf* threadProf) :
+	 GCPauseThreadManager(void) :
 		 curr_entry_(-1), curr_ev_ind_(kGCMMPMaxEventEntries), ev_Count_(-1) {
-			threadProf->pauseManager = this;
-			IncrementIndices();
+		IncrementIndices();
 	 }
 
 	 ~GCPauseThreadManager(void);
