@@ -159,20 +159,21 @@ public:
 
   static bool IsMProfRunning() {
   	MProfiler* mP = MProfiler::Current();
-  	if(MProfiler::instance_ != NULL)
-  		return MProfiler::instance_->IsProfilingRunning();
+  	if(mP != NULL)
+  		return mP->IsProfilingRunning();
   	return false;
   }
 
   static void MProfAttachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		MProfiler::instance_->AttachThread(th);
+  		MProfiler* mP = MProfiler::Current();
+  		mP->AttachThread(th);
   	}
   }
 
   static void MProfDetachThread(Thread* th) {
   	if(IsMProfRunning()) {
-  		MProfiler::instance_->DettachThread(th);
+  		mP->DettachThread(th);
   	}
   }
 
