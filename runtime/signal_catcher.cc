@@ -207,7 +207,7 @@ void* SignalCatcher::Run(void* arg) {
   SignalSet signals;
   signals.Add(SIGQUIT);
   signals.Add(SIGUSR1);
-  signals.Add(SIGUSR2);
+  //signals.Add(SIGUSR2);
 
   while (true) {
     int signal_number = signal_catcher->WaitForSignal(self, signals);

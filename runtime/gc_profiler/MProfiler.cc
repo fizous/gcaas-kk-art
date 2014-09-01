@@ -216,20 +216,20 @@ void* MProfiler::Run(void* arg) {
     	mProfiler->prof_thread_ = self;
     	mProfiler->SetMProfileFlags();
     } else {
-    	 LOG(INFO) << "MPRofiler: Profiler was already created";
+    	 LOG(INFO) << "MProfiler: Profiler was already created";
     }
 
     mProfiler->prof_thread_cond_->Broadcast(self);
   }
 
 
-  LOG(INFO) << "MPRofiler: Profiler Daemon Created and Leaving";
+  LOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
 
 
   while(true) {
     // Check if GC is running holding gc_complete_lock_.
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    LOG(INFO) << "MPRofiler: Profiler Daemon Is goin to Wait";
+    LOG(INFO) << "MProfiler: Profiler Daemon Is goin to Wait";
     ScopedThreadStateChange tsc(Thread::Current(), kWaitingInMainGCMMPCatcherLoop);
     {
     	mProfiler->prof_thread_cond_->Wait(self);
@@ -307,7 +307,7 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread){
  * We assume that checks already done before we call this
  */
 void MProfiler::AttachThread(Thread* thread) {
-	LOG(INFO) << "MPRofiler: Attaching thread Late " << thread->GetTid();
+	LOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -317,12 +317,12 @@ void MProfiler::AttachThread(Thread* thread) {
 	}
 	if(thread->GetTid() == prof_thread_->GetTid()){
 		if(!IsAttachProfDaemon()) {
-			LOG(INFO) << "MPRofiler: Skipping profDaemon attached " << thread->GetTid() ;
+			LOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
 			return;
 		}
 	}
 
-	LOG(INFO) << "MPRofiler: Initializing threadProf for " << thread->GetTid();
+	LOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid();
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);
@@ -336,7 +336,7 @@ void MProfiler::AttachThread(Thread* thread) {
 }
 
 void MProfiler::DettachThread(Thread* thread) {
-	LOG(INFO) << "MPRofiler: Detaching thread from List " << thread->GetTid();
+	LOG(INFO) << "MProfiler: Detaching thread from List " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		thread->SetProfRec(NULL);
@@ -359,11 +359,11 @@ void MProfiler::AttachThreads(){
 //	 thread_list->ResumeAll();
 
 	Thread* self = Thread::Current();
-	LOG(INFO) << "MPRofiler: Attaching All threads " << self->GetTid();
+	LOG(INFO) << "MProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
 	MutexLock mu(self, *Locks::thread_list_lock_);
 	thread_list->ForEach(GCMMPAttachThread, this);
-	LOG(INFO) << "MPRofiler: Done Attaching All threads ";
+	LOG(INFO) << "MProfiler: Done Attaching All threads ";
 
 }
 
