@@ -102,8 +102,8 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false)
 {
-	if(instance_ != NULL) {
-		instance_ = this;
+	if(MProfiler::instance_ != NULL) {
+		MProfiler::instance_ = this;
 	}
 
 	if(IsProfilingEnabled()) {
