@@ -164,9 +164,9 @@ public:
   	return false;
   }
 
-  static void MProfAttachThread(Thread*);
+  static void MProfAttachThread(art::Thread*);
 
-  static void MProfDetachThread(Thread*);
+  static void MProfDetachThread(art::Thread*);
 
   friend class GCMMPThreadProf;
 }; //class MProfiler
