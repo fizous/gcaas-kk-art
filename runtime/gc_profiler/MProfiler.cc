@@ -198,10 +198,10 @@ void* MProfiler::Run(void* arg) {
   	return NULL;
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
-
+  Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
-  	Thread* self = Thread::Current();
+
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
 
