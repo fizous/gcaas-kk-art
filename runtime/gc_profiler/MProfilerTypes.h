@@ -61,7 +61,7 @@ typedef enum GCMMPFlagsEnum_s {
  * Struct used to hold the temporary values when we enter the block of an
  * activity. When we exit we add the delta to the accumulated field.
  */
-typedef struct GCMMP_ProfileActivity_S {
+typedef struct PACKED(4) GCMMP_ProfileActivity_S {
 	/* Used as a temp to hold the counter vaue when we enter the activity block */
 	uint64_t startMarker;
 	/* represents the total value of the activity */
@@ -72,7 +72,7 @@ typedef struct GCMMP_ProfileActivity_S {
  * Struct used to hold the temporary values when we enter the block of an
  * activity. When we exit we add the delta to the accumulated field.
  */
-typedef struct GCPauseThreadMarker_S {
+typedef struct PACKED(4) GCPauseThreadMarker_S {
 	/* Used as a temp to hold the counter vaue when we enter the activity block */
 	uint64_t startMarker;
 	/* represents the total value of the activity */

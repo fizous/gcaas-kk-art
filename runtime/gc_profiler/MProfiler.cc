@@ -59,7 +59,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	  state(GCMMP_TH_STARTING) {
 
 	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-		memset(&timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
 
 	state = GCMMP_TH_RUNNING;

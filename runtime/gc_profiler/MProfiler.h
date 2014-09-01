@@ -46,7 +46,7 @@ namespace mprofiler {
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 
 /* types of Profiling defined here */
-typedef struct GCMMPProfilingEntry_S {
+typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	int 						id_;					/* id of the profiling */
 	unsigned int 		flags_;				/* the flag vector used to specify the functionality*/
 	const char			*name_;	     	/* event name */
@@ -55,7 +55,7 @@ typedef struct GCMMPProfilingEntry_S {
 	GCMMPDumpCurrentUsage dumpMethod;
 }GCMMPProfilingEntry;
 
-class MProfiler {
+class PACKED(4) MProfiler {
 private:
 
 	//Index of the profiler type we are running
