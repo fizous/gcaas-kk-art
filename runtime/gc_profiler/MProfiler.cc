@@ -336,19 +336,19 @@ void MProfiler::PreForkPreparation() {
 
 void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		MProfiler::Current()->AttachThread(th);
+		MProfiler::instance_->AttachThread(th);
 	}
 }
 
 
 void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		MProfiler::Current()->DettachThread(th);
+		MProfiler::instance_->DettachThread(th);
 	}
 }
 
 bool MProfiler::IsMProfRunning() {
-	MProfiler* mP = MProfiler::Current();
+	MProfiler* mP = MProfiler::instance_;
 	if(mP != NULL)
 		return mP->IsProfilingRunning();
 	return false;

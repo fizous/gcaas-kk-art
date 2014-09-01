@@ -134,10 +134,6 @@ public:
 
 	static MProfiler* instance_;
 
-	static MProfiler* Current() {
-		return instance_;
-	}
-
 	MProfiler(GCMMP_Options*);
 
 	~MProfiler();
