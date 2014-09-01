@@ -124,6 +124,7 @@ private:
 
   bool ProfiledThreadsContain(Thread*);
   void RemoveThreadProfile(GCMMPThreadProf*);
+
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
 	static const unsigned int kGCMMPEnableProfiling = 0;

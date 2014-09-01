@@ -54,6 +54,12 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
+
+
+void GCPauseThreadManager::AddEventTime(GCMMP_BREAK_DOWN_ENUM evType) {
+	IncrementIndices();
+}
+
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),
 	  suspendedGC(false),
@@ -136,11 +142,22 @@ void MProfiler::DumpCurrentOutpu(void){
 	//ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
 }
 
-void MProfiler::ShutdownProfiling(void){
+static void GCMMPKillThreadProf(Thread* t, void* arg) {
+	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
+	if(mProfiler != NULL) {
+		mProfiler->DettachThread(t);
+	}
+}
+
+void MProfiler::ShutdownProfiling(void) {
 
 	if(IsProfilingRunning()){
 		Runtime* runtime = Runtime::Current();
 		running_ = false;
+
+		LOG(INFO) << "Starting Detaching all the thread Profiling";
+		threadProflist_->ForEach(GCMMPKillThreadProf, this);
+		LOG(INFO) << "Done Detaching all the thread Profiling";
 
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
 			runtime->DetachCurrentThread();
@@ -254,8 +271,15 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
 		Thread* self = Thread::Current();
     MutexLock mu(self, *prof_thread_mutex_);
     receivedSignal_ = true;
+
+    if(!hasProfDaemon_) {
+    	ShutdownProfiling();
+    }
+
     // Wake anyone who may have been waiting for the GC to complete.
     prof_thread_cond_->Broadcast(self);
+
+
 
     LOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
 	}

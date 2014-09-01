@@ -82,13 +82,46 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 	GCMMP_BREAK_DOWN_ENUM type;
 } GCPauseThreadMarker;
 
-class GCPauseThreadManager {
+class PACKED(4) GCPauseThreadManager {
 	 GCMMP_ProfileActivity marker;
 	 GCPauseThreadMarker* pauseEvents[GCMMP_GCPAUSE_ARRAY_SIZE];
-	 int currentEntry;
-	 int currEventsIndex;
-	 int eventsCount;
-};
+	 int curr_entry_;
+	 int curr_ev_ind_;
+	 int ev_Count_;
+public:
+	 static constexpr int kGCMMPMaxEventEntries = 32;
+
+	 GCPauseThreadManager(GCMMPThreadProf* threadProf) :
+		 curr_entry_(-1), curr_ev_ind_(kGCMMPMaxEventEntries), ev_Count_(-1) {
+			threadProf->pauseManager = this;
+			IncrementIndices();
+	 }
+
+	 ~GCPauseThreadManager(void);
+
+	 void InitPausesEntry(GCPauseThreadMarker** entryPointer) {
+			*entryPointer =
+					reinterpret_cast<GCPauseThreadMarker*>(calloc(kGCMMPMaxEventEntries,
+					sizeof(GCPauseThreadMarker)));
+		} //InitPausesEntry
+
+	 void IncrementIndices(void) {
+			ev_Count_++;
+			curr_ev_ind_++;
+			if(curr_ev_ind_ >= kGCMMPMaxEventEntries) {
+				curr_ev_ind_ = 0;
+				curr_entry_ ++;
+				if(curr_entry_ >= GCMMP_GCPAUSE_ARRAY_SIZE) {
+					LOG(ERROR) << "MPRofiler: Exceeded maximum count of entries ";
+				}
+				InitPausesEntry(&pauseEvents[curr_entry_]);
+
+			}
+	 } //IncrementIndices
+
+	 void AddEventTime(GCMMP_BREAK_DOWN_ENUM);
+
+}; // Class GCPauseThreadManager
 
 class MProfiler;
 /*
