@@ -519,7 +519,7 @@ void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec) {
  */
 void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		//Runtime::Current()->mprofiler_->MarkWaitTimeEvent(th->GetProfRec());
+		Runtime::Current()->mprofiler_->MarkWaitTimeEvent(th->GetProfRec());
 	}
 }
 /*

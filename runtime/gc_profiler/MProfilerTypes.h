@@ -113,7 +113,7 @@ public:
 			curr_entry_++;
 			if(curr_entry_ >= kGCMMPMaxEventEntries) {
 				curr_entry_ = 0;
-				curr_bucket_ind_ ++;
+				curr_bucket_ind_++;
 				if(curr_entry_ >= GCMMP_GCPAUSE_ARRAY_SIZE) {
 					LOG(ERROR) << "MPRofiler: Exceeded maximum count of entries ";
 				}
