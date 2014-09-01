@@ -1753,7 +1753,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
         LOG(INFO) << "WaitForConcurrentGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
- //   mprofiler::MProfiler::MProfMarkEndWaitTimeEvent(self);
+    mprofiler::MProfiler::MProfMarkEndWaitTimeEvent(self);
     ATRACE_END();
   }
   return last_gc_type;

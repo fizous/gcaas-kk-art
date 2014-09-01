@@ -237,11 +237,12 @@ void MProfiler::InitializeProfiler() {
 
 void MProfiler::SetMProfileFlags(void) {
 	OpenDumpFile();
+	AttachThreads();
 	running_ = true;
 //	size_t capacity = MProfiler::kGCMMPMAXThreadCount * sizeof(GCMMPThreadProf);
 //  UniquePtr<GCMMPThreadProf> mem_threads_allocated(MemMap::MapAnonymous(
 //  		"thredProfileRegion", NULL, capacity, PROT_READ | PROT_WRITE));
-	AttachThreads();
+
 }
 
 MProfiler::~MProfiler() {
