@@ -88,13 +88,13 @@ bool GCMMPThreadProf::StopProfiling(void) {
 	return false;
 }
 
-void GCMMPThreadProf::Destroy(MProfiler* mProfiler){
+void GCMMPThreadProf::Destroy(MProfiler* mProfiler) {
 
 }
 
-void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec){
+void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	if(IsProfilingRunning()){
-			if(!thProfRec->StopProfiling()){
+			if(!thProfRec->StopProfiling()) {
 				LOG(ERROR) << "MProfiler : ThreadProf is initialized";
 			}
 			threadProflist_.remove(thProfRec);
@@ -139,7 +139,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 }
 
 
-void MProfiler::DumpCurrentOutpu(void){
+void MProfiler::DumpCurrentOutpu(void) {
 	//ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
 }
 
@@ -159,7 +159,7 @@ void MProfiler::ShutdownProfiling(void) {
 		running_ = false;
 
 		LOG(INFO) << "Starting Detaching all the thread Profiling";
-		threadProflist_->ForEach(GCMMPKillThreadProf, this);
+		ForEach(GCMMPKillThreadProf, this);
 		LOG(INFO) << "Done Detaching all the thread Profiling";
 
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
@@ -170,7 +170,7 @@ void MProfiler::ShutdownProfiling(void) {
 	}
 }
 
-void MProfiler::InitializeProfiler(){
+void MProfiler::InitializeProfiler() {
 	if(!IsProfilingEnabled())
 		return;
 	if(IsProfilingRunning())
@@ -295,7 +295,7 @@ void MProfiler::MProfileSignalCatcher(int signalVal) {
 	}
 }
 
-void MProfiler::CreateProfilerDaemon(void){
+void MProfiler::CreateProfilerDaemon(void) {
   // Create a raw pthread; its start routine will attach to the runtime.
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
@@ -312,14 +312,14 @@ void MProfiler::CreateProfilerDaemon(void){
 
 }
 
-static void GCMMPAttachThread(Thread* t, void* arg){
+static void GCMMPAttachThread(Thread* t, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
 		mProfiler->AttachThread(t);
 	}
 }
 
-bool MProfiler::ProfiledThreadsContain(Thread* thread){
+bool MProfiler::ProfiledThreadsContain(Thread* thread) {
 	pid_t tId = thread->GetTid();
 	for (const auto& threadProf : threadProflist_) {
     if (threadProf->GetTid() == tId) {
@@ -371,7 +371,7 @@ bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	return false;
 }
 
-void MProfiler::AttachThreads(){
+void MProfiler::AttachThreads() {
 //
 //	 thread_list->SuspendAll();
 //	 thread_list()->ForEach(GCMMPAttachThread, this);
