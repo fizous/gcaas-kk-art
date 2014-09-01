@@ -173,6 +173,7 @@ public:
 
   static void MProfDetachThread(Thread* th) {
   	if(IsMProfRunning()) {
+  		MProfiler* mP = MProfiler::Current();
   		mP->DettachThread(th);
   	}
   }
