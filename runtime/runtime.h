@@ -526,9 +526,9 @@ class Runtime {
 
   // As returned by ClassLoader.getSystemClassLoader().
   jobject system_class_loader_;
-
+public:
   mprofiler::MProfiler* mprofiler_;
-
+private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };
 
