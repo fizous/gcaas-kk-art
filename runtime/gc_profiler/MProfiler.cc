@@ -95,7 +95,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
 	LOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
-	pauseManager = new GCPauseThreadManager();
+	//pauseManager = new GCPauseThreadManager();
 	state = GCMMP_TH_RUNNING;
 	LOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
@@ -410,13 +410,6 @@ void MProfiler::AttachThread(Thread* thread) {
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);
-
-	if(IsProfilingRunning()) {
-//		if(ProfiledThreadsContain(thread)){
-//			LOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
-//			return;
-//		}
-	}
 }
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
