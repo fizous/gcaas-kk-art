@@ -125,7 +125,7 @@ public:
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void InsertEvent(GCMMP_BREAK_DOWN_ENUM);
-
+	 void DumpProfData(void);
 }; // Class GCPauseThreadManager
 
 

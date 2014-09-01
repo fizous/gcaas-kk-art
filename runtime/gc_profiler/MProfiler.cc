@@ -65,10 +65,23 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	InsertEvent(evType);
 }
 
+
+void GCPauseThreadManager::DumpProfData(void) {
+	int totalC = 0;
+	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
+		int limit_ = (bucketInd == curr_entry_) ? curr_bucket_ind_:kGCMMPMaxEventEntries;
+		for(int entryInd = 0; entryInd < limit_; entryInd++){
+			LOG(INFO) << "pMgr " << totalC << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+		}
+	}
+}
+
+
 void GCPauseThreadManager::InsertEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	pauseEvents[curr_bucket_ind_][curr_entry_].finalMarker = marker.finalMarker;
 	pauseEvents[curr_bucket_ind_][curr_entry_].startMarker = marker.startMarker;
 	pauseEvents[curr_bucket_ind_][curr_entry_].type = evType;
+	IncrementIndices();
 }
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
@@ -90,6 +103,8 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 GCMMPThreadProf::~GCMMPThreadProf() {
 
 }
+
+
 
 bool GCMMPThreadProf::StopProfiling(void) {
 	if(state == GCMMP_TH_RUNNING) {
@@ -171,6 +186,9 @@ static void GCMMPResetThreadField(Thread* t, void* arg) {
 void MProfiler::ShutdownProfiling(void) {
 
 	if(IsProfilingRunning()){
+
+		DumpProfData();
+
 		Runtime* runtime = Runtime::Current();
 		running_ = false;
 
@@ -288,6 +306,20 @@ void* MProfiler::Run(void* arg) {
 
   return NULL;
 
+}
+
+
+static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
+	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
+	if(mProfiler != NULL) {
+		 LOG(INFO) << "MProfiler_out: " << profRec->GetTid() << "---------------";
+		 profRec->getPauseMgr()->DumpProfData();
+		 LOG(INFO) << "MPr_out: " << profRec->GetTid() ;
+	}
+}
+
+void MProfiler::DumpProfData(void) {
+	ForEach(GCMMPDumpThreadProf, this);
 }
 
 
