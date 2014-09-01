@@ -29,6 +29,10 @@
 
 namespace art {
 
+namespace mprofiler {
+	class MProfiler;
+}
+
 ThreadList::ThreadList()
     : allocated_ids_lock_("allocated thread ids lock"),
       suspend_all_count_(0), debug_suspend_all_count_(0),
