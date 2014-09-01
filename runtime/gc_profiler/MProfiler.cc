@@ -392,6 +392,12 @@ void MProfiler::AttachThreads(){
 
 }
 
+void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context) {
+  for (const auto& profRec : threadProflist_) {
+    callback(profRec, context);
+  }
+}
+
 void MProfiler::OpenDumpFile(){
 	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
 		char str[256];

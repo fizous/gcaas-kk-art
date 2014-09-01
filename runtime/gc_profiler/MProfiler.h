@@ -166,7 +166,7 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
   static bool IsMProfRunning();
-
+  void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static void MProfAttachThread(art::Thread*);
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
