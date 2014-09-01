@@ -347,6 +347,14 @@ void MProfiler::MProfDetachThread(art::Thread* th) {
 	}
 }
 
+bool MProfiler::IsMProfRunning() {
+	MProfiler* mP = MProfiler::Current();
+	if(mP != NULL)
+		return mP->IsProfilingRunning();
+	return false;
+}
+
+
 }// namespace mprofiler
 }// namespace art
 

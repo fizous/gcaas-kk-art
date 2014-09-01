@@ -157,12 +157,7 @@ public:
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
 
-  static bool IsMProfRunning() {
-  	MProfiler* mP = MProfiler::Current();
-  	if(mP != NULL)
-  		return mP->IsProfilingRunning();
-  	return false;
-  }
+  static bool IsMProfRunning();
 
   static void MProfAttachThread(art::Thread*);
 
