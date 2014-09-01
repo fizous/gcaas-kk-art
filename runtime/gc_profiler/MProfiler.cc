@@ -13,14 +13,15 @@
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
-#include <cutils/trace.h>
+
 #include "gc/heap.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
 #include "locks.h"
 #include "os.h"
 #include "runtime.h"
-
+#include "ScopedLocalRef.h"
+#include "scoped_thread_state_change.h"
 #include "thread_list.h"
 #include "thread.h"
 //#include "scoped_thread_state_change.h"
