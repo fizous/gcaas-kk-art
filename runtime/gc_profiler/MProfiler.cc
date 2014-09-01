@@ -93,7 +93,7 @@ void GCMMPThreadProf::Destroy(MProfiler* mProfiler) {
 }
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
-	if(IsProfilingRunning()){
+	if(IsProfilingRunning()) {
 			if(!thProfRec->StopProfiling()) {
 				LOG(ERROR) << "MProfiler : ThreadProf is initialized";
 			}
@@ -143,14 +143,19 @@ void MProfiler::DumpCurrentOutpu(void) {
 	//ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
 }
 
-static void GCMMPKillThreadProf(Thread* t, void* arg) {
+static void GCMMPKillThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
-		if(mProfiler->DettachThread(t->GetProfRec())) {
-			t->SetProfRec(NULL);
+		if(mProfiler->DettachThread(profRec)) {
+			ThreadList* thread_list = Runtime::Current()->GetThreadList();
 		}
 	}
 }
+
+static void GCMMPResetThreadField(Thread* t, void* arg) {
+	t->SetProfRec(NULL);
+}
+
 
 void MProfiler::ShutdownProfiling(void) {
 
@@ -160,6 +165,12 @@ void MProfiler::ShutdownProfiling(void) {
 
 		LOG(INFO) << "Starting Detaching all the thread Profiling";
 		ForEach(GCMMPKillThreadProf, this);
+
+		Thread* self = Thread::Current();
+		ThreadList* thread_list = Runtime::Current()->GetThreadList();
+		MutexLock mu(self, *Locks::thread_list_lock_);
+		thread_list->ForEach(GCMMPResetThreadField, this);
+
 		LOG(INFO) << "Done Detaching all the thread Profiling";
 
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
@@ -319,6 +330,9 @@ static void GCMMPAttachThread(Thread* t, void* arg) {
 	}
 }
 
+
+
+
 bool MProfiler::ProfiledThreadsContain(Thread* thread) {
 	pid_t tId = thread->GetTid();
 	for (const auto& threadProf : threadProflist_) {
@@ -393,7 +407,7 @@ void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context
   }
 }
 
-void MProfiler::OpenDumpFile(){
+void MProfiler::OpenDumpFile() {
 	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
 		char str[256];
 		strcpy(str, gcMMPRootPath[i]);
