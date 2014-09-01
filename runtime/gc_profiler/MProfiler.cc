@@ -334,14 +334,14 @@ void MProfiler::PreForkPreparation() {
 }
 
 
-static void MProfAttachThread(Thread* th) {
+static void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		MProfiler::Current()->AttachThread(th);
 	}
 }
 
 
-static void MProfDetachThread(Thread* th) {
+static void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		MProfiler::Current()->DettachThread(th);
 	}
