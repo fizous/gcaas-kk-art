@@ -131,7 +131,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 
 
 void MProfiler::DumpCurrentOutpu(void){
-	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
+	//ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
 }
 
 void MProfiler::ShutdownProfiling(void){
