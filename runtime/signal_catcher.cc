@@ -36,6 +36,8 @@
 #include "thread_list.h"
 #include "utils.h"
 
+#include "gc_profiler/MProfiler.h"
+
 namespace art {
 
 static void DumpCmdLine(std::ostream& os) {
@@ -160,6 +162,11 @@ void SignalCatcher::HandleSigUsr1() {
   Runtime::Current()->GetHeap()->CollectGarbage(false);
 }
 
+void SignalCatcher::HandleSigUsr2() {
+  LOG(INFO) << "SIGUSR2 For GCMMProfile";
+  art::mprofiler::MProfiler::MProfileSignalCatcher(SIGUSR2);
+}
+
 int SignalCatcher::WaitForSignal(Thread* self, SignalSet& signals) {
   ScopedThreadStateChange tsc(self, kWaitingInMainSignalCatcherLoop);
 
@@ -200,6 +207,7 @@ void* SignalCatcher::Run(void* arg) {
   SignalSet signals;
   signals.Add(SIGQUIT);
   signals.Add(SIGUSR1);
+  signals.Add(SIGUSR2);
 
   while (true) {
     int signal_number = signal_catcher->WaitForSignal(self, signals);
@@ -214,6 +222,9 @@ void* SignalCatcher::Run(void* arg) {
       break;
     case SIGUSR1:
       signal_catcher->HandleSigUsr1();
+      break;
+    case SIGUSR2:
+      signal_catcher->HandleSigUsr2();
       break;
     default:
       LOG(ERROR) << "Unexpected signal %d" << signal_number;

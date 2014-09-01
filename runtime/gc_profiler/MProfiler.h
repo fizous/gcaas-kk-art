@@ -114,6 +114,8 @@ private:
 
   bool hasProfDaemon_;
 
+  bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+
   void ShutdownProfiling(void);
 
   void SetMProfileFlags(void);
@@ -161,12 +163,15 @@ public:
   void GCMMProfPerfCounters(const char*);
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
-
+  void DumpCurrentOutpu(void);
   static bool IsMProfRunning();
 
   static void MProfAttachThread(art::Thread*);
-
   static void MProfDetachThread(art::Thread*);
+  static void MProfileSignalCatcher(int);
+
+  void ProcessSignalCatcher(int);
+
 
   friend class GCMMPThreadProf;
 }; //class MProfiler

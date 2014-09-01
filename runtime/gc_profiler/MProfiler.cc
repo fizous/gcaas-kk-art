@@ -101,7 +101,8 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		gc_daemon_(NULL),
 		prof_thread_(NULL),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
-		running_(false)
+		running_(false),
+		receivedSignal_(false)
 {
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
@@ -128,6 +129,10 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 	LOG(INFO) << "MProfiler Created";
 }
 
+
+void MProfiler::DumpCurrentOutpu(void){
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForSignalCatcherOutput);
+}
 
 void MProfiler::ShutdownProfiling(void){
 
@@ -219,10 +224,43 @@ void* MProfiler::Run(void* arg) {
   LOG(INFO) << "MPRofiler: Profiler Daemon Created and Leaving";
 
 
+  while(true) {
+    // Check if GC is running holding gc_complete_lock_.
+    MutexLock mu(self, *prof_thread_mutex_);
+    LOG(INFO) << "MPRofiler: Profiler Daemon Is goin to Wait";
+    mProfiler->prof_thread_cond_->Wait(self);
+    if(receivedSignal_) { //we recived Signal to Shutdown
+      LOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
+    	break;
+    } else {
+    	//process here
+    }
+  }
+
   mProfiler->ShutdownProfiling();
 
   return NULL;
 
+}
+
+
+void MProfiler::ProcessSignalCatcher(int signalVal) {
+	if(signalVal == kGCMMPDumpSignal) {
+		Thread* self = Thread::Current();
+    MutexLock mu(self, *prof_thread_mutex_);
+    receivedSignal_ = true;
+    // Wake anyone who may have been waiting for the GC to complete.
+    prof_thread_cond_->Broadcast(self);
+
+    LOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
+	}
+}
+
+
+void MProfiler::MProfileSignalCatcher(int signalVal) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->ProcessSignalCatcher(signalVal);
+	}
 }
 
 void MProfiler::CreateProfilerDaemon(void){
@@ -230,14 +268,15 @@ void MProfiler::CreateProfilerDaemon(void){
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
 
-  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this), "MProfiler Daemon thread");
+  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this),
+  		"MProfiler Daemon thread");
 
   while (prof_thread_ == NULL) {
   	prof_thread_cond_->Wait(self);
   }
   prof_thread_cond_->Broadcast(self);
 
-  LOG(INFO) << "MPRofiler: Caller is leaving now";
+  LOG(INFO) << "MProfiler: Caller is leaving now";
 
 }
 

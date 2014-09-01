@@ -1147,6 +1147,8 @@ void Runtime::BlockSignals() {
   signals.Add(SIGQUIT);
   // SIGUSR1 is used to initiate a GC.
   signals.Add(SIGUSR1);
+  // SIGUSR2 is used to initiate a GCMMP Profile.
+  signals.Add(SIGUSR2);
   signals.Block();
 }
 
