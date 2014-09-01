@@ -226,10 +226,10 @@ void* MProfiler::Run(void* arg) {
 
   while(true) {
     // Check if GC is running holding gc_complete_lock_.
-    MutexLock mu(self, *prof_thread_mutex_);
+    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     LOG(INFO) << "MPRofiler: Profiler Daemon Is goin to Wait";
     mProfiler->prof_thread_cond_->Wait(self);
-    if(receivedSignal_) { //we recived Signal to Shutdown
+    if(mProfiler->receivedSignal_) { //we recived Signal to Shutdown
       LOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
     	break;
     } else {
