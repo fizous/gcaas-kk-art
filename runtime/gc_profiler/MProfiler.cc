@@ -20,10 +20,10 @@
 #include "locks.h"
 #include "os.h"
 #include "runtime.h"
-#include "scoped_thread_state_change.h"
+
 #include "thread_list.h"
 #include "thread.h"
-
+#include "scoped_thread_state_change.h"
 
 
 namespace art {
