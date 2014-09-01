@@ -321,8 +321,8 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 				return;
 			}
 		}
+		LOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 	}
-	LOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 }
 
 void MProfiler::PreForkPreparation() {
