@@ -1729,7 +1729,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
   if (concurrent_gc_) {
     ATRACE_BEGIN("GC: Wait For Concurrent");
     bool do_wait;
-   // mprofiler::MProfiler::MProfMarkWaitTimeEvent(self);
+    mprofiler::MProfiler::MProfMarkWaitTimeEvent(self);
     uint64_t wait_start = NanoTime();
     {
       // Check if GC is running holding gc_complete_lock_.
