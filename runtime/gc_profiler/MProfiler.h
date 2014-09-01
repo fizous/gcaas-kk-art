@@ -114,7 +114,7 @@ private:
 
   bool hasProfDaemon_;
 
-  bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+  volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
 
   void ShutdownProfiling(void);
 
