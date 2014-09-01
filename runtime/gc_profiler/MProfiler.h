@@ -103,10 +103,18 @@ private:
   bool IsCreateProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
   }
+
+  bool IsAttachProfDaemon() const {
+    return (flags_ & GCMMP_FLAGS_ATTACH_PROF_DAEMON);
+  }
+
   bool IsProfilingRunning() {
     return running_;
   }
 
+  bool hasProfDaemon_;
+
+  void ShutdownProfiling(void);
 
   void SetMProfileFlags(void);
 
@@ -145,6 +153,9 @@ public:
   bool IsProfilingEnabled() const {
     return enabled_;
   }
+
+
+
   void AttachThread(Thread*);
   void DettachThread(Thread*);
   void GCMMProfPerfCounters(const char*);

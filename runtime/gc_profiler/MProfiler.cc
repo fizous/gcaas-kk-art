@@ -128,6 +128,20 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 	LOG(INFO) << "MProfiler Created";
 }
 
+
+void MProfiler::ShutdownProfiling(void){
+  Runtime* runtime = Runtime::Current();
+
+  running_ = false;
+
+  if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
+  	runtime->DetachCurrentThread();
+  }
+
+  LOG(INFO) << "Shutting Down";
+
+}
+
 void MProfiler::InitializeProfiler(){
 	if(!IsProfilingEnabled())
 		return;
@@ -172,18 +186,22 @@ void* MProfiler::Run(void* arg) {
 
   Runtime* runtime = Runtime::Current();
 
-  bool hasProfDaemon =
+  Thread* self = Thread::Current();
+
+  prof_thread_ = self;
+
+  hasProfDaemon_ =
   		runtime->AttachCurrentThread("MProfile Daemon", true,
   				runtime->GetSystemThreadGroup(),
       !runtime->IsCompiler());
-  CHECK(hasProfDaemon);
+  CHECK(hasProfDaemon_);
 
-  if(!hasProfDaemon)
+  if(!hasProfDaemon_)
   	return NULL;
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
 
-  Thread* self = Thread::Current();
+
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
@@ -199,6 +217,10 @@ void* MProfiler::Run(void* arg) {
 
 
   LOG(INFO) << "MPRofiler: Profiler Daemon Created and Leaving";
+
+
+  ShutdownProfiling();
+
   return NULL;
 
 }
@@ -249,6 +271,13 @@ void MProfiler::AttachThread(Thread* thread) {
 			return;
 		}
 	}
+	if(thread->GetTid() == prof_thread_->GetTid()){
+		if(!IsAttachProfDaemon()) {
+			LOG(INFO) << "MPRofiler: Skipping profDaemon attached " << thread->GetTid() ;
+			return;
+		}
+	}
+
 	LOG(INFO) << "MPRofiler: Initializing threadProf for " << thread->GetTid();
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);

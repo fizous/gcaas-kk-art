@@ -54,7 +54,8 @@ typedef enum GCMMPFlagsEnum_s {
 	GCMMP_FLAGS_NONE = 0,
 	GCMMP_FLAGS_CREATE_DAEMON = 1, //should we create a daemon profiler?
 	GCMMP_FLAGS_HAS_DAEMON = 2,		 //does it possess a daemon thread
-	GCMMP_FLAGS_MARK_ALLOC_WINDOWS = 4 //should we mark the allocation chunks
+	GCMMP_FLAGS_ATTACH_PROF_DAEMON = 4, // should we attach the profile daemon
+	GCMMP_FLAGS_MARK_ALLOC_WINDOWS = 8 //should we mark the allocation chunks
 } GCMMPFlagsEnum;
 
 /*
