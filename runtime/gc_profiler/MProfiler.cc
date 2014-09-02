@@ -254,7 +254,8 @@ void MProfiler::SetMProfileFlags(void) {
 MProfiler::~MProfiler() {
 	if(prof_thread_mutex_ != NULL)
 		delete prof_thread_mutex_;
-
+  CHECK_PTHREAD_CALL(pthread_kill, (pthread_, SIGQUIT), "MProfiler shutdown");
+  CHECK_PTHREAD_CALL(pthread_join, (pthread_, NULL), "MProfiler shutdown");
 }
 
 bool MProfiler::MainProfDaemonExec(){
@@ -314,7 +315,7 @@ void* MProfiler::Run(void* arg) {
 
   while(true) {
     // Check if GC is running holding gc_complete_lock_.
-    if(MainProfDaemonExec())
+    if(mProfiler->MainProfDaemonExec())
     	break;
   }
 
