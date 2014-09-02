@@ -62,6 +62,7 @@ void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 		curr_marker_->startMarker = NanoTime();
 		curr_marker_->type = evType;
 		busy_ = true;
+		count_opens_++;
 	}
 }
 
@@ -71,6 +72,7 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 			return;
 		curr_marker_->finalMarker = NanoTime();
 		IncrementIndices();
+		count_opens_--;
 	}
 }
 
@@ -79,6 +81,7 @@ void GCPauseThreadManager::DumpProfData(void) {
 	int totalC = 0;
 	if(curr_bucket_ind_ < 0)
 		return;
+	LOG(INFO) << "parenthesis: " << count_opens_;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		for(int entryInd = 0; entryInd < limit_; entryInd++){
@@ -318,9 +321,9 @@ void* MProfiler::Run(void* arg) {
 static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
-		 LOG(INFO) << "MProfiler_out: " << profRec->GetTid() << "---------------";
+		 LOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 		 profRec->getPauseMgr()->DumpProfData();
-		 LOG(INFO) << "MPr_out: " << profRec->GetTid() ;
+		 LOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
 	}
 }
 

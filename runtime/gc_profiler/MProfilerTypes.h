@@ -94,13 +94,14 @@ class PACKED(4) GCPauseThreadManager {
 	 int curr_entry_;
 	 int ev_count_;
 	 bool busy_;
+	 int count_opens_;
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false) {
-		IncrementIndices();
+		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false), count_opens_(0) {
+		 IncrementIndices();
 	 }
 
 	 ~GCPauseThreadManager(void);
