@@ -417,9 +417,8 @@ void MProfiler::AttachThread(Thread* thread) {
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	if(threadProf != NULL) {
-		threadProf->StopProfiling();
-		LOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
-		return true;
+//		LOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
+		return threadProf->StopProfiling();
 	}
 	return false;
 }
@@ -499,6 +498,7 @@ void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		if(Runtime::Current()->mprofiler_->DettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
+			LOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
 		}
 	}
 }
