@@ -531,7 +531,7 @@ void ThreadList::Unregister(Thread* self) {
   // Any time-consuming destruction, plus anything that can call back into managed code or
   // suspend and so on, must happen at this point, and not in ~Thread.
   self->Destroy();
-
+  art::mprofiler::MProfiler::MProfDetachThread(self);
   uint32_t thin_lock_id = self->thin_lock_id_;
   self->thin_lock_id_ = 0;
   ReleaseThreadId(self, thin_lock_id);
@@ -540,7 +540,6 @@ void ThreadList::Unregister(Thread* self) {
     // thread_suspend_count_lock_ so that the unregistering thread cannot be suspended.
     // Note: deliberately not using MutexLock that could hold a stale self pointer.
     Locks::thread_list_lock_->ExclusiveLock(self);
-    art::mprofiler::MProfiler::MProfDetachThread(self);
     CHECK(Contains(self));
     // Note: we don't take the thread_suspend_count_lock_ here as to be suspending a thread other
     // than yourself you need to hold the thread_list_lock_ (see Thread::ModifySuspendCount).

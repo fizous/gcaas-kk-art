@@ -96,7 +96,7 @@ public:
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(kGCMMPMaxEventEntries), ev_count_(-1) {
+		 curr_bucket_ind_(-1), curr_entry_(0), ev_count_(-1) {
 		IncrementIndices();
 	 }
 
@@ -110,8 +110,8 @@ public:
 
 	 void IncrementIndices(void) {
 			ev_count_++;
-			curr_entry_++;
-			if(curr_entry_ >= kGCMMPMaxEventEntries) {
+			curr_entry_ = (curr_entry_ + 1) % kGCMMPMaxEventEntries;
+			if(curr_entry_ == 0) {
 				curr_entry_ = 0;
 				curr_bucket_ind_++;
 				if(curr_entry_ >= GCMMP_GCPAUSE_ARRAY_SIZE) {
