@@ -571,6 +571,15 @@ void Thread::RunCheckpointFunction() {
   ATRACE_END();
 }
 
+
+bool Thread::MarkStartSuspensionTime(ThreadState new_state){
+	return (mprofiler::MProfiler::MProfMarkSuspendTimeEvent(Thread::Current(), new_state));
+}
+
+void Thread::MarkStartEndSuspensionTime(ThreadState new_state){
+	mprofiler::MProfiler::MProfMarkEndSuspendTimeEvent(Thread::Current(), new_state);
+}
+
 bool Thread::RequestCheckpoint(Closure* function) {
   CHECK(!ReadFlag(kCheckpointRequest)) << "Already have a pending checkpoint request";
   checkpoint_function_ = function;

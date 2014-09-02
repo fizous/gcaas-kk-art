@@ -59,6 +59,7 @@ inline void Thread::AssertThreadSuspensionIsAllowable(bool check_locks) const {
 
 inline void Thread::TransitionFromRunnableToSuspended(ThreadState new_state) {
   AssertThreadSuspensionIsAllowable();
+  bool didMark = MarkStartSuspensionTime(new_state);
   DCHECK_NE(new_state, kRunnable);
   DCHECK_EQ(this, Thread::Current());
   // Change to non-runnable state, thereby appearing suspended to the system.
@@ -86,6 +87,8 @@ inline ThreadState Thread::TransitionFromSuspendedToRunnable() {
   bool done = false;
   union StateAndFlags old_state_and_flags = state_and_flags_;
   int16_t old_state = old_state_and_flags.as_struct.state;
+  bool didMark = (old_state_and_flags.as_struct.state == kSuspended);
+
   DCHECK_NE(static_cast<ThreadState>(old_state), kRunnable);
   do {
     Locks::mutator_lock_->AssertNotHeld(this);  // Otherwise we starve GC..
@@ -121,6 +124,9 @@ inline ThreadState Thread::TransitionFromSuspendedToRunnable() {
       Locks::mutator_lock_->SharedUnlock(this);
     }
   } while (UNLIKELY(!done));
+  if(didMark) {
+  	MarkStartEndSuspensionTime(kSuspended);
+  }
   return static_cast<ThreadState>(old_state);
 }
 

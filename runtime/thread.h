@@ -828,6 +828,9 @@ class PACKED(4) Thread {
   void SetProfRec(mprofiler::GCMMPThreadProf* profRec) {
   	profRec_ = profRec;
   }
+
+  bool MarkStartSuspensionTime(ThreadState);
+  void MarkStartEndSuspensionTime(ThreadState);
 private:
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };

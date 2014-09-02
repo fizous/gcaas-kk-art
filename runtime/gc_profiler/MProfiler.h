@@ -179,6 +179,8 @@ public:
   static void MProfMarkEndGCHatTimeEvent(art::Thread*);
   static void MProfMarkGCExplTimeEvent(art::Thread*);
   static void MProfMarkEndGCExplTimeEvent(art::Thread*);
+  static bool MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
+  static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
   void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
   void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
   void ProcessSignalCatcher(int);
