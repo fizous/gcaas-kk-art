@@ -96,7 +96,7 @@ public:
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(0), ev_count_(-1) {
+		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1) {
 		IncrementIndices();
 	 }
 
@@ -112,13 +112,12 @@ public:
 			ev_count_++;
 			curr_entry_ = (curr_entry_ + 1) % kGCMMPMaxEventEntries;
 			if(curr_entry_ == 0) {
-				curr_entry_ = 0;
 				curr_bucket_ind_++;
-				if(curr_entry_ >= GCMMP_GCPAUSE_ARRAY_SIZE) {
-					LOG(ERROR) << "MPRofiler: Exceeded maximum count of entries ";
+				if(curr_bucket_ind_ >= kGCMMPMaxBucketEntries) {
+					LOG(ERROR) << "MProfiler: Exceeded maximum count of entries ";
 				}
 				LOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
-				InitPausesEntry(&pauseEvents[curr_entry_]);
+				InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
 			}
 			LOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
 	 } //IncrementIndices
