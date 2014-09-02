@@ -57,12 +57,20 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	marker.startMarker = NanoTime();
+	if(!busy_) {
+		curr_marker_->startMarker = NanoTime();
+		curr_marker_->type = evType;
+		busy_ = true;
+	}
 }
 
 void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	marker.finalMarker = NanoTime();
-	InsertEvent(evType);
+	if(busy_){
+		if(curr_marker_->type != evType)
+			return;
+		curr_marker_->finalMarker = NanoTime();
+		IncrementIndices();
+	}
 }
 
 
@@ -76,14 +84,6 @@ void GCPauseThreadManager::DumpProfData(void) {
 			LOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
 		}
 	}
-}
-
-
-void GCPauseThreadManager::InsertEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	pauseEvents[curr_bucket_ind_][curr_entry_].finalMarker = marker.finalMarker;
-	pauseEvents[curr_bucket_ind_][curr_entry_].startMarker = marker.startMarker;
-	pauseEvents[curr_bucket_ind_][curr_entry_].type = evType;
-	IncrementIndices();
 }
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
@@ -412,6 +412,14 @@ void MProfiler::AttachThread(Thread* thread) {
 	}
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
+	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+		gc_daemon_ = thread;
+		if(!IsAttachGCDaemon()) {
+			return;
+		}
+	} else if(thread_name.compare("main") == 0) { //that's the main thread
+		main_thread_ = thread;
+	}
 	LOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
@@ -506,16 +514,14 @@ void MProfiler::MProfDetachThread(art::Thread* th) {
 	}
 }
 
-void MProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec) {
-	if(profRec != NULL && profRec->state == GCMMP_TH_RUNNING) {
-		profRec->getPauseMgr()->MarkStartTimeEvent(GCMMP_GC_BRK_WAIT_CONC);
-	}
+void MProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec,
+		GCMMP_BREAK_DOWN_ENUM evType) {
+	profRec->getPauseMgr()->MarkStartTimeEvent(evType);
 }
 
-void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec) {
-	if(profRec != NULL && profRec->state == GCMMP_TH_RUNNING) {
-		profRec->getPauseMgr()->MarkEndTimeEvent(GCMMP_GC_BRK_WAIT_CONC);
-	}
+void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
+		GCMMP_BREAK_DOWN_ENUM evType) {
+	profRec->getPauseMgr()->MarkEndTimeEvent(evType);
 }
 
 /*
@@ -523,7 +529,9 @@ void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec) {
  */
 void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->MarkWaitTimeEvent(th->GetProfRec());
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
 /*
@@ -531,9 +539,31 @@ void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
  */
 void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(th->GetProfRec());
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
+
+void MProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_GC_HAT);
+	}
+}
+
+void MProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_GC_HAT);
+	}
+}
+
 /*
  * Return true only when the MProfiler is Running
  */

@@ -55,7 +55,8 @@ typedef enum GCMMPFlagsEnum_s {
 	GCMMP_FLAGS_CREATE_DAEMON = 1, //should we create a daemon profiler?
 	GCMMP_FLAGS_HAS_DAEMON = 2,		 //does it possess a daemon thread
 	GCMMP_FLAGS_ATTACH_PROF_DAEMON = 4, // should we attach the profile daemon
-	GCMMP_FLAGS_MARK_ALLOC_WINDOWS = 8 //should we mark the allocation chunks
+	GCMMP_FLAGS_MARK_ALLOC_WINDOWS = 8, //should we mark the allocation chunks
+	GCMMP_FLAGS_ATTACH_GCDAEMON = 16
 } GCMMPFlagsEnum;
 
 /*
@@ -86,17 +87,18 @@ class MProfiler;
 class GCMMPThreadProf;
 
 class PACKED(4) GCPauseThreadManager {
-	 GCMMP_ProfileActivity marker;
+	 GCPauseThreadMarker* curr_marker_;
 	 GCPauseThreadMarker* pauseEvents[GCMMP_GCPAUSE_ARRAY_SIZE];
 	 int curr_bucket_ind_;
 	 int curr_entry_;
 	 int ev_count_;
+	 bool busy_;
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1) {
+		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false) {
 		IncrementIndices();
 	 }
 
@@ -119,12 +121,13 @@ public:
 				LOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
 				InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
 			}
+			busy_ = false;
+			curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
 			LOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
 	 } //IncrementIndices
 
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM);
-	 void InsertEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void DumpProfData(void);
 }; // Class GCPauseThreadManager
 

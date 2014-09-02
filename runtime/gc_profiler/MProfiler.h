@@ -112,6 +112,9 @@ private:
     return running_;
   }
 
+  bool IsAttachGCDaemon () {
+    return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
+  }
   bool hasProfDaemon_;
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
@@ -172,9 +175,11 @@ public:
   static void MProfileSignalCatcher(int);
   static void MProfMarkWaitTimeEvent(art::Thread*);
   static void MProfMarkEndWaitTimeEvent(art::Thread*);
+  static void MProfMarkGCHatTimeEvent(art::Thread*);
+  static void MProfMarkEndGCHatTimeEvent(art::Thread*);
 
-  void MarkWaitTimeEvent(GCMMPThreadProf*);
-  void MarkEndWaitTimeEvent(GCMMPThreadProf*);
+  void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
+  void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
   void ProcessSignalCatcher(int);
 
 

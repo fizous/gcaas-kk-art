@@ -860,7 +860,10 @@ inline mirror::Object* Heap::Allocate(Thread* self, T* space, size_t alloc_size,
   if (ptr != NULL) {
     return ptr;
   }
-  return AllocateInternalWithGc(self, space, alloc_size, bytes_allocated);
+  mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
+  mirror::Object* ptrAfterGC = AllocateInternalWithGc(self, space, alloc_size, bytes_allocated);
+  mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
+  return ptrAfterGC;
 }
 
 mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* space,
