@@ -572,8 +572,8 @@ void Thread::RunCheckpointFunction() {
 }
 
 
-bool Thread::MarkStartSuspensionTime(ThreadState new_state){
-	return (mprofiler::MProfiler::MProfMarkSuspendTimeEvent(Thread::Current(), new_state));
+void Thread::MarkStartSuspensionTime(ThreadState new_state){
+	mprofiler::MProfiler::MProfMarkSuspendTimeEvent(Thread::Current(), new_state);
 }
 
 void Thread::MarkStartEndSuspensionTime(ThreadState new_state){

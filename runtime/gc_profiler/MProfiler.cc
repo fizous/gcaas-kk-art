@@ -585,18 +585,18 @@ void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
 	}
 }
 
-static bool MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
+static void MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
 	if(MProfiler::IsMProfRunning()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
 				Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
 						GCMMP_GC_BRK_SUSPENSION);
-				return true;
+				return;
 			}
 		}
 	}
-	return false;
+	return;
 }
 
 static void MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
