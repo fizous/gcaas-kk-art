@@ -789,8 +789,11 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
 
   // This is safe to do since the GC will never free objects which are neither in the allocation
   // stack or the live bitmap.
+  Thread* self = Runtime::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
+  	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
+    mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
   }
 }
 
@@ -2016,11 +2019,12 @@ void Heap::ConcurrentGC(Thread* self) {
       return;
     }
   }
-
+  mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageInternal(next_gc_type_, kGcCauseBackground, false);
   }
+  mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
 }
 
 void Heap::RequestHeapTrim() {
@@ -2106,7 +2110,9 @@ void Heap::RegisterNativeAllocation(int bytes) {
 
         // If we still are over the watermark, attempt a GC for alloc and run finalizers.
         if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_limit_) {
+        	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
           CollectGarbageInternal(collector::kGcTypePartial, kGcCauseForAlloc, false);
+        	mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
           env->CallStaticVoidMethod(WellKnownClasses::java_lang_System,
                                     WellKnownClasses::java_lang_System_runFinalization);
           CHECK(!env->ExceptionCheck());
