@@ -410,8 +410,9 @@ void MProfiler::AttachThread(Thread* thread) {
 			return;
 		}
 	}
-
-	LOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid();
+	std::string thread_name;
+	thread->GetThreadName(thread_name);
+	LOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);

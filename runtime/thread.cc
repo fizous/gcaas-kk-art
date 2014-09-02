@@ -1034,7 +1034,7 @@ void Thread::Destroy() {
     // We may need to call user-supplied managed code, do this before final clean-up.
     HandleUncaughtExceptions(soa);
     RemoveFromThreadGroup(soa);
-    art::mprofiler::MProfiler::MProfDetachThread(self);
+
     // this.nativePeer = 0;
     soa.DecodeField(WellKnownClasses::java_lang_Thread_nativePeer)->SetInt(opeer_, 0);
     Dbg::PostThreadDeath(self);
