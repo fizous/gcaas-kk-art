@@ -789,7 +789,7 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
 
   // This is safe to do since the GC will never free objects which are neither in the allocation
   // stack or the live bitmap.
-  Thread* self = Runtime::Current();
+  Thread* self = Thread::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
   	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
