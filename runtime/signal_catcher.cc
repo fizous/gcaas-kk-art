@@ -215,7 +215,6 @@ void* SignalCatcher::Run(void* arg) {
       runtime->DetachCurrentThread();
       return NULL;
     }
-
     switch (signal_number) {
     case SIGQUIT:
       signal_catcher->HandleSigQuit();
