@@ -225,9 +225,8 @@ void MProfiler::InitializeProfiler() {
 		return;
 	}
 	cpu_time_ns_ = ProcessTimeNS();
-	start_time_ns_ = uptimeNanos();
+	start_time_ns_ = android::uptimeNanos();
 	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_;
-	<<
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	} else {
@@ -343,7 +342,7 @@ void MProfiler::DumpProfData(void) {
 	uint64_t cuuT = ProcessTimeNS();
 	LOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
 	cpu_time_ns_ = ProcessTimeNS();
-	cuuT = uptimeNanos();
+	cuuT = android::uptimeNanos();
 	LOG(INFO) << "StartTime =  "<< cpu_time_ns_ << ", cuuT: "<< cuuT;
 	ForEach(GCMMPDumpThreadProf, this);
 }
