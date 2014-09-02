@@ -69,9 +69,9 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 void GCPauseThreadManager::DumpProfData(void) {
 	int totalC = 0;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
-		int limit_ = (bucketInd == curr_entry_) ? curr_bucket_ind_:kGCMMPMaxEventEntries;
+		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		for(int entryInd = 0; entryInd < limit_; entryInd++){
-			LOG(INFO) << "pMgr " << totalC << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+			LOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
 		}
 	}
 }
