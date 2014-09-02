@@ -206,11 +206,12 @@ void MProfiler::ShutdownProfiling(void) {
 			ThreadList* thread_list = Runtime::Current()->GetThreadList();
 			MutexLock mu(self, *Locks::thread_list_lock_);
 			thread_list->ForEach(GCMMPResetThreadField, this);
-			prof_thread_cond_->Broadcast(self);
 		}
 		LOG(INFO) << "Done Detaching all the thread Profiling";
 		LOG(INFO) << "Shutting Down";
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
+			MutexLock mu(self, *prof_thread_mutex_);
+			prof_thread_cond_->Broadcast(self);
 			runtime->DetachCurrentThread();
 		}
 	}
