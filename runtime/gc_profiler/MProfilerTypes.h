@@ -120,6 +120,7 @@ public:
 				LOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
 				InitPausesEntry(&pauseEvents[curr_entry_]);
 			}
+			LOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
 	 } //IncrementIndices
 
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
