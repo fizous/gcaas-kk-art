@@ -68,6 +68,8 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 
 void GCPauseThreadManager::DumpProfData(void) {
 	int totalC = 0;
+	if(curr_bucket_ind_ < 0)
+		return;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		for(int entryInd = 0; entryInd < limit_; entryInd++){
