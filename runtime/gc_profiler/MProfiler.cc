@@ -415,6 +415,7 @@ void MProfiler::AttachThread(Thread* thread) {
 	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
 		gc_daemon_ = thread;
 		if(!IsAttachGCDaemon()) {
+			LOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
 	} else if(thread_name.compare("main") == 0) { //that's the main thread
