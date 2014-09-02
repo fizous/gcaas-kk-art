@@ -585,7 +585,7 @@ void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
 	}
 }
 
-static void MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
+void MProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
 	if(MProfiler::IsMProfRunning()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
@@ -599,7 +599,7 @@ static void MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState)
 	return;
 }
 
-static void MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
+void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
 	if(MProfiler::IsMProfRunning()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
