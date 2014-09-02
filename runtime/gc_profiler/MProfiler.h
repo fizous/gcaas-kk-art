@@ -187,6 +187,9 @@ public:
   void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
   void ProcessSignalCatcher(int);
 
+  /* represents the time captured when we started the profiling */
+  uint64_t start_time_ns_;
+  uint64_t cpu_time_ns_;
 
   friend class GCMMPThreadProf;
 }; //class MProfiler

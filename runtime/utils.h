@@ -285,6 +285,9 @@ uint64_t MicroTime();
 // Returns the monotonic time since some unspecified starting point in nanoseconds.
 uint64_t NanoTime();
 
+//returns the Process-specific CPU time in nanoseconds or -1 if unavailable
+uint64_t ProcessTimeNS();
+
 // Returns the thread-specific CPU-time clock in nanoseconds or -1 if unavailable.
 uint64_t ThreadCpuNanoTime();
 

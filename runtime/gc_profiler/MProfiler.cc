@@ -13,7 +13,7 @@
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
-
+#include "utils/SystemClock.h"
 #include "gc/heap.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
@@ -224,7 +224,10 @@ void MProfiler::InitializeProfiler() {
 		LOG(INFO) << "MProfiler: was already running";
 		return;
 	}
-
+	cpu_time_ns_ = ProcessTimeNS();
+	start_time_ns_ = uptimeNanos();
+	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_;
+	<<
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	} else {
@@ -337,6 +340,11 @@ static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
 }
 
 void MProfiler::DumpProfData(void) {
+	uint64_t cuuT = ProcessTimeNS();
+	LOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
+	cpu_time_ns_ = ProcessTimeNS();
+	cuuT = uptimeNanos();
+	LOG(INFO) << "StartTime =  "<< cpu_time_ns_ << ", cuuT: "<< cuuT;
 	ForEach(GCMMPDumpThreadProf, this);
 }
 
