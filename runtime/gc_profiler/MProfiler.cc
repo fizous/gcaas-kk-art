@@ -202,17 +202,17 @@ void MProfiler::ShutdownProfiling(void) {
 		ForEach(GCMMPKillThreadProf, this);
 
 		Thread* self = Thread::Current();
-		ThreadList* thread_list = Runtime::Current()->GetThreadList();
-		MutexLock mu(self, *Locks::thread_list_lock_);
-		thread_list->ForEach(GCMMPResetThreadField, this);
-
+		{
+			ThreadList* thread_list = Runtime::Current()->GetThreadList();
+			MutexLock mu(self, *Locks::thread_list_lock_);
+			thread_list->ForEach(GCMMPResetThreadField, this);
+		}
 		LOG(INFO) << "Done Detaching all the thread Profiling";
-
+		LOG(INFO) << "Shutting Down";
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
+		  prof_thread_cond_->Broadcast(self);
 			runtime->DetachCurrentThread();
 		}
-
-		LOG(INFO) << "Shutting Down";
 	}
 }
 
@@ -257,6 +257,23 @@ MProfiler::~MProfiler() {
 
 }
 
+bool MProfiler::MainProfDaemonExec(){
+	Thread* self = Thread::Current();
+  // Check if GC is running holding gc_complete_lock_.
+  MutexLock mu(self, *prof_thread_mutex_);
+  LOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
+  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+  {
+  	prof_thread_cond_->Wait(self);
+  }
+  if(receivedSignal_) { //we recived Signal to Shutdown
+    LOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
+  	return true;
+  } else {
+  	return false;
+  }
+}
+
 void* MProfiler::Run(void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 
@@ -297,18 +314,8 @@ void* MProfiler::Run(void* arg) {
 
   while(true) {
     // Check if GC is running holding gc_complete_lock_.
-    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    LOG(INFO) << "MProfiler: Profiler Daemon Is goin to Wait";
-    ScopedThreadStateChange tsc(Thread::Current(), kWaitingInMainGCMMPCatcherLoop);
-    {
-    	mProfiler->prof_thread_cond_->Wait(self);
-    }
-    if(mProfiler->receivedSignal_) { //we recived Signal to Shutdown
-      LOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
+    if(MainProfDaemonExec())
     	break;
-    } else {
-    	//process here
-    }
   }
 
   mProfiler->ShutdownProfiling();
@@ -344,8 +351,6 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
 
     // Wake anyone who may have been waiting for the GC to complete.
     prof_thread_cond_->Broadcast(self);
-
-
 
     LOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
 	}
