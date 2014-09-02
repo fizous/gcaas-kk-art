@@ -26,7 +26,8 @@ typedef struct GCMMP_Options_s {
  * Make sure that GCMMP_GC_BRK_MAXIMUM always at the bottom of the definition
  */
 typedef enum {
-	GCMMP_GC_BRK_SUSPENSION = 0,
+	GCMMP_GC_BRK_NONE = 0,
+	GCMMP_GC_BRK_SUSPENSION = 1,
 	GCMMP_GC_BRK_WAIT_CONC,
 	GCMMP_GC_BRK_GC_EXPL,
 	GCMMP_GC_BRK_GC_HAT,
