@@ -23,6 +23,7 @@
 #include "ScopedLocalRef.h"
 #include "scoped_thread_state_change.h"
 #include "thread_list.h"
+#include "thread_state.h"
 #include "thread.h"
 //#include "scoped_thread_state_change.h"
 
