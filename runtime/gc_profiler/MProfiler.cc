@@ -564,6 +564,25 @@ void MProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
 	}
 }
 
+
+void MProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_GC_EXPL);
+	}
+}
+
+void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_GC_EXPL);
+	}
+}
+
 /*
  * Return true only when the MProfiler is Running
  */
