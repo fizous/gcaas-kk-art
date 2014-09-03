@@ -19,7 +19,7 @@
 #include "gc_profiler/MProfilerTypes.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
-#include "thread.h"
+
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -43,7 +43,6 @@ void dvmGCMMProfPerfCounters(const char*);
 namespace art {
 class ConditionVariable;
 class Mutex;
-class Thread;
 
 namespace mprofiler {
 
