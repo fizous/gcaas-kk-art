@@ -55,12 +55,14 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
-uint64_t GCPauseThreadManager::GetRelevantRealTime()  {
-	 return uptime_nanos() - startRealTime;
+uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
+	return 0;
+	//return uptime_nanos() - startRealTime;
 }
 
-uint64_t GCPauseThreadManager::GetRelevantCPUTime()  {
-	 return ProcessTimeNS() - startCPUTime;
+uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
+	return 0;
+	//return ProcessTimeNS() - startCPUTime;
 }
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
@@ -232,8 +234,8 @@ void MProfiler::InitializeProfiler() {
 	}
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
-	GCPauseThreadManager::startCPUTime = cpu_time_ns_;
-	GCPauseThreadManager::startRealTime = start_time_ns_;
+//	GCPauseThreadManager::startCPUTime = cpu_time_ns_;
+//	GCPauseThreadManager::startRealTime = start_time_ns_;
 
 	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
