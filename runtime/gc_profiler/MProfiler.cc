@@ -57,7 +57,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
-
+MProfiler* GCMMPThreadProf::mProfiler = NULL;
 
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
 	return uptime_nanos() - GCPauseThreadManager::startRealTime;
@@ -86,18 +86,35 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	}
 }
 
+void GCPauseThreadManager::DumpProfData(void* args) {
+	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(args);
 
-void GCPauseThreadManager::DumpProfData(void) {
+	art::File* file = mProfiler->GetDumpFile();
 	int totalC = 0;
 	if(curr_bucket_ind_ < 0)
 		return;
 	LOG(INFO) << "parenthesis: " << count_opens_;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
-		for(int entryInd = 0; entryInd < limit_; entryInd++){
-			LOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+		if(limit_ > 0) {
+			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
+			for(int entryInd = 0; entryInd < limit_; entryInd++){
+				file->WriteFully(&pauseEvents[bucketInd][entryInd], sizeof(GCMMP_ProfileActivity));
+				LOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+			}
 		}
 	}
+	file->WriteFully(&MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+}
+
+int GCMMPThreadProf::GetThreadType(void) {
+	if(GCMMPThreadProf::mProfiler->GetMainID() == GetTid()){
+		return 1;
+	}
+	if(GCMMPThreadProf::mProfiler->GetGCDaemonID() == GetTid()){
+		return 2;
+	}
+	return 0;
 }
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
@@ -113,6 +130,8 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	LOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	pauseManager = new GCPauseThreadManager();
 	state = GCMMP_TH_RUNNING;
+	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+	lifeTime_.finalMarker = 0;
 	LOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
 
@@ -121,10 +140,10 @@ GCMMPThreadProf::~GCMMPThreadProf() {
 }
 
 
-
 bool GCMMPThreadProf::StopProfiling(void) {
 	if(state == GCMMP_TH_RUNNING) {
 		state = GCMMP_TH_STOPPED;
+		lifeTime_.finalMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 		return true;
 	}
 	return false;
@@ -203,14 +222,18 @@ static void GCMMPResetThreadField(Thread* t, void* arg) {
 void MProfiler::ShutdownProfiling(void) {
 
 	if(IsProfilingRunning()){
-
-		DumpProfData(true);
-
-		Runtime* runtime = Runtime::Current();
+		end_heap_bytes_ = GetRelevantAllocBytes();
+		end_cpu_time_ns_ = GetRelevantCPUTime();
+		end_time_ns_ = GetRelevantRealTime();
 		running_ = false;
 
 		LOG(INFO) << "Starting Detaching all the thread Profiling";
 		ForEach(GCMMPKillThreadProf, this);
+
+		DumpProfData(true);
+
+		Runtime* runtime = Runtime::Current();
+
 
 		Thread* self = Thread::Current();
 		{
@@ -235,6 +258,7 @@ void MProfiler::InitializeProfiler() {
 		LOG(INFO) << "MProfiler: was already running";
 		return;
 	}
+	GCMMPThreadProf::mProfiler = this;
 	start_heap_bytes_ = GetRelevantAllocBytes();
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
@@ -347,19 +371,62 @@ void* MProfiler::Run(void* arg) {
 }
 
 
-static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
+static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 	if(mProfiler != NULL) {
+
+		 GCPauseThreadManager* mgr = profRec->getPauseMgr();
+		 if(!mgr->HasData())
+			 return;
+		 art::File* f = mProfiler->GetDumpFile();
+		 int _pid = profRec->GetTid();
+		 int _type = profRec->GetThreadType();
+		 f->WriteFully(&_pid, sizeof(int));
+		 f->WriteFully(&_type, sizeof(int));
+		 f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
+
 		 LOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
-		 profRec->getPauseMgr()->DumpProfData();
+
+		 mgr->DumpProfData(mProfiler);
 		 LOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
+
+
 	}
 }
 
 void MProfiler::DumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  LOG(INFO) << " Dumping the commin information ";
+  bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+  }
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  }
 
+  LOG(INFO) << " Dumping the MMU information ";
 
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  }
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
+  }
+
+  if(successWrite) {
+  	ForEach(GCMMPDumpMMUThreadProf, this);
+  }
+
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&kGCMMPDumpEndMarker, sizeof(uint64_t));
+  }
+
+	if(isLastDump) {
+		dump_file_->WriteFully(&MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->Close();
+	}
 	LOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
 	LOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
@@ -368,9 +435,6 @@ void MProfiler::DumpProfData(bool isLastDump) {
 	LOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
 	LOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
-
-	ForEach(GCMMPDumpThreadProf, this);
-
 }
 
 

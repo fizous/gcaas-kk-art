@@ -138,7 +138,10 @@ public:
 
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM);
-	 void DumpProfData(void);
+	 bool HasData(void) const {
+		 return (ev_count_ > 0);
+	 }
+	 void DumpProfData(void* args);
 }; // Class GCPauseThreadManager
 
 
@@ -158,7 +161,9 @@ class GCMMPThreadProf {
 
 	GCPauseThreadManager* pauseManager;
 
+	GCMMP_ProfileActivity lifeTime_;
 public:
+	static MProfiler* mProfiler;
 	volatile GCMMPThreadProfState state;
 
 	GCMMPThreadProf(MProfiler*, Thread*);
@@ -174,6 +179,21 @@ public:
   	return pauseManager;
   }
   bool StopProfiling(void);
+  void ForceDeadTime(void);
+
+  uint64_t GetCreationTime(void) const {
+  	return lifeTime_.startMarker;
+  }
+
+  uint64_t GetEndTime(void) const {
+  	return lifeTime_.finalMarker;
+  }
+
+  GCMMP_ProfileActivity* GetliveTimeInfo(void) const {
+  	return &lifeTime_;
+  }
+
+  int GetThreadType(void);
 };
 } // namespace mprofiler
 } // namespace art

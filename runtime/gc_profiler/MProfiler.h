@@ -118,6 +118,7 @@ private:
   bool IsAttachGCDaemon () {
     return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
   }
+
   bool hasProfDaemon_;
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
@@ -137,6 +138,7 @@ public:
   static const int kGCMMPDisableMProfile = 999;
   static const int kGCMMPDefaultGrowMethod = 0;
   static const int kGCMMPMAXThreadCount = 64;
+  static const int kGCMMPDumpEndMarker = -99999999;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
 	/*
@@ -162,7 +164,9 @@ public:
   bool IsProfilingEnabled() const {
     return enabled_;
   }
-
+  art::File* GetDumpFile(void) const {
+  	return dump_file_;
+  }
 
 
   void AttachThread(Thread*);
@@ -191,8 +195,11 @@ public:
 
   /* represents the time captured when we started the profiling */
   uint64_t 	start_time_ns_;
+  uint64_t 	end_time_ns_;
   uint64_t 	cpu_time_ns_;
+  uint64_t 	end_cpu_time_ns_;
   size_t 		start_heap_bytes_;
+  size_t 		end_heap_bytes_;
 
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - cpu_time_ns_;
@@ -204,6 +211,16 @@ public:
 
   size_t GetRelevantAllocBytes(void);
 
+  int GetMainID(void) const {
+  	return main_thread_->GetTid();
+  }
+
+  int GetGCDaemonID(void) const {
+  	if(gc_daemon_ != NULL) {
+  		return gc_daemon_->GetTid();
+  	}
+  	return 0;
+  }
   friend class GCMMPThreadProf;
 }; //class MProfiler
 
