@@ -226,7 +226,7 @@ void MProfiler::InitializeProfiler() {
 	}
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
-	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_;
+	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	} else {
@@ -341,9 +341,8 @@ static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
 void MProfiler::DumpProfData(void) {
 	uint64_t cuuT = ProcessTimeNS();
 	LOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
-	cpu_time_ns_ = ProcessTimeNS();
 	cuuT = uptime_nanos();
-	LOG(INFO) << "StartTime =  "<< cpu_time_ns_ << ", cuuT: "<< cuuT;
+	LOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 	ForEach(GCMMPDumpThreadProf, this);
 }
 
