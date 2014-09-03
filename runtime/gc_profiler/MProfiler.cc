@@ -663,7 +663,7 @@ bool MProfiler::IsMProfRunning() {
 }
 
 size_t MProfiler::GetRelevantAllocBytes(void)  {
-	return Runtime::Current()->GetHeap()->GetBytesAllocated() - start_heap_bytes_;
+	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
 }
 
 
