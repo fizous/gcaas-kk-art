@@ -190,8 +190,9 @@ public:
   void ProcessSignalCatcher(int);
 
   /* represents the time captured when we started the profiling */
-  uint64_t start_time_ns_;
-  uint64_t cpu_time_ns_;
+  uint64_t 	start_time_ns_;
+  uint64_t 	cpu_time_ns_;
+  size_t 		start_heap_bytes_;
 
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - cpu_time_ns_;
@@ -200,6 +201,11 @@ public:
   uint64_t GetRelevantRealTime(void) const {
   	return uptime_nanos() - start_time_ns_;
   }
+
+  size_t GetRelevantAllocBytes(void) const {
+  	return Runtime::Current()->GetHeap()->GetBytesAllocated() - start_heap_bytes_;
+  }
+
   friend class GCMMPThreadProf;
 }; //class MProfiler
 

@@ -153,7 +153,8 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		prof_thread_(NULL),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false),
-		receivedSignal_(false)
+		receivedSignal_(false),
+		start_heap_bytes_(0)
 {
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
@@ -234,6 +235,7 @@ void MProfiler::InitializeProfiler() {
 		LOG(INFO) << "MProfiler: was already running";
 		return;
 	}
+	start_heap_bytes_ = GetRelevantAllocBytes();
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
 
