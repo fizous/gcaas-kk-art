@@ -8,6 +8,8 @@
 #ifndef MPROFILERTYPES_H_
 #define MPROFILERTYPES_H_
 
+#include "cutils/system_clock.h"
+
 #define GCMMP_GCPAUSE_ARRAY_SIZE					  32
 
 namespace art {
@@ -19,7 +21,7 @@ namespace mprofiler {
 typedef struct GCMMP_Options_s {
 	int mprofile_type_;
 	int mprofile_grow_method_;
-}GCMMP_Options;
+} GCMMP_Options;
 
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
@@ -98,6 +100,17 @@ class PACKED(4) GCPauseThreadManager {
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
+	 static uint64_t startRealTime;
+	 static uint64_t startCPUTime;
+
+	 static uint64_t GetRelevantCPUTime() const {
+		 return ProcessTimeNS() - startCPUTime;
+	 }
+
+	 static uint64_t GetRelevantRealTime() const {
+		 return uptime_nanos() - startRealTime;
+	 }
+
 
 	 GCPauseThreadManager(void) :
 		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false), count_opens_(0) {

@@ -59,7 +59,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(!busy_) {
-		curr_marker_->startMarker = NanoTime();
+		curr_marker_->startMarker = GetRelevantCPUTime();
 		curr_marker_->type = evType;
 		busy_ = true;
 		count_opens_++;
@@ -70,7 +70,7 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(busy_){
 		if(curr_marker_->type != evType)
 			return;
-		curr_marker_->finalMarker = NanoTime();
+		curr_marker_->finalMarker = GetRelevantCPUTime();
 		IncrementIndices();
 		count_opens_--;
 	}
@@ -226,6 +226,9 @@ void MProfiler::InitializeProfiler() {
 	}
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
+	mprofiler::GCPauseThreadManager::startCPUTime = cpu_time_ns_;
+	mprofiler::GCPauseThreadManager::startRealTime = start_time_ns_;
+
 	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
