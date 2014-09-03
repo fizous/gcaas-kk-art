@@ -60,13 +60,11 @@ uint64_t GCPauseThreadManager::startRealTime = 0;
 
 
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
-	return 0;
-	//return uptime_nanos() - startRealTime;
+	return uptime_nanos() - GCPauseThreadManager::startRealTime;
 }
 
 uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
-	return 0;
-	//return ProcessTimeNS() - startCPUTime;
+	return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
 }
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
