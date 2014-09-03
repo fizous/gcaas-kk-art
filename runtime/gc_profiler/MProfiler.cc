@@ -337,8 +337,9 @@ void* MProfiler::Run(void* arg) {
     if(mProfiler->MainProfDaemonExec())
     	break;
   }
-  const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
-  ThreadState old_state = self->SetStateUnsafe(kRunnable);
+  //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
+  //ThreadState old_state =
+  self->SetStateUnsafe(kRunnable);
   mProfiler->ShutdownProfiling();
 
   return NULL;
