@@ -353,11 +353,16 @@ static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
 }
 
 void MProfiler::DumpProfData(void) {
+	LOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
+	LOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
 	LOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
 	cuuT = uptime_nanos();
 	LOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 	ForEach(GCMMPDumpThreadProf, this);
+
+
+
 }
 
 
