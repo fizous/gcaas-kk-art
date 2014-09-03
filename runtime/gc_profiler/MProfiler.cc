@@ -59,6 +59,8 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 MProfiler* GCMMPThreadProf::mProfiler = NULL;
 
+const int MProfiler::kGCMMPDumpEndMarker = -99999999;
+
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
 	return uptime_nanos() - GCPauseThreadManager::startRealTime;
 }
