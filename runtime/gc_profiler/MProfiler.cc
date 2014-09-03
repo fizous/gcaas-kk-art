@@ -104,7 +104,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			}
 		}
 	}
-	file->WriteFully(&MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+	file->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
 }
 
 int GCMMPThreadProf::GetThreadType(void) {
@@ -420,11 +420,11 @@ void MProfiler::DumpProfData(bool isLastDump) {
   }
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&kGCMMPDumpEndMarker, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
 		dump_file_->Close();
 	}
 	LOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
