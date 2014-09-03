@@ -55,11 +55,11 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
-uint64_t GCPauseThreadManager::GetRelevantRealTime()  {
+uint64_t GetRelevantRealTime()  {
 	 return uptime_nanos() - GCPauseThreadManager::startRealTime;
 }
 
-uint64_t GCPauseThreadManager::GetRelevantCPUTime()  {
+uint64_t GetRelevantCPUTime()  {
 	 return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
 }
 
