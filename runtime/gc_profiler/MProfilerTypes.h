@@ -103,11 +103,11 @@ public:
 	 static uint64_t startRealTime;
 	 static uint64_t startCPUTime;
 
-	 static uint64_t GetRelevantCPUTime() const {
+	 static uint64_t GetRelevantCPUTime()  {
 		 return ProcessTimeNS() - startCPUTime;
 	 }
 
-	 static uint64_t GetRelevantRealTime() const {
+	 static uint64_t GetRelevantRealTime()  {
 		 return uptime_nanos() - startRealTime;
 	 }
 
