@@ -733,6 +733,16 @@ size_t MProfiler::GetRelevantAllocBytes(void)  {
 	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
 }
 
+int MProfiler::GetMainID(void)  {
+	return main_thread_->GetTid();
+}
+
+int MProfiler::GetGCDaemonID(void)  {
+	if(gc_daemon_ != NULL) {
+		return gc_daemon_->GetTid();
+	}
+	return 0;
+}
 
 }// namespace mprofiler
 }// namespace art

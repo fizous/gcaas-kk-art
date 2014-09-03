@@ -212,16 +212,10 @@ public:
 
   size_t GetRelevantAllocBytes(void);
 
-  int GetMainID(void) const {
-  	return main_thread_->GetTid();
-  }
+  int GetMainID(void);
 
-  int GetGCDaemonID(void) const {
-  	if(gc_daemon_ != NULL) {
-  		return gc_daemon_->GetTid();
-  	}
-  	return 0;
-  }
+  int GetGCDaemonID(void);
+
   friend class GCMMPThreadProf;
 }; //class MProfiler
 
