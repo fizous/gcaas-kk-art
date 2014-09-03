@@ -662,6 +662,10 @@ bool MProfiler::IsMProfRunning() {
 	return false;
 }
 
+size_t MProfiler::GetRelevantAllocBytes(void)  {
+	return Runtime::Current()->GetHeap()->GetBytesAllocated() - start_heap_bytes_;
+}
+
 
 }// namespace mprofiler
 }// namespace art

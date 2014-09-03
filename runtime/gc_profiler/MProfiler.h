@@ -202,9 +202,7 @@ public:
   	return uptime_nanos() - start_time_ns_;
   }
 
-  size_t GetRelevantAllocBytes(void) const {
-  	return Runtime::Current()->GetHeap()->GetBytesAllocated() - start_heap_bytes_;
-  }
+  size_t GetRelevantAllocBytes(void);
 
   friend class GCMMPThreadProf;
 }; //class MProfiler
