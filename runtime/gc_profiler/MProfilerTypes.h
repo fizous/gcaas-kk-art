@@ -189,7 +189,7 @@ public:
   	return lifeTime_.finalMarker;
   }
 
-  GCMMP_ProfileActivity* GetliveTimeInfo(void) const {
+  GCMMP_ProfileActivity* GetliveTimeInfo(void)  {
   	return &lifeTime_;
   }
 
