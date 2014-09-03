@@ -13,7 +13,7 @@
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
-#include "cutils/uptime_nanos.h"
+#include "cutils/system_clock.h"
 #include "gc/heap.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
