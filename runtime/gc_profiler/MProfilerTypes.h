@@ -103,9 +103,9 @@ public:
 	 static uint64_t startRealTime;
 	 static uint64_t startCPUTime;
 
-	 static uint64_t GetRelevantCPUTime();
+	 static uint64_t GetRelevantCPUTime(void);
 
-	 static uint64_t GetRelevantRealTime();
+	 static uint64_t GetRelevantRealTime(void);
 
 	 GCPauseThreadManager(void) :
 		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false), count_opens_(0) {

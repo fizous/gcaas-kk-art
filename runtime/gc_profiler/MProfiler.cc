@@ -55,17 +55,17 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
-uint64_t GetRelevantRealTime()  {
-	 return uptime_nanos() - GCPauseThreadManager::startRealTime;
+uint64_t GCPauseThreadManager::GetRelevantRealTime()  {
+	 return uptime_nanos() - startRealTime;
 }
 
-uint64_t GetRelevantCPUTime()  {
-	 return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
+uint64_t GCPauseThreadManager::GetRelevantCPUTime()  {
+	 return ProcessTimeNS() - startCPUTime;
 }
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(!busy_) {
-		curr_marker_->startMarker = GetRelevantCPUTime();
+		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantCPUTime();
 		curr_marker_->type = evType;
 		busy_ = true;
 		count_opens_++;
@@ -76,7 +76,7 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(busy_){
 		if(curr_marker_->type != evType)
 			return;
-		curr_marker_->finalMarker = GetRelevantCPUTime();
+		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantCPUTime();
 		IncrementIndices();
 		count_opens_--;
 	}
