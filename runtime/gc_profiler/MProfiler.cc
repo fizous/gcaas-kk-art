@@ -232,8 +232,8 @@ void MProfiler::InitializeProfiler() {
 	}
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
-	mprofiler::GCPauseThreadManager::startCPUTime = cpu_time_ns_;
-	mprofiler::GCPauseThreadManager::startRealTime = start_time_ns_;
+	GCPauseThreadManager::startCPUTime = cpu_time_ns_;
+	GCPauseThreadManager::startRealTime = start_time_ns_;
 
 	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
