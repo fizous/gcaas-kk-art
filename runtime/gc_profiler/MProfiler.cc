@@ -204,7 +204,7 @@ void MProfiler::ShutdownProfiling(void) {
 
 	if(IsProfilingRunning()){
 
-		DumpProfData();
+		DumpProfData(true);
 
 		Runtime* runtime = Runtime::Current();
 		running_ = false;
@@ -337,7 +337,8 @@ void* MProfiler::Run(void* arg) {
     if(mProfiler->MainProfDaemonExec())
     	break;
   }
-
+  const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
+  ThreadState old_state = self->SetStateUnsafe(kRunnable);
   mProfiler->ShutdownProfiling();
 
   return NULL;
@@ -354,7 +355,10 @@ static void GCMMPDumpThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	}
 }
 
-void MProfiler::DumpProfData(void) {
+void MProfiler::DumpProfData(bool isLastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+
+
 	LOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
 	LOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
@@ -365,8 +369,6 @@ void MProfiler::DumpProfData(void) {
 	LOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
 
 	ForEach(GCMMPDumpThreadProf, this);
-
-
 
 }
 

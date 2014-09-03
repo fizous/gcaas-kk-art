@@ -92,7 +92,7 @@ private:
 
   void InitializeProfiler(void);
 
-  void DumpProfData(void);
+  void DumpProfData(bool);
 
   const bool enabled_;
 
