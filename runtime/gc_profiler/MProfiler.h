@@ -17,6 +17,8 @@
 
 #include "thread_state.h"
 #include "gc_profiler/MProfilerTypes.h"
+#include "cutils/system_clock.h"
+#include "utils.h"
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -191,6 +193,13 @@ public:
   uint64_t start_time_ns_;
   uint64_t cpu_time_ns_;
 
+  uint64_t GetRelevantCPUTime(void) const {
+  	return ProcessTimeNS() - cpu_time_ns_;
+  }
+
+  uint64_t GetRelevantRealTime(void) const {
+  	return uptime_nanos() - start_time_ns_;
+  }
   friend class GCMMPThreadProf;
 }; //class MProfiler
 
