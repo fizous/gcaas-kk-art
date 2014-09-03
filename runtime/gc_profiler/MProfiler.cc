@@ -55,7 +55,13 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
+uint64_t GCPauseThreadManager::GetRelevantRealTime()  {
+	 return uptime_nanos() - GCPauseThreadManager::startRealTime;
+}
 
+uint64_t GCPauseThreadManager::GetRelevantCPUTime()  {
+	 return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
+}
 
 void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(!busy_) {
