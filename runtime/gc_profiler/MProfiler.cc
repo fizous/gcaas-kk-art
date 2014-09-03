@@ -55,6 +55,10 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		}//MMU
 };//profilTypes
 
+uint64_t GCPauseThreadManager::startCPUTime = 0;
+uint64_t GCPauseThreadManager::startRealTime = 0;
+
+
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
 	return 0;
 	//return uptime_nanos() - startRealTime;
@@ -235,8 +239,7 @@ void MProfiler::InitializeProfiler() {
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
 
-  uint64_t GCPauseThreadManager::startCPUTime = cpu_time_ns_;
-  uint64_t GCPauseThreadManager::startRealTime = start_time_ns_;
+
 
 	LOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
