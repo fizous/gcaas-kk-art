@@ -104,11 +104,11 @@ public:
 	 static uint64_t startCPUTime;
 
 	 static uint64_t GetRelevantCPUTime()  {
-		 return ProcessTimeNS() - startCPUTime;
+		 return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
 	 }
 
 	 static uint64_t GetRelevantRealTime()  {
-		 return uptime_nanos() - startRealTime;
+		 return uptime_nanos() - GCPauseThreadManager::startRealTime;
 	 }
 
 
