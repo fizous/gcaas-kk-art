@@ -340,6 +340,9 @@ bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
 	        	mprofiler_opts->mprofile_type_ = atoi(mprofile_options[++i].c_str());
 	          LOG(INFO) << "Parsing -Xgcmmp option: " << mprofiler_opts->mprofile_type_;
 	          return true;
+	        } else if (mprofile_options[i] == "grow") {
+	        	mprofiler_opts->mprofile_grow_method_ = atoi(mprofile_options[++i].c_str());
+	        	return true;
 	        } else {
 	          LOG(INFO) << "Ignoring unknown -Xgcmmp option: " << mprofile_options[i];
 	        }
@@ -567,6 +570,10 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
         }
       }
     } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->mprofiler_options_)) {
+    	if(parsed->mprofiler_options_->mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
+    		 parsed->is_concurrent_gc_enabled_ = false;
+    		 LOG(INFO) << "XXX Diablie concurrent GC ";
+    	}
     	LOG(INFO) << "XXXX Done Parsing -Xgcmmp option: " << option;
     } else if (option == "-XX:+DisableExplicitGC") {
       parsed->is_explicit_gc_disabled_ = true;
@@ -914,7 +921,7 @@ bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
                        options->heap_target_utilization_,
                        options->heap_maximum_size_,
                        options->image_,
-                       options->is_concurrent_gc_enabled_,
+                       options->is_concurrent_gc_enabled_ && options->,
                        options->parallel_gc_threads_,
                        options->conc_gc_threads_,
                        options->low_memory_mode_,

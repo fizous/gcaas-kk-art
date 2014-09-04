@@ -23,6 +23,21 @@ typedef struct GCMMP_Options_s {
 	int mprofile_grow_method_;
 } GCMMP_Options;
 
+/**
+ * enum used to define the concurrency of the virtual machine
+ */
+typedef enum {
+	GC_GROW_METHOD_DEFAULT 	= 0,
+	GC_GROW_METHOD_BG_GC 		= 1,
+	GC_GROW_METHOD_WITH_PID = 2,
+	GC_GROW_METHOD_WITH_HEUR= 4,
+	GC_GROW_METHOD_FG_GC		= 8,
+	GC_GROW_METHOD_EXPL_OFF	= 16,
+	GC_GROW_METHOD_SUPER_BG_GC 		= 32
+} GC_GROW_METHODS;
+
+
+
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
  * Make sure that GCMMP_GC_BRK_MAXIMUM always at the bottom of the definition
