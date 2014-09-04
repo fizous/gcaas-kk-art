@@ -570,7 +570,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
         }
       }
     } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->mprofiler_options_)) {
-    	if(parsed->mprofiler_options_->mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
+    	if(parsed->mprofiler_options_.mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
     		 parsed->is_concurrent_gc_enabled_ = false;
     		 LOG(INFO) << "XXX Diablie concurrent GC";
     	}
