@@ -54,6 +54,8 @@
 #include "well_known_classes.h"
 #include "zip_archive.h"
 
+#define DEX_MPROF_SEVERITY DEBUG
+
 namespace art {
 
 static void UsageErrorV(const char* fmt, va_list ap) {
@@ -619,7 +621,7 @@ static int dex2oat(int argc, char** argv) {
     const StringPiece option(argv[i]);
     bool log_options = false;
     if (log_options) {
-      LOG(INFO) << "dex2oat: option[" << i << "]=" << argv[i];
+      LOG(DEX_MPROF_SEVERITY) << "dex2oat: option[" << i << "]=" << argv[i];
     }
     if (option.starts_with("--dex-file=")) {
       dex_filenames.push_back(option.substr(strlen("--dex-file=")).data());
@@ -696,7 +698,7 @@ static int dex2oat(int argc, char** argv) {
         Usage("Missing required argument for --runtime-arg");
       }
       if (log_options) {
-        LOG(INFO) << "dex2oat: option[" << i << "]=" << argv[i];
+        LOG(DEX_MPROF_SEVERITY) << "dex2oat: option[" << i << "]=" << argv[i];
       }
       runtime_args.push_back(argv[i]);
     } else if (option == "--dump-timing") {
@@ -832,7 +834,7 @@ static int dex2oat(int argc, char** argv) {
   }
 
   timings.StartSplit("dex2oat Setup");
-  LOG(INFO) << "dex2oat: " << oat_location;
+  LOG(DEX_MPROF_SEVERITY) << "dex2oat: " << oat_location;
 
   if (image) {
     bool has_compiler_filter = false;
@@ -1035,7 +1037,7 @@ static int dex2oat(int argc, char** argv) {
 
   if (is_host) {
     if (dump_timing || (dump_slow_timing && timings.GetTotalNs() > MsToNs(1000))) {
-      LOG(INFO) << Dumpable<base::TimingLogger>(timings);
+      LOG(DEX_MPROF_SEVERITY) << Dumpable<base::TimingLogger>(timings);
     }
     return EXIT_SUCCESS;
   }
@@ -1076,7 +1078,7 @@ static int dex2oat(int argc, char** argv) {
   timings.EndSplit();
 
   if (dump_timing || (dump_slow_timing && timings.GetTotalNs() > MsToNs(1000))) {
-    LOG(INFO) << Dumpable<base::TimingLogger>(timings);
+    LOG(DEX_MPROF_SEVERITY) << Dumpable<base::TimingLogger>(timings);
   }
 
   // Everything was successfully written, do an explicit exit here to avoid running Runtime
