@@ -23,6 +23,16 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
+#define DEBUG_PROFILER 1
+
+/* log information. used to monitor the flow of the profiler.*/
+#if DEBUG_PROFILER
+ #define MPROF_LOG_SEV    	INFO
+#else
+ #define MPROF_LOG_SEV    	DEBUG
+#endif
+
+
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
 
 
