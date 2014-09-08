@@ -193,13 +193,14 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
+		LOG(MPROF_LOG_SEV) << "MProfiler Created";
 
 	} else {
 		flags_ = 0;
 		dump_file_name_ = NULL;
 		LOG(MPROF_LOG_SEV) << "MProfiler Profiling is Disabled";
 	}
-	LOG(MPROF_LOG_SEV) << "MProfiler Created";
+
 }
 
 

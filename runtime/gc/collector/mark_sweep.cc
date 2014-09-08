@@ -256,7 +256,7 @@ void MarkSweep::MarkingPhase() {
   if (Locks::mutator_lock_->IsExclusiveHeld(self)) {
     // If we exclusively hold the mutator lock, all threads must be suspended.
     MarkRoots();
-  } else {
+  } else { //concurrent
     MarkThreadRoots(self);
     // At this point the live stack should no longer have any mutators which push into it.
     MarkNonThreadRoots();
@@ -945,6 +945,7 @@ void MarkSweep::RecursiveMark() {
     ThreadPool* thread_pool = heap_->GetThreadPool();
     size_t thread_count = GetThreadCount(false);
     const bool parallel = kParallelRecursiveMark && thread_count > 1;
+    LOG(INFO) << "Recursive Mark is " << (parallel? ("parallel " << thread_count) : "non-parallel");
     mark_stack_->Reset();
     for (const auto& space : GetHeap()->GetContinuousSpaces()) {
       if ((space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) ||
