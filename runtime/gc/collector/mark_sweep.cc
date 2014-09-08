@@ -945,7 +945,12 @@ void MarkSweep::RecursiveMark() {
     ThreadPool* thread_pool = heap_->GetThreadPool();
     size_t thread_count = GetThreadCount(false);
     const bool parallel = kParallelRecursiveMark && thread_count > 1;
-    LOG(INFO) << "Recursive Mark is " << (parallel? ("parallel " << thread_count) : "non-parallel");
+    if(parallel) {
+    	LOG(INFO) << "Recursive Mark is parallel " << thread_count;
+    } else {
+    	 LOG(INFO) << "Recursive Mark is non-parallel";
+    }
+
     mark_stack_->Reset();
     for (const auto& space : GetHeap()->GetContinuousSpaces()) {
       if ((space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) ||
