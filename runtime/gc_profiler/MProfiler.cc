@@ -53,6 +53,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 				 GCMMP_FLAGS_CREATE_DAEMON,
 				 "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
 		}//MMU
+
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;

@@ -326,27 +326,40 @@ void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprof
 			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
 	mprofiler_opts->mprofile_grow_method_=
 			art::mprofiler::MProfiler::kGCMMPDefaultGrowMethod;
+	mprofiler_opts->mprofile_gc_affinity_ =
+			art::mprofiler::MProfiler::kGCMMPDefaultAffinity;
+
 }
 
 
 bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
 		mprofiler::GCMMP_Options* mprofiler_opts){
 	if (StartsWith(option, "-Xgcmmp.")) {
-	    	LOG(INFO) << "XXXX Parsing -Xgcmmp option: " << option;
-	    	std::vector<std::string> mprofile_options;
-	    	Split(option.substr(strlen("-Xgcmmp.")), '.', mprofile_options);
-	      for (size_t i = 0; i < mprofile_options.size(); ++i) {
-	        if (mprofile_options[i] == "perftype") {
-	        	mprofiler_opts->mprofile_type_ = atoi(mprofile_options[++i].c_str());
-	          LOG(INFO) << "Parsing -Xgcmmp option: " << mprofiler_opts->mprofile_type_;
-	          return true;
-	        } else if (mprofile_options[i] == "grow") {
-	        	mprofiler_opts->mprofile_grow_method_ = atoi(mprofile_options[++i].c_str());
-	        	return true;
-	        } else {
-	          LOG(INFO) << "Ignoring unknown -Xgcmmp option: " << mprofile_options[i];
-	        }
-	      }
+		LOG(INFO) << "XXXX Parsing -Xgcmmp option: " << option;
+	  std::vector<std::string> mprofile_options;
+	  Split(option.substr(strlen("-Xgcmmp.")), '.', mprofile_options);
+	  for (size_t i = 0; i < mprofile_options.size(); ++i) {
+	  	if (mprofile_options[i] == "perftype") {
+	  		mprofiler_opts->mprofile_type_ = atoi(mprofile_options[++i].c_str());
+	      LOG(INFO) << "Parsing -Xgcmmp option: " << mprofiler_opts->mprofile_type_;
+	      return true;
+	    } else if (mprofile_options[i] == "grow") {
+	    	mprofiler_opts->mprofile_grow_method_ = atoi(mprofile_options[++i].c_str());
+	      return true;
+	    } else {
+	    	LOG(INFO) << "Ignoring unknown -Xgcmmp option: " << mprofile_options[i];
+	    }
+	  }
+	} else if (StartsWith(option, "-Xheap.")) {
+  	std::vector<std::string> mprofile_options;
+  	Split(option.substr(strlen("-Xheap.")), '.', mprofile_options);
+  	for (size_t i = 0; i < mprofile_options.size(); ++i) {
+  		if (mprofile_options[i] == "affinity") {
+  			mprofiler_opts->mprofile_gc_affinity_ = atoi(mprofile_options[++i].c_str());
+  			LOG(INFO) << "Parsing -Xheap option: " << mprofiler_opts->mprofile_gc_affinity_;
+  			return true;
+  		}
+  	}
 	}
 	return false;
 }
@@ -572,7 +585,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
     } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->mprofiler_options_)) {
     	if(parsed->mprofiler_options_.mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
     		 parsed->is_concurrent_gc_enabled_ = false;
-    		 LOG(INFO) << "XXX Diablie concurrent GC";
+    		 LOG(INFO) << "XXX Disable concurrent GC";
     	}
     	LOG(INFO) << "XXXX Done Parsing -Xgcmmp option: " << option;
     } else if (option == "-XX:+DisableExplicitGC") {
@@ -831,6 +844,7 @@ bool Runtime::InitZygote() {
 void Runtime::DidForkFromZygote() {
   is_zygote_ = false;
 
+  LOG(MPROF_LOG_SEV) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
   // Create the thread pool.
   heap_->CreateThreadPool();
 

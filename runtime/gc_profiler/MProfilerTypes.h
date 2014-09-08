@@ -21,6 +21,7 @@ namespace mprofiler {
 typedef struct GCMMP_Options_s {
 	int mprofile_type_;
 	int mprofile_grow_method_;
+	int mprofile_gc_affinity_;
 } GCMMP_Options;
 
 /**

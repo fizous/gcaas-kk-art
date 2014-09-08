@@ -148,6 +148,7 @@ public:
   static const int kGCMMPDisableMProfile = 999;
   static const int kGCMMPDefaultGrowMethod = 0;
   static const int kGCMMPMAXThreadCount = 64;
+  static const int kGCMMPDefaultAffinity = -1;
   static const int kGCMMPDumpEndMarker;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];

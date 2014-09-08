@@ -938,7 +938,7 @@ void MarkSweep::RecursiveMark() {
   CHECK(phantom_reference_list_ == NULL);
   CHECK(cleared_reference_list_ == NULL);
 
-  if (kUseRecursiveMark) {
+  if (kUseRecursiveMark) { // so far it is false
     const bool partial = GetGcType() == kGcTypePartial;
     ScanObjectVisitor scan_visitor(this);
     auto* self = Thread::Current();
