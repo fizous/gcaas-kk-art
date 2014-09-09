@@ -599,7 +599,7 @@ void MProfiler::OpenDumpFile() {
 	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
 	    continue;
 	  }
-    PGCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
     dump_file_ = new File(fd, std::string(dump_file_name_));
     return;
 	}
