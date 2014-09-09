@@ -10,6 +10,7 @@
 
 #include <linux/perf_event.h>
 #include <linux/types.h>
+#include <stdint.h>
 #include "os.h"
 
 typedef struct PerfLibS
