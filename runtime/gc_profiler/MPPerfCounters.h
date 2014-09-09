@@ -8,7 +8,7 @@
 #ifndef MPPERFCOUNTERS_H_
 #define MPPERFCOUNTERS_H_
 
-#include <linux/perf_events.h>
+#include <linux/perf_event.h>
 #include <linux/types.h>
 
 
