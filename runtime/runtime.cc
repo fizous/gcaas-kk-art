@@ -844,7 +844,7 @@ bool Runtime::InitZygote() {
 void Runtime::DidForkFromZygote() {
   is_zygote_ = false;
 
-  LOG(MPROF_LOG_SEV) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
+  GCMMP_VLOG(INFO) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
   // Create the thread pool.
   heap_->CreateThreadPool();
 
@@ -865,7 +865,7 @@ void Runtime::StartDaemonThreads() {
   VLOG(startup) << "Runtime::StartDaemonThreads entering";
 
   Thread* self = Thread::Current();
-  LOG(MPROF_LOG_SEV) << "GCMMP: Creating the GC Daemons after we Did a fork From Zygote";
+  GCMMP_VLOG(INFO) << "GCMMP: Creating the GC Daemons after we Did a fork From Zygote";
   // Must be in the kNative state for calling native methods.
   CHECK_EQ(self->GetState(), kNative);
 

@@ -14,7 +14,7 @@
 #include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
-
+#include "logging.h"
 #include "thread_state.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "cutils/system_clock.h"
@@ -23,14 +23,9 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
-#define DEBUG_PROFILER 0
-
+#define VERBOSE_PROFILER 0
 /* log information. used to monitor the flow of the profiler.*/
-#if DEBUG_PROFILER
- #define MPROF_LOG_SEV    	INFO
-#else
- #define MPROF_LOG_SEV    	DEBUG
-#endif
+#define GCMMP_VLOG(severity) if (VERBOSE_PROFILER) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
 
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))

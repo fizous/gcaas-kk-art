@@ -96,14 +96,14 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	int totalC = 0;
 	if(curr_bucket_ind_ < 0)
 		return;
-	LOG(MPROF_LOG_SEV) << "parenthesis: " << count_opens_;
+	GCMMP_VLOG(INFO) << "parenthesis: " << count_opens_;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		if(limit_ > 0) {
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
 			for(int entryInd = 0; entryInd < limit_; entryInd++){
 				file->WriteFully(&pauseEvents[bucketInd][entryInd], sizeof(GCMMP_ProfileActivity));
-				LOG(MPROF_LOG_SEV) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+				GCMMP_VLOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
 			}
 		}
 	}
@@ -126,16 +126,16 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	  pauseManager(NULL),
 	  state(GCMMP_TH_STARTING) {
 
-	LOG(MPROF_LOG_SEV) << "MPRofiler: Initializing arrayBreaks for " << thread->GetTid();
+	GCMMP_VLOG(INFO) << "MPRofiler: Initializing arrayBreaks for " << thread->GetTid();
 	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
-	LOG(MPROF_LOG_SEV) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
+	GCMMP_VLOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	pauseManager = new GCPauseThreadManager();
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
-	LOG(MPROF_LOG_SEV) << "MProfiler : ThreadProf is initialized";
+	GCMMP_VLOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
 
 GCMMPThreadProf::~GCMMPThreadProf() {
@@ -191,16 +191,16 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
 		flags_ = profEntry->flags_;
 		dump_file_name_ = profEntry->logFile_;
-		LOG(MPROF_LOG_SEV) << "MProfiler Profiling is Enabled";
+		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
-		LOG(MPROF_LOG_SEV) << "MProfiler Created";
+		GCMMP_VLOG(INFO) << "MProfiler Created";
 
 	} else {
 		flags_ = 0;
 		dump_file_name_ = NULL;
-		LOG(MPROF_LOG_SEV) << "MProfiler Profiling is Disabled";
+		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
 	}
 
 }
@@ -232,7 +232,7 @@ void MProfiler::ShutdownProfiling(void) {
 		end_time_ns_ = GetRelevantRealTime();
 		running_ = false;
 
-		LOG(MPROF_LOG_SEV) << "Starting Detaching all the thread Profiling";
+		GCMMP_VLOG(INFO) << "Starting Detaching all the thread Profiling";
 		ForEach(GCMMPKillThreadProf, this);
 
 		DumpProfData(true);
@@ -246,8 +246,8 @@ void MProfiler::ShutdownProfiling(void) {
 			MutexLock mu(self, *Locks::thread_list_lock_);
 			thread_list->ForEach(GCMMPResetThreadField, this);
 		}
-		LOG(MPROF_LOG_SEV) << "Done Detaching all the thread Profiling";
-		LOG(MPROF_LOG_SEV) << "Shutting Down";
+		GCMMP_VLOG(INFO) << "Done Detaching all the thread Profiling";
+		GCMMP_VLOG(INFO) << "Shutting Down";
 		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
 			MutexLock mu(self, *prof_thread_mutex_);
 			prof_thread_cond_->Broadcast(self);
@@ -260,7 +260,7 @@ void MProfiler::InitializeProfiler() {
 	if(!IsProfilingEnabled())
 		return;
 	if(IsProfilingRunning()) {
-		LOG(MPROF_LOG_SEV) << "MProfiler: was already running";
+		GCMMP_VLOG(INFO) << "MProfiler: was already running";
 		return;
 	}
 	GCMMPThreadProf::mProfiler = this;
@@ -271,22 +271,22 @@ void MProfiler::InitializeProfiler() {
 	GCPauseThreadManager::startCPUTime = cpu_time_ns_;
 	GCPauseThreadManager::startRealTime = start_time_ns_;
 
-	LOG(MPROF_LOG_SEV) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
+	GCMMP_VLOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	} else {
-		LOG(MPROF_LOG_SEV) << "MProfiler: No Daemon Creation";
+		GCMMP_VLOG(INFO) << "MProfiler: No Daemon Creation";
 		Thread* self = Thread::Current();
 		MutexLock mu(self, *prof_thread_mutex_);
 		if(!running_) {
 			SetMProfileFlags();
 		} else {
-			LOG(MPROF_LOG_SEV) << "MProfiler: was already running";
+			GCMMP_VLOG(INFO) << "MProfiler: was already running";
 		}
 		prof_thread_cond_->Broadcast(self);
 	}
 
-	LOG(MPROF_LOG_SEV) << "MProfiler Is Initialized";
+	GCMMP_VLOG(INFO) << "MProfiler Is Initialized";
 }
 
 void MProfiler::SetMProfileFlags(void) {
@@ -310,13 +310,13 @@ bool MProfiler::MainProfDaemonExec(){
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
-  LOG(MPROF_LOG_SEV) << "MProfiler: Profiler Daemon Is going to Wait";
+  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
   ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
   {
   	prof_thread_cond_->Wait(self);
   }
   if(receivedSignal_) { //we recived Signal to Shutdown
-    LOG(MPROF_LOG_SEV) << "MProfiler: signal Received " << self->GetTid() ;
+    GCMMP_VLOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
   	return true;
   } else {
   	return false;
@@ -347,18 +347,18 @@ void* MProfiler::Run(void* arg) {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
 
-      LOG(MPROF_LOG_SEV) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
+      GCMMP_VLOG(INFO) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
     	mProfiler->prof_thread_ = self;
     	mProfiler->SetMProfileFlags();
     } else {
-    	 LOG(MPROF_LOG_SEV) << "MProfiler: Profiler was already created";
+    	 GCMMP_VLOG(INFO) << "MProfiler: Profiler was already created";
     }
 
     mProfiler->prof_thread_cond_->Broadcast(self);
   }
 
 
-  LOG(MPROF_LOG_SEV) << "MProfiler: Profiler Daemon Created and Leaving";
+  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
 
 
   while(true) {
@@ -390,10 +390,10 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 		 f->WriteFully(&_type, sizeof(int));
 		 f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
 
-		 LOG(MPROF_LOG_SEV) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
+		 GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 
 		 mgr->DumpProfData(mProfiler);
-		 LOG(MPROF_LOG_SEV) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
+		 GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
 
 
 	}
@@ -401,7 +401,7 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 
 void MProfiler::DumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-  LOG(MPROF_LOG_SEV) << " Dumping the commin information ";
+  GCMMP_VLOG(INFO) << " Dumping the commin information ";
   bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
   if(successWrite) {
   	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
@@ -411,7 +411,7 @@ void MProfiler::DumpProfData(bool isLastDump) {
   	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
   }
 
-  LOG(MPROF_LOG_SEV) << " Dumping the MMU information ";
+  GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
   if(successWrite) {
   	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
@@ -432,14 +432,14 @@ void MProfiler::DumpProfData(bool isLastDump) {
 		dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
 		dump_file_->Close();
 	}
-	LOG(MPROF_LOG_SEV) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
-	LOG(MPROF_LOG_SEV) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
+	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
+	GCMMP_VLOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
-	LOG(MPROF_LOG_SEV) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
+	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
 	cuuT = uptime_nanos();
-	LOG(MPROF_LOG_SEV) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
+	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
-	LOG(MPROF_LOG_SEV) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
+	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
 }
 
 
@@ -456,7 +456,7 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
     // Wake anyone who may have been waiting for the GC to complete.
     prof_thread_cond_->Broadcast(self);
 
-    LOG(MPROF_LOG_SEV) << "MProfiler: Sent the signal " << self->GetTid() ;
+    GCMMP_VLOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
 	}
 }
 
@@ -480,7 +480,7 @@ void MProfiler::CreateProfilerDaemon(void) {
   }
   prof_thread_cond_->Broadcast(self);
 
-  LOG(MPROF_LOG_SEV) << "MProfiler: Caller is leaving now";
+  GCMMP_VLOG(INFO) << "MProfiler: Caller is leaving now";
 
 }
 
@@ -509,17 +509,17 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread) {
  * We assume that checks already done before we call this
  */
 void MProfiler::AttachThread(Thread* thread) {
-	LOG(MPROF_LOG_SEV) << "MProfiler: Attaching thread Late " << thread->GetTid();
+	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
-			LOG(MPROF_LOG_SEV) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
 			return;
 		}
 	}
 	if(thread->GetTid() == prof_thread_->GetTid()) {
 		if(!IsAttachProfDaemon()) {
-			LOG(MPROF_LOG_SEV) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
 			return;
 		}
 	}
@@ -534,7 +534,7 @@ void MProfiler::AttachThread(Thread* thread) {
 		gc_daemon_ = thread;
 		SetThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
-			LOG(MPROF_LOG_SEV) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+			GCMMP_VLOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
 	} else {
@@ -542,7 +542,7 @@ void MProfiler::AttachThread(Thread* thread) {
 			gc_trimmer_ = thread;
 			SetThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
-				LOG(MPROF_LOG_SEV) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+				GCMMP_VLOG(INFO) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
 				return;
 			}
 		} else if(thread_name.compare("main") == 0) { //that's the main thread
@@ -551,7 +551,7 @@ void MProfiler::AttachThread(Thread* thread) {
 		SetThreadAffinity(thread, true);
 	}
 
-	LOG(MPROF_LOG_SEV) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	GCMMP_VLOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);
@@ -559,7 +559,7 @@ void MProfiler::AttachThread(Thread* thread) {
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	if(threadProf != NULL) {
-//		LOG(MPROF_LOG_SEV) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
+//		GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
 		return threadProf->StopProfiling();
 	}
 	return false;
@@ -573,11 +573,11 @@ void MProfiler::AttachThreads() {
 //	 thread_list->ResumeAll();
 
 	Thread* self = Thread::Current();
-	LOG(MPROF_LOG_SEV) << "MProfiler: Attaching All threads " << self->GetTid();
+	GCMMP_VLOG(INFO) << "MProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
 	MutexLock mu(self, *Locks::thread_list_lock_);
 	thread_list->ForEach(GCMMPAttachThread, this);
-	LOG(MPROF_LOG_SEV) << "MProfiler: Done Attaching All threads ";
+	GCMMP_VLOG(INFO) << "MProfiler: Done Attaching All threads ";
 
 }
 
@@ -599,7 +599,7 @@ void MProfiler::OpenDumpFile() {
 	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
 	    continue;
 	  }
-    PLOG(MPROF_LOG_SEV) << "opened  Successsfully MProfile Output file '" << str << "'";
+    PGCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
     dump_file_ = new File(fd, std::string(dump_file_name_));
     return;
 	}
@@ -611,12 +611,12 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
-				LOG(MPROF_LOG_SEV) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 				InitializeProfiler();
 				return;
 			}
 		}
-		LOG(MPROF_LOG_SEV) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+		GCMMP_VLOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 	}
 }
 
@@ -651,14 +651,14 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 		if(sched_setaffinity(th->GetTid(),
 												sizeof(mask), &mask) != 0) {
 			if(complementary) {
-				LOG(MPROF_LOG_SEV) << "GCMMP: Complementary";
+				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
 			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
 		} else {
 			if(complementary) {
-				LOG(MPROF_LOG_SEV) << "GCMMP: Complementary";
+				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
-			LOG(MPROF_LOG_SEV) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
 		}
 	}
 }
@@ -669,7 +669,7 @@ void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		if(Runtime::Current()->mprofiler_->DettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
-			LOG(MPROF_LOG_SEV) << "MProfiler: Detaching thread from List " << th->GetTid();
+			GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
 		}
 	}
 }
