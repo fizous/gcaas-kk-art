@@ -10,12 +10,12 @@
 
 #include <linux/perf_event.h>
 #include <linux/types.h>
-
+#include "os.h"
 
 typedef struct PerfLibS
 {
 	int     cpus;   			/* What cpu to monitor */
-	u32     pid;        	/* what pid to monitor 0=self */
+	uint32_t     pid;        	/* what pid to monitor 0=self */
 	char    *event_name; 	/* Name of event matching with whats on qwiki */
 	void		*attrAddress; /* address of the profile attribute in the perfcounter struct */
 
