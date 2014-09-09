@@ -14,7 +14,7 @@
 #include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
-#include "logging.h"
+#include "base/logging.h"
 #include "thread_state.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "cutils/system_clock.h"
