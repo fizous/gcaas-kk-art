@@ -173,7 +173,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		prof_thread_(NULL),
-		gcDaemonAffinity_(argOptions->mprofile_type_),
+		gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false),
 		receivedSignal_(false),
