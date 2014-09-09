@@ -517,24 +517,40 @@ void MProfiler::AttachThread(Thread* thread) {
 			return;
 		}
 	}
-	if(thread->GetTid() == prof_thread_->GetTid()){
+	if(thread->GetTid() == prof_thread_->GetTid()) {
 		if(!IsAttachProfDaemon()) {
 			LOG(MPROF_LOG_SEV) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
 			return;
 		}
 	}
-	SetThreadAffinity(thread);
+
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
+
+
+
+
 	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
 		gc_daemon_ = thread;
+		SetThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
 			LOG(MPROF_LOG_SEV) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
-	} else if(thread_name.compare("main") == 0) { //that's the main thread
-		main_thread_ = thread;
+	} else {
+		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+			gc_trimmer_ = thread;
+			SetThreadAffinity(thread, false);
+			if(!IsAttachGCDaemon()) {
+				LOG(MPROF_LOG_SEV) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+				return;
+			}
+		} else if(thread_name.compare("main") == 0) { //that's the main thread
+				main_thread_ = thread;
+		}
+		SetThreadAffinity(thread, true);
 	}
+
 	LOG(MPROF_LOG_SEV) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
@@ -592,7 +608,7 @@ void MProfiler::OpenDumpFile() {
 
 
 void MProfiler::GCMMProfPerfCounters(const char* name) {
-	if(IsProfilingEnabled()){
+	if(IsProfilingEnabled()) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				LOG(MPROF_LOG_SEV) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
@@ -618,18 +634,31 @@ void MProfiler::MProfAttachThread(art::Thread* th) {
 	}
 }
 
-void MProfiler::SetThreadAffinity(art::Thread* th) {
+void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 	if(SetAffinityThread()) {
-
-		uint32_t cpu = (uint32_t) gcDaemonAffinity_;
 		cpu_set_t mask;
 		CPU_ZERO(&mask);
-		CPU_SET(cpu, &mask);
+		uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+		uint32_t _cpu_id =  (uint32_t) gcDaemonAffinity_;
+		if(complementary) {
+			for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+				if(_ind != _cpu_id)
+					CPU_SET(_ind, &mask);
+			}
+		} else {
+			CPU_SET(_cpu_id, &mask);
+		}
 		if(sched_setaffinity(th->GetTid(),
 												sizeof(mask), &mask) != 0) {
-			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  cpu;
+			if(complementary) {
+				LOG(MPROF_LOG_SEV) << "GCMMP: Complementary";
+			}
+			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
 		} else {
-			LOG(MPROF_LOG_SEV) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  cpu;
+			if(complementary) {
+				LOG(MPROF_LOG_SEV) << "GCMMP: Complementary";
+			}
+			LOG(MPROF_LOG_SEV) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
 		}
 	}
 }

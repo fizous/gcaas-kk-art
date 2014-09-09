@@ -23,7 +23,7 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
-#define DEBUG_PROFILER 1
+#define DEBUG_PROFILER 0
 
 /* log information. used to monitor the flow of the profiler.*/
 #if DEBUG_PROFILER
@@ -75,9 +75,10 @@ private:
 	const int index_;
   // System thread used as main (thread id = 1).
 	Thread* main_thread_;
-  // System thread used as GC Daemon (thread id = 1).
+  // System thread used as GC Daemon.
 	Thread* gc_daemon_;
-
+  // System thread used as GC Timmer.
+	Thread* gc_trimmer_;
   // flags of the Profiler we are running
   // combines markAllocWindows, createProfDaemon, hasProfThread,
   unsigned int flags_;
@@ -191,7 +192,7 @@ public:
   bool DettachThread(GCMMPThreadProf*);
   void GCMMProfPerfCounters(const char*);
 
-  void SetThreadAffinity(Thread*);
+  void SetThreadAffinity(Thread*,bool);
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
