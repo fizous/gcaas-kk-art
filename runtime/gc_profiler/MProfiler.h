@@ -104,6 +104,8 @@ private:
 
   void DumpProfData(bool);
 
+	int gcDaemonAffinity_;
+
   const bool enabled_;
 
   volatile bool running_;
@@ -175,6 +177,11 @@ public:
   bool IsProfilingEnabled() const {
     return enabled_;
   }
+
+  bool SetAffinityThread() const {
+    return IsProfilingEnabled() && (gcDaemonAffinity_ != kGCMMPDefaultAffinity) ;
+  }
+
   art::File* GetDumpFile(void) const {
   	return dump_file_;
   }
@@ -183,6 +190,8 @@ public:
   void AttachThread(Thread*);
   bool DettachThread(GCMMPThreadProf*);
   void GCMMProfPerfCounters(const char*);
+
+  void SetThreadAffinity(Thread*);
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);

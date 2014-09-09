@@ -80,7 +80,7 @@ void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 }
 
 void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	if(busy_){
+	if(busy_) {
 		if(curr_marker_->type != evType)
 			return;
 		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantCPUTime();
@@ -97,7 +97,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	if(curr_bucket_ind_ < 0)
 		return;
 	LOG(MPROF_LOG_SEV) << "parenthesis: " << count_opens_;
-	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++){
+	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		if(limit_ > 0) {
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
@@ -173,6 +173,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		main_thread_(NULL),
 		gc_daemon_(NULL),
 		prof_thread_(NULL),
+		gcDaemonAffinity_(MProfiler::kGCMMPDefaultAffinity),
 		enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 		running_(false),
 		receivedSignal_(false),
@@ -522,6 +523,7 @@ void MProfiler::AttachThread(Thread* thread) {
 			return;
 		}
 	}
+	SetThreadAffinity(thread);
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
 	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
@@ -612,9 +614,25 @@ void MProfiler::PreForkPreparation() {
 void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		Runtime::Current()->mprofiler_->AttachThread(th);
+
 	}
 }
 
+void MProfiler::SetThreadAffinity(art::Thread* th) {
+	if(SetAffinityThread()) {
+
+		uint32_t cpu = (uint32_t) gcDaemonAffinity_;
+		cpu_set_t mask;
+		CPU_ZERO(&mask);
+		CPU_SET(cpu, &mask);
+		if(sched_setaffinity(th->GetTid(),
+												sizeof(mask), &mask) != 0) {
+			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  cpu;
+		} else {
+			LOG(MPROF_LOG_SEV) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  cpu;
+		}
+	}
+}
 /*
  * Detach a thread from the MProfiler
  */
