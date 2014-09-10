@@ -128,7 +128,7 @@ define build-art-test
   ifeq ($$(art_target_or_host),target)
     LOCAL_CLANG := $(ART_TARGET_CLANG)
     LOCAL_CFLAGS += $(ART_TARGET_CFLAGS) $(ART_TARGET_DEBUG_CFLAGS)
-    LOCAL_SHARED_LIBRARIES += libdl libicuuc libicui18n libnativehelper libz libcutils
+    LOCAL_SHARED_LIBRARIES += libdl libicuuc libicui18n libnativehelper libz libpfm4 libcutils
     LOCAL_STATIC_LIBRARIES += libgtest
     LOCAL_MODULE_PATH := $(ART_NATIVETEST_OUT)
     include $(LLVM_DEVICE_BUILD_MK)
@@ -139,7 +139,7 @@ define build-art-test
     LOCAL_CLANG := $(ART_HOST_CLANG)
     LOCAL_CFLAGS += $(ART_HOST_CFLAGS) $(ART_HOST_DEBUG_CFLAGS)
     LOCAL_SHARED_LIBRARIES += libicuuc-host libicui18n-host libnativehelper libz-host
-    LOCAL_STATIC_LIBRARIES += libcutils
+    LOCAL_STATIC_LIBRARIES += libpfm4 libcutils
     ifeq ($(HOST_OS),darwin)
       # Mac OS complains about unresolved symbols if you don't include this.
       LOCAL_WHOLE_STATIC_LIBRARIES := libgtest_host
