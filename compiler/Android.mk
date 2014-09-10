@@ -202,7 +202,7 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
   LOCAL_ADDITIONAL_DEPENDENCIES := art/build/Android.common.mk
   LOCAL_ADDITIONAL_DEPENDENCIES += $(LOCAL_PATH)/Android.mk
   ifeq ($$(art_target_or_host),target)
-    LOCAL_SHARED_LIBRARIES += libpfm4 libcutils
+    LOCAL_SHARED_LIBRARIES += libcutils
     include $(LLVM_GEN_INTRINSICS_MK)
     include $(LLVM_DEVICE_BUILD_MK)
     include $(BUILD_SHARED_LIBRARY)
