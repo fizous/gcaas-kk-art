@@ -38,7 +38,7 @@ bool MPPerfCounter::OpenPerfLib(PerfLibCounterT* prfRec, pid_t pid) {
 
 
 	prfRec->event_name = NULL;
-	prfRec->event_name = (char*) calloc(sizeof(char) * MPPerfCounter::kGCPerfCountersNameSize);
+	prfRec->event_name = (char*) calloc(1, sizeof(char) * MPPerfCounter::kGCPerfCountersNameSize);
 	strcpy(prfRec->event_name, event_name_);
 
 	_locRet = create_perf_counter(prfRec);
