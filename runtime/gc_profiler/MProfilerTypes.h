@@ -9,6 +9,7 @@
 #define MPROFILERTYPES_H_
 
 #include "cutils/system_clock.h"
+#include "gc_profiler/MPPerfCounters.h"
 
 #define GCMMP_GCPAUSE_ARRAY_SIZE					  32
 
@@ -104,6 +105,7 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 
 class MProfiler;
 class GCMMPThreadProf;
+class MPPerfCounter;
 
 class PACKED(4) GCPauseThreadManager {
 	 GCPauseThreadMarker* curr_marker_;
@@ -210,6 +212,10 @@ public:
   }
 
   int GetThreadType(void);
+
+  // The performance counter record.
+  UniquePtr<MPPerfCounter> perf_record_;
+
 };
 } // namespace mprofiler
 } // namespace art

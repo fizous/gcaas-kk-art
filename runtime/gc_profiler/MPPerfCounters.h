@@ -12,25 +12,40 @@
 #include "cutils/perflib.h"
 
 
-/*
- * Initiliazes performance library counters
- */
-int GCMMPInitPerflib(void) {
-	return init_perflib_counters();
-}
+namespace art {
+namespace mprofiler {
 
-/*
- * terminates performance library counters
- */
-int GCMMPTerminatePerflib(void)
-{
-	return terminate_perflib_counters();
-}
+class MPPerfCounter {
+public:
+	static const bool kGCPerfCountersExcIdle = true;
+	static const int 	kGCPerfCountersNameSize = 16;
+	const char* event_name_;
 
-/*
- * Open perflib and process ID
- */
-bool GCMMPperfLibOpen(PerfLibCounterT*, pid_t);
+	MPPerfCounter(void);
+	/*
+	 * Initiliazes performance library counters
+	 */
+	int InitPerflib(void) {
+		return init_perflib_counters();
+	}
 
+	/*
+	 * terminates performance library counters
+	 */
+	int TerminatePerflib(void) {
+		return terminate_perflib_counters();
+	}
+
+	/*
+	 * Open perflib and process ID
+	 */
+	bool OpenPerfLib(PerfLibCounterT*, pid_t);
+
+
+  static MPPerfCounter* Create(const char* event_name);
+};
+
+} //namespace mprofiler
+} //namespace art
 
 #endif /* MPPERFCOUNTERS_H_ */

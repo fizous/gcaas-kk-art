@@ -11,19 +11,52 @@
 #include "runtime.h"
 #include "thread.h"
 #include "gc_profiler/MPPerfCounters.h"
+#include "gc_profiler/MProfiler.h"
 
-int init_perflib_counters(void) {
-	return 0;
+
+namespace art {
+namespace mprofiler {
+
+
+
+MPPerfCounter::MPPerfCounter(void) :
+		event_name_("CYCLES") {
+
 }
+
+MPPerfCounter* MPPerfCounter::Create(const char* event_name){
+	return new MPPerfCounter();
+}
+
 
 /*
  * Open perflib and process ID
  */
-bool GCMMPperfLibOpen(PerfLibCounterT* prfRec, pid_t pid) {
+bool MPPerfCounter::OpenPerfLib(PerfLibCounterT* prfRec, pid_t pid) {
 	int _locRet = 0;
-	bool _lResult = true;
 	art::Thread* self = art::Thread::Current();
+
+
+	prfRec->event_name = NULL;
+	prfRec->event_name = (char*) calloc(sizeof(char) * MPPerfCounter::kGCPerfCountersNameSize);
+	strcpy(prfRec->event_name, event_name_);
+
 	_locRet = create_perf_counter(prfRec);
 
-	return false;
+	if (_locRet < 0) {
+		LOG(FATAL) << "could not create perflib for tid: " << pid;
+		return false;
+	}
+	prfRec->pid = pid;
+	_locRet = open_perf_counter(prfRec);
+	if (_locRet < 0) {
+		LOG(FATAL) << "could not open perflib for tid: " << pid;
+		return false;
+	}
+	set_exclude_idle(prfRec, MPPerfCounter::kGCPerfCountersExcIdle);
+
+	GCMMP_VLOG(INFO) << "MPPerfCounters: Finished creating the performance counters for tid:" << pid;
+	return true;
 }
+}// namespace mprofiler
+}// namespace art

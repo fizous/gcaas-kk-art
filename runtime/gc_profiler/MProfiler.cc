@@ -15,6 +15,7 @@
 #include "cutils/process_name.h"
 #include "cutils/system_clock.h"
 #include "gc/heap.h"
+#include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
 #include "locks.h"
@@ -132,6 +133,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	}
 	GCMMP_VLOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	pauseManager = new GCPauseThreadManager();
+	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
