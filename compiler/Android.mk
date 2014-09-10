@@ -173,7 +173,7 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
   # TODO: clean up the compilers and remove this.
   LOCAL_CFLAGS += -Wno-unused-parameter
 
-  LOCAL_SHARED_LIBRARIES += liblog
+  LOCAL_SHARED_LIBRARIES += liblog libpfm4
   ifeq ($$(art_ndebug_or_debug),debug)
     ifeq ($$(art_target_or_host),target)
       LOCAL_CFLAGS += $(ART_TARGET_DEBUG_CFLAGS)
@@ -207,7 +207,7 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
     include $(LLVM_DEVICE_BUILD_MK)
     include $(BUILD_SHARED_LIBRARY)
   else # host
-    LOCAL_STATIC_LIBRARIES += libpfm4 libcutils
+    LOCAL_STATIC_LIBRARIES += libcutils
     include $(LLVM_GEN_INTRINSICS_MK)
     include $(LLVM_HOST_BUILD_MK)
     include $(BUILD_HOST_SHARED_LIBRARY)
