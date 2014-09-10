@@ -9,24 +9,9 @@
 #define MPPERFCOUNTERS_H_
 
 #include <stdint.h>
-#include <linux/types.h>
+#include "cutils/perflib.h"
 
 
-
-typedef struct PerfLibS
-{
-	int     cpus;   			/* What cpu to monitor */
-	uint32_t     pid;        	/* what pid to monitor 0=self */
-	char    *event_name; 	/* Name of event matching with whats on qwiki */
-	void		*attrAddress; /* address of the profile attribute in the perfcounter struct */
-
-	/*
-	 * Perf uses file descriptors to read the performance counters.
-   * This is the file descriptor for the counter.
-	 */
-	int             fileDescriptor;
-
-} PerfLibCounterT;
 
 
 int init_perflib_counters(void);
