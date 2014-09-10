@@ -22,7 +22,7 @@ int init_perflib_counters(void) {
 bool GCMMPperfLibOpen(PerfLibCounterT* prfRec, pid_t pid) {
 	int _locRet = 0;
 	bool _lResult = true;
-	Thread* self = Thread::Current();
+	art::Thread* self = art::Thread::Current();
 	_locRet = create_perf_counter(prfRec);
 
 	return false;
