@@ -34,7 +34,7 @@ MPPerfCounter* MPPerfCounter::Create(const char* event_name){
  */
 bool MPPerfCounter::OpenPerfLib(PerfLibCounterT* prfRec, pid_t pid) {
 	int _locRet = 0;
-	art::Thread* self = art::Thread::Current();
+	//art::Thread* self = art::Thread::Current();
 
 
 	prfRec->event_name = NULL;
