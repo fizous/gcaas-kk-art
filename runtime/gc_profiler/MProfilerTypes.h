@@ -163,6 +163,59 @@ public:
 }; // Class GCPauseThreadManager
 
 
+class GCMMPThreadProfiling {
+protected:
+	/* system ID of the thread monitored */
+	const pid_t pid_;
+	volatile bool suspendedGC_;
+	GCMMP_ProfileActivity lifeTime_;
+	volatile GCMMPThreadProfState state_;
+
+	static MProfiler& mProfiler;
+	const static GCMMPThreadProfiling defaultTHProfiler;
+
+
+  bool StopProfiling(void);
+  void ForceDeadTime(void);
+
+  void InitThreadRecord(void);
+  void InitDataStucture(void);
+
+public:
+	GCMMPThreadProfiling(void);
+
+	GCMMPThreadProfiling(Thread&);
+
+	int GetThreadType(void);
+
+  uint64_t GetCreationTime(void) const;
+
+  uint64_t GetEndTime(void) const;
+
+  GCMMP_ProfileActivity* GetliveTimeInfo(void) const;
+
+  static void SetMProfiler(MProfiler&);
+
+  static const GCMMPThreadProfiling& GetDefaultTHProfilier() const;
+};
+
+inline uint64_t GCMMPThreadProfiling::GetCreationTime(void) const {
+	return lifeTime_.startMarker;
+}
+
+inline uint64_t GCMMPThreadProfiling::GetEndTime(void) const {
+	return lifeTime_.finalMarker;
+}
+
+inline GCMMP_ProfileActivity* GCMMPThreadProfiling::GetliveTimeInfo(void)  const {
+	return &lifeTime_;
+}
+
+inline const GCMMPThreadProfiling& GCMMPThreadProfiling::GetDefaultTHProfilier() const {
+	return defaultTHProfiler;
+}
+
+
 /*
  * Holds the profiling data per thread . We do not keep a pointer to the thread
  * because threads may terminate before we collect the information
