@@ -146,12 +146,12 @@ public:
 				if(curr_bucket_ind_ >= kGCMMPMaxBucketEntries) {
 					LOG(ERROR) << "MProfiler: Exceeded maximum count of entries ";
 				}
-				LOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
+		//		GCMMP_VLOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
 				InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
 			}
 			busy_ = false;
 			curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
-			LOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
+		//	GCMMP_VLOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
 	 } //IncrementIndices
 
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
