@@ -5,9 +5,9 @@
  *      Author: hussein
  */
 
-
-#include "gc_profiler/MProfilerTypes.h"
 #include "thread.h"
+#include "gc_profiler/MProfilerTypes.h"
+
 
 namespace art {
 namespace mprofiler {
