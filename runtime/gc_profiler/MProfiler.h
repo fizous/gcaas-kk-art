@@ -53,11 +53,11 @@ namespace mprofiler {
 
 
 template <typename T>
-VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
 {
 	return new T(opts, entry);
 }
-typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+typedef mprofiler::VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 
