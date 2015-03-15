@@ -70,23 +70,24 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 
 
 template <typename T>
-art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts,
+		void* entry)
 {
 	return new T(opts, entry);
 }
-typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
 
 
 class VMProfiler {
 public:
-	VMProfiler(GCMMP_Options*, GCMMPProfilingEntry*);
+	VMProfiler(GCMMP_Options*, void*);
 	~VMProfiler();
 };
 
 
 class PerfCounterProfiler : public VMProfiler {
 public:
-	PerfCounterProfiler(GCMMP_Options*, GCMMPProfilingEntry*);
+	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler();
 };
 

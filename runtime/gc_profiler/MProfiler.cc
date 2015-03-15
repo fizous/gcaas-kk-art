@@ -55,7 +55,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 				 "CYCLES", "Perf Counter of CPU over a given period of time",
 				 "PERF_CPU_USAGE.log",
 				 NULL,
-				 &createVMProfiler<GCMMPProfilingEntry>
+				 &createVMProfiler<PerfCounterProfiler>
 		},//Cycles
 		{
 				 0x0D,
@@ -63,7 +63,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 				 "MMU", "MMU over a given period of time",
 				 "PERF_MMU_REF.log",
 				 NULL,
-				 &createVMProfiler<GCMMPProfilingEntry>
+				 &createVMProfiler<PerfCounterProfiler>
 		}//MMU
 
 };//profilTypes
@@ -180,7 +180,13 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	}
 }
 
-PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions, GCMMPProfilingEntry* entry) {
+VMProfiler::VMProfiler(GCMMP_Options* argOptions,
+		void* entry) {
+
+}
+
+PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
+		void* entry): VMProfiler(argOptions, entry){
 
 }
 
