@@ -82,6 +82,39 @@ class VMProfiler {
 public:
 	VMProfiler(GCMMP_Options*, void*);
 	~VMProfiler();
+protected:
+	//Index of the profiler type we are running
+	const int index_;
+  // System thread used as main (thread id = 1).
+	Thread* main_thread_;
+  // System thread used as GC Daemon.
+	Thread* gc_daemon_;
+  // System thread used as GC Timmer.
+	Thread* gc_trimmer_;
+  // flags of the Profiler we are running
+  // combines markAllocWindows, createProfDaemon, hasProfThread,
+  unsigned int flags_;
+
+  /* file used to dump the profiling data */
+  const char * dump_file_name_;
+  art::File* dump_file_;
+
+	Thread* prof_thread_;
+  void CreateProfilerDaemon(void);
+
+  void InitializeProfiler(void);
+
+  void DumpProfData(bool);
+
+	int gcDaemonAffinity_;
+
+  const bool enabled_;
+
+  volatile bool running_;
+
+  volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+public:
+  size_t 		start_heap_bytes_;
 };
 
 

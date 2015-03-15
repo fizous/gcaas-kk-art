@@ -182,7 +182,16 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 }
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
-		void* entry) {
+		void* entry) :
+				index_(argOptions->mprofile_type_),
+				main_thread_(NULL),
+				gc_daemon_(NULL),
+				prof_thread_(NULL),
+				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
+				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
+				running_(false),
+				receivedSignal_(false),
+				start_heap_bytes_(0) {
 	LOG(ERROR) << "VMProfiler : VMProfiler";
 }
 
