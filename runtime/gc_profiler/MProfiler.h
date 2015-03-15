@@ -50,14 +50,14 @@ class ConditionVariable;
 class Mutex;
 
 namespace mprofiler {
-
+class VMprofiler;
 
 template <typename T>
-mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
 {
 	return new T(opts, entry);
 }
-typedef mprofiler::VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 
