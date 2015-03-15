@@ -53,7 +53,7 @@ namespace mprofiler {
 class VMProfiler;
 
 
-typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 
@@ -69,17 +69,20 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 }GCMMPProfilingEntry;
 
 
+template <typename T>
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+{
+	return new T(opts, entry);
+}
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+
+
 class VMProfiler {
 public:
 	VMProfiler(GCMMP_Options*, GCMMPProfilingEntry*);
 	~VMProfiler();
 };
 
-template <typename T>
-art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
-{
-	return new T(opts, entry);
-}
 
 class PerfCounterProfiler : public VMProfiler {
 public:
