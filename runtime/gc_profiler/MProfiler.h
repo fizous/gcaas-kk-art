@@ -203,6 +203,8 @@ public:
   static void MProfMarkEndGCHatTimeEvent(art::Thread*);
   static void MProfMarkGCExplTimeEvent(art::Thread*);
   static void MProfMarkEndGCExplTimeEvent(art::Thread*);
+  static void MProfMarkStartSafePointEvent(art::Thread*);
+  static void MProfMarkEndSafePointEvent(art::Thread*);
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
   void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);

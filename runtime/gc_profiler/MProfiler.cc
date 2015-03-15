@@ -512,9 +512,6 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread) {
  */
 void MProfiler::AttachThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
-
-	/*
-
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -560,7 +557,6 @@ void MProfiler::AttachThread(Thread* thread) {
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProflist_.push_back(threadProf);
 	thread->SetProfRec(threadProf);
-	*/
 }
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
@@ -746,6 +742,24 @@ void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_EXPL);
+	}
+}
+
+void MProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_SAFEPOINT);
+	}
+}
+
+void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th){
+	if(MProfiler::IsMProfRunning()) {
+		GCMMPThreadProf* thProf = th->GetProfRec();
+		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
+			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+					GCMMP_GC_BRK_SAFEPOINT);
 	}
 }
 

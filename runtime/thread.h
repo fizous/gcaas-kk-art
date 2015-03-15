@@ -821,12 +821,12 @@ class PACKED(4) Thread {
   uint32_t thread_exit_check_count_;
 
   friend class ScopedThreadStateChange;
-  mprofiler::GCMMPThreadProfiling& profRec_;
+  mprofiler::GCMMPThreadProf* profRec_;
  public:
-  mprofiler::GCMMPThreadProfiling& GetProfRec() {
+  mprofiler::GCMMPThreadProf* GetProfRec() {
   	return profRec_;
   }
-  void SetProfRec(mprofiler::GCMMPThreadProf& profRec) {
+  void SetProfRec(mprofiler::GCMMPThreadProf* profRec) {
   	profRec_ = profRec;
 
   }
