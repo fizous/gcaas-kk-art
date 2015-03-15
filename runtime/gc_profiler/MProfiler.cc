@@ -50,6 +50,11 @@ const char * MProfiler::gcMMPRootPath[] = {
 
 const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
+				 0x00,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "CYCLES", "Perf Counter of CPU over a given period of time", "PERF_CPU_USAGE.log", NULL
+		},//Cycles
+		{
 				 0x0D,
 				 GCMMP_FLAGS_CREATE_DAEMON,
 				 "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
@@ -102,7 +107,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
 		if(limit_ > 0) {
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
-			for(int entryInd = 0; entryInd < limit_; entryInd++){
+			for(int entryInd = 0; entryInd < limit_; entryInd++) {
 				file->WriteFully(&pauseEvents[bucketInd][entryInd], sizeof(GCMMP_ProfileActivity));
 				GCMMP_VLOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
 			}
@@ -112,10 +117,10 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 }
 
 int GCMMPThreadProf::GetThreadType(void) {
-	if(GCMMPThreadProf::mProfiler->GetMainID() == GetTid()){
+	if(GCMMPThreadProf::mProfiler->GetMainID() == GetTid()) {
 		return 1;
 	}
-	if(GCMMPThreadProf::mProfiler->GetGCDaemonID() == GetTid()){
+	if(GCMMPThreadProf::mProfiler->GetGCDaemonID() == GetTid()) {
 		return 2;
 	}
 	return 0;

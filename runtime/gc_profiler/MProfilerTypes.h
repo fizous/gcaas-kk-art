@@ -177,9 +177,7 @@ class GCMMPThreadProf {
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 
 	volatile bool suspendedGC;
-
 	GCPauseThreadManager* pauseManager;
-
 	GCMMP_ProfileActivity lifeTime_;
 public:
 	static MProfiler* mProfiler;

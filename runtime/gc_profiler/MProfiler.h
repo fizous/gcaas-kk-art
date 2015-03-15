@@ -52,6 +52,15 @@ class Mutex;
 namespace mprofiler {
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
+typedef VMProfiler* (*CreateVMProfiler)(GCMMP_Options*, GCMMPProfilingEntry*);
+template <typename T>
+VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+{
+	return new T(opts, entry);
+}
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
+
+
 
 /* types of Profiling defined here */
 typedef struct PACKED(4) GCMMPProfilingEntry_S {
@@ -61,7 +70,15 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	const char			*desc_;	     	/* event description */
 	const char			*logFile_;	  /* log file name */
 	GCMMPDumpCurrentUsage dumpMethod;
+	VMProfilerConstructor creator_;
 }GCMMPProfilingEntry;
+
+
+class VMProfiler {
+public:
+	VMProfiler(GCMMP_Options*, GCMMPProfilingEntry*);
+	~VMProfiler();
+};
 
 class MProfiler {
 private:
