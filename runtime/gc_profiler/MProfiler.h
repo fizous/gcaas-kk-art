@@ -56,7 +56,7 @@ class VMProfiler;
 
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
-
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
 /* types of Profiling defined here */
 typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	int 						id_;					/* id of the profiling */
@@ -75,7 +75,7 @@ art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts,
 {
 	return new T(opts, entry);
 }
-typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
+
 
 
 class VMProfiler {
