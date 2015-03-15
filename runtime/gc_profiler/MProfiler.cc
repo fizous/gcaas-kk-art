@@ -72,6 +72,7 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 MProfiler* GCMMPThreadProf::mProfiler = NULL;
 
+
 const int MProfiler::kGCMMPDumpEndMarker = -99999999;
 
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
@@ -182,12 +183,13 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		void* entry) {
-
+	LOG(ERROR) << "VMProfiler : VMProfiler";
 }
 
 PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 		void* entry): VMProfiler(argOptions, entry){
 
+	LOG(ERROR) << "VMProfiler : PerfCounters";
 }
 
 // Member functions definitions including constructor
@@ -218,6 +220,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
+		vmProfile = profEntry->creator_(argOptions, profEntry);
 		GCMMP_VLOG(INFO) << "MProfiler Created";
 
 	} else {

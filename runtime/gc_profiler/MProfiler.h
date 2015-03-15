@@ -262,6 +262,9 @@ public:
   int GetGCDaemonID(void);
 
   friend class GCMMPThreadProf;
+
+
+  VMProfiler* vmProfile;
 }; //class MProfiler
 
 
