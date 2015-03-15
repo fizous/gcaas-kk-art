@@ -80,6 +80,13 @@ public:
 	~VMProfiler();
 };
 
+
+class PerfCounterProfiler : public VMProfiler {
+public:
+	PerfCounterProfiler(GCMMP_Options*, GCMMPProfilingEntry*);
+	~PerfCounterProfiler();
+};
+
 class MProfiler {
 private:
 

@@ -52,12 +52,18 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
 				 0x00,
 				 GCMMP_FLAGS_CREATE_DAEMON,
-				 "CYCLES", "Perf Counter of CPU over a given period of time", "PERF_CPU_USAGE.log", NULL
+				 "CYCLES", "Perf Counter of CPU over a given period of time",
+				 "PERF_CPU_USAGE.log",
+				 NULL,
+				 &createVMProfiler<GCMMPProfilingEntry>
 		},//Cycles
 		{
 				 0x0D,
 				 GCMMP_FLAGS_CREATE_DAEMON,
-				 "MMU", "MMU over a given period of time", "PERF_MMU_REF.log", NULL
+				 "MMU", "MMU over a given period of time",
+				 "PERF_MMU_REF.log",
+				 NULL,
+				 &createVMProfiler<GCMMPProfilingEntry>
 		}//MMU
 
 };//profilTypes
@@ -172,6 +178,10 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 			thProfRec->Destroy(this);
 			delete thProfRec;
 	}
+}
+
+PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions, GCMMPProfilingEntry* entry) {
+
 }
 
 // Member functions definitions including constructor
