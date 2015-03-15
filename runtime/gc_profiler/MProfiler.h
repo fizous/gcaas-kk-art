@@ -113,8 +113,19 @@ protected:
   volatile bool running_;
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+
+  /*
+   * Guards access to the state of the profiler daemon,
+   * associated conditional variable is used to signal when a GC completes
+   */
+  Mutex* prof_thread_mutex_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
+  pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 public:
   size_t 		start_heap_bytes_;
+  bool IsProfilingEnabled() const {
+    return enabled_;
+  }
 };
 
 

@@ -192,6 +192,26 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 				running_(false),
 				receivedSignal_(false),
 				start_heap_bytes_(0) {
+	if(IsProfilingEnabled()) {
+		size_t _loop = 0;
+		bool _found = false;
+		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
+			if(MProfiler::profilTypes[_loop].id_ == index_) {
+				_found = true;
+				break;
+			}
+		}
+		if(_found) {
+			const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+			flags_ = profEntry->flags_;
+			dump_file_name_ = profEntry->logFile_;
+			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
+			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
+																										*prof_thread_mutex_));
+		} else {
+			LOG(ERROR) << "profile index is not supported";
+		}
+	}
 	LOG(ERROR) << "VMProfiler : VMProfiler";
 }
 
