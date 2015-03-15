@@ -220,7 +220,7 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																									*prof_thread_mutex_));
-		vmProfile = profEntry->creator_(argOptions, profEntry);
+		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
 		GCMMP_VLOG(INFO) << "MProfiler Created";
 
 	} else {
