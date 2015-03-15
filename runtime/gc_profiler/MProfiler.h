@@ -53,7 +53,7 @@ namespace mprofiler {
 class VMprofiler;
 
 template <typename T>
-mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
 {
 	return new T(opts, entry);
 }
