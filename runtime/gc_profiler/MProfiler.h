@@ -139,6 +139,7 @@ class PerfCounterProfiler : public VMProfiler {
 public:
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler();
+	int initCounters(const char*);
 };
 
 class MProfiler {
