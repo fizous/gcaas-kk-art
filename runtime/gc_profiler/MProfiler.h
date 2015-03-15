@@ -50,7 +50,7 @@ class ConditionVariable;
 class Mutex;
 
 namespace mprofiler {
-class VMprofiler;
+class VMProfiler;
 
 
 typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
