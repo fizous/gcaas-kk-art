@@ -129,6 +129,12 @@ public:
 };
 
 
+class MMUProfiler : public VMProfiler {
+public:
+	MMUProfiler(GCMMP_Options* opts, void* entry);
+	~MMUProfiler();
+};
+
 class PerfCounterProfiler : public VMProfiler {
 public:
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);

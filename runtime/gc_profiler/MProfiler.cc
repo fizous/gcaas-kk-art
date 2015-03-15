@@ -63,7 +63,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 				 "MMU", "MMU over a given period of time",
 				 "PERF_MMU_REF.log",
 				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				 &createVMProfiler<MMUProfiler>
 		}//MMU
 
 };//profilTypes
@@ -220,6 +220,13 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 
 	LOG(ERROR) << "VMProfiler : PerfCounters";
 }
+
+MMUProfiler::MMUProfiler(GCMMP_Options* argOptions,
+		void* entry): VMProfiler(argOptions, entry){
+
+	LOG(ERROR) << "VMProfiler : MMUProfiler";
+}
+
 
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
