@@ -52,11 +52,7 @@ class Mutex;
 namespace mprofiler {
 class VMprofiler;
 
-template <typename T>
-art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
-{
-	return new T(opts, entry);
-}
+
 typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, GCMMPProfilingEntry*);
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
@@ -79,7 +75,11 @@ public:
 	~VMProfiler();
 };
 
-
+template <typename T>
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, GCMMPProfilingEntry* entry)
+{
+	return new T(opts, entry);
+}
 
 class PerfCounterProfiler : public VMProfiler {
 public:
