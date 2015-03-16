@@ -133,13 +133,17 @@ public:
   VMProfiler(GCMMP_Options*, void*);
 	~VMProfiler();
 
-	void* runDaemon(void* arg);
+	static void* runDaemon(void* arg);
 
   bool IsProfilingEnabled() const {
     return enabled_;
   }
   bool IsCreateProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
+  }
+
+  bool IsProfilingRunning() {
+    return running_;
   }
 
   void OpenDumpFile(void);
