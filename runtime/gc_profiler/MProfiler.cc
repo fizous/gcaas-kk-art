@@ -953,7 +953,7 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 				vmProfile->startProfiling();
-				InitializeProfiler();
+				//InitializeProfiler();
 				return;
 			}
 		}
