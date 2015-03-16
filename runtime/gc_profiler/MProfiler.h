@@ -159,7 +159,7 @@ public:
   void startProfiling(void);
 
 
-  size_t GetRelevantAllocBytes(void);
+  size_t getRelevantAllocBytes(void);
 };
 
 

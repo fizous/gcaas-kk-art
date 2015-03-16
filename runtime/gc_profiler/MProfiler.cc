@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 
-
+#include "locks.h"
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
@@ -26,6 +26,7 @@
 #include "thread_list.h"
 #include "thread_state.h"
 #include "thread.h"
+#include "utils.h"
 //#include "scoped_thread_state_change.h"
 
 
@@ -339,6 +340,10 @@ void VMProfiler::attachThreads(){
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
 }
 
+size_t VMProfiler::getRelevantAllocBytes(void) {
+	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
+}
+
 bool VMProfiler::MainProfDaemonExec() {
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
@@ -356,9 +361,7 @@ bool VMProfiler::MainProfDaemonExec() {
   }
 }
 
-size_t VMProfiler::getRelevantAllocBytes(void)  {
-	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
-}
+
 
 void VMProfiler::createProfDaemon(){
 	//if(IsCreateProfDaemon()) { //create daemon
@@ -1040,7 +1043,7 @@ bool MProfiler::IsMProfRunning() {
 	return false;
 }
 
-size_t MProfiler::GetRelevantAllocBytes(void)  {
+std::size_t MProfiler::GetRelevantAllocBytes(void)  {
 	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
 }
 
