@@ -240,11 +240,14 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 
 void VMProfiler::InitCommonData(){
 	OpenDumpFile();
-	attachThreads();
 
 	start_heap_bytes_ = getRelevantAllocBytes();
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
+
+	attachThreads();
+
+
 
 	running_ = true;
 }
@@ -857,6 +860,7 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+				vmProfile->startProfiling();
 				InitializeProfiler();
 				return;
 			}
