@@ -185,6 +185,15 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	}
 }
 
+
+void VMProfiler::startProfiling(void) {
+	if(IsCreateProfDaemon()) { //create daemon thread
+		createProfDaemon();
+	} else { //init without daemon thread
+		InitCommonData();
+	}
+}
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		void* entry) :
 				index_(argOptions->mprofile_type_),
@@ -212,12 +221,6 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																										*prof_thread_mutex_));
-
-			if(IsCreateProfDaemon()) { //create daemon thread
-				createProfDaemon();
-			} else { //init without daemon thread
-				InitCommonData();
-			}
 		} else {
 			LOG(ERROR) << "VMprofile index is not supported";
 		}

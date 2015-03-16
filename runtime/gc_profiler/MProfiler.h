@@ -149,6 +149,7 @@ public:
   void InitCommonData(void);
   bool MainProfDaemonExec(void);
   void ShutdownProfiling(void);
+  void startProfiling(void);
 };
 
 
