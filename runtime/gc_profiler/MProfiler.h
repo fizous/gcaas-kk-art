@@ -121,6 +121,7 @@ protected:
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 public:
+  static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
   size_t 		start_heap_bytes_;
   size_t 		end_heap_bytes_;
