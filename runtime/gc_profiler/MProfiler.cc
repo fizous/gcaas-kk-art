@@ -257,7 +257,9 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 }
 
 
+void VMProfiler::attachSingleThread(Thread* th){
 
+}
 
 void* VMProfiler::runDaemon(void* arg) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
