@@ -151,10 +151,10 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 //	pauseManager = new GCPauseThreadManager();
-//	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
+	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
 	state = GCMMP_TH_RUNNING;
-//	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
-//	lifeTime_.finalMarker = 0;
+	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
 
@@ -304,7 +304,7 @@ void VMProfiler::attachSingleThread(Thread* thread){
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "VMPRofiler: The Thread was already attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " << thread->GetTid() ;
 			return;
 		}
 	}
@@ -952,6 +952,7 @@ void MProfiler::GCMMProfPerfCounters(const char* name) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+				GCMMPThreadProf::mProfiler = this;
 				vmProfile->startProfiling();
 				//InitializeProfiler();
 				return;
