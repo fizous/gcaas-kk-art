@@ -342,7 +342,7 @@ void VMProfiler::createProfDaemon(){
 		Thread* self = Thread::Current();
 		MutexLock mu(self, *prof_thread_mutex_);
 		GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler";
-	  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this),
+	  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &runDaemon, this),
 	  		"VMProfiler Daemon thread");
 
 	  while (prof_thread_ == NULL) {
