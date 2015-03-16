@@ -138,6 +138,26 @@ int GCMMPThreadProf::GetThreadType(void) {
 	return 0;
 }
 
+
+GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
+	: pid(thread->GetTid()),
+	  suspendedGC(false),
+	  pauseManager(NULL),
+	  state(GCMMP_TH_STARTING) {
+
+	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
+	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+	}
+	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
+	pauseManager = new GCPauseThreadManager();
+	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
+	state = GCMMP_TH_RUNNING;
+	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+	lifeTime_.finalMarker = 0;
+	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
+}
+
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),
 	  suspendedGC(false),
@@ -279,8 +299,50 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 }
 
 
-void VMProfiler::attachSingleThread(Thread* th){
+void VMProfiler::attachSingleThread(Thread* thread){
+	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf != NULL) {
+		if(threadProf->state == GCMMP_TH_RUNNING) {
+			GCMMP_VLOG(INFO) << "VMPRofiler: The Thread was already attached " << thread->GetTid() ;
+			return;
+		}
+	}
+	if(thread->GetTid() == prof_thread_->GetTid()) {
+		if(!IsAttachProfDaemon()) {
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+			return;
+		}
+	}
 
+	std::string thread_name;
+	thread->GetThreadName(thread_name);
+
+	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+		gc_daemon_ = thread;
+		setThreadAffinity(thread, false);
+		if(!IsAttachGCDaemon()) {
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+			return;
+		}
+	} else {
+		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+			gc_trimmer_ = thread;
+			setThreadAffinity(thread, false);
+			if(!IsAttachGCDaemon()) {
+				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+				return;
+			}
+		} else if(thread_name.compare("main") == 0) { //that's the main thread
+				main_thread_ = thread;
+		}
+		setThreadAffinity(thread, true);
+	}
+
+	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	threadProf = new GCMMPThreadProf(this, thread);
+	threadProfList_.push_back(threadProf);
+	thread->SetProfRec(threadProf);
 }
 
 void* VMProfiler::runDaemon(void* arg) {
@@ -565,6 +627,36 @@ bool MProfiler::MainProfDaemonExec(){
   	return false;
   }
 }
+
+void VMProfiler::setThreadAffinity(art::Thread* th, bool complementary) {
+	if(IsSetAffinityThread()) {
+		cpu_set_t mask;
+		CPU_ZERO(&mask);
+		uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+		uint32_t _cpu_id =  (uint32_t) gcDaemonAffinity_;
+		if(complementary) {
+			for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+				if(_ind != _cpu_id)
+					CPU_SET(_ind, &mask);
+			}
+		} else {
+			CPU_SET(_cpu_id, &mask);
+		}
+		if(sched_setaffinity(th->GetTid(),
+												sizeof(mask), &mask) != 0) {
+			if(complementary) {
+				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+			}
+			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+		} else {
+			if(complementary) {
+				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+			}
+			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+		}
+	}
+}
+
 
 void* MProfiler::Run(void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);

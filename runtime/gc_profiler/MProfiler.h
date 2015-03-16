@@ -152,6 +152,18 @@ public:
     return running_;
   }
 
+  bool IsAttachProfDaemon() const {
+    return (flags_ & GCMMP_FLAGS_ATTACH_PROF_DAEMON);
+  }
+
+  bool IsSetAffinityThread() const {
+    return IsProfilingEnabled() && (gcDaemonAffinity_ != kGCMMPDefaultAffinity) ;
+  }
+
+  bool IsAttachGCDaemon () {
+    return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
+  }
+
   void OpenDumpFile(void);
   void InitCommonData(void);
   bool MainProfDaemonExec(void);
@@ -160,6 +172,8 @@ public:
 
 
   size_t getRelevantAllocBytes(void);
+
+  void setThreadAffinity(art::Thread* th, bool complementary);
 };
 
 

@@ -184,6 +184,7 @@ public:
 	volatile GCMMPThreadProfState state;
 
 	GCMMPThreadProf(MProfiler*, Thread*);
+	GCMMPThreadProf(VMProfiler*, Thread*);
 	~GCMMPThreadProf(void);
 
   void Destroy(MProfiler*);
