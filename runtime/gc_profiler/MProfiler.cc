@@ -146,12 +146,12 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	  state(GCMMP_TH_STARTING) {
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
-	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
-	}
+//	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+//		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+//	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
-	pauseManager = new GCPauseThreadManager();
-	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
+//	pauseManager = new GCPauseThreadManager();
+//	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
