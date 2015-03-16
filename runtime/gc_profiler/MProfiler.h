@@ -79,9 +79,7 @@ art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts,
 
 
 class VMProfiler {
-public:
-	VMProfiler(GCMMP_Options*, void*);
-	~VMProfiler();
+
 protected:
 	//Index of the profiler type we are running
 	const int index_;
@@ -114,6 +112,8 @@ protected:
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
 
+  bool hasProfDaemon_;
+
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
@@ -122,10 +122,28 @@ protected:
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 public:
+	static const char * gcMMPRootPath[];
   size_t 		start_heap_bytes_;
+  std::vector<GCMMPThreadProf*> threadProfList_;
+  void attachThreads(void);
+  void attachSingleThread(Thread* t);
+
+  void createProfDaemon();
+
+  VMProfiler(GCMMP_Options*, void*);
+	~VMProfiler();
+
+	void* runDaemon(void* arg);
+
   bool IsProfilingEnabled() const {
     return enabled_;
   }
+  bool IsCreateProfDaemon() const {
+    return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
+  }
+
+  void OpenDumpFile(void);
+  void InitCommonData(void);
 };
 
 

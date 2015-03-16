@@ -48,6 +48,10 @@ const char * MProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
 
+const char * VMProfiler::gcMMPRootPath[] = {
+		"/sdcard/gcperf/", "/data/anr/"
+};
+
 const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
 				 0x00,
@@ -208,11 +212,128 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																										*prof_thread_mutex_));
+
+			if(flags_ & GCMMP_FLAGS_CREATE_DAEMON) { //create daemon thread
+
+			}
 		} else {
 			LOG(ERROR) << "profile index is not supported";
 		}
 	}
 	LOG(ERROR) << "VMProfiler : VMProfiler";
+}
+
+void VMProfiler::InitCommonData(){
+	OpenDumpFile();
+	attachThreads();
+
+	running_ = true;
+}
+
+
+void VMProfiler::OpenDumpFile() {
+	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
+		char str[256];
+		strcpy(str, gcMMPRootPath[i]);
+		strcat(str, dump_file_name_);
+
+
+		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
+	  if (fd == -1) {
+	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
+	    continue;
+	  }
+    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+    dump_file_ = new File(fd, std::string(dump_file_name_));
+    return;
+	}
+}
+
+static void GCMMPVMAttachThread(Thread* t, void* arg) {
+	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
+	if(vmProfiler != NULL) {
+		vmProfiler->attachSingleThread(t);
+	}
+}
+
+
+void* VMProfiler::runDaemon(void* arg) {
+	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
+
+
+  Runtime* runtime = Runtime::Current();
+
+  mProfiler->hasProfDaemon_ =
+  		runtime->AttachCurrentThread("VMProfile Daemon", true,
+  				runtime->GetSystemThreadGroup(),
+      !runtime->IsCompiler());
+
+  CHECK(mProfiler->hasProfDaemon_);
+
+  if(!mProfiler->hasProfDaemon_)
+  	return NULL;
+
+  mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
+  Thread* self = Thread::Current();
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+
+    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+    if(!mProfiler->running_) {
+
+      GCMMP_VLOG(INFO) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
+    	mProfiler->prof_thread_ = self;
+    	mProfiler->SetMProfileFlags();
+    } else {
+    	 GCMMP_VLOG(INFO) << "VMProfiler: Profiler was already created";
+    }
+
+    mProfiler->prof_thread_cond_->Broadcast(self);
+  }
+
+
+  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
+
+
+  while(true) {
+    // Check if GC is running holding gc_complete_lock_.
+    if(mProfiler->MainProfDaemonExec())
+    	break;
+  }
+  //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
+  //ThreadState old_state =
+  //self->SetStateUnsafe(kRunnable);
+  mProfiler->ShutdownProfiling();
+
+  return NULL;
+}
+
+void VMProfiler::attachThreads(){
+	Thread* self = Thread::Current();
+	GCMMP_VLOG(INFO) << "VMProfiler: Attaching All threads " << self->GetTid();
+	ThreadList* thread_list = Runtime::Current()->GetThreadList();
+	MutexLock mu(self, *Locks::thread_list_lock_);
+	thread_list->ForEach(GCMMPVMAttachThread, this);
+	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
+}
+
+void VMProfiler::createProfDaemon(){
+	if(IsCreateProfDaemon()) { //create daemon
+	  // Create a raw pthread; its start routine will attach to the runtime.
+		Thread* self = Thread::Current();
+		MutexLock mu(self, *prof_thread_mutex_);
+		GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler";
+	  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this),
+	  		"VMProfiler Daemon thread");
+
+	  while (prof_thread_ == NULL) {
+	  	prof_thread_cond_->Wait(self);
+	  }
+	  prof_thread_cond_->Broadcast(self);
+
+	  GCMMP_VLOG(INFO) << "VMProfiler: Caller is leaving now";
+
+	}
 }
 
 PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
