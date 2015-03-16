@@ -105,6 +105,7 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 } GCPauseThreadMarker;
 
 class MProfiler;
+class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
 
