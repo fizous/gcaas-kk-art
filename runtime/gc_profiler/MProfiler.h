@@ -98,7 +98,6 @@ protected:
   art::File* dump_file_;
 
 	Thread* prof_thread_;
-  void CreateProfilerDaemon(void);
 
   void InitializeProfiler(void);
 

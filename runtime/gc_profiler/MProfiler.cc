@@ -213,11 +213,13 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																										*prof_thread_mutex_));
 
-			if(flags_ & GCMMP_FLAGS_CREATE_DAEMON) { //create daemon thread
-
+			if(IsCreateProfDaemon()) { //create daemon thread
+				createProfDaemon();
+			} else { //init without daemon thread
+				InitCommonData();
 			}
 		} else {
-			LOG(ERROR) << "profile index is not supported";
+			LOG(ERROR) << "VMprofile index is not supported";
 		}
 	}
 	LOG(ERROR) << "VMProfiler : VMProfiler";
@@ -339,11 +341,11 @@ bool VMProfiler::MainProfDaemonExec() {
 }
 
 void VMProfiler::createProfDaemon(){
-	if(IsCreateProfDaemon()) { //create daemon
+	//if(IsCreateProfDaemon()) { //create daemon
 	  // Create a raw pthread; its start routine will attach to the runtime.
 		Thread* self = Thread::Current();
 		MutexLock mu(self, *prof_thread_mutex_);
-		GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler";
+		GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler Daemon";
 	  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &runDaemon, this),
 	  		"VMProfiler Daemon thread");
 
@@ -354,7 +356,7 @@ void VMProfiler::createProfDaemon(){
 
 	  GCMMP_VLOG(INFO) << "VMProfiler: Caller is leaving now";
 
-	}
+//	}
 }
 
 PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
