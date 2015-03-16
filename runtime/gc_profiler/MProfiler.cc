@@ -257,6 +257,8 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 }
 
 
+
+
 void* VMProfiler::runDaemon(void* arg) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
 
@@ -283,7 +285,7 @@ void* VMProfiler::runDaemon(void* arg) {
 
       GCMMP_VLOG(INFO) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
     	mProfiler->prof_thread_ = self;
-    	mProfiler->SetMProfileFlags();
+    	mProfiler->InitCommonData();
     } else {
     	 GCMMP_VLOG(INFO) << "VMProfiler: Profiler was already created";
     }
@@ -315,6 +317,23 @@ void VMProfiler::attachThreads(){
 	MutexLock mu(self, *Locks::thread_list_lock_);
 	thread_list->ForEach(GCMMPVMAttachThread, this);
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
+}
+
+bool VMProfiler::MainProfDaemonExec() {
+	Thread* self = Thread::Current();
+  // Check if GC is running holding gc_complete_lock_.
+  MutexLock mu(self, *prof_thread_mutex_);
+  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
+  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+  {
+  	prof_thread_cond_->Wait(self);
+  }
+  if(receivedSignal_) { //we recived Signal to Shutdown
+    GCMMP_VLOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
+  	return true;
+  } else {
+  	return false;
+  }
 }
 
 void VMProfiler::createProfDaemon(){
@@ -566,6 +585,11 @@ void* MProfiler::Run(void* arg) {
   mProfiler->ShutdownProfiling();
 
   return NULL;
+
+}
+
+void VMProfiler::ShutdownProfiling(void) {
+
 
 }
 

@@ -144,6 +144,8 @@ public:
 
   void OpenDumpFile(void);
   void InitCommonData(void);
+  bool MainProfDaemonExec(void);
+  void ShutdownProfiling(void);
 };
 
 
