@@ -153,8 +153,8 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	pauseManager = new GCPauseThreadManager();
 //	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
 	state = GCMMP_TH_RUNNING;
-	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
-	lifeTime_.finalMarker = 0;
+//	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+//	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
 
