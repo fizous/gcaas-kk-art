@@ -123,6 +123,13 @@ protected:
 public:
 	static const char * gcMMPRootPath[];
   size_t 		start_heap_bytes_;
+  size_t 		end_heap_bytes_;
+
+  uint64_t 	start_time_ns_;
+  uint64_t 	end_time_ns_;
+  uint64_t 	cpu_time_ns_;
+  uint64_t 	end_cpu_time_ns_;
+
   std::vector<GCMMPThreadProf*> threadProfList_;
   void attachThreads(void);
   void attachSingleThread(Thread* t);
@@ -150,6 +157,9 @@ public:
   bool MainProfDaemonExec(void);
   void ShutdownProfiling(void);
   void startProfiling(void);
+
+
+  size_t GetRelevantAllocBytes(void);
 };
 
 

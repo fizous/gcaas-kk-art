@@ -187,6 +187,15 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 
 
 void VMProfiler::startProfiling(void) {
+	if(!IsProfilingEnabled())
+		return;
+	if(IsProfilingRunning()) {
+		GCMMP_VLOG(INFO) << "VMProfiler: was already running";
+		return;
+	}
+
+
+
 	if(IsCreateProfDaemon()) { //create daemon thread
 		createProfDaemon();
 	} else { //init without daemon thread
@@ -231,6 +240,10 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 void VMProfiler::InitCommonData(){
 	OpenDumpFile();
 	attachThreads();
+
+	start_heap_bytes_ = getRelevantAllocBytes();
+	cpu_time_ns_ = ProcessTimeNS();
+	start_time_ns_ = uptime_nanos();
 
 	running_ = true;
 }
@@ -341,6 +354,10 @@ bool VMProfiler::MainProfDaemonExec() {
   } else {
   	return false;
   }
+}
+
+size_t VMProfiler::getRelevantAllocBytes(void)  {
+	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
 }
 
 void VMProfiler::createProfDaemon(){
