@@ -288,8 +288,6 @@ void VMProfiler::InitCommonData() {
 
 	attachThreads();
 
-
-
 	running_ = true;
 }
 
@@ -321,7 +319,7 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 
 
 void VMProfiler::attachSingleThread(Thread* thread) {
-	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
+	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -872,52 +870,55 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread) {
  * We assume that checks already done before we call this
  */
 void MProfiler::AttachThread(Thread* thread) {
-	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
-	GCMMPThreadProf* threadProf = thread->GetProfRec();
-	if(threadProf != NULL) {
-		if(threadProf->state == GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
-			return;
-		}
-	}
-	if(thread->GetTid() == prof_thread_->GetTid()) {
-		if(!IsAttachProfDaemon()) {
-			GCMMP_VLOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
-			return;
-		}
-	}
 
-	std::string thread_name;
-	thread->GetThreadName(thread_name);
+	vmProfile->attachSingleThread(thread);
 
-
-
-
-	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
-		gc_daemon_ = thread;
-		SetThreadAffinity(thread, false);
-		if(!IsAttachGCDaemon()) {
-			GCMMP_VLOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
-			return;
-		}
-	} else {
-		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-			gc_trimmer_ = thread;
-			SetThreadAffinity(thread, false);
-			if(!IsAttachGCDaemon()) {
-				GCMMP_VLOG(INFO) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
-				return;
-			}
-		} else if(thread_name.compare("main") == 0) { //that's the main thread
-				main_thread_ = thread;
-		}
-		SetThreadAffinity(thread, true);
-	}
-
-	GCMMP_VLOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
-	threadProf = new GCMMPThreadProf(this, thread);
-	threadProflist_.push_back(threadProf);
-	thread->SetProfRec(threadProf);
+//	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
+//	GCMMPThreadProf* threadProf = thread->GetProfRec();
+//	if(threadProf != NULL) {
+//		if(threadProf->state == GCMMP_TH_RUNNING) {
+//			GCMMP_VLOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+//			return;
+//		}
+//	}
+//	if(thread->GetTid() == prof_thread_->GetTid()) {
+//		if(!IsAttachProfDaemon()) {
+//			GCMMP_VLOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+//			return;
+//		}
+//	}
+//
+//	std::string thread_name;
+//	thread->GetThreadName(thread_name);
+//
+//
+//
+//
+//	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+//		gc_daemon_ = thread;
+//		SetThreadAffinity(thread, false);
+//		if(!IsAttachGCDaemon()) {
+//			GCMMP_VLOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+//			return;
+//		}
+//	} else {
+//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+//			gc_trimmer_ = thread;
+//			SetThreadAffinity(thread, false);
+//			if(!IsAttachGCDaemon()) {
+//				GCMMP_VLOG(INFO) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+//				return;
+//			}
+//		} else if(thread_name.compare("main") == 0) { //that's the main thread
+//				main_thread_ = thread;
+//		}
+//		SetThreadAffinity(thread, true);
+//	}
+//
+//	GCMMP_VLOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+//	threadProf = new GCMMPThreadProf(this, thread);
+//	threadProflist_.push_back(threadProf);
+//	thread->SetProfRec(threadProf);
 }
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
