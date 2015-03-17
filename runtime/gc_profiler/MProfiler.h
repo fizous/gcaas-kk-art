@@ -184,7 +184,7 @@ public:
 class MMUProfiler : public VMProfiler {
 public:
 	MMUProfiler(GCMMP_Options* opts, void* entry);
-	~MMUProfiler();
+	~MMUProfiler(){};
 
 	MPPerfCounter* createHWCounter(Thread*);
 	bool createHWEvents(void) {return false;}
@@ -195,7 +195,7 @@ class PerfCounterProfiler : public VMProfiler {
 public:
 	const char			*hwEvent_;
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
-	~PerfCounterProfiler();
+	~PerfCounterProfiler(){};
 	int initCounters(const char*);
 	MPPerfCounter* createHWCounter(Thread*);
 
