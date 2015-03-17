@@ -466,11 +466,11 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 		void* entry): VMProfiler(argOptions, entry){
 	GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
 	if(initCounters(_entry->name_) != 0) {
-		LOG(ERROR) << "VMProfiler : init counters returned error";
+		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
 	} else {
-		LOG(ERROR) << "VMProfiler : init counters returned valid";
+		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid";
 	}
-	LOG(ERROR) << "VMProfiler : PerfCounters";
+	LOG(ERROR) << "PerfCounterProfiler : PerfCounters";
 }
 
 int PerfCounterProfiler::initCounters(const char* evtName){
