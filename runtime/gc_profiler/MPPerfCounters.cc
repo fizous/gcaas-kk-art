@@ -54,7 +54,7 @@ bool MPPerfCounter::ClosePerfLib(void) {
 		int _locRet = close_perf_counter(hwCounter);
 
 		if(_locRet < 0) {
-			LOG(FATAL) << "could not close perflib for tid: " << pid;
+			LOG(FATAL) << "could not close perflib for tid: " << hwCounter->pid;
 		} else {
 			GCMMP_VLOG(INFO) << "MPPerfCounters: closing for pids: " << hwCounter->pid;
 		}
