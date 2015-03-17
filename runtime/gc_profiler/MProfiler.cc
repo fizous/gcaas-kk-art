@@ -406,6 +406,10 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
   }
 }
 
+bool MMUProfiler::periodicDaemonExec(void){
+
+}
+
 void* VMProfiler::runDaemon(void* arg) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
 
