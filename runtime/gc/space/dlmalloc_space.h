@@ -19,7 +19,7 @@
 
 #include "gc/allocator/dlmalloc.h"
 #include "space.h"
-
+#include "gc_profiler/MProfiler.h"
 namespace art {
 namespace mprofiler {
 	class MProfiler;

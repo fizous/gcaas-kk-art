@@ -18,7 +18,7 @@
 #define ART_RUNTIME_GC_SPACE_DLMALLOC_SPACE_INL_H_
 
 #include "dlmalloc_space.h"
-
+#include "gc_profiler/MProfiler.h"
 namespace art {
 namespace mprofiler {
 	class MProfiler;

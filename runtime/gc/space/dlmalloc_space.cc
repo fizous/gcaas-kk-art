@@ -24,7 +24,7 @@
 
 #include <valgrind.h>
 #include <../memcheck/memcheck.h>
-
+#include "gc_profiler/MProfiler.h"
 namespace art {
 
 namespace mprofiler {

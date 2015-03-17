@@ -23,7 +23,7 @@
 #include "os.h"
 #include "thread.h"
 #include "utils.h"
-
+#include "gc_profiler/MProfiler.h"
 namespace art {
 namespace gc {
 namespace space {
