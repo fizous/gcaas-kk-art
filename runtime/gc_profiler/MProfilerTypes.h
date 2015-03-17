@@ -8,6 +8,14 @@
 #ifndef MPROFILERTYPES_H_
 #define MPROFILERTYPES_H_
 
+#include "base/histogram.h"
+#include "base/macros.h"
+#include "base/mutex.h"
+
+#include <string>
+#include <vector>
+#include <map>
+
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
@@ -108,6 +116,7 @@ class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
+
 
 class PACKED(4) GCPauseThreadManager {
 	 GCPauseThreadMarker* curr_marker_;

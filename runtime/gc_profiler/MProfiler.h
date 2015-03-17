@@ -174,6 +174,7 @@ public:
   void OpenDumpFile(void);
   void InitCommonData(void);
   bool MainProfDaemonExec(void);
+  virtual bool periodicDaemonExec(void) = 0;
   void ShutdownProfiling(void);
   void startProfiling(void);
   void ProcessSignalCatcher(int);
@@ -197,6 +198,7 @@ public:
 	MPPerfCounter* createHWCounter(Thread*);
 	bool createHWEvents(void) {return false;}
 	bool isMarkTimeEvents(void) {return true;}
+	bool periodicDaemonExec(void);
 };
 
 class PerfCounterProfiler : public VMProfiler {
@@ -210,6 +212,8 @@ public:
 
 	bool createHWEvents(void) {return true;}
 	bool isMarkTimeEvents(void) {return false;}
+	bool periodicDaemonExec(void);
+	void readPerfData(void);
 };
 
 class MProfiler {

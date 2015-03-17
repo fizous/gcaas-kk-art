@@ -389,6 +389,25 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	thread->SetProfRec(threadProf);
 }
 
+
+bool PerfCounterProfiler::periodicDaemonExec(void){
+	Thread* self = Thread::Current();
+  // Check if GC is running holding gc_complete_lock_.
+  MutexLock mu(self, *prof_thread_mutex_);
+  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Is going to Wait";
+  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+  {
+  	prof_thread_cond_->Wait(self);
+  }
+  if(receivedSignal_) { //we recived Signal to Shutdown
+    GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+    receivedSignal_ = false;
+  	return receivedShutdown_;
+  } else {
+  	return false;
+  }
+}
+
 void* VMProfiler::runDaemon(void* arg) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
 
