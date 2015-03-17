@@ -1128,6 +1128,7 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
  */
 void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
+		GCMMP_VLOG(INFO) << "VMProfiler: Detaching thid: " << th->GetTid();
 		if(Runtime::Current()->mprofiler_->vmProfile->dettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
 			GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
