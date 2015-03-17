@@ -870,7 +870,7 @@ bool MProfiler::ProfiledThreadsContain(Thread* thread) {
  * We assume that checks already done before we call this
  */
 void MProfiler::AttachThread(Thread* thread) {
-
+	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread:" << thread->GetTid();
 	vmProfile->attachSingleThread(thread);
 
 //	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
