@@ -20,6 +20,10 @@
 #include "dlmalloc_space.h"
 
 namespace art {
+namespace mprofiler {
+	class MProfiler;
+}
+
 namespace gc {
 namespace space {
 

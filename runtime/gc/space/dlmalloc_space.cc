@@ -26,6 +26,11 @@
 #include <../memcheck/memcheck.h>
 
 namespace art {
+
+namespace mprofiler {
+	class MProfiler;
+}
+
 namespace gc {
 namespace space {
 
