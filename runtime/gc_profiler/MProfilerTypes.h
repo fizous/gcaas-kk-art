@@ -223,8 +223,15 @@ public:
 
   int GetThreadType(void);
 
+  void resetPerfRecord(){
+  	perf_record_(NULL);
+  }
   // The performance counter record.
   UniquePtr<MPPerfCounter> perf_record_;
+
+  MPPerfCounter& GetPerfRecord() {
+    return *perf_record_;
+  }
 
 };
 } // namespace mprofiler

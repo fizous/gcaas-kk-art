@@ -44,6 +44,23 @@ void MPPerfCounter::readPerfData(void) {
 	}
 }
 
+
+
+
+bool MPPerfCounter::ClosePerfLib(void) {
+	int _locRet = 0;
+	if(hwCounter != NULL) {
+
+		int _locRet = close_perf_counter(hwCounter);
+
+		if(_locRet < 0) {
+			LOG(FATAL) << "could not close perflib for tid: " << pid;
+		} else {
+			GCMMP_VLOG(INFO) << "MPPerfCounters: closing for pids: " << hwCounter->pid;
+		}
+	}
+	return _locRet == 0;
+}
 /*
  * Open perflib and process ID
  */

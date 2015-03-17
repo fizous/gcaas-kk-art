@@ -268,6 +268,21 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	}
 }
 
+bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
+
+}
+
+bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		if(thProf->GetPerfRecord() != NULL) {
+			thProf->GetPerfRecord().ClosePerfLib();
+			thProf->resetPerfRecord();
+		}
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+}
+
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		void* entry) :
 				index_(argOptions->mprofile_type_),
@@ -1111,7 +1126,7 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
  */
 void MProfiler::MProfDetachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
-		if(Runtime::Current()->mprofiler_->DettachThread(th->GetProfRec())) {
+		if(Runtime::Current()->mprofiler_->vmProfile->dettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
 			GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
 		}

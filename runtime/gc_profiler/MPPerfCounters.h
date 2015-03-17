@@ -64,6 +64,7 @@ public:
 	 * Open perflib and process ID
 	 */
 	bool OpenPerfLib(pid_t);
+	bool ClosePerfLib(void);
 	void readPerfData(void);
 
   static MPPerfCounter* Create(const char* event_name);

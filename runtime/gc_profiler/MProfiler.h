@@ -187,6 +187,7 @@ public:
 
   bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
+  virtual bool dettachThread(GCMMPThreadProf*)=0;
 };
 
 
@@ -199,6 +200,7 @@ public:
 	bool createHWEvents(void) {return false;}
 	bool isMarkTimeEvents(void) {return true;}
 	bool periodicDaemonExec(void);
+	bool dettachThread(GCMMPThreadProf*);
 };
 
 class PerfCounterProfiler : public VMProfiler {
@@ -214,6 +216,7 @@ public:
 	bool isMarkTimeEvents(void) {return false;}
 	bool periodicDaemonExec(void);
 	void readPerfData(void);
+	bool dettachThread(GCMMPThreadProf*);
 };
 
 class MProfiler {
