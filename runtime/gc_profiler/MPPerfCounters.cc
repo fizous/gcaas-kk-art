@@ -24,9 +24,8 @@ MPPerfCounter::MPPerfCounter(void) :
 
 }
 
-MPPerfCounter::MPPerfCounter(const char* event_name) :
-		event_name_(event_name) {
-
+MPPerfCounter::MPPerfCounter(const char* event_name)  {
+	event_name_ = event_name;
 }
 
 MPPerfCounter* MPPerfCounter::Create(const char* event_name){
@@ -41,7 +40,7 @@ bool MPPerfCounter::OpenPerfLib(PerfLibCounterT* prfRec, pid_t pid) {
 	int _locRet = 0;
 	//art::Thread* self = art::Thread::Current();
 
-
+	GCMMP_VLOG(INFO) << "MPPerfCounters: openPerfLib for event:" << event_name_;
 	prfRec->event_name = NULL;
 	prfRec->event_name =
 			(char*) calloc(1, sizeof(char) * MPPerfCounter::kGCPerfCountersNameSize);
