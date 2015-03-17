@@ -49,6 +49,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     *bytes_allocated = allocation_size;
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
+    art::mprofiler::MProfiler::MProfNotifyAlloc(allocation_size);
     ++total_objects_allocated_;
     ++num_objects_allocated_;
   }

@@ -131,10 +131,14 @@ public:
   uint64_t 	cpu_time_ns_;
   uint64_t 	end_cpu_time_ns_;
 
+
+  AtomicInteger total_alloc_bytes_;
+
+
   std::vector<GCMMPThreadProf*> threadProfList_;
   void attachThreads(void);
   void attachSingleThread(Thread* t);
-
+  void notifyAllocation(size_t);
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
@@ -342,6 +346,7 @@ public:
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
   static void MProfAttachThread(art::Thread*);
+  static void MProfNotifyAlloc(size_t);
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
   static void MProfMarkWaitTimeEvent(art::Thread*);

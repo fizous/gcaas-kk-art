@@ -245,6 +245,14 @@ void VMProfiler::startProfiling(void) {
 	}
 }
 
+void VMProfiler::notifyAllocation(size_t allocSize) {
+	int32_t initValue = total_alloc_bytes_.load();
+	total_alloc_bytes_.fetch_add(allocSize);
+	if((initValue >> 16) != (total_alloc_bytes_.load() >> 16)){
+		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
+	}
+}
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		void* entry) :
 				index_(argOptions->mprofile_type_),
@@ -996,6 +1004,17 @@ void MProfiler::PreForkPreparation() {
 void MProfiler::MProfAttachThread(art::Thread* th) {
 	if(MProfiler::IsMProfRunning()) {
 		Runtime::Current()->mprofiler_->AttachThread(th);
+
+	}
+}
+
+
+/*
+ * Attach a thread from the MProfiler
+ */
+void MProfiler::MProfNotifyAlloc(size_t allocSize) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->vmProfile->notifyAllocation(allocSize);
 
 	}
 }

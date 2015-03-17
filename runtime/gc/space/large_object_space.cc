@@ -70,6 +70,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
+  art::mprofiler::MProfiler::MProfNotifyAlloc(allocation_size);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -287,7 +288,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
   ++total_objects_allocated_;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-
+  art::mprofiler::MProfiler::MProfNotifyAlloc(allocation_size);
   // We always put our object at the start of the free block, there can not be another free block
   // before it.
   if (kIsDebugBuild) {
