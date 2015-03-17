@@ -138,7 +138,7 @@ public:
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
-	~VMProfiler();
+	virtual ~VMProfiler(){}
 
 	static void* runDaemon(void* arg);
 
@@ -171,11 +171,13 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
 
-  MPPerfCounter* createHWCounter(Thread*);
+  virtual MPPerfCounter* createHWCounter(Thread*) = 0;
 
   size_t getRelevantAllocBytes(void);
 
   void setThreadAffinity(art::Thread* th, bool complementary);
+
+  bool createHWEvents(void) {return true;}
 };
 
 
@@ -185,6 +187,7 @@ public:
 	~MMUProfiler();
 
 	MPPerfCounter* createHWCounter(Thread*);
+	bool createHWEvents(void) {return false;}
 };
 
 class PerfCounterProfiler : public VMProfiler {
@@ -195,6 +198,8 @@ public:
 	~PerfCounterProfiler();
 	int initCounters(const char*);
 	MPPerfCounter* createHWCounter(Thread*);
+
+	bool createHWEvents(void) {return true;}
 };
 
 class MProfiler {

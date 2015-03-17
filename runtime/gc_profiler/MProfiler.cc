@@ -151,6 +151,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 //	pauseManager = new GCPauseThreadManager();
+
 	perf_record_.reset(vmProfiler->createHWCounter(thread));
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
@@ -319,7 +320,7 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 }
 
 
-void VMProfiler::attachSingleThread(Thread* thread){
+void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
