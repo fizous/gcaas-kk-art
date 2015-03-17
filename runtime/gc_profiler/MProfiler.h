@@ -139,6 +139,7 @@ public:
 
   VMProfiler(GCMMP_Options*, void*);
 	~VMProfiler();
+	virtual ~VMProfiler() = 0;
 
 	static void* runDaemon(void* arg);
 
