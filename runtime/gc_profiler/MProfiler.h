@@ -138,7 +138,7 @@ public:
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
-	virtual ~VMProfiler(){}
+	~VMProfiler(){}
 
 	static void* runDaemon(void* arg);
 
@@ -171,7 +171,7 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
 
-  virtual MPPerfCounter* createHWCounter(Thread*) = 0;
+  MPPerfCounter* createHWCounter(Thread*);
 
   size_t getRelevantAllocBytes(void);
 
