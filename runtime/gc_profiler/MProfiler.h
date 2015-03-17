@@ -139,7 +139,6 @@ public:
 
   VMProfiler(GCMMP_Options*, void*);
 	~VMProfiler();
-	virtual ~VMProfiler() = 0;
 
 	static void* runDaemon(void* arg);
 
@@ -172,7 +171,7 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
 
-  virtual MPPerfCounter* createHWCounter(Thread*) = 0;
+  MPPerfCounter* createHWCounter(Thread*);
 
   size_t getRelevantAllocBytes(void);
 
@@ -184,7 +183,6 @@ class MMUProfiler : public VMProfiler {
 public:
 	MMUProfiler(GCMMP_Options* opts, void* entry);
 	~MMUProfiler();
-	MPPerfCounter* createHWCounter(Thread*);
 };
 
 class PerfCounterProfiler : public VMProfiler {
