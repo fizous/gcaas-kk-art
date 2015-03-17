@@ -151,7 +151,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 //	pauseManager = new GCPauseThreadManager();
-	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
+	perf_record_.reset(vmProfiler->createHWCounter(thread));
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
@@ -206,6 +206,21 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	}
 }
 
+MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
+	GCMMP_VLOG(INFO) << "VMProfiler: creating hwCount";
+	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
+
+	PerfLibCounterT* libCounter =
+			(PerfLibCounterT*) calloc(1, sizeof(PerfLibCounterT));
+	_perfCounter->OpenPerfLib(libCounter, thread->GetTid());
+
+	return _perfCounter;
+}
+
+
+MPPerfCounter* VMProfiler::createHWCounter(Thread* thread) {
+	return NULL;
+}
 
 void VMProfiler::startProfiling(void) {
 	if(!IsProfilingEnabled())

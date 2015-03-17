@@ -1173,8 +1173,10 @@ void Runtime::BlockSignals() {
   signals.Block();
 }
 
-bool Runtime::AttachCurrentThread(const char* thread_name, bool as_daemon, jobject thread_group,
-                                  bool create_peer) {
+bool Runtime::AttachCurrentThread(const char* thread_name,
+																	bool as_daemon,
+																	jobject thread_group,
+																	bool create_peer) {
   bool success = Thread::Attach(thread_name, as_daemon, thread_group, create_peer) != NULL;
   if (thread_name == NULL) {
     LOG(WARNING) << *Thread::Current() << " attached without supplying a name";

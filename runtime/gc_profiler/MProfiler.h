@@ -171,6 +171,7 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
 
+  MPPerfCounter* createHWCounter(Thread*);
 
   size_t getRelevantAllocBytes(void);
 
@@ -185,10 +186,13 @@ public:
 };
 
 class PerfCounterProfiler : public VMProfiler {
+
 public:
+	const char			*hwEvent_;
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler();
 	int initCounters(const char*);
+	MPPerfCounter* createHWCounter(Thread*);
 };
 
 class MProfiler {

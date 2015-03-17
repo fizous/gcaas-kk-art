@@ -21,6 +21,7 @@ public:
 	static const int 	kGCPerfCountersNameSize = 16;
 	const char* event_name_;
 
+	MPPerfCounter(const char*);
 	MPPerfCounter(void);
 	/*
 	 * Initiliazes performance library counters
