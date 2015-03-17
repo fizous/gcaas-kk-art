@@ -177,7 +177,8 @@ public:
 
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  bool createHWEvents(void) {return true;}
+  bool createHWEvents(void) {return false;}
+  virtual bool isMarkTimeEvents(void) {return false;}
 };
 
 
@@ -188,6 +189,7 @@ public:
 
 	MPPerfCounter* createHWCounter(Thread*);
 	bool createHWEvents(void) {return false;}
+	bool isMarkTimeEvents(void) {return true;}
 };
 
 class PerfCounterProfiler : public VMProfiler {
@@ -200,6 +202,7 @@ public:
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool createHWEvents(void) {return true;}
+	bool isMarkTimeEvents(void) {return false;}
 };
 
 class MProfiler {
