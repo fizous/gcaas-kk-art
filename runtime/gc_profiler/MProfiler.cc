@@ -152,7 +152,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 //	pauseManager = new GCPauseThreadManager();
 
-	perf_record_.reset(vmProfiler->createHWCounter(thread));
+	perf_record_ = vmProfiler->createHWCounter(thread);
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
@@ -171,7 +171,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	}
 	GCMMP_VLOG(INFO) << "MPRofiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	pauseManager = new GCPauseThreadManager();
-	perf_record_.reset(MPPerfCounter::Create("CYCLES"));
+	perf_record_ = MPPerfCounter::Create("CYCLES");
 	state = GCMMP_TH_RUNNING;
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
@@ -269,17 +269,18 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 }
 
 bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
-
+	return true;
 }
 
 bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		if(thProf->GetPerfRecord() != NULL) {
-			thProf->GetPerfRecord().ClosePerfLib();
+			thProf->GetPerfRecord()->ClosePerfLib();
 			thProf->resetPerfRecord();
 		}
 		thProf->state = GCMMP_TH_STOPPED;
 	}
+	return true;
 }
 
 

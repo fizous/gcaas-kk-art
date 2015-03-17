@@ -227,9 +227,9 @@ public:
   	perf_record_ = NULL;
   }
   // The performance counter record.
-  UniquePtr<MPPerfCounter> perf_record_;
+  MPPerfCounter* perf_record_;
 
-  MPPerfCounter& GetPerfRecord() {
+  MPPerfCounter* GetPerfRecord() {
     return *perf_record_;
   }
 
