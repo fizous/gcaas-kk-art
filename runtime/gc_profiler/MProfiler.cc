@@ -206,6 +206,12 @@ void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	}
 }
 
+
+MPPerfCounter* MMUProfiler::createHWCounter(Thread* thread) {
+	GCMMP_VLOG(INFO) << "MMUProfiling: creating hwCount";
+	return NULL;
+}
+
 MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: creating hwCount";
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
