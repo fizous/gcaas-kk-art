@@ -214,7 +214,7 @@ MPPerfCounter* MMUProfiler::createHWCounter(Thread* thread) {
 }
 
 MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount";
+	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << ;
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
 
 	PerfLibCounterT* libCounter =
@@ -474,7 +474,9 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 	if(initCounters(_entry->name_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
 	} else {
-		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid";
+		hwEvent_ = _entry->name_;
+		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid..evtName=" << hwEvent_;
+
 	}
 	LOG(ERROR) << "PerfCounterProfiler : Initializer";
 }
