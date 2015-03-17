@@ -214,7 +214,7 @@ MPPerfCounter* MMUProfiler::createHWCounter(Thread* thread) {
 }
 
 MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << ;
+	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << hwEvent_;
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
 
 	PerfLibCounterT* libCounter =
