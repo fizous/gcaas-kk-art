@@ -265,6 +265,10 @@ private:
     return vmProfile->IsProfilingRunning();
   }
 
+  bool IsProfilingTimeEvent() {
+    return vmProfile->IsProfilingRunning() && vmProfile->isMarkTimeEvents();
+  }
+
   bool IsAttachGCDaemon () {
     return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
   }
@@ -334,6 +338,7 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
   static bool IsMProfRunning();
+  static bool IsProfilingTimeEvent();
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
   static void MProfAttachThread(art::Thread*);

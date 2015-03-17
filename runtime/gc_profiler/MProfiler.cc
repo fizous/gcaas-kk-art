@@ -1054,7 +1054,7 @@ void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
  * Detach a thread from the MProfiler
  */
 void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
@@ -1064,7 +1064,7 @@ void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
  * Detach a thread from the MProfiler
  */
 void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
@@ -1073,7 +1073,7 @@ void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
 }
 
 void MProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
@@ -1082,7 +1082,7 @@ void MProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
 }
 
 void MProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
@@ -1092,7 +1092,7 @@ void MProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
 
 
 void MProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
@@ -1101,7 +1101,7 @@ void MProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
 }
 
 void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
@@ -1110,7 +1110,7 @@ void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
 }
 
 void MProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
@@ -1119,7 +1119,7 @@ void MProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
 }
 
 void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th){
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
 			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
@@ -1128,7 +1128,7 @@ void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th){
 }
 
 void MProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
@@ -1142,7 +1142,7 @@ void MProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thSt
 }
 
 void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
-	if(MProfiler::IsMProfRunning()) {
+	if(MProfiler::IsProfilingTimeEvent()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
@@ -1161,6 +1161,17 @@ bool MProfiler::IsMProfRunning() {
 	MProfiler* mP = Runtime::Current()->mprofiler_;
 	if(mP != NULL)
 		return mP->IsProfilingRunning();
+	return false;
+}
+
+
+/*
+ * Return true only when the MProfiler is Running
+ */
+bool MProfiler::IsProfilingTimeEvent() {
+	MProfiler* mP = Runtime::Current()->mprofiler_;
+	if(mP != NULL)
+		return mP->IsProfilingTimeEvent();
 	return false;
 }
 
