@@ -407,7 +407,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
 }
 
 bool MMUProfiler::periodicDaemonExec(void){
-
+	return true;
 }
 
 void* VMProfiler::runDaemon(void* arg) {
