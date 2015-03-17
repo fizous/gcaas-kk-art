@@ -274,6 +274,7 @@ bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
 
 bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
 			thProf->GetPerfRecord()->ClosePerfLib();
 			thProf->resetPerfRecord();
