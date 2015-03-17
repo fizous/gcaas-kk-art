@@ -225,7 +225,7 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 
 
 MPPerfCounter* VMProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "VMProfiler: was already running";
+	GCMMP_VLOG(INFO) << "VMProfiler: createHWCounter";
 	return NULL;
 }
 
@@ -236,8 +236,6 @@ void VMProfiler::startProfiling(void) {
 		GCMMP_VLOG(INFO) << "VMProfiler: was already running";
 		return;
 	}
-
-
 
 	if(IsCreateProfDaemon()) { //create daemon thread
 		createProfDaemon();
@@ -280,7 +278,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 	LOG(ERROR) << "VMProfiler : VMProfiler";
 }
 
-void VMProfiler::InitCommonData(){
+void VMProfiler::InitCommonData() {
 	OpenDumpFile();
 
 	start_heap_bytes_ = getRelevantAllocBytes();
@@ -477,7 +475,7 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 	} else {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid";
 	}
-	LOG(ERROR) << "PerfCounterProfiler : PerfCounters";
+	LOG(ERROR) << "PerfCounterProfiler : Initializer";
 }
 
 int PerfCounterProfiler::initCounters(const char* evtName){
