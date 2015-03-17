@@ -224,7 +224,7 @@ public:
   int GetThreadType(void);
 
   void resetPerfRecord(){
-  	perf_record_(NULL);
+  	perf_record_ = NULL;
   }
   // The performance counter record.
   UniquePtr<MPPerfCounter> perf_record_;
