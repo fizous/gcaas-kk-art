@@ -760,7 +760,7 @@ void* MProfiler::Run(void* arg) {
 
 void VMProfiler::ShutdownProfiling(void) {
 
-
+	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
 }
 
 
@@ -831,11 +831,12 @@ void MProfiler::DumpProfData(bool isLastDump) {
 }
 
 
-void MProfiler::ProcessSignalCatcher(int signalVal) {
+void VMProfiler::ProcessSignalCatcher(int signalVal) {
 	if(signalVal == kGCMMPDumpSignal) {
 		Thread* self = Thread::Current();
     MutexLock mu(self, *prof_thread_mutex_);
     receivedSignal_ = true;
+    receivedShutdown_ = true;
 
     if(!hasProfDaemon_) {
     	ShutdownProfiling();
@@ -844,8 +845,26 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
     // Wake anyone who may have been waiting for the GC to complete.
     prof_thread_cond_->Broadcast(self);
 
-    GCMMP_VLOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
+    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
 	}
+}
+
+void MProfiler::ProcessSignalCatcher(int signalVal) {
+	vmProfile->ProcessSignalCatcher(signalVal);
+//	if(signalVal == kGCMMPDumpSignal) {
+//		Thread* self = Thread::Current();
+//    MutexLock mu(self, *prof_thread_mutex_);
+//    receivedSignal_ = true;
+//
+//    if(!hasProfDaemon_) {
+//    	ShutdownProfiling();
+//    }
+//
+//    // Wake anyone who may have been waiting for the GC to complete.
+//    prof_thread_cond_->Broadcast(self);
+//
+//    GCMMP_VLOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
+//	}
 }
 
 
