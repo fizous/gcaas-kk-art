@@ -338,7 +338,7 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
   static bool IsMProfRunning();
-  static bool IsProfilingTimeEvent();
+  static bool IsMProfilingTimeEvent();
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
   static void MProfAttachThread(art::Thread*);
