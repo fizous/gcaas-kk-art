@@ -250,6 +250,23 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	total_alloc_bytes_.fetch_add(allocSize);
 	if((initValue >> 16) != (total_alloc_bytes_.load() >> 16)){
 		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
+
+
+		{
+			Thread* self = Thread::Current();
+	    MutexLock mu(self, *prof_thread_mutex_);
+	    receivedSignal_ = true;
+
+	    if(hasProfDaemon_) {
+	    	prof_thread_cond_->Broadcast(self);
+	    }
+
+	    // Wake anyone who may have been waiting for the GC to complete.
+
+
+	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
+		}
+
 	}
 }
 
@@ -410,10 +427,11 @@ void* VMProfiler::runDaemon(void* arg) {
   GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
 
 
-  while(true) {
+  while(!receivedShutdown_) {
     // Check if GC is running holding gc_complete_lock_.
     if(mProfiler->MainProfDaemonExec())
     	break;
+
   }
   //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
   //ThreadState old_state =
@@ -440,14 +458,15 @@ bool VMProfiler::MainProfDaemonExec() {
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
-  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
+  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Is going to Wait";
   ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
   {
   	prof_thread_cond_->Wait(self);
   }
   if(receivedSignal_) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
-  	return true;
+    GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+    receivedSignal_ = false;
+  	return receivedShutdown_;
   } else {
   	return false;
   }

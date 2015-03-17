@@ -110,6 +110,7 @@ protected:
   volatile bool running_;
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+  volatile bool receivedShutdown_;
 
   bool hasProfDaemon_;
 
