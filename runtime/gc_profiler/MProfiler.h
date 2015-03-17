@@ -138,7 +138,7 @@ public:
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
-	~VMProfiler(){}
+	virtual ~VMProfiler(){}
 
 	static void* runDaemon(void* arg);
 
