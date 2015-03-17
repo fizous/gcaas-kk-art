@@ -171,7 +171,7 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
 
-  virtual MPPerfCounter* createHWCounter(Thread*){return NULL};
+  virtual MPPerfCounter* createHWCounter(Thread*)=0;
 
   size_t getRelevantAllocBytes(void);
 
