@@ -259,7 +259,7 @@ private:
   }
 
   bool IsProfilingRunning() {
-    return vmProfile->running_;
+    return vmProfile->IsProfilingRunning();
   }
 
   bool IsAttachGCDaemon () {
