@@ -230,7 +230,7 @@ public:
   MPPerfCounter* perf_record_;
 
   MPPerfCounter* GetPerfRecord() {
-    return *perf_record_;
+    return perf_record_;
   }
 
 };
