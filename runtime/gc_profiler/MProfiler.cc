@@ -427,7 +427,7 @@ void* VMProfiler::runDaemon(void* arg) {
   GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
 
 
-  while(!receivedShutdown_) {
+  while(!mProfiler->receivedShutdown_) {
     // Check if GC is running holding gc_complete_lock_.
     if(mProfiler->MainProfDaemonExec())
     	break;
