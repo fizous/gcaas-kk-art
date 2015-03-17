@@ -225,10 +225,10 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 }
 
 
-MPPerfCounter* VMProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "VMProfiler: createHWCounter";
-	return NULL;
-}
+//MPPerfCounter* VMProfiler::createHWCounter(Thread* thread) {
+//	GCMMP_VLOG(INFO) << "VMProfiler: createHWCounter";
+//	return NULL;
+//}
 
 void VMProfiler::startProfiling(void) {
 	if(!IsProfilingEnabled())
