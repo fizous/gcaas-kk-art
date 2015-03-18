@@ -63,6 +63,46 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 				 &createVMProfiler<PerfCounterProfiler>
 		},//Cycles
 		{
+				 0x01,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "INSTRUCTIONS", "Perf Counter of Instructions over a given period of time",
+				 "PERF_INSTRUCTIONS.log",
+				 NULL,
+				 &createVMProfiler<PerfCounterProfiler>
+		},//Instructions
+		{
+				 0x02,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "L1I_ACCESS", "Perf Counter of L1I_ACCESS over a given period of time",
+				 "PERF_IL1_ACCESS.log",
+				 NULL,
+				 &createVMProfiler<PerfCounterProfiler>
+		},//L1I_ACCESS
+		{
+				 0x03,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "L1I_MISS", "Perf Counter of L1I_MISS over a given period of time",
+				 "PERF_IL1_MISS.log",
+				 NULL,
+				 &createVMProfiler<PerfCounterProfiler>
+		},//L1I_MISS
+		{
+				 0x04,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "L1D_ACCESS", "Perf Counter of L1D_ACCESS over a given period of time",
+				 "PERF_DL1_ACCESS.log",
+				 NULL,
+				 &createVMProfiler<PerfCounterProfiler>
+		},//L1D_ACCESS
+		{
+				 0x05,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "L1D_MISS", "Perf Counter of L1D_MISS over a given period of time",
+				 "PERF_DL1_MISS.log",
+				 NULL,
+				 &createVMProfiler<PerfCounterProfiler>
+		},//L1D_MISS
+		{
 				 0x0D,
 				 GCMMP_FLAGS_CREATE_DAEMON,
 				 "MMU", "MMU over a given period of time",
@@ -467,7 +507,7 @@ void* VMProfiler::runDaemon(void* arg) {
 
   while(!mProfiler->receivedShutdown_) {
     // Check if GC is running holding gc_complete_lock_.
-    if(mProfiler->MainProfDaemonExec())
+    if(mProfiler->periodicDaemonExec())
     	break;
 
   }
@@ -492,23 +532,7 @@ size_t VMProfiler::getRelevantAllocBytes(void) {
 	return Runtime::Current()->GetHeap()->GetBytesAllocatedEver() - start_heap_bytes_;
 }
 
-bool VMProfiler::MainProfDaemonExec() {
-	Thread* self = Thread::Current();
-  // Check if GC is running holding gc_complete_lock_.
-  MutexLock mu(self, *prof_thread_mutex_);
-  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Is going to Wait";
-  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-  {
-  	prof_thread_cond_->Wait(self);
-  }
-  if(receivedSignal_) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
-    receivedSignal_ = false;
-  	return receivedShutdown_;
-  } else {
-  	return false;
-  }
-}
+
 
 
 

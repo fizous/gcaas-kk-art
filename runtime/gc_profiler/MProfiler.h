@@ -173,7 +173,6 @@ public:
 
   void OpenDumpFile(void);
   void InitCommonData(void);
-  bool MainProfDaemonExec(void);
   virtual bool periodicDaemonExec(void) = 0;
   void ShutdownProfiling(void);
   void startProfiling(void);
