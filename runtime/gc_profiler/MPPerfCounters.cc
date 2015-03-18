@@ -54,7 +54,7 @@ void MPPerfCounter::readPerfData(void) {
 void MPPerfCounter::storeReading(int32_t tag) {
 	readPerfData();
 	evtLogger.addEvents(tag, data);
-  timing_logger_->splits_.push_back(SplitTiming(running_ns_, label_));
+
 
 }
 
