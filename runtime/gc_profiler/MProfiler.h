@@ -216,6 +216,7 @@ public:
 	bool periodicDaemonExec(void);
 	void readPerfData(void);
 	bool dettachThread(GCMMPThreadProf*);
+	void getPerfData(void);
 };
 
 class MProfiler {

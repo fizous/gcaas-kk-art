@@ -232,6 +232,7 @@ public:
   MPPerfCounter* GetPerfRecord() {
     return perf_record_;
   }
+  void readPerfCounter(void);
 
 };
 } // namespace mprofiler

@@ -178,6 +178,14 @@ int GCMMPThreadProf::GetThreadType(void) {
 	return 0;
 }
 
+void GCMMPThreadProf::readPerfCounter(int32_t val) {
+	if(GetPerfRecord() == NULL)
+		return;
+	if(state == GCMMP_TH_RUNNING) {
+		GetPerfRecord()->storeReading(val);
+	}
+
+}
 
 GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	: pid(thread->GetTid()),
@@ -445,6 +453,13 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 }
 
 
+void PerfCounterProfiler::getPerfData() {
+	int32_t currBytes_ = total_alloc_bytes_.load();
+	for (const auto& threadProf : threadProfList_) {
+		threadProf->readPerfCounter(currBytes_);
+	}
+}
+
 bool PerfCounterProfiler::periodicDaemonExec(void){
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
@@ -456,6 +471,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
   }
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+    getPerfData();
     receivedSignal_ = false;
   	return receivedShutdown_;
   } else {
