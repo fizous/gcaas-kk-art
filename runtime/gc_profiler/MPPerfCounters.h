@@ -31,7 +31,11 @@ class PerfEventLogger {
   typedef std::vector<EventReading> EventReadings;
 
 
+  EventReadings events;
+  void addEvents(int32_t, uint64_t);
   explicit PerfEventLogger(void);
+
+
 };
 
 class MPPerfCounter {
@@ -68,6 +72,8 @@ public:
 	void readPerfData(void);
 
   static MPPerfCounter* Create(const char* event_name);
+
+  void storeReading(int32_t);
 };
 
 } //namespace mprofiler

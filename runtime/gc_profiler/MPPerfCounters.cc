@@ -5,7 +5,9 @@
  *      Author: hussein
  */
 
-
+#include <string>
+#include <vector>
+#include <map>
 #include "cutils/perflib.h"
 #include "os.h"
 #include "runtime.h"
@@ -18,9 +20,13 @@ namespace art {
 namespace mprofiler {
 
 
-PerfEventLogger::PerfEventLogger(void)  {
+PerfEventLogger::PerfEventLogger(void) {
+
 }
 
+void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
+	events.push_back(EventReading(tag, data));
+}
 
 MPPerfCounter::MPPerfCounter(void) :
 		event_name_("CYCLES") {
@@ -45,7 +51,12 @@ void MPPerfCounter::readPerfData(void) {
 }
 
 
+void MPPerfCounter::storeReading(int32_t tag) {
+	readPerfData();
+	evtLogger.addEvents(tag, data);
+  timing_logger_->splits_.push_back(SplitTiming(running_ns_, label_));
 
+}
 
 bool MPPerfCounter::ClosePerfLib(void) {
 	int _locRet = 0;
