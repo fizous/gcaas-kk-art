@@ -478,7 +478,7 @@ void PerfCounterProfiler::logPerfData() {
 		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
 		_sumData += _data;
 	}
-	LOG(ERROR) << "sumData= "<< _sumData;
+	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData;
 }
 
 
