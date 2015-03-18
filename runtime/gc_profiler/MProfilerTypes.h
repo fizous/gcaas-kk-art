@@ -233,7 +233,7 @@ public:
     return perf_record_;
   }
   void readPerfCounter(int32_t);
-
+  uint64_t getDataPerfCounter();
 };
 } // namespace mprofiler
 } // namespace art

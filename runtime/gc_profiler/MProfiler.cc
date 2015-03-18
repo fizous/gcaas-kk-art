@@ -187,6 +187,13 @@ void GCMMPThreadProf::readPerfCounter(int32_t val) {
 
 }
 
+uint64_t GCMMPThreadProf::getDataPerfCounter(void){
+	if(GetPerfRecord() == NULL)
+		return 0;
+	return GetPerfRecord()->data;
+}
+
+
 GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	: pid(thread->GetTid()),
 	  suspendedGC(false),
@@ -324,8 +331,10 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
+			int32_t currBytes_ = total_alloc_bytes_.load();
+			thProf->readPerfCounter(currBytes_);
 			thProf->GetPerfRecord()->ClosePerfLib();
-			thProf->resetPerfRecord();
+			//thProf->resetPerfRecord();
 		}
 		thProf->state = GCMMP_TH_STOPPED;
 	}
@@ -460,6 +469,20 @@ void PerfCounterProfiler::getPerfData() {
 	}
 }
 
+void PerfCounterProfiler::logPerfData() {
+	int32_t currBytes_ = total_alloc_bytes_.load();
+	uint64_t _sumData = 0;
+	uint64_t _data = 0;
+	for (const auto& threadProf : threadProfList_) {
+		_data = threadProf->getDataPerfCounter();
+		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
+		_sumData += _data;
+	}
+	LOG(ERROR) << "sumData= "<< _sumData;
+}
+
+
+
 bool PerfCounterProfiler::periodicDaemonExec(void){
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
@@ -473,6 +496,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
     getPerfData();
     receivedSignal_ = false;
+    if(receivedShutdown_) logPerfData();
   	return receivedShutdown_;
   } else {
   	return false;

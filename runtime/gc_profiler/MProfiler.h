@@ -217,6 +217,7 @@ public:
 	void readPerfData(void);
 	bool dettachThread(GCMMPThreadProf*);
 	void getPerfData(void);
+	void logPerfData(void);
 };
 
 class MProfiler {
