@@ -1284,7 +1284,7 @@ void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState t
  */
 bool MProfiler::IsMProfRunning() {
 	MProfiler* mP = Runtime::Current()->mprofiler_;
-	if(mP != NULL)
+	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingRunning();
 	return false;
 }
@@ -1295,7 +1295,7 @@ bool MProfiler::IsMProfRunning() {
  */
 bool MProfiler::IsMProfilingTimeEvent() {
 	MProfiler* mP = Runtime::Current()->mprofiler_;
-	if(mP != NULL)
+	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingTimeEvent();
 	return false;
 }
