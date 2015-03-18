@@ -496,7 +496,11 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
     getPerfData();
     receivedSignal_ = false;
-    if(receivedShutdown_) logPerfData();
+
+    if(receivedShutdown_) {
+    	LOG(ERROR) << "received shutdown";
+    	logPerfData();
+    }
   	return receivedShutdown_;
   } else {
   	return false;
@@ -861,7 +865,7 @@ void* MProfiler::Run(void* arg) {
 }
 
 void VMProfiler::ShutdownProfiling(void) {
-
+	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
 	 if(hasProfDaemon_) {
 		 Runtime* runtime = Runtime::Current();
@@ -946,6 +950,7 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
     receivedShutdown_ = true;
 
     if(!hasProfDaemon_) {
+    	LOG(ERROR) << "processSignalCatcher shutting Down";
     	ShutdownProfiling();
     }
 
