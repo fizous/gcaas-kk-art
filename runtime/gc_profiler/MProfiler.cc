@@ -474,7 +474,7 @@ void* VMProfiler::runDaemon(void* arg) {
   Runtime* runtime = Runtime::Current();
 
   mProfiler->hasProfDaemon_ =
-  		runtime->AttachCurrentThread("VMProfile Daemon", true,
+  		runtime->AttachCurrentThread("VMProfile", true,
   				runtime->GetSystemThreadGroup(),
       !runtime->IsCompiler());
 
@@ -502,7 +502,7 @@ void* VMProfiler::runDaemon(void* arg) {
   }
 
 
-  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
+  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Created and Leaving";
 
 
   while(!mProfiler->receivedShutdown_) {
@@ -823,6 +823,11 @@ void* MProfiler::Run(void* arg) {
 void VMProfiler::ShutdownProfiling(void) {
 
 	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
+	 if(hasProfDaemon_) {
+		 Runtime* runtime = Runtime::Current();
+		 runtime->DetachCurrentThread();
+		 hasProfDaemon_ = false;
+	 }
 }
 
 
