@@ -525,7 +525,7 @@ void* VMProfiler::runDaemon(void* arg) {
 
   CHECK(mProfiler->hasProfDaemon());
 
-  if(!hasProfDaemon())
+  if(!mProfiler->hasProfDaemon())
   	return NULL;
 
   LOG(ERROR) << "starting the gcDaemon";
