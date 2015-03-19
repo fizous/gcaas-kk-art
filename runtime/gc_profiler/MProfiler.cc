@@ -487,7 +487,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
-  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Is going to Wait";
+  LOG(ERROR) << "VMProfiler: Profiler Daemon Is going to Wait";
   ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
   {
   	prof_thread_cond_->Wait(self);
@@ -528,7 +528,7 @@ void* VMProfiler::runDaemon(void* arg) {
   if(!mProfiler->hasProfDaemon())
   	return NULL;
 
-  //LOG(ERROR) << "starting the gcDaemon";
+  LOG(ERROR) << "starting the profiler daemon";
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
   Thread* self = Thread::Current();
@@ -538,7 +538,7 @@ void* VMProfiler::runDaemon(void* arg) {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
 
-      GCMMP_VLOG(INFO) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
+    	LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
     	mProfiler->prof_thread_ = self;
     	mProfiler->InitCommonData();
     } else {
@@ -954,9 +954,9 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 
 
     if(hasProfDaemon()){
-
+    	LOG(ERROR) << "processSignalCatcher found that there is profDaemon";
     } else {
-    	//LOG(ERROR) << "processSignalCatcher shutting Down";
+    	LOG(ERROR) << "processSignalCatcher shutting Down";
     	ShutdownProfiling();
     }
 
