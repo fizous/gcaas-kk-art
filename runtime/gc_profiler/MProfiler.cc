@@ -868,7 +868,7 @@ void* MProfiler::Run(void* arg) {
 }
 
 void VMProfiler::ShutdownProfiling(void) {
-	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
+//	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
 	 if(hasProfDaemon()) {
 		 Runtime* runtime = Runtime::Current();
@@ -956,7 +956,7 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
     if(hasProfDaemon()){
 
     } else {
-    	LOG(ERROR) << "processSignalCatcher shutting Down";
+    	//LOG(ERROR) << "processSignalCatcher shutting Down";
     	ShutdownProfiling();
     }
 
