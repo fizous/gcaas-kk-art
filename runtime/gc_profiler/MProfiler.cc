@@ -369,6 +369,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																										*prof_thread_mutex_));
+			setReceivedShutDown(false);
 		} else {
 			LOG(ERROR) << "VMprofile index is not supported";
 		}
@@ -499,11 +500,11 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
     getPerfData();
     receivedSignal_ = false;
 
-    if(receivedShutdown_) {
+    if(getRecivedShutDown()) {
     	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
     	logPerfData();
     }
-  	return receivedShutdown_;
+  	return getRecivedShutDown();
   } else {
   	return false;
   }
@@ -553,7 +554,7 @@ void* VMProfiler::runDaemon(void* arg) {
   GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Created and Leaving";
 
 
-  while(!mProfiler->receivedShutdown_) {
+  while(!mProfiler->getRecivedShutDown()) {
   	LOG(ERROR) << "the daemon exiting the loop";
     // Check if GC is running holding gc_complete_lock_.
     mProfiler->periodicDaemonExec();
@@ -869,6 +870,14 @@ void* MProfiler::Run(void* arg) {
 
 }
 
+
+void VMProfiler::setReceivedShutDown(bool val){
+	receivedShutdown_ = val;
+}
+
+bool VMProfiler::getRecivedShutDown(void) {
+	return receivedShutdown_;
+}
 void VMProfiler::ShutdownProfiling(void) {
 //	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 	 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
@@ -952,7 +961,7 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 		Thread* self = Thread::Current();
     MutexLock mu(self, *prof_thread_mutex_);
     receivedSignal_ = true;
-    receivedShutdown_ = true;
+    setReceivedShutDown(true);
 
 
     if(hasProfDaemon()){

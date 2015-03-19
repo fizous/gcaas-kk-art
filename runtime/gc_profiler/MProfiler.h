@@ -191,6 +191,8 @@ public:
   virtual bool dettachThread(GCMMPThreadProf*)=0;
 
   void setProfDaemon(bool);
+  void setReceivedShutDown(bool);
+  bool getRecivedShutDown(void);
   bool hasProfDaemon(void);
 };
 
