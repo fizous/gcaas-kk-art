@@ -332,6 +332,7 @@ class Heap {
   int64_t GetFreeMemory() const {
     return GetTotalMemory() - num_bytes_allocated_;
   }
+  size_t GetConcStartBytes();
 
   // Get the space that corresponds to an object's address. Current implementation searches all
   // spaces in turn. If fail_ok is false then failing to find a space will cause an abort.
@@ -488,7 +489,7 @@ class Heap {
   // collection.
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
-  size_t GetConcStartBytes();
+
 
   size_t GetPercentFree();
 
