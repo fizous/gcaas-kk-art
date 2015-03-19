@@ -485,11 +485,9 @@ void PerfCounterProfiler::logPerfData() {
 
 
 bool PerfCounterProfiler::periodicDaemonExec(void){
-	LOG(ERROR) << "Periodic execution of daemon";
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
-  LOG(ERROR) << "VMProfiler: Profiler Daemon Is going to Wait";
   ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
   {
   	prof_thread_cond_->Wait(self);
@@ -555,7 +553,6 @@ void* VMProfiler::runDaemon(void* arg) {
 
 
   while(!mProfiler->getRecivedShutDown()) {
-  	LOG(ERROR) << "the daemon exiting the loop";
     // Check if GC is running holding gc_complete_lock_.
     mProfiler->periodicDaemonExec();
 
