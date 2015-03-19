@@ -870,10 +870,10 @@ void* MProfiler::Run(void* arg) {
 void VMProfiler::ShutdownProfiling(void) {
 	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
-	 if(hasProfDaemon_) {
+	 if(hasProfDaemon()) {
 		 Runtime* runtime = Runtime::Current();
 		 runtime->DetachCurrentThread();
-		 hasProfDaemon_ = false;
+		 setProfDaemon(false);
 	 }
 }
 

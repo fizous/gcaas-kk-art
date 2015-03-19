@@ -112,8 +112,6 @@ protected:
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
   volatile bool receivedShutdown_;
 
-  bool hasProfDaemon_;
-
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
