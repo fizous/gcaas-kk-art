@@ -334,6 +334,7 @@ class Heap {
   }
   size_t GetConcStartBytes();
 
+  size_t GetMaxAllowedFootPrint();
   // Get the space that corresponds to an object's address. Current implementation searches all
   // spaces in turn. If fail_ok is false then failing to find a space will cause an abort.
   // TODO: consider using faster data structure like binary tree.

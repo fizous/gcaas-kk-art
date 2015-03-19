@@ -1782,7 +1782,9 @@ size_t Heap::GetPercentFree() {
 size_t Heap::GetConcStartBytes() {
 	return concurrent_start_bytes_;
 }
-
+size_t Heap::GetMaxAllowedFootPrint() {
+	return max_allowed_footprint_;
+}
 
 void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
   if (max_allowed_footprint > GetMaxMemory()) {
