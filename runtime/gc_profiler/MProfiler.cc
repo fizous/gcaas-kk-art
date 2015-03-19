@@ -528,7 +528,7 @@ void* VMProfiler::runDaemon(void* arg) {
   if(!mProfiler->hasProfDaemon())
   	return NULL;
 
-  LOG(ERROR) << "starting the gcDaemon";
+  //LOG(ERROR) << "starting the gcDaemon";
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
   Thread* self = Thread::Current();
