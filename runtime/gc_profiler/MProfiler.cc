@@ -56,7 +56,7 @@ const char * VMProfiler::gcMMPRootPath[] = {
 const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
 				 0x00,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "CYCLES", "Perf Counter of CPU over a given period of time",
 				 "PERF_CPU_USAGE.log",
 				 NULL,
@@ -64,7 +64,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//Cycles
 		{
 				 0x01,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "INSTRUCTIONS", "Perf Counter of Instructions over a given period of time",
 				 "PERF_INSTRUCTIONS.log",
 				 NULL,
@@ -72,7 +72,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//Instructions
 		{
 				 0x02,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "L1I_ACCESS", "Perf Counter of L1I_ACCESS over a given period of time",
 				 "PERF_IL1_ACCESS.log",
 				 NULL,
@@ -80,7 +80,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1I_ACCESS
 		{
 				 0x03,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "L1I_MISS", "Perf Counter of L1I_MISS over a given period of time",
 				 "PERF_IL1_MISS.log",
 				 NULL,
@@ -88,7 +88,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1I_MISS
 		{
 				 0x04,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "L1D_ACCESS", "Perf Counter of L1D_ACCESS over a given period of time",
 				 "PERF_DL1_ACCESS.log",
 				 NULL,
@@ -96,7 +96,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1D_ACCESS
 		{
 				 0x05,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
 				 "L1D_MISS", "Perf Counter of L1D_MISS over a given period of time",
 				 "PERF_DL1_MISS.log",
 				 NULL,
@@ -442,6 +442,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
+		LOG(ERROR) << "vmprofiler: Attaching GCDAemon: " << thread->GetTid();
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
 			gc_trimmer_ = thread;
@@ -450,6 +451,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
 				return;
 			}
+			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 		} else if(thread_name.compare("main") == 0) { //that's the main thread
 				main_thread_ = thread;
 		}
