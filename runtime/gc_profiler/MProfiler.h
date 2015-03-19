@@ -187,13 +187,17 @@ public:
   bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
   virtual bool dettachThread(GCMMPThreadProf*)=0;
+
+  virtual bool hasProfDaemon() = 0;
 };
 
 
 class MMUProfiler : public VMProfiler {
 public:
+
 	MMUProfiler(GCMMP_Options* opts, void* entry);
 	~MMUProfiler(){};
+	volatile bool has_profDaemon_;
 
 	MPPerfCounter* createHWCounter(Thread*);
 	bool createHWEvents(void) {return false;}
@@ -206,6 +210,8 @@ class PerfCounterProfiler : public VMProfiler {
 
 public:
 	const char			*hwEvent_;
+
+	volatile bool has_profDaemon_;
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler(){};
 	int initCounters(const char*);
@@ -218,6 +224,7 @@ public:
 	bool dettachThread(GCMMPThreadProf*);
 	void getPerfData(void);
 	void logPerfData(void);
+
 };
 
 class MProfiler {

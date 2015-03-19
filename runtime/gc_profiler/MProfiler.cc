@@ -310,7 +310,7 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	    MutexLock mu(self, *prof_thread_mutex_);
 	    receivedSignal_ = true;
 
-	    if(hasProfDaemon_) {
+	    if(hasProfDaemon()) {
 	    	prof_thread_cond_->Broadcast(self);
 	    }
 
@@ -494,11 +494,12 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
   }
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+    LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
     getPerfData();
     receivedSignal_ = false;
 
     if(receivedShutdown_) {
-    	LOG(ERROR) << "received shutdown";
+    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
     	logPerfData();
     }
   	return receivedShutdown_;
@@ -517,15 +518,17 @@ void* VMProfiler::runDaemon(void* arg) {
 
   Runtime* runtime = Runtime::Current();
 
-  mProfiler->hasProfDaemon_ =
+  mProfiler->setProfDaemon(
   		runtime->AttachCurrentThread("VMProfile", true,
   				runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler());
+      !runtime->IsCompiler()));
 
-  CHECK(mProfiler->hasProfDaemon_);
+  CHECK(mProfiler->hasProfDaemon());
 
-  if(!mProfiler->hasProfDaemon_)
+  if(!hasProfDaemon())
   	return NULL;
+
+  LOG(ERROR) << "starting the gcDaemon";
 
   mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
   Thread* self = Thread::Current();
@@ -707,7 +710,7 @@ void MProfiler::ShutdownProfiling(void) {
 		}
 		GCMMP_VLOG(INFO) << "Done Detaching all the thread Profiling";
 		GCMMP_VLOG(INFO) << "Shutting Down";
-		if(hasProfDaemon_) { //the PRof Daemon has to be the one doing the shutdown
+		if(hasProfDaemon_) { //the Prof Daemon has to be the one doing the shutdown
 			MutexLock mu(self, *prof_thread_mutex_);
 			prof_thread_cond_->Broadcast(self);
 			runtime->DetachCurrentThread();
@@ -949,7 +952,10 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
     receivedSignal_ = true;
     receivedShutdown_ = true;
 
-    if(!hasProfDaemon_) {
+
+    if(hasProfDaemon()){
+
+    } else {
     	LOG(ERROR) << "processSignalCatcher shutting Down";
     	ShutdownProfiling();
     }
@@ -959,6 +965,22 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 
     GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
 	}
+}
+
+bool MMUProfiler::hasProfDaemon()  {
+  return false;
+}
+
+void MMUProfiler::setProfDaemon(bool val)  {
+	has_profDaemon_ = val;
+}
+
+void PerfCounterProfiler::setProfDaemon(bool val) {
+	has_profDaemon_ = val;
+}
+
+bool PerfCounterProfiler::hasProfDaemon()  {
+  return has_profDaemon_;
 }
 
 void MProfiler::ProcessSignalCatcher(int signalVal) {
