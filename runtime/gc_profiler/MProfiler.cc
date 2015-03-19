@@ -494,7 +494,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
   }
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
-    LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
     getPerfData();
     receivedSignal_ = false;
 
