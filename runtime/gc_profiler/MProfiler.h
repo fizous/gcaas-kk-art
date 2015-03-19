@@ -108,7 +108,7 @@ protected:
 
 
 
-  volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
+
 
 
   /*
@@ -127,6 +127,7 @@ public:
 	volatile bool has_profDaemon_;
 	volatile bool receivedShutdown_;
 	volatile bool running_;
+	volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
 
   size_t 		start_heap_bytes_;
   size_t 		end_heap_bytes_;
