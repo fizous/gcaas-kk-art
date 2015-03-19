@@ -484,6 +484,7 @@ void PerfCounterProfiler::logPerfData() {
 
 
 bool PerfCounterProfiler::periodicDaemonExec(void){
+	LOG(ERROR) << "Periodic execution of daemon";
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
@@ -553,10 +554,12 @@ void* VMProfiler::runDaemon(void* arg) {
 
 
   while(!mProfiler->receivedShutdown_) {
+  	LOG(ERROR) << "the daemon exiting the loop";
     // Check if GC is running holding gc_complete_lock_.
     mProfiler->periodicDaemonExec();
 
   }
+  LOG(ERROR) << "the daemon exiting the loop";
   //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
   //ThreadState old_state =
   //self->SetStateUnsafe(kRunnable);
@@ -868,7 +871,7 @@ void* MProfiler::Run(void* arg) {
 
 void VMProfiler::ShutdownProfiling(void) {
 //	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
-	 GCMMP_VLOG(INFO) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
+	 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
 	 if(hasProfDaemon()) {
 		 Runtime* runtime = Runtime::Current();
 		 runtime->DetachCurrentThread();
