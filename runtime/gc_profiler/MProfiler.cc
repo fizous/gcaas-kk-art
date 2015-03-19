@@ -554,8 +554,7 @@ void* VMProfiler::runDaemon(void* arg) {
 
   while(!mProfiler->receivedShutdown_) {
     // Check if GC is running holding gc_complete_lock_.
-    if(mProfiler->periodicDaemonExec())
-    	break;
+    mProfiler->periodicDaemonExec();
 
   }
   //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");

@@ -110,7 +110,7 @@ protected:
   volatile bool running_;
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
-  volatile bool receivedShutdown_;
+
 
   /*
    * Guards access to the state of the profiler daemon,
@@ -125,6 +125,7 @@ public:
 	static const char * gcMMPRootPath[];
 
 	volatile bool has_profDaemon_;
+	volatile bool receivedShutdown_;
 
   size_t 		start_heap_bytes_;
   size_t 		end_heap_bytes_;
