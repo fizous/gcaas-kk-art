@@ -123,6 +123,9 @@ public:
   static constexpr int kGCMMPDumpSignal = SIGUSR2;
   static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
+
+	volatile bool has_profDaemon_;
+
   size_t 		start_heap_bytes_;
   size_t 		end_heap_bytes_;
 
@@ -186,8 +189,8 @@ public:
   virtual bool isMarkTimeEvents(void) {return false;}
   virtual bool dettachThread(GCMMPThreadProf*)=0;
 
-  virtual bool hasProfDaemon() = 0;
-  virtual void setProfDaemon(bool) = 0;
+  void setProfDaemon(bool);
+  bool hasProfDaemon(void);
 };
 
 
@@ -196,15 +199,15 @@ public:
 
 	MMUProfiler(GCMMP_Options* opts, void* entry);
 	~MMUProfiler(){};
-	volatile bool has_profDaemon_;
+
 
 	MPPerfCounter* createHWCounter(Thread*);
 	bool createHWEvents(void) {return false;}
 	bool isMarkTimeEvents(void) {return true;}
 	bool periodicDaemonExec(void);
 	bool dettachThread(GCMMPThreadProf*);
-	void setProfDaemon(bool);
-	bool hasProfDaemon(void);
+
+
 };
 
 class PerfCounterProfiler : public VMProfiler {
@@ -212,7 +215,6 @@ class PerfCounterProfiler : public VMProfiler {
 public:
 	const char			*hwEvent_;
 
-	volatile bool has_profDaemon_;
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler(){};
 	int initCounters(const char*);
@@ -225,8 +227,6 @@ public:
 	bool dettachThread(GCMMPThreadProf*);
 	void getPerfData(void);
 	void logPerfData(void);
-	void setProfDaemon(bool);
-	bool hasProfDaemon(void);
 };
 
 class MProfiler {

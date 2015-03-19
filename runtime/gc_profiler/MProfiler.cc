@@ -967,19 +967,13 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 	}
 }
 
-bool MMUProfiler::hasProfDaemon()  {
-  return false;
-}
 
-void MMUProfiler::setProfDaemon(bool val)  {
+void VMProfiler::setProfDaemon(bool val)  {
 	has_profDaemon_ = val;
 }
 
-void PerfCounterProfiler::setProfDaemon(bool val) {
-	has_profDaemon_ = val;
-}
 
-bool PerfCounterProfiler::hasProfDaemon()  {
+bool VMProfiler::hasProfDaemon()  {
   return has_profDaemon_;
 }
 
