@@ -454,8 +454,9 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 		} else if(thread_name.compare("main") == 0) { //that's the main thread
 				main_thread_ = thread;
+				setThreadAffinity(thread, true);
 		}
-		setThreadAffinity(thread, true);
+
 	}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
