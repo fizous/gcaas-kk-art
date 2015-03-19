@@ -1779,6 +1779,11 @@ size_t Heap::GetPercentFree() {
   return static_cast<size_t>(100.0f * static_cast<float>(GetFreeMemory()) / GetTotalMemory());
 }
 
+size_t Heap::GetConcStartBytes() {
+	return concurrent_start_bytes_;
+}
+
+
 void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
   if (max_allowed_footprint > GetMaxMemory()) {
     VLOG(gc) << "Clamp target GC heap from " << PrettySize(max_allowed_footprint) << " to "

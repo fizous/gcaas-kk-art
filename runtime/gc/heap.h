@@ -488,6 +488,8 @@ class Heap {
   // collection.
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
+  size_t GetConcStartBytes();
+
   size_t GetPercentFree();
 
   void AddContinuousSpace(space::ContinuousSpace* space) LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);

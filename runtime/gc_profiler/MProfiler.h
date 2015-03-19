@@ -90,8 +90,7 @@ protected:
   // System thread used as GC Timmer.
 	Thread* gc_trimmer_;
   // flags of the Profiler we are running
-  // combines markAllocWindows, createProfDaemon, hasProfThread,
-  unsigned int flags_;
+
 
   /* file used to dump the profiling data */
   const char * dump_file_name_;
@@ -107,7 +106,7 @@ protected:
 
   const bool enabled_;
 
-  volatile bool running_;
+
 
   volatile bool receivedSignal_ GUARDED_BY(prof_thread_mutex_);
 
@@ -123,9 +122,11 @@ public:
   static constexpr int kGCMMPDumpSignal = SIGUSR2;
   static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
-
+  // combines markAllocWindows, createProfDaemon, hasProfThread,
+  unsigned int flags_;
 	volatile bool has_profDaemon_;
 	volatile bool receivedShutdown_;
+	volatile bool running_;
 
   size_t 		start_heap_bytes_;
   size_t 		end_heap_bytes_;
@@ -159,6 +160,10 @@ public:
 
   bool IsProfilingRunning() {
     return running_;
+  }
+
+  void setIsProfilingRunning(bool val) {
+    running_ = val;
   }
 
   bool IsAttachProfDaemon() const {

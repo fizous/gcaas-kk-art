@@ -386,7 +386,7 @@ void VMProfiler::InitCommonData() {
 
 	attachThreads();
 
-	running_ = true;
+	setIsProfilingRunning(true);
 }
 
 
@@ -465,6 +465,9 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 void PerfCounterProfiler::getPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes();
 	for (const auto& threadProf : threadProfList_) {
 		threadProf->readPerfCounter(currBytes_);
 	}
@@ -536,7 +539,7 @@ void* VMProfiler::runDaemon(void* arg) {
   {
 
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    if(!mProfiler->running_) {
+    if(!mProfiler->IsProfilingRunning()) {
 
     	LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
     	mProfiler->prof_thread_ = self;
