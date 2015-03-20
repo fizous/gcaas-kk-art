@@ -418,7 +418,7 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 
 
 void VMProfiler::attachSingleThread(Thread* thread) {
-	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
+	LOG(ERROR) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -435,29 +435,30 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
-
+	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
 	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
 		setGcDaemon(thread);
-		threadProf->setThreadTag(GCMMP_THREAD_GCDAEMON);
+
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
+		_tag = GCMMP_THREAD_GCDAEMON;
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
 			setGcTrimmer(thread);
-			threadProf->setThreadTag(GCMMP_THREAD_GCTRIM);
 			setThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
 				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
 				return;
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+			_tag = GCMMP_THREAD_GCTRIM;
 		} else if(thread_name.compare("main") == 0) { //that's the main thread
 			setMainThread(thread);
-			threadProf->setThreadTag(GCMMP_THREAD_MAIN);
+			_tag = GCMMP_THREAD_MAIN;
 			setThreadAffinity(thread, true);
 		}
 
@@ -465,6 +466,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
+	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
 	thread->SetProfRec(threadProf);
 }
