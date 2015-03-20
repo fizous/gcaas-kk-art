@@ -174,6 +174,9 @@ public:
   static MPPerfCounter* Create(const char* event_name);
 
   void storeReading(int32_t);
+
+  void addStartEvent(GCMMP_BREAK_DOWN_ENUM);
+  void addEndEvent(GCMMP_BREAK_DOWN_ENUM);
 };
 
 } //namespace mprofiler

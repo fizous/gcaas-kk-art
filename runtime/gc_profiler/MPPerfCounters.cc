@@ -50,7 +50,7 @@ void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
 	events.push_back(EventReading(tag, data));
 }
 
-void MPPerfCounter::addStartEvent(GCPauseThreadMarker evt){
+void MPPerfCounter::addStartEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	readPerfData();
 	evtLogger.addStartMarkEvent(evt, data);
 }
