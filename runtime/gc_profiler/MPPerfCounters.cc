@@ -38,10 +38,11 @@ uint64_t PerfEventLogger::addEndMarkEvent(GCMMP_BREAK_DOWN_ENUM evt, uint64_t va
 
 PerfEventLogger::PerfEventLogger(void) {
 	for(int i = GCMMP_GC_BRK_NONE; i < GCMMP_GC_BRK_MAXIMUM; i++){
-		eventMarkers[i].type = i;
-		eventMarkers[i].startMarker = 0;
-		eventMarkers[i].finalMarker = 0;
-		eventAccMarkers[i] = 0;
+		GCMMP_BREAK_DOWN_ENUM valIter = static_cast<GCMMP_BREAK_DOWN_ENUM>(i);
+		eventMarkers[valIter].type = valIter;
+		eventMarkers[valIter].startMarker = 0;
+		eventMarkers[valIter].finalMarker = 0;
+		eventAccMarkers[valIter] = 0;
 	}
 }
 
