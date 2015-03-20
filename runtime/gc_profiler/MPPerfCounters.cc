@@ -55,7 +55,7 @@ void MPPerfCounter::addStartEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	evtLogger.addStartMarkEvent(evt, data);
 }
 
-void MPPerfCounter::addEndEvent(GCPauseThreadMarker evt){
+void MPPerfCounter::addEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	readPerfData();
 	evtLogger.eventAccMarkers[evt] += evtLogger.addEndMarkEvent(evt, data);
 }
