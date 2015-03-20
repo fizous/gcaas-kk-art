@@ -215,6 +215,9 @@ public:
   void setReceivedShutDown(bool);
   bool getRecivedShutDown(void);
   bool hasProfDaemon(void);
+
+	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt){};
+	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {};
 };
 
 
@@ -230,6 +233,8 @@ public:
 	bool isMarkTimeEvents(void) {return true;}
 	bool periodicDaemonExec(void);
 	bool dettachThread(GCMMPThreadProf*);
+
+
 
 
 };
@@ -251,6 +256,10 @@ public:
 	bool dettachThread(GCMMPThreadProf*);
 	void getPerfData(void);
 	void logPerfData(void);
+
+
+	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt);
+	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt);
 };
 
 class MProfiler {
@@ -393,6 +402,10 @@ public:
   static void MProfNotifyAlloc(size_t);
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
+
+  static void MProfMarkStartExplGCHWEvent(void);
+  static void MProfMarkEndExplGCHWEvent(void);
+
   static void MProfMarkWaitTimeEvent(art::Thread*);
   static void MProfMarkEndWaitTimeEvent(art::Thread*);
   static void MProfMarkGCHatTimeEvent(art::Thread*);

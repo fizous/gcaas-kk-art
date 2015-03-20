@@ -324,6 +324,21 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	}
 }
 
+void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt){
+	Thread* self = Thread::Current();
+	GCMMPThreadProf* _profRec =  self->GetProfRec();
+	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
+		_profRec->perf_record_->addStartEvent(evt);
+	}
+}
+void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
+	Thread* self = Thread::Current();
+	GCMMPThreadProf* _profRec =  self->GetProfRec();
+	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
+		_profRec->perf_record_->addEndEvent(evt);
+	}
+}
+
 bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
 	return true;
 }
@@ -1260,6 +1275,20 @@ void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 		GCMMP_BREAK_DOWN_ENUM evType) {
 	profRec->getPauseMgr()->MarkEndTimeEvent(evType);
 }
+
+
+void MProfiler::MProfMarkStartExplGCHWEvent(void) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->vmProfile->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
+	}
+}
+
+void MProfiler::MProfMarkEndExplGCHWEvent(void) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->vmProfile->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
+	}
+}
+
 
 /*
  * Detach a thread from the MProfiler

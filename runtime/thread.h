@@ -826,6 +826,8 @@ class PACKED(4) Thread {
   mprofiler::GCMMPThreadProf* GetProfRec() {
   	return profRec_;
   }
+
+
   void SetProfRec(mprofiler::GCMMPThreadProf* profRec) {
   	profRec_ = profRec;
 
