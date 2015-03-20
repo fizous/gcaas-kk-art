@@ -88,6 +88,18 @@ typedef enum GCMMPFlagsEnum_s {
 	GCMMP_FLAGS_ATTACH_GCDAEMON = 16
 } GCMMPFlagsEnum;
 
+
+
+/*
+ * Flags used to check the functionality of the mprofiler->flags_
+ */
+typedef enum GCMMPThProfileTag_s {
+	GCMMP_THREAD_DEFAULT = 0,
+	GCMMP_THREAD_MAIN = 1,
+	GCMMP_THREAD_GCDAEMON = 2, //should we create a daemon profiler?
+	GCMMP_THREAD_GCTRIM = 3		 //does it possess a daemon thread
+} GCMMPThProfileTag;
+
 /*
  * Struct used to hold the temporary values when we enter the block of an
  * activity. When we exit we add the delta to the accumulated field.
@@ -192,6 +204,7 @@ class GCMMPThreadProf {
 public:
 	static MProfiler* mProfiler;
 	volatile GCMMPThreadProfState state;
+	GCMMPThProfileTag tag_;
 
 	GCMMPThreadProf(MProfiler*, Thread*);
 	GCMMPThreadProf(VMProfiler*, Thread*);
@@ -206,6 +219,16 @@ public:
   GCPauseThreadManager* getPauseMgr(void) const {
   	return pauseManager;
   }
+
+  GCMMPThProfileTag getThreadTag(){
+  	return tag_;
+  }
+
+  void setThreadTag(GCMMPThProfileTag tag){
+  	tag_ = tag;
+  }
+
+
   bool StopProfiling(void);
   void ForceDeadTime(void);
 

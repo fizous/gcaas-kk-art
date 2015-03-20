@@ -83,13 +83,7 @@ class VMProfiler {
 protected:
 	//Index of the profiler type we are running
 	const int index_;
-  // System thread used as main (thread id = 1).
-	Thread* main_thread_;
-  // System thread used as GC Daemon.
-	Thread* gc_daemon_;
-  // System thread used as GC Timmer.
-	Thread* gc_trimmer_;
-  // flags of the Profiler we are running
+
 
 
   /* file used to dump the profiling data */
@@ -106,11 +100,6 @@ protected:
 
   const bool enabled_;
 
-
-
-
-
-
   /*
    * Guards access to the state of the profiler daemon,
    * associated conditional variable is used to signal when a GC completes
@@ -123,6 +112,13 @@ public:
   static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
   // combines markAllocWindows, createProfDaemon, hasProfThread,
+  // System thread used as main (thread id = 1).
+	Thread* main_thread_;
+  // System thread used as GC Daemon.
+	Thread* gc_daemon_;
+  // System thread used as GC Timmer.
+	Thread* gc_trimmer_;
+  // flags of the Profiler we are running
   unsigned int flags_;
 	volatile bool has_profDaemon_;
 	volatile bool receivedShutdown_;
@@ -178,6 +174,19 @@ public:
   bool IsAttachGCDaemon () {
     return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
   }
+
+	void setMainThread(Thread* thread) {
+		main_thread_ = thread;
+	}
+
+	void setGcDaemon(Thread* thread) {
+		gc_daemon_ = thread;
+	}
+
+	void setGcTrimmer(Thread* thread) {
+		gc_trimmer_ = thread;
+	}
+
 
   void OpenDumpFile(void);
   void InitCommonData(void);

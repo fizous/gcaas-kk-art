@@ -206,9 +206,10 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 //	pauseManager = new GCPauseThreadManager();
-
+	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
 	state = GCMMP_TH_RUNNING;
+
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
@@ -436,16 +437,18 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	thread->GetThreadName(thread_name);
 
 	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
-		gc_daemon_ = thread;
+		setGcDaemon(thread);
+		threadProf->setThreadTag(GCMMP_THREAD_GCDAEMON);
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
 			return;
 		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDAemon: " << thread->GetTid();
+		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-			gc_trimmer_ = thread;
+			setGcTrimmer(thread);
+			threadProf->setThreadTag(GCMMP_THREAD_GCTRIM);
 			setThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
 				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
@@ -453,8 +456,9 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 		} else if(thread_name.compare("main") == 0) { //that's the main thread
-				main_thread_ = thread;
-				setThreadAffinity(thread, true);
+			setMainThread(thread);
+			threadProf->setThreadTag(GCMMP_THREAD_MAIN);
+			setThreadAffinity(thread, true);
 		}
 
 	}
@@ -479,13 +483,18 @@ void PerfCounterProfiler::getPerfData() {
 void PerfCounterProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	uint64_t _sumData = 0;
+	uint64_t _sumGc = 0;
 	uint64_t _data = 0;
 	for (const auto& threadProf : threadProfList_) {
 		_data = threadProf->getDataPerfCounter();
+		if(threadProf->getThreadTag() > GCMMP_THREAD_MAIN) {
+			_sumGc += _data;
+			LOG(ERROR) << "logging specific gcThreadProf: " << threadProf->getThreadTag() << ", tid:" << threadProf->GetTid();
+		}
 		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
 		_sumData += _data;
 	}
-	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData;
+	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData << ", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);
 }
 
 
