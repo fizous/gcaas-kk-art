@@ -129,6 +129,7 @@ class PerfEventLogger {
   EventReadings events;
   GCPauseThreadMarker eventMarkers[GCMMP_GC_BRK_MAXIMUM];
   uint64_t eventAccMarkers[GCMMP_GC_BRK_MAXIMUM];
+
   void addEvents(int32_t, uint64_t);
   void addStartMarkEvent(GCPauseThreadMarker, uint64_t);
   uint64_t addEndMarkEvent(GCPauseThreadMarker, uint64_t);

@@ -22,7 +22,8 @@ namespace mprofiler {
 
 
 void PerfEventLogger::addStartMarkEvent(GCPauseThreadMarker evt, uint64_t val) {
-	(&eventMarkers[evt])->startMarker = val;
+	GCPauseThreadMarker* arr = eventMarkers;
+	(arr[evt]).startMarker = val;
 }
 
 uint64_t PerfEventLogger::addEndMarkEvent(GCPauseThreadMarker evt, uint64_t val){
