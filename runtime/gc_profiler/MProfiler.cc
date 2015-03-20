@@ -1278,6 +1278,17 @@ void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 }
 
 
+void MProfiler::MProfMarkStartAllocGCHWEvent(void) {
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->vmProfile->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
+	}
+}
+void MProfiler::MProfMarkEndAllocGCHWEvent(void){
+	if(MProfiler::IsMProfRunning()) {
+		Runtime::Current()->mprofiler_->vmProfile->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
+	}
+}
+
 void MProfiler::MProfMarkStartExplGCHWEvent(void) {
 	if(MProfiler::IsMProfRunning()) {
 		Runtime::Current()->mprofiler_->vmProfile->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);

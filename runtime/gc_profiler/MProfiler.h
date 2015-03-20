@@ -403,6 +403,8 @@ public:
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
 
+  static void MProfMarkStartAllocGCHWEvent(void);
+  static void MProfMarkEndAllocGCHWEvent(void);
   static void MProfMarkStartExplGCHWEvent(void);
   static void MProfMarkEndExplGCHWEvent(void);
 

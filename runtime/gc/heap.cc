@@ -791,9 +791,11 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   // stack or the live bitmap.
   Thread* self = Thread::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
+  	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
   	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
     mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
+    mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
   }
 }
 
@@ -907,8 +909,10 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     }
 
     if (run_gc) {
-      // If we actually ran a different type of Gc than requested, we can skip the index forwards.
+    	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
+    	// If we actually ran a different type of Gc than requested, we can skip the index forwards.
       collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
+      mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
       DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
       i = static_cast<size_t>(gc_type_ran);
 
@@ -936,7 +940,9 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
            << " allocation";
 
   // We don't need a WaitForConcurrentGcToComplete here either.
+  mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseForAlloc, true);
+  mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
   return TryToAllocate(self, space, alloc_size, true, bytes_allocated);
 }
 
@@ -2123,8 +2129,10 @@ void Heap::RegisterNativeAllocation(int bytes) {
         // If we still are over the watermark, attempt a GC for alloc and run finalizers.
         if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_limit_) {
         	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
+        	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
           CollectGarbageInternal(collector::kGcTypePartial, kGcCauseForAlloc, false);
         	mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
+        	mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
           env->CallStaticVoidMethod(WellKnownClasses::java_lang_System,
                                     WellKnownClasses::java_lang_System_runFinalization);
           CHECK(!env->ExceptionCheck());
