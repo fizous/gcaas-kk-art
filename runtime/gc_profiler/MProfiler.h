@@ -90,15 +90,13 @@ protected:
   const char * dump_file_name_;
   art::File* dump_file_;
 
-	Thread* prof_thread_;
+
 
   void InitializeProfiler(void);
 
   void DumpProfData(bool);
 
-	int gcDaemonAffinity_;
 
-  const bool enabled_;
 
   /*
    * Guards access to the state of the profiler daemon,
@@ -112,7 +110,15 @@ public:
   static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
   // combines markAllocWindows, createProfDaemon, hasProfThread,
-  // System thread used as main (thread id = 1).
+
+	const bool enabled_;
+	// System thread used as main (thread id = 1).
+
+	int gcDaemonAffinity_;
+
+	Thread* prof_thread_;
+
+
 	Thread* main_thread_;
   // System thread used as GC Daemon.
 	Thread* gc_daemon_;
