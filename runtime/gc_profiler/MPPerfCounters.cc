@@ -12,6 +12,7 @@
 #include "os.h"
 #include "runtime.h"
 #include "thread.h"
+#include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfiler.h"
 
