@@ -20,12 +20,42 @@ namespace art {
 namespace mprofiler {
 
 
-PerfEventLogger::PerfEventLogger(void) {
+void PerfEventLogger::addStartMarkEvent(GCPauseThreadMarker evt, uint64_t val) {
+	eventMarkers[evt].startMarker = val;
+}
 
+uint64_t PerfEventLogger::addEndMarkEvent(GCPauseThreadMarker evt, uint64_t val){
+	uint64_t _diff = 0;
+	eventMarkers[evt].finalMarker = val;
+	if(eventMarkers[evt].startMarker > 0) {
+		_diff = val - eventMarkers[evt].startMarker;
+		eventMarkers[evt].startMarker = 0;
+	}
+	eventMarkers[evt].finalMarker = 0;
+	return _diff;
+}
+
+PerfEventLogger::PerfEventLogger(void) {
+	for(GCMMP_BREAK_DOWN_ENUM i = GCMMP_GC_BRK_NONE; i < GCMMP_GC_BRK_MAXIMUM; i++){
+		eventMarkers[i].type = i;
+		eventMarkers[i].startMarker = 0;
+		eventMarkers[i].finalMarker = 0;
+		eventAccMarkers[i] = 0;
+	}
 }
 
 void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
 	events.push_back(EventReading(tag, data));
+}
+
+void MPPerfCounter::addStartEvent(GCPauseThreadMarker evt){
+	readPerfData();
+	evtLogger.addStartMarkEvent(evt, data);
+}
+
+void MPPerfCounter::addEndEvent(GCPauseThreadMarker evt){
+	readPerfData();
+	evtLogger.eventAccMarkers[evt] += evtLogger.addEndMarkEvent(evt, data);
 }
 
 MPPerfCounter::MPPerfCounter(void) :
@@ -54,8 +84,6 @@ void MPPerfCounter::readPerfData(void) {
 void MPPerfCounter::storeReading(int32_t tag) {
 	readPerfData();
 	evtLogger.addEvents(tag, data);
-
-
 }
 
 bool MPPerfCounter::ClosePerfLib(void) {
