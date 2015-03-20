@@ -21,12 +21,11 @@ namespace art {
 namespace mprofiler {
 
 
-void PerfEventLogger::addStartMarkEvent(GCPauseThreadMarker evt, uint64_t val) {
-	GCPauseThreadMarker* arr = eventMarkers;
-	(arr[0]).startMarker = val;
+void PerfEventLogger::addStartMarkEvent(GCMMP_BREAK_DOWN_ENUM evt, uint64_t val) {
+	(eventMarkers[evt]).startMarker = val;
 }
 
-uint64_t PerfEventLogger::addEndMarkEvent(GCPauseThreadMarker evt, uint64_t val){
+uint64_t PerfEventLogger::addEndMarkEvent(GCMMP_BREAK_DOWN_ENUM evt, uint64_t val){
 	uint64_t _diff = 0;
 	eventMarkers[evt].finalMarker = val;
 	if(eventMarkers[evt].startMarker > 0) {
