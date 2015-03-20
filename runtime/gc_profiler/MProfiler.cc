@@ -346,9 +346,9 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		void* entry) :
 				index_(argOptions->mprofile_type_),
+				prof_thread_(NULL),
 				main_thread_(NULL),
 				gc_daemon_(NULL),
-				prof_thread_(NULL),
 				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
 				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 				running_(false),
