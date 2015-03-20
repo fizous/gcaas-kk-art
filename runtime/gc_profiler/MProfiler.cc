@@ -509,6 +509,7 @@ void PerfCounterProfiler::logPerfData() {
 			LOG(ERROR) << "logging specific gcThreadProf: " << threadProf->getThreadTag() << ", tid:" << threadProf->GetTid();
 		}
 		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
+		threadProf->GetPerfRecord()->dumpMarks();
 		_sumData += _data;
 	}
 	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData << ", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);

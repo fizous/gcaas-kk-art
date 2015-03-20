@@ -46,6 +46,17 @@ PerfEventLogger::PerfEventLogger(void) {
 	}
 }
 
+void PerfEventLogger::dumpMarks(void) {
+	for(int i = GCMMP_GC_BRK_NONE; i < GCMMP_GC_BRK_MAXIMUM; i++){
+		GCMMP_BREAK_DOWN_ENUM valIter = static_cast<GCMMP_BREAK_DOWN_ENUM>(i);
+    if(eventAccMarkers[valIter] > 0) {
+    	LOG(ERROR) << "markedEvents: " << valIter << ", " << eventAccMarkers[valIter];
+    }
+	}
+}
+
+
+
 void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
 	events.push_back(EventReading(tag, data));
 }
@@ -53,6 +64,10 @@ void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
 void MPPerfCounter::addStartEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	readPerfData();
 	evtLogger.addStartMarkEvent(evt, data);
+}
+
+void MPPerfCounter::dumpMarks(void) {
+	evtLogger.dumpMarks();
 }
 
 void MPPerfCounter::addEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
