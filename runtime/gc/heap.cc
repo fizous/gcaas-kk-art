@@ -1133,8 +1133,10 @@ void Heap::GetReferringObjects(mirror::Object* o, int32_t max_count,
 void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.
+
 	mprofiler::MProfiler::MProfMarkStartExplGCHWEvent();
   Thread* self = Thread::Current();
+  LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
   mprofiler::MProfiler::MProfMarkGCExplTimeEvent(self);
   WaitForConcurrentGcToComplete(self);
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
