@@ -2038,12 +2038,13 @@ void Heap::ConcurrentGC(Thread* self) {
       return;
     }
   }
-  //LOG(ERROR) << "vmprofiler: concurrent: "<< self->GetTid();
+  LOG(ERROR) << "<<<<vmprofiler: concurrent: "<< self->GetTid();
   mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageInternal(next_gc_type_, kGcCauseBackground, false);
   }
+  LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
 }
 
