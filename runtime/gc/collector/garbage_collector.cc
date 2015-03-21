@@ -65,7 +65,8 @@ void GarbageCollector::Run() {
   uint64_t start_time = NanoTime();
   pause_times_.clear();
   duration_ns_ = 0;
-
+  Thread* self = Thread::Current();
+  LOG(ERROR) << ">>>>vmprofiler: GCRun "<< self->GetTid();
   InitializePhase();
 
   if (!IsConcurrent()) {
@@ -110,6 +111,8 @@ void GarbageCollector::Run() {
   duration_ns_ = end_time - start_time;
 
   FinishPhase();
+
+  LOG(ERROR) << "<<<<vmprofiler: GCRun "<< self->GetTid();
 }
 
 void GarbageCollector::SwapBitmaps() {
