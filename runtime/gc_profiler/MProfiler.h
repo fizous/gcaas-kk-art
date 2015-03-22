@@ -255,6 +255,7 @@ public:
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t);
 	static void MProfileSignalCatcher(int);
+	static void MProfDetachThread(art::Thread*);
 };
 
 
@@ -427,7 +428,7 @@ public:
   bool MainProfDaemonExec(void);
 
 
-  static void MProfDetachThread(art::Thread*);
+
 
 
   static void MProfMarkStartAllocGCHWEvent(void);

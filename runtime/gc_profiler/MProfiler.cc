@@ -710,30 +710,30 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 		receivedSignal_(false),
 		start_heap_bytes_(0)
 {
-	if(IsProfilingEnabled()) {
-		size_t _loop = 0;
-		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
-			if(MProfiler::profilTypes[_loop].id_ == index_)
-				break; //found
-		}
-		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
-			LOG(ERROR) << "MProfiler : Performance type is not supported";
-		}
-		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
-		flags_ = profEntry->flags_;
-		dump_file_name_ = profEntry->logFile_;
-		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
-		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
-		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
-																									*prof_thread_mutex_));
-		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
-		GCMMP_VLOG(INFO) << "MProfiler Created";
-
-	} else {
-		flags_ = 0;
-		dump_file_name_ = NULL;
-		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
-	}
+//	if(IsProfilingEnabled()) {
+//		size_t _loop = 0;
+//		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
+//			if(MProfiler::profilTypes[_loop].id_ == index_)
+//				break; //found
+//		}
+//		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
+//			LOG(ERROR) << "MProfiler : Performance type is not supported";
+//		}
+//		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+//		flags_ = profEntry->flags_;
+//		dump_file_name_ = profEntry->logFile_;
+//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
+//		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
+//		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
+//																									*prof_thread_mutex_));
+//		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
+//		GCMMP_VLOG(INFO) << "MProfiler Created";
+//
+//	} else {
+//		flags_ = 0;
+//		dump_file_name_ = NULL;
+//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
+//	}
 
 }
 
@@ -1204,21 +1204,21 @@ void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context
 }
 
 void MProfiler::OpenDumpFile() {
-	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
-		char str[256];
-		strcpy(str, gcMMPRootPath[i]);
-		strcat(str, dump_file_name_);
-
-
-		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
-	  if (fd == -1) {
-	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
-	    continue;
-	  }
-    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
-    dump_file_ = new File(fd, std::string(dump_file_name_));
-    return;
-	}
+//	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
+//		char str[256];
+//		strcpy(str, gcMMPRootPath[i]);
+//		strcat(str, dump_file_name_);
+//
+//
+//		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
+//	  if (fd == -1) {
+//	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
+//	    continue;
+//	  }
+//    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+//    dump_file_ = new File(fd, std::string(dump_file_name_));
+//    return;
+//	}
 }
 
 
@@ -1303,10 +1303,10 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 /*
  * Detach a thread from the MProfiler
  */
-void MProfiler::MProfDetachThread(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
+void VMProfiler::MProfDetachThread(art::Thread* th) {
+	if(VMProfiler::IsMProfRunning()) {
 		GCMMP_VLOG(INFO) << "VMProfiler: Detaching thid: " << th->GetTid();
-		if(Runtime::Current()->mprofiler_->vmProfile->dettachThread(th->GetProfRec())) {
+		if(Runtime::Current()->GetMProfiler()->dettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
 			GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
 		}
