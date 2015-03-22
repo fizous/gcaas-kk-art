@@ -1329,7 +1329,7 @@ void VMProfiler::MProfMarkStartAllocGCHWEvent(void) {
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
-void MProfiler::MProfMarkEndAllocGCHWEvent(void){
+void VMProfiler::MProfMarkEndAllocGCHWEvent(void){
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
 	}
