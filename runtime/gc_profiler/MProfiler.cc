@@ -395,14 +395,14 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
 		bool _found = false;
-		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
-			if(MProfiler::profilTypes[_loop].id_ == index_) {
+		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
+			if(VMProfiler::profilTypes[_loop].id_ == index_) {
 				_found = true;
 				break;
 			}
 		}
 		if(_found) {
-			const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+			const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
 			resetHeapAllocStatus();
 			flags_ = profEntry->flags_;
 			dump_file_name_ = profEntry->logFile_;
