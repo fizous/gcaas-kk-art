@@ -697,7 +697,7 @@ MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
 	LOG(ERROR) << "VMProfiler : MMUProfiler";
 }
 
-VMProfiler* CreateVMprofiler(GCMMP_Options* opts) {
+VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
 	size_t _loop = 0;
 	bool _found = false;
 	for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
