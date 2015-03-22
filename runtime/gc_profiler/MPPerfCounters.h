@@ -120,6 +120,27 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 	GCMMP_BREAK_DOWN_ENUM type;
 } GCPauseThreadMarker;
 
+
+typedef struct GCMMPHeapStatus_S {
+	double 			index;
+	double			timeInNsec;
+	size_t 			allocatedBytes;
+	size_t 			currAllocBytes;
+	size_t			currFootPrint;
+	size_t 			heapIdealFree;
+	size_t 			concurrentStartBytes;
+	size_t			softLimit;
+	double			heapIntegral;
+	double			gcCounts;
+	double			gcCPULoad;
+	double			gcCPUIdleLoad;
+	double 			heapTargetUtilization;
+	double 			gcDaemonUsage;
+	double			gcMutUsage;
+	u64 				totalMetric;
+} GCMMPHeapStatus;
+
+
 class PerfEventLogger {
  public:
   // Splits are nanosecond times and split names.

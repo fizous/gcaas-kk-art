@@ -187,6 +187,17 @@ void GCMMPThreadProf::readPerfCounter(int32_t val) {
 
 }
 
+
+void GCMMPThreadProf::readPerfCounter(int32_t val, uint64_t* totalVals, uint64_t* gcVals) {
+	if(GetPerfRecord() == NULL)
+		return;
+	if(state == GCMMP_TH_RUNNING) {
+		GetPerfRecord()->storeReading(val);
+		GetPerfRecord()->getGCMarks(gcVals);
+	}
+	*totalVals +=  GetPerfRecord()->data;
+}
+
 uint64_t GCMMPThreadProf::getDataPerfCounter(void) {
 	if(GetPerfRecord() == NULL)
 		return 0;
@@ -299,12 +310,33 @@ void VMProfiler::startProfiling(void) {
 	}
 }
 
+
+void VMProfiler::updateHeapAllocStatus(void) {
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+
+
+	int32_t _allocBytes = total_alloc_bytes_.load();
+
+	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindow);
+	heapStatus.timeInNsec = GetRelevantCPUTime();
+	heapStatus.allocatedBytes = _allocBytes;
+	heapStatus.currAllocBytes = heap_->GetBytesAllocated();
+	heapStatus.concurrentStartBytes = heap_->GetConcStartBytes();
+	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
+
+
+}
+
 void VMProfiler::notifyAllocation(size_t allocSize) {
 	if(!IsAllocWindowsSet())
 		return;
 	int32_t initValue = total_alloc_bytes_.load();
+	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
+
 	total_alloc_bytes_.fetch_add(allocSize);
-	if((initValue >> 16) != (total_alloc_bytes_.load() >> 16)){
+
+	if((_newIndex) != (getAllocIndex())) {
+
 		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
 
 
@@ -382,6 +414,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 		}
 		if(_found) {
 			const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+			resetHeapAllocStatus();
 			flags_ = profEntry->flags_;
 			dump_file_name_ = profEntry->logFile_;
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
@@ -489,14 +522,23 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 }
 
 
+void VMProfiler::updateHeapPerfStatus(uint64_t totalVals, uint64_t gcVals) {
+	heapStatus.totalMetric = totalVals;
+	heapStatus.gcDaemonUsage = (gcVals * 1.0) /totalVals;
+	heapStatus.gcMutUsage = 0.0;
+}
+
 void PerfCounterProfiler::getPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
+	uint64_t _totalVals = 0;
+	uint64_t _gcVals = 0;
 	//gc::Heap* heap_ = Runtime::Current()->GetHeap();
 
 	//LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
 	for (const auto& threadProf : threadProfList_) {
-		threadProf->readPerfCounter(currBytes_);
+		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcVals);
 	}
+	updateHeapPerfStatus(_totalVals, _gcVals);
 }
 
 void PerfCounterProfiler::logPerfData() {
@@ -533,6 +575,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
     //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+    updateHeapAllocStatus();
     getPerfData();
     receivedSignal_ = false;
 

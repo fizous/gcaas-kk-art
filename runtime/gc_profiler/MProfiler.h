@@ -109,6 +109,7 @@ public:
   static constexpr int kGCMMPDumpSignal = SIGUSR2;
   static const int kGCMMPDefaultAffinity = -1;
 	static const char * gcMMPRootPath[];
+	static constexpr int kGCMMPLogAllocWindow = 16;
   // combines markAllocWindows, createProfDaemon, hasProfThread,
 
 	const bool enabled_;
@@ -141,6 +142,14 @@ public:
 
 
   AtomicInteger total_alloc_bytes_;
+
+  uint64_t GetRelevantCPUTime(void) const {
+  	return ProcessTimeNS() - cpu_time_ns_;
+  }
+
+  uint64_t GetRelevantRealTime(void) const {
+  	return uptime_nanos() - start_time_ns_;
+  }
 
 
   std::vector<GCMMPThreadProf*> threadProfList_;
@@ -221,6 +230,12 @@ public:
 
 	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt){};
 	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {};
+
+	GCMMPHeapStatus heapStatus;
+	virtual double getAllocIndex(){return heapStatus.index;};
+	virtual void resetHeapAllocStatus(){memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));};
+	void updateHeapAllocStatus(void);
+	void updateHeapPerfStatus(uint64_t, uint64_t);
 };
 
 
