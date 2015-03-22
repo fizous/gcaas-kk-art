@@ -168,15 +168,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	file->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
 }
 
-int GCMMPThreadProf::GetThreadType(void) {
-	if(GCMMPThreadProf::mProfiler->GetMainID() == GetTid()) {
-		return 1;
-	}
-	if(GCMMPThreadProf::mProfiler->GetGCDaemonID() == GetTid()) {
-		return 2;
-	}
-	return 0;
-}
+
 
 void GCMMPThreadProf::readPerfCounter(int32_t val) {
 	if(GetPerfRecord() == NULL)
@@ -976,7 +968,7 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 			 return;
 		 art::File* f = mProfiler->GetDumpFile();
 		 int _pid = profRec->GetTid();
-		 int _type = profRec->GetThreadType();
+		 int _type = profRec->getThreadTag();
 		 f->WriteFully(&_pid, sizeof(int));
 		 f->WriteFully(&_type, sizeof(int));
 		 f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));

@@ -149,7 +149,6 @@ public:
   	return &lifeTime_;
   }
 
-  int GetThreadType(void);
 
   void resetPerfRecord(){
   	perf_record_ = NULL;
