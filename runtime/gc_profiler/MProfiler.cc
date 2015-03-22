@@ -381,8 +381,7 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 
-VMProfiler::VMProfiler(GCMMP_Options* argOptions,
-		void* entry) :
+VMProfiler::VMProfiler(GCMMP_Options* argOptions) :
 				index_(argOptions->mprofile_type_),
 				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
@@ -406,6 +405,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions,
 			resetHeapAllocStatus();
 			flags_ = profEntry->flags_;
 			dump_file_name_ = profEntry->logFile_;
+			perfName_ = profEntry->name_;
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
 																										*prof_thread_mutex_));
@@ -672,13 +672,13 @@ void VMProfiler::createProfDaemon(){
 //	}
 }
 
-PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
-		void* entry): VMProfiler(argOptions, entry){
+PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions):
+		VMProfiler(argOptions){
 	GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
-	if(initCounters(_entry->name_) != 0) {
+	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
 	} else {
-		hwEvent_ = _entry->name_;
+		hwEvent_ = perfName_;
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid..evtName=" << hwEvent_;
 
 	}
@@ -691,8 +691,8 @@ int PerfCounterProfiler::initCounters(const char* evtName){
 }
 
 
-MMUProfiler::MMUProfiler(GCMMP_Options* argOptions,
-		void* entry): VMProfiler(argOptions, entry){
+MMUProfiler::MMUProfiler(GCMMP_Options* argOptions):
+		VMProfiler(argOptions){
 
 	LOG(ERROR) << "VMProfiler : MMUProfiler";
 }

@@ -90,7 +90,7 @@ protected:
   const char * dump_file_name_;
   art::File* dump_file_;
 
-
+  const char			*perfName_;
 
   void InitializeProfiler(void);
 
@@ -168,7 +168,7 @@ public:
   void notifyAllocation(size_t);
   void createProfDaemon();
 
-  VMProfiler(GCMMP_Options*, void*);
+  VMProfiler(GCMMP_Options*);
 	virtual ~VMProfiler(){}
 
 	static void* runDaemon(void* arg);
@@ -289,7 +289,7 @@ public:
 class MMUProfiler : public VMProfiler {
 public:
 
-	MMUProfiler(GCMMP_Options* opts, void* entry);
+	MMUProfiler(GCMMP_Options* opts);
 	~MMUProfiler(){};
 
 
@@ -309,7 +309,7 @@ class PerfCounterProfiler : public VMProfiler {
 public:
 	const char			*hwEvent_;
 
-	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
+	PerfCounterProfiler(GCMMP_Options* opts);
 	~PerfCounterProfiler(){};
 	int initCounters(const char*);
 	MPPerfCounter* createHWCounter(Thread*);

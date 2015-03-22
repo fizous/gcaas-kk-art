@@ -521,7 +521,7 @@ void ThreadList::Register(Thread* self) {
   }
   CHECK(!Contains(self));
   list_.push_back(self);
-	art::mprofiler::MProfiler::MProfAttachThread(self);
+	art::mprofiler::VMProfiler::MProfAttachThread(self);
 }
 
 void ThreadList::Unregister(Thread* self) {
