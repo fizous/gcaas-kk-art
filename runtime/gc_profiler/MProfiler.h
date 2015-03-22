@@ -203,6 +203,11 @@ public:
   bool IsAllocWindowsSet() {
   	return (flags_ & GCMMP_FLAGS_MARK_ALLOC_WINDOWS);
   }
+
+  bool IsProfilingTimeEvent() {
+    return IsProfilingRunning() && isMarkTimeEvents();
+  }
+
 	void setMainThread(Thread* thread) {
 		main_thread_ = thread;
 	}
@@ -251,11 +256,33 @@ public:
 	void GCMMProfPerfCounters(const char*);
 
 
+  void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
+  void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
+
 	static bool IsMProfRunning();
+	static bool IsMProfilingTimeEvent();
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
+
+  static void MProfMarkStartAllocGCHWEvent(void);
+  static void MProfMarkEndAllocGCHWEvent(void);
+  static void MProfMarkStartExplGCHWEvent(void);
+  static void MProfMarkEndExplGCHWEvent(void);
+
+
+  static void MProfMarkWaitTimeEvent(art::Thread*);
+  static void MProfMarkEndWaitTimeEvent(art::Thread*);
+  static void MProfMarkGCHatTimeEvent(art::Thread*);
+  static void MProfMarkEndGCHatTimeEvent(art::Thread*);
+  static void MProfMarkGCExplTimeEvent(art::Thread*);
+  static void MProfMarkEndGCExplTimeEvent(art::Thread*);
+  static void MProfMarkStartSafePointEvent(art::Thread*);
+  static void MProfMarkEndSafePointEvent(art::Thread*);
+  static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
+  static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
+
 };
 
 
@@ -423,7 +450,7 @@ public:
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
 
-  static bool IsMProfilingTimeEvent();
+
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
 
@@ -431,23 +458,10 @@ public:
 
 
 
-  static void MProfMarkStartAllocGCHWEvent(void);
-  static void MProfMarkEndAllocGCHWEvent(void);
-  static void MProfMarkStartExplGCHWEvent(void);
-  static void MProfMarkEndExplGCHWEvent(void);
 
-  static void MProfMarkWaitTimeEvent(art::Thread*);
-  static void MProfMarkEndWaitTimeEvent(art::Thread*);
-  static void MProfMarkGCHatTimeEvent(art::Thread*);
-  static void MProfMarkEndGCHatTimeEvent(art::Thread*);
-  static void MProfMarkGCExplTimeEvent(art::Thread*);
-  static void MProfMarkEndGCExplTimeEvent(art::Thread*);
-  static void MProfMarkStartSafePointEvent(art::Thread*);
-  static void MProfMarkEndSafePointEvent(art::Thread*);
-  static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
-  static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
-  void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
-  void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
+
+
+
   void ProcessSignalCatcher(int);
 
   /* represents the time captured when we started the profiling */

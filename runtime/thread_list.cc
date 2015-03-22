@@ -531,7 +531,7 @@ void ThreadList::Unregister(Thread* self) {
   // Any time-consuming destruction, plus anything that can call back into managed code or
   // suspend and so on, must happen at this point, and not in ~Thread.
   self->Destroy();
-  art::mprofiler::MProfiler::MProfDetachThread(self);
+  art::mprofiler::VMProfiler::MProfDetachThread(self);
   uint32_t thin_lock_id = self->thin_lock_id_;
   self->thin_lock_id_ = 0;
   ReleaseThreadId(self, thin_lock_id);

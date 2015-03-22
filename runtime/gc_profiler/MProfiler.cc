@@ -1313,37 +1313,37 @@ void VMProfiler::MProfDetachThread(art::Thread* th) {
 	}
 }
 
-void MProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec,
+void VMProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec,
 		GCMMP_BREAK_DOWN_ENUM evType) {
 	profRec->getPauseMgr()->MarkStartTimeEvent(evType);
 }
 
-void MProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
+void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 		GCMMP_BREAK_DOWN_ENUM evType) {
 	profRec->getPauseMgr()->MarkEndTimeEvent(evType);
 }
 
 
-void MProfiler::MProfMarkStartAllocGCHWEvent(void) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->vmProfile->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
+void VMProfiler::MProfMarkStartAllocGCHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 void MProfiler::MProfMarkEndAllocGCHWEvent(void){
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->vmProfile->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 
-void MProfiler::MProfMarkStartExplGCHWEvent(void) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->vmProfile->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
+void VMProfiler::MProfMarkStartExplGCHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
-void MProfiler::MProfMarkEndExplGCHWEvent(void) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->vmProfile->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
+void VMProfiler::MProfMarkEndExplGCHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
@@ -1351,86 +1351,86 @@ void MProfiler::MProfMarkEndExplGCHWEvent(void) {
 /*
  * Detach a thread from the MProfiler
  */
-void MProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
+			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
 /*
  * Detach a thread from the MProfiler
  */
-void MProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
 
-void MProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_HAT);
 	}
 }
 
-void MProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_HAT);
 	}
 }
 
 
-void MProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
-void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
-void MProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_SAFEPOINT);
 	}
 }
 
-void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th) {
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkEndSafePointEvent(art::Thread* th) {
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_SAFEPOINT);
 	}
 }
 
-void MProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-				Runtime::Current()->mprofiler_->MarkWaitTimeEvent(thProf,
+				Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
 						GCMMP_GC_BRK_SUSPENSION);
 				return;
 			}
@@ -1439,12 +1439,12 @@ void MProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thSt
 	return;
 }
 
-void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
-	if(MProfiler::IsMProfilingTimeEvent()) {
+void VMProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState thState){
+	if(VMProfiler::IsMProfilingTimeEvent()) {
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-				Runtime::Current()->mprofiler_->MarkEndWaitTimeEvent(thProf,
+				Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
 						GCMMP_GC_BRK_SUSPENSION);
 			}
 		}
@@ -1457,8 +1457,8 @@ void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState t
 /*
  * Return true only when the MProfiler is Running
  */
-bool MProfiler::IsMProfilingTimeEvent() {
-	MProfiler* mP = Runtime::Current()->mprofiler_;
+bool VMProfiler::IsMProfilingTimeEvent() {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingTimeEvent();
 	return false;
