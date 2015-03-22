@@ -70,10 +70,9 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 
 
 template <typename T>
-art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts,
-		void* entry)
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts)
 {
-	return new T(opts, entry);
+	return new T(opts);
 }
 
 

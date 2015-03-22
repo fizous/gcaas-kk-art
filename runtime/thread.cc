@@ -573,11 +573,11 @@ void Thread::RunCheckpointFunction() {
 
 
 void Thread::MarkStartSuspensionTime(ThreadState new_state){
-	mprofiler::MProfiler::MProfMarkSuspendTimeEvent(Thread::Current(), new_state);
+	mprofiler::VMProfiler::MProfMarkSuspendTimeEvent(Thread::Current(), new_state);
 }
 
 void Thread::MarkStartEndSuspensionTime(ThreadState new_state){
-	mprofiler::MProfiler::MProfMarkEndSuspendTimeEvent(Thread::Current(), new_state);
+	mprofiler::VMProfiler::MProfMarkEndSuspendTimeEvent(Thread::Current(), new_state);
 }
 
 bool Thread::RequestCheckpoint(Closure* function) {
