@@ -228,6 +228,9 @@ public:
   void ProcessSignalCatcher(int);
 
   virtual MPPerfCounter* createHWCounter(Thread*)=0;
+  virtual void setPauseManager(GCMMPThreadProf* thProf) {
+  	thProf->pauseManager = NULL;
+  };
 
   size_t getRelevantAllocBytes(void);
 
@@ -301,6 +304,7 @@ public:
 	bool periodicDaemonExec(void);
 	bool dettachThread(GCMMPThreadProf*);
 
+	void setPauseManager(GCMMPThreadProf*);
 
 
 

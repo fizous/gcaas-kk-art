@@ -200,6 +200,8 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	  pauseManager(NULL),
 	  state(GCMMP_TH_STARTING) {
 
+
+
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
 //	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 //		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
@@ -208,12 +210,23 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 //	pauseManager = new GCPauseThreadManager();
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
+	vmProfiler->setPauseManager(this);
 	state = GCMMP_TH_RUNNING;
 
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
+
+void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
+	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+		memset((void*) &thProf->timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+	}
+	thProf->pauseManager = new GCPauseThreadManager();
+
+
+}
+
 
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),

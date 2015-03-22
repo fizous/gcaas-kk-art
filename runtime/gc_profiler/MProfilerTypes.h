@@ -100,13 +100,15 @@ class GCMMPThreadProf {
 	/* system ID of the thread monitored */
 	const pid_t pid;
 
-	/* markers used to set the temporary information to start an event */
-	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
+
 
 	volatile bool suspendedGC;
-	GCPauseThreadManager* pauseManager;
+
 	GCMMP_ProfileActivity lifeTime_;
 public:
+	GCPauseThreadManager* pauseManager;
+	/* markers used to set the temporary information to start an event */
+	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 	static VMProfiler* mProfiler;
 	volatile GCMMPThreadProfState state;
 	GCMMPThProfileTag tag_;
