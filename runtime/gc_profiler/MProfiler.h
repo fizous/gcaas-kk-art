@@ -56,7 +56,7 @@ class VMProfiler;
 
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
-typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*);
+typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
 /* types of Profiling defined here */
 typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	int 						id_;					/* id of the profiling */
@@ -70,9 +70,9 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 
 
 template <typename T>
-art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts)
+art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, void* entry)
 {
-	return new T(opts);
+	return new T(opts, entry);
 }
 
 
@@ -167,7 +167,7 @@ public:
   void notifyAllocation(size_t);
   void createProfDaemon();
 
-  VMProfiler(GCMMP_Options*);
+  VMProfiler(GCMMP_Options*, void*);
 	virtual ~VMProfiler(){}
 
 	static void* runDaemon(void* arg);
@@ -282,13 +282,16 @@ public:
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
+
+  VMProfiler* CreateVMprofiler(GCMMP_Options*);
+
 };
 
 
 class MMUProfiler : public VMProfiler {
 public:
 
-	MMUProfiler(GCMMP_Options* opts);
+	MMUProfiler(GCMMP_Options* opts, void* entry);
 	~MMUProfiler(){};
 
 
@@ -308,7 +311,7 @@ class PerfCounterProfiler : public VMProfiler {
 public:
 	const char			*hwEvent_;
 
-	PerfCounterProfiler(GCMMP_Options* opts);
+	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler(){};
 	int initCounters(const char*);
 	MPPerfCounter* createHWCounter(Thread*);

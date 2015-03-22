@@ -381,7 +381,7 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 
-VMProfiler::VMProfiler(GCMMP_Options* argOptions) :
+VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				index_(argOptions->mprofile_type_),
 				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
 				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
@@ -672,8 +672,8 @@ void VMProfiler::createProfDaemon(){
 //	}
 }
 
-PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions):
-		VMProfiler(argOptions){
+PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions, void* entry):
+		VMProfiler(argOptions, entry){
 	//GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
@@ -691,13 +691,28 @@ int PerfCounterProfiler::initCounters(const char* evtName){
 }
 
 
-MMUProfiler::MMUProfiler(GCMMP_Options* argOptions):
-		VMProfiler(argOptions){
+MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
+		VMProfiler(argOptions, entry){
 
 	LOG(ERROR) << "VMProfiler : MMUProfiler";
 }
 
-
+VMProfiler* CreateVMprofiler(GCMMP_Options* opts) {
+	size_t _loop = 0;
+	bool _found = false;
+	for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
+		if(VMProfiler::profilTypes[_loop].id_ == opts->mprofile_type_) {
+			_found = true;
+			break;
+		}
+	}
+	if(_found) {
+		const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
+		VMProfiler* profiler = profEntry->creator_(opts, (void*) profEntry);
+		return profiler;
+	}
+	return NULL;
+}
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
