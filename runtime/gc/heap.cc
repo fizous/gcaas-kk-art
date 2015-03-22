@@ -791,11 +791,11 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   // stack or the live bitmap.
   Thread* self = Thread::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
-  	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
-  	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
+  	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
+  	mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
-    mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
-    mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
+    mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
+    mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
   }
 }
 
@@ -865,9 +865,9 @@ inline mirror::Object* Heap::Allocate(Thread* self, T* space, size_t alloc_size,
   if (ptr != NULL) {
     return ptr;
   }
-  mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   mirror::Object* ptrAfterGC = AllocateInternalWithGc(self, space, alloc_size, bytes_allocated);
-  mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
   return ptrAfterGC;
 }
 
@@ -909,10 +909,10 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     }
 
     if (run_gc) {
-    	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
+    	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
     	// If we actually ran a different type of Gc than requested, we can skip the index forwards.
       collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
-      mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
+      mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
       DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
       i = static_cast<size_t>(gc_type_ran);
 
@@ -940,9 +940,9 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
            << " allocation";
 
   // We don't need a WaitForConcurrentGcToComplete here either.
-  mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
+  mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseForAlloc, true);
-  mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
+  mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
   return TryToAllocate(self, space, alloc_size, true, bytes_allocated);
 }
 
@@ -1134,14 +1134,14 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.
 
-	mprofiler::MProfiler::MProfMarkStartExplGCHWEvent();
+	mprofiler::VMProfiler::MProfMarkStartExplGCHWEvent();
   Thread* self = Thread::Current();
   LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
-  mprofiler::MProfiler::MProfMarkGCExplTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
   WaitForConcurrentGcToComplete(self);
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
-  mprofiler::MProfiler::MProfMarkEndGCExplTimeEvent(self);
-  mprofiler::MProfiler::MProfMarkEndExplGCHWEvent();
+  mprofiler::VMProfiler::MProfMarkEndGCExplTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
 
 void Heap::PreZygoteFork() {
@@ -1749,7 +1749,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
   if (concurrent_gc_) {
     ATRACE_BEGIN("GC: Wait For Concurrent");
     bool do_wait;
-    mprofiler::MProfiler::MProfMarkWaitTimeEvent(self);
+    mprofiler::VMProfiler::MProfMarkWaitTimeEvent(self);
     uint64_t wait_start = NanoTime();
     {
       // Check if GC is running holding gc_complete_lock_.
@@ -1773,7 +1773,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
         LOG(INFO) << "WaitForConcurrentGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
-    mprofiler::MProfiler::MProfMarkEndWaitTimeEvent(self);
+    mprofiler::VMProfiler::MProfMarkEndWaitTimeEvent(self);
     ATRACE_END();
   }
   return last_gc_type;
@@ -2039,13 +2039,13 @@ void Heap::ConcurrentGC(Thread* self) {
     }
   }
   LOG(ERROR) << "<<<<vmprofiler: concurrent: "<< self->GetTid();
-  mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageInternal(next_gc_type_, kGcCauseBackground, false);
   }
   LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
-  mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
+  mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
 }
 
 void Heap::RequestHeapTrim() {
@@ -2131,11 +2131,11 @@ void Heap::RegisterNativeAllocation(int bytes) {
 
         // If we still are over the watermark, attempt a GC for alloc and run finalizers.
         if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_limit_) {
-        	mprofiler::MProfiler::MProfMarkGCHatTimeEvent(self);
-        	mprofiler::MProfiler::MProfMarkStartAllocGCHWEvent();
+        	mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
+        	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
           CollectGarbageInternal(collector::kGcTypePartial, kGcCauseForAlloc, false);
-        	mprofiler::MProfiler::MProfMarkEndGCHatTimeEvent(self);
-        	mprofiler::MProfiler::MProfMarkEndAllocGCHWEvent();
+        	mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
+        	mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
           env->CallStaticVoidMethod(WellKnownClasses::java_lang_System,
                                     WellKnownClasses::java_lang_System_runFinalization);
           CHECK(!env->ExceptionCheck());
