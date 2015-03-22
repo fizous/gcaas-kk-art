@@ -41,7 +41,7 @@
 namespace art {
 
 namespace mprofiler {
-  class MProfiler;
+  class VMProfiler;
 }
 
 namespace gc {
@@ -288,7 +288,7 @@ class Runtime {
     return heap_;
   }
 
-  mprofiler::MProfiler* GetMProfiler() const {
+  mprofiler::VMProfiler* GetMProfiler() const {
     return mprofiler_;
   }
 
@@ -527,7 +527,7 @@ class Runtime {
   // As returned by ClassLoader.getSystemClassLoader().
   jobject system_class_loader_;
 public:
-  mprofiler::MProfiler* mprofiler_;
+  mprofiler::VMProfiler* mprofiler_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };

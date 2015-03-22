@@ -236,6 +236,10 @@ public:
 	virtual void resetHeapAllocStatus(){memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));};
 	void updateHeapAllocStatus(void);
 	void updateHeapPerfStatus(uint64_t, uint64_t);
+
+	void PreForkPreparation(void);
+	void GCMMProfPerfCounters(const char*);
+
 };
 
 
@@ -389,8 +393,6 @@ public:
 
 	void ProcessSignal(int);
 
-	void PreForkPreparation(void);
-
   bool IsProfilingEnabled() const {
     return enabled_;
   }
@@ -406,7 +408,7 @@ public:
 
   void AttachThread(Thread*);
   bool DettachThread(GCMMPThreadProf*);
-  void GCMMProfPerfCounters(const char*);
+
 
   void SetThreadAffinity(Thread*,bool);
 

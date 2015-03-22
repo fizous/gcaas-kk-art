@@ -60,7 +60,7 @@ void PerfEventLogger::getGCMarks(uint64_t* contVal) {
 		GCMMP_BREAK_DOWN_ENUM valIter = static_cast<GCMMP_BREAK_DOWN_ENUM>(i);
     if(eventAccMarkers[valIter] > 0) {
     	*contVal += eventAccMarkers[valIter];
-    	LOG(ERROR) << "markedEvents: " << valIter << ", " << eventAccMarkers[valIter];
+    	//LOG(ERROR) << "markedEvents: " << valIter << ", " << eventAccMarkers[valIter];
     }
 	}
 }

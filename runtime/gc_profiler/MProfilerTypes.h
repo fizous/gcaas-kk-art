@@ -107,7 +107,7 @@ class GCMMPThreadProf {
 	GCPauseThreadManager* pauseManager;
 	GCMMP_ProfileActivity lifeTime_;
 public:
-	static MProfiler* mProfiler;
+	static VMProfiler* mProfiler;
 	volatile GCMMPThreadProfState state;
 	GCMMPThProfileTag tag_;
 

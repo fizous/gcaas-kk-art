@@ -115,7 +115,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
-MProfiler* GCMMPThreadProf::mProfiler = NULL;
+VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 
 
 const int MProfiler::kGCMMPDumpEndMarker = -99999999;
@@ -1234,22 +1234,22 @@ void MProfiler::OpenDumpFile() {
 
 
 
-void MProfiler::GCMMProfPerfCounters(const char* name) {
+void VMProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 				GCMMPThreadProf::mProfiler = this;
-				vmProfile->startProfiling();
+				startProfiling();
 				//InitializeProfiler();
 				return;
 			}
 		}
-		GCMMP_VLOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+		//GCMMP_VLOG(INFO) << "MProfiler did not find a target VM for " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
 	}
 }
 
-void MProfiler::PreForkPreparation() {
+void VMProfiler::PreForkPreparation() {
 	dvmGCMMPSetName = dvmGCMMProfPerfCounters;
 }
 
@@ -1400,7 +1400,7 @@ void MProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
 	}
 }
 
-void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th){
+void MProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th) {
 	if(MProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
@@ -1418,7 +1418,7 @@ void MProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
 	}
 }
 
-void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th){
+void MProfiler::MProfMarkEndSafePointEvent(art::Thread* th) {
 	if(MProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
@@ -1494,7 +1494,7 @@ int MProfiler::GetGCDaemonID(void)  {
 }// namespace art
 
 void dvmGCMMProfPerfCounters(const char* vmName){
-	art::mprofiler::MProfiler* mProfiler =
+	art::mprofiler::VMProfiler* mProfiler =
 			art::Runtime::Current()->GetMProfiler();
 	if(mProfiler != NULL) {
 		mProfiler->GCMMProfPerfCounters(vmName);
