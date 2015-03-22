@@ -1254,12 +1254,22 @@ void VMProfiler::PreForkPreparation() {
 }
 
 /*
+ * Return true only when the MProfiler is Running
+ */
+bool VMProfiler::IsMProfRunning() {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled())
+		return mP->IsProfilingRunning();
+	return false;
+}
+
+
+/*
  * Attach a thread from the MProfiler
  */
-void MProfiler::MProfAttachThread(art::Thread* th) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->AttachThread(th);
-
+void VMProfiler::MProfAttachThread(art::Thread* th) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->attachSingleThread(th);
 	}
 }
 
@@ -1267,10 +1277,9 @@ void MProfiler::MProfAttachThread(art::Thread* th) {
 /*
  * Attach a thread from the MProfiler
  */
-void MProfiler::MProfNotifyAlloc(size_t allocSize) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->vmProfile->notifyAllocation(allocSize);
-
+void VMProfiler::MProfNotifyAlloc(size_t allocSize) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->notifyAllocation(allocSize);
 	}
 }
 
@@ -1454,15 +1463,6 @@ void MProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState t
 }
 
 
-/*
- * Return true only when the MProfiler is Running
- */
-bool MProfiler::IsMProfRunning() {
-	MProfiler* mP = Runtime::Current()->mprofiler_;
-	if(mP != NULL && mP->IsProfilingEnabled())
-		return mP->IsProfilingRunning();
-	return false;
-}
 
 
 /*

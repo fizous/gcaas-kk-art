@@ -240,6 +240,10 @@ public:
 	void PreForkPreparation(void);
 	void GCMMProfPerfCounters(const char*);
 
+
+	static bool IsMProfRunning();
+	static void MProfAttachThread(art::Thread*);
+	static void MProfNotifyAlloc(size_t);
 };
 
 
@@ -282,6 +286,7 @@ public:
 
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt);
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt);
+
 };
 
 class MProfiler {
@@ -414,12 +419,12 @@ public:
 
   GCMMPDumpCurrentUsage dumpCurrUsage;
   void DumpCurrentOutpu(void);
-  static bool IsMProfRunning();
+
   static bool IsMProfilingTimeEvent();
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
-  static void MProfAttachThread(art::Thread*);
-  static void MProfNotifyAlloc(size_t);
+
+
   static void MProfDetachThread(art::Thread*);
   static void MProfileSignalCatcher(int);
 
