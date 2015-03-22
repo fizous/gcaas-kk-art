@@ -674,7 +674,7 @@ void VMProfiler::createProfDaemon(){
 
 PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions):
 		VMProfiler(argOptions){
-	GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
+	//GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
 	} else {
