@@ -108,9 +108,19 @@ protected:
 public:
   static constexpr int kGCMMPDumpSignal = SIGUSR2;
   static const int kGCMMPDefaultAffinity = -1;
-	static const char * gcMMPRootPath[];
 	static constexpr int kGCMMPLogAllocWindow = 16;
+	// List of profiled benchmarks in our system
+	static const char * benchmarks[];
   // combines markAllocWindows, createProfDaemon, hasProfThread,
+	/*
+	 * list of the directory paths to save the logs
+	 */
+	static const char * gcMMPRootPath[];
+
+	/*
+	 * Predefined List of types
+	 */
+	static const GCMMPProfilingEntry profilTypes[];
 
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
@@ -244,6 +254,7 @@ public:
 	static bool IsMProfRunning();
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t);
+	static void MProfileSignalCatcher(int);
 };
 
 
@@ -378,17 +389,8 @@ public:
   static const int kGCMMPMAXThreadCount = 64;
   static const int kGCMMPDefaultAffinity = -1;
   static const int kGCMMPDumpEndMarker;
-	// List of profiled benchmarks in our system
-	static const char * benchmarks[];
-	/*
-	 * list of the directory paths to save the logs
-	 */
-	static const char * gcMMPRootPath[];
 
-	/*
-	 * Predefined List of types
-	 */
-	static const GCMMPProfilingEntry profilTypes[];
+
 
 	MProfiler(GCMMP_Options*);
 
@@ -426,7 +428,7 @@ public:
 
 
   static void MProfDetachThread(art::Thread*);
-  static void MProfileSignalCatcher(int);
+
 
   static void MProfMarkStartAllocGCHWEvent(void);
   static void MProfMarkEndAllocGCHWEvent(void);

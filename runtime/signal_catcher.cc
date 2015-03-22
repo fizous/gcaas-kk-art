@@ -164,7 +164,7 @@ void SignalCatcher::HandleSigUsr1() {
 
 void SignalCatcher::HandleSigUsr2() {
   LOG(INFO) << "SIGUSR2 For GCMMProfile";
-  art::mprofiler::MProfiler::MProfileSignalCatcher(SIGUSR2);
+  art::mprofiler::VMProfiler::MProfileSignalCatcher(SIGUSR2);
 }
 
 int SignalCatcher::WaitForSignal(Thread* self, SignalSet& signals) {

@@ -33,7 +33,7 @@
 namespace art {
 namespace mprofiler {
 
-const char * MProfiler::benchmarks[] = {
+const char * VMProfiler::benchmarks[] = {
 			"com.aurorasoftworks.quadrant.ui.professional",
 			"purdue.specjvm98",
 			"purdue.dacapo",
@@ -45,15 +45,12 @@ const char * MProfiler::benchmarks[] = {
 			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
 };
 
-const char * MProfiler::gcMMPRootPath[] = {
-		"/sdcard/gcperf/", "/data/anr/"
-};
 
 const char * VMProfiler::gcMMPRootPath[] = {
 		"/sdcard/gcperf/", "/data/anr/"
 };
 
-const GCMMPProfilingEntry MProfiler::profilTypes[] = {
+const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 		{
 				 0x00,
 				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
@@ -798,7 +795,7 @@ void MProfiler::InitializeProfiler() {
 		GCMMP_VLOG(INFO) << "MProfiler: was already running";
 		return;
 	}
-	GCMMPThreadProf::mProfiler = this;
+	//GCMMPThreadProf::mProfiler = this;
 	start_heap_bytes_ = GetRelevantAllocBytes();
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
@@ -1077,9 +1074,9 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
 }
 
 
-void MProfiler::MProfileSignalCatcher(int signalVal) {
-	if(MProfiler::IsMProfRunning()) {
-		Runtime::Current()->mprofiler_->ProcessSignalCatcher(signalVal);
+void VMProfiler::MProfileSignalCatcher(int signalVal) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->ProcessSignalCatcher(signalVal);
 	}
 }
 
