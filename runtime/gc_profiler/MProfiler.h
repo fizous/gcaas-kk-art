@@ -283,7 +283,7 @@ public:
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
 
-  VMProfiler* CreateVMprofiler(GCMMP_Options*);
+  static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
 };
 
