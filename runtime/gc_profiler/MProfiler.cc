@@ -56,7 +56,7 @@ const char * VMProfiler::gcMMPRootPath[] = {
 const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		{
 				 0x00,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "CYCLES", "Perf Counter of CPU over a given period of time",
 				 "PERF_CPU_USAGE.log",
 				 NULL,
@@ -64,7 +64,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//Cycles
 		{
 				 0x01,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "INSTRUCTIONS", "Perf Counter of Instructions over a given period of time",
 				 "PERF_INSTRUCTIONS.log",
 				 NULL,
@@ -72,7 +72,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//Instructions
 		{
 				 0x02,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "L1I_ACCESS", "Perf Counter of L1I_ACCESS over a given period of time",
 				 "PERF_IL1_ACCESS.log",
 				 NULL,
@@ -80,7 +80,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1I_ACCESS
 		{
 				 0x03,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "L1I_MISS", "Perf Counter of L1I_MISS over a given period of time",
 				 "PERF_IL1_MISS.log",
 				 NULL,
@@ -88,7 +88,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1I_MISS
 		{
 				 0x04,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "L1D_ACCESS", "Perf Counter of L1D_ACCESS over a given period of time",
 				 "PERF_DL1_ACCESS.log",
 				 NULL,
@@ -96,7 +96,7 @@ const GCMMPProfilingEntry MProfiler::profilTypes[] = {
 		},//L1D_ACCESS
 		{
 				 0x05,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
 				 "L1D_MISS", "Perf Counter of L1D_MISS over a given period of time",
 				 "PERF_DL1_MISS.log",
 				 NULL,
@@ -187,7 +187,7 @@ void GCMMPThreadProf::readPerfCounter(int32_t val) {
 
 }
 
-uint64_t GCMMPThreadProf::getDataPerfCounter(void){
+uint64_t GCMMPThreadProf::getDataPerfCounter(void) {
 	if(GetPerfRecord() == NULL)
 		return 0;
 	return GetPerfRecord()->data;
@@ -300,6 +300,8 @@ void VMProfiler::startProfiling(void) {
 }
 
 void VMProfiler::notifyAllocation(size_t allocSize) {
+	if(!IsAllocWindowsSet())
+		return;
 	int32_t initValue = total_alloc_bytes_.load();
 	total_alloc_bytes_.fetch_add(allocSize);
 	if((initValue >> 16) != (total_alloc_bytes_.load() >> 16)){
@@ -511,7 +513,8 @@ void PerfCounterProfiler::logPerfData() {
 			LOG(ERROR) << "logging specific gcThreadProf: " << threadProf->getThreadTag() << ", tid:" << threadProf->GetTid();
 		}
 		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
-		threadProf->GetPerfRecord()->dumpMarks();
+		//threadProf->GetPerfRecord()->dumpMarks();
+		threadProf->GetPerfRecord()->getGCMarks(&_sumGc);
 		_sumData += _data;
 	}
 	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData << ", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);

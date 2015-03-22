@@ -181,6 +181,9 @@ public:
     return (flags_ & GCMMP_FLAGS_ATTACH_GCDAEMON);
   }
 
+  bool IsAllocWindowsSet() {
+  	return (flags_ & GCMMP_FLAGS_MARK_ALLOC_WINDOWS);
+  }
 	void setMainThread(Thread* thread) {
 		main_thread_ = thread;
 	}

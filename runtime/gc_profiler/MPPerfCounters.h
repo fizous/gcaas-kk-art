@@ -134,7 +134,7 @@ class PerfEventLogger {
   void addStartMarkEvent(GCMMP_BREAK_DOWN_ENUM, uint64_t);
   uint64_t addEndMarkEvent(GCMMP_BREAK_DOWN_ENUM, uint64_t);
   void dumpMarks(void);
-
+  void getGCMarks(uint64_t*);
   explicit PerfEventLogger(void);
 
 
@@ -180,6 +180,7 @@ public:
   void addStartEvent(GCMMP_BREAK_DOWN_ENUM);
   void addEndEvent(GCMMP_BREAK_DOWN_ENUM);
   void dumpMarks(void);
+  void getGCMarks(uint64_t*);
 };
 
 } //namespace mprofiler
