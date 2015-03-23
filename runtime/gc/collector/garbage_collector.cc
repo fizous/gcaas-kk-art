@@ -65,7 +65,7 @@ void GarbageCollector::Run() {
   uint64_t start_time = NanoTime();
   pause_times_.clear();
   duration_ns_ = 0;
-  Thread* self = Thread::Current();
+  //Thread* self = Thread::Current();
 
   InitializePhase();
 
