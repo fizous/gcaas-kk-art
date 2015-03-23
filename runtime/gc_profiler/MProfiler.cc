@@ -101,7 +101,7 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 		},//L1D_MISS
 		{
 				 0x0D,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 0,
 				 "MMU", "MMU over a given period of time",
 				 "PERF_MMU_REF.log",
 				 NULL,
