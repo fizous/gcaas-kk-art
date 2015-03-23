@@ -48,12 +48,10 @@ void dvmGCMMProfPerfCounters(const char*);
 namespace art {
 class ConditionVariable;
 class Mutex;
+class Thread;
 
 namespace mprofiler {
 class VMProfiler;
-
-
-
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
