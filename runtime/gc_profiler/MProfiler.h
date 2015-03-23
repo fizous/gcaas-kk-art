@@ -234,7 +234,7 @@ public:
   void startProfiling(void);
   void ProcessSignalCatcher(int);
 
-  virtual MPPerfCounter* createHWCounter(Thread*)=0;
+  virtual MPPerfCounter* createHWCounter(Thread*){return NULL;};
   virtual void setPauseManager(GCMMPThreadProf* thProf) {
   	thProf->pauseManager = NULL;
   };
@@ -319,6 +319,7 @@ public:
 
 class CPUFreqProfiler : public VMProfiler {
 public:
+	bool periodicDaemonExec(void);
 	CPUFreqProfiler(GCMMP_Options* opts, void* entry);
 	~CPUFreqProfiler(){};
 };

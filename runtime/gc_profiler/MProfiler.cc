@@ -584,7 +584,9 @@ void PerfCounterProfiler::logPerfData() {
 	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData << ", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);
 }
 
-
+bool CPUFreqProfiler::periodicDaemonExec(void){
+	return true;
+}
 
 bool PerfCounterProfiler::periodicDaemonExec(void){
 	Thread* self = Thread::Current();
