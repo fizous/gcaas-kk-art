@@ -305,6 +305,11 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 //	return NULL;
 //}
 
+bool VMProfiler::IsProfilerThread(Thread* th) const {
+  return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
+}
+
+
 void VMProfiler::startProfiling(void) {
 	if(!IsProfilingEnabled())
 		return;

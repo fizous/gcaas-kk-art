@@ -192,9 +192,7 @@ public:
     running_ = val;
   }
 
-  bool IsProfilerThread(Thread* th) const {
-    return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
-  }
+  bool IsProfilerThread(Thread* th) const;
 
   bool IsAttachProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_ATTACH_PROF_DAEMON);
