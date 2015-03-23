@@ -1295,6 +1295,12 @@ void MProfiler::AttachThreads() {
 
 }
 
+void VMProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context) {
+  for (const auto& profRec : threadProfList_) {
+    callback(profRec, context);
+  }
+}
+
 void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context) {
   for (const auto& profRec : threadProflist_) {
     callback(profRec, context);
