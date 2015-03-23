@@ -245,7 +245,7 @@ public:
 
   virtual bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
-  virtual bool dettachThread(GCMMPThreadProf*)=0;
+  virtual bool dettachThread(GCMMPThreadProf*){return true;};
 
   void setProfDaemon(bool);
   void setReceivedShutDown(bool);
