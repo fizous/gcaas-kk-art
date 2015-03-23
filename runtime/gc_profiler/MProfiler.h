@@ -243,7 +243,7 @@ public:
 
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  bool createHWEvents(void) {return false;}
+  virtual bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
   virtual bool dettachThread(GCMMPThreadProf*)=0;
 
@@ -308,7 +308,6 @@ public:
 
 
 	MPPerfCounter* createHWCounter(Thread*);
-	bool createHWEvents(void) {return false;}
 	bool isMarkTimeEvents(void) {return true;}
 	bool periodicDaemonExec(void);
 	bool dettachThread(GCMMPThreadProf*);

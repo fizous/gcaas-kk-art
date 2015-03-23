@@ -406,6 +406,14 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 
+CPUFreqProfiler::CPUFreqProfiler(GCMMP_Options* argOptions, void* entry):
+		VMProfiler(argOptions, entry){
+
+	LOG(ERROR) << "VMProfiler : CPUFreqProfiler";
+}
+
+
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				index_(argOptions->mprofile_type_),
 				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
