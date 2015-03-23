@@ -269,10 +269,10 @@ void MarkSweep::MarkingPhase() {
 }
 
 void MarkSweep::MarkThreadRoots(Thread* self) {
-	 mprofiler::VMProfiler::MProfMarkStartSafePointEvent(self);
-	  LOG(ERROR) << ">>>>vmprofiler: MarkThreadRoots "<< self->GetTid();
+	mprofiler::VMProfiler::MProfMarkStartSafePointEvent(self);
+	//  LOG(ERROR) << ">>>>vmprofiler: MarkThreadRoots "<< self->GetTid();
   MarkRootsCheckpoint(self);
-  LOG(ERROR) << "<<<<vmprofiler: MarkThreadRoots "<< self->GetTid();
+ // LOG(ERROR) << "<<<<vmprofiler: MarkThreadRoots "<< self->GetTid();
   mprofiler::VMProfiler::MProfMarkEndSafePointEvent(self);
 }
 

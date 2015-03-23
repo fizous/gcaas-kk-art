@@ -23,7 +23,7 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
-#define VERBOSE_PROFILER 0
+#define VERBOSE_PROFILER 1
 /* log information. used to monitor the flow of the profiler.*/
 #define GCMMP_VLOG(severity) if (VERBOSE_PROFILER) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
