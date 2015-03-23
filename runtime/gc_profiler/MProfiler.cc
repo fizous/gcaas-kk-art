@@ -987,11 +987,11 @@ void VMProfiler::ShutdownProfiling(void) {
 			dumpProfData(true);
 
 
-			Runtime* runtime = Runtime::Current();
+			//Runtime* runtime = Runtime::Current();
 
 			Thread* self = Thread::Current();
 			{
-				ThreadList* thread_list = Runtime::Current()->GetThreadList();
+				//ThreadList* thread_list = Runtime::Current()->GetThreadList();
 				MutexLock mu(self, *Locks::thread_list_lock_);
 				ForEach(GCMMPKillThreadProf, this);
 				//thread_list->ForEach(GCMMPResetThreadField, this);
@@ -1073,7 +1073,7 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 	cuuT = uptime_nanos();
 	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
-	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
+	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << getRelevantAllocBytes();
 
 };
 
