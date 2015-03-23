@@ -136,7 +136,7 @@ public:
   }
 
 
-  bool StopProfiling(void);
+  bool StopTimeProfiling(void);
   void ForceDeadTime(void);
 
   uint64_t GetCreationTime(void) const {

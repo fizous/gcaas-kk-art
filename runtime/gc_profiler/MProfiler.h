@@ -316,9 +316,14 @@ public:
 	void setPauseManager(GCMMPThreadProf*);
 
 	void dumpProfData(bool);
-
-
 };
+
+class CPUFreqProfiler : public VMProfiler {
+public:
+	CPUFreqProfiler(GCMMP_Options* opts, void* entry);
+	~CPUFreqProfiler(){};
+};
+
 
 class PerfCounterProfiler : public VMProfiler {
 

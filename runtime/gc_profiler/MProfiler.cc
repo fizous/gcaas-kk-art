@@ -100,6 +100,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 &createVMProfiler<PerfCounterProfiler>
 		},//L1D_MISS
 		{
+				 0x0B,
+				 GCMMP_FLAGS_CREATE_DAEMON,
+				 "FREQ_MONITOR", "CPU Frequency Monitoring",
+				 "FREQ_MONITOR_PROF.log",
+				 NULL,
+				 &createVMProfiler<CPUFreqProfiler>
+		},//FREQ_MONITOR
+		{
 				 0x0D,
 				 GCMMP_FLAGS_CREATE_DAEMON,
 				 "MMU", "MMU over a given period of time",
@@ -252,7 +260,7 @@ GCMMPThreadProf::~GCMMPThreadProf() {
 }
 
 
-bool GCMMPThreadProf::StopProfiling(void) {
+bool GCMMPThreadProf::StopTimeProfiling(void) {
 	if(state == GCMMP_TH_RUNNING) {
 		state = GCMMP_TH_STOPPED;
 		lifeTime_.finalMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
@@ -267,7 +275,7 @@ void GCMMPThreadProf::Destroy(MProfiler* mProfiler) {
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	if(IsProfilingRunning()) {
-			if(!thProfRec->StopProfiling()) {
+			if(!thProfRec->StopTimeProfiling()) {
 				LOG(ERROR) << "MProfiler : ThreadProf is initialized";
 			}
 			threadProflist_.remove(thProfRec);
@@ -376,6 +384,10 @@ void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
 }
 
 bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "MMUProfiler -- dettaching thread pid: " << thProf->GetTid();
+		thProf->StopTimeProfiling();
+	}
 	return true;
 }
 
@@ -1298,7 +1310,7 @@ void MProfiler::AttachThread(Thread* thread) {
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	if(threadProf != NULL) {
 //		GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
-		return threadProf->StopProfiling();
+		return threadProf->StopTimeProfiling();
 	}
 	return false;
 }
