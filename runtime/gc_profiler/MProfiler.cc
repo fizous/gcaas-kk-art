@@ -275,12 +275,12 @@ void GCMMPThreadProf::Destroy(MProfiler* mProfiler) {
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
 	if(IsProfilingRunning()) {
-			if(!thProfRec->StopTimeProfiling()) {
-				LOG(ERROR) << "MProfiler : ThreadProf is initialized";
-			}
-			threadProflist_.remove(thProfRec);
-			thProfRec->Destroy(this);
-			delete thProfRec;
+		if(!thProfRec->StopTimeProfiling()) {
+			LOG(ERROR) << "MProfiler : ThreadProf is initialized";
+		}
+		threadProflist_.remove(thProfRec);
+		thProfRec->Destroy(this);
+		delete thProfRec;
 	}
 }
 
@@ -463,6 +463,7 @@ void VMProfiler::InitCommonData() {
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
 
+	initMarkerManager();
 	attachThreads();
 
 	setIsProfilingRunning(true);
@@ -570,6 +571,7 @@ void PerfCounterProfiler::getPerfData() {
 }
 
 void CPUFreqProfiler::initMarkerManager(void) {
+	 LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
 	size_t capacity =
 			RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 	markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));

@@ -243,7 +243,7 @@ public:
   void startProfiling(void);
   void ProcessSignalCatcher(int);
 
-  virtual MPPerfCounter* createHWCounter(Thread*){return NULL;};
+  virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
   virtual void setPauseManager(GCMMPThreadProf* thProf) {
   	thProf->pauseManager = NULL;
   };
