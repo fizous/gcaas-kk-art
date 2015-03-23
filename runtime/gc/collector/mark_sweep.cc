@@ -1103,7 +1103,6 @@ class CheckpointMarkThreadRoots : public Closure {
 };
 
 void MarkSweep::MarkRootsCheckpoint(Thread* self) {
-	LOG(ERROR) << "[[[[[[vmprofiler: MarkRootsCheckpoint: "<< self->GetTid();
   CheckpointMarkThreadRoots check_point(this);
   timings_.StartSplit("MarkRootsCheckpoint");
   ThreadList* thread_list = Runtime::Current()->GetThreadList();
@@ -1121,7 +1120,7 @@ void MarkSweep::MarkRootsCheckpoint(Thread* self) {
   Locks::mutator_lock_->SharedLock(self);
   Locks::heap_bitmap_lock_->ExclusiveLock(self);
   timings_.EndSplit();
-  LOG(ERROR) << "]]]]vmprofiler: MarkRootsCheckpoint: "<< self->GetTid();
+
 }
 
 void MarkSweep::SweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {

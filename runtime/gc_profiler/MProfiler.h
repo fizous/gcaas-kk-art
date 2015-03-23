@@ -285,7 +285,9 @@ public:
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
+  virtual void dumpProfData(bool lastDump) {};
 
+  void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
 };
@@ -306,6 +308,7 @@ public:
 
 	void setPauseManager(GCMMPThreadProf*);
 
+	void dumpProfData(bool);
 
 
 };

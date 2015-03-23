@@ -66,7 +66,7 @@ void GarbageCollector::Run() {
   pause_times_.clear();
   duration_ns_ = 0;
   Thread* self = Thread::Current();
-  LOG(ERROR) << ">>>>vmprofiler: GCRun "<< self->GetTid();
+
   InitializePhase();
 
   if (!IsConcurrent()) {
@@ -112,7 +112,7 @@ void GarbageCollector::Run() {
 
   FinishPhase();
 
-  LOG(ERROR) << "<<<<vmprofiler: GCRun "<< self->GetTid();
+
 }
 
 void GarbageCollector::SwapBitmaps() {

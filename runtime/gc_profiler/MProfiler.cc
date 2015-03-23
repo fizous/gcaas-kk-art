@@ -771,9 +771,9 @@ void MProfiler::DumpCurrentOutpu(void) {
 }
 
 static void GCMMPKillThreadProf(GCMMPThreadProf* profRec, void* arg) {
-	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
-	if(mProfiler != NULL) {
-		if(mProfiler->DettachThread(profRec)) {
+	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
+	if(vmProfiler != NULL) {
+		if(vmProfiler->dettachThread(profRec)) {
 
 		}
 	}
@@ -793,9 +793,10 @@ void MProfiler::ShutdownProfiling(void) {
 		running_ = false;
 
 		GCMMP_VLOG(INFO) << "Starting Detaching all the thread Profiling";
+
 		ForEach(GCMMPKillThreadProf, this);
 
-		DumpProfData(true);
+
 
 		Runtime* runtime = Runtime::Current();
 
@@ -975,11 +976,34 @@ bool VMProfiler::getRecivedShutDown(void) {
 }
 void VMProfiler::ShutdownProfiling(void) {
 //	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
-	 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
-	 if(hasProfDaemon()) {
-		 Runtime* runtime = Runtime::Current();
-		 runtime->DetachCurrentThread();
-		 setProfDaemon(false);
+
+	 if(IsProfilingRunning()) {
+		 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
+			end_heap_bytes_ = getRelevantAllocBytes();
+			end_cpu_time_ns_ = GetRelevantCPUTime();
+			end_time_ns_ = GetRelevantRealTime();
+
+
+			dumpProfData(true);
+
+
+			Runtime* runtime = Runtime::Current();
+
+			Thread* self = Thread::Current();
+			{
+				ThreadList* thread_list = Runtime::Current()->GetThreadList();
+				MutexLock mu(self, *Locks::thread_list_lock_);
+				ForEach(GCMMPKillThreadProf, this);
+				//thread_list->ForEach(GCMMPResetThreadField, this);
+			}
+
+			setIsProfilingRunning(false);
+
+			if(hasProfDaemon()) {
+				Runtime* runtime = Runtime::Current();
+				runtime->DetachCurrentThread();
+				setProfDaemon(false);
+			}
 	 }
 }
 
@@ -1006,6 +1030,52 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 
 	}
 }
+
+
+void MMUProfiler::dumpProfData(bool isLastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  LOG(ERROR) <<  "dumping for MMU";
+  GCMMP_VLOG(INFO) << " Dumping the commin information ";
+  bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+  }
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  }
+
+  GCMMP_VLOG(INFO) << " Dumping the MMU information ";
+
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  }
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
+  }
+
+  if(successWrite) {
+  	ForEach(GCMMPDumpMMUThreadProf, this);
+  }
+
+  if(successWrite) {
+  	successWrite = dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
+  }
+
+	if(isLastDump) {
+		dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->Close();
+	}
+	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
+	GCMMP_VLOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
+	uint64_t cuuT = ProcessTimeNS();
+	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
+	cuuT = uptime_nanos();
+	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
+
+	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
+
+};
 
 void MProfiler::DumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
