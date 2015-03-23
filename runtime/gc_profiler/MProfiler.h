@@ -108,6 +108,8 @@ public:
   static constexpr int kGCMMPDumpSignal = SIGUSR2;
   static const int kGCMMPDefaultAffinity = -1;
 	static constexpr int kGCMMPLogAllocWindow = 16;
+	static const int kGCMMPDumpEndMarker;
+
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
   // combines markAllocWindows, createProfDaemon, hasProfThread,
@@ -162,6 +164,11 @@ public:
 
 
   std::vector<GCMMPThreadProf*> threadProfList_;
+
+  art::File* GetDumpFile(void) const {
+  	return dump_file_;
+  }
+
   void attachThreads(void);
   void attachSingleThread(Thread* t);
   void notifyAllocation(size_t);

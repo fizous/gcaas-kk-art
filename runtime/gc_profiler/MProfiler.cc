@@ -115,7 +115,7 @@ uint64_t GCPauseThreadManager::startRealTime = 0;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 
 
-const int MProfiler::kGCMMPDumpEndMarker = -99999999;
+const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
 uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
 	return uptime_nanos() - GCPauseThreadManager::startRealTime;
@@ -145,7 +145,7 @@ void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 }
 
 void GCPauseThreadManager::DumpProfData(void* args) {
-	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(args);
+	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(args);
 
 	art::File* file = mProfiler->GetDumpFile();
 	int totalC = 0;
@@ -162,7 +162,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			}
 		}
 	}
-	file->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+	file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
 }
 
 
@@ -1009,13 +1009,13 @@ void VMProfiler::ShutdownProfiling(void) {
 
 
 static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
-	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
-	if(mProfiler != NULL) {
+	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
+	if(vmProfiler != NULL) {
 
 		 GCPauseThreadManager* mgr = profRec->getPauseMgr();
 		 if(!mgr->HasData())
 			 return;
-		 art::File* f = mProfiler->GetDumpFile();
+		 art::File* f = vmProfiler->GetDumpFile();
 		 int _pid = profRec->GetTid();
 		 int _type = profRec->getThreadTag();
 		 f->WriteFully(&_pid, sizeof(int));
@@ -1059,11 +1059,11 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
   }
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
 		dump_file_->Close();
 	}
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
@@ -1103,11 +1103,11 @@ void MProfiler::DumpProfData(bool isLastDump) {
   }
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&mprofiler::MProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
 		dump_file_->Close();
 	}
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
