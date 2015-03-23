@@ -34,6 +34,46 @@ class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
 
+/*
+ * enum of the events we are profiling per mutator. we can look for activities.
+ * Make sure that GCMMP_GC_MAX_ACTIVITIES always at the bottom of the definition
+ */
+typedef enum {
+	GCMMP_GC_MALLOC 	= 0,
+	GCMMP_GC_EXPLICIT = 1,
+	GCMMP_GC_DAEMON 	= 2,
+	GCMMP_GC_TRIM			= 3,
+	GCMMP_GC_GROW			= 4,
+	GCMMP_FORCE_UTIL	= 5,
+	GCMMP_FORCE_CONC	= 6,
+	GCMMP_MINOR_COLLECTION = 7,
+	GCMMP_MAJOR_COLLECTION = 8,
+	GCMMP_CPU_FREQ_UPDATE = 9,
+	GCMMP_GC_MAX_ACTIVITIES
+} GCMMP_ACTIVITY_ENUM;
+
+/*
+ * struct that represents the status of the heap when an event is triggered
+ */
+typedef struct EventMarker_S {
+	/* time of the event */
+	uint64_t currTime;
+	/* the heap size when the event was marked */
+	size_t currHSize;
+	/* event type */
+	GCMMP_ACTIVITY_ENUM evType;
+} EventMarker;
+
+/*
+ * Container of all the events in the profiler
+ */
+typedef struct EventMarkerManager_S {
+	/* current index of the event being triggered */
+	volatile int32_t currIndex;
+	/* pointer to the area of the memory holding all the events */
+	EventMarker* markers; //
+} EventMarkerManager;
+
 
 class PACKED(4) GCPauseThreadManager {
 	 GCPauseThreadMarker* curr_marker_;

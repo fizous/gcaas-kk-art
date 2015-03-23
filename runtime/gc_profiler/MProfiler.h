@@ -121,6 +121,8 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
+	static const int kGCMMPMaxEventsCounts = 8192;
+
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
 
@@ -151,6 +153,13 @@ public:
 
 
   AtomicInteger total_alloc_bytes_;
+
+  EventMarkerManager* markerManager;
+
+
+  virtual void initMarkerManager(void) {
+  	markerManager = NULL;
+  }
 
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - cpu_time_ns_;
@@ -322,6 +331,8 @@ public:
 	bool periodicDaemonExec(void);
 	CPUFreqProfiler(GCMMP_Options* opts, void* entry);
 	~CPUFreqProfiler(){};
+
+  void initMarkerManager(void);
 };
 
 

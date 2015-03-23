@@ -569,6 +569,23 @@ void PerfCounterProfiler::getPerfData() {
 	updateHeapPerfStatus(_totalVals, _gcVals);
 }
 
+void CPUFreqProfiler::initMarkerManager(void) {
+	size_t capacity =
+			RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
+	markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL, capacity,
+                                                 PROT_READ | PROT_WRITE));
+
+  if (mem_map.get() == NULL) {
+    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity);
+    return;
+  }
+
+  markerManager->markers = (EventMarker*)(mem_map->Begin());
+
+}
+
 void PerfCounterProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
