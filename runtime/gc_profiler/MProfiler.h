@@ -194,6 +194,10 @@ public:
     running_ = val;
   }
 
+  bool IsProfilerThread(Thread* th) const {
+    return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
+  }
+
   bool IsAttachProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_ATTACH_PROF_DAEMON);
   }
@@ -245,7 +249,7 @@ public:
 
   virtual bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
-  virtual bool dettachThread(GCMMPThreadProf*){return true;};
+  virtual bool dettachThread(GCMMPThreadProf*){return true;}
 
   void setProfDaemon(bool);
   void setReceivedShutDown(bool);

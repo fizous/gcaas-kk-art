@@ -101,7 +101,7 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 		},//L1D_MISS
 		{
 				 0x0B,
-				 GCMMP_FLAGS_CREATE_DAEMON,
+				 0,
 				 "FREQ_MONITOR", "CPU Frequency Monitoring",
 				 "FREQ_MONITOR_PROF.log",
 				 NULL,
@@ -368,14 +368,14 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	}
 }
 
-void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt){
+void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
 		_profRec->perf_record_->addStartEvent(evt);
 	}
 }
-void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
+void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
@@ -383,7 +383,7 @@ void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	}
 }
 
-bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf){
+bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		GCMMP_VLOG(INFO) << "MMUProfiler -- dettaching thread pid: " << thProf->GetTid();
 		thProf->StopTimeProfiling();
@@ -498,7 +498,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			return;
 		}
 	}
-	if(thread->GetTid() == prof_thread_->GetTid()) {
+	if(IsProfilerThread(thread)) {
 		if(!IsAttachProfDaemon()) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " << thread->GetTid() ;
 			return;
