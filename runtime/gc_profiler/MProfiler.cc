@@ -439,6 +439,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
+			setProfDaemon(false);
 			const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
 			resetHeapAllocStatus();
 			flags_ = profEntry->flags_;
