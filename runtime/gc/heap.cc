@@ -1136,7 +1136,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 
 	mprofiler::VMProfiler::MProfMarkStartExplGCHWEvent();
   Thread* self = Thread::Current();
-  LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
+  //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
   mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
   WaitForConcurrentGcToComplete(self);
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
@@ -1261,7 +1261,7 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
     gc_type = collector::kGcTypePartial;
   }
 
-  GCMMP_VLOG(INFO) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+  //GCMMP_VLOG(INFO) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   DCHECK_LT(gc_type, collector::kGcTypeMax);
   DCHECK_NE(gc_type, collector::kGcTypeNone);
   DCHECK_LE(gc_cause, kGcCauseExplicit);
