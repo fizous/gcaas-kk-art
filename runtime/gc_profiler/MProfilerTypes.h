@@ -59,7 +59,7 @@ typedef struct EventMarker_S {
 	/* time of the event */
 	uint64_t currTime;
 	/* the heap size when the event was marked */
-	size_t currHSize;
+	int32_t currHSize;
 	/* event type */
 	GCMMP_ACTIVITY_ENUM evType;
 } EventMarker;

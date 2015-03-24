@@ -459,6 +459,7 @@ size_t DlMallocSpace::AllocationSize(const mirror::Object* obj) {
 }
 
 size_t DlMallocSpace::Trim() {
+	mprofiler::VMProfiler::MProfMarkStartStartTrimHWEvent();
   MutexLock mu(Thread::Current(), lock_);
   // Trim to release memory at the end of the space.
   mspace_trim(mspace_, 0);

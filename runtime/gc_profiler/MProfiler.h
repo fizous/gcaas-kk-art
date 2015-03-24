@@ -154,6 +154,7 @@ public:
 
   AtomicInteger total_alloc_bytes_;
 
+  Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
 
 
@@ -266,7 +267,9 @@ public:
 
 	GCMMPHeapStatus heapStatus;
 	virtual double getAllocIndex(){return heapStatus.index;};
-	virtual void resetHeapAllocStatus(){memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));};
+	virtual void resetHeapAllocStatus() {
+		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
+	}
 	void updateHeapAllocStatus(void);
 	void updateHeapPerfStatus(uint64_t, uint64_t);
 
@@ -284,6 +287,8 @@ public:
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
 
+	static void MProfMarkStartStartTrimHWEvent(void);
+	static void MProfMarkStartConcGCHWEvent(void);
   static void MProfMarkStartAllocGCHWEvent(void);
   static void MProfMarkEndAllocGCHWEvent(void);
   static void MProfMarkStartExplGCHWEvent(void);
@@ -302,6 +307,7 @@ public:
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
   virtual void dumpProfData(bool lastDump) {};
+  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM evtMark){}
 
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
@@ -333,6 +339,7 @@ public:
 	~CPUFreqProfiler(){};
 
   void initMarkerManager(void);
+  void addEventMarker(GCMMP_ACTIVITY_ENUM);
 };
 
 

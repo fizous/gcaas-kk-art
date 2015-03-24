@@ -570,22 +570,45 @@ void PerfCounterProfiler::getPerfData() {
 	updateHeapPerfStatus(_totalVals, _gcVals);
 }
 
+
+
+
+void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
+	Thread* self = Thread::Current();
+	MutexLock mu(self, evt_manager_lock_);
+	EventMarker* _address = &markerManager->markers[markerManager->currIndex];
+	_address->evType = evtMark;
+	_address->currTime = GetRelevantCPUTime();
+	_address->currHSize = total_alloc_bytes_.load();
+	markerManager->currIndex++;
+
+	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
+		 LOG(ERROR) << "Index of events exceeds the maximum allowed";
+	}
+}
+
 void CPUFreqProfiler::initMarkerManager(void) {
-	 LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
-	size_t capacity =
-			RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
-	markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL, capacity,
-                                                 PROT_READ | PROT_WRITE));
+	LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
 
-  if (mem_map.get() == NULL) {
-    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity);
-    return;
-  }
+	evt_manager_lock_ = new Mutex("Event manager lock");
+	Thread* self = Thread::Current();
+	{
+	  MutexLock mu(self, evt_manager_lock_);
+		size_t capacity =
+				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
+		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
+	  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL, capacity,
+	                                                 PROT_READ | PROT_WRITE));
 
-  markerManager->markers = (EventMarker*)(mem_map->Begin());
-
+	  if (mem_map.get() == NULL) {
+	    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+	        << PrettySize(capacity);
+	    return;
+	  }
+	  markerManager->markers = (EventMarker*)(mem_map->Begin());
+	  markerManager->currIndex = 0;
+	  mem_map.release();
+	}
 }
 
 void PerfCounterProfiler::logPerfData() {
@@ -1499,8 +1522,22 @@ void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 }
 
 
+void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
+	}
+}
+
+void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
+	}
+}
+
+
 void VMProfiler::MProfMarkStartAllocGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_MALLOC);
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
@@ -1512,6 +1549,7 @@ void VMProfiler::MProfMarkEndAllocGCHWEvent(void){
 
 void VMProfiler::MProfMarkStartExplGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_EXPLICIT);
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
