@@ -121,7 +121,7 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static const int kGCMMPMaxEventsCounts = 8192;
+	static const int kGCMMPMaxEventsCounts = 4096;
 
 	const bool enabled_;
 	// System thread used as main (thread id = 1).

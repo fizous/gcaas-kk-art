@@ -579,8 +579,8 @@ void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	MutexLock mu(self, *evt_manager_lock_);
 	EventMarker* _address = &markerManager->markers[markerManager->currIndex];
 	_address->evType = evtMark;
-	_address->currTime = GetRelevantCPUTime();
-	_address->currHSize = total_alloc_bytes_.load();
+//	_address->currTime = GetRelevantCPUTime();
+//	_address->currHSize = total_alloc_bytes_.load();
 	markerManager->currIndex++;
 
 	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
@@ -595,7 +595,8 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	Thread* self = Thread::Current();
 	{
 	  MutexLock mu(self, *evt_manager_lock_);
-		size_t capacity =
+	  markerManager->currIndex = 0;
+	  size_t capacity =
 				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
 	  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL, capacity,
@@ -607,7 +608,7 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	    return;
 	  }
 	  markerManager->markers = (EventMarker*)(mem_map->Begin());
-	  markerManager->currIndex = 0;
+
 	  //mem_map.release();
 	}
 }
@@ -616,6 +617,9 @@ void CPUFreqProfiler::dumpProfData(bool lastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
   LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
 	dumpEventMarks();
+	if(lastDump) {
+		dump_file_->Close();
+	}
 	LOG(ERROR) <<  "CPUFreqProfiler: done dumping data";
 }
 
@@ -623,10 +627,16 @@ void CPUFreqProfiler::dumpEventMarks(void) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *evt_manager_lock_);
 
-	//size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
+	size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
 
+  bool successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
+  if(successWrite) {
+  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
+  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
+  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+  }
 
-	LOG(ERROR) << "<<<< Sizeof(EventMarker):"<< sizeof(EventMarker)
+	LOG(ERROR) << "<<<< total written: " << dataLength << ", Sizeof(EventMarker):"<< sizeof(EventMarker)
 			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
 			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
 
