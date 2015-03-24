@@ -554,7 +554,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 }
 
 
-void VMProfiler::updateHeapPerfStatus(uint64_t totalVals, uint64_t gcVals) {
+inline void VMProfiler::updateHeapPerfStatus(uint64_t totalVals, uint64_t gcVals) {
 	heapStatus.totalMetric = totalVals;
 	heapStatus.gcDaemonUsage = (gcVals * 1.0) /totalVals;
 	heapStatus.gcMutUsage = 0.0;
