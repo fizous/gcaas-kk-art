@@ -500,7 +500,7 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 
 
 void VMProfiler::attachSingleThread(Thread* thread) {
-	LOG(ERROR) << "VMProfiler: Attaching thread: " << thread->GetTid();
+	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
