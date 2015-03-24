@@ -2039,7 +2039,7 @@ void Heap::ConcurrentGC(Thread* self) {
     }
   }
   //LOG(ERROR) << "<<<<vmprofiler: concurrent: "<< self->GetTid();
-  mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
+  mprofiler::VMProfiler::MProfMarkStartConcGCHWEvent();
   //mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
