@@ -575,7 +575,7 @@ void PerfCounterProfiler::getPerfData() {
 
 void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
-	MutexLock mu(self, evt_manager_lock_);
+	MutexLock mu(self, *evt_manager_lock_);
 	EventMarker* _address = &markerManager->markers[markerManager->currIndex];
 	_address->evType = evtMark;
 	_address->currTime = GetRelevantCPUTime();
