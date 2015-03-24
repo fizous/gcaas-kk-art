@@ -611,6 +611,29 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	}
 }
 
+void CPUFreqProfiler::dumpEventMarks(void) {
+	Thread* self = Thread::Current();
+	MutexLock mu(self, *evt_manager_lock_);
+
+	size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
+
+
+	LOG(ERROR) << "<<<< Sizeof(EventMarker):"<< sizeof(EventMarker)
+			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
+			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
+
+	for(int _indIter = 0; _indIter < markerManager->currIndex; _indIter++) {
+		EventMarker* marker = markerManager->markers + _indIter;
+		if(marker == NULL)
+			return;
+		LOG(ERROR) << "---->>>>> data written:<<["<<_indIter<<"] evtYpe:" <<
+				marker->evType << "; currHSize:" << marker->currHSize << "; time:"
+				<< marker->currTime;
+
+	}
+
+}
+
 void PerfCounterProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();

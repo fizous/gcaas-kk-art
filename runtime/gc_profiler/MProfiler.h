@@ -308,6 +308,7 @@ public:
 
   virtual void dumpProfData(bool lastDump) {};
   virtual void addEventMarker(GCMMP_ACTIVITY_ENUM evtMark){}
+  virtual void dumpEventMarks(void){}
 
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
@@ -340,6 +341,7 @@ public:
 
   void initMarkerManager(void);
   void addEventMarker(GCMMP_ACTIVITY_ENUM);
+  void dumpEventMarks(void);
 };
 
 
