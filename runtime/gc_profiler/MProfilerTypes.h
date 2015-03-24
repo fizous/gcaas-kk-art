@@ -69,7 +69,7 @@ typedef struct EventMarker_S {
  */
 typedef struct EventMarkerManager_S {
 	/* current index of the event being triggered */
-	volatile int32_t currIndex;
+	int32_t currIndex;
 	/* pointer to the area of the memory holding all the events */
 	EventMarker* markers; //
 } EventMarkerManager;

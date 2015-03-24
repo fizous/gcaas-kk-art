@@ -460,9 +460,11 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 void VMProfiler::InitCommonData() {
 	OpenDumpFile();
 
+	total_alloc_bytes_ = 0;
 	start_heap_bytes_ = getRelevantAllocBytes();
 	cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
+
 
 	initMarkerManager();
 	attachThreads();
@@ -579,7 +581,7 @@ void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	MutexLock mu(self, *evt_manager_lock_);
 	EventMarker* _address = &markerManager->markers[markerManager->currIndex];
 	_address->evType = evtMark;
-//	_address->currTime = GetRelevantCPUTime();
+	_address->currTime = GetRelevantCPUTime();
 //	_address->currHSize = total_alloc_bytes_.load();
 	markerManager->currIndex++;
 
