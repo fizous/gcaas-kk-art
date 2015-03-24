@@ -578,18 +578,20 @@ void PerfCounterProfiler::getPerfData() {
 
 void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
-	MutexLock mu(self, *evt_manager_lock_);
-	EventMarker* _address = markerManager->markers + markerManager->currIndex;
-	_address->evType = evtMark;
-	_address->currHSize = 0;
-	_address->currTime = 0;
-			//total_alloc_bytes_.load();
-//	_address->currTime = GetRelevantCPUTime();
-//
-	markerManager->currIndex++;
+	{
+		MutexLock mu(self, *evt_manager_lock_);
+		EventMarker* _address = markerManager->markers + markerManager->currIndex;
+		_address->evType = evtMark;
+		_address->currHSize = 0;
+		_address->currTime = 0;
+				//total_alloc_bytes_.load();
+	//	_address->currTime = GetRelevantCPUTime();
+	//
+		markerManager->currIndex++;
 
-	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
-		 LOG(ERROR) << "Index of events exceeds the maximum allowed";
+		if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
+			 LOG(ERROR) << "Index of events exceeds the maximum allowed";
+		}
 	}
 }
 
