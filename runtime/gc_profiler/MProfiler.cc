@@ -1181,13 +1181,13 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
   	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
   }
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
   }
 
   GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
   }
   if(successWrite) {
   	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
@@ -1208,7 +1208,7 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
 	GCMMP_VLOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
-	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
+	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< start_cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
 	cuuT = uptime_nanos();
 	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
