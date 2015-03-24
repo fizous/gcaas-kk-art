@@ -611,11 +611,18 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	}
 }
 
+void CPUFreqProfiler::dumpProfData(bool lastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
+	dumpEventMarks();
+	LOG(ERROR) <<  "CPUFreqProfiler: done dumping data";
+}
+
 void CPUFreqProfiler::dumpEventMarks(void) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *evt_manager_lock_);
 
-	size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
+	//size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
 
 
 	LOG(ERROR) << "<<<< Sizeof(EventMarker):"<< sizeof(EventMarker)
@@ -631,7 +638,6 @@ void CPUFreqProfiler::dumpEventMarks(void) {
 				<< marker->currTime;
 
 	}
-
 }
 
 void PerfCounterProfiler::logPerfData() {
