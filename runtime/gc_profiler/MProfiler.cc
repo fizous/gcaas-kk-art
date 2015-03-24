@@ -1571,13 +1571,13 @@ inline void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 }
 
 
-inline void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
+void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
 	}
 }
 
-inline void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
+void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
 	}
