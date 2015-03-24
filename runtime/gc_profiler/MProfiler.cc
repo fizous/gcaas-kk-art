@@ -581,7 +581,7 @@ void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	MutexLock mu(self, *evt_manager_lock_);
 	EventMarker* _address = &markerManager->markers[markerManager->currIndex];
 	_address->evType = evtMark;
-	_address->currTime = GetRelevantCPUTime();
+//	_address->currTime = GetRelevantCPUTime();
 //	_address->currHSize = total_alloc_bytes_.load();
 	markerManager->currIndex++;
 
