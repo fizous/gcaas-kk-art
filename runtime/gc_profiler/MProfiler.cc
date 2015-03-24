@@ -576,7 +576,7 @@ void PerfCounterProfiler::getPerfData() {
 
 
 
-void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
+inline void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
 	EventMarker* _address = NULL;
 	{
