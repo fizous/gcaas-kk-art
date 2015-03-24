@@ -133,7 +133,7 @@ uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 	return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
 }
 
-void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
+inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(!busy_) {
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantCPUTime();
 		curr_marker_->type = evType;
@@ -142,7 +142,7 @@ void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	}
 }
 
-void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
+inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(busy_) {
 		if(curr_marker_->type != evType)
 			return;
@@ -305,7 +305,7 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 //	return NULL;
 //}
 
-bool VMProfiler::IsProfilerThread(Thread* th) const {
+inline bool VMProfiler::IsProfilerThread(Thread* th) const {
   return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
 }
 
@@ -326,7 +326,7 @@ void VMProfiler::startProfiling(void) {
 }
 
 
-void VMProfiler::updateHeapAllocStatus(void) {
+inline void VMProfiler::updateHeapAllocStatus(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 
 
@@ -374,14 +374,14 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	}
 }
 
-void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
+inline void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
 		_profRec->perf_record_->addStartEvent(evt);
 	}
 }
-void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
+inline void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
@@ -1110,11 +1110,11 @@ void* MProfiler::Run(void* arg) {
 }
 
 
-void VMProfiler::setReceivedShutDown(bool val){
+inline void VMProfiler::setReceivedShutDown(bool val){
 	receivedShutdown_ = val;
 }
 
-bool VMProfiler::getRecivedShutDown(void) {
+inline bool VMProfiler::getRecivedShutDown(void) {
 	return receivedShutdown_;
 }
 void VMProfiler::ShutdownProfiling(void) {
@@ -1292,7 +1292,7 @@ void VMProfiler::setProfDaemon(bool val)  {
 }
 
 
-bool VMProfiler::hasProfDaemon()  {
+inline bool VMProfiler::hasProfDaemon()  {
   return has_profDaemon_;
 }
 
@@ -1492,7 +1492,7 @@ void VMProfiler::PreForkPreparation() {
 /*
  * Return true only when the MProfiler is Running
  */
-bool VMProfiler::IsMProfRunning() {
+inline bool VMProfiler::IsMProfRunning() {
 	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingRunning();
@@ -1560,24 +1560,24 @@ void VMProfiler::MProfDetachThread(art::Thread* th) {
 	}
 }
 
-void VMProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec,
+inline void VMProfiler::MarkWaitTimeEvent(GCMMPThreadProf* profRec,
 		GCMMP_BREAK_DOWN_ENUM evType) {
 	profRec->getPauseMgr()->MarkStartTimeEvent(evType);
 }
 
-void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
+inline void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 		GCMMP_BREAK_DOWN_ENUM evType) {
 	profRec->getPauseMgr()->MarkEndTimeEvent(evType);
 }
 
 
-void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
+inline void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
 	}
 }
 
-void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
+inline void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
 	}
@@ -1719,7 +1719,7 @@ void VMProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState 
 /*
  * Return true only when the MProfiler is Running
  */
-bool VMProfiler::IsMProfilingTimeEvent() {
+inline bool VMProfiler::IsMProfilingTimeEvent() {
 	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingTimeEvent();
