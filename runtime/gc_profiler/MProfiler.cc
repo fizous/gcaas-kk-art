@@ -593,7 +593,7 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	evt_manager_lock_ = new Mutex("Event manager lock");
 	Thread* self = Thread::Current();
 	{
-	  MutexLock mu(self, evt_manager_lock_);
+	  MutexLock mu(self, *evt_manager_lock_);
 		size_t capacity =
 				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
