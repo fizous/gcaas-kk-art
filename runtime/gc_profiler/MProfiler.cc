@@ -606,6 +606,9 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
 	        << PrettySize(capacity);
 	    return;
+	  } else {
+	    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+	        << PrettySize(capacity);
 	  }
 	  markerManager->markers = (EventMarker*)(mem_map->Begin());
 
