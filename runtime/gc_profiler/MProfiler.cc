@@ -462,7 +462,7 @@ void VMProfiler::InitCommonData() {
 
 	total_alloc_bytes_ = 0;
 	start_heap_bytes_ = getRelevantAllocBytes();
-	cpu_time_ns_ = ProcessTimeNS();
+	start_cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
 
 

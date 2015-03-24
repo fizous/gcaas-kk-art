@@ -148,7 +148,7 @@ public:
 
   uint64_t 	start_time_ns_;
   uint64_t 	end_time_ns_;
-  uint64_t 	cpu_time_ns_;
+  uint64_t 	start_cpu_time_ns_;
   uint64_t 	end_cpu_time_ns_;
 
 
@@ -163,7 +163,7 @@ public:
   }
 
   uint64_t GetRelevantCPUTime(void) const {
-  	return ProcessTimeNS() - cpu_time_ns_;
+  	return ProcessTimeNS() - start_cpu_time_ns_;
   }
 
   uint64_t GetRelevantRealTime(void) const {
