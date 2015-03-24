@@ -607,7 +607,7 @@ void CPUFreqProfiler::initMarkerManager(void) {
 	  }
 	  markerManager->markers = (EventMarker*)(mem_map->Begin());
 	  markerManager->currIndex = 0;
-	  mem_map.release();
+	  //mem_map.release();
 	}
 }
 
