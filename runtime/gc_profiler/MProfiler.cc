@@ -343,12 +343,13 @@ void VMProfiler::updateHeapAllocStatus(void) {
 }
 
 void VMProfiler::notifyAllocation(size_t allocSize) {
+	total_alloc_bytes_.fetch_add(allocSize);
 	if(!IsAllocWindowsSet())
 		return;
 	int32_t initValue = total_alloc_bytes_.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
 
-	total_alloc_bytes_.fetch_add(allocSize);
+
 
 	if((_newIndex) != (getAllocIndex())) {
 
