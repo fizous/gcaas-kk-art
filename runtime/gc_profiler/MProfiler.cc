@@ -481,7 +481,7 @@ void VMProfiler::InitCommonData() {
 	start_heap_bytes_ = getRelevantAllocBytes();
 	start_cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = NanoTime();
-
+	LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; start_time_ns_ is: " << start_time_ns_;
 	GC_MMPHeapConf heapConf;
 	setHeapHeaderConf(&heapConf);
 	dumpHeapConfigurations(&heapConf);
@@ -1209,6 +1209,7 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 
 void MMUProfiler::dumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+
   LOG(ERROR) <<  "dumping for MMU";
   GCMMP_VLOG(INFO) << " Dumping the commin information ";
   bool successWrite = false;
@@ -1229,7 +1230,7 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
   if(successWrite) {
   	successWrite = dump_file_->WriteFully(&end_time_ns_, sizeof(uint64_t));
   }
-
+  LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; endTime is: " << end_time_ns_;
   if(successWrite) {
   	ForEach(GCMMPDumpMMUThreadProf, this);
   }
