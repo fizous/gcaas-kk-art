@@ -457,6 +457,18 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 	LOG(ERROR) << "VMProfiler : VMProfiler";
 }
 
+void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
+
+  bool successWrite = dump_file_->WriteFully(heapConf, sizeof(GC_MMPHeapConf));
+  if(!successWrite) {
+  	LOG(ERROR) << "VMProfiler : dumpHeapConfigurations error writing heap header";
+  } else {
+  	LOG(ERROR) << "VMProfiler: heap header.. start: " << heapConf->startSize
+  			<< "growthLimit= "<< heapConf->growthLimit <<", uptime= "
+				<< heapConf->elapsedUPTimeNS;
+  }
+}
+
 void VMProfiler::InitCommonData() {
 	OpenDumpFile();
 
@@ -465,6 +477,9 @@ void VMProfiler::InitCommonData() {
 	start_cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = uptime_nanos();
 
+	GC_MMPHeapConf heapConf;
+	setHeapHeaderConf(&heapConf);
+	dumpHeapConfigurations(&heapconf);
 
 	initMarkerManager();
 	attachThreads();
@@ -1117,6 +1132,14 @@ inline void VMProfiler::setReceivedShutDown(bool val){
 inline bool VMProfiler::getRecivedShutDown(void) {
 	return receivedShutdown_;
 }
+
+void VMProfiler::setHeapHeaderConf(GC_MMPHeapConf* heapConf) {
+	heapConf->elapsedUPTimeNS = (uptime_nanos()*1.0);
+	gc::Heap* _heap = Runtime::Current()->GetHeap();
+	heapConf->growthLimit = _heap->GetMaxMemory();
+	heapConf->startSize   = _heap->GetHeapCapacity();
+}
+
 void VMProfiler::ShutdownProfiling(void) {
 //	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 
@@ -1179,20 +1202,21 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
   LOG(ERROR) <<  "dumping for MMU";
   GCMMP_VLOG(INFO) << " Dumping the commin information ";
-  bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-  }
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
-  }
+  bool successWrite = false;
+//  dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+//  if(successWrite) {
+//  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+//  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+//  }
+//  if(successWrite) {
+//  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
+//  }
 
   GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
-  }
+  successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
+
+
   if(successWrite) {
   	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
   }

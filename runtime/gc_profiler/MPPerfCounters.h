@@ -121,6 +121,12 @@ typedef struct PACKED(4) GCPauseThreadMarker_S {
 } GCPauseThreadMarker;
 
 
+typedef struct GC_MMPHeapConf_S {
+	uint32_t startSize;
+	uint32_t growthLimit;
+	double elapsedUPTimeNS;
+} GC_MMPHeapConf;
+
 typedef struct GCMMPHeapStatus_S {
 	double 			index;
 	double			timeInNsec;
@@ -137,7 +143,7 @@ typedef struct GCMMPHeapStatus_S {
 	double 			heapTargetUtilization;
 	double 			gcDaemonUsage;
 	double			gcMutUsage;
-	u64 				totalMetric;
+	uint64_t 	  totalMetric;
 } GCMMPHeapStatus;
 
 

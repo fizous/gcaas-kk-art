@@ -312,6 +312,8 @@ public:
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
+  void setHeapHeaderConf(GC_MMPHeapConf*);
+  void dumpHeapConfigurations(GC_MMPHeapConf*);
 };
 
 

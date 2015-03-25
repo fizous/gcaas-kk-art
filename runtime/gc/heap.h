@@ -429,6 +429,10 @@ class Heap {
     return conc_gc_threads_;
   }
 
+  size_t GetHeapCapacity() const {
+  	return capacity_;
+  }
+
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
