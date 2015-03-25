@@ -255,7 +255,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	pauseManager = new GCPauseThreadManager();
 	perf_record_ = MPPerfCounter::Create("CYCLES");
 	state = GCMMP_TH_RUNNING;
-	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
+	lifeTime_.startMarker = GCPauseThreadManager::GetRelevantRealTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
@@ -268,7 +268,7 @@ GCMMPThreadProf::~GCMMPThreadProf() {
 bool GCMMPThreadProf::StopTimeProfiling(void) {
 	if(state == GCMMP_TH_RUNNING) {
 		state = GCMMP_TH_STOPPED;
-		lifeTime_.finalMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
+		lifeTime_.finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 		return true;
 	}
 	return false;
