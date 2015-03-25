@@ -125,17 +125,17 @@ VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
-uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
+inline uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
 	return uptime_nanos() - GCPauseThreadManager::startRealTime;
 }
 
-uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
+inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 	return ProcessTimeNS() - GCPauseThreadManager::startCPUTime;
 }
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(!busy_) {
-		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantCPUTime();
+		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
 		busy_ = true;
 		count_opens_++;
@@ -146,7 +146,7 @@ inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType)
 	if(busy_) {
 		if(curr_marker_->type != evType)
 			return;
-		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantCPUTime();
+		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 		IncrementIndices();
 		count_opens_--;
 	}
@@ -221,7 +221,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	vmProfiler->setPauseManager(this);
 	state = GCMMP_TH_RUNNING;
 
-	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
@@ -250,7 +250,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	pauseManager = new GCPauseThreadManager();
 	perf_record_ = MPPerfCounter::Create("CYCLES");
 	state = GCMMP_TH_RUNNING;
-	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
@@ -263,7 +263,7 @@ GCMMPThreadProf::~GCMMPThreadProf() {
 bool GCMMPThreadProf::StopTimeProfiling(void) {
 	if(state == GCMMP_TH_RUNNING) {
 		state = GCMMP_TH_STOPPED;
-		lifeTime_.finalMarker = GCMMPThreadProf::mProfiler->GetRelevantCPUTime();
+		lifeTime_.finalMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
 		return true;
 	}
 	return false;
@@ -1214,11 +1214,11 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 
   GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
-  successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
+  successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
 
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
+  	successWrite = dump_file_->WriteFully(&end_time_ns_, sizeof(uint64_t));
   }
 
   if(successWrite) {
