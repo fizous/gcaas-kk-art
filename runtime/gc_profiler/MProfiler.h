@@ -167,7 +167,7 @@ public:
   }
 
   uint64_t GetRelevantRealTime(void) const {
-  	return uptime_nanos() - start_time_ns_;
+  	return NanoTime() - start_time_ns_;
   }
 
 

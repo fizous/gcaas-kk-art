@@ -126,7 +126,7 @@ VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
 inline uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
-	return uptime_nanos() - GCPauseThreadManager::startRealTime;
+	return NanoTime() - GCPauseThreadManager::startRealTime;
 }
 
 inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
@@ -230,6 +230,8 @@ void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
 	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 		memset((void*) &thProf->timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
+	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
+	GCPauseThreadManager::startRealTime = start_time_ns_;
 	thProf->pauseManager = new GCPauseThreadManager();
 
 
@@ -243,6 +245,9 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	  state(GCMMP_TH_STARTING) {
 
 	GCMMP_VLOG(INFO) << "MPRofiler: Initializing arrayBreaks for " << thread->GetTid();
+
+
+
 	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	}
@@ -475,7 +480,7 @@ void VMProfiler::InitCommonData() {
 	total_alloc_bytes_ = 0;
 	start_heap_bytes_ = getRelevantAllocBytes();
 	start_cpu_time_ns_ = ProcessTimeNS();
-	start_time_ns_ = uptime_nanos();
+	start_time_ns_ = NanoTime();
 
 	GC_MMPHeapConf heapConf;
 	setHeapHeaderConf(&heapConf);
@@ -1147,7 +1152,7 @@ void VMProfiler::ShutdownProfiling(void) {
 		 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
 			end_heap_bytes_ = getRelevantAllocBytes();
 			end_cpu_time_ns_ = GetRelevantCPUTime();
-			end_time_ns_ = GetRelevantRealTime();
+			end_time_ns_ = NanoTime();
 
 
 			dumpProfData(true);
@@ -1186,6 +1191,10 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 		 int _type = profRec->getThreadTag();
 		 f->WriteFully(&_pid, sizeof(int));
 		 f->WriteFully(&_type, sizeof(int));
+		 if(profRec->GetEndTime() == 0) {
+			 profRec->GetliveTimeInfo()->finalMarker =
+					 vmProfiler->end_time_ns_ - vmProfiler->start_time_ns_;
+		 }
 		 f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
 
 		 GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
