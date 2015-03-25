@@ -479,7 +479,7 @@ void VMProfiler::InitCommonData() {
 
 	GC_MMPHeapConf heapConf;
 	setHeapHeaderConf(&heapConf);
-	dumpHeapConfigurations(&heapconf);
+	dumpHeapConfigurations(&heapConf);
 
 	initMarkerManager();
 	attachThreads();
