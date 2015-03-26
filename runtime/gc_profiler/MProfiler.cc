@@ -607,7 +607,7 @@ inline void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	if(_address != NULL) {
 		_address->evType = evtMark;
 		_address->currHSize = total_alloc_bytes_.load();
-		_address->currTime = GetRelevantCPUTime();
+		_address->currTime = GetRelevantRealTime();
 	}
 	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
 			 LOG(ERROR) << "Index of events exceeds the maximum allowed";
