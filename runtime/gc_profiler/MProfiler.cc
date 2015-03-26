@@ -596,7 +596,7 @@ void PerfCounterProfiler::getPerfData() {
 
 
 
-inline void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
+inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
 	EventMarker* _address = NULL;
 	{
@@ -614,7 +614,7 @@ inline void CPUFreqProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	}
 }
 
-void CPUFreqProfiler::initMarkerManager(void) {
+void VMProfiler::initMarkerManager(void) {
 	LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
 
 	evt_manager_lock_ = new Mutex("Event manager lock");
@@ -652,7 +652,23 @@ void CPUFreqProfiler::dumpProfData(bool lastDump) {
 	LOG(ERROR) <<  "CPUFreqProfiler: done dumping data";
 }
 
-void CPUFreqProfiler::dumpEventMarks(void) {
+inline void CPUFreqProfiler::AddEventMarker(GCMMP_ACTIVITY_ENUM evt){
+	addEventMarker(evt);
+}
+
+inline void CPUFreqProfiler::DumpEventMarks(void){
+	dumpEventMarks();
+}
+
+inline void PerfCounterProfiler::AddEventMarker(GCMMP_ACTIVITY_ENUM evt){
+	addEventMarker(evt);
+}
+
+inline void PerfCounterProfiler::DumpEventMarks(void){
+	dumpEventMarks();
+}
+
+void VMProfiler::dumpEventMarks(void) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *evt_manager_lock_);
 

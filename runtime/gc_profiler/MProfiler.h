@@ -158,9 +158,7 @@ public:
   EventMarkerManager* markerManager;
 
 
-  virtual void initMarkerManager(void) {
-  	markerManager = NULL;
-  }
+  virtual void initMarkerManager(void);
 
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - start_cpu_time_ns_;
@@ -307,13 +305,20 @@ public:
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
   virtual void dumpProfData(bool) {}
-  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM){}
-  virtual void dumpEventMarks(void){}
+
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   void setHeapHeaderConf(GC_MMPHeapConf*);
   void dumpHeapConfigurations(GC_MMPHeapConf*);
+
+  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
+  virtual void dumpEventMarks(void);
+
+
+  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
+  virtual void DumpEventMarks(void){}
+
 };
 
 
@@ -332,6 +337,10 @@ public:
 	void setPauseManager(GCMMPThreadProf*);
 
 	void dumpProfData(bool);
+
+	void initMarkerManager(void) {
+		markerManager = NULL;
+	}
 };
 
 class CPUFreqProfiler : public VMProfiler {
@@ -340,10 +349,12 @@ public:
 	CPUFreqProfiler(GCMMP_Options* opts, void* entry);
 	~CPUFreqProfiler(){};
 
-  void initMarkerManager(void);
-  void addEventMarker(GCMMP_ACTIVITY_ENUM);
-  void dumpEventMarks(void);
   void dumpProfData(bool);
+
+  void AddEventMarker(GCMMP_ACTIVITY_ENUM);
+  void DumpEventMarks(void);
+
+
 };
 
 
@@ -368,6 +379,9 @@ public:
 
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt);
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt);
+
+  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM);
+  virtual void DumpEventMarks(void);
 
 };
 
