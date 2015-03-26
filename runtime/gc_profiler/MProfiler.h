@@ -262,8 +262,8 @@ public:
   bool getRecivedShutDown(void);
   bool hasProfDaemon(void);
 
-	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt){};
-	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {};
+	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
+	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM) {};
 
 	GCMMPHeapStatus heapStatus;
 	virtual double getAllocIndex(){return heapStatus.index;};
@@ -306,8 +306,8 @@ public:
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
-  virtual void dumpProfData(bool lastDump) {}
-  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM evtMark){}
+  virtual void dumpProfData(bool) {}
+  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void dumpEventMarks(void){}
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
