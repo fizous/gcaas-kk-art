@@ -343,6 +343,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.currAllocBytes = heap_->GetBytesAllocated();
 	heapStatus.concurrentStartBytes = heap_->GetConcStartBytes();
 	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
+
+
 }
 
 void VMProfiler::notifyAllocation(size_t allocSize) {
@@ -649,7 +651,11 @@ void PerfCounterProfiler::dumpProfData(bool lastDump) {
   	bool successWrite =
   			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
   					sizeof(int));
-    dumpEventMarks();
+  	if(successWrite) {
+  		dumpEventMarks();
+  	} else {
+  		LOG(ERROR) << "PerfCounterProfiler:: could not dump the event marker after heap stats";
+  	}
     dump_file_->Close();
   }
 
@@ -739,7 +745,12 @@ bool CPUFreqProfiler::periodicDaemonExec(void){
 }
 
 inline void PerfCounterProfiler::dumpHeapStats(void) {
-	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(heapStatus));
+	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	if(successWrite) {
+
+	} else {
+		LOG(ERROR) << "could not dump heap stats";
+	}
 }
 
 bool PerfCounterProfiler::periodicDaemonExec(void) {
