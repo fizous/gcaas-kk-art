@@ -345,7 +345,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
 	heapStatus.softLimit = heapStatus.currFootPrint;
 
-	heapStatus.gcCounts = getGCEventsCounts();
+	heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 
 
 }
