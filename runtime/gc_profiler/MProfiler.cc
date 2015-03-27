@@ -343,7 +343,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.currAllocBytes = heap_->GetBytesAllocated();
 	heapStatus.concurrentStartBytes = heap_->GetConcStartBytes();
 	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
-	heapStatus.softLimit = heap_->GetMaxMemory();
+	heapStatus.softLimit = 0;//heap_->GetMaxMemory();
+	heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
 
 	heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 
