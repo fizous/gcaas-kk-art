@@ -202,7 +202,7 @@ public:
     return perf_record_;
   }
   void readPerfCounter(int32_t);
-  void readPerfCounter(int32_t, uint64_t*, uint64_t*);
+  void readPerfCounter(int32_t, uint64_t*, uint64_t*, uint64_t*);
   uint64_t getDataPerfCounter();
 
 
