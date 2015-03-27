@@ -338,13 +338,11 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	int32_t _allocBytes = total_alloc_bytes_.load();
 
 	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindow);
-	heapStatus.timeInNsec = GetRelevantCPUTime();
+	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 	heapStatus.currAllocBytes = heap_->GetBytesAllocated();
 	heapStatus.concurrentStartBytes = heap_->GetConcStartBytes();
 	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
-
-
 }
 
 void VMProfiler::notifyAllocation(size_t allocSize) {
@@ -642,6 +640,22 @@ void VMProfiler::initMarkerManager(void) {
 	}
 }
 
+
+void PerfCounterProfiler::dumpProfData(bool lastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  LOG(ERROR) <<  "PerfCounterProfiler: start dumping data";
+
+  if(lastDump) {
+  	bool successWrite =
+  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+  					sizeof(int));
+    dumpEventMarks();
+    dump_file_->Close();
+  }
+
+}
+
+
 void CPUFreqProfiler::dumpProfData(bool lastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
   LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
@@ -696,6 +710,9 @@ void VMProfiler::dumpEventMarks(void) {
 	}
 }
 
+
+
+
 void PerfCounterProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
@@ -721,7 +738,11 @@ bool CPUFreqProfiler::periodicDaemonExec(void){
 	return true;
 }
 
-bool PerfCounterProfiler::periodicDaemonExec(void){
+inline void PerfCounterProfiler::dumpHeapStats(void) {
+	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(heapStatus));
+}
+
+bool PerfCounterProfiler::periodicDaemonExec(void) {
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
@@ -734,6 +755,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void){
     //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
     updateHeapAllocStatus();
     getPerfData();
+    dumpHeapStats();
     receivedSignal_ = false;
 
     if(getRecivedShutDown()) {

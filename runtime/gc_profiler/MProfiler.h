@@ -383,6 +383,9 @@ public:
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM);
   virtual void DumpEventMarks(void);
 
+  void dumpProfData(bool);
+  void dumpHeapStats(void);
+
 };
 
 class MProfiler {
