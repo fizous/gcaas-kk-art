@@ -272,7 +272,7 @@ public:
 		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
 	}
 	void updateHeapAllocStatus(void);
-	void updateHeapPerfStatus(uint64_t, uint64_t);
+	void updateHeapPerfStatus(uint64_t, uint64_t, uint64_t);
 
 	void PreForkPreparation(void);
 	void GCMMProfPerfCounters(const char*);

@@ -584,10 +584,11 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 }
 
 
-inline void VMProfiler::updateHeapPerfStatus(uint64_t totalVals, uint64_t gcVals) {
+inline void VMProfiler::updateHeapPerfStatus(uint64_t totalVals,
+		uint64_t gcMutVals, uint64_t gcDaemonVals) {
 	heapStatus.totalMetric = totalVals;
-	heapStatus.gcDaemonUsage = (gcVals * 100.0) /totalVals;
-	heapStatus.gcMutUsage = 0.0;
+	heapStatus.gcDaemonUsage = (gcDaemonVals * 100.0) /totalVals;
+	heapStatus.gcMutUsage = (gcMutVals * 100.0) /totalVals;
 }
 
 void PerfCounterProfiler::getPerfData() {
@@ -601,7 +602,7 @@ void PerfCounterProfiler::getPerfData() {
 	for (const auto& threadProf : threadProfList_) {
 		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcMutVals, &_gcDaemonVals);
 	}
-	updateHeapPerfStatus(_totalVals, _gcVals);
+	updateHeapPerfStatus(_totalVals, _gcMutVals, _gcDaemonVals);
 }
 
 
