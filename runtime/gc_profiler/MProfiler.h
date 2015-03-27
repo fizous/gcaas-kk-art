@@ -157,7 +157,10 @@ public:
   Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
 
-
+  virtual int32_t getGCEventsCounts(void) {
+  	if(markerManager != NULL) return markerManager->currIndex;
+  	return 0;
+  }
   virtual void initMarkerManager(void);
 
   uint64_t GetRelevantCPUTime(void) const {

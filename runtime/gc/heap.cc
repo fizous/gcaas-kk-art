@@ -1790,7 +1790,7 @@ size_t Heap::GetPercentFree() {
 }
 
 size_t Heap::GetConcStartBytes() {
-	return concurrent_start_bytes_;
+	return std::min(max_allowed_footprint_, concurrent_start_bytes_);
 }
 size_t Heap::GetMaxAllowedFootPrint() {
 	return max_allowed_footprint_;
