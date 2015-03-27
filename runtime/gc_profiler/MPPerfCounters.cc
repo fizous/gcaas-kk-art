@@ -66,7 +66,7 @@ void PerfEventLogger::getGCMarks(uint64_t* contVal) {
 }
 
 
-inline void MPPerfCounter::getGCDataDistributions(uint64_t* totalVal,
+void MPPerfCounter::getGCDataDistributions(uint64_t* totalVal,
 		uint64_t* totalGcVal) {
 	*totalVal += data;
 	*totalGcVal += gcAcc;
