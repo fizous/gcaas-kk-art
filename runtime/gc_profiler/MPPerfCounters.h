@@ -181,7 +181,7 @@ public:
 	uint64_t data;
 	uint64_t gcAcc;
 
-	void getGCDataDistributions(uint64_t*, uint64_t*);
+	void getGCDataDistributions(uint64_t*, uint64_t*, uint64_t*);
 	MPPerfCounter(const char*);
 	MPPerfCounter(void);
 	/*

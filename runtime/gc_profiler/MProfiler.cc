@@ -185,16 +185,20 @@ void GCMMPThreadProf::readPerfCounter(int32_t val) {
 }
 
 
-void GCMMPThreadProf::readPerfCounter(int32_t val, uint64_t* totalVals, uint64_t* gcVals) {
+void GCMMPThreadProf::readPerfCounter(int32_t val, uint64_t* totalVals,
+		uint64_t* gcMutVals, uint64_t* gcDaemonVals) {
 	if(GetPerfRecord() == NULL)
 		return;
 	if(state == GCMMP_TH_RUNNING) {
 		GetPerfRecord()->storeReading(val);
 	}
-	GetPerfRecord()->getGCDataDistributions(totalVals, gcVals);
 	if(isGCThread()) {
-		*gcVals += GetPerfRecord()->data;
+		*gcDaemonVals += GetPerfRecord()->data;
+		*totalVals += GetPerfRecord()->data;
+	} else {
+		GetPerfRecord()->getGCDataDistributions(totalVals, gcMutVals, gcDaemonVals);
 	}
+
 }
 
 uint64_t GCMMPThreadProf::getDataPerfCounter(void) {
@@ -582,19 +586,20 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 inline void VMProfiler::updateHeapPerfStatus(uint64_t totalVals, uint64_t gcVals) {
 	heapStatus.totalMetric = totalVals;
-	heapStatus.gcDaemonUsage = (gcVals * 1.0) /totalVals;
+	heapStatus.gcDaemonUsage = (gcVals * 100.0) /totalVals;
 	heapStatus.gcMutUsage = 0.0;
 }
 
 void PerfCounterProfiler::getPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	uint64_t _totalVals = 0;
-	uint64_t _gcVals = 0;
+	uint64_t _gcMutVals = 0;
+	uint64_t _gcDaemonVals = 0;
 	//gc::Heap* heap_ = Runtime::Current()->GetHeap();
 
 	//LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
 	for (const auto& threadProf : threadProfList_) {
-		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcVals);
+		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcMutVals, &_gcDaemonVals);
 	}
 	updateHeapPerfStatus(_totalVals, _gcVals);
 }
