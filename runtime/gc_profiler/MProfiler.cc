@@ -190,9 +190,11 @@ void GCMMPThreadProf::readPerfCounter(int32_t val, uint64_t* totalVals, uint64_t
 		return;
 	if(state == GCMMP_TH_RUNNING) {
 		GetPerfRecord()->storeReading(val);
-		GetPerfRecord()->getGCMarks(gcVals);
 	}
-	*totalVals +=  GetPerfRecord()->data;
+	GetPerfRecord()->getGCDataDistributions(totalVals, gcVals);
+	if(isGCThread) {
+		*gcVals += GetPerfRecord()->data;
+	}
 }
 
 uint64_t GCMMPThreadProf::getDataPerfCounter(void) {

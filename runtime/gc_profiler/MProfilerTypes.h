@@ -204,6 +204,11 @@ public:
   void readPerfCounter(int32_t);
   void readPerfCounter(int32_t, uint64_t*, uint64_t*);
   uint64_t getDataPerfCounter();
+
+
+  bool isGCThread() {
+  	return (tag_ >= GCMMP_THREAD_GCDAEMON);
+  }
 };
 } // namespace mprofiler
 } // namespace art

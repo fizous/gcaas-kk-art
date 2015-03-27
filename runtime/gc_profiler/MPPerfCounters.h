@@ -165,6 +165,7 @@ class PerfEventLogger {
   uint64_t addEndMarkEvent(GCMMP_BREAK_DOWN_ENUM, uint64_t);
   void dumpMarks(void);
   void getGCMarks(uint64_t*);
+
   explicit PerfEventLogger(void);
 
 
@@ -177,9 +178,10 @@ public:
 	PerfLibCounterT*  hwCounter;
 	const char* event_name_;
 	PerfEventLogger evtLogger;
-	u64 data;
+	uint64_t data;
+	uint64_t gcAcc;
 
-
+	void getGCDataDistributions(uint64_t*, uint64_t*);
 	MPPerfCounter(const char*);
 	MPPerfCounter(void);
 	/*

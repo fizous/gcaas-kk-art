@@ -65,6 +65,16 @@ void PerfEventLogger::getGCMarks(uint64_t* contVal) {
 	}
 }
 
+
+inline void MPPerfCounter::getGCDataDistributions(uint64_t* totalVal,
+		uint64_t* totalGcVal) {
+	*totalVal += data;
+	*totalGcVal += gcAcc;
+}
+
+
+
+
 void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
 	events.push_back(EventReading(tag, data));
 }
@@ -84,7 +94,9 @@ void MPPerfCounter::getGCMarks(uint64_t* val) {
 
 void MPPerfCounter::addEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	readPerfData();
-	evtLogger.eventAccMarkers[evt] += evtLogger.addEndMarkEvent(evt, data);
+	uint64_t _diff = evtLogger.addEndMarkEvent(evt, data);
+	gcAcc += _diff;
+	evtLogger.eventAccMarkers[evt] += _diff;
 }
 
 MPPerfCounter::MPPerfCounter(void) :
@@ -94,6 +106,8 @@ MPPerfCounter::MPPerfCounter(void) :
 
 MPPerfCounter::MPPerfCounter(const char* event_name)  {
 	event_name_ = event_name;
+	gcAcc = 0;
+	data = 0;
 }
 
 MPPerfCounter* MPPerfCounter::Create(const char* event_name){
