@@ -466,7 +466,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 
 		    	if(_index == 2) {
 		    		GCMMPCPIDataDumped dataDumped;
-		    		dataDumped.index = ((total_alloc_bytes_.load() * 1.0) >> kGCMMPLogAllocWindow);
+		    		dataDumped.index = ((total_alloc_bytes_.load()) >> kGCMMPLogAllocWindow)  * 1.0;
 		    		dataDumped.currCycles = accData.currInstructions;
 		    		dataDumped.currInstructions = accData.currInstructions;
 		    		dataDumped.currCPI =
