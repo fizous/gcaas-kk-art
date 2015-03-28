@@ -454,7 +454,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 			int _index = 0;
 		  for (const auto& profRec : threadProfList_) {
 		    if(profRec->GetTid() == _pid) {
-		    	LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
+		    	//LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
 //		    	profRec->perf_record_->addEndEventNOSpecial(evt);
 		    	if(_index > 0) {
 		    		accData.currInstructions =
