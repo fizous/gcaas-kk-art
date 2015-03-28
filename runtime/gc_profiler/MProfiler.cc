@@ -829,11 +829,19 @@ void PerfCounterProfiler::dumpProfData(bool lastDump) {
 
 void GCDaemonCPIProfiler::dumpProfData(bool lastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-  LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
+
 	if(lastDump) {
+		LOG(ERROR) <<  "GCDaemonCPIProfiler: start dumping data";
+	  bool _success =
+	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	  			sizeof(int));
+	  if(_success)
+	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
+	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
 		dump_file_->Close();
+		LOG(ERROR) <<  "GCDaemonCPIProfiler: done dumping data";
 	}
-	LOG(ERROR) <<  "CPUFreqProfiler: done dumping data";
+
 }
 
 
