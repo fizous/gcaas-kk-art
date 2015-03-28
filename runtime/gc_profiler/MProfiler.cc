@@ -121,7 +121,7 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 "GCCPI", "Measure CPI for GC daemon",
 				 "CPI_GC.log",
 				 NULL,
-				 &createVMProfiler<MMUProfiler>
+				 &createVMProfiler<GCDaemonCPIProfiler>
 		},//GCCPI
 };//profilTypes
 
