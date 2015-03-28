@@ -454,9 +454,10 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 			int _index = 0;
 		  for (const auto& profRec : threadProfList_) {
 		    if(profRec->GetTid() == _pid) {
+		    	_index++;
 		    	//LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
 //		    	profRec->perf_record_->addEndEventNOSpecial(evt);
-		    	if(_index > 0) {
+		    	if(_index == 2) {
 		    		accData.currInstructions =
 		    				profRec->perf_record_->addEndEventNOSpecial(evt);
 		    		accData.instructions = profRec->perf_record_->data;
@@ -464,8 +465,9 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    		accData.currCycles =
 		    				profRec->perf_record_->addEndEventNOSpecial(evt);
 		    		accData.cycles = profRec->perf_record_->data;
+
 		    	}
-		    	_index++;
+
 
 		    	if(_index == 2) {
 		    		if(accData.currInstructions == 0) {
@@ -474,7 +476,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    		GCMMPCPIDataDumped dataDumped;
 
 		    		dataDumped.index = ((total_alloc_bytes_.load()) >> kGCMMPLogAllocWindow)  * 1.0;
-		    		dataDumped.currCycles = accData.currInstructions;
+		    		dataDumped.currCycles = accData.currCycles;
 		    		dataDumped.currInstructions = accData.currInstructions;
 		    		dataDumped.currCPI =
 		    				(dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
@@ -486,6 +488,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    	}
 		    }
 		  }
+
 		}
 	}
 }
