@@ -226,7 +226,7 @@ public:
 
   void addStartEvent(GCMMP_BREAK_DOWN_ENUM);
   void addEndEvent(GCMMP_BREAK_DOWN_ENUM);
-  void addEndEventNOSpecial(GCMMP_BREAK_DOWN_ENUM);
+  uint64_t addEndEventNOSpecial(GCMMP_BREAK_DOWN_ENUM);
   void dumpMarks(void);
   void getGCMarks(uint64_t*);
 };
