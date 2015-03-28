@@ -656,19 +656,19 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
 	} else {
-		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-			setGcTrimmer(thread);
-			setThreadAffinity(thread, false);
-			if(!IsAttachGCDaemon()) {
-				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
-				return;
-			}
-			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
-			_tag = GCMMP_THREAD_GCTRIM;
-		} else {
+//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+//			setGcTrimmer(thread);
+//			setThreadAffinity(thread, false);
+//			if(!IsAttachGCDaemon()) {
+//				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+//				return;
+//			}
+//			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+//			_tag = GCMMP_THREAD_GCTRIM;
+//		} else {
 			return;
 		}
-	}
+	//}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
