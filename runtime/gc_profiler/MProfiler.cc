@@ -425,9 +425,9 @@ inline void GCDaemonCPIProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
 		if(evt == GCMMP_GC_BRK_NONE) {
-			GCMMPThreadProf* _rec = _profRec->perf_record_;
+			pid_t _pid = _profRec->GetTid();
 		  for (const auto& profRec : threadProfList_) {
-		    if(profRec->GetTid() == _rec->GetTid())
+		    if(profRec->GetTid() == _pid)
 		    	profRec->perf_record_->addStartEvent(evt);
 		  }
 		}
@@ -448,10 +448,10 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
 		if(evt == GCMMP_GC_BRK_NONE) {
-			GCMMPThreadProf* _rec = _profRec->perf_record_;
+			pid_t _pid = _profRec->GetTid();
 			int _index = 0;
 		  for (const auto& profRec : threadProfList_) {
-		    if(profRec->GetTid() == _rec->GetTid()) {
+		    if(profRec->GetTid() == _pid) {
 //		    	profRec->perf_record_->addEndEventNOSpecial(evt);
 		    	if(_index > 0) {
 		    		accData.currInstructions =
