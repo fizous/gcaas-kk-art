@@ -2048,6 +2048,7 @@ void Heap::ConcurrentGC(Thread* self) {
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageInternal(next_gc_type_, kGcCauseBackground, false);
   }
+  mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   //mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
 }
@@ -2101,9 +2102,10 @@ void Heap::RequestHeapTrim() {
 }
 
 size_t Heap::Trim() {
-	mprofiler::VMProfiler::MProfMarkStartStartTrimHWEvent();
+	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();
+  mprofiler::VMProfiler::MProfMarkEndTrimHWEvent();
   return _trimmed;
 }
 
