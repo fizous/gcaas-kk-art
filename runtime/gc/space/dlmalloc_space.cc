@@ -459,13 +459,14 @@ size_t DlMallocSpace::AllocationSize(const mirror::Object* obj) {
 }
 
 size_t DlMallocSpace::Trim() {
-	mprofiler::VMProfiler::MProfMarkStartStartTrimHWEvent();
+	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   MutexLock mu(Thread::Current(), lock_);
   // Trim to release memory at the end of the space.
   mspace_trim(mspace_, 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
   size_t reclaimed = 0;
   mspace_inspect_all(mspace_, DlmallocMadviseCallback, &reclaimed);
+  mprofiler::VMProfiler::MProfMarkEndTrimHWEvent();
   return reclaimed;
 }
 
