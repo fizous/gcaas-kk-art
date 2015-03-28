@@ -919,6 +919,10 @@ bool CPUFreqProfiler::periodicDaemonExec(void){
 	return true;
 }
 
+bool GCDaemonCPIProfiler::periodicDaemonExec(void){
+	return true;
+}
+
 inline void PerfCounterProfiler::dumpHeapStats(void) {
 	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
 	if(successWrite) {

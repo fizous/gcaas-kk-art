@@ -410,6 +410,7 @@ public:
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM);
 	bool dettachThread(GCMMPThreadProf*);
 	void dumpCPIStats(GCMMPCPIDataDumped*);
+	bool periodicDaemonExec(void);
 	void dumpProfData(bool);
 };//GCDaemonCPIProfiler
 
