@@ -320,10 +320,12 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 MPPerfCounter* GCDaemonCPIProfiler::createHWCounter(Thread* thread) {
 	MPPerfCounter* _perfCounter = NULL;
 	if(thread->GetProfRec() != NULL) { //create hw for instructions
-		GCMMP_VLOG(INFO) << "GCDaemonCPIProfiler: creating hwCount: INSTRUCTIONS";
+		//GCMMP_VLOG(INFO) <<
+		LOG(ERROR) << "GCDaemonCPIProfiler: creating hwCount: INSTRUCTIONS";
 		_perfCounter = MPPerfCounter::Create("INSTRUCTIONS");
 	} else {
-		GCMMP_VLOG(INFO) << "GCDaemonCPIProfiler: creating hwCount: Cycles";
+		//GCMMP_VLOG(INFO) <<
+		LOG(ERROR) << "GCDaemonCPIProfiler: creating hwCount: Cycles";
 		_perfCounter = MPPerfCounter::Create("CYCLES");
 	}
 	_perfCounter->OpenPerfLib(thread->GetTid());
@@ -674,11 +676,10 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
+	thread->SetProfRec(threadProf);
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
-
-	thread->SetProfRec(threadProf);
 }
 
 
