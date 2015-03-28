@@ -516,7 +516,7 @@ bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		  for (const auto& profRec : threadProfList_) {
 		    if(profRec->GetTid() == _id) {
 		    	profRec->readPerfCounter(currBytes_);
-		    	profRec->ClosePerfLib();
+		    	profRec->perf_record_->ClosePerfLib();
 		    	profRec->state = GCMMP_TH_STOPPED;
 		    }
 		  }
