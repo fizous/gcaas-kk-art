@@ -56,7 +56,7 @@ void PerfEventLogger::dumpMarks(void) {
 }
 
 void PerfEventLogger::getGCMarks(uint64_t* contVal) {
-	for(int i = GCMMP_GC_BRK_NONE; i < GCMMP_GC_BRK_MAXIMUM; i++){
+	for(int i = GCMMP_GC_BRK_SUSPENSION; i < GCMMP_GC_BRK_MAXIMUM; i++){
 		GCMMP_BREAK_DOWN_ENUM valIter = static_cast<GCMMP_BREAK_DOWN_ENUM>(i);
     if(eventAccMarkers[valIter] > 0) {
     	*contVal += eventAccMarkers[valIter];
@@ -99,6 +99,15 @@ void MPPerfCounter::addEndEvent(GCMMP_BREAK_DOWN_ENUM evt){
 	evtLogger.eventAccMarkers[evt] += _diff;
 }
 
+uint64_t MPPerfCounter::addEndEventNOSpecial(GCMMP_BREAK_DOWN_ENUM evt){
+	readPerfData();
+	uint64_t _diff = evtLogger.addEndMarkEvent(evt, data);
+	noSpectialAcc += _diff;
+	evtLogger.eventAccMarkers[evt] += _diff;
+	return _diff;
+}
+
+
 MPPerfCounter::MPPerfCounter(void) :
 		event_name_("CYCLES") {
 
@@ -108,6 +117,7 @@ MPPerfCounter::MPPerfCounter(const char* event_name)  {
 	event_name_ = event_name;
 	gcAcc = 0;
 	data = 0;
+	noSpectialAcc = 0;
 }
 
 MPPerfCounter* MPPerfCounter::Create(const char* event_name){

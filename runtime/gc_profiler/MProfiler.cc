@@ -114,8 +114,15 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 "PERF_MMU_REF.log",
 				 NULL,
 				 &createVMProfiler<MMUProfiler>
-		}//MMU
-
+		},//MMU
+		{
+				 0x12,
+				 GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				 "GCCPI", "Measure CPI for GC daemon",
+				 "CPI_GC.log",
+				 NULL,
+				 &createVMProfiler<MMUProfiler>
+		},//GCCPI
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -310,6 +317,20 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 	return _perfCounter;
 }
 
+MPPerfCounter* GCDaemonCPIProfiler::createHWCounter(Thread* thread) {
+	MPPerfCounter* _perfCounter = NULL;
+	if(thread->GetProfRec() != NULL) { //create hw for instructions
+		GCMMP_VLOG(INFO) << "GCDaemonCPIProfiler: creating hwCount: INSTRUCTIONS";
+		_perfCounter = MPPerfCounter::Create("INSTRUCTIONS");
+	} else {
+		GCMMP_VLOG(INFO) << "GCDaemonCPIProfiler: creating hwCount: Cycles";
+		_perfCounter = MPPerfCounter::Create("CYCLES");
+	}
+	_perfCounter->OpenPerfLib(thread->GetTid());
+
+	return _perfCounter;
+}
+
 
 //MPPerfCounter* VMProfiler::createHWCounter(Thread* thread) {
 //	GCMMP_VLOG(INFO) << "VMProfiler: createHWCounter";
@@ -393,16 +414,75 @@ inline void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
-		_profRec->perf_record_->addStartEvent(evt);
+		if(evt != GCMMP_GC_BRK_NONE)
+			_profRec->perf_record_->addStartEvent(evt);
 	}
 }
+
+
+inline void GCDaemonCPIProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
+	Thread* self = Thread::Current();
+	GCMMPThreadProf* _profRec =  self->GetProfRec();
+	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
+		if(evt == GCMMP_GC_BRK_NONE) {
+			GCMMPThreadProf* _rec = _profRec->perf_record_;
+		  for (const auto& profRec : threadProfList_) {
+		    if(profRec->GetTid() == _rec->GetTid())
+		    	profRec->perf_record_->addStartEvent(evt);
+		  }
+		}
+	}
+}
+
 inline void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
 	GCMMPThreadProf* _profRec =  self->GetProfRec();
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
-		_profRec->perf_record_->addEndEvent(evt);
+		if(evt != GCMMP_GC_BRK_NONE)
+			_profRec->perf_record_->addEndEvent(evt);
 	}
 }
+
+inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
+	Thread* self = Thread::Current();
+	GCMMPThreadProf* _profRec =  self->GetProfRec();
+	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
+		if(evt == GCMMP_GC_BRK_NONE) {
+			GCMMPThreadProf* _rec = _profRec->perf_record_;
+			int _index = 0;
+		  for (const auto& profRec : threadProfList_) {
+		    if(profRec->GetTid() == _rec->GetTid()) {
+//		    	profRec->perf_record_->addEndEventNOSpecial(evt);
+		    	if(_index > 0) {
+		    		accData.currInstructions =
+		    				profRec->perf_record_->addEndEventNOSpecial(evt);
+		    		accData.instructions = profRec->perf_record_->data;
+		    	} else {
+		    		accData.currCycles =
+		    				profRec->perf_record_->addEndEventNOSpecial(evt);
+		    		accData.cycles = profRec->perf_record_->data;
+		    	}
+		    	_index++;
+
+		    	if(_index == 2) {
+		    		GCMMPCPIDataDumped dataDumped;
+		    		dataDumped.index = ((total_alloc_bytes_.load() * 1.0) >> kGCMMPLogAllocWindow);
+		    		dataDumped.currCycles = accData.currInstructions;
+		    		dataDumped.currInstructions = accData.currInstructions;
+		    		dataDumped.currCPI =
+		    				(dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
+		    		dataDumped.averageCPI =
+		    				(accData.cycles * 1.0) / accData.instructions;
+
+		    		dumpCPIStats(&dataDumped);
+		    		break;
+		    	}
+		    }
+		  }
+		}
+	}
+}
+
 
 bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
@@ -422,6 +502,25 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 			//thProf->resetPerfRecord();
 		}
 		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
+
+
+bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
+		if(thProf->GetPerfRecord() != NULL) {
+			pid_t _id = thProf->GetTid();
+			int32_t currBytes_ = total_alloc_bytes_.load();
+		  for (const auto& profRec : threadProfList_) {
+		    if(profRec->GetTid() == _id) {
+		    	profRec->readPerfCounter(currBytes_);
+		    	profRec->ClosePerfLib();
+		    	profRec->state = GCMMP_TH_STOPPED;
+		    }
+		  }
+		}
 	}
 	return true;
 }
@@ -526,6 +625,60 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 	if(vmProfiler != NULL) {
 		vmProfiler->attachSingleThread(t);
 	}
+}
+
+void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
+	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf != NULL) {
+		if(threadProf->state == GCMMP_TH_RUNNING) {
+			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " << thread->GetTid() ;
+			return;
+		}
+	}
+	if(IsProfilerThread(thread)) {
+		if(!IsAttachProfDaemon()) {
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+			return;
+		}
+	}
+
+	std::string thread_name;
+	thread->GetThreadName(thread_name);
+	GCMMPThProfileTag _tag = GCMMP_THREAD_GCDAEMON;
+	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+		setGcDaemon(thread);
+
+		setThreadAffinity(thread, false);
+		if(!IsAttachGCDaemon()) {
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+			return;
+		}
+		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
+	} else {
+		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+			setGcTrimmer(thread);
+			setThreadAffinity(thread, false);
+			if(!IsAttachGCDaemon()) {
+				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+				return;
+			}
+			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+			_tag = GCMMP_THREAD_GCTRIM;
+		} else {
+			return;
+		}
+	}
+
+	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	threadProf = new GCMMPThreadProf(this, thread);
+	threadProf->setThreadTag(_tag);
+	threadProfList_.push_back(threadProf);
+	threadProf = new GCMMPThreadProf(this, thread);
+	threadProf->setThreadTag(_tag);
+	threadProfList_.push_back(threadProf);
+
+	thread->SetProfRec(threadProf);
 }
 
 
@@ -674,6 +827,16 @@ void PerfCounterProfiler::dumpProfData(bool lastDump) {
 }
 
 
+void GCDaemonCPIProfiler::dumpProfData(bool lastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
+	if(lastDump) {
+		dump_file_->Close();
+	}
+	LOG(ERROR) <<  "CPUFreqProfiler: done dumping data";
+}
+
+
 void CPUFreqProfiler::dumpProfData(bool lastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
   LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
@@ -758,6 +921,16 @@ bool CPUFreqProfiler::periodicDaemonExec(void){
 
 inline void PerfCounterProfiler::dumpHeapStats(void) {
 	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	if(successWrite) {
+
+	} else {
+		LOG(ERROR) << "could not dump heap stats";
+	}
+}
+
+
+inline void GCDaemonCPIProfiler::dumpCPIStats(GCMMPCPIDataDumped* dataD) {
+	bool successWrite = dump_file_->WriteFully(dataD, sizeof(GCMMPCPIDataDumped));
 	if(successWrite) {
 
 	} else {
@@ -909,8 +1082,19 @@ void VMProfiler::createProfDaemon(){
 //	}
 }
 
-PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions, void* entry):
-		VMProfiler(argOptions, entry){
+GCDaemonCPIProfiler::GCDaemonCPIProfiler(GCMMP_Options* argOptions, void* entry) :
+	VMProfiler(argOptions, entry) {
+	if(initCounters(perfName_) != 0) {
+		LOG(ERROR) << "GCDaemonCPIProfiler : init counters returned error";
+	} else {
+		memset(&accData, 0, sizeof(GCMMPCPIData));
+		LOG(ERROR) << "GCDaemonCPIProfiler : Initializer";
+	}
+}
+
+PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
+		void* entry) :
+		VMProfiler(argOptions, entry) {
 	//GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
@@ -922,7 +1106,7 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions, void* entry)
 	LOG(ERROR) << "PerfCounterProfiler : Initializer";
 }
 
-int PerfCounterProfiler::initCounters(const char* evtName){
+int VMProfiler::initCounters(const char* evtName){
 	init_perflib_counters();
 	return 0;
 }
@@ -1238,7 +1422,6 @@ void VMProfiler::ShutdownProfiling(void) {
 			}
 	 }
 }
-
 
 static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
@@ -1668,13 +1851,28 @@ inline void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 
 void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
 	}
 }
 
-void VMProfiler::MProfMarkStartStartTrimHWEvent(void) {
+void VMProfiler::MProfMarkEndConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
+	}
+}
+
+
+void VMProfiler::MProfMarkStartTrimHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
+	}
+}
+
+void VMProfiler::MProfMarkEndTrimHWEvent(void) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
 	}
 }
 

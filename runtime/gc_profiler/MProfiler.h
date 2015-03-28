@@ -179,7 +179,7 @@ public:
   }
 
   void attachThreads(void);
-  void attachSingleThread(Thread* t);
+  virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t);
   void createProfDaemon();
 
@@ -244,6 +244,7 @@ public:
   void ShutdownProfiling(void);
   void startProfiling(void);
   void ProcessSignalCatcher(int);
+  int initCounters(const char*);
 
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
   virtual void setPauseManager(GCMMPThreadProf* thProf) {
@@ -288,8 +289,10 @@ public:
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
 
-	static void MProfMarkStartStartTrimHWEvent(void);
+	static void MProfMarkStartTrimHWEvent(void);
+	static void MProfMarkEndTrimHWEvent(void);
 	static void MProfMarkStartConcGCHWEvent(void);
+	static void MProfMarkEndConcGCHWEvent(void);
   static void MProfMarkStartAllocGCHWEvent(void);
   static void MProfMarkEndAllocGCHWEvent(void);
   static void MProfMarkStartExplGCHWEvent(void);
@@ -368,7 +371,7 @@ public:
 
 	PerfCounterProfiler(GCMMP_Options* opts, void* entry);
 	~PerfCounterProfiler(){};
-	int initCounters(const char*);
+
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool createHWEvents(void) {return true;}
@@ -390,6 +393,25 @@ public:
   void dumpHeapStats(void);
 
 };
+
+
+class GCDaemonCPIProfiler : public VMProfiler {
+
+
+public:
+	GCMMPCPIData accData;
+
+	GCDaemonCPIProfiler(GCMMP_Options* opts, void* entry);
+	~GCDaemonCPIProfiler(){};
+	bool createHWEvents(void) {return true;}
+	void attachSingleThread(Thread*);
+	MPPerfCounter* createHWCounter(Thread*);
+	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM);
+	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM);
+	bool dettachThread(GCMMPThreadProf*);
+	void dumpCPIStats(GCMMPCPIDataDumped*);
+	void dumpProfData(bool);
+};//GCDaemonCPIProfiler
 
 class MProfiler {
 private:

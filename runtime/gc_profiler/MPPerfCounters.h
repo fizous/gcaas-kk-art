@@ -146,8 +146,22 @@ typedef struct GCMMPHeapStatus_S {
 	uint64_t 	  totalMetric;
 } GCMMPHeapStatus;
 
+typedef struct GCMMPCPIData_S {
+	pid_t 			threadID;
+	uint64_t		currCycles;
+	uint64_t 		currInstructions;
+	uint64_t		cycles;
+	uint64_t 		instructions;
+} GCMMPCPIData;
 
 
+typedef struct GCMMPCPIDataDumped_S {
+	double 			index;
+	uint64_t		currCycles;
+	uint64_t 		currInstructions;
+	double		  currCPI;
+	double 		  averageCPI;
+} GCMMPCPIDataDumped;
 
 
 class PerfEventLogger {
@@ -180,6 +194,7 @@ public:
 	PerfEventLogger evtLogger;
 	uint64_t data;
 	uint64_t gcAcc;
+	uint64_t noSpectialAcc;
 
 	void getGCDataDistributions(uint64_t*, uint64_t*, uint64_t*);
 	MPPerfCounter(const char*);
@@ -211,6 +226,7 @@ public:
 
   void addStartEvent(GCMMP_BREAK_DOWN_ENUM);
   void addEndEvent(GCMMP_BREAK_DOWN_ENUM);
+  void addEndEventNOSpecial(GCMMP_BREAK_DOWN_ENUM);
   void dumpMarks(void);
   void getGCMarks(uint64_t*);
 };
