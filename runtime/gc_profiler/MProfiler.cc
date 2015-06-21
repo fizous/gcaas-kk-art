@@ -2118,7 +2118,7 @@ void ObjectSizesProfiler::initHistogram(void) {
 	globalRecord.pcntTotal = 100.0;
 	memset((void*)histogramTable, 0, totalHistogramSize);
 
-	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 		histogramTable[i].index = i * 1.0;
 	}
 }
@@ -2156,7 +2156,7 @@ void ObjectSizesProfiler::logPerfData() {
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
 
 
-	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 		LOG(ERROR) << "index: " << histogramTable[i].index << "cntLive=" <<
 				histogramTable[i].cntLive << "; cntTotal="<<
 				histogramTable[i].cntTotal<<"; pcntLive=" <<histogramTable[i].pcntLive <<
@@ -2205,7 +2205,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
   //get the percentage of each histogram entry
-	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 		if(histogramTable[i].pcntTotal < 1.0)
 			continue;
 		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
