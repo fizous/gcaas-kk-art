@@ -457,7 +457,7 @@ public:
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool dettachThread(GCMMPThreadProf*);
-
+  void notifyFreeing(size_t);
   void gcpAddObject(size_t size);
   void gcpRemoveObject(size_t size);
 
