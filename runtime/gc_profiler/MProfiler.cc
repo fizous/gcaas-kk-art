@@ -395,7 +395,7 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	if(!IsAllocWindowsSet())
 		return;
 
-	GCP_DECLARE_ADD_ALLOC(0allocSize);
+	GCP_DECLARE_ADD_ALLOC(allocSize);
 
 	int32_t initValue = total_alloc_bytes_.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
