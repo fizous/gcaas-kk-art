@@ -336,8 +336,8 @@ public:
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void DumpEventMarks(void){}
 
-  virtual void gcpAddObject(size_t bd, size_t size, pid_t tId){}
-  virtual void gcpRemoveObject(size_t bd, size_t size, pid_t tId){}
+  virtual void gcpAddObject(size_t bd, size_t size, pid_t tId){size=bd=tId=0;}
+  virtual void gcpRemoveObject(size_t bd, size_t size, pid_t tId){size=bd=tId=0;}
 };
 
 
