@@ -37,6 +37,7 @@
 #include "gc/accounting/card_table-inl.h"
 #include "gc/heap.h"
 #include "gc_profiler/MProfiler.h"
+#include "gc_profiler/MProfilerHeap.h"
 #include "gc/space/space.h"
 #include "image.h"
 #include "instrumentation.h"
@@ -328,7 +329,8 @@ void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprof
 			art::mprofiler::MProfiler::kGCMMPDefaultGrowMethod;
 	mprofiler_opts->mprofile_gc_affinity_ =
 			art::mprofiler::MProfiler::kGCMMPDefaultAffinity;
-
+	mprofiler_opts->gcp_type_ =
+			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
 }
 
 
@@ -360,7 +362,22 @@ bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
   			return true;
   		}
   	}
+	} else if (StartsWith(option, "-Xgcp.")) {
+		std::vector<std::string> mprofile_options;
+		Split(option.substr(strlen("-Xgcp.")), '.', mprofile_options);
+		for (size_t i = 0; i < mprofile_options.size(); ++i) {
+			if (mprofile_options[i] == "window") {
+
+			} else if (mprofile_options[i] == "type") {
+	  		mprofiler_opts->gcp_type_ = atoi(mprofile_options[++i].c_str());
+	      LOG(INFO) << "Parsing -Xgcp option: " << mprofiler_opts->mprofile_type_;
+	      return true;
+			} else if (mprofile_options[i] == "cohort") {
+
+			}
+		}
 	}
+
 	return false;
 }
 
@@ -587,6 +604,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
     		 parsed->is_concurrent_gc_enabled_ = false;
     		 LOG(INFO) << "XXX Disable concurrent GC";
     	}
+
     	LOG(INFO) << "XXXX Done Parsing -Xgcmmp option: " << option;
     } else if (option == "-XX:+DisableExplicitGC") {
       parsed->is_explicit_gc_disabled_ = true;
@@ -682,6 +700,18 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
       }
     }
   }
+
+	if(parsed->mprofiler_options_.gcp_type_ !=
+			art::mprofiler::MProfiler::kGCMMPDisableMProfile) {
+  	if(GCP_OFF_CONCURRENT_GC()) {
+  		parsed->is_concurrent_gc_enabled_ = false;
+  		LOG(INFO) << "XXXX Disable Concurrent gc for GC Prof";
+  	}
+  	if(GCP_OFF_EXPLICIT_GC()) {
+  		parsed->is_explicit_gc_disabled_ = true;
+  		LOG(INFO) << "XXXX Disable explicit gc for GC Prof";
+  	}
+	}
 
   // If a reference to the dalvik core.jar snuck in, replace it with
   // the art specific version. This can happen with on device

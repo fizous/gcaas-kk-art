@@ -17,6 +17,7 @@
 #include "base/logging.h"
 #include "thread_state.h"
 #include "gc_profiler/MProfilerTypes.h"
+#include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
 
@@ -35,6 +36,13 @@
 #define GCMMP_ALLOW_PROFILE 								0
 
 
+#if DVM_ALLOW_GCPROFILER
+#define GCMMP_HANDLE_FINE_GARINE_FREE(x) art::mprofiler::VMProfiler::MProfNotifyFree(x)
+#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(0, x, 0)
+#else//DVM_ALLOW_GCPROFILER
+#define GCMMP_HANDLE_FINE_GARINE_FREE(x) ((void) 0)
+#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) ((void) 0)
+#endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
  *
@@ -181,6 +189,8 @@ public:
   void attachThreads(void);
   virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t);
+  virtual void notifyFreeing(size_t){}
+  void notifyFree(size_t);
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
@@ -286,6 +296,7 @@ public:
 	static bool IsMProfilingTimeEvent();
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t);
+	static void MProfNotifyFree(size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
 
@@ -325,6 +336,8 @@ public:
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void DumpEventMarks(void){}
 
+  virtual void gcpAddObject(size_t bd, size_t size, pid_t tId){}
+  virtual void gcpRemoveObject(size_t bd, size_t size, pid_t tId){}
 };
 
 
@@ -413,6 +426,42 @@ public:
 	bool periodicDaemonExec(void);
 	void dumpProfData(bool);
 };//GCDaemonCPIProfiler
+
+/* Application profilier for heap */
+
+typedef struct PACKED(4) GCPHistogramRecord_S {
+	double   index;
+	double cntLive;
+	double cntTotal;
+	double pcntLive;
+	double pcntTotal;
+} GCPHistogramRecord;
+
+class ObjectSizesProfiler : public VMProfiler {
+public:
+	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
+	~ObjectSizesProfiler(){};
+
+	size_t totalHistogramSize;
+	GCPHistogramRecord globalRecord;
+	GCPHistogramRecord histogramTable[32];
+
+
+	bool isMarkTimeEvents(void) {return false;}
+	void initHistogram(void);
+
+	bool periodicDaemonExec(void);
+	void dumpProfData(bool);
+  void dumpHeapStats(void);
+  void logPerfData(void);
+	MPPerfCounter* createHWCounter(Thread*);
+
+	bool dettachThread(GCMMPThreadProf*);
+
+  void gcpAddObject(size_t bd, size_t size, pid_t tId);
+  void gcpRemoveObject(size_t bd, size_t size, pid_t tId);
+
+};
 
 class MProfiler {
 private:
@@ -577,6 +626,8 @@ public:
 
   VMProfiler* vmProfile;
 }; //class MProfiler
+
+
 
 
 

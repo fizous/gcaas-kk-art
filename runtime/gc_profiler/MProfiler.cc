@@ -18,6 +18,7 @@
 #include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
+#include "gc_profiler/MProfilerHeap.h"
 #include "locks.h"
 #include "os.h"
 #include "runtime.h"
@@ -123,6 +124,15 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<GCDaemonCPIProfiler>
 		},//GCCPI
+		{
+				 0x02,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				 "ObjectSizesProfiler", "Object Histogram Profiler",
+				 "GCP_HISTOGRAM.log",
+				 NULL,
+				 &createVMProfiler<ObjectSizesProfiler>
+		},//Objects Histograms
+
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -384,6 +394,9 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	total_alloc_bytes_.fetch_add(allocSize);
 	if(!IsAllocWindowsSet())
 		return;
+
+	GCP_DECLARE_ADD_ALLOC(0, allocSize, 0);
+
 	int32_t initValue = total_alloc_bytes_.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
 
@@ -546,7 +559,7 @@ CPUFreqProfiler::CPUFreqProfiler(GCMMP_Options* argOptions, void* entry):
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				index_(argOptions->mprofile_type_),
-				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile)),
+				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != MProfiler::kGCMMPDisableMProfile)),
 				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
 				prof_thread_(NULL),
 				main_thread_(NULL),
@@ -557,10 +570,21 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 	if(IsProfilingEnabled()) {
 		size_t _loop = 0;
 		bool _found = false;
-		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
-			if(VMProfiler::profilTypes[_loop].id_ == index_) {
-				_found = true;
-				break;
+		if(argOptions->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
+			index_ = argOptions->gcp_type_;
+			for(_loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
+					_loop >= 0; _loop--) {
+				if(VMProfiler::profilTypes[_loop].id_ == index_) {
+					_found = true;
+					break;
+				}
+			}
+		} else {
+			for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
+				if(VMProfiler::profilTypes[_loop].id_ == index_) {
+					_found = true;
+					break;
+				}
 			}
 		}
 		if(_found) {
@@ -1142,10 +1166,20 @@ MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
 VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
 	size_t _loop = 0;
 	bool _found = false;
-	for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
-		if(VMProfiler::profilTypes[_loop].id_ == opts->mprofile_type_) {
-			_found = true;
-			break;
+	if(opts->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
+		for(_loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
+				_loop >= 0; _loop--) {
+			if(VMProfiler::profilTypes[_loop].id_ == opts->gcp_type_) {
+				_found = true;
+				break;
+			}
+		}
+	} else {
+		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
+			if(VMProfiler::profilTypes[_loop].id_ == opts->mprofile_type_) {
+				_found = true;
+				break;
+			}
 		}
 	}
 	if(_found) {
@@ -1155,6 +1189,7 @@ VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
 	}
 	return NULL;
 }
+
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
 		: index_(argOptions->mprofile_type_),
@@ -1809,6 +1844,16 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 }
 
 
+
+/*
+ * Attach a thread from the MProfiler
+ */
+void VMProfiler::MProfNotifyFree(size_t allocSize) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->notifyFreeing(allocSize);
+	}
+}
+
 /*
  * Attach a thread from the MProfiler
  */
@@ -2054,7 +2099,159 @@ int MProfiler::GetGCDaemonID(void)  {
 	}
 	return 0;
 }
+/********************************* Object demographics profiling ****************/
 
+ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
+	VMProfiler(argOptions, entry) {
+	if(initCounters(perfName_) != 0) {
+		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
+	} else {
+		initHistogram();
+		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
+	}
+}
+
+MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
+	GCMMP_VLOG(INFO) << "ObjectSizesProfiler: creating hwCount";
+	return NULL;
+}
+
+void ObjectSizesProfiler::initHistogram(void) {
+	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
+	globalRecord.pcntLive = 100.0;
+	globalRecord.pcntTotal = 100.0;
+	memset((void*)histogramTable, 0, totalHistogramSize);
+
+	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+		histogramTable[i].index = i * 1.0;
+	}
+}
+
+inline void ObjectSizesProfiler::gcpAddObject(size_t bd, size_t size, pid_t tId){
+	size_t histIndex = 32 - CLZ(size);
+	histogramTable[histIndex].cntLive++;
+	histogramTable[histIndex].cntTotal++;
+	globalRecord.cntLive++;
+	globalRecord.cntTotal++;
+}
+
+inline void ObjectSizesProfiler::gcpRemoveObject(size_t bd, size_t size, pid_t tId){
+	size_t histIndex = 32 - CLZ(size);
+	histogramTable[histIndex].cntLive--;
+	globalRecord.cntLive--;
+}
+
+inline void ObjectSizesProfiler::dumpHeapStats(void) {
+	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	if(successWrite) {
+
+	} else {
+		LOG(ERROR) << "could not dump heap stats";
+	}
+}
+
+inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
+	GCP_DECLARE_REMOVE_ALLOC(0, objSize, 0);
+}
+
+void ObjectSizesProfiler::logPerfData() {
+	int32_t currBytes_ = total_alloc_bytes_.load();
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
+	uint64_t _sumData = 0;
+	uint64_t _sumGc = 0;
+	uint64_t _data = 0;
+
+	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+		LOG(ERROR) << "index: " << histogramTable[i].index << "cntLive=" <<
+				histogramTable[i].cntLive << "; cntTotal="<<
+				histogramTable[i].cntTotal<<"; pcntLive=" <<histogramTable[i].pcntLive <<
+				"; pcntTotal="<<histogramTable[i].pcntTotal;
+	}
+}
+
+bool ObjectSizesProfiler::periodicDaemonExec(void) {
+	Thread* self = Thread::Current();
+  // Check if GC is running holding gc_complete_lock_.
+  MutexLock mu(self, *prof_thread_mutex_);
+  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+  {
+  	prof_thread_cond_->Wait(self);
+  }
+  if(receivedSignal_) { //we recived Signal to Shutdown
+    GCMMP_VLOG(INFO) << "ObjectSizesProfiler: signal Received " << self->GetTid() ;
+    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+    updateHeapAllocStatus();
+
+    receivedSignal_ = false;
+
+
+    if(getRecivedShutDown()) {
+    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+
+    } else {
+    	dumpProfData(false);
+    }
+
+  	return getRecivedShutDown();
+  } else {
+  	return false;
+  }
+}
+
+bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "ObjectSizesProfiler -- dettaching thread pid: " << thProf->GetTid();
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
+
+void ObjectSizesProfiler::dumpProfData(bool isLastDump){
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+
+  //get the percentage of each histogram entry
+	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+		if(histogramTable[i].pcntTotal < 1.0)
+			continue;
+		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
+		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+	}
+
+	//dump the heap stats
+	dumpHeapStats();
+	//dump the global entry
+  bool _success =
+  	dump_file_->WriteFully(&globalRecord,
+  			sizeof(GCPHistogramRecord));
+ if(_success) {
+		//dump the histogram entries
+	 _success =
+	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+	 _success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+ }
+
+ if(lastDump) {
+	 _success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 	  if(_success) {
+	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
+	 	  }
+	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	 		dump_file_->Close();
+	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
+ }
+
+ logPerfData();
+
+ if(!_success) {
+	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
+ }
+}
 }// namespace mprofiler
 }// namespace art
 

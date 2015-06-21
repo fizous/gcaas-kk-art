@@ -360,6 +360,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   const size_t bytes_freed = InternalAllocationSize(ptr);
   num_bytes_allocated_ -= bytes_freed;
   --num_objects_allocated_;
+  GCMMP_HANDLE_FINE_GARINE_FREE(allocation_size);
   if (kRecentFreeCount > 0) {
     RegisterRecentFree(ptr);
   }
@@ -372,6 +373,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
 
   // Don't need the lock to calculate the size of the freed pointers.
   size_t bytes_freed = 0;
+  size_t _lastFreedBytes = 0;
   for (size_t i = 0; i < num_ptrs; i++) {
     mirror::Object* ptr = ptrs[i];
     const size_t look_ahead = 8;
@@ -379,7 +381,9 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
       // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
       __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
     }
-    bytes_freed += InternalAllocationSize(ptr);
+    _lastFreedBytes = InternalAllocationSize(ptr);
+    GCMMP_HANDLE_FINE_GARINE_FREE(_lastFreedBytes);
+    bytes_freed += _lastFreedBytes;
   }
 
   if (kRecentFreeCount > 0) {
