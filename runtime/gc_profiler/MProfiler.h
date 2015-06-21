@@ -38,7 +38,7 @@
 
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) art::mprofiler::VMProfiler::MProfNotifyFree(x)
-#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(0, x, 0)
+#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(x)
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) ((void) 0)
 #define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) ((void) 0)
@@ -336,8 +336,8 @@ public:
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void DumpEventMarks(void){}
 
-  virtual void gcpAddObject(size_t bd, size_t size, pid_t tId){size=bd=tId=0;}
-  virtual void gcpRemoveObject(size_t bd, size_t size, pid_t tId){size=bd=tId=0;}
+  virtual void gcpAddObject(size_t size){if(size == 0) return;}
+  virtual void gcpRemoveObject(size_t size){if(size == 0) return;}
 };
 
 
@@ -458,8 +458,8 @@ public:
 
 	bool dettachThread(GCMMPThreadProf*);
 
-  void gcpAddObject(size_t bd, size_t size, pid_t tId);
-  void gcpRemoveObject(size_t bd, size_t size, pid_t tId);
+  void gcpAddObject(size_t size);
+  void gcpRemoveObject(size_t size);
 
 };
 

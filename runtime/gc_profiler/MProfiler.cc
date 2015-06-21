@@ -395,7 +395,7 @@ void VMProfiler::notifyAllocation(size_t allocSize) {
 	if(!IsAllocWindowsSet())
 		return;
 
-	GCP_DECLARE_ADD_ALLOC(0, allocSize, 0);
+	GCP_DECLARE_ADD_ALLOC(0allocSize);
 
 	int32_t initValue = total_alloc_bytes_.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
@@ -2128,7 +2128,7 @@ void ObjectSizesProfiler::initHistogram(void) {
 	}
 }
 
-inline void ObjectSizesProfiler::gcpAddObject(size_t bd, size_t size, pid_t tId){
+inline void ObjectSizesProfiler::gcpAddObject(size_t size){
 	size_t histIndex = 32 - CLZ(size);
 	histogramTable[histIndex].cntLive++;
 	histogramTable[histIndex].cntTotal++;
@@ -2136,7 +2136,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t bd, size_t size, pid_t tId)
 	globalRecord.cntTotal++;
 }
 
-inline void ObjectSizesProfiler::gcpRemoveObject(size_t bd, size_t size, pid_t tId){
+inline void ObjectSizesProfiler::gcpRemoveObject(size_t size){
 	size_t histIndex = 32 - CLZ(size);
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;

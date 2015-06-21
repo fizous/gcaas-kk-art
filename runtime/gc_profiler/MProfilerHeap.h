@@ -21,12 +21,12 @@
 #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
 
 #if DVM_ALLOW_GCPROFILER
-#define GCP_DECLARE_ADD_ALLOC(x,y,z)			  (gcpAddObject(x,y,z))
-#define GCP_DECLARE_REMOVE_ALLOC(x,y,z)			(gcpRemoveObject(x,y,z))
+#define GCP_DECLARE_ADD_ALLOC(x)			  (gcpAddObject(x))
+#define GCP_DECLARE_REMOVE_ALLOC(x)			(gcpRemoveObject(x))
 #else//if DVM_ALLOW_GCPROFILER
 
-#define GCP_DECLARE_ADD_ALLOC(x,y,z)			((void) 0)
-#define GCP_DECLARE_REMOVE_ALLOC(x,y,z)		((void) 0)
+#define GCP_DECLARE_ADD_ALLOC(x)			((void) 0)
+#define GCP_DECLARE_REMOVE_ALLOC(x)		((void) 0)
 
 
 #endif//if DVM_ALLOW_GCPROFILER
