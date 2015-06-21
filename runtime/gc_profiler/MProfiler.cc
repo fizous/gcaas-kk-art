@@ -571,10 +571,9 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 		size_t _loop = 0;
 		bool _found = false;
 		if(argOptions->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
-			index_ = argOptions->gcp_type_;
 			for(_loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
 					_loop >= 0; _loop--) {
-				if(VMProfiler::profilTypes[_loop].id_ == index_) {
+				if(VMProfiler::profilTypes[_loop].id_ == argOptions->gcp_type_) {
 					_found = true;
 					break;
 				}
