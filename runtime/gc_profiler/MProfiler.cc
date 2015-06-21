@@ -2157,7 +2157,7 @@ void ObjectSizesProfiler::logPerfData() {
 
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		LOG(ERROR) << "index: " << histogramTable[i].index << "cntLive=" <<
+		LOG(ERROR) << "index: " << histogramTable[i].index << " :: cntLive=" <<
 				histogramTable[i].cntLive << "; cntTotal="<<
 				histogramTable[i].cntTotal<<"; pcntLive=" <<histogramTable[i].pcntLive <<
 				"; pcntTotal="<<histogramTable[i].pcntTotal;
@@ -2206,7 +2206,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
   //get the percentage of each histogram entry
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		if(histogramTable[i].pcntTotal < 1.0)
+		if(histogramTable[i].cntTotal < 1.0)
 			continue;
 		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
 		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;

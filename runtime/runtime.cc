@@ -370,7 +370,7 @@ bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
 
 			} else if (mprofile_options[i] == "type") {
 	  		mprofiler_opts->gcp_type_ = atoi(mprofile_options[++i].c_str());
-	      LOG(INFO) << "Parsing -Xgcp option: " << mprofiler_opts->mprofile_type_;
+	      LOG(INFO) << "Parsing -Xgcp option: " << mprofiler_opts->gcp_type_;
 	      return true;
 			} else if (mprofile_options[i] == "cohort") {
 
