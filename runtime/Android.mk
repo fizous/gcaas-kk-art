@@ -256,6 +256,10 @@ ifeq ($(ART_USE_PORTABLE_COMPILER),true)
   LIBART_CFLAGS += -DART_USE_PORTABLE_COMPILER=1
 endif
 
+ifeq ($(ART_USE_GC_PROFILER),true)
+  LIBART_CFLAGS += -DART_USE_GC_PROFILER=1
+endif
+
 # $(1): target or host
 # $(2): ndebug or debug
 define build-libart

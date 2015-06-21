@@ -8,8 +8,11 @@
 #ifndef ART_RUNTIME_GC_PROFILER_MPROFILERHEAP_H_
 #define ART_RUNTIME_GC_PROFILER_MPROFILERHEAP_H_
 
+#if !defined(ART_USE_GC_PROFILER)
 #define DVM_ALLOW_GCPROFILER			0
-
+#else
+#define DVM_ALLOW_GCPROFILER			1
+#endif
 /******************************************************************************
  * 																Macro Definitions
  *
