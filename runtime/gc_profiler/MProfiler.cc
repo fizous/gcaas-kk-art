@@ -2152,7 +2152,7 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 }
 
 inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
-	GCP_DECLARE_REMOVE_ALLOC(0, objSize, 0);
+	GCP_DECLARE_REMOVE_ALLOC(objSize);
 }
 
 void ObjectSizesProfiler::logPerfData() {
