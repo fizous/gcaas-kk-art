@@ -579,8 +579,8 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				}
 			}
 		} else {
-			for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
-				if(VMProfiler::profilTypes[_loop].id_ == index_) {
+			for(size_t _loopI = 0; _loopI < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loopI++) {
+				if(VMProfiler::profilTypes[_loopI].id_ == index_) {
 					_found = true;
 					break;
 				}
