@@ -2231,7 +2231,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 	  			sizeof(int));
  }
 
- if(lastDump) {
+ if(isLastDump) {
 	 _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
