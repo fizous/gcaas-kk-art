@@ -1163,30 +1163,26 @@ MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
 }
 
 VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
-
-	bool _found = false;
+	VMProfiler* profiler = NULL;
 	if(opts->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
 		for(int _loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
 				_loop >= 0; _loop--) {
 			if(VMProfiler::profilTypes[_loop].id_ == opts->gcp_type_) {
-				_found = true;
+				const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
+				profiler = profEntry->creator_(opts, (void*) profEntry);
 				break;
 			}
 		}
 	} else {
 		for(size_t _loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
 			if(VMProfiler::profilTypes[_loop].id_ == opts->mprofile_type_) {
-				_found = true;
+				const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
+				profiler = profEntry->creator_(opts, (void*) profEntry);
 				break;
 			}
 		}
 	}
-	if(_found) {
-		const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
-		VMProfiler* profiler = profEntry->creator_(opts, (void*) profEntry);
-		return profiler;
-	}
-	return NULL;
+	return profiler;
 }
 
 // Member functions definitions including constructor
