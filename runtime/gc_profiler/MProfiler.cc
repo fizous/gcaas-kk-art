@@ -568,7 +568,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				receivedSignal_(false),
 				start_heap_bytes_(0) {
 	if(IsProfilingEnabled()) {
-		size_t _loop = 0;
+		int _loop = 0;
 		bool _found = false;
 		if(argOptions->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
 			for(_loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
