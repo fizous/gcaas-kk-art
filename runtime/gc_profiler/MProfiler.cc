@@ -2158,9 +2158,7 @@ void ObjectSizesProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
-	uint64_t _sumData = 0;
-	uint64_t _sumGc = 0;
-	uint64_t _data = 0;
+
 
 	for(int i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 		LOG(ERROR) << "index: " << histogramTable[i].index << "cntLive=" <<
