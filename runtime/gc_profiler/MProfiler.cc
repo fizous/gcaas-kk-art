@@ -2237,9 +2237,10 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
 	 		dump_file_->Close();
 	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
+	 		logPerfData();
  }
 
- logPerfData();
+
 
  if(!_success) {
 	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
