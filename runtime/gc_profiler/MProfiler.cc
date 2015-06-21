@@ -1163,10 +1163,10 @@ MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
 }
 
 VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
-	size_t _loop = 0;
+
 	bool _found = false;
 	if(opts->gcp_type_ != MProfiler::kGCMMPDisableMProfile) {
-		for(_loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
+		for(int _loop = GCMMP_ARRAY_SIZE(VMProfiler::profilTypes) - 1;
 				_loop >= 0; _loop--) {
 			if(VMProfiler::profilTypes[_loop].id_ == opts->gcp_type_) {
 				_found = true;
@@ -1174,7 +1174,7 @@ VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
 			}
 		}
 	} else {
-		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
+		for(size_t _loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loop++) {
 			if(VMProfiler::profilTypes[_loop].id_ == opts->mprofile_type_) {
 				_found = true;
 				break;
