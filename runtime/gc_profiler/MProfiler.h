@@ -235,6 +235,10 @@ public:
     return IsProfilingRunning() && isMarkTimeEvents();
   }
 
+  bool IsProfilingHWEvent() {
+    return IsProfilingRunning() && isMarkHWEvents();
+  }
+
 	void setMainThread(Thread* thread) {
 		main_thread_ = thread;
 	}
@@ -267,6 +271,7 @@ public:
 
   virtual bool createHWEvents(void) {return false;}
   virtual bool isMarkTimeEvents(void) {return false;}
+  virtual bool isMarkHWEvents(void){return false;}
   virtual bool dettachThread(GCMMPThreadProf*){return true;}
 
   void setProfDaemon(bool);
@@ -294,6 +299,7 @@ public:
 
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
+	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t);
 	static void MProfNotifyFree(size_t);
@@ -350,6 +356,7 @@ public:
 
 	MPPerfCounter* createHWCounter(Thread*);
 	bool isMarkTimeEvents(void) {return true;}
+	bool isMarkHWEvents(void) {return false;}
 	bool periodicDaemonExec(void);
 	bool dettachThread(GCMMPThreadProf*);
 
@@ -389,6 +396,7 @@ public:
 
 	bool createHWEvents(void) {return true;}
 	bool isMarkTimeEvents(void) {return false;}
+	bool isMarkHWEvents(void) {return true;}
 	bool periodicDaemonExec(void);
 	void readPerfData(void);
 	bool dettachThread(GCMMPThreadProf*);
@@ -417,6 +425,7 @@ public:
 	GCDaemonCPIProfiler(GCMMP_Options* opts, void* entry);
 	~GCDaemonCPIProfiler(){};
 	bool createHWEvents(void) {return true;}
+	bool isMarkHWEvents(void) {return true;}
 	void attachSingleThread(Thread*);
 	MPPerfCounter* createHWCounter(Thread*);
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM);
@@ -448,6 +457,7 @@ public:
 
 
 	bool isMarkTimeEvents(void) {return false;}
+	bool isMarkHWEvents(void) {return false;}
 	void initHistogram(void);
 
 	bool periodicDaemonExec(void);

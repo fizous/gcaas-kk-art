@@ -628,7 +628,11 @@ void VMProfiler::InitCommonData() {
 	setHeapHeaderConf(&heapConf);
 	dumpHeapConfigurations(&heapConf);
 
-	initMarkerManager();
+	if(isMarkHWEvents()){
+		initMarkerManager();
+	} else {
+		LOG(ERROR) <<  "no need to initialize event manager ";
+	}
 	attachThreads();
 
 	setIsProfilingRunning(true);
@@ -1828,6 +1832,15 @@ inline bool VMProfiler::IsMProfRunning() {
 	return false;
 }
 
+/*
+ * Return true only when the MProfiler is Running for HW events
+ */
+inline bool VMProfiler::IsMProfHWRunning() {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled())
+		return mP->IsProfilingHWEvent();
+	return false;
+}
 
 /*
  * Attach a thread from the MProfiler
@@ -1911,54 +1924,54 @@ inline void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 
 
 void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
 	}
 }
 
 void VMProfiler::MProfMarkEndConcGCHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
 	}
 }
 
 
 void VMProfiler::MProfMarkStartTrimHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
 	}
 }
 
 void VMProfiler::MProfMarkEndTrimHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
 	}
 }
 
 
 void VMProfiler::MProfMarkStartAllocGCHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_MALLOC);
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 void VMProfiler::MProfMarkEndAllocGCHWEvent(void){
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 
 void VMProfiler::MProfMarkStartExplGCHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_EXPLICIT);
 		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
 void VMProfiler::MProfMarkEndExplGCHWEvent(void) {
-	if(VMProfiler::IsMProfRunning()) {
+	if(VMProfiler::IsMProfHWRunning()) {
 		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
