@@ -2291,6 +2291,12 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
+	 //dump the summary one more time
+	 _success &=
+	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+	 _success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
 	 	  if(_success) {
 	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
 	 	  }
