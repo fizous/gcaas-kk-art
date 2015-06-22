@@ -164,7 +164,7 @@ class Heap {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   // Initiates an explicit garbage collection.
-  void CollectGarbageForProfile(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
+  void CollectGarbageForProfile(bool clear_soft_references) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   // Initiates an explicit garbage collection.
   void CollectGarbage(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
