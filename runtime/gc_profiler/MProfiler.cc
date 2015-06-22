@@ -2173,12 +2173,12 @@ void ObjectSizesProfiler::initHistogram(void) {
 	memset((void*)histogramTable, 0, totalHistogramSize);
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		histogramTable[i].index = i * 1.0;
+		histogramTable[i].index = (i+1) * 1.0;
 	}
 }
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t size){
-	size_t histIndex = 32 - CLZ(size);
+	size_t histIndex = 32 - CLZ(size) - 1;
 	histogramTable[histIndex].cntLive++;
 	histogramTable[histIndex].cntTotal++;
 	globalRecord.cntLive++;
@@ -2186,7 +2186,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t size){
 }
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t size){
-	size_t histIndex = 32 - CLZ(size);
+	size_t histIndex = 32 - CLZ(size) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
 }
