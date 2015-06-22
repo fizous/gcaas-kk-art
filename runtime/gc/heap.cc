@@ -1130,6 +1130,13 @@ void Heap::GetReferringObjects(mirror::Object* o, int32_t max_count,
   GetLiveBitmap()->Visit(finder);
 }
 
+void Heap::CollectGarbageForProfile(bool clear_soft_references) {
+  Thread* self = Thread::Current();
+  self->TransitionFromRunnableToSuspended(kNative);
+  CollectGarbage(false);
+  self->TransitionFromSuspendedToRunnable();
+}
+
 void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.

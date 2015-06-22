@@ -2232,10 +2232,14 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "ObjectSizesProfiler: signal Received " << self->GetTid() ;
     //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-    updateHeapAllocStatus();
+
 
     receivedSignal_ = false;
-
+#if GCP_COLLECT_FOR_PROFILE
+    gc::Heap* heap_ = Runtime::Current()->GetHeap();
+    heap_->CollectGarbageForProfile(false);
+#endif
+    updateHeapAllocStatus();
 
     if(getRecivedShutDown()) {
     	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
