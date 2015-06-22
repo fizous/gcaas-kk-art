@@ -631,6 +631,7 @@ void VMProfiler::InitCommonData() {
 	if(isMarkHWEvents()){
 		initMarkerManager();
 	} else {
+		markerManager = NULL;
 		LOG(ERROR) <<  "no need to initialize event manager ";
 	}
 	attachThreads();
@@ -707,7 +708,8 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 		}
 	//}
 
-	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
+			thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
@@ -723,13 +725,15 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " <<
+					thread->GetTid() ;
 			return;
 		}
 	}
 	if(IsProfilerThread(thread)) {
 		if(!IsAttachProfDaemon()) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " <<
+					thread->GetTid() ;
 			return;
 		}
 	}
@@ -742,7 +746,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
+					thread->GetTid() << thread_name;
 			return;
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
@@ -752,7 +757,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			setGcTrimmer(thread);
 			setThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
-				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " <<
+						thread->GetTid() << thread_name;
 				return;
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
@@ -765,7 +771,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	}
 
-	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
+			thread->GetTid() << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
@@ -920,7 +927,8 @@ void VMProfiler::dumpEventMarks(void) {
   	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
   }
 
-	LOG(ERROR) << "<<<< total written: " << dataLength << ", Sizeof(EventMarker):"<< sizeof(EventMarker)
+	LOG(ERROR) << "<<<< total written: " << dataLength <<
+			", Sizeof(EventMarker):"<< sizeof(EventMarker)
 			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
 			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
 
@@ -941,7 +949,10 @@ void VMProfiler::dumpEventMarks(void) {
 void PerfCounterProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
+			heap_->GetBytesAllocated() << ", concBytes: " <<
+			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetMaxAllowedFootPrint();
 	uint64_t _sumData = 0;
 	uint64_t _sumGc = 0;
 	uint64_t _data = 0;
@@ -1148,7 +1159,8 @@ PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
 	} else {
 		hwEvent_ = perfName_;
-		LOG(ERROR) << "PerfCounterProfiler : init counters returned valid..evtName=" << hwEvent_;
+		LOG(ERROR) <<
+				"PerfCounterProfiler : init counters returned valid..evtName=" << hwEvent_;
 
 	}
 	LOG(ERROR) << "PerfCounterProfiler : Initializer";
@@ -1295,7 +1307,8 @@ void MProfiler::InitializeProfiler() {
 	GCPauseThreadManager::startCPUTime = cpu_time_ns_;
 	GCPauseThreadManager::startRealTime = start_time_ns_;
 
-	GCMMP_VLOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ << ", statTime: " << start_time_ns_;
+	GCMMP_VLOG(INFO) << "MProfiler startCPU NS is : " << cpu_time_ns_ <<
+			", statTime: " << start_time_ns_;
 	if(IsCreateProfDaemon()){
 		CreateProfilerDaemon();
 	} else {
@@ -1366,12 +1379,14 @@ void VMProfiler::setThreadAffinity(art::Thread* th, bool complementary) {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
-			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+					th->GetTid() << ", cpuid: " <<  _cpu_id;
 		} else {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
-			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
+					th->GetTid() << ", cpuid: " <<  _cpu_id;
 		}
 	}
 }
@@ -1401,7 +1416,8 @@ void* MProfiler::Run(void* arg) {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->running_) {
 
-      GCMMP_VLOG(INFO) << "MProfiler: Assigning profID to profDaemon " << self->GetTid();
+      GCMMP_VLOG(INFO) << "MProfiler: Assigning profID to profDaemon " <<
+      		self->GetTid();
     	mProfiler->prof_thread_ = self;
     	mProfiler->SetMProfileFlags();
     } else {
@@ -1535,21 +1551,27 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
   }
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
+  	successWrite =
+  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+  					sizeof(uint64_t));
   }
 
 	if(isLastDump) {
 		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
 		dump_file_->Close();
 	}
-	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
-	GCMMP_VLOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
+	GCMMP_VLOG(INFO) << " ManagerCPUTime: " <<
+			GCPauseThreadManager::GetRelevantCPUTime();
+	GCMMP_VLOG(INFO) << " ManagerRealTime: " <<
+			GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
-	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< start_cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
+	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< start_cpu_time_ns_ <<
+			", cuuCPUT: "<< cuuT;
 	cuuT = uptime_nanos();
 	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
-	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << getRelevantAllocBytes();
+	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ <<
+			", cuuBytes = " << getRelevantAllocBytes();
 
 };
 
@@ -1579,21 +1601,27 @@ void MProfiler::DumpProfData(bool isLastDump) {
   }
 
   if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(uint64_t));
+  	successWrite =
+  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+  					sizeof(uint64_t));
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+				sizeof(int));
 		dump_file_->Close();
 	}
-	GCMMP_VLOG(INFO) << " ManagerCPUTime: " << GCPauseThreadManager::GetRelevantCPUTime();
-	GCMMP_VLOG(INFO) << " ManagerRealTime: " << GCPauseThreadManager::GetRelevantRealTime();
+	GCMMP_VLOG(INFO) << " ManagerCPUTime: " <<
+			GCPauseThreadManager::GetRelevantCPUTime();
+	GCMMP_VLOG(INFO) << " ManagerRealTime: " <<
+			GCPauseThreadManager::GetRelevantRealTime();
 	uint64_t cuuT = ProcessTimeNS();
 	GCMMP_VLOG(INFO) << "StartCPUTime =  "<< cpu_time_ns_ << ", cuuCPUT: "<< cuuT;
 	cuuT = uptime_nanos();
 	GCMMP_VLOG(INFO) << "StartTime =  "<< start_time_ns_ << ", cuuT: "<< cuuT;
 
-	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ << ", cuuBytes = " << GetRelevantAllocBytes();
+	GCMMP_VLOG(INFO) << " startBytes = " << start_heap_bytes_ <<
+			", cuuBytes = " << GetRelevantAllocBytes();
 }
 
 
@@ -1771,13 +1799,15 @@ void MProfiler::AttachThreads() {
 
 }
 
-void VMProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context) {
+void VMProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*),
+		void* context) {
   for (const auto& profRec : threadProfList_) {
     callback(profRec, context);
   }
 }
 
-void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context) {
+void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*),
+		void* context) {
   for (const auto& profRec : threadProflist_) {
     callback(profRec, context);
   }
@@ -1807,7 +1837,8 @@ void VMProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
 		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
 			if (strcmp(name, benchmarks[i]) == 0) {
-				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " << GCMMP_ARRAY_SIZE(benchmarks);
+				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " <<
+						GCMMP_ARRAY_SIZE(benchmarks);
 				GCMMPThreadProf::mProfiler = this;
 				startProfiling();
 				//InitializeProfiler();
@@ -1890,12 +1921,14 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
-			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+			LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+					th->GetTid() << ", cpuid: " <<  _cpu_id;
 		} else {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
-			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" << th->GetTid() << ", cpuid: " <<  _cpu_id;
+			GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
+					th->GetTid() << ", cpuid: " <<  _cpu_id;
 		}
 	}
 }
@@ -2166,7 +2199,10 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
 void ObjectSizesProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
+			heap_->GetBytesAllocated() << ", concBytes: " <<
+			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetMaxAllowedFootPrint();
 
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
