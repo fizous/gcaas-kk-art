@@ -1304,7 +1304,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
             pause_string << PrettyDuration((pauses[i] / 1000) * 1000)
                          << ((i != pauses.size() - 1) ? ", " : "");
         }
-        LOG(INFO) << gc_cause << " " << collector->GetName()
+      if(!DVM_ALLOW_GCPROFILER)
+      	LOG(INFO) << gc_cause << " " << collector->GetName()
                   << " GC freed "  <<  collector->GetFreedObjects() << "("
                   << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
                   << collector->GetFreedLargeObjects() << "("

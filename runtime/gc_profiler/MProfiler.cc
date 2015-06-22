@@ -2272,9 +2272,13 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	//dump the heap stats
 	dumpHeapStats();
 	//dump the global entry
-  bool _success =
+
+	bool _success = true;
+	if(false){
+   _success =
   	dump_file_->WriteFully(&globalRecord,
   			sizeof(GCPHistogramRecord));
+	}
  if(_success) {
 		//dump the histogram entries
 	 _success =
