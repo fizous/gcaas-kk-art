@@ -1130,7 +1130,7 @@ void Heap::GetReferringObjects(mirror::Object* o, int32_t max_count,
   GetLiveBitmap()->Visit(finder);
 }
 
-void Heap::CollectGarbageForProfile(bool clear_soft_references) {
+void Heap::CollectGarbageForProfile(bool clear_soft_references) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   Thread* self = Thread::Current();
   self->TransitionFromRunnableToSuspended(kNative);
   CollectGarbage(false);
