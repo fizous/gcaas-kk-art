@@ -670,13 +670,15 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " <<
+					thread->GetTid() ;
 			return;
 		}
 	}
 	if(IsProfilerThread(thread)) {
 		if(!IsAttachProfDaemon()) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping profDaemon attached " <<
+					thread->GetTid() ;
 			return;
 		}
 	}
@@ -689,7 +691,8 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
+					thread->GetTid() << thread_name;
 			return;
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
@@ -796,7 +799,8 @@ void PerfCounterProfiler::getPerfData() {
 
 	//LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " << heap_->GetBytesAllocated() << ", concBytes: " <<heap_->GetConcStartBytes() << ", footPrint: " << heap_->GetMaxAllowedFootPrint();
 	for (const auto& threadProf : threadProfList_) {
-		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcMutVals, &_gcDaemonVals);
+		threadProf->readPerfCounter(currBytes_, &_totalVals, &_gcMutVals,
+				&_gcDaemonVals);
 	}
 	updateHeapPerfStatus(_totalVals, _gcMutVals, _gcDaemonVals);
 }
@@ -829,12 +833,16 @@ void VMProfiler::initMarkerManager(void) {
 	Thread* self = Thread::Current();
 	{
 	  MutexLock mu(self, *evt_manager_lock_);
-
+		if(!isMarkHWEvents()) {
+			markerManager = NULL;
+			LOG(ERROR) <<  "no need to initialize event manager ";
+			return;
+		}
 	  size_t capacity =
 				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-	  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL, capacity,
-	                                                 PROT_READ | PROT_WRITE));
+	  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL,
+	  		capacity, PROT_READ | PROT_WRITE));
 	  markerManager->currIndex = 0;
 	  if (mem_map.get() == NULL) {
 	    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
