@@ -2242,10 +2242,12 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
     	MutexLock mu(self, *prof_thread_mutex_);
     	receivedSignal_ = false;
 #if GCP_COLLECT_FOR_PROFILE
+    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+    	heap_->CollectGarbageForProfile(false);
 #endif
     }
- //   gc::Heap* heap_ = Runtime::Current()->GetHeap();
- //   heap_->CollectGarbageForProfile(false);
+ //
+ //
 
     updateHeapAllocStatus();
 
