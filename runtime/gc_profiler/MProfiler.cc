@@ -2221,7 +2221,7 @@ void ObjectSizesProfiler::logPerfData() {
 	}
 }
 
-bool ObjectSizesProfiler::periodicDaemonExec(void) {
+void ObjectSizesProfiler::waitForProfileSignal(void) {
 	Thread* self = Thread::Current();
   // Check if GC is running holding gc_complete_lock_.
   MutexLock mu(self, *prof_thread_mutex_);
@@ -2229,6 +2229,11 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
   {
   	prof_thread_cond_->Wait(self);
   }
+}
+
+bool ObjectSizesProfiler::periodicDaemonExec(void) {
+	Thread* self = Thread::Current();
+	waitForProfileSignal();
   if(receivedSignal_) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "ObjectSizesProfiler: signal Received " << self->GetTid() ;
     //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
@@ -2236,8 +2241,9 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
 
     receivedSignal_ = false;
 #if GCP_COLLECT_FOR_PROFILE
-    gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    heap_->CollectGarbageForProfile(false);
+
+ //   gc::Heap* heap_ = Runtime::Current()->GetHeap();
+ //   heap_->CollectGarbageForProfile(false);
 #endif
     updateHeapAllocStatus();
 
