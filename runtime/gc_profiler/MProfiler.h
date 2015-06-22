@@ -470,7 +470,7 @@ public:
   void notifyFreeing(size_t);
   void gcpAddObject(size_t size);
   void gcpRemoveObject(size_t size);
-  void waitForProfileSignal(void);
+  bool waitForProfileSignal(void);
 };
 
 class MProfiler {
