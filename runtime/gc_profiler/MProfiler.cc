@@ -2352,7 +2352,7 @@ inline size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 /********************************* Cohort profiling ****************/
 
 CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
-		ObjectSizesProfiler(argOptions, entry) {
+		VMProfiler(argOptions, entry) {
 	initCohortsTable();
 }
 
