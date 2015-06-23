@@ -2413,7 +2413,7 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 
 	if(shouldCnt) {
 		gcpAddDataToHist(&rec->cohortObjStats);
-		gcpAddDataToHist(&(rec->histogramTable+histIndex]));
+		gcpAddDataToHist(&(rec->histogramTable[histIndex]));
 
 		gcpAddDataToHist(&globalRecord);
 	}
