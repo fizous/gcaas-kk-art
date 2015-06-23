@@ -13,6 +13,7 @@
 #else
 #define DVM_ALLOW_GCPROFILER			0
 #endif
+
 /******************************************************************************
  * 																Macro Definitions
  *
