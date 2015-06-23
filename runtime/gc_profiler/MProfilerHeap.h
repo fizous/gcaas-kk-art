@@ -24,14 +24,22 @@
 #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
 #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */
 
+
+#define GCP_MAX_COHORT_ARRAYLET_SIZE			128
+#define GCP_MAX_COHORT_ROW_SIZE						64
+#define GCP_COHORT_LOG										18
+
+
+
 #if DVM_ALLOW_GCPROFILER
 #define GCP_DECLARE_ADD_ALLOC(x)			  (gcpAddObject(x))
 #define GCP_DECLARE_REMOVE_ALLOC(x)			(gcpRemoveObject(x))
+#define GCP_ADD_EXTRA_BYES(x)						(x = mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
 #else//if DVM_ALLOW_GCPROFILER
 
 #define GCP_DECLARE_ADD_ALLOC(x)			((void) 0)
 #define GCP_DECLARE_REMOVE_ALLOC(x)		((void) 0)
-
+#define GCP_ADD_EXTRA_BYES(x)					((void) 0)
 
 #endif//if DVM_ALLOW_GCPROFILER
 

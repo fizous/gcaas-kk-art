@@ -450,15 +450,77 @@ class ObjectSizesProfiler : public VMProfiler {
 public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
+	static size_t AddMProfilingExtraBytes(size_t);
 
 	size_t totalHistogramSize;
 	GCPHistogramRecord globalRecord;
 	GCPHistogramRecord histogramTable[32];
 
+	virtual int getExtraProfileBytes(void) {return 0;}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
 	void initHistogram(void);
+
+	bool periodicDaemonExec(void);
+	void dumpProfData(bool);
+  void dumpHeapStats(void);
+  void logPerfData(void);
+	MPPerfCounter* createHWCounter(Thread*);
+
+	bool dettachThread(GCMMPThreadProf*);
+  void notifyFreeing(size_t);
+  void gcpAddObject(size_t size);
+  void gcpRemoveObject(size_t size);
+  bool waitForProfileSignal(void);
+};
+
+typedef struct PACKED(4) GCPCohortRecord_S {
+	/* cohort index */
+	double   index;
+	/* tracking objects allocation */
+	GCPHistogramRecord cohortObjStats;
+	/* tracking volume statistics */
+	GCPHistogramRecord cohortVolumeStats;
+	/* object size histogram */
+	GCPHistogramRecord histogramTable[32];
+} GCPCohortRecord;
+
+typedef struct PACKED(4) GCPCohortsRow_S {
+	int index;
+	GCPCohortRecord cohortArr[GCP_MAX_COHORT_ROW_SIZE];
+} GCPCohortsRow;
+
+typedef struct PACKED(4) GCPCohortsTable_S {
+	int index;
+	GCPCohortsRow* cohortRows[GCP_MAX_COHORT_ARRAYLET_SIZE];
+} GCPCohortsTable;
+
+
+class CohortProfiler : public ObjectSizesProfiler {
+public:
+	CohortProfiler(GCMMP_Options* opts, void* entry);
+	~CohortProfiler(){};
+	void initHistogram(void);
+
+	int cohortIndex;
+	size_t cohortArrayletSize;
+	size_t cohortRowSize;
+	GCPHistogramRecord globalRecord;
+	GCPCohortsTable cohortsTable;
+
+	GCPCohortsRow*    currCohortRow;
+	GCPCohortRecord*  currCohortRec;
+
+	void addCohortRecord(void);
+	void addCohortRow(void);
+	void initCohortsTable(void);
+
+	bool isMarkTimeEvents(void) {return false;}
+	bool isMarkHWEvents(void) {return false;}
+
+	int getExtraProfileBytes(void) {return 8;}
+
 
 	bool periodicDaemonExec(void);
 	void dumpProfData(bool);

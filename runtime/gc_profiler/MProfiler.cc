@@ -623,7 +623,8 @@ void VMProfiler::InitCommonData() {
 	start_heap_bytes_ = getRelevantAllocBytes();
 	start_cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = NanoTime();
-	LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; start_time_ns_ is: " << start_time_ns_;
+	LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; start_time_ns_ is: " <<
+			start_time_ns_;
 	GC_MMPHeapConf heapConf;
 	setHeapHeaderConf(&heapConf);
 	dumpHeapConfigurations(&heapConf);
@@ -968,14 +969,17 @@ void PerfCounterProfiler::logPerfData() {
 		_data = threadProf->getDataPerfCounter();
 		if(threadProf->getThreadTag() > GCMMP_THREAD_MAIN) {
 			_sumGc += _data;
-			LOG(ERROR) << "logging specific gcThreadProf: " << threadProf->getThreadTag() << ", tid:" << threadProf->GetTid();
+			LOG(ERROR) << "logging specific gcThreadProf: " <<
+					threadProf->getThreadTag() << ", tid:" << threadProf->GetTid();
 		}
-		LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
+		if(false)
+			LOG(ERROR) << "logging thid: "<< threadProf->GetTid() << ", "<< _data;
 		//threadProf->GetPerfRecord()->dumpMarks();
 		threadProf->GetPerfRecord()->getGCMarks(&_sumGc);
 		_sumData += _data;
 	}
-	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData << ", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);
+	LOG(ERROR) << "currBytes: " << currBytes_ <<", sumData= "<< _sumData <<
+			", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);
 }
 
 bool CPUFreqProfiler::periodicDaemonExec(void){
@@ -2122,8 +2126,6 @@ void VMProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState 
 }
 
 
-
-
 /*
  * Return true only when the MProfiler is Running
  */
@@ -2152,12 +2154,13 @@ int MProfiler::GetGCDaemonID(void)  {
 
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
 	VMProfiler(argOptions, entry) {
-	if(initCounters(perfName_) != 0) {
-		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
-	} else {
-		initHistogram();
-		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
-	}
+	initHistogram();
+//	if(initCounters(perfName_) != 0) {
+//		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
+//	} else {
+//
+//		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
+//	}
 }
 
 MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
@@ -2165,11 +2168,13 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 	return NULL;
 }
 
+
 void ObjectSizesProfiler::initHistogram(void) {
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
 	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
 	globalRecord.pcntLive = 100.0;
 	globalRecord.pcntTotal = 100.0;
+
 	memset((void*)histogramTable, 0, totalHistogramSize);
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
@@ -2325,6 +2330,73 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
  }
 }
+
+
+/********************************* Cohort profiling ****************/
+
+CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
+		ObjectSizesProfiler(argOptions, entry) {
+	initCohortsTable();
+}
+
+void CohortProfiler::addCohortRecord(void) {
+	if(currCohortRow == NULL) {
+		addCohortRow();
+	}
+	if(currCohortRow->index >= GCP_MAX_COHORT_ROW_SIZE) {
+		addCohortRow();
+	}
+	currCohortRec = &(currCohortRow->cohortArr[currCohortRow->index]);
+	currCohortRow->index++;
+	memset((void*)(currCohortRec), 0, sizeof(GCPCohortRecord));
+	currCohortRec->index = 1.0 * cohortIndex;
+	memset((void*)currCohortRec->histogramTable, 0, totalHistogramSize);
+	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(currCohortRec->histogramTable); i++) {
+		currCohortRec->histogramTable[i].index = (i+1) * 1.0;
+	}
+	cohortIndex++;
+}
+
+void CohortProfiler::addCohortRow(void) {
+	currCohortRow = (GCPCohortsRow*) calloc(1, cohortRowSize);
+	currCohortRow->index = 0;
+	memset((void*)(currCohortRow->cohortArr), 0, cohortRowSize);
+	cohortsTable.cohortRows[cohortsTable.index++] = currCohortRow;
+}
+
+/*
+ * Return true only when the MProfiler is Running
+ */
+inline size_t CohortProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled()) {
+		return ((CohortProfiler*) mP)->getExtraProfileBytes() + allocBytes;
+	}
+	return allocBytes;
+}
+
+void CohortProfiler::initCohortsTable(void) {
+	cohortArrayletSize = GCP_MAX_COHORT_ARRAYLET_SIZE * sizeof(GCPCohortsRow*);
+	cohortRowSize = GCP_MAX_COHORT_ROW_SIZE * sizeof(GCPCohortsRow);
+	memset((void*)(cohortsTable.cohortRows), 0, cohortArrayletSize);
+	cohortIndex = 0;
+	cohortsTable.index = 0;
+	currCohortRow = NULL;
+	currCohortRec = NULL;
+
+	addCohortRecord();
+
+	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+
+	globalRecord.pcntLive = 100.0;
+	globalRecord.pcntTotal = 100.0;
+	memset((void*)histogramTable, 0, totalHistogramSize);
+
+	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+		histogramTable[i].index = (i+1) * 1.0;
+	}
+}
+
 }// namespace mprofiler
 }// namespace art
 
