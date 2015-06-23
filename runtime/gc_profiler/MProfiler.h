@@ -472,7 +472,7 @@ public:
   void notifyFreeing(size_t);
   void gcpAddObject(size_t size);
   void gcpRemoveObject(size_t size);
-  bool waitForProfileSignal(void);
+  virtual bool waitForProfileSignal(void);
 
 
   void gcpAddDataToHist(GCPHistogramRecord*);
