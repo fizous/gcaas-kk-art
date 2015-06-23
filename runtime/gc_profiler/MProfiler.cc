@@ -2419,9 +2419,6 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 	}
 	rec->cohortVolumeStats.cntLive  += fitSize;
 	rec->cohortVolumeStats.cntTotal += fitSize;
-
-
-
 }
 
 inline void CohortProfiler::gcpAddObject(size_t size) {
