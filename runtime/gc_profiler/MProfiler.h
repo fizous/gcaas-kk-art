@@ -60,6 +60,7 @@ class Thread;
 
 namespace mprofiler {
 class VMProfiler;
+class CohortProfiler;
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
