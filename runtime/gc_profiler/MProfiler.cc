@@ -132,15 +132,6 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<ObjectSizesProfiler>
 		},//Objects Histograms
-		{
-				 0x02,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "CohortProfiler", "Cohort Profiler",
-				 "GCP_HISTOGRAM.log",
-				 NULL,
-				 &createVMProfiler<CohortProfiler>
-		},//Cohort Profiler
-
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -2352,7 +2343,7 @@ inline size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 /********************************* Cohort profiling ****************/
 
 CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
-		VMProfiler(argOptions, entry) {
+		ObjectSizesProfiler(argOptions, entry) {
 	initCohortsTable();
 }
 
