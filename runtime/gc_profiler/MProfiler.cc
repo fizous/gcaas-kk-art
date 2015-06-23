@@ -2442,12 +2442,32 @@ inline void CohortProfiler::gcpAddObject(size_t size) {
 	}
 }
 
+
+void CohortProfiler::dumpProfData(bool isLastDump){
+
+}
+void CohortProfiler::dumpHeapStats(void) {
+
+}
+
+bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "CohortProfiler -- dettaching thread pid: " << thProf->GetTid();
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
+
 inline void CohortProfiler::gcpRemoveObject(size_t size){
 	size_t histIndex = 32 - CLZ(size) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
 }
 
+MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
+	GCMMP_VLOG(INFO) << "CohortProfiler: empry creating hwCount";
+	return NULL;
+}
 
 }// namespace mprofiler
 }// namespace art
