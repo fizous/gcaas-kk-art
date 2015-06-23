@@ -2474,7 +2474,7 @@ bool CohortProfiler::periodicDaemonExec(void){
 	return true;
 }
 
-inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
+inline void CohortProfiler::notifyFreeing(size_t objSize) {
 	GCP_DECLARE_REMOVE_ALLOC(objSize);
 }
 
