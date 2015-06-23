@@ -2341,10 +2341,10 @@ inline size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 }
 
 /********************************* Cohort profiling ****************/
-CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
-		ObjectSizesProfiler(argOptions, entry) {
-
-}
+//CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
+//		ObjectSizesProfiler(argOptions, entry) {
+//
+//}
 
 void CohortProfiler::addCohortRecord(void) {
 	if(currCohortRow == NULL) {

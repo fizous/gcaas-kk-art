@@ -499,7 +499,7 @@ typedef struct PACKED(4) GCPCohortsTable_S {
 
 class CohortProfiler : public ObjectSizesProfiler {
 public:
-	CohortProfiler(GCMMP_Options* opts, void* entry);
+
 	~CohortProfiler(){};
 	void initHistogram(void);
 
@@ -533,6 +533,11 @@ public:
   void gcpAddObject(size_t size);
   void gcpRemoveObject(size_t size);
   bool waitForProfileSignal(void);
+
+	CohortProfiler(GCMMP_Options* opts, void* entry) :
+		ObjectSizesProfiler(opts, entry) {
+		initCohortsTable();
+	}
 };
 
 class MProfiler {
