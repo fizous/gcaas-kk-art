@@ -2469,6 +2469,15 @@ MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
 	return NULL;
 }
 
+
+bool CohortProfiler::periodicDaemonExec(void){
+	return true;
+}
+
+inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
+	GCP_DECLARE_REMOVE_ALLOC(objSize);
+}
+
 }// namespace mprofiler
 }// namespace art
 
