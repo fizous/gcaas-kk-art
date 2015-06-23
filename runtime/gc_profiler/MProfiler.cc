@@ -2330,7 +2330,16 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
  }
 }
-
+/*
+ * Return true only when the MProfiler is Running
+ */
+inline size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled()) {
+		return ((CohortProfiler*) mP)->getExtraProfileBytes() + allocBytes;
+	}
+	return allocBytes;
+}
 
 /********************************* Cohort profiling ****************/
 
@@ -2364,16 +2373,7 @@ void CohortProfiler::addCohortRow(void) {
 	cohortsTable.cohortRows[cohortsTable.index++] = currCohortRow;
 }
 
-/*
- * Return true only when the MProfiler is Running
- */
-inline size_t CohortProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
-	if(mP != NULL && mP->IsProfilingEnabled()) {
-		return ((CohortProfiler*) mP)->getExtraProfileBytes() + allocBytes;
-	}
-	return allocBytes;
-}
+
 
 void CohortProfiler::initCohortsTable(void) {
 	cohortArrayletSize = GCP_MAX_COHORT_ARRAYLET_SIZE * sizeof(GCPCohortsRow*);
