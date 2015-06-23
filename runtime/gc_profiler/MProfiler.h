@@ -39,7 +39,7 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) art::mprofiler::VMProfiler::MProfNotifyFree(x)
 #define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(x)
-#define GCP_ADD_EXTRA_BYES(x)						(x = mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
+#define GCP_ADD_EXTRA_BYES(x)						(x = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) ((void) 0)
 #define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) ((void) 0)
@@ -62,6 +62,7 @@ class Thread;
 
 namespace mprofiler {
 class VMProfiler;
+class ObjectSizesProfiler;
 
 typedef void (*GCMMPDumpCurrentUsage)(bool);
 typedef VMProfiler* (*VMProfilerConstructor) (GCMMP_Options*, void*);
