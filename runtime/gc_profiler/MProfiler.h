@@ -497,7 +497,7 @@ typedef struct PACKED(4) GCPCohortsTable_S {
 } GCPCohortsTable;
 
 
-class CohortProfiler : public VMProfiler {
+class CohortProfiler : public ObjectSizesProfiler {
 public:
 	CohortProfiler(GCMMP_Options* opts, void* entry);
 	~CohortProfiler(){};
