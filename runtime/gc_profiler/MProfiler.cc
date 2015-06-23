@@ -2343,7 +2343,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 /*
  * Return true only when the MProfiler is Running
  */
-inline size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
+size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled()) {
 		return ((CohortProfiler*) mP)->getExtraProfileBytes() + allocBytes;
