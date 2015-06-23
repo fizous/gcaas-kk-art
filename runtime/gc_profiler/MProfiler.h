@@ -532,9 +532,6 @@ public:
 	bool dettachThread(GCMMPThreadProf*);
   void notifyFreeing(size_t);
 
-  bool waitForProfileSignal(void);
-
-
   inline void dumpCohortGeneralStats(void);
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
