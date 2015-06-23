@@ -54,6 +54,7 @@
 #include "thread_list.h"
 #include "UniquePtr.h"
 #include "well_known_classes.h"
+#include "gc/gc_profiler/MProfiler.h"
 
 namespace art {
 namespace gc {
