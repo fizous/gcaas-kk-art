@@ -35,12 +35,11 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCP_DECLARE_ADD_ALLOC(x)			  (gcpAddObject(x))
 #define GCP_DECLARE_REMOVE_ALLOC(x)			(gcpRemoveObject(x))
-#define GCP_ADD_EXTRA_BYES(x)						(x = mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
 #else//if DVM_ALLOW_GCPROFILER
 
 #define GCP_DECLARE_ADD_ALLOC(x)			((void) 0)
 #define GCP_DECLARE_REMOVE_ALLOC(x)		((void) 0)
-#define GCP_ADD_EXTRA_BYES(x)					((void) 0)
+
 
 #endif//if DVM_ALLOW_GCPROFILER
 

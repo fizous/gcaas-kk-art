@@ -39,9 +39,11 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) art::mprofiler::VMProfiler::MProfNotifyFree(x)
 #define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(x)
+#define GCP_ADD_EXTRA_BYES(x)						(x = mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GARINE_FREE(x) ((void) 0)
 #define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) ((void) 0)
+#define GCP_ADD_EXTRA_BYES(x)					((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
