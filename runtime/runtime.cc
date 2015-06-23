@@ -337,7 +337,7 @@ void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprof
 bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
 		mprofiler::GCMMP_Options* mprofiler_opts){
 #if DVM_ALLOW_GCPROFILER
-	LOG(ERROR) << "THE GC PROFILER IS ENABLED"
+	LOG(ERROR) << "THE GC PROFILER IS ENABLED";
 #endif
 	if (StartsWith(option, "-Xgcmmp.")) {
 		LOG(INFO) << "XXXX Parsing -Xgcmmp option: " << option;
