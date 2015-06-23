@@ -42,6 +42,7 @@ namespace art {
 
 namespace mprofiler {
   class VMProfiler;
+  class ObjectSizesProfiler;
 }
 
 namespace gc {
