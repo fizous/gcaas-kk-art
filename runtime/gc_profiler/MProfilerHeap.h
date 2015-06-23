@@ -29,7 +29,7 @@
 #define GCP_MAX_COHORT_ARRAYLET_SIZE			128
 #define GCP_MAX_COHORT_ROW_SIZE						64
 #define GCP_COHORT_LOG										18
-
+#define GCP_COHORT_SIZE										262144 // 256k
 
 
 #if DVM_ALLOW_GCPROFILER

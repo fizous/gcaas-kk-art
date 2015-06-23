@@ -132,6 +132,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<ObjectSizesProfiler>
 		},//Objects Histograms
+		{
+				 0x03,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				 "CohortProfiler", "Cohort Profiler",
+				 "GCP_COHORT.log",
+				 NULL,
+				 &createVMProfiler<CohortProfiler>
+		},//Cohort
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -2181,12 +2189,15 @@ void ObjectSizesProfiler::initHistogram(void) {
 	}
 }
 
+inline void  ObjectSizesProfiler::gcpAddDataToHist(GCPHistogramRecord* rec){
+	rec->cntLive++;
+	rec->cntTotal++;
+}
+
 inline void ObjectSizesProfiler::gcpAddObject(size_t size){
 	size_t histIndex = 32 - CLZ(size) - 1;
-	histogramTable[histIndex].cntLive++;
-	histogramTable[histIndex].cntTotal++;
-	globalRecord.cntLive++;
-	globalRecord.cntTotal++;
+	gcpAddDataToHist(&histogramTable[histIndex]);
+	gcpAddDataToHist(&globalRecord);
 }
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t size){
@@ -2386,7 +2397,7 @@ void CohortProfiler::initCohortsTable(void) {
 
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
 
-	globalRecord.pcntLive = 100.0;
+	globalRecord.pcntLive  = 100.0;
 	globalRecord.pcntTotal = 100.0;
 	memset((void*)histogramTable, 0, totalHistogramSize);
 
@@ -2394,6 +2405,52 @@ void CohortProfiler::initCohortsTable(void) {
 		histogramTable[i].index = (i+1) * 1.0;
 	}
 }
+
+inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
+		size_t objSize, size_t fitSize, bool shouldCnt) {
+	//get histograms
+	size_t histIndex = 32 - CLZ(objSize) - 1;
+
+	if(shouldCnt) {
+		gcpAddDataToHist(&rec->cohortObjStats);
+		gcpAddDataToHist(&(rec->histogramTable+histIndex]));
+
+		gcpAddDataToHist(&globalRecord);
+	}
+	rec->cohortVolumeStats.cntLive  += fitSize;
+	rec->cohortVolumeStats.cntTotal += fitSize;
+
+
+
+}
+
+inline void CohortProfiler::gcpAddObject(size_t size) {
+	//get cohorts
+	bool firstLoop = true;
+	size_t sizeObjLeft = size;
+	size_t cohortSpaceLeft = 0;
+	size_t fitSize = 0;
+	while(sizeObjLeft != 0) {
+		cohortSpaceLeft =
+				GCP_COHORT_SIZE - currCohortRec->cohortVolumeStats.cntTotal;
+		if(cohortSpaceLeft != 0) {
+			fitSize = std::min(sizeObjLeft, cohortSpaceLeft);
+			sizeObjLeft -= fitSize;
+			addObjectToCohortRecord(currCohortRec, size, fitSize, firstLoop);
+			firstLoop &= false;
+		}
+		if(sizeObjLeft != 0) {
+			addCohortRecord();
+		}
+	}
+}
+
+inline void CohortProfiler::gcpRemoveObject(size_t size){
+	size_t histIndex = 32 - CLZ(size) - 1;
+	histogramTable[histIndex].cntLive--;
+	globalRecord.cntLive--;
+}
+
 
 }// namespace mprofiler
 }// namespace art

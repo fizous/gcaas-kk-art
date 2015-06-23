@@ -473,6 +473,9 @@ public:
   void gcpAddObject(size_t size);
   void gcpRemoveObject(size_t size);
   bool waitForProfileSignal(void);
+
+
+  void gcpAddDataToHist(GCPHistogramRecord*);
 };
 
 typedef struct PACKED(4) GCPCohortRecord_S {
@@ -516,11 +519,10 @@ public:
 	void addCohortRow(void);
 	void initCohortsTable(void);
 
-	bool isMarkTimeEvents(void) {return false;}
-	bool isMarkHWEvents(void) {return false;}
-
 	int getExtraProfileBytes(void) {return 8;}
-
+  void gcpAddObject(size_t size);
+  void gcpRemoveObject(size_t size);
+  void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
 
 	bool periodicDaemonExec(void);
 	void dumpProfData(bool);
@@ -530,8 +532,7 @@ public:
 
 	bool dettachThread(GCMMPThreadProf*);
   void notifyFreeing(size_t);
-  void gcpAddObject(size_t size);
-  void gcpRemoveObject(size_t size);
+
   bool waitForProfileSignal(void);
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
