@@ -509,7 +509,6 @@ public:
 	int cohortIndex;
 	size_t cohortArrayletSize;
 	size_t cohortRowSize;
-	GCPHistogramRecord globalRecord;
 	GCPCohortsTable cohortsTable;
 
 	GCPCohortsRow*    currCohortRow;
@@ -534,6 +533,9 @@ public:
   void notifyFreeing(size_t);
 
   bool waitForProfileSignal(void);
+
+
+  inline void dumpCohortGeneralStats(void);
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {

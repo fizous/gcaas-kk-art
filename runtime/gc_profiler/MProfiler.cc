@@ -2421,6 +2421,14 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 	rec->cohortVolumeStats.cntTotal += fitSize;
 }
 
+
+inline void CohortProfiler::gcpRemoveObject(size_t size){
+	size_t histIndex = 32 - CLZ(size) - 1;
+	if(histIndex == 0)
+		return;
+}
+
+
 inline void CohortProfiler::gcpAddObject(size_t size) {
 	//get cohorts
 	bool firstLoop = true;
@@ -2443,8 +2451,67 @@ inline void CohortProfiler::gcpAddObject(size_t size) {
 }
 
 
-void CohortProfiler::dumpProfData(bool isLastDump){
+inline void CohortProfiler::dumpCohortGeneralStats(void) {
+	LOG(ERROR) << "<<<< currentCohortIndex: " << cohortIndex ;
+}
 
+void CohortProfiler::dumpProfData(bool isLastDump){
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+
+  if(isLastDump || true) {
+  	dumpCohortGeneralStats();
+  }
+
+//  //get the percentage of each histogram entry
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+//		if(histogramTable[i].cntTotal < 1.0)
+//			continue;
+//		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
+//		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+//	}
+//
+//	//dump the heap stats
+//	dumpHeapStats();
+//	//dump the global entry
+//
+//	bool _success = true;
+//	_success =
+//  	dump_file_->WriteFully(&globalRecord,
+//  			sizeof(GCPHistogramRecord));
+//
+// if(_success) {
+//		//dump the histogram entries
+//	 _success =
+//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
+// }
+//
+// if(isLastDump) {
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
+//	 //dump the summary one more time
+//	 _success &=
+//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
+//	 	  if(_success) {
+//	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
+//	 	  }
+//	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+//	 		dump_file_->Close();
+//	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
+//	 		logPerfData();
+// }
+//
+//
+//
+// if(!_success) {
+//	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
+// }
 }
 void CohortProfiler::dumpHeapStats(void) {
 
@@ -2458,11 +2525,7 @@ bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	return true;
 }
 
-inline void CohortProfiler::gcpRemoveObject(size_t size){
-	size_t histIndex = 32 - CLZ(size) - 1;
-	histogramTable[histIndex].cntLive--;
-	globalRecord.cntLive--;
-}
+
 
 MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "CohortProfiler: empry creating hwCount";
@@ -2470,8 +2533,35 @@ MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
 }
 
 
-bool CohortProfiler::periodicDaemonExec(void){
-	return true;
+bool CohortProfiler::periodicDaemonExec(void) {
+	Thread* self = Thread::Current();
+  if(waitForProfileSignal()) { //we recived Signal to Shutdown
+    GCMMP_VLOG(INFO) << "CohortProfiler: signal Received " << self->GetTid() ;
+    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+
+    {
+    	MutexLock mu(self, *prof_thread_mutex_);
+    	receivedSignal_ = false;
+    }
+ //
+ //
+#if GCP_COLLECT_FOR_PROFILE
+    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+    	heap_->CollectGarbageForProfile(false);
+#endif
+    updateHeapAllocStatus();
+
+    if(getRecivedShutDown()) {
+    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+
+    } else {
+    	dumpProfData(false);
+    }
+
+  	return getRecivedShutDown();
+  } else {
+  	return false;
+  }
 }
 
 inline void CohortProfiler::notifyFreeing(size_t objSize) {
