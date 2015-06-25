@@ -862,7 +862,7 @@ inline mirror::Object* Heap::Allocate(Thread* self, T* space, size_t alloc_size,
   DCHECK_EQ(self->GetState(), kRunnable);
   self->AssertThreadSuspensionIsAllowable();
 
-  GCP_ADD_EXTRA_BYES(alloc_size);
+  //GCP_ADD_EXTRA_BYES(alloc_size);
 
   mirror::Object* ptr = TryToAllocate(self, space, alloc_size, false, bytes_allocated);
   if (ptr != NULL) {
