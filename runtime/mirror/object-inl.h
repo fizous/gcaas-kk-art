@@ -27,6 +27,7 @@
 #include "monitor.h"
 #include "runtime.h"
 #include "throwable.h"
+#include "class-inl.h"
 
 namespace art {
 namespace mirror {
