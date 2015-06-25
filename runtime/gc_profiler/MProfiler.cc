@@ -2222,7 +2222,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
 	size_t histIndex = 32 - CLZ(objSize) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&globalRecord);
-	if(allocSize == objSize) {
+	if(false && allocSize == objSize) {
 			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
 		}
 }

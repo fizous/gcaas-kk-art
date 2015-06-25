@@ -465,7 +465,7 @@ public:
 	GCPHistogramRecord globalRecord;
 	GCPHistogramRecord histogramTable[32];
 
-	virtual int getExtraProfileBytes(void) {return 0;}
+	virtual int getExtraProfileBytes(void) {return 8;}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
