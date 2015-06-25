@@ -314,7 +314,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
 
   DCHECK(bytes_allocated != NULL);
   *bytes_allocated = allocation_size;
-  size_t objSize = allocation_size;
+  //size_t objSize = allocation_size;
   // Need to do these inside of the lock.
   ++num_objects_allocated_;
   ++total_objects_allocated_;
