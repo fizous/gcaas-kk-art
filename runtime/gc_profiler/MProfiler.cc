@@ -2218,6 +2218,7 @@ int MProfiler::GetGCDaemonID(void)  {
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
 	VMProfiler(argOptions, entry) {
 	initHistogram();
+	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
 //	if(initCounters(perfName_) != 0) {
 //		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
 //	} else {
