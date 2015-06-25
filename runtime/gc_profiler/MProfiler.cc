@@ -2305,7 +2305,7 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
-	LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
+	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
 	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
 			allocatedMemory - sizeof(GCPObjectExtraHeader));
 	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
