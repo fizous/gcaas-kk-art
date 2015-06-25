@@ -2287,6 +2287,7 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
+
 	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
 			allocatedMemory - sizeof(GCPObjectExtraHeader));
 	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
@@ -2304,6 +2305,7 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
+	LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
 	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
 			allocatedMemory - sizeof(GCPObjectExtraHeader));
 	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
@@ -2329,7 +2331,7 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 }
 
 inline void ObjectSizesProfiler::notifyFreeing(size_t allocatedSpace, mirror::Object* obj){
-	gcpRemoveObject(allocatedSpace,obj);
+	gcpRemoveObject(allocatedSpace, obj);
 }
 
 inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
