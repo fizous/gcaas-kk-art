@@ -402,8 +402,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Obj
 	Thread* thread = Thread::Current();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
-		if(threadProf->state == GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " <<
+		if(threadProf->state != GCMMP_TH_RUNNING) {
+			GCMMP_VLOG(INFO) << "VMProfiler: Allocation is not tracked because the thread is not profiled " <<
 					thread->GetTid() ;
 			return;
 		}
