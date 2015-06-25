@@ -72,6 +72,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
         kChunkOverhead;
   }
 
+  size_t AllocationNoOverhead(const mirror::Object* obj) {
+    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+  }
+
   void* MoreCore(intptr_t increment);
 
   void* GetMspace() const {

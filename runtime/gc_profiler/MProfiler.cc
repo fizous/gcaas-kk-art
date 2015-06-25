@@ -397,12 +397,25 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 
 }
 
-void VMProfiler::notifyAllocation(size_t allocSize) {
+
+void VMProfiler::notifyAllocation(size_t allocSize, mirror::Object* obj) {
+	Thread* thread = Thread::Current();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf != NULL) {
+		if(threadProf->state == GCMMP_TH_RUNNING) {
+			GCMMP_VLOG(INFO) << "VMProfiler: The Thread was already attached " <<
+					thread->GetTid() ;
+			return;
+		}
+	}
+}
+
+void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
 	total_alloc_bytes_.fetch_add(allocSize);
 	if(!IsAllocWindowsSet())
 		return;
 
-	GCP_DECLARE_ADD_ALLOC(allocSize);
+	GCP_DECLARE_ADD_ALLOC(objSize, allocSize);
 
 	int32_t initValue = total_alloc_bytes_.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
@@ -1906,20 +1919,31 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 /*
  * Attach a thread from the MProfiler
  */
-void VMProfiler::MProfNotifyFree(size_t allocSize) {
+void VMProfiler::MProfNotifyFree(size_t objSize, size_t allocSize) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyFreeing(allocSize);
+		Runtime::Current()->GetMProfiler()->notifyFreeing(objSize, allocSize);
 	}
 }
 
 /*
  * Attach a thread from the MProfiler
  */
-void VMProfiler::MProfNotifyAlloc(size_t allocSize) {
+void VMProfiler::MProfNotifyAlloc(size_t allocSize, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyAllocation(allocSize);
+		Runtime::Current()->GetMProfiler()->notifyAllocation(allocSize, obj);
 	}
 }
+
+/*
+ * Attach a thread from the MProfiler
+ */
+void VMProfiler::MProfNotifyAlloc(size_t objSize, size_t allocSize) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->notifyAllocation(objSize, allocSize);
+	}
+}
+
+
 
 void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 	if(SetAffinityThread()) {
@@ -2194,16 +2218,22 @@ inline void  ObjectSizesProfiler::gcpAddDataToHist(GCPHistogramRecord* rec){
 	rec->cntTotal++;
 }
 
-inline void ObjectSizesProfiler::gcpAddObject(size_t size){
-	size_t histIndex = 32 - CLZ(size) - 1;
+inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
+	size_t histIndex = 32 - CLZ(objSize) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&globalRecord);
+	if(allocSize == objSize) {
+			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+		}
 }
 
-inline void ObjectSizesProfiler::gcpRemoveObject(size_t size){
-	size_t histIndex = 32 - CLZ(size) - 1;
+inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSize) {
+	size_t histIndex = 32 - CLZ(objSize) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
+	if(allocSize == objSize) {
+			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+	}
 }
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
@@ -2215,8 +2245,8 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 	}
 }
 
-inline void ObjectSizesProfiler::notifyFreeing(size_t objSize) {
-	GCP_DECLARE_REMOVE_ALLOC(objSize);
+inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
+	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 }
 
 void ObjectSizesProfiler::logPerfData() {
@@ -2422,17 +2452,23 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 }
 
 
-inline void CohortProfiler::gcpRemoveObject(size_t size){
-	size_t histIndex = 32 - CLZ(size) - 1;
+inline void CohortProfiler::gcpRemoveObject(size_t objSize, size_t allocSize){
+	size_t histIndex = 32 - CLZ(objSize) - 1;
 	if(histIndex == 0)
 		return;
+	if(allocSize == objSize) {
+		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+	}
 }
 
 
-inline void CohortProfiler::gcpAddObject(size_t size) {
+inline void CohortProfiler::gcpAddObject(size_t objSize, size_t allocSize) {
 	//get cohorts
 	bool firstLoop = true;
-	size_t sizeObjLeft = size;
+	size_t sizeObjLeft = objSize;
+	if(allocSize == objSize) {
+		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+	}
 	size_t cohortSpaceLeft = 0;
 	size_t fitSize = 0;
 	while(sizeObjLeft != 0) {
@@ -2441,7 +2477,7 @@ inline void CohortProfiler::gcpAddObject(size_t size) {
 		if(cohortSpaceLeft != 0) {
 			fitSize = std::min(sizeObjLeft, cohortSpaceLeft);
 			sizeObjLeft -= fitSize;
-			addObjectToCohortRecord(currCohortRec, size, fitSize, firstLoop);
+			addObjectToCohortRecord(currCohortRec, objSize, fitSize, firstLoop);
 			firstLoop &= false;
 		}
 		if(sizeObjLeft != 0) {

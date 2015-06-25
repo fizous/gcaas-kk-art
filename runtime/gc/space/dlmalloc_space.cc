@@ -360,7 +360,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   const size_t bytes_freed = InternalAllocationSize(ptr);
   num_bytes_allocated_ -= bytes_freed;
   --num_objects_allocated_;
-  GCMMP_HANDLE_FINE_GARINE_FREE(bytes_freed);
+  GCMMP_HANDLE_FINE_GRAINED_FREE(AllocationNoOverhead(ptr), bytes_freed);
   if (kRecentFreeCount > 0) {
     RegisterRecentFree(ptr);
   }
@@ -382,7 +382,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
       __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
     }
     _lastFreedBytes = InternalAllocationSize(ptr);
-    GCMMP_HANDLE_FINE_GARINE_FREE(_lastFreedBytes);
+    GCMMP_HANDLE_FINE_GRAINED_FREE(AllocationNoOverhead(ptr),_lastFreedBytes);
     bytes_freed += _lastFreedBytes;
   }
 

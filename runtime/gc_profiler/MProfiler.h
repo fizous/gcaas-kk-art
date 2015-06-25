@@ -37,12 +37,12 @@
 
 
 #if DVM_ALLOW_GCPROFILER
-#define GCMMP_HANDLE_FINE_GARINE_FREE(x) art::mprofiler::VMProfiler::MProfNotifyFree(x)
-#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) GCP_DECLARE_ADD_ALLOC(x)
+#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
+#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
 #define GCP_ADD_EXTRA_BYES(x)						(x = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
 #else//DVM_ALLOW_GCPROFILER
-#define GCMMP_HANDLE_FINE_GARINE_FREE(x) ((void) 0)
-#define GCMMP_HANDLE_FINE_GARINE_ALLOC(x) ((void) 0)
+#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
+#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
 #define GCP_ADD_EXTRA_BYES(x)					((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
@@ -191,7 +191,8 @@ public:
 
   void attachThreads(void);
   virtual void attachSingleThread(Thread* t);
-  void notifyAllocation(size_t);
+  void notifyAllocation(size_t,size_t);
+  void notifyAllocation(size_t, mirror::Object*);
   virtual void notifyFreeing(size_t){}
   void notifyFree(size_t);
   void createProfDaemon();
@@ -304,8 +305,9 @@ public:
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
-	static void MProfNotifyAlloc(size_t);
-	static void MProfNotifyFree(size_t);
+	static void MProfNotifyAlloc(size_t,size_t);
+	static void MProfNotifyAlloc(size_t, mirror::Object*);
+	static void MProfNotifyFree(size_t,size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
 
@@ -345,8 +347,8 @@ public:
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void DumpEventMarks(void){}
 
-  virtual void gcpAddObject(size_t size){if(size == 0) return;}
-  virtual void gcpRemoveObject(size_t size){if(size == 0) return;}
+  virtual void gcpAddObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
+  virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
 };
 
 
@@ -472,9 +474,9 @@ public:
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool dettachThread(GCMMPThreadProf*);
-  void notifyFreeing(size_t);
-  void gcpAddObject(size_t size);
-  void gcpRemoveObject(size_t size);
+  void notifyFreeing(size_t, size_t);
+  void gcpAddObject(size_t objSize, size_t allocSize);
+  void gcpRemoveObject(size_t objSize, size_t allocSize);
   virtual bool waitForProfileSignal(void);
 
 
@@ -522,8 +524,8 @@ public:
 	void initCohortsTable(void);
 
 	int getExtraProfileBytes(void) {return 8;}
-  void gcpAddObject(size_t size);
-  void gcpRemoveObject(size_t size);
+  void gcpAddObject(size_t objSize, size_t allocSize);
+  void gcpRemoveObject(size_t objSize, size_t allocSize);
   void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
 
 	bool periodicDaemonExec(void);
@@ -533,7 +535,7 @@ public:
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool dettachThread(GCMMPThreadProf*);
-  void notifyFreeing(size_t);
+  void notifyFreeing(size_t, size_t);
 
   inline void dumpCohortGeneralStats(void);
 

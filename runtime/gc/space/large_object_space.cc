@@ -70,7 +70,9 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
+  if(sizeof(AllocationHeader) + num_bytes < allocation_size)
+  	LOG(ERROR) << "difference between objectSize:" << num_bytes << "; and Allocation is:"<< num_bytes_allocated_ << ":" << (num_bytes_allocated_ - num_bytes);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -79,10 +81,13 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
 size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   MutexLock mu(self, lock_);
   MemMaps::iterator found = mem_maps_.find(ptr);
+  //Fizo:  should tune this
+  size_t objectSize = obj->SizeOf();
   CHECK(found != mem_maps_.end()) << "Attempted to free large object which was not live";
   DCHECK_GE(num_bytes_allocated_, found->second->Size());
   size_t allocation_size = found->second->Size();
   num_bytes_allocated_ -= allocation_size;
+  GCMMP_HANDLE_FINE_GRAINED_FREE(objectSize, allocation_size);
   --num_objects_allocated_;
   delete found->second;
   mem_maps_.erase(found);
@@ -189,6 +194,8 @@ FreeListSpace::AllocationHeader* FreeListSpace::AllocationHeader::GetNextNonFree
 size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   MutexLock mu(self, lock_);
   DCHECK(Contains(obj));
+  //Fizo:  should tune this
+  size_t objectSize = obj->SizeOf();
   AllocationHeader* header = GetAllocationHeader(obj);
   CHECK(IsAligned<kAlignment>(header));
   size_t allocation_size = header->AllocationSize();
@@ -228,6 +235,7 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   --num_objects_allocated_;
   DCHECK_LE(allocation_size, num_bytes_allocated_);
   num_bytes_allocated_ -= allocation_size;
+  GCMMP_HANDLE_FINE_GRAINED_FREE(objectSize, allocation_size);
   madvise(header, allocation_size, MADV_DONTNEED);
   if (kIsDebugBuild) {
     // Can't disallow reads since we use them to find next chunks during coalescing.
@@ -288,7 +296,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
   ++total_objects_allocated_;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
   // We always put our object at the start of the free block, there can not be another free block
   // before it.
   if (kIsDebugBuild) {

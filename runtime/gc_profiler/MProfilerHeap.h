@@ -33,12 +33,12 @@
 
 
 #if DVM_ALLOW_GCPROFILER
-#define GCP_DECLARE_ADD_ALLOC(x)			  (gcpAddObject(x))
-#define GCP_DECLARE_REMOVE_ALLOC(x)			(gcpRemoveObject(x))
+#define GCP_DECLARE_ADD_ALLOC(x,y)			  (gcpAddObject(x,y))
+#define GCP_DECLARE_REMOVE_ALLOC(x,y)			(gcpRemoveObject(x,y))
 #else//if DVM_ALLOW_GCPROFILER
 
-#define GCP_DECLARE_ADD_ALLOC(x)			((void) 0)
-#define GCP_DECLARE_REMOVE_ALLOC(x)		((void) 0)
+#define GCP_DECLARE_ADD_ALLOC(x,y)			((void) 0)
+#define GCP_DECLARE_REMOVE_ALLOC(x,y)		((void) 0)
 
 
 #endif//if DVM_ALLOW_GCPROFILER
