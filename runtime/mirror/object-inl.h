@@ -232,7 +232,7 @@ inline size_t Object::SizeOfNoLock() const {
   } else if (IsClass()) {
     result = AsClass()->SizeOf();
   } else {
-    result = GetClass()->GetObjectSize();
+    result = GetClass()->GetObjectSizeNoLock();
   }
   DCHECK(!IsArtField()  || result == sizeof(ArtField));
   DCHECK(!IsArtMethod() || result == sizeof(ArtMethod));

@@ -398,6 +398,7 @@ class MANAGED Class : public StaticStorageBase {
   void SetClassSize(size_t new_class_size)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  size_t GetObjectSizeNoLock()const;
   size_t GetObjectSize() const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   void SetObjectSize(size_t new_object_size) {

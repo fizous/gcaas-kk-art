@@ -31,6 +31,14 @@
 namespace art {
 namespace mirror {
 
+inline size_t Class::GetObjectSizeNoLock() const {
+  DCHECK(!IsVariableSize()) << " class=" << PrettyTypeOf(this);
+  DCHECK_EQ(sizeof(size_t), sizeof(int32_t));
+  size_t result = GetField32(OFFSET_OF_OBJECT_MEMBER(Class, object_size_), false);
+  DCHECK_GE(result, sizeof(Object)) << " class=" << PrettyTypeOf(this);
+  return result;
+}
+
 inline size_t Class::GetObjectSize() const {
   DCHECK(!IsVariableSize()) << " class=" << PrettyTypeOf(this);
   DCHECK_EQ(sizeof(size_t), sizeof(int32_t));
