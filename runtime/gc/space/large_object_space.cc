@@ -196,10 +196,10 @@ FreeListSpace::AllocationHeader* FreeListSpace::GetAllocationHeader(const mirror
       sizeof(AllocationHeader));
 }
 
-art::mprofiler:GCPObjectExtraHeader* FreeListSpace::GetExtraProfilerData(const mirror::Object*) {
+byte* FreeListSpace::GetExtraProfilerDataHeader(const mirror::Object*, size_t offset) {
   DCHECK(Contains(obj));
-  return reinterpret_cast<art::mprofiler:GCPObjectExtraHeader*>(reinterpret_cast<uintptr_t>(obj) -
-      sizeof(AllocationHeader)-sizeof(art::mprofiler:GCPObjectExtraHeader));
+  return reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) -
+      sizeof(AllocationHeader)-offset);
 }
 
 FreeListSpace::AllocationHeader* FreeListSpace::AllocationHeader::GetNextNonFree() {
