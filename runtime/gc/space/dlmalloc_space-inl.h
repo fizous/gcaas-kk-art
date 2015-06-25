@@ -43,8 +43,8 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
 
 inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
 	size_t extendedSize = num_bytes;
-	 size_t calculatedSize  = 0;
-	 size_t checkingSize =0;
+	size_t calculatedSize  = 0;
+	size_t checkingSize = 0;
 	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
   mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(mspace_, extendedSize));
   if (result != NULL) {

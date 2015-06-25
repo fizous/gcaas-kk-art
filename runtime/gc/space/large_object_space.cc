@@ -58,7 +58,12 @@ LargeObjectMapSpace* LargeObjectMapSpace::Create(const std::string& name) {
 }
 
 mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
-  MemMap* mem_map = MemMap::MapAnonymous("large object space allocation", NULL, num_bytes,
+	size_t extendedSize = num_bytes;
+	//size_t calculatedSize  = 0;
+	//size_t checkingSize = 0;
+	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
+
+	MemMap* mem_map = MemMap::MapAnonymous("large object space allocation", NULL, extendedSize,
                                          PROT_READ | PROT_WRITE);
   if (mem_map == NULL) {
     return NULL;
@@ -73,7 +78,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(objSize, allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -268,7 +273,9 @@ size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
 
 mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
   MutexLock mu(self, lock_);
-  size_t allocation_size = RoundUp(num_bytes + sizeof(AllocationHeader), kAlignment);
+	size_t extendedSize = num_bytes;
+	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
+  size_t allocation_size = RoundUp(extendedSize + sizeof(AllocationHeader), kAlignment);
   AllocationHeader temp;
   temp.SetPrevFree(allocation_size);
   temp.SetAllocationSize(0);

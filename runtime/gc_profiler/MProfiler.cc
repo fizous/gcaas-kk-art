@@ -2231,7 +2231,7 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 	size_t histIndex = 32 - CLZ(objSize) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
-	if(allocSize == objSize) {
+	if(false && allocSize == objSize) {
 			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
 	}
 }
