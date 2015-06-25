@@ -227,13 +227,14 @@ inline bool Object::IsPhantomReferenceInstance() const {
 
 
 inline size_t Object::SizeOfNoLock() const {
+	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
   size_t result;
   if (IsArrayInstance()) {
     result = AsArray()->SizeOf();
   } else if (IsClass()) {
     result = AsClass()->SizeOf();
   } else {
-    result = GetClass()->GetObjectSizeNoLock();
+    result = GetClass()->GetObjectSize();
   }
   DCHECK(!IsArtField()  || result == sizeof(ArtField));
   DCHECK(!IsArtMethod() || result == sizeof(ArtMethod));
