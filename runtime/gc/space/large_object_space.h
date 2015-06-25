@@ -217,7 +217,7 @@ class FreeListSpace : public LargeObjectSpace {
 
   // Finds the allocation header corresponding to obj.
   AllocationHeader* GetAllocationHeader(const mirror::Object* obj);
-  byte* GetExtraProfilerDataHeader(const mirror::Object*, size_t offset);
+  byte* GetExtraProfilerDataHeader(const mirror::Object*, size_t);
   typedef std::set<AllocationHeader*, AllocationHeader::SortByPrevFree,
                    accounting::GCAllocator<AllocationHeader*> > FreeBlocks;
 

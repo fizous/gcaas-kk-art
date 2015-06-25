@@ -196,7 +196,7 @@ FreeListSpace::AllocationHeader* FreeListSpace::GetAllocationHeader(const mirror
       sizeof(AllocationHeader));
 }
 
-byte* FreeListSpace::GetExtraProfilerDataHeader(const mirror::Object*, size_t offset) {
+byte* FreeListSpace::GetExtraProfilerDataHeader(const mirror::Object* obj, size_t offset) {
   DCHECK(Contains(obj));
   return reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) -
       sizeof(AllocationHeader)-offset);
