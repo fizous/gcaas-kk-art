@@ -2692,9 +2692,9 @@ bool CohortProfiler::periodicDaemonExec(void) {
   }
 }
 
-inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
-	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
-}
+//inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
+//	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
+//}
 
 }// namespace mprofiler
 }// namespace art
