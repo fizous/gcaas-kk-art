@@ -220,7 +220,8 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   AllocationHeader* header = GetAllocationHeader(obj);
   CHECK(IsAligned<kAlignment>(header));
   size_t allocation_size = header->AllocationSize();
-  size_t objectSize = allocation_size;//;AllocationSize(obj) - sizeof(AllocationHeader);
+  //size_t objectSize = allocation_size;//;AllocationSize(obj) - sizeof(AllocationHeader);
+  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, obj);
   DCHECK_GT(allocation_size, size_t(0));
   DCHECK(IsAligned<kAlignment>(allocation_size));
   // Look at the next chunk.
@@ -257,7 +258,6 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   --num_objects_allocated_;
   DCHECK_LE(allocation_size, num_bytes_allocated_);
   num_bytes_allocated_ -= allocation_size;
-  GCMMP_HANDLE_FINE_GRAINED_FREE(objectSize, allocation_size);
   madvise(header, allocation_size, MADV_DONTNEED);
   if (kIsDebugBuild) {
     // Can't disallow reads since we use them to find next chunks during coalescing.
