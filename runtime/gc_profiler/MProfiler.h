@@ -39,14 +39,14 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
-#define GCP_ADD_EXTRA_BYES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
-#define GCP_REMOVE_EXTRA_BYES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
+#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
+#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
 
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
-#define GCP_ADD_EXTRA_BYES(actualSize, extendedSize)					((void) 0)
-#define GCP_REMOVE_EXTRA_BYES(actualSize, modifiedSize)			((void) 0)
+#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
+#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
