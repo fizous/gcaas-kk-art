@@ -73,7 +73,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   large_objects_.push_back(obj);
   mem_maps_.Put(obj, mem_map);
   size_t allocation_size = mem_map->Size();
-  size_t objSize = allocation_size;
+  //size_t objSize = allocation_size;
   DCHECK(bytes_allocated != NULL);
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
