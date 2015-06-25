@@ -68,11 +68,12 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   large_objects_.push_back(obj);
   mem_maps_.Put(obj, mem_map);
   size_t allocation_size = mem_map->Size();
+  size_t objSize = allocation_size;
   DCHECK(bytes_allocated != NULL);
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(objSize, allocation_size);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -204,10 +205,11 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   MutexLock mu(self, lock_);
   DCHECK(Contains(obj));
   //Fizo:  should tune this
-  size_t objectSize = AllocationSize(obj) - sizeof(AllocationHeader);
+
   AllocationHeader* header = GetAllocationHeader(obj);
   CHECK(IsAligned<kAlignment>(header));
   size_t allocation_size = header->AllocationSize();
+  size_t objectSize = allocation_size;//;AllocationSize(obj) - sizeof(AllocationHeader);
   DCHECK_GT(allocation_size, size_t(0));
   DCHECK(IsAligned<kAlignment>(allocation_size));
   // Look at the next chunk.
@@ -299,13 +301,13 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
 
   DCHECK(bytes_allocated != NULL);
   *bytes_allocated = allocation_size;
-
+  size_t objSize = allocation_size;
   // Need to do these inside of the lock.
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(objSize, allocation_size);
   // We always put our object at the start of the free block, there can not be another free block
   // before it.
   if (kIsDebugBuild) {
