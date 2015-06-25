@@ -18,14 +18,14 @@
 
 #include "base/logging.h"
 #include "base/stl_util.h"
-#include "base/mutex-inl.h"
-#include "object-inl.h"
 #include "UniquePtr.h"
 #include "image.h"
 #include "os.h"
 #include "thread.h"
 #include "utils.h"
 #include "gc_profiler/MProfiler.h"
+#include "mirror/object-inl.h"
+#include "base/mutex-inl.h"
 namespace art {
 namespace gc {
 namespace space {
@@ -96,9 +96,9 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
 
 
 size_t LargeObjectMapSpace::AllocationSizeNoOverhead(const mirror::Object* obj) {
+	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
  // MemMaps::iterator found = mem_maps_.find(const_cast<mirror::Object*>(obj));
  // CHECK(found != mem_maps_.end()) << "Attempted to get size of a large object which is not live";
-	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 	return obj->SizeOf();
 }
 
