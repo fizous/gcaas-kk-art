@@ -60,8 +60,8 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     total_bytes_allocated_ += allocation_size;
     //Fizo: should tune this
     tempSize = AllocationNoOverhead(result);
-    calculatedSize = GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
-    checkingSize = GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
+    GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
+    GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
 
     if(calculatedSize != checkingSize)
     	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
