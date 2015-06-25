@@ -39,11 +39,14 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
-#define GCP_ADD_EXTRA_BYES(x)						(x = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(x))
+#define GCP_ADD_EXTRA_BYES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
+#define GCP_REMOVE_EXTRA_BYES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
+
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
-#define GCP_ADD_EXTRA_BYES(x)					((void) 0)
+#define GCP_ADD_EXTRA_BYES(actualSize, extendedSize)					((void) 0)
+#define GCP_REMOVE_EXTRA_BYES(actualSize, modifiedSize)			((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
@@ -456,6 +459,7 @@ public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
 	static size_t AddMProfilingExtraBytes(size_t);
+	static size_t removeMProfilingExtraBytes(size_t);
 
 	size_t totalHistogramSize;
 	GCPHistogramRecord globalRecord;

@@ -42,19 +42,29 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
 }
 
 inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
-  mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(mspace_, num_bytes));
+	size_t extendedSize = num_bytes;
+	GCP_ADD_EXTRA_BYES(num_bytes, extendedSize);
+  mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(mspace_, extendedSize));
   if (result != NULL) {
     if (kDebugSpaces) {
       CHECK(Contains(result)) << "Allocation (" << reinterpret_cast<void*>(result)
             << ") not in bounds of allocation space " << *this;
     }
     size_t allocation_size = AllocationSizeNonvirtual(result);
+
     DCHECK(bytes_allocated != NULL);
     *bytes_allocated = allocation_size;
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
     //Fizo: should tune this
-    art::mprofiler::VMProfiler::MProfNotifyAlloc(AllocationNoOverhead(result), allocation_size);
+    size_t tempSize = AllocationNoOverhead(result);
+    size_t calculatedSize = GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
+    size_t checkingSize = GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
+
+    if(calculatedSize != checkingSize)
+    	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
+
+    art::mprofiler::VMProfiler::MProfNotifyAlloc(calculatedSize, allocation_size);
     ++total_objects_allocated_;
     ++num_objects_allocated_;
   }

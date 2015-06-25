@@ -2381,6 +2381,17 @@ size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 	return allocBytes;
 }
 
+/*
+ * Return true only when the MProfiler is Running
+ */
+size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
+	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled()) {
+		return allocBytes - ((CohortProfiler*) mP)->getExtraProfileBytes();
+	}
+	return allocBytes;
+}
+
 /********************************* Cohort profiling ****************/
 //CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
 //		ObjectSizesProfiler(argOptions, entry) {
