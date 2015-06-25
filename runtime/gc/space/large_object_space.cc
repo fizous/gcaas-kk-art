@@ -95,10 +95,11 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
 
 
 size_t LargeObjectMapSpace::AllocationSizeNoOverhead(const mirror::Object* obj) {
-	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
+	//ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
  // MemMaps::iterator found = mem_maps_.find(const_cast<mirror::Object*>(obj));
  // CHECK(found != mem_maps_.end()) << "Attempted to get size of a large object which is not live";
-  return 0;//obj->SizeOfNoLock();
+  if (obj != NULL) return 0;
+	return 0;//obj->SizeOfNoLock();
 }
 
 size_t LargeObjectMapSpace::AllocationSize(const mirror::Object* obj) {
