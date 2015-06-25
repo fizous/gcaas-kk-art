@@ -2338,9 +2338,9 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize)
 	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 }
 
-inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
-	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
-}
+//inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
+//	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
+//}
 
 void ObjectSizesProfiler::logPerfData() {
 	int32_t currBytes_ = total_alloc_bytes_.load();
@@ -2556,53 +2556,53 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 }
 
 
-inline void CohortProfiler::gcpRemoveObject(size_t objSize, size_t allocSize){
-	size_t histIndex = 32 - CLZ(objSize) - 1;
-	if(histIndex == 0)
-		return;
-	if(allocSize == objSize) {
-		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
-	}
-}
-
-
-inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
-		size_t objSize, mirror::Object* obj){
-	size_t histIndex = 32 - CLZ(objSize) - 1;
-	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-			allocatedMemory - sizeof(GCPObjectExtraHeader));
-	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
-	extraHeader->objSize = objSize;
-	gcpAddDataToHist(&histogramTable[histIndex]);
-	gcpAddDataToHist(&globalRecord);
-//	if(false && allocSize == objSize) {
-//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//inline void CohortProfiler::gcpRemoveObject(size_t objSize, size_t allocSize){
+//	size_t histIndex = 32 - CLZ(objSize) - 1;
+//	if(histIndex == 0)
+//		return;
+//	if(allocSize == objSize) {
+//		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//	}
+//}
 //
-}
-
-inline void CohortProfiler::gcpAddObject(size_t objSize, size_t allocSize) {
-	//get cohorts
-	bool firstLoop = true;
-	size_t sizeObjLeft = objSize;
-	if(allocSize == objSize) {
-		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
-	}
-	size_t cohortSpaceLeft = 0;
-	size_t fitSize = 0;
-	while(sizeObjLeft != 0) {
-		cohortSpaceLeft =
-				GCP_COHORT_SIZE - currCohortRec->cohortVolumeStats.cntTotal;
-		if(cohortSpaceLeft != 0) {
-			fitSize = std::min(sizeObjLeft, cohortSpaceLeft);
-			sizeObjLeft -= fitSize;
-			addObjectToCohortRecord(currCohortRec, objSize, fitSize, firstLoop);
-			firstLoop &= false;
-		}
-		if(sizeObjLeft != 0) {
-			addCohortRecord();
-		}
-	}
-}
+//
+//inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
+//		size_t objSize, mirror::Object* obj){
+//	size_t histIndex = 32 - CLZ(objSize) - 1;
+//	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+//			allocatedMemory - sizeof(GCPObjectExtraHeader));
+//	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+//	extraHeader->objSize = objSize;
+//	gcpAddDataToHist(&histogramTable[histIndex]);
+//	gcpAddDataToHist(&globalRecord);
+////	if(false && allocSize == objSize) {
+////			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+////
+//}
+//
+//inline void CohortProfiler::gcpAddObject(size_t objSize, size_t allocSize) {
+//	//get cohorts
+//	bool firstLoop = true;
+//	size_t sizeObjLeft = objSize;
+//	if(allocSize == objSize) {
+//		LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//	}
+//	size_t cohortSpaceLeft = 0;
+//	size_t fitSize = 0;
+//	while(sizeObjLeft != 0) {
+//		cohortSpaceLeft =
+//				GCP_COHORT_SIZE - currCohortRec->cohortVolumeStats.cntTotal;
+//		if(cohortSpaceLeft != 0) {
+//			fitSize = std::min(sizeObjLeft, cohortSpaceLeft);
+//			sizeObjLeft -= fitSize;
+//			addObjectToCohortRecord(currCohortRec, objSize, fitSize, firstLoop);
+//			firstLoop &= false;
+//		}
+//		if(sizeObjLeft != 0) {
+//			addCohortRecord();
+//		}
+//	}
+//}
 
 
 inline void CohortProfiler::dumpCohortGeneralStats(void) {
