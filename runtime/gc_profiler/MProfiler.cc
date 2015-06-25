@@ -2227,6 +2227,20 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
 		}
 }
 
+
+virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {
+
+}
+
+inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSize) {
+	size_t histIndex = 32 - CLZ(objSize) - 1;
+	histogramTable[histIndex].cntLive--;
+	globalRecord.cntLive--;
+	if(false && allocSize == objSize) {
+			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+	}
+}
+
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSize) {
 	size_t histIndex = 32 - CLZ(objSize) - 1;
 	histogramTable[histIndex].cntLive--;

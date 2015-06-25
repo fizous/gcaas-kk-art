@@ -196,6 +196,12 @@ FreeListSpace::AllocationHeader* FreeListSpace::GetAllocationHeader(const mirror
       sizeof(AllocationHeader));
 }
 
+art::mprofiler:GCPObjectExtraHeader* FreeListSpace::GetExtraProfilerData(const mirror::Object*) {
+  DCHECK(Contains(obj));
+  return reinterpret_cast<art::mprofiler:GCPObjectExtraHeader*>(reinterpret_cast<uintptr_t>(obj) -
+      sizeof(AllocationHeader)-sizeof(art::mprofiler:GCPObjectExtraHeader));
+}
+
 FreeListSpace::AllocationHeader* FreeListSpace::AllocationHeader::GetNextNonFree() {
   // We know that there has to be at least one object after us or else we would have
   // coalesced with the free end region. May be worth investigating a better way to do this

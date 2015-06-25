@@ -352,6 +352,7 @@ public:
 
   virtual void gcpAddObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
+  virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
 };
 
 
@@ -454,6 +455,12 @@ typedef struct PACKED(4) GCPHistogramRecord_S {
 	double pcntTotal;
 } GCPHistogramRecord;
 
+
+typedef struct PACKED(4) GCPObjectExtraHeader_S {
+	size_t objSize;
+	size_t threadID;
+}GCPObjectExtraHeader;
+
 class ObjectSizesProfiler : public VMProfiler {
 public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
@@ -481,6 +488,7 @@ public:
   void notifyFreeing(size_t, size_t);
   void gcpAddObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
   virtual bool waitForProfileSignal(void);
 
 
@@ -530,6 +538,7 @@ public:
 	int getExtraProfileBytes(void) {return 8;}
   void gcpAddObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
   void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
 
 	bool periodicDaemonExec(void);

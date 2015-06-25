@@ -21,6 +21,7 @@
 #include "dlmalloc_space.h"
 #include "safe_map.h"
 #include "space.h"
+#include "gc_profiler/MProfiler.h"
 
 #include <set>
 #include <vector>
@@ -216,7 +217,7 @@ class FreeListSpace : public LargeObjectSpace {
 
   // Finds the allocation header corresponding to obj.
   AllocationHeader* GetAllocationHeader(const mirror::Object* obj);
-
+  GCPObjectExtraHeader* GetExtraProfilerData(const mirror::Object*);
   typedef std::set<AllocationHeader*, AllocationHeader::SortByPrevFree,
                    accounting::GCAllocator<AllocationHeader*> > FreeBlocks;
 
