@@ -383,6 +383,7 @@ class MANAGED Class : public StaticStorageBase {
     DCHECK_EQ(sizeof(size_t), sizeof(int32_t));
     return GetField32(OFFSET_OF_OBJECT_MEMBER(Class, class_size_), false);
   }
+
   size_t SizeOfNoLock() const {
     DCHECK_EQ(sizeof(size_t), sizeof(int32_t));
     return GetField32(OFFSET_OF_OBJECT_MEMBER(Class, class_size_), false);

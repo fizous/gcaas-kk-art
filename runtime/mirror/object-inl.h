@@ -238,6 +238,7 @@ inline size_t Object::SizeOfNoLock() const {
   DCHECK(!IsArtMethod() || result == sizeof(ArtMethod));
   return result;
 }
+
 inline size_t Object::SizeOf() const {
   size_t result;
   if (IsArrayInstance()) {
