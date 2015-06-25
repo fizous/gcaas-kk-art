@@ -2285,23 +2285,23 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 	}
 }
 
-inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
-		mirror::Object* obj) {
-
-	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-			allocatedMemory - sizeof(GCPObjectExtraHeader));
-	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
-	if(extraHeader->objSize == 0) {
-		LOG(ERROR) << "skipping object with size 0";
-		return;
-	}
-	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	histogramTable[histIndex].cntLive--;
-	globalRecord.cntLive--;
-//	if(false && allocSize == objSize) {
-//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
+//		mirror::Object* obj) {
+//
+//	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+//			allocatedMemory - sizeof(GCPObjectExtraHeader));
+//	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+//	if(extraHeader->objSize == 0) {
+//		LOG(ERROR) << "skipping object with size 0";
+//		return;
 //	}
-}
+//	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+//	histogramTable[histIndex].cntLive--;
+//	globalRecord.cntLive--;
+////	if(false && allocSize == objSize) {
+////			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+////	}
+//}
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
