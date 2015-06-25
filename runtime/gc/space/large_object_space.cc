@@ -18,6 +18,7 @@
 
 #include "base/logging.h"
 #include "base/stl_util.h"
+#include "base/mutex-inl.h"
 #include "UniquePtr.h"
 #include "image.h"
 #include "os.h"
