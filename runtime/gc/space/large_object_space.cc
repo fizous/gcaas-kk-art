@@ -24,6 +24,7 @@
 #include "thread.h"
 #include "utils.h"
 #include "gc_profiler/MProfiler.h"
+#include "mirror/object-inl.h"
 namespace art {
 namespace gc {
 namespace space {
