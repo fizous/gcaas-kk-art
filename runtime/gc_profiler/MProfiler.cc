@@ -1960,7 +1960,7 @@ void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 }
 
 
-static void MProfNotifyAlloc(size_t allocatedSpace, size_t objSize, mirror::Object* obj) {
+static void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace, size_t objSize, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
 	}
