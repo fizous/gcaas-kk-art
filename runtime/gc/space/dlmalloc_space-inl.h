@@ -43,6 +43,8 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
 
 inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
 	size_t extendedSize = num_bytes;
+	 size_t calculatedSize  = 0;
+	 size_t checkingSize =0;
 	GCP_ADD_EXTRA_BYES(num_bytes, extendedSize);
   mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(mspace_, extendedSize));
   if (result != NULL) {
@@ -57,9 +59,9 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
     //Fizo: should tune this
-    size_t tempSize = AllocationNoOverhead(result);
-    size_t calculatedSize = GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
-    size_t checkingSize = GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
+    tempSize = AllocationNoOverhead(result);
+    calculatedSize = GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
+    checkingSize = GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
 
     if(calculatedSize != checkingSize)
     	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
