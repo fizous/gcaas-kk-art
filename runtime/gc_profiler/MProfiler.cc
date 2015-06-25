@@ -2267,7 +2267,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 			allocatedMemory - sizeof(GCPObjectExtraHeader));
 	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
 	extraHeader->objSize = objSize;
-	size_t histIndex = 32 - CLZ(objSize) - 1;
+	size_t histIndex = (32 - CLZ(objSize)) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&globalRecord);
 //	if(false && allocSize == objSize) {
@@ -2314,6 +2314,8 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		return;
 	}
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	if(histogramTable[histIndex].cntLive == 0)
+		return;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
 //	if(false && allocSize == objSize) {
