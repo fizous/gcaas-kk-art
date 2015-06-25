@@ -37,7 +37,7 @@ class MANAGED Array : public Object {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   size_t SizeOf() const;
-  size_t SizeOfNoLock const;
+  size_t SizeOfNoLock() const;
   int32_t GetLength() const {
     return GetField32(OFFSET_OF_OBJECT_MEMBER(Array, length_), false);
   }
