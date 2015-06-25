@@ -227,7 +227,6 @@ inline bool Object::IsPhantomReferenceInstance() const {
 
 
 inline size_t Object::SizeOfNoLock() const {
-	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
   size_t result;
   if (IsArrayInstance()) {
     result = AsArray()->SizeOf();
