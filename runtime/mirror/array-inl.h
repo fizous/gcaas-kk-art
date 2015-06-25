@@ -33,6 +33,15 @@ inline size_t Array::SizeOf() const {
   return header_size + data_size;
 }
 
+inline size_t Array::SizeOfNoLock() const {
+  // This is safe from overflow because the array was already allocated, so we know it's sane.
+  size_t component_size = GetClass()->GetComponentSize();
+  int32_t component_count = GetLength();
+  size_t header_size = sizeof(Object) + (component_size == sizeof(int64_t) ? 8 : 4);
+  size_t data_size = component_count * component_size;
+  return header_size + data_size;
+}
+
 }  // namespace mirror
 }  // namespace art
 

@@ -80,6 +80,7 @@ class MANAGED Object {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   size_t SizeOf() const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  size_t SizeOfNoLock() const;
 
   Object* Clone(Thread* self) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

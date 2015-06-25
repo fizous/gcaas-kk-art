@@ -224,6 +224,20 @@ inline bool Object::IsPhantomReferenceInstance() const {
   return GetClass()->IsPhantomReferenceClass();
 }
 
+
+inline size_t Object::SizeOfNoLock() const {
+  size_t result;
+  if (IsArrayInstance()) {
+    result = AsArray()->SizeOf();
+  } else if (IsClass()) {
+    result = AsClass()->SizeOf();
+  } else {
+    result = GetClass()->GetObjectSize();
+  }
+  DCHECK(!IsArtField()  || result == sizeof(ArtField));
+  DCHECK(!IsArtMethod() || result == sizeof(ArtMethod));
+  return result;
+}
 inline size_t Object::SizeOf() const {
   size_t result;
   if (IsArrayInstance()) {
