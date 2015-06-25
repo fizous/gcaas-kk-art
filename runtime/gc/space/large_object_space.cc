@@ -71,8 +71,6 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
   art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
-  if(sizeof(AllocationHeader) + num_bytes < allocation_size)
-  	LOG(ERROR) << "difference between objectSize:" << num_bytes << "; and Allocation is:"<< num_bytes_allocated_ << ":" << (num_bytes_allocated_ - num_bytes);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -82,7 +80,7 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   MutexLock mu(self, lock_);
   MemMaps::iterator found = mem_maps_.find(ptr);
   //Fizo:  should tune this
-  size_t objectSize = obj->SizeOf();
+  size_t objectSize = ptr->SizeOf();
   CHECK(found != mem_maps_.end()) << "Attempted to free large object which was not live";
   DCHECK_GE(num_bytes_allocated_, found->second->Size());
   size_t allocation_size = found->second->Size();
