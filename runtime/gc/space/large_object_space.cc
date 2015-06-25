@@ -320,7 +320,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
   ++total_objects_allocated_;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(objSize, allocation_size);
+
   // We always put our object at the start of the free block, there can not be another free block
   // before it.
   if (kIsDebugBuild) {
@@ -328,6 +328,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
   }
   new_header->SetPrevFree(0);
   new_header->SetAllocationSize(allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(extendedSize, num_bytes, new_header->GetObjectAddress());
   return new_header->GetObjectAddress();
 }
 
