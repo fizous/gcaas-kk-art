@@ -2541,6 +2541,20 @@ inline void CohortProfiler::gcpRemoveObject(size_t objSize, size_t allocSize){
 }
 
 
+inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj){
+	size_t histIndex = 32 - CLZ(objSize) - 1;
+	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+			allocatedMemory - sizeof(GCPObjectExtraHeader));
+	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+	extraHeader->objSize = objSize;
+	gcpAddDataToHist(&histogramTable[histIndex]);
+	gcpAddDataToHist(&globalRecord);
+//	if(false && allocSize == objSize) {
+//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//
+}
+
 inline void CohortProfiler::gcpAddObject(size_t objSize, size_t allocSize) {
 	//get cohorts
 	bool firstLoop = true;

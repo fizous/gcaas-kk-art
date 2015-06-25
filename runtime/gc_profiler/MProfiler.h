@@ -497,8 +497,7 @@ public:
   void notifyFreeing(size_t, size_t);
   void notifyFreeing(size_t, mirror::Object* obj);
   void gcpAddObject(size_t objSize, size_t allocSize);
-  void gcpAddObject(size_t allocatedMemory,
-  		size_t objSize, mirror::Object* obj);
+  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
   virtual bool waitForProfileSignal(void);
@@ -549,6 +548,7 @@ public:
 
 	int getExtraProfileBytes(void) {return 8;}
   void gcpAddObject(size_t objSize, size_t allocSize);
+  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
   void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
