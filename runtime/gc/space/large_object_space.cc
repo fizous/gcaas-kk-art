@@ -80,7 +80,7 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   MutexLock mu(self, lock_);
   MemMaps::iterator found = mem_maps_.find(ptr);
   //Fizo:  should tune this
-  size_t objectSize = ptr->SizeOf();
+  size_t objectSize = AllocationSizeNoOverhead(ptr);
   CHECK(found != mem_maps_.end()) << "Attempted to free large object which was not live";
   DCHECK_GE(num_bytes_allocated_, found->second->Size());
   size_t allocation_size = found->second->Size();
@@ -90,6 +90,14 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   delete found->second;
   mem_maps_.erase(found);
   return allocation_size;
+}
+
+
+size_t LargeObjectMapSpace::AllocationSizeNoOverhead(const mirror::Object* obj) {
+  MutexLock mu(Thread::Current(), lock_);
+  MemMaps::iterator found = mem_maps_.find(const_cast<mirror::Object*>(obj));
+  CHECK(found != mem_maps_.end()) << "Attempted to get size of a large object which is not live";
+  return obj->SizeOf();
 }
 
 size_t LargeObjectMapSpace::AllocationSize(const mirror::Object* obj) {
@@ -193,7 +201,7 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   MutexLock mu(self, lock_);
   DCHECK(Contains(obj));
   //Fizo:  should tune this
-  size_t objectSize = obj->SizeOf();
+  size_t objectSize = AllocationSize(obj) - sizeof(AllocationHeader);
   AllocationHeader* header = GetAllocationHeader(obj);
   CHECK(IsAligned<kAlignment>(header));
   size_t allocation_size = header->AllocationSize();

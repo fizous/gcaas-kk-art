@@ -81,6 +81,7 @@ class LargeObjectMapSpace : public LargeObjectSpace {
   // of malloc.
   static LargeObjectMapSpace* Create(const std::string& name);
 
+  size_t AllocationSizeNoOverhead(const mirror::Object* obj);
   // Return the storage space required by obj.
   size_t AllocationSize(const mirror::Object* obj);
   mirror::Object* Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated);
