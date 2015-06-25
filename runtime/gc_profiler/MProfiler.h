@@ -193,7 +193,7 @@ public:
   virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t,size_t);
   void notifyAllocation(size_t, mirror::Object*);
-  virtual void notifyFreeing(size_t){}
+  virtual void notifyFreeing(size_t, size_t){}
   void notifyFree(size_t);
   void createProfDaemon();
 
