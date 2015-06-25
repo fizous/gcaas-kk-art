@@ -59,7 +59,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
     //Fizo: should tune this
-    tempSize = AllocationNoOverhead(result);
+    size_t tempSize = AllocationNoOverhead(result);
     GCP_REMOVE_EXTRA_BYES(tempSize, calculatedSize);
     GCP_REMOVE_EXTRA_BYES(allocation_size - kChunkOverhead, checkingSize);
 
