@@ -2261,11 +2261,12 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj){
-	size_t histIndex = 32 - CLZ(objSize) - 1;
+
 	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
 			allocatedMemory - sizeof(GCPObjectExtraHeader));
 	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
 	extraHeader->objSize = objSize;
+	size_t histIndex = 32 - CLZ(objSize) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&globalRecord);
 //	if(false && allocSize == objSize) {
@@ -2292,7 +2293,7 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		LOG(ERROR) << "skipping object with size 0";
 		return;
 	}
-	size_t histIndex = 32 - CLZ(extraHeader->objSize) - 1;
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
 //	if(false && allocSize == objSize) {
@@ -2309,7 +2310,7 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		LOG(ERROR) << "skipping object with size 0";
 		return;
 	}
-	size_t histIndex = 32 - CLZ(extraHeader->objSize) - 1;
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
 //	if(false && allocSize == objSize) {
