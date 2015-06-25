@@ -78,7 +78,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(num_bytes, allocation_size);
+  art::mprofiler::VMProfiler::MProfNotifyAlloc(allocation_size, num_bytes, obj);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -94,7 +94,7 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   size_t allocation_size = found->second->Size();
   size_t objectSize = allocation_size;//AllocationSizeNoOverhead(ptr);
   num_bytes_allocated_ -= allocation_size;
-  GCMMP_HANDLE_FINE_GRAINED_FREE(objectSize, allocation_size);
+  GCMMP_HANDLE_FINE_PRECISE_FREE(objectSize, ptr);
   --num_objects_allocated_;
   delete found->second;
   mem_maps_.erase(found);

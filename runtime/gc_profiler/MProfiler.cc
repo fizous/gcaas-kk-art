@@ -398,7 +398,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 }
 
 
-void VMProfiler::notifyAllocation(size_t allocSize, mirror::Object* obj) {
+void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Object* obj) {
 	Thread* thread = Thread::Current();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
@@ -408,6 +408,35 @@ void VMProfiler::notifyAllocation(size_t allocSize, mirror::Object* obj) {
 			return;
 		}
 	}
+	total_alloc_bytes_.fetch_add(allocSpace);
+	if(!IsAllocWindowsSet())
+		return;
+	GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
+
+	int32_t initValue = total_alloc_bytes_.load();
+	double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
+	if((_newIndex) != (getAllocIndex())) {
+
+		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
+
+
+		{
+			Thread* self = Thread::Current();
+	    MutexLock mu(self, *prof_thread_mutex_);
+	    receivedSignal_ = true;
+
+	    if(hasProfDaemon()) {
+	    	prof_thread_cond_->Broadcast(self);
+	    }
+
+	    // Wake anyone who may have been waiting for the GC to complete.
+
+
+	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
+		}
+
+	}
+
 }
 
 void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
@@ -1916,33 +1945,37 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 
 
 
-/*
- * Attach a thread from the MProfiler
- */
+
 void VMProfiler::MProfNotifyFree(size_t objSize, size_t allocSize) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->notifyFreeing(objSize, allocSize);
 	}
 }
 
-/*
- * Attach a thread from the MProfiler
- */
-void VMProfiler::MProfNotifyAlloc(size_t allocSize, mirror::Object* obj) {
+
+void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyAllocation(allocSize, obj);
+		Runtime::Current()->GetMProfiler()->notifyFreeing(allocSpace, obj);
 	}
 }
 
-/*
- * Attach a thread from the MProfiler
- */
-void VMProfiler::MProfNotifyAlloc(size_t objSize, size_t allocSize) {
+
+static void MProfNotifyAlloc(size_t allocatedSpace, size_t objSize, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyAllocation(objSize, allocSize);
+		Runtime::Current()->GetMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
 	}
 }
 
+
+///*
+// * Attach a thread from the MProfiler
+// */
+//void VMProfiler::MProfNotifyAlloc(size_t objSize, size_t allocSize) {
+//	if(VMProfiler::IsMProfRunning()) {
+//		Runtime::Current()->GetMProfiler()->notifyAllocation(objSize, allocSize);
+//	}
+//}
+//
 
 
 void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
@@ -2227,10 +2260,20 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
 		}
 }
 
-
-virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {
-
+inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj){
+	size_t histIndex = 32 - CLZ(objSize) - 1;
+	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+			allocatedMemory - sizeof(GCPObjectExtraHeader));
+	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+	extraHeader->objSize = objSize;
+	gcpAddDataToHist(&histogramTable[histIndex]);
+	gcpAddDataToHist(&globalRecord);
+//	if(false && allocSize == objSize) {
+//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//		}
 }
+
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSize) {
 	size_t histIndex = 32 - CLZ(objSize) - 1;
@@ -2241,13 +2284,21 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 	}
 }
 
-inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSize) {
-	size_t histIndex = 32 - CLZ(objSize) - 1;
+inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
+		mirror::Object* obj) {
+	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+			allocatedMemory - sizeof(GCPObjectExtraHeader));
+	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+	if(extraHeader->objSize == 0) {
+		LOG(ERROR) << "skipping object with size 0";
+		return;
+	}
+	size_t histIndex = 32 - CLZ(extraHeader->objSize) - 1;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
-	if(false && allocSize == objSize) {
-			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
-	}
+//	if(false && allocSize == objSize) {
+//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//	}
 }
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
@@ -2259,6 +2310,9 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 	}
 }
 
+inline void ObjectSizesProfiler::notifyFreeing(size_t allocatedSpace, mirror::Object* obj){
+	gcpRemoveObject(allocatedSpace,obj);
+}
 inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
 	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 }

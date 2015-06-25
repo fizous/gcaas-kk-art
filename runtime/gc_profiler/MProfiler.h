@@ -39,6 +39,8 @@
 #if DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
+#define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) GCP_DECLARE_ADD_PRECISE_ALLOC(x,y,z)
+#define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
 
@@ -47,6 +49,8 @@
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
+#define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
+#define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) 									((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
@@ -195,8 +199,9 @@ public:
   void attachThreads(void);
   virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t,size_t);
-  void notifyAllocation(size_t, mirror::Object*);
+  void notifyAllocation(size_t, size_t, mirror::Object*);
   virtual void notifyFreeing(size_t, size_t){}
+  void notifyFreeing(size_t, mirror::Object*){}
   void notifyFree(size_t);
   void createProfDaemon();
 
@@ -309,7 +314,9 @@ public:
 	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
 	static void MProfNotifyAlloc(size_t,size_t);
-	static void MProfNotifyAlloc(size_t, mirror::Object*);
+//	static void MProfNotifyAlloc(size_t, mirror::Object*);
+	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
+	static void MProfNotifyFree(size_t, mirror::Object*);
 	static void MProfNotifyFree(size_t,size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
@@ -351,6 +358,8 @@ public:
   virtual void DumpEventMarks(void){}
 
   virtual void gcpAddObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
+  virtual void gcpAddObject(size_t allocatedMemory,
+  		size_t objSize, mirror::Object* obj){if(allocatedMemory == 0 || objSize ==0 || obj == NULL) return;}
   virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
 };
@@ -486,9 +495,12 @@ public:
 
 	bool dettachThread(GCMMPThreadProf*);
   void notifyFreeing(size_t, size_t);
+  void notifyFreeing(size_t, mirror::Object* obj);
   void gcpAddObject(size_t objSize, size_t allocSize);
+  void gcpAddObject(size_t allocatedMemory,
+  		size_t objSize, mirror::Object* obj);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
-  void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
   virtual bool waitForProfileSignal(void);
 
 
@@ -549,7 +561,7 @@ public:
 
 	bool dettachThread(GCMMPThreadProf*);
   void notifyFreeing(size_t, size_t);
-
+  void notifyFreeing(size_t, mirror::Object*);
   inline void dumpCohortGeneralStats(void);
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :

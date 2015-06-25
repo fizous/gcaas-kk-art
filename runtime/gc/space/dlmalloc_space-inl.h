@@ -59,6 +59,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
     //Fizo: should tune this
+    size_t allocSpaceWithProfHeader = AllocationNoOverhead(result);
     size_t tempSize = AllocationNoOverhead(result);
     GCP_REMOVE_EXTRA_BYTES(tempSize, calculatedSize);
     GCP_REMOVE_EXTRA_BYTES(allocation_size - kChunkOverhead, checkingSize);
@@ -66,7 +67,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     if(calculatedSize != checkingSize)
     	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
 
-    art::mprofiler::VMProfiler::MProfNotifyAlloc(calculatedSize, allocation_size);
+    art::mprofiler::VMProfiler::MProfNotifyAlloc(allocSpaceWithProfHeader, num_bytes, result);
     ++total_objects_allocated_;
     ++num_objects_allocated_;
   }
