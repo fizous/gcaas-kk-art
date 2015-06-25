@@ -82,10 +82,11 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   MutexLock mu(self, lock_);
   MemMaps::iterator found = mem_maps_.find(ptr);
   //Fizo:  should tune this
-  size_t objectSize = AllocationSizeNoOverhead(ptr);
+
   CHECK(found != mem_maps_.end()) << "Attempted to free large object which was not live";
   DCHECK_GE(num_bytes_allocated_, found->second->Size());
   size_t allocation_size = found->second->Size();
+  size_t objectSize = allocation_size;//AllocationSizeNoOverhead(ptr);
   num_bytes_allocated_ -= allocation_size;
   GCMMP_HANDLE_FINE_GRAINED_FREE(objectSize, allocation_size);
   --num_objects_allocated_;
