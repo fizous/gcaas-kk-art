@@ -2514,10 +2514,12 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 
 	int32_t readVal = lastLiveGuard;
 
-	while(readVal != 0) {
-		readVal = lastLiveGuard;
-		if (LIKELY(android_atomic_cas(0, 1, &lastLiveGuard) == 0))
-			break;
+	if(force) {
+		while(readVal != 0) {
+			readVal = lastLiveGuard;
+			if (LIKELY(android_atomic_cas(0, 1, &lastLiveGuard) == 0))
+				break;
+		}
 	}
 	if(globalRec->cntLive < 1.0 || globalRec->cntTotal < 1.0)
 		return;
@@ -2528,9 +2530,11 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 		array[i].pcntTotal = (array[i].cntTotal * 100.0) / globalRec->cntTotal;
 	}
 
-	do {
-		readVal = lastLiveGuard;
-	} while (UNLIKELY(android_atomic_cas(1, 0, &lastLiveGuard) != 0));
+	if(force) {
+		do {
+			readVal = lastLiveGuard;
+		} while (UNLIKELY(android_atomic_cas(1, 0, &lastLiveGuard) != 0));
+	}
 }
 
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
@@ -2538,7 +2542,10 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
 
   gcpAggregateGlobalRecs(&globalRecord, histogramTable, false);
-  gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, true);
+
+  bool forceAtomicity = true;
+  if(isLastDump) forceAtomicity = false;
+  gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, forceAtomicity);
 //  //get the percentage of each histogram entry
 //	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 //		if(histogramTable[i].cntTotal < 1.0)
@@ -2572,7 +2579,8 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
 
-	 gcpResetLastLive(&lastLiveRecord, lastLiveTable);
+	 if(!isLastDump)
+		 gcpResetLastLive(&lastLiveRecord, lastLiveTable);
  }
 
  if(isLastDump) {
