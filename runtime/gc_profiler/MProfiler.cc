@@ -2713,13 +2713,13 @@ inline void GCHistogramThreadManager::addObject(size_t allocatedMemory,
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&histRecord);
 
-	int32_t _readCohortIndex = GCHistogramThreadManager::kGCPLastCohortIndex.load();
+	int32_t _readCohortIndex = (GCHistogramThreadManager::kGCPLastCohortIndex.load());
 
 	if(lastCohortIndex != _readCohortIndex) {
 		lastCohortIndex = _readCohortIndex;
 		histAtomicRecord.cntLive  = 1;
 		histAtomicRecord.cntTotal = 1;
-		for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 			lastWindowHistTable[i].cntTotal  = 0.0;
 			lastWindowHistTable[i].cntLive  = 0.0;
 		}
