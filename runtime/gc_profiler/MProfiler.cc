@@ -2275,7 +2275,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 	gcpAddDataToHist(&globalRecord);
 
 
-	if(globalRecord.cntTotal > 10000) {
+	if(false && globalRecord.cntTotal > 10000) {
 		if(testLogic.takeTest == 1) {
 			testLogic.takeTest = 2;
 			testLogic.obj = obj;
@@ -2327,7 +2327,7 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		return;
 	}
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	if(testLogic.takeTest == 2) {
+	if(false && testLogic.takeTest == 2) {
 		if(testLogic.obj == obj) {
 			testLogic.takeTest = 3;
 			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
