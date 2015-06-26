@@ -2239,29 +2239,52 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 void ObjectSizesProfiler::initHistogram(void) {
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
 	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
+	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
+
 	globalRecord.pcntLive = 100.0;
 	globalRecord.pcntTotal = 100.0;
 
+	lastLiveRecord.pcntLive = 100.0;
+	lastLiveRecord.pcntTotal = 100.0;
+
 	memset((void*)histogramTable, 0, totalHistogramSize);
+	memset((void*)lastLiveTable, 0, totalHistogramSize);
+
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 		histogramTable[i].index = (i+1) * 1.0;
+		lastLiveTable[i].index = (i+1) * 1.0;
 	}
 }
+
+
+inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
+		GCPHistogramRecord* array){
+	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
+		if(array[i].cntTotal < 1.0)
+			continue;
+		array[i].pcntLive = (array[i].cntLive * 100.0) / globalRec->cntLive;
+		array[i].pcntTotal = (array[i].cntTotal * 100.0) / globalRec->cntTotal;
+
+	}
+}
+
+//void ObjectSizesProfiler::gcpResetLastLiveData(void) {
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(GCP_MAX_HISTOGRAM_SIZE); i++){
+//		if(histogramTable[i].cntTotal < 1.0)
+//			continue;
+//		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
+//		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+//	}
+//}
+
 
 inline void  ObjectSizesProfiler::gcpAddDataToHist(GCPHistogramRecord* rec){
 	rec->cntLive++;
 	rec->cntTotal++;
 }
 
-inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize){
-	size_t histIndex = 32 - CLZ(objSize) - 1;
-	gcpAddDataToHist(&histogramTable[histIndex]);
-	gcpAddDataToHist(&globalRecord);
-	if(false && allocSize == objSize) {
-			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
-		}
-}
+
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj){
@@ -2434,16 +2457,29 @@ bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	return true;
 }
 
+inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
+		GCPHistogramRecord* array){
+	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
+		if(array[i].cntTotal < 1.0)
+			continue;
+		array[i].pcntLive = (array[i].cntLive * 100.0) / globalRec->cntLive;
+		array[i].pcntTotal = (array[i].cntTotal * 100.0) / globalRec->cntTotal;
+
+	}
+}
+
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
-  //get the percentage of each histogram entry
-	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		if(histogramTable[i].cntTotal < 1.0)
-			continue;
-		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
-		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
-	}
+
+  gcpAggregateGlobalRecs(&globalRecord, histogramTable);
+//  //get the percentage of each histogram entry
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+//		if(histogramTable[i].cntTotal < 1.0)
+//			continue;
+//		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
+//		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+//	}
 
 	//dump the heap stats
 	dumpHeapStats();

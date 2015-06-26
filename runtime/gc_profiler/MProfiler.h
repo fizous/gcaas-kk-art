@@ -486,7 +486,9 @@ public:
 
 	size_t totalHistogramSize;
 	GCPHistogramRecord globalRecord;
-	GCPHistogramRecord histogramTable[32];
+	GCPHistogramRecord lastLiveRecord;
+	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
+	GCPHistogramRecord lastLiveTable[GCP_MAX_HISTOGRAM_SIZE];
 	GCPObjectHeaderTest testLogic;
 
 
@@ -513,6 +515,9 @@ public:
 
 
   void gcpAddDataToHist(GCPHistogramRecord*);
+  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*);
+
+
 };
 
 typedef struct PACKED(4) GCPCohortRecord_S {
