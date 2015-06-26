@@ -98,7 +98,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 	GCHistogramThreadManager* histRecP;
 }GCPExtraObjHeader;
 
-class PACKED(4) GCHistogramThreadManager {
+class /*PACKED(4)*/ GCHistogramThreadManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
 	size_t lastCohortIndex;
