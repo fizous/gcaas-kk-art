@@ -2258,17 +2258,6 @@ void ObjectSizesProfiler::initHistogram(void) {
 }
 
 
-inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
-		GCPHistogramRecord* array){
-	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
-		if(array[i].cntTotal < 1.0)
-			continue;
-		array[i].pcntLive = (array[i].cntLive * 100.0) / globalRec->cntLive;
-		array[i].pcntTotal = (array[i].cntTotal * 100.0) / globalRec->cntTotal;
-
-	}
-}
-
 //void ObjectSizesProfiler::gcpResetLastLiveData(void) {
 //	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(GCP_MAX_HISTOGRAM_SIZE); i++){
 //		if(histogramTable[i].cntTotal < 1.0)
