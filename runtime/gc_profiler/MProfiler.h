@@ -517,7 +517,7 @@ public:
 
 
   void gcpAddDataToHist(GCPHistogramRecord*);
-  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*);
+  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*, bool);
   void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
   volatile int32_t lastLiveGuard;
 

@@ -2490,6 +2490,11 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array, bool force) {
+	if(force) {
+		while (lastLiveGuard == 1){
+
+		}
+	}
 	if(globalRec->cntLive < 1.0 || globalRec->cntTotal < 1.0)
 		return;
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++) {
