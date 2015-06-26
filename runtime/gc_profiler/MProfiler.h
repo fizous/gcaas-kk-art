@@ -43,7 +43,7 @@
 #define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
-
+#define GCP_RESET_LASTLIVE_DATA()
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
@@ -51,6 +51,7 @@
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
 #define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) 									((void) 0)
+#define GCP_RESET_LASTLIVE_DATA()															((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
@@ -485,6 +486,7 @@ public:
 	static size_t removeMProfilingExtraBytes(size_t);
 
 	size_t totalHistogramSize;
+	size_t lastCohortIndex;
 	GCPHistogramRecord globalRecord;
 	GCPHistogramRecord lastLiveRecord;
 	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
@@ -516,7 +518,7 @@ public:
 
   void gcpAddDataToHist(GCPHistogramRecord*);
   void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*);
-
+  void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
 
 };
 
