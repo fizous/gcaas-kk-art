@@ -2287,19 +2287,25 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 	gcpAddDataToHist(&globalRecord);
 
 
-	int32_t readVal = lastLiveGuard;
-
-	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
-		readVal = lastLiveGuard;
+	if(lastLiveGuard != 1) {
+		gcpAddDataToHist(&lastLiveTable[histIndex]);
+		gcpAddDataToHist(&lastLiveRecord);
 	}
 
 
-	gcpAddDataToHist(&lastLiveTable[histIndex]);
-	gcpAddDataToHist(&lastLiveRecord);
+//	int32_t readVal = lastLiveGuard;
 
-	do {
-		readVal = 2;
-	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+//	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
+//		readVal = lastLiveGuard;
+//	}
+//
+//
+//	gcpAddDataToHist(&lastLiveTable[histIndex]);
+//	gcpAddDataToHist(&lastLiveRecord);
+
+//	do {
+//		readVal = 2;
+//	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 
 	if(false && globalRecord.cntTotal > 10000) {
 		if(testLogic.takeTest == 1) {
@@ -2366,21 +2372,26 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		globalRecord.cntLive--;
 	}
 
-	int32_t readVal = 0;
+	//int32_t readVal = 0;
 
-	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
-		readVal = 0;
+
+	if(lastLiveGuard != 1) {
+		if(lastLiveTable[histIndex].cntLive >= 1.0) {
+			lastLiveTable[histIndex].cntLive--;
+			if(lastLiveRecord.cntLive >= 1.0)
+				lastLiveRecord.cntLive--;
+		}
 	}
 
-	if(lastLiveTable[histIndex].cntLive >= 1.0) {
-		lastLiveTable[histIndex].cntLive--;
-		if(lastLiveRecord.cntLive >= 1.0)
-			lastLiveRecord.cntLive--;
-	}
+//	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
+//		readVal = 0;
+//	}
 
-	do {
-		readVal = 2;
-	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+
+
+//	do {
+//		readVal = 2;
+//	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 
 //	if(false && allocSize == objSize) {
 //			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
@@ -2516,7 +2527,7 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 
 	if(force) {
 		while(readVal != 0) {
-			readVal = lastLiveGuard;
+			readVal = 0;
 			if (LIKELY(android_atomic_cas(0, 1, &lastLiveGuard) == 0))
 				break;
 		}
@@ -2533,7 +2544,7 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 	if(force) {
 		do {
 			readVal = lastLiveGuard;
-		} while (UNLIKELY(android_atomic_cas(1, 0, &lastLiveGuard) != 0));
+		} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 	}
 }
 
