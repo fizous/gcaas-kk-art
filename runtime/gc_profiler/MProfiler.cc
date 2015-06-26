@@ -2347,10 +2347,15 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		}
 	}
 
-	if(histogramTable[histIndex].cntLive == 0)
-		return;
-	histogramTable[histIndex].cntLive--;
-	globalRecord.cntLive--;
+	if(histogramTable[histIndex].cntLive >= 1.0 ) {
+		histogramTable[histIndex].cntLive--;
+		globalRecord.cntLive--;
+	}
+	if(lastLiveTable[histIndex].cntLive >= 1.0) {
+		lastLiveTable[histIndex].cntLive--;
+		if(lastLiveRecord.cntLive >= 1.0)
+			lastLiveRecord.cntLive--;
+	}
 
 
 
