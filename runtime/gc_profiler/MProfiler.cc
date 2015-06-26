@@ -2465,8 +2465,8 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 	lastCohortIndex = newCohortIndex;
 
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
-		if(array[i].cntTotal < 1.0)
-			continue;
+//		if(array[i].cntTotal < 1.0)
+//			continue;
 		array[i].cntLive = 0.0;
 		array[i].cntTotal = 0.0;
 		array[i].pcntLive = 0.0;
