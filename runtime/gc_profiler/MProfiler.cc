@@ -2237,6 +2237,8 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 
 
 void ObjectSizesProfiler::initHistogram(void) {
+	lastLiveGuard = 0;
+
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
 	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
 	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
@@ -2283,9 +2285,11 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&lastLiveTable[histIndex]);
-	gcpAddDataToHist(&globalRecord);
-	gcpAddDataToHist(&lastLiveRecord);
 
+	if(lastLiveGuard == 0) {
+		gcpAddDataToHist(&globalRecord);
+		gcpAddDataToHist(&lastLiveRecord);
+	}
 
 	if(false && globalRecord.cntTotal > 10000) {
 		if(testLogic.takeTest == 1) {
@@ -2463,6 +2467,10 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 		return;
 
 	lastCohortIndex = newCohortIndex;
+	int32_t readVal = lastLiveGuard;
+	do {
+		readVal = lastLiveGuard;
+	} while (UNLIKELY(android_atomic_cas(readVal, 1, &lastLiveGuard) != 0));
 
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
 //		if(array[i].cntTotal < 1.0)
@@ -2474,10 +2482,14 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 	}
 	globalRec->cntLive = 0.0;
 	globalRec->cntTotal = 0.0;
+
+	do {
+		readVal = lastLiveGuard;
+	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 }
 
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
-		GCPHistogramRecord* array) {
+		GCPHistogramRecord* array, bool force) {
 	if(globalRec->cntLive < 1.0 || globalRec->cntTotal < 1.0)
 		return;
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++) {
@@ -2492,8 +2504,8 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
 
-  gcpAggregateGlobalRecs(&globalRecord, histogramTable);
-  gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable);
+  gcpAggregateGlobalRecs(&globalRecord, histogramTable, false);
+  gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, true);
 //  //get the percentage of each histogram entry
 //	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 //		if(histogramTable[i].cntTotal < 1.0)
