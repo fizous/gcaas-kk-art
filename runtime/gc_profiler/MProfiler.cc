@@ -2694,7 +2694,7 @@ GCHistogramThreadManager::GCHistogramThreadManager(void) {
 	initHistograms();
 }
 
-inline void  GCHistogramThreadManager::gcpAddDataToHist(GCPHistogramRecord* rec) {
+inline void  GCHistogramThreadManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 	rec->cntLive++;
 	rec->cntTotal++;
 }

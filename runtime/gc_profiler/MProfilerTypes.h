@@ -35,7 +35,7 @@ class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
-
+class GCHistogramThreadManager;
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
  * Make sure that GCMMP_GC_MAX_ACTIVITIES always at the bottom of the definition
@@ -77,7 +77,7 @@ typedef struct EventMarkerManager_S {
 } EventMarkerManager;
 
 
-typedef struct PACKED(4) GCPHistogramRecAtomic_S {
+typedef struct GCPHistogramRecAtomic_S {
 	AtomicInteger   index;
 	AtomicInteger cntLive;
 	AtomicInteger cntTotal;
@@ -108,7 +108,7 @@ public:
 	GCPHistogramRecAtomic histAtomicRecord;
 	GCPHistogramRec				histRecord;
 
-	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
+	GCPHistogramRec histogramTable[GCP_MAX_HISTOGRAM_SIZE];
 	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
 
 
@@ -116,7 +116,7 @@ public:
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
-  void gcpAddDataToHist(GCPHistogramRecord*);
+  void gcpAddDataToHist(GCPHistogramRec*);
 
 };//GCHistogramThreadManager
 
