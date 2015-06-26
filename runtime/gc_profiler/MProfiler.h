@@ -470,6 +470,13 @@ typedef struct PACKED(4) GCPObjectExtraHeader_S {
 	size_t threadID;
 }GCPObjectExtraHeader;
 
+
+typedef struct PACKED(4) GCPObjectHeaderTest_S {
+	mirror::Object* obj;
+	GCPObjectExtraHeader headerReplica;
+	int takeTest;
+}GCPObjectHeaderTest;
+
 class ObjectSizesProfiler : public VMProfiler {
 public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
@@ -480,6 +487,8 @@ public:
 	size_t totalHistogramSize;
 	GCPHistogramRecord globalRecord;
 	GCPHistogramRecord histogramTable[32];
+	GCPObjectHeaderTest testLogic;
+
 
 	virtual int getExtraProfileBytes(void) {return 8;}
 

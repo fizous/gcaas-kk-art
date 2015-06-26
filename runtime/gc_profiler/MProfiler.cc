@@ -2218,6 +2218,9 @@ int MProfiler::GetGCDaemonID(void)  {
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
 	VMProfiler(argOptions, entry) {
 	initHistogram();
+	memset((void*)&testLogic, 0, sizeof(GCPObjectHeaderTest));
+	testLogic.takeTest = 1;
+
 	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
 //	if(initCounters(perfName_) != 0) {
 //		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
@@ -2270,6 +2273,16 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 	gcpAddDataToHist(&histogramTable[histIndex]);
 	gcpAddDataToHist(&globalRecord);
+
+
+	if(globalRecord.cntTotal > 10000) {
+		if(testLogic.takeTest == 1) {
+			testLogic.takeTest = 2;
+			testLogic.obj = obj;
+			testLogic.headerReplica.objSize = objSize;
+			LOG(ERROR) << " ##### testRecord: obj: " << obj << " with size: " << testLogic.headerReplica.objSize;
+		}
+	}
 //	if(false && allocSize == objSize) {
 //			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
 //		}
@@ -2318,6 +2331,14 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		return;
 	histogramTable[histIndex].cntLive--;
 	globalRecord.cntLive--;
+
+	if(testLogic.takeTest == 2) {
+		if(testLogic.obj == obj) {
+			testLogic.takeTest = 3;
+			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
+		}
+	}
+
 //	if(false && allocSize == objSize) {
 //			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
 //	}
