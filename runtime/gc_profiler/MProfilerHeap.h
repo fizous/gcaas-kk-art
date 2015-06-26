@@ -20,7 +20,6 @@
  *
  ******************************************************************************/
 /** define the type of the collection **/
-#define GCP_MAX_HISTOGRAM_SIZE						32 /* number of buckets to create the histogram */
 #define GCP_DISABLE_CONC_COLLECT					1 /* turn off ConcurrentGC */
 #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
 #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */

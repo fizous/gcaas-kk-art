@@ -2275,6 +2275,16 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t objSize, size_t allocSize) 
 	}
 }
 
+
+
+
+
+inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf) {
+
+}
+
+
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj){
 
@@ -2639,6 +2649,88 @@ size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 		return allocBytes - ((CohortProfiler*) mP)->getExtraProfileBytes();
 	}
 	return allocBytes;
+}
+
+
+
+
+
+/********************* GCHistogramThreadManager profiling ****************/
+
+void GCHistogramThreadManager::initHistograms(void){
+	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+
+	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRecord));
+	memset((void*)histogramTable, 0, totalHistogramSize);
+
+	histRecord.pcntLive = 100.0;
+	histRecord.pcntTotal = 100.0;
+
+
+
+	lastWindowHistSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecAtomic);
+	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
+
+
+
+	histAtomicRecord.pcntLive = 100.0;
+	histAtomicRecord.pcntTotal = 100.0;
+
+
+	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
+
+
+	for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		histogramTable[i].index 			= (i+1) * 1.0;
+		lastWindowHistTable[i].index  = (i+1) * 1.0;
+	}
+
+	lastCohortIndex = 0;
+}
+
+
+
+GCHistogramThreadManager::GCHistogramThreadManager(void) {
+	initHistograms();
+}
+
+inline void  GCHistogramThreadManager::gcpAddDataToHist(GCPHistogramRecord* rec) {
+	rec->cntLive++;
+	rec->cntTotal++;
+}
+
+
+inline void GCHistogramThreadManager::addObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+
+	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+			allocatedMemory - sizeof(GCPExtraObjHeader));
+	GCPExtraObjHeader* extraHeader =
+			reinterpret_cast<GCPExtraObjHeader*>(address);
+	extraHeader->objSize = objSize;
+	extraHeader->histRecP = this;
+	size_t histIndex = (32 - CLZ(objSize)) - 1;
+	gcpAddDataToHist(&histogramTable[histIndex]);
+	gcpAddDataToHist(&histRecord);
+
+	int32_t _readCohortIndex = GCHistogramThreadManager::kGCPLastCohortIndex.load();
+
+	if(lastCohortIndex != _readCohortIndex) {
+		lastCohortIndex = _readCohortIndex;
+		histAtomicRecord.cntLive  = 1;
+		histAtomicRecord.cntTotal = 1;
+		for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++){
+			lastWindowHistTable[i].cntTotal  = 0.0;
+			lastWindowHistTable[i].cntLive  = 0.0;
+		}
+		lastWindowHistTable[histIndex].cntTotal = 1;
+		lastWindowHistTable[histIndex].cntLive = 1;
+	} else {
+		histAtomicRecord.cntLive++;
+		histAtomicRecord.cntTotal++;
+		lastWindowHistTable[histIndex].cntTotal++;
+		lastWindowHistTable[histIndex].cntLive++;
+	}
 }
 
 /********************************* Cohort profiling ****************/

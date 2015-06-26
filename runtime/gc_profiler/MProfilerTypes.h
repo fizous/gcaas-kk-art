@@ -19,7 +19,9 @@
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
-#define GCMMP_GCPAUSE_ARRAY_SIZE					  32
+/* number of buckets to create the histogram */
+#define GCP_MAX_HISTOGRAM_SIZE						32
+#define GCMMP_GCPAUSE_ARRAY_SIZE					32
 
 namespace art {
 
@@ -73,6 +75,50 @@ typedef struct EventMarkerManager_S {
 	/* pointer to the area of the memory holding all the events */
 	EventMarker* markers; //
 } EventMarkerManager;
+
+
+typedef struct PACKED(4) GCPHistogramRecAtomic_S {
+	AtomicInteger   index;
+	AtomicInteger cntLive;
+	AtomicInteger cntTotal;
+	double pcntLive;
+	double pcntTotal;
+} GCPHistogramRecAtomic;
+
+typedef struct PACKED(4) GCPHistogramRec_S {
+	double   index;
+	double cntLive;
+	double cntTotal;
+	double pcntLive;
+	double pcntTotal;
+} GCPHistogramRec;
+
+typedef struct PACKED(4) GCPExtraObjHeader_S {
+	size_t objSize;
+	GCHistogramThreadManager* histRecP;
+}GCPExtraObjHeader;
+
+class PACKED(4) GCHistogramThreadManager {
+	size_t totalHistogramSize;
+	size_t lastWindowHistSize;
+	size_t lastCohortIndex;
+public:
+	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
+	static AtomicInteger kGCPLastCohortIndex;
+	GCPHistogramRecAtomic histAtomicRecord;
+	GCPHistogramRec				histRecord;
+
+	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
+	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
+
+
+	GCHistogramThreadManager(void);
+
+	void initHistograms(void);
+	void addObject(size_t, size_t, mirror::Object*);
+  void gcpAddDataToHist(GCPHistogramRecord*);
+
+};//GCHistogramThreadManager
 
 
 class PACKED(4) GCPauseThreadManager {
