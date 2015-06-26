@@ -2327,17 +2327,19 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		return;
 	}
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	if(histogramTable[histIndex].cntLive == 0)
-		return;
-	histogramTable[histIndex].cntLive--;
-	globalRecord.cntLive--;
-
 	if(testLogic.takeTest == 2) {
 		if(testLogic.obj == obj) {
 			testLogic.takeTest = 3;
 			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
 		}
 	}
+
+	if(histogramTable[histIndex].cntLive == 0)
+		return;
+	histogramTable[histIndex].cntLive--;
+	globalRecord.cntLive--;
+
+
 
 //	if(false && allocSize == objSize) {
 //			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
