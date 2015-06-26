@@ -2478,7 +2478,7 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array) {
-	if(globalRec->cntLive <= 1.0)
+	if(globalRec->cntLive < 1.0)
 		return;
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++) {
 		if(array[i].cntTotal < 1.0)
