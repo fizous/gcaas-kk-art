@@ -11,6 +11,7 @@
 #include "base/histogram.h"
 #include "base/macros.h"
 #include "base/mutex.h"
+#include "os.h"
 
 #include <string>
 #include <vector>
