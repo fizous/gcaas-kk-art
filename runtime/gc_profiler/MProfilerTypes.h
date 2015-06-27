@@ -101,7 +101,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 class /*PACKED(4)*/ GCHistogramManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
-	AtomicInteger lastCohortIndex;
+	int32_t lastCohortIndex;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static AtomicInteger kGCPLastCohortIndex;
