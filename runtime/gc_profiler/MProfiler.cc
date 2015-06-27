@@ -2585,7 +2585,7 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 
 bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 	GCPHistogramRec dummyRec;
-	bool _success = false;
+	bool _success = true;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
 		 _success &=
@@ -2708,7 +2708,7 @@ size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 /********************* GCHistogramManager profiling ****************/
 
 void GCHistogramManager::initHistograms(void){
-	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecord);
 
 	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRecord));
 	memset((void*)histogramTable, 0, totalHistogramSize);
@@ -2718,7 +2718,7 @@ void GCHistogramManager::initHistograms(void){
 
 
 
-	lastWindowHistSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecAtomic);
+	lastWindowHistSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecAtomic);
 	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
 
 
