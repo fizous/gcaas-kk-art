@@ -145,7 +145,8 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
-
+AtomicInteger VMProfiler::GCPTotalAllocBytes;
+AtomicInteger GCHistogramManager::kGCPLastCohortIndex;
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
@@ -379,7 +380,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 
 
-	int32_t _allocBytes = total_alloc_bytes_.load();
+	int32_t _allocBytes = GCPTotalAllocBytes.load();
 
 	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindow);
 	heapStatus.timeInNsec = GetRelevantRealTime();
@@ -406,16 +407,16 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Obj
 			return;
 		}
 	}
-	total_alloc_bytes_.fetch_add(allocSpace);
+	GCPTotalAllocBytes.fetch_add(allocSpace);
 	if(!IsAllocWindowsSet())
 		return;
 	GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
 
-	int32_t initValue = total_alloc_bytes_.load();
+	int32_t initValue = GCPTotalAllocBytes.load();
 	double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
 	if((_newIndex) != (getAllocIndex())) {
 
-		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
+		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << GCPTotalAllocBytes.load();
 
 
 		{
@@ -438,20 +439,20 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Obj
 }
 
 void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
-	total_alloc_bytes_.fetch_add(allocSize);
+	GCPTotalAllocBytes.fetch_add(allocSize);
 	if(!IsAllocWindowsSet())
 		return;
 
 	GCP_DECLARE_ADD_ALLOC(objSize, allocSize);
 
-	int32_t initValue = total_alloc_bytes_.load();
+	int32_t initValue = GCPTotalAllocBytes.load();
 	double _newIndex =  1.0 * ((initValue + allocSize) >> kGCMMPLogAllocWindow);
 
 
 
 	if((_newIndex) != (getAllocIndex())) {
 
-		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << total_alloc_bytes_.load();
+		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << GCPTotalAllocBytes.load();
 
 
 		{
@@ -535,7 +536,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    		}
 		    		GCMMPCPIDataDumped dataDumped;
 
-		    		dataDumped.index = ((total_alloc_bytes_.load()) >> kGCMMPLogAllocWindow)  * 1.0;
+		    		dataDumped.index = ((GCPTotalAllocBytes.load()) >> kGCMMPLogAllocWindow)  * 1.0;
 		    		dataDumped.currCycles = accData.currCycles;
 		    		dataDumped.currInstructions = accData.currInstructions;
 		    		dataDumped.currCPI =
@@ -566,7 +567,7 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
-			int32_t currBytes_ = total_alloc_bytes_.load();
+			int32_t currBytes_ = GCPTotalAllocBytes.load();
 			thProf->readPerfCounter(currBytes_);
 			thProf->GetPerfRecord()->ClosePerfLib();
 			//thProf->resetPerfRecord();
@@ -582,7 +583,7 @@ bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
 			pid_t _id = thProf->GetTid();
-			int32_t currBytes_ = total_alloc_bytes_.load();
+			int32_t currBytes_ = GCPTotalAllocBytes.load();
 		  for (const auto& profRec : threadProfList_) {
 		    if(profRec->GetTid() == _id) {
 		    	profRec->readPerfCounter(currBytes_);
@@ -666,7 +667,7 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 void VMProfiler::InitCommonData() {
 	OpenDumpFile();
 
-	total_alloc_bytes_ = 0;
+	GCPTotalAllocBytes = 0;
 	start_heap_bytes_ = getRelevantAllocBytes();
 	start_cpu_time_ns_ = ProcessTimeNS();
 	start_time_ns_ = NanoTime();
@@ -839,7 +840,7 @@ inline void VMProfiler::updateHeapPerfStatus(uint64_t totalVals,
 }
 
 void PerfCounterProfiler::getPerfData() {
-	int32_t currBytes_ = total_alloc_bytes_.load();
+	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	uint64_t _totalVals = 0;
 	uint64_t _gcMutVals = 0;
 	uint64_t _gcDaemonVals = 0;
@@ -866,7 +867,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	}
 	if(_address != NULL) {
 		_address->evType = evtMark;
-		_address->currHSize = total_alloc_bytes_.load();
+		_address->currHSize = GCPTotalAllocBytes.load();
 		_address->currTime = GetRelevantRealTime();
 	}
 	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
@@ -1003,7 +1004,7 @@ void VMProfiler::dumpEventMarks(void) {
 
 
 void PerfCounterProfiler::logPerfData() {
-	int32_t currBytes_ = total_alloc_bytes_.load();
+	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
@@ -2419,7 +2420,7 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize)
 //}
 
 void ObjectSizesProfiler::logPerfData() {
-	int32_t currBytes_ = total_alloc_bytes_.load();
+	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
@@ -2504,7 +2505,7 @@ void GCHistogramManager::gcpCheckForResetHist(void) {
 inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array) {
 
-	int32_t _allocBytes = total_alloc_bytes_.load();
+	int32_t _allocBytes = GCPTotalAllocBytes.load();
 
 	size_t newCohortIndex  = (_allocBytes >> GCP_COHORT_LOG);
 

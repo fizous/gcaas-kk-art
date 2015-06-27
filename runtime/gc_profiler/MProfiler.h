@@ -143,7 +143,7 @@ public:
 	static const int kGCMMPMaxEventsCounts = 1024;
 
 
-	static AtomicInteger total_alloc_bytes_;
+	static AtomicInteger GCPTotalAllocBytes;
 
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
@@ -372,7 +372,7 @@ public:
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
 
   static int32_t GCPGetCalcCohortIndex(void) {
-  	return (total_alloc_bytes_.load() >> GCP_COHORT_LOG);
+  	return (GCPTotalAllocBytes.load() >> GCP_COHORT_LOG);
   }
 };
 
