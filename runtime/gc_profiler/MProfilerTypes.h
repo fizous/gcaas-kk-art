@@ -125,7 +125,7 @@ public:
 
 
 
-  static void GCPRemoveObj(size_t allocatedMemory);
+  static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
   static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory, mirror::Object* obj) {
   	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
