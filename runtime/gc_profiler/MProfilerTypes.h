@@ -35,7 +35,7 @@ class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
-class GCHistogramThreadManager;
+class GCHistogramManager;
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
  * Make sure that GCMMP_GC_MAX_ACTIVITIES always at the bottom of the definition
@@ -95,13 +95,13 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 
 typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
-	GCHistogramThreadManager* histRecP;
+	GCHistogramManager* histRecP;
 }GCPExtraObjHeader;
 
-class /*PACKED(4)*/ GCHistogramThreadManager {
+class /*PACKED(4)*/ GCHistogramManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
-	int32_t lastCohortIndex;
+	AtomicInteger lastCohortIndex;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static AtomicInteger kGCPLastCohortIndex;
@@ -112,13 +112,49 @@ public:
 	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
 
 
-	GCHistogramThreadManager(void);
+	GCHistogramManager(void);
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
   void gcpAddDataToHist(GCPHistogramRec*);
 
-};//GCHistogramThreadManager
+  bool gcpRemoveDataFromHist(GCPHistogramRec*);
+  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
+  void gcpRemoveObject(size_t);
+
+
+
+  static void GCPRemoveObj(size_t allocatedMemory);
+
+  static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory, mirror::Object* obj) {
+  	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+  			allocatedMemory - sizeof(GCPExtraObjHeader));
+  	GCPExtraObjHeader* extraHeader = reinterpret_cast<GCPExtraObjHeader*>(address);
+  	return extraHeader;
+  }
+
+  //// methods for dumping and aggrgating /////////
+  void gcpAggAtomicHistograms(GCPHistogramRec* hisTable,
+  		GCPHistogramRec* globalRec);
+  void gcpAggregateHistograms(GCPHistogramRec* hisTable,
+  		GCPHistogramRec* globalRec);
+  void gcpCalculateEntries(GCPHistogramRec* hisTable,
+  		GCPHistogramRec* globalRec);
+  void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
+  		GCPHistogramRecAtomic* globalRec);
+
+  void gcpCheckForResetHist(void);
+
+  bool gcpDumpHistTable(art::File*);
+  bool gcpDumpHistAtomicTable(art::File*);
+  void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
+  	dest->index = src->index;
+  	dest->cntLive = src->cntLive.load();
+  	dest->cntTotal = src->cntTotal.load();
+  	dest->pcntLive = src->pcntLive;
+  	dest->pcntTotal = src->pcntTotal;
+  }
+};//GCHistogramManager
 
 
 class PACKED(4) GCPauseThreadManager {
@@ -193,6 +229,7 @@ class GCMMPThreadProf {
 	GCMMP_ProfileActivity lifeTime_;
 public:
 	GCPauseThreadManager* pauseManager;
+	GCHistogramManager* histogramManager;
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 	static VMProfiler* mProfiler;

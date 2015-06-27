@@ -263,8 +263,6 @@ void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
 	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
 	GCPauseThreadManager::startRealTime = start_time_ns_;
 	thProf->pauseManager = new GCPauseThreadManager();
-
-
 }
 
 
@@ -2230,6 +2228,10 @@ ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry)
 //	}
 }
 
+void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
+	thProf->histogramManager = new GCHistogramManager();
+}
+
 MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "ObjectSizesProfiler: creating hwCount";
 	return NULL;
@@ -2237,6 +2239,10 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 
 
 void ObjectSizesProfiler::initHistogram(void) {
+	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	objHistograms = new GCHistogramManager();
+
+
 	lastLiveGuard = 0;
 
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
@@ -2286,23 +2292,8 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
-		size_t objSize, mirror::Object* obj){
-
-	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-			allocatedMemory - sizeof(GCPObjectExtraHeader));
-	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
-	extraHeader->objSize = objSize;
-	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	gcpAddDataToHist(&histogramTable[histIndex]);
-	gcpAddDataToHist(&globalRecord);
-
-
-	if(lastLiveGuard != 1) {
-		gcpAddDataToHist(&lastLiveTable[histIndex]);
-		gcpAddDataToHist(&lastLiveRecord);
-	}
-
-
+		size_t objSize, mirror::Object* obj) {
+	objHistograms->addObject(allocatedMemory, objSize, obj);
 //	int32_t readVal = lastLiveGuard;
 
 //	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
@@ -2317,17 +2308,14 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 //		readVal = 2;
 //	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 
-	if(false && globalRecord.cntTotal > 10000) {
-		if(testLogic.takeTest == 1) {
-			testLogic.takeTest = 2;
-			testLogic.obj = obj;
-			testLogic.headerReplica.objSize = objSize;
-			LOG(ERROR) << " ##### testRecord: obj: " << obj << " with size: " << testLogic.headerReplica.objSize;
-		}
-	}
-//	if(false && allocSize == objSize) {
-//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//	if(false && globalRecord.cntTotal > 10000) {
+//		if(testLogic.takeTest == 1) {
+//			testLogic.takeTest = 2;
+//			testLogic.obj = obj;
+//			testLogic.headerReplica.objSize = objSize;
+//			LOG(ERROR) << " ##### testRecord: obj: " << obj << " with size: " << testLogic.headerReplica.objSize;
 //		}
+//	}
 }
 
 
@@ -2361,51 +2349,54 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t objSize, size_t allocSiz
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
-	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
-	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-			allocatedMemory - sizeof(GCPObjectExtraHeader));
-	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
-	if(extraHeader->objSize == 0) {
-		//LOG(ERROR) << "skipping object with size 0";
-		return;
-	}
-	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	if(false && testLogic.takeTest == 2) {
-		if(testLogic.obj == obj) {
-			testLogic.takeTest = 3;
-			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
-		}
-	}
-
-	if(histogramTable[histIndex].cntLive >= 1.0 ) {
-		histogramTable[histIndex].cntLive--;
-		globalRecord.cntLive--;
-	}
-
-	//int32_t readVal = 0;
-
-
-	if(lastLiveGuard != 1) {
-		if(lastLiveTable[histIndex].cntLive >= 1.0) {
-			lastLiveTable[histIndex].cntLive--;
-			if(lastLiveRecord.cntLive >= 1.0)
-				lastLiveRecord.cntLive--;
-		}
-	}
-
-//	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
-//		readVal = 0;
+	GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
+//	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
+//	objHistograms->(allocatedMemory, objSize, obj);
+//
+//	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+//			allocatedMemory - sizeof(GCPObjectExtraHeader));
+//	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+//	if(extraHeader->objSize == 0) {
+//		//LOG(ERROR) << "skipping object with size 0";
+//		return;
 //	}
-
-
-
-//	do {
-//		readVal = 2;
-//	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
-
-//	if(false && allocSize == objSize) {
-//			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+//	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+//	if(false && testLogic.takeTest == 2) {
+//		if(testLogic.obj == obj) {
+//			testLogic.takeTest = 3;
+//			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
+//		}
 //	}
+//
+//	if(histogramTable[histIndex].cntLive >= 1.0 ) {
+//		histogramTable[histIndex].cntLive--;
+//		globalRecord.cntLive--;
+//	}
+//
+//	//int32_t readVal = 0;
+//
+//
+//	if(lastLiveGuard != 1) {
+//		if(lastLiveTable[histIndex].cntLive >= 1.0) {
+//			lastLiveTable[histIndex].cntLive--;
+//			if(lastLiveRecord.cntLive >= 1.0)
+//				lastLiveRecord.cntLive--;
+//		}
+//	}
+//
+////	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
+////		readVal = 0;
+////	}
+//
+//
+//
+////	do {
+////		readVal = 2;
+////	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+//
+////	if(false && allocSize == objSize) {
+////			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+////	}
 }
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
@@ -2496,6 +2487,22 @@ bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	return true;
 }
 
+void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
+	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	//we are relaxed we do not need to lookup for the whole records
+	objHistograms->gcpCheckForResetHist();
+}
+
+void GCHistogramManager::gcpCheckForResetHist(void) {
+	if(lastCohortIndex.load() != GCHistogramManager::kGCPLastCohortIndex.load()){
+		//reset percentages in the atomic fields
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+			histAtomicRecord.pcntLive = 0.0;
+			histAtomicRecord.pcntTotal = 0.0;
+		}
+	}
+}
+
 inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array) {
 
@@ -2530,6 +2537,12 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 	} while (UNLIKELY(android_atomic_cas(1, readVal, &lastLiveGuard) != 0));
 }
 
+void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
+	//we do not need to aggregate since we have only one histogram
+	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
+			&objHistograms->histRecord);
+}
+
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array, bool force) {
 
@@ -2558,15 +2571,43 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 	}
 }
 
+
+
+
+bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
+	 bool _success =
+	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	 _success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 return _success;
+}
+
+
+bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
+	GCPHistogramRec dummyRec;
+	bool _success = false;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		GCPCopyRecords(&dummyRec, &histAtomicRecord[i]);
+		 _success &=
+		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+	 _success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 return _success;
+}
+
+
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
 
-  gcpAggregateGlobalRecs(&globalRecord, histogramTable, false);
+  //gcpAggregateGlobalRecs(&globalRecord, histogramTable, false);
 
-  bool forceAtomicity = true;
-  if(isLastDump) forceAtomicity = false;
-  gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, forceAtomicity);
+ // bool forceAtomicity = true;
+  //if(isLastDump) forceAtomicity = false;
+  //gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, forceAtomicity);
 //  //get the percentage of each histogram entry
 //	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
 //		if(histogramTable[i].cntTotal < 1.0)
@@ -2586,22 +2627,30 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
  if(_success) {
 		//dump the histogram entries
-	 _success =
-	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+	 gcpUpdateGlobalHistogram();
 
-	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+	 _success &= objHistograms->gcpDumpHistTable(dump_file_);
+	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
+//	 _success =
+//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+//
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
 
-	 _success =
-	   	dump_file_->WriteFully(lastLiveTable, totalHistogramSize);
+//	 _success =
+//	   	dump_file_->WriteFully(lastLiveTable, totalHistogramSize);
 
-	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
 
-	 if(!isLastDump)
-		 gcpResetLastLive(&lastLiveRecord, lastLiveTable);
+
+	 if(!isLastDump) {
+		 gcpFinalizeHistUpdates();
+//		 gcpFinalizeHistUpdates();
+		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
+	 }
  }
 
  if(isLastDump) {
@@ -2609,11 +2658,13 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
 	 //dump the summary one more time
-	 _success &=
-	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+	 _success &= objHistograms->gcpDumpHistTable(dump_file_);
+//	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
+//	 _success &=
+//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+//	 _success &=
+//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+//	 	  			sizeof(int));
 	 	  if(_success) {
 	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
 	 	  }
@@ -2655,9 +2706,9 @@ size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 
 
 
-/********************* GCHistogramThreadManager profiling ****************/
+/********************* GCHistogramManager profiling ****************/
 
-void GCHistogramThreadManager::initHistograms(void){
+void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
 
 	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRecord));
@@ -2685,53 +2736,162 @@ void GCHistogramThreadManager::initHistograms(void){
 		lastWindowHistTable[i].index  = (i+1) * 1.0;
 	}
 
-	lastCohortIndex = 0;
 }
 
 
 
-GCHistogramThreadManager::GCHistogramThreadManager(void) {
+GCHistogramManager::GCHistogramManager(void) {
+	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
 	initHistograms();
 }
 
-inline void  GCHistogramThreadManager::gcpAddDataToHist(GCPHistogramRec* rec) {
+inline void  GCHistogramManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 	rec->cntLive++;
 	rec->cntTotal++;
 }
 
+inline bool GCHistogramManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic* rec) {
+	bool modified = false;
+	if(rec->cntLive.load() > 0) {
+		rec->cntLive--;
+		modified = true;
+	}
+  return modified;
+}
 
-inline void GCHistogramThreadManager::addObject(size_t allocatedMemory,
+bool GCHistogramManager::gcpRemoveDataFromHist(GCPHistogramRec* rec) {
+	bool modified = false;
+	if (rec->cntLive >= 1.0) {
+		rec->cntLive--;
+		modified = true;
+	}
+  return modified;
+}
+
+
+inline void GCHistogramManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-
-	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-			allocatedMemory - sizeof(GCPExtraObjHeader));
-	GCPExtraObjHeader* extraHeader =
-			reinterpret_cast<GCPExtraObjHeader*>(address);
+	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
 	extraHeader->objSize = objSize;
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	gcpAddDataToHist(&histogramTable[histIndex]);
-	gcpAddDataToHist(&histRecord);
 
-	int32_t _readCohortIndex = (GCHistogramThreadManager::kGCPLastCohortIndex.load());
+	int32_t _readCohortIndex = (GCHistogramManager::kGCPLastCohortIndex.load());
 
 	if(lastCohortIndex != _readCohortIndex) {
 		lastCohortIndex = _readCohortIndex;
-		histAtomicRecord.cntLive  = 1;
-		histAtomicRecord.cntTotal = 1;
+		histAtomicRecord.cntLive.store(1);
+		histAtomicRecord.cntTotal.store(1);
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 			lastWindowHistTable[i].cntTotal  = 0.0;
 			lastWindowHistTable[i].cntLive  = 0.0;
 		}
-		lastWindowHistTable[histIndex].cntTotal = 1;
-		lastWindowHistTable[histIndex].cntLive = 1;
+		lastWindowHistTable[histIndex].cntTotal.store(1);
+		lastWindowHistTable[histIndex].cntLive.store(1);
 	} else {
+		gcpAddDataToHist(&histogramTable[histIndex]);
+		gcpAddDataToHist(&histRecord);
+
 		histAtomicRecord.cntLive++;
 		histAtomicRecord.cntTotal++;
 		lastWindowHistTable[histIndex].cntTotal++;
 		lastWindowHistTable[histIndex].cntLive++;
 	}
 }
+
+
+void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
+	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
+	if(removedFlag) {
+		gcpRemoveDataFromHist(&histRecord);
+	}
+	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+		//we cannot remove since there was no allocation done
+		return;
+	}
+	removedFlag = gcpRemoveAtomicDataFromHist(&lastWindowHistTable[histIndex]);
+	if(removedFlag) {
+		gcpRemoveAtomicDataFromHist(&histAtomicRecord);
+	}
+	gcpRemoveDataFromHist(&histogramTable[histIndex]);
+}
+
+void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
+		mirror::Object* obj) {
+
+	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
+
+	GCHistogramManager* threadHistRec = extraHeader->histRecP;
+
+	if(threadHistRec == NULL || extraHeader->objSize == 0)
+		return;
+
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	threadHistRec->GCPRemoveObj(histIndex);
+}
+
+inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
+		GCPHistogramRec* globalRec) {
+	if(histRecord->cntTotal <= 0.0)
+		return;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		hisTable[i].cntLive 			+= histogramTable[i].cntLive;
+		hisTable[i].cntTotal 		  += histogramTable[i].cntTotal;
+	}
+	globalRec->cntLive += histRecord.cntLive;
+	globalRec->cntTotal += histRecord.cntTotal;
+}
+
+inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRec* hisTable,
+		GCPHistogramRec* globalRec) {
+	int32_t total = histAtomicRecord->cntTotal.load();
+	if(total <= 0.0)
+		return;
+	globalRec->cntTotal += total;
+	globalRec->cntLive  += histAtomicRecord.cntLive.load();
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		hisTable[i].cntLive 			+= lastWindowHistTable[i].cntLive.load();
+		hisTable[i].cntTotal 		  += histogramTable[i].cntTotal.load();
+	}
+}
+
+
+inline void GCHistogramManager::gcpCalculateEntries(GCPHistogramRec* hisTable,
+		GCPHistogramRec* globalRec) {
+	for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		if(hisTable[i].cntTotal < 1.0)
+			continue;
+		hisTable[i].pcntLive = (hisTable[i].cntLive * 100.0) / globalRec->cntLive;
+		hisTable[i].pcntTotal = (hisTable[i].cntTotal * 100.0) / globalRec->cntTotal;
+	}
+}
+
+inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
+		GCPHistogramRecAtomic* globalRec) {
+	int32_t cntLive = globalRec->cntLive.load();
+	int32_t cntTotal = globalRec->cntTotal.load();
+	int32_t entryTotal = 0;
+	if(cntTotal == 0)
+		return;
+	if(cntLive == 0) {
+		for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+			entryTotal = hisTable[i].cntTotal.load();
+			if(entryTotal < 1)
+				continue;
+			hisTable[i].pcntTotal = (entryTotal * 100.0) / cntTotal;
+		}
+	} else  {
+		for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+			entryTotal = hisTable[i].cntTotal.load();
+			if(entryTotal < 1)
+				continue;
+			hisTable[i].pcntLive = (hisTable[i].cntLive.load() * 100.0) / cntLive;
+			hisTable[i].pcntTotal = (entryTotal * 100.0) / cntTotal;
+		}
+	}
+
+}
+
 
 /********************************* Cohort profiling ****************/
 //CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :

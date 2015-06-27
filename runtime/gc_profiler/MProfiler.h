@@ -278,6 +278,10 @@ public:
   	thProf->pauseManager = NULL;
   };
 
+  virtual void setHistogramManager(GCMMPThreadProf* thProf) {
+  	thProf->histogramManager = NULL;
+  };
+
   size_t getRelevantAllocBytes(void);
 
   void setThreadAffinity(art::Thread* th, bool complementary);
@@ -363,6 +367,10 @@ public:
   		size_t objSize, mirror::Object* obj){if(allocatedMemory == 0 || objSize ==0 || obj == NULL) return;}
   virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
+
+  static int32_t GCPGetCalcCohortIndex(void) {
+  	return (total_alloc_bytes_.load() >> GCP_COHORT_LOG);
+  }
 };
 
 
@@ -482,6 +490,10 @@ class ObjectSizesProfiler : public VMProfiler {
 public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
+
+	GCHistogramManager* objHistograms;
+
+
 	static size_t AddMProfilingExtraBytes(size_t);
 	static size_t removeMProfilingExtraBytes(size_t);
 
@@ -504,24 +516,32 @@ public:
 	void dumpProfData(bool);
   void dumpHeapStats(void);
   void logPerfData(void);
+
+
+  void setHistogramManager(GCMMPThreadProf*);
+
 	MPPerfCounter* createHWCounter(Thread*);
 
 	bool dettachThread(GCMMPThreadProf*);
-  void notifyFreeing(size_t, size_t);
-  void notifyFreeing(size_t, mirror::Object* obj);
+
   void gcpAddObject(size_t objSize, size_t allocSize);
   void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf);
+
+  void notifyFreeing(size_t, size_t);
+  void notifyFreeing(size_t, mirror::Object* obj);
   void gcpRemoveObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
   virtual bool waitForProfileSignal(void);
 
 
   void gcpAddDataToHist(GCPHistogramRecord*);
+  void gcpUpdateGlobalHistogram(void);
   void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*, bool);
   void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
-  volatile int32_t lastLiveGuard;
+  void gcpFinalizeHistUpdates(void);
+
 
 };
 
