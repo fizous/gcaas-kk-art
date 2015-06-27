@@ -2708,9 +2708,9 @@ size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 /********************* GCHistogramManager profiling ****************/
 
 void GCHistogramManager::initHistograms(void){
-	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecord);
+	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
 
-	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRecord));
+	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
 	memset((void*)histogramTable, 0, totalHistogramSize);
 
 	histRecord.pcntLive = 100.0;
