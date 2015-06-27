@@ -2241,30 +2241,28 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 void ObjectSizesProfiler::initHistogram(void) {
 	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	objHistograms = new GCHistogramManager();
-
-
-	lastLiveGuard = 0;
-
-	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
-	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
-	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
-
-	globalRecord.pcntLive = 100.0;
-	globalRecord.pcntTotal = 100.0;
-
-	lastLiveRecord.pcntLive = 100.0;
-	lastLiveRecord.pcntTotal = 100.0;
-
-	memset((void*)histogramTable, 0, totalHistogramSize);
-	memset((void*)lastLiveTable, 0, totalHistogramSize);
-
-
-	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		histogramTable[i].index = (i+1) * 1.0;
-		lastLiveTable[i].index = (i+1) * 1.0;
-	}
-
-	lastCohortIndex = 0;
+//	lastLiveGuard = 0;
+//
+//	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+//	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
+//	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
+//
+//	globalRecord.pcntLive = 100.0;
+//	globalRecord.pcntTotal = 100.0;
+//
+//	lastLiveRecord.pcntLive = 100.0;
+//	lastLiveRecord.pcntTotal = 100.0;
+//
+//	memset((void*)histogramTable, 0, totalHistogramSize);
+//	memset((void*)lastLiveTable, 0, totalHistogramSize);
+//
+//
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+//		histogramTable[i].index = (i+1) * 1.0;
+//		lastLiveTable[i].index = (i+1) * 1.0;
+//	}
+//
+//	lastCohortIndex = 0;
 }
 
 
@@ -2516,9 +2514,9 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 	lastCohortIndex = newCohortIndex;
 	int32_t readVal = 0;
 
-	while(UNLIKELY(android_atomic_cas(readVal, 1, &lastLiveGuard) != 0)) {
-		readVal = 0;
-	}
+//	while(UNLIKELY(android_atomic_cas(readVal, 1, &lastLiveGuard) != 0)) {
+//		readVal = 0;
+//	}
 
 
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++){
@@ -2532,9 +2530,9 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 	globalRec->cntLive = 0.0;
 	globalRec->cntTotal = 0.0;
 
-	do {
-		readVal = 0;
-	} while (UNLIKELY(android_atomic_cas(1, readVal, &lastLiveGuard) != 0));
+//	do {
+//		readVal = 0;
+//	} while (UNLIKELY(android_atomic_cas(1, readVal, &lastLiveGuard) != 0));
 }
 
 void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
@@ -2546,15 +2544,15 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
 		GCPHistogramRecord* array, bool force) {
 
-	int32_t readVal = lastLiveGuard;
-
-	if(force) {
-		while(readVal != 0) {
-			readVal = 0;
-			if (LIKELY(android_atomic_cas(0, 1, &lastLiveGuard) == 0))
-				break;
-		}
-	}
+//	int32_t readVal = lastLiveGuard;
+//
+//	if(force) {
+//		while(readVal != 0) {
+//			readVal = 0;
+//			if (LIKELY(android_atomic_cas(0, 1, &lastLiveGuard) == 0))
+//				break;
+//		}
+//	}
 	if(globalRec->cntLive < 1.0 || globalRec->cntTotal < 1.0)
 		return;
 	for(size_t i = 0; i < GCP_MAX_HISTOGRAM_SIZE; i++) {
@@ -2564,11 +2562,11 @@ inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* glob
 		array[i].pcntTotal = (array[i].cntTotal * 100.0) / globalRec->cntTotal;
 	}
 
-	if(force) {
-		do {
-			readVal = lastLiveGuard;
-		} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
-	}
+//	if(force) {
+//		do {
+//			readVal = lastLiveGuard;
+//		} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+//	}
 }
 
 
