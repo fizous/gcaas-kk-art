@@ -144,9 +144,11 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
+
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 AtomicInteger GCHistogramManager::kGCPLastCohortIndex;
+int GCHistogramManager::kGCMMPHEaderSize = sizeof(GCPExtraObjHeader);
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
