@@ -399,6 +399,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 }
 
 
+
+
 void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Object* obj) {
 	Thread* thread = Thread::Current();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
@@ -1960,7 +1962,9 @@ void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 	}
 }
 
-void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace, size_t objSize, mirror::Object* obj) {
+void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
+		size_t objSize, mirror::Object* obj) {
+	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
 	}
@@ -2821,6 +2825,14 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 		gcpRemoveAtomicDataFromHist(&histAtomicRecord);
 	}
 	LOG(ERROR) << "Done+++histIndex b " << histIndex;
+}
+
+
+void VMProfiler::gcpInitObjectProfileHeader(size_t allocatedMemory,
+		mirror::Object* obj) {
+	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
+	extraHeader->histRecP = NULL;
+	extraHeader->objSize = 0;
 }
 
 void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
