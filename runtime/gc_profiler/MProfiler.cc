@@ -2804,6 +2804,7 @@ inline void GCHistogramManager::addObject(size_t allocatedMemory,
 void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 	LOG(ERROR) << "passing+++histIndex << " histIndex;
 	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
+	LOG(ERROR) << "Done+++histIndex << " histIndex;
 	if(true || removedFlag)
 		return;
 	if(removedFlag) {
