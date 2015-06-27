@@ -2512,7 +2512,7 @@ inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 		return;
 
 	lastCohortIndex = newCohortIndex;
-	int32_t readVal = 0;
+//	int32_t readVal = 0;
 
 //	while(UNLIKELY(android_atomic_cas(readVal, 1, &lastLiveGuard) != 0)) {
 //		readVal = 0;
@@ -2576,7 +2576,7 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 	 bool _success =
 	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
 	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
 	 return _success;
 }
@@ -2591,7 +2591,7 @@ bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
 	}
 	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
 	 return _success;
 }
