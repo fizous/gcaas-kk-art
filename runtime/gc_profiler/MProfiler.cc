@@ -2632,7 +2632,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
 	bool _success = true;
 	_success =
-  	dump_file_->WriteFully(&globalRecord,
+  	dump_file_->WriteFully(&objHistograms->histRecord,
   			sizeof(GCPHistogramRecord));
 
  if(_success) {
@@ -2656,11 +2656,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 //	 	  			sizeof(int));
 
 
-	 if(!isLastDump) {
-		 gcpFinalizeHistUpdates();
-//		 gcpFinalizeHistUpdates();
-		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
-	 }
+
  }
 
  if(isLastDump) {
@@ -2682,6 +2678,13 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 		dump_file_->Close();
 	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
 	 		logPerfData();
+ } else {
+
+		 gcpFinalizeHistUpdates();
+//		 gcpFinalizeHistUpdates();
+		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
+
+
  }
 
 
