@@ -2586,7 +2586,7 @@ bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 	GCPHistogramRec dummyRec;
 	bool _success = false;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-		GCPCopyRecords(&dummyRec, &histAtomicRecord[i]);
+		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
 		 _success &=
 		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
 	}
@@ -2825,7 +2825,7 @@ void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
 		return;
 
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	threadHistRec->GCPRemoveObj(histIndex);
+	threadHistRec->gcpRemoveObject(histIndex);
 }
 
 inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
