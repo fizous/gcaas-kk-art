@@ -2842,8 +2842,8 @@ inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable
 
 inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRec* hisTable,
 		GCPHistogramRec* globalRec) {
-	int32_t total = histAtomicRecord->cntTotal.load();
-	if(total <= 0.0)
+	int32_t total = histAtomicRecord.cntTotal.load();
+	if(total < 1)
 		return;
 	globalRec->cntTotal += total;
 	globalRec->cntLive  += histAtomicRecord.cntLive.load();
