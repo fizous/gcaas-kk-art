@@ -2549,6 +2549,8 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 	//we do not need to aggregate since we have only one histogram
 	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
 			&objHistograms->histRecord);
+	objHistograms->gcpCalculateAtomicEntries(objHistograms->lastWindowHistTable,
+			&objHistograms->histAtomicRecord);
 }
 
 inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
