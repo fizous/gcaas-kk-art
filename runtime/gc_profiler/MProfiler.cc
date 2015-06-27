@@ -2812,7 +2812,6 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 	if(removedFlag) {
 		gcpRemoveAtomicDataFromHist(&histAtomicRecord);
 	}
-	gcpRemoveDataFromHist(&histogramTable[histIndex]);
 }
 
 void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
