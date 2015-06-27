@@ -142,6 +142,9 @@ public:
 
 	static const int kGCMMPMaxEventsCounts = 1024;
 
+
+	static AtomicInteger total_alloc_bytes_;
+
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
 
@@ -171,7 +174,7 @@ public:
   uint64_t 	end_cpu_time_ns_;
 
 
-  AtomicInteger total_alloc_bytes_;
+
 
   Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
