@@ -2828,7 +2828,7 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 }
 
 
-void VMProfiler::gcpInitObjectProfileHeader(size_t allocatedMemory,
+void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 		mirror::Object* obj) {
 	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
 	extraHeader->histRecP = NULL;
