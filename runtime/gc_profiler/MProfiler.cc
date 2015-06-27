@@ -2849,7 +2849,7 @@ inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRec* hisTable
 	globalRec->cntLive  += histAtomicRecord.cntLive.load();
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		hisTable[i].cntLive 			+= lastWindowHistTable[i].cntLive.load();
-		hisTable[i].cntTotal 		  += histogramTable[i].cntTotal.load();
+		hisTable[i].cntTotal 		  += lastWindowHistTable[i].cntTotal.load();
 	}
 }
 
@@ -2872,7 +2872,7 @@ inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic*
 	if(cntTotal == 0)
 		return;
 	if(cntLive == 0) {
-		for(size_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 			entryTotal = hisTable[i].cntTotal.load();
 			if(entryTotal < 1)
 				continue;
