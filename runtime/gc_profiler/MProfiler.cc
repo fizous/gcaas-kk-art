@@ -2426,6 +2426,9 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize)
 //}
 
 void ObjectSizesProfiler::logPerfData() {
+
+
+
 	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
@@ -2435,10 +2438,10 @@ void ObjectSizesProfiler::logPerfData() {
 
 
 	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		LOG(ERROR) << "index: " << histogramTable[i].index << " :: cntLive=" <<
-				histogramTable[i].cntLive << "; cntTotal="<<
-				histogramTable[i].cntTotal<<"; pcntLive=" <<histogramTable[i].pcntLive <<
-				"; pcntTotal="<<histogramTable[i].pcntTotal;
+		LOG(ERROR) << "index: " << objHistograms->histogramTable[i].index << " :: cntLive=" <<
+				objHistograms->histogramTable[i].cntLive << "; cntTotal="<<
+				objHistograms->histogramTable[i].cntTotal<<"; pcntLive=" << objHistograms->histogramTable[i].pcntLive <<
+				"; pcntTotal="<< objHistograms->histogramTable[i].pcntTotal;
 	}
 }
 
