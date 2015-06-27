@@ -2492,7 +2492,7 @@ void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
 }
 
 void GCHistogramManager::gcpCheckForResetHist(void) {
-	if(lastCohortIndex.load() != GCHistogramManager::kGCPLastCohortIndex.load()){
+	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
 		//reset percentages in the atomic fields
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 			histAtomicRecord.pcntLive = 0.0;
