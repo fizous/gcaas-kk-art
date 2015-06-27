@@ -2800,6 +2800,8 @@ inline void GCHistogramManager::addObject(size_t allocatedMemory,
 
 
 void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
+	if(true)
+		return;
 	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
 	if(removedFlag) {
 		gcpRemoveDataFromHist(&histRecord);
