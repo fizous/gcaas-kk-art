@@ -2830,7 +2830,8 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 
 void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 		mirror::Object* obj) {
-	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
+	GCPExtraObjHeader* extraHeader =
+			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
 	extraHeader->histRecP = NULL;
 	extraHeader->objSize = 0;
 }
