@@ -2760,6 +2760,8 @@ inline bool GCHistogramManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomi
 
 bool GCHistogramManager::gcpRemoveDataFromHist(GCPHistogramRec* rec) {
 	bool modified = false;
+	if(true)
+		return false;
 	if (rec->cntLive >= 1.0) {
 		rec->cntLive--;
 		modified = true;
@@ -2800,6 +2802,7 @@ inline void GCHistogramManager::addObject(size_t allocatedMemory,
 
 
 void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
+	LOG(ERROR) << "passing+++histIndex << " histIndex;
 	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
 	if(true || removedFlag)
 		return;
