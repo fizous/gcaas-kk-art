@@ -105,6 +105,7 @@ class /*PACKED(4)*/ GCHistogramManager {
 	int32_t lastCohortIndex;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
+	static int kGCMMPHEaderSize = sizeof(GCPExtraObjHeader);
 	static AtomicInteger kGCPLastCohortIndex;
 	GCPHistogramRecAtomic histAtomicRecord;
 	GCPHistogramRec				histRecord;

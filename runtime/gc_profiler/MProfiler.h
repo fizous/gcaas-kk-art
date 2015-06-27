@@ -509,7 +509,7 @@ public:
 	GCPObjectHeaderTest testLogic;
 
 
-	virtual int getExtraProfileBytes(void) {return 8;}
+	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHEaderSize;}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
