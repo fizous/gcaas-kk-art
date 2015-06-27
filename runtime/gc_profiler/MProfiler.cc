@@ -2830,7 +2830,7 @@ void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
 
 inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
 		GCPHistogramRec* globalRec) {
-	if(histRecord->cntTotal <= 0.0)
+	if(histRecord.cntTotal <= 0.0)
 		return;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		hisTable[i].cntLive 			+= histogramTable[i].cntLive;
