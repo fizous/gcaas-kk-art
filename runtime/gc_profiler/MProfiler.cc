@@ -2806,12 +2806,12 @@ inline void GCHistogramManager::addObject(size_t allocatedMemory,
 void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
 	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
-	LOG(ERROR) << "Done+++histIndex  " << histIndex;
-	if(true || removedFlag)
-		return;
+
 	if(removedFlag) {
 		gcpRemoveDataFromHist(&histRecord);
 	}
+
+	LOG(ERROR) << "Done+++histIndex a " << histIndex;
 	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
 		//we cannot remove since there was no allocation done
 		return;
@@ -2820,6 +2820,7 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 	if(removedFlag) {
 		gcpRemoveAtomicDataFromHist(&histAtomicRecord);
 	}
+	LOG(ERROR) << "Done+++histIndex b " << histIndex;
 }
 
 void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
