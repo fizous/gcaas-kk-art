@@ -176,12 +176,6 @@ public:
   }
 
   void gcpResetAtomicData() {
-  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
-  	memset((void*)histogramTable, 0, totalHistogramSize);
-
-  	histRecord.pcntLive = 100.0;
-  	histRecord.pcntTotal = 100.0;
-
   	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
   	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
 
