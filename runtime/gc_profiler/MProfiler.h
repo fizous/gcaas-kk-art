@@ -493,31 +493,23 @@ public:
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
+	GCHistogramManager* objHistograms;
+
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
 
-	GCHistogramManager* objHistograms;
-
-
 	static size_t AddMProfilingExtraBytes(size_t);
 	static size_t removeMProfilingExtraBytes(size_t);
-
-//	size_t totalHistogramSize;
-//	size_t lastCohortIndex;
-//	GCPHistogramRecord globalRecord;
-//	GCPHistogramRecord lastLiveRecord;
-//	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
-//	GCPHistogramRecord lastLiveTable[GCP_MAX_HISTOGRAM_SIZE];
-//	GCPObjectHeaderTest testLogic;
-
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
 
 	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHEaderSize;}
+	void initHistogram(void);
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
-	void initHistogram(void);
+
+
 
 	bool periodicDaemonExec(void);
 	void dumpProfData(bool);
@@ -553,6 +545,18 @@ public:
 
 
 };
+
+
+class ThreadAllocProfiler : public ObjectSizesProfiler {
+public:
+
+	ThreadAllocProfiler(GCMMP_Options* opts, void* entry) :
+		ObjectSizesProfiler(opts, entry) {
+		LOG(ERROR) << "ThreadAllocProfiler : Constructor of ThreadAllocProfiler";
+	}
+
+};
+
 
 //typedef struct PACKED(4) GCPCohortRecord_S {
 //	/* cohort index */

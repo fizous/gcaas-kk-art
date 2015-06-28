@@ -241,8 +241,6 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	  pauseManager(NULL),
 	  state(GCMMP_TH_STARTING) {
 
-
-
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
 //	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 //		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
@@ -252,6 +250,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
 	vmProfiler->setPauseManager(this);
+	vmProfiler->setHistogramManager(this);
 	state = GCMMP_TH_RUNNING;
 
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
@@ -2501,15 +2500,6 @@ void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
 	objHistograms->gcpCheckForResetHist();
 }
 
-void GCHistogramManager::gcpCheckForResetHist(void) {
-	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
-		//reset percentages in the atomic fields
-		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-			histAtomicRecord.pcntLive = 0.0;
-			histAtomicRecord.pcntTotal = 0.0;
-		}
-	}
-}
 
 //inline void ObjectSizesProfiler::gcpResetLastLive(GCPHistogramRecord* globalRec,
 //		GCPHistogramRecord* array) {
@@ -2583,30 +2573,6 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 
 
 
-
-bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
-	 bool _success =
-	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
-	 _success &=
-			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
-	 return _success;
-}
-
-
-bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
-	GCPHistogramRec dummyRec;
-	bool _success = true;
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
-		 _success &=
-		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
-	}
-	 _success &=
-			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
-	 return _success;
-}
 
 
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
@@ -2916,6 +2882,55 @@ inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic*
 		}
 	}
 
+}
+
+
+
+bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
+	 bool _success =
+	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	 _success &=
+			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 return _success;
+}
+
+
+void GCHistogramManager::gcpCheckForResetHist(void) {
+	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+		//reset percentages in the atomic fields
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+			histAtomicRecord.pcntLive = 0.0;
+			histAtomicRecord.pcntTotal = 0.0;
+		}
+	}
+}
+
+bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
+	GCPHistogramRec dummyRec;
+	bool _success = true;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+		 _success &=
+		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+	 _success &=
+			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 return _success;
+}
+
+/********************************* Thread Alloc Profiler ****************/
+
+void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf){
+	thProf->histogramManager = new GCHistogramManager();
+
+	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+		memset((void*) &thProf->timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+	}
+	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
+	GCPauseThreadManager::startRealTime = start_time_ns_;
+	thProf->pauseManager = new GCPauseThreadManager();
 }
 
 
