@@ -2827,13 +2827,16 @@ inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hi
 	int32_t total = histAtomicRecord.cntTotal.load();
 	if(total < 1)
 		return;
-	globalRec->cntTotal += total;
-	globalRec->cntLive  += histAtomicRecord.cntLive.load();
+	int32_t _cntLive = 0;
+	int32_t _cntTotal = 0;
+	globalRec->cntTotal.fetch_add(total);
+	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		hisTable[i].index 				= lastWindowHistTable[i].index;
-		hisTable[i].cntLive 			+= lastWindowHistTable[i].cntLive.load();
-		hisTable[i].cntTotal 		  += lastWindowHistTable[i].cntTotal.load();
+		hisTable[i].cntLive.fetch_add(lastWindowHistTable[i].cntLive.load());
+		hisTable[i].cntTotal.fetch_add(lastWindowHistTable[i].cntTotal.load());
 	}
+
 }
 
 
