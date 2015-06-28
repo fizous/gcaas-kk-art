@@ -2923,6 +2923,14 @@ inline bool GCHistogramManager::gcpDumpHistRec(art::File* dump_file) {
 
 /********************************* Thread Alloc Profiler ****************/
 
+bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
+
 void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf){
 	thProf->histogramManager = new GCHistogramManager();
 	thProf->histogramManager->histRecord.index = thProf->GetTid();

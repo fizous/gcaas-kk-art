@@ -560,6 +560,7 @@ public:
 
   void setHistogramManager(GCMMPThreadProf*);
   bool periodicDaemonExec(void);
+  bool dettachThread(GCMMPThreadProf*);
   void dumpProfData(bool);
   void dumpHeapStats(void);
 
