@@ -470,26 +470,26 @@ public:
 
 /* Application profilier for heap */
 
-typedef struct PACKED(4) GCPHistogramRecord_S {
-	double   index;
-	double cntLive;
-	double cntTotal;
-	double pcntLive;
-	double pcntTotal;
-} GCPHistogramRecord;
-
-
-typedef struct PACKED(4) GCPObjectExtraHeader_S {
-	size_t objSize;
-	size_t threadID;
-}GCPObjectExtraHeader;
-
-
-typedef struct PACKED(4) GCPObjectHeaderTest_S {
-	mirror::Object* obj;
-	GCPObjectExtraHeader headerReplica;
-	int takeTest;
-}GCPObjectHeaderTest;
+//typedef struct PACKED(4) GCPHistogramRecord_S {
+//	double   index;
+//	double cntLive;
+//	double cntTotal;
+//	double pcntLive;
+//	double pcntTotal;
+//} GCPHistogramRecord;
+//
+//
+//typedef struct PACKED(4) GCPObjectExtraHeader_S {
+//	size_t objSize;
+//	size_t threadID;
+//}GCPObjectExtraHeader;
+//
+//
+//typedef struct PACKED(4) GCPObjectHeaderTest_S {
+//	mirror::Object* obj;
+//	GCPObjectExtraHeader headerReplica;
+//	int takeTest;
+//}GCPObjectHeaderTest;
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
@@ -502,13 +502,13 @@ public:
 	static size_t AddMProfilingExtraBytes(size_t);
 	static size_t removeMProfilingExtraBytes(size_t);
 
-	size_t totalHistogramSize;
-	size_t lastCohortIndex;
-	GCPHistogramRecord globalRecord;
-	GCPHistogramRecord lastLiveRecord;
-	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
-	GCPHistogramRecord lastLiveTable[GCP_MAX_HISTOGRAM_SIZE];
-	GCPObjectHeaderTest testLogic;
+//	size_t totalHistogramSize;
+//	size_t lastCohortIndex;
+//	GCPHistogramRecord globalRecord;
+//	GCPHistogramRecord lastLiveRecord;
+//	GCPHistogramRecord histogramTable[GCP_MAX_HISTOGRAM_SIZE];
+//	GCPHistogramRecord lastLiveTable[GCP_MAX_HISTOGRAM_SIZE];
+//	GCPObjectHeaderTest testLogic;
 
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
@@ -543,10 +543,10 @@ public:
   virtual bool waitForProfileSignal(void);
 
 
-  void gcpAddDataToHist(GCPHistogramRecord*);
+//  void gcpAddDataToHist(GCPHistogramRecord*);
   void gcpUpdateGlobalHistogram(void);
-  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*, bool);
-  void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
+//  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*, bool);
+//  void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
   void gcpFinalizeHistUpdates(void);
 
   void gcpResetObjectHeader(mirror::Object* obj);
@@ -554,69 +554,69 @@ public:
 
 };
 
-typedef struct PACKED(4) GCPCohortRecord_S {
-	/* cohort index */
-	double   index;
-	/* tracking objects allocation */
-	GCPHistogramRecord cohortObjStats;
-	/* tracking volume statistics */
-	GCPHistogramRecord cohortVolumeStats;
-	/* object size histogram */
-	GCPHistogramRecord histogramTable[32];
-} GCPCohortRecord;
-
-typedef struct PACKED(4) GCPCohortsRow_S {
-	int index;
-	GCPCohortRecord cohortArr[GCP_MAX_COHORT_ROW_SIZE];
-} GCPCohortsRow;
-
-typedef struct PACKED(4) GCPCohortsTable_S {
-	int index;
-	GCPCohortsRow* cohortRows[GCP_MAX_COHORT_ARRAYLET_SIZE];
-} GCPCohortsTable;
-
-
-class CohortProfiler : public ObjectSizesProfiler {
-public:
-
-	~CohortProfiler(){};
-	void initHistogram(void);
-
-	int cohortIndex;
-	size_t cohortArrayletSize;
-	size_t cohortRowSize;
-	GCPCohortsTable cohortsTable;
-
-	GCPCohortsRow*    currCohortRow;
-	GCPCohortRecord*  currCohortRec;
-
-	void addCohortRecord(void);
-	void addCohortRow(void);
-	void initCohortsTable(void);
-
-	int getExtraProfileBytes(void) {return 8;}
-//  void gcpAddObject(size_t objSize, size_t allocSize);
-//  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
-//  void gcpRemoveObject(size_t objSize, size_t allocSize);
-//  void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
-  void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
-
-	bool periodicDaemonExec(void);
-	void dumpProfData(bool);
-  void dumpHeapStats(void);
-  void logPerfData(void);
-	MPPerfCounter* createHWCounter(Thread*);
-
-	bool dettachThread(GCMMPThreadProf*);
-//  void notifyFreeing(size_t, size_t);
-//  void notifyFreeing(size_t, mirror::Object*);
-  inline void dumpCohortGeneralStats(void);
-
-	CohortProfiler(GCMMP_Options* opts, void* entry) :
-		ObjectSizesProfiler(opts, entry) {
-		initCohortsTable();
-	}
-};
+//typedef struct PACKED(4) GCPCohortRecord_S {
+//	/* cohort index */
+//	double   index;
+//	/* tracking objects allocation */
+//	GCPHistogramRecord cohortObjStats;
+//	/* tracking volume statistics */
+//	GCPHistogramRecord cohortVolumeStats;
+//	/* object size histogram */
+//	GCPHistogramRecord histogramTable[32];
+//} GCPCohortRecord;
+//
+//typedef struct PACKED(4) GCPCohortsRow_S {
+//	int index;
+//	GCPCohortRecord cohortArr[GCP_MAX_COHORT_ROW_SIZE];
+//} GCPCohortsRow;
+//
+//typedef struct PACKED(4) GCPCohortsTable_S {
+//	int index;
+//	GCPCohortsRow* cohortRows[GCP_MAX_COHORT_ARRAYLET_SIZE];
+//} GCPCohortsTable;
+//
+//
+//class CohortProfiler : public ObjectSizesProfiler {
+//public:
+//
+//	~CohortProfiler(){};
+//	void initHistogram(void);
+//
+//	int cohortIndex;
+//	size_t cohortArrayletSize;
+//	size_t cohortRowSize;
+//	GCPCohortsTable cohortsTable;
+//
+//	GCPCohortsRow*    currCohortRow;
+//	GCPCohortRecord*  currCohortRec;
+//
+//	void addCohortRecord(void);
+//	void addCohortRow(void);
+//	void initCohortsTable(void);
+//
+//	int getExtraProfileBytes(void) {return 8;}
+////  void gcpAddObject(size_t objSize, size_t allocSize);
+////  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
+////  void gcpRemoveObject(size_t objSize, size_t allocSize);
+////  void gcpRemoveObject(size_t sizeOffset, mirror::Object*);
+//  void addObjectToCohortRecord(GCPCohortRecord*, size_t, size_t, bool);
+//
+//	bool periodicDaemonExec(void);
+//	void dumpProfData(bool);
+//  void dumpHeapStats(void);
+//  void logPerfData(void);
+//	MPPerfCounter* createHWCounter(Thread*);
+//
+//	bool dettachThread(GCMMPThreadProf*);
+////  void notifyFreeing(size_t, size_t);
+////  void notifyFreeing(size_t, mirror::Object*);
+//  inline void dumpCohortGeneralStats(void);
+//
+//	CohortProfiler(GCMMP_Options* opts, void* entry) :
+//		ObjectSizesProfiler(opts, entry) {
+//		initCohortsTable();
+//	}
+//};
 
 class MProfiler {
 private:

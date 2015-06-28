@@ -1213,10 +1213,11 @@ void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetM
 }
 
 
-const char* gc_cause_and_type_strings[3][4] = {
+const char* gc_cause_and_type_strings[4][4] = {
     {"", "GC Alloc Sticky", "GC Alloc Partial", "GC Alloc Full"},
     {"", "GC Background Sticky", "GC Background Partial", "GC Background Full"},
-    {"", "GC Explicit Sticky", "GC Explicit Partial", "GC Explicit Full"}};
+    {"", "GC Explicit Sticky", "GC Explicit Partial", "GC Explicit Full"},
+		{"", "GC Profile Sticky", "GC Profile Partial", "GC Profile Full"}};
 
 collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCause gc_cause,
                                                bool clear_soft_references) {
