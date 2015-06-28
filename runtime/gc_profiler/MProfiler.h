@@ -370,7 +370,7 @@ public:
   virtual void gcpAddObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj){if(allocatedMemory == 0 || objSize ==0 || obj == NULL) return;}
-  virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
+  //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
 
   static int32_t GCPGetCalcCohortIndex(void) {
