@@ -2971,6 +2971,28 @@ bool ThreadAllocProfiler::periodicDaemonExec(void) {
 //gcpAggregateHistograms(GCPHistogramRec* hisTable,
 //		GCPHistogramRec* globalRec)
 
+void ThreadAllocProfiler::logPerfData() {
+
+	int32_t currBytes_ = GCPTotalAllocBytes.load();
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
+			heap_->GetBytesAllocated() << ", concBytes: " <<
+			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetMaxAllowedFootPrint();
+
+	GCPHistogramRec* _tempRec = NULL;
+	for (const auto& threadProf : threadProfList_) {
+		GCHistogramManager* _histMgr = threadProf->histogramManager;
+		if(_histMgr != NULL) {
+			_tempRec = &_histMgr->histRecord;
+			LOG(ERROR) << "index: " << _tempRec->index << " :: cntLive=" <<
+					_tempRec->cntLive << "; cntTotal="<< _tempRec->cntTotal <<
+					"; pcntLive=" << _tempRec->pcntLive <<
+					"; pcntTotal="<< _tempRec->pcntTotal;
+		}
+	}
+}
+
 
 void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 	for (const auto& threadProf : threadProfList_) {
@@ -3063,7 +3085,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 		_count++;
 	}
 	if(_count > 0) {
-	_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+		_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 				 	  			sizeof(int));
 	}
 	return _success;
@@ -3116,23 +3138,7 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 }
 
 
-void ThreadAllocProfiler::logPerfData() {
 
-	int32_t currBytes_ = GCPTotalAllocBytes.load();
-	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
-			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes() << ", footPrint: " <<
-			heap_->GetMaxAllowedFootPrint();
-
-
-	for(int i = 0; i < GCHistogramManager::kGCMMPMaxHistogramEntries; i++){
-		LOG(ERROR) << "index: " << objHistograms->histogramTable[i].index << " :: cntLive=" <<
-				objHistograms->histogramTable[i].cntLive << "; cntTotal="<<
-				objHistograms->histogramTable[i].cntTotal<<"; pcntLive=" << objHistograms->histogramTable[i].pcntLive <<
-				"; pcntTotal="<< objHistograms->histogramTable[i].pcntTotal;
-	}
-}
 
 
 void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
