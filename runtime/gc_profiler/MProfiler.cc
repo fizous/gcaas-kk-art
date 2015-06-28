@@ -3004,6 +3004,9 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 					&objHistograms->histAtomicRecord);
 		}
 	}
+
+	int32_t _cntAtomicTotal = objHistograms->histAtomicRecord.cntTotal.load();
+	int32_t _cntAtomicLive = objHistograms->histAtomicRecord.cntLive.load();
 	for (const auto& threadProf : threadProfList_) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
@@ -3011,11 +3014,16 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 					(_histMgr->histRecord.cntLive * 100.0) / objHistograms->histRecord.cntLive;
 			_histMgr->histRecord.pcntTotal =
 					(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
-//
-//			_histMgr->gcpAggregateHistograms(objHistograms->histogramTable,
-//					&objHistograms->histRecord);
-//			_histMgr->gcpAggAtomicHistograms(objHistograms->lastWindowHistTable,
-//					&objHistograms->histAtomicRecord);
+
+			if(_cntAtomicTotal < 1.0) {
+				_histMgr->histAtomicRecord.pcntLive = 0.0;
+				_histMgr->histAtomicRecord.pcntTotal = 0.0;
+			} else {
+				_histMgr->histAtomicRecord.pcntLive =
+						(_histMgr->histAtomicRecord.cntLive * 100.0) / _cntAtomicLive;
+				_histMgr->histAtomicRecord.pcntTotal =
+						(_histMgr->histAtomicRecord.cntLive * 100.0) / _cntAtomicTotal;
+			}
 		}
 	}
 
