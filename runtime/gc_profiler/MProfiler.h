@@ -536,10 +536,10 @@ public:
 
 
 //  void gcpAddDataToHist(GCPHistogramRecord*);
-  void gcpUpdateGlobalHistogram(void);
+  virtual void gcpUpdateGlobalHistogram(void);
 //  void gcpAggregateGlobalRecs(GCPHistogramRecord*, GCPHistogramRecord*, bool);
 //  void gcpResetLastLive(GCPHistogramRecord*, GCPHistogramRecord*);
-  void gcpFinalizeHistUpdates(void);
+  virtual void gcpFinalizeHistUpdates(void);
 
   void gcpResetObjectHeader(mirror::Object* obj);
 
@@ -557,6 +557,10 @@ public:
 
   void setHistogramManager(GCMMPThreadProf*);
   bool periodicDaemonExec(void);
+  void gcpUpdateGlobalHistogram(void);
+  void gcpFinalizeHistUpdates(void);
+
+  void logPerfData(void);
 };
 
 

@@ -156,6 +156,37 @@ public:
   	dest->pcntLive = src->pcntLive;
   	dest->pcntTotal = src->pcntTotal;
   }
+
+  void gcpResetHistogramData() {
+  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
+  	memset((void*)histogramTable, 0, totalHistogramSize);
+
+  	histRecord.pcntLive = 100.0;
+  	histRecord.pcntTotal = 100.0;
+  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+  		histogramTable[i].index 			= (i+1) * 1.0;
+  	}
+  }
+
+  void gcpResetAtomicData() {
+  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
+  	memset((void*)histogramTable, 0, totalHistogramSize);
+
+  	histRecord.pcntLive = 100.0;
+  	histRecord.pcntTotal = 100.0;
+
+  	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
+  	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
+
+
+  	histAtomicRecord.pcntLive = 100.0;
+  	histAtomicRecord.pcntTotal = 100.0;
+
+  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+  		lastWindowHistTable[i].index  = (i+1) * 1.0;
+  	}
+  }
+
 };//GCHistogramManager
 
 
