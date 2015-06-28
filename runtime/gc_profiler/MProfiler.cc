@@ -2827,8 +2827,6 @@ inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hi
 	int32_t total = histAtomicRecord.cntTotal.load();
 	if(total < 1)
 		return;
-	int32_t _cntLive = 0;
-	int32_t _cntTotal = 0;
 	globalRec->cntTotal.fetch_add(total);
 	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
