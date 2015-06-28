@@ -3071,6 +3071,11 @@ void ThreadAllocProfiler::logPerfData() {
 }
 
 
+void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize){
+	return;
+}
+
 inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCMMPThreadProf* thProf = Thread::Current()->GetProfRec();
