@@ -2980,6 +2980,16 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 	objHistograms->gcpResetHistogramData();
 }
 
+
+inline void ThreadAllocProfiler::dumpHeapStats(void) {
+	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	if(successWrite) {
+
+	} else {
+		LOG(ERROR) << "could not dump heap stats";
+	}
+}
+
 void ThreadAllocProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	//dump the heap stats

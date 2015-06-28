@@ -557,6 +557,9 @@ public:
 
   void setHistogramManager(GCMMPThreadProf*);
   bool periodicDaemonExec(void);
+  void dumpProfData(bool);
+  void dumpHeapStats(void);
+
   void gcpUpdateGlobalHistogram(void);
   void gcpFinalizeHistUpdates(void);
 
@@ -565,6 +568,7 @@ public:
   void gcpAddObject(size_t objSize, size_t allocSize);
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);
+
 
 };
 
