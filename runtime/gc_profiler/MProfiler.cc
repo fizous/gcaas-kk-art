@@ -132,14 +132,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<ObjectSizesProfiler>
 		},//Objects Histograms
-		{
-				 0x03,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "CohortProfiler", "Cohort Profiler",
-				 "GCP_COHORT.log",
-				 NULL,
-				 &createVMProfiler<CohortProfiler>
-		},//Cohort
+//		{
+//				 0x03,
+//				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+//				 "CohortProfiler", "Cohort Profiler",
+//				 "GCP_COHORT.log",
+//				 NULL,
+//				 &createVMProfiler<CohortProfiler>
+//		},//Cohort
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -2924,70 +2924,70 @@ inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic*
 //		ObjectSizesProfiler(argOptions, entry) {
 //
 //}
-
-void CohortProfiler::addCohortRecord(void) {
-	if(currCohortRow == NULL) {
-		addCohortRow();
-	}
-	if(currCohortRow->index >= GCP_MAX_COHORT_ROW_SIZE) {
-		addCohortRow();
-	}
-	currCohortRec = &(currCohortRow->cohortArr[currCohortRow->index]);
-	currCohortRow->index++;
-	memset((void*)(currCohortRec), 0, sizeof(GCPCohortRecord));
-	currCohortRec->index = 1.0 * cohortIndex;
-	memset((void*)currCohortRec->histogramTable, 0, totalHistogramSize);
-	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(currCohortRec->histogramTable); i++) {
-		currCohortRec->histogramTable[i].index = (i+1) * 1.0;
-	}
-	cohortIndex++;
-}
-
-void CohortProfiler::addCohortRow(void) {
-	currCohortRow = (GCPCohortsRow*) calloc(1, cohortRowSize);
-	currCohortRow->index = 0;
-	memset((void*)(currCohortRow->cohortArr), 0, cohortRowSize);
-	cohortsTable.cohortRows[cohortsTable.index++] = currCohortRow;
-}
-
-
-
-void CohortProfiler::initCohortsTable(void) {
-	cohortArrayletSize = GCP_MAX_COHORT_ARRAYLET_SIZE * sizeof(GCPCohortsRow*);
-	cohortRowSize = GCP_MAX_COHORT_ROW_SIZE * sizeof(GCPCohortsRow);
-	memset((void*)(cohortsTable.cohortRows), 0, cohortArrayletSize);
-	cohortIndex = 0;
-	cohortsTable.index = 0;
-	currCohortRow = NULL;
-	currCohortRec = NULL;
-
-	addCohortRecord();
-
-	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
-
-	globalRecord.pcntLive  = 100.0;
-	globalRecord.pcntTotal = 100.0;
-	memset((void*)histogramTable, 0, totalHistogramSize);
-
-	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-		histogramTable[i].index = (i+1) * 1.0;
-	}
-}
-
-inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
-		size_t objSize, size_t fitSize, bool shouldCnt) {
-	//get histograms
-	size_t histIndex = 32 - CLZ(objSize) - 1;
-
-	if(shouldCnt) {
-		gcpAddDataToHist(&rec->cohortObjStats);
-		gcpAddDataToHist(&(rec->histogramTable[histIndex]));
-
-		gcpAddDataToHist(&globalRecord);
-	}
-	rec->cohortVolumeStats.cntLive  += fitSize;
-	rec->cohortVolumeStats.cntTotal += fitSize;
-}
+//
+//void CohortProfiler::addCohortRecord(void) {
+//	if(currCohortRow == NULL) {
+//		addCohortRow();
+//	}
+//	if(currCohortRow->index >= GCP_MAX_COHORT_ROW_SIZE) {
+//		addCohortRow();
+//	}
+//	currCohortRec = &(currCohortRow->cohortArr[currCohortRow->index]);
+//	currCohortRow->index++;
+//	memset((void*)(currCohortRec), 0, sizeof(GCPCohortRecord));
+//	currCohortRec->index = 1.0 * cohortIndex;
+//	memset((void*)currCohortRec->histogramTable, 0, totalHistogramSize);
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(currCohortRec->histogramTable); i++) {
+//		currCohortRec->histogramTable[i].index = (i+1) * 1.0;
+//	}
+//	cohortIndex++;
+//}
+//
+//void CohortProfiler::addCohortRow(void) {
+//	currCohortRow = (GCPCohortsRow*) calloc(1, cohortRowSize);
+//	currCohortRow->index = 0;
+//	memset((void*)(currCohortRow->cohortArr), 0, cohortRowSize);
+//	cohortsTable.cohortRows[cohortsTable.index++] = currCohortRow;
+//}
+//
+//
+//
+//void CohortProfiler::initCohortsTable(void) {
+//	cohortArrayletSize = GCP_MAX_COHORT_ARRAYLET_SIZE * sizeof(GCPCohortsRow*);
+//	cohortRowSize = GCP_MAX_COHORT_ROW_SIZE * sizeof(GCPCohortsRow);
+//	memset((void*)(cohortsTable.cohortRows), 0, cohortArrayletSize);
+//	cohortIndex = 0;
+//	cohortsTable.index = 0;
+//	currCohortRow = NULL;
+//	currCohortRec = NULL;
+//
+//	addCohortRecord();
+//
+//	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+//
+//	globalRecord.pcntLive  = 100.0;
+//	globalRecord.pcntTotal = 100.0;
+//	memset((void*)histogramTable, 0, totalHistogramSize);
+//
+//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+//		histogramTable[i].index = (i+1) * 1.0;
+//	}
+//}
+//
+//inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
+//		size_t objSize, size_t fitSize, bool shouldCnt) {
+//	//get histograms
+//	size_t histIndex = 32 - CLZ(objSize) - 1;
+//
+//	if(shouldCnt) {
+//		gcpAddDataToHist(&rec->cohortObjStats);
+//		gcpAddDataToHist(&(rec->histogramTable[histIndex]));
+//
+//		gcpAddDataToHist(&globalRecord);
+//	}
+//	rec->cohortVolumeStats.cntLive  += fitSize;
+//	rec->cohortVolumeStats.cntTotal += fitSize;
+//}
 
 
 //inline void CohortProfiler::gcpRemoveObject(size_t objSize, size_t allocSize){
@@ -3038,119 +3038,119 @@ inline void CohortProfiler::addObjectToCohortRecord(GCPCohortRecord* rec,
 //	}
 //}
 
-
-inline void CohortProfiler::dumpCohortGeneralStats(void) {
-	LOG(ERROR) << "<<<< currentCohortIndex: " << cohortIndex ;
-}
-
-void CohortProfiler::dumpProfData(bool isLastDump){
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-
-  if(isLastDump || true) {
-  	dumpCohortGeneralStats();
-  }
-
-//  //get the percentage of each histogram entry
-//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-//		if(histogramTable[i].cntTotal < 1.0)
-//			continue;
-//		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
-//		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+//
+//inline void CohortProfiler::dumpCohortGeneralStats(void) {
+//	LOG(ERROR) << "<<<< currentCohortIndex: " << cohortIndex ;
+//}
+//
+//void CohortProfiler::dumpProfData(bool isLastDump){
+//  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+//
+//  if(isLastDump || true) {
+//  	dumpCohortGeneralStats();
+//  }
+//
+////  //get the percentage of each histogram entry
+////	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+////		if(histogramTable[i].cntTotal < 1.0)
+////			continue;
+////		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
+////		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
+////	}
+////
+////	//dump the heap stats
+////	dumpHeapStats();
+////	//dump the global entry
+////
+////	bool _success = true;
+////	_success =
+////  	dump_file_->WriteFully(&globalRecord,
+////  			sizeof(GCPHistogramRecord));
+////
+//// if(_success) {
+////		//dump the histogram entries
+////	 _success =
+////	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+////	 _success &=
+////	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+////	 	  			sizeof(int));
+//// }
+////
+//// if(isLastDump) {
+////	 _success &=
+////	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+////	 	  			sizeof(int));
+////	 //dump the summary one more time
+////	 _success &=
+////	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
+////	 _success &=
+////	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+////	 	  			sizeof(int));
+////	 	  if(_success) {
+////	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
+////	 	  }
+////	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+////	 		dump_file_->Close();
+////	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
+////	 		logPerfData();
+//// }
+////
+////
+////
+//// if(!_success) {
+////	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
+//// }
+//}
+//void CohortProfiler::dumpHeapStats(void) {
+//
+//}
+//
+//bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
+//	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+//		GCMMP_VLOG(INFO) << "CohortProfiler -- dettaching thread pid: " << thProf->GetTid();
+//		thProf->state = GCMMP_TH_STOPPED;
 //	}
-//
-//	//dump the heap stats
-//	dumpHeapStats();
-//	//dump the global entry
-//
-//	bool _success = true;
-//	_success =
-//  	dump_file_->WriteFully(&globalRecord,
-//  			sizeof(GCPHistogramRecord));
-//
-// if(_success) {
-//		//dump the histogram entries
-//	 _success =
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-// }
-//
-// if(isLastDump) {
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-//	 //dump the summary one more time
-//	 _success &=
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-//	 	  if(_success) {
-//	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
-//	 	  }
-//	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-//	 		dump_file_->Close();
-//	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
-//	 		logPerfData();
-// }
+//	return true;
+//}
 //
 //
 //
-// if(!_success) {
-//	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
-// }
-}
-void CohortProfiler::dumpHeapStats(void) {
-
-}
-
-bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
-	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "CohortProfiler -- dettaching thread pid: " << thProf->GetTid();
-		thProf->state = GCMMP_TH_STOPPED;
-	}
-	return true;
-}
-
-
-
-MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "CohortProfiler: empry creating hwCount";
-	return NULL;
-}
-
-
-bool CohortProfiler::periodicDaemonExec(void) {
-	Thread* self = Thread::Current();
-  if(waitForProfileSignal()) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "CohortProfiler: signal Received " << self->GetTid() ;
-    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-
-    {
-    	MutexLock mu(self, *prof_thread_mutex_);
-    	receivedSignal_ = false;
-    }
- //
- //
-#if GCP_COLLECT_FOR_PROFILE
-    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    	heap_->CollectGarbageForProfile(false);
-#endif
-    updateHeapAllocStatus();
-
-    if(getRecivedShutDown()) {
-    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
-
-    } else {
-    	dumpProfData(false);
-    }
-
-  	return getRecivedShutDown();
-  } else {
-  	return false;
-  }
-}
+//MPPerfCounter* CohortProfiler::createHWCounter(Thread* thread) {
+//	GCMMP_VLOG(INFO) << "CohortProfiler: empry creating hwCount";
+//	return NULL;
+//}
+//
+//
+//bool CohortProfiler::periodicDaemonExec(void) {
+//	Thread* self = Thread::Current();
+//  if(waitForProfileSignal()) { //we recived Signal to Shutdown
+//    GCMMP_VLOG(INFO) << "CohortProfiler: signal Received " << self->GetTid() ;
+//    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+//
+//    {
+//    	MutexLock mu(self, *prof_thread_mutex_);
+//    	receivedSignal_ = false;
+//    }
+// //
+// //
+//#if GCP_COLLECT_FOR_PROFILE
+//    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+//    	heap_->CollectGarbageForProfile(false);
+//#endif
+//    updateHeapAllocStatus();
+//
+//    if(getRecivedShutDown()) {
+//    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+//
+//    } else {
+//    	dumpProfData(false);
+//    }
+//
+//  	return getRecivedShutDown();
+//  } else {
+//  	return false;
+//  }
+//}
 
 //inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
 //	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
