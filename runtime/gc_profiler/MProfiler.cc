@@ -3072,14 +3072,13 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	//dump the global entry
 	gcpUpdateGlobalHistogram();
 		//dump the global stats
-
 	bool _success =
 	  	dump_file_->WriteFully(&objHistograms->histRecord,
 	  			sizeof(GCPHistogramRec));
+	if(true)
+		return;
 	if(_success) {
 		_success &= dumpGlobalThreadsStats();
-		if(true)
-			return;
 		_success &= dumpGlobalThreadsAtomicStats();
 	}
 
