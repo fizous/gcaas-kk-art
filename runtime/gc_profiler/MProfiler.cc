@@ -2889,9 +2889,13 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 void GCHistogramManager::gcpCheckForResetHist(void) {
 	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
 		//reset percentages in the atomic fields
+		histAtomicRecord.pcntLive = 0.0;
+		histAtomicRecord.pcntTotal = 0.0;
+		histAtomicRecord.cntLive.store(0);
+		histAtomicRecord.cntTotal.store(0);
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-			histAtomicRecord.pcntLive = 0.0;
-			histAtomicRecord.pcntTotal = 0.0;
+			lastWindowHistTable[i].pcntLive = 0.0;
+			lastWindowHistTable[i].pcntTotal = 0.0;
 		}
 	}
 }
