@@ -2485,7 +2485,8 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
     	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
 
     } else {
-    	dumpProfData(false);
+    	if(false)
+    		dumpProfData(false);
     }
 
   	return getRecivedShutDown();
