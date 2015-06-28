@@ -2910,10 +2910,23 @@ bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 	 return _success;
 }
 
+
+inline bool GCHistogramManager::gcpDumpHistAtomicRec(art::File* dump_file) {
+	GCPHistogramRec dummyRec;
+	GCPCopyRecords(&dummyRec, &histAtomicRecord);
+	return dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+}
+
+inline bool GCHistogramManager::gcpDumpHistRec(art::File* dump_file) {
+	return dump_file->WriteFully(&histRecord, sizeof(GCPHistogramRec));
+}
+
 /********************************* Thread Alloc Profiler ****************/
 
 void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf){
 	thProf->histogramManager = new GCHistogramManager();
+	thProf->histogramManager->histRecord.index = thProf->GetTid();
+	thProf->histogramManager->histAtomicRecord.index = thProf->GetTid();
 }
 
 bool ThreadAllocProfiler::periodicDaemonExec(void) {
@@ -2961,10 +2974,25 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 					&objHistograms->histAtomicRecord);
 		}
 	}
-	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
-			&objHistograms->histRecord);
-	objHistograms->gcpCalculateAtomicEntries(objHistograms->lastWindowHistTable,
-			&objHistograms->histAtomicRecord);
+	for (const auto& threadProf : threadProfList_) {
+		GCHistogramManager* _histMgr = threadProf->histogramManager;
+		if(_histMgr != NULL) {
+			_histMgr->histRecord.pcntLive =
+					(_histMgr->histRecord.cntLive * 100.0) / objHistograms->histRecord.cntLive;
+			_histMgr->histRecord.pcntTotal =
+					(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
+//
+//			_histMgr->gcpAggregateHistograms(objHistograms->histogramTable,
+//					&objHistograms->histRecord);
+//			_histMgr->gcpAggAtomicHistograms(objHistograms->lastWindowHistTable,
+//					&objHistograms->histAtomicRecord);
+		}
+	}
+
+//	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
+//			&objHistograms->histRecord);
+//	objHistograms->gcpCalculateAtomicEntries(objHistograms->lastWindowHistTable,
+//			&objHistograms->histAtomicRecord);
 }
 
 void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
@@ -2990,73 +3018,55 @@ inline void ThreadAllocProfiler::dumpHeapStats(void) {
 	}
 }
 
+bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
+	GCHistogramManager* _histMgr = NULL;
+	bool _success = true;
+	for (const auto& threadProf : threadProfList_) {
+		_histMgr = threadProf->histogramManager;
+		if(_histMgr == NULL)
+			continue;
+		_success &= _histMgr->gcpDumpHistRec(dump_file_);
+		if(!_success)
+			return false;
+	}
+
+	_succes &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+				 	  			sizeof(int));
+
+	return _success;
+}
+
+
 void ThreadAllocProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	//dump the heap stats
 	dumpHeapStats();
 	//dump the global entry
+	gcpUpdateGlobalHistogram();
+		//dump the global stats
+	bool _success =
+	  	dump_file_->WriteFully(&objHistograms->histRecord,
+	  			sizeof(GCPHistogramRec));
+	if(_success) {
+		_success &= dumpGlobalThreadsStats();
+	}
 
-	bool _success = true;
-
-	//dump the global stats
-	_success =
-  	dump_file_->WriteFully(&objHistograms->histRecord,
-  			sizeof(GCPHistogramRec));
-
- if(_success) {
-		//dump the histogram entries
-	 gcpUpdateGlobalHistogram();
-
-	 _success &= objHistograms->gcpDumpHistTable(dump_file_);
-	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
-//	 _success =
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-
-//	 _success =
-//	   	dump_file_->WriteFully(lastLiveTable, totalHistogramSize);
-
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-
-
-
- }
-
- if(isLastDump) {
-	 _success &=
+  if(isLastDump && _success) {
+	  _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
-	 //dump the summary one more time
-	 _success &= objHistograms->gcpDumpHistTable(dump_file_);
-//	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
-//	 _success &=
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-	 	  if(_success) {
-	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
-	 	  }
+	 	if(_success) {
+	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
+	 	}
 	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-	 		dump_file_->Close();
-	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
-	 		logPerfData();
- } else {
-
+	 	dump_file_->Close();
+	 	LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
+	 	logPerfData();
+  } else {
 		 gcpFinalizeHistUpdates();
 //		 gcpFinalizeHistUpdates();
 		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
-
-
  }
-
-
-
  if(!_success) {
 	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
  }

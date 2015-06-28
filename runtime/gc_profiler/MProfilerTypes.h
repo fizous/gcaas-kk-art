@@ -149,6 +149,9 @@ public:
 
   bool gcpDumpHistTable(art::File*);
   bool gcpDumpHistAtomicTable(art::File*);
+  bool gcpDumpHistAtomicRec(art::File*);
+  bool gcpDumpHistRec(art::File*);
+
   void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();
