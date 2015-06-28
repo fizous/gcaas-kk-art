@@ -524,7 +524,7 @@ public:
 	bool dettachThread(GCMMPThreadProf*);
 
   void gcpAddObject(size_t objSize, size_t allocSize);
-  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
+  virtual void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf);
 
@@ -561,6 +561,10 @@ public:
   void gcpFinalizeHistUpdates(void);
 
   void logPerfData(void);
+
+  void gcpAddObject(size_t allocatedMemory,
+  		size_t objSize, mirror::Object* obj);
+
 };
 
 

@@ -2303,7 +2303,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 }
 
 
-inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
+void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	objHistograms->addObject(allocatedMemory, objSize, obj);
 //	int32_t readVal = lastLiveGuard;
@@ -3067,6 +3067,16 @@ void ThreadAllocProfiler::logPerfData() {
 				objHistograms->histogramTable[i].cntLive << "; cntTotal="<<
 				objHistograms->histogramTable[i].cntTotal<<"; pcntLive=" << objHistograms->histogramTable[i].pcntLive <<
 				"; pcntTotal="<< objHistograms->histogramTable[i].pcntTotal;
+	}
+}
+
+
+void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	GCMMPThreadProf* thProf = Thread::Current()->GetProfRec();
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
+		if(thProf->histogramManager != NULL)
+			thProf->histogramManager->addObject(allocatedMemory, objSize, obj);
 	}
 }
 
