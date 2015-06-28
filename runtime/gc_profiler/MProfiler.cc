@@ -3080,7 +3080,7 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	dummyRec.pcntLive = 1;
 	dummyRec.pcntTotal = 1;
 	bool _success =
-	  	dump_file_->WriteFully(&dummyRec/*objHistograms->histRecord*/,
+	  	dump_file_->WriteFully(&objHistograms->histRecord,
 	  			sizeof(GCPHistogramRec));
 	if(true)
 		return;
