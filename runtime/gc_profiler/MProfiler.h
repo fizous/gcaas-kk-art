@@ -323,11 +323,11 @@ public:
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
-	static void MProfNotifyAlloc(size_t,size_t);
-//	static void MProfNotifyAlloc(size_t, mirror::Object*);
+//	static void MProfNotifyAlloc(size_t,size_t);
+//  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
 	static void MProfNotifyFree(size_t, mirror::Object*);
-	static void MProfNotifyFree(size_t,size_t);
+//	static void MProfNotifyFree(size_t,size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);
 

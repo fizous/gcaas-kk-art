@@ -1949,11 +1949,11 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 
 
 
-void VMProfiler::MProfNotifyFree(size_t objSize, size_t allocSize) {
-	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyFreeing(objSize, allocSize);
-	}
-}
+//void VMProfiler::MProfNotifyFree(size_t objSize, size_t allocSize) {
+//	if(VMProfiler::IsMProfRunning()) {
+//		Runtime::Current()->GetMProfiler()->notifyFreeing(objSize, allocSize);
+//	}
+//}
 
 
 void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
