@@ -3077,10 +3077,10 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	  			sizeof(GCPHistogramRec));
 	if(_success) {
 		_success &= dumpGlobalThreadsStats();
-		_success &= dumpGlobalThreadsAtomicStats();
+		if(false)_success &= dumpGlobalThreadsAtomicStats();
 	}
 
-  if(isLastDump && _success) {
+  if(false&& isLastDump && _success) {
 	  _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
