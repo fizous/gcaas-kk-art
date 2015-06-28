@@ -3030,7 +3030,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 			return false;
 	}
 
-	_succes &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 				 	  			sizeof(int));
 
 	return _success;
