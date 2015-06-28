@@ -2485,8 +2485,7 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
     	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
 
     } else {
-    	if(false)
-    		dumpProfData(false);
+    	dumpProfData(false);
     }
 
   	return getRecivedShutDown();
@@ -3065,6 +3064,8 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	//dump the global entry
 	gcpUpdateGlobalHistogram();
 		//dump the global stats
+	if(true)
+		return;
 	bool _success =
 	  	dump_file_->WriteFully(&objHistograms->histRecord,
 	  			sizeof(GCPHistogramRec));
