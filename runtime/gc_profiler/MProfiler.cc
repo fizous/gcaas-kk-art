@@ -2904,15 +2904,15 @@ inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic*
 	if(cntLive == 0) {
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 			entryTotal = hisTable[i].cntTotal.load();
-			if(entryTotal < 1)
-				continue;
+//			if(entryTotal < 1)
+//				continue;
 			hisTable[i].pcntTotal = (entryTotal * 100.0) / cntTotal;
 		}
 	} else  {
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 			entryTotal = hisTable[i].cntTotal.load();
-			if(entryTotal < 1)
-				continue;
+//			if(entryTotal < 1)
+//				continue;
 			hisTable[i].pcntLive = (hisTable[i].cntLive.load() * 100.0) / cntLive;
 			hisTable[i].pcntTotal = (entryTotal * 100.0) / cntTotal;
 		}
