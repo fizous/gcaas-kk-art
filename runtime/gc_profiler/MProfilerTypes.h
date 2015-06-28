@@ -138,8 +138,8 @@ public:
   //// methods for dumping and aggrgating /////////
   void gcpAggAtomicHistograms(GCPHistogramRec* hisTable,
   		GCPHistogramRec* globalRec);
-  void gcpAggregateHistograms(GCPHistogramRec* hisTable,
-  		GCPHistogramRec* globalRec);
+  void gcpAggregateHistograms(GCPHistogramRecAtomic* hisTable,
+  		GCPHistogramRecAtomic* globalRec);
   void gcpCalculateEntries(GCPHistogramRec* hisTable,
   		GCPHistogramRec* globalRec);
   void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
