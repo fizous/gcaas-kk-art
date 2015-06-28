@@ -206,7 +206,7 @@ public:
   virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t,size_t);
   void notifyAllocation(size_t, size_t, mirror::Object*);
-  virtual void notifyFreeing(size_t, size_t){}
+//  virtual void notifyFreeing(size_t, size_t){}
   virtual void notifyFreeing(size_t, mirror::Object*){}
   void notifyFree(size_t);
   void createProfDaemon();
@@ -536,7 +536,7 @@ public:
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf);
 
-  void notifyFreeing(size_t, size_t);
+//  void notifyFreeing(size_t, size_t);
   void notifyFreeing(size_t, mirror::Object* obj);
 //  void gcpRemoveObject(size_t objSize, size_t allocSize);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);

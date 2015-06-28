@@ -2417,9 +2417,9 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t allocatedSpace, mirror::Ob
 	gcpRemoveObject(allocatedSpace, obj);
 }
 
-inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
-	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
-}
+//inline void ObjectSizesProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
+//	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
+//}
 
 //inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
 //	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
