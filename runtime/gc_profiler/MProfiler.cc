@@ -3076,6 +3076,8 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	  _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
+	  //dump the summary at the end one more time
+	  _success &= dumpGlobalThreadsStats();
 	 	if(_success) {
 	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
 	 	}
