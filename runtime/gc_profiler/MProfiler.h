@@ -555,6 +555,8 @@ public:
 		LOG(ERROR) << "ThreadAllocProfiler : Constructor of ThreadAllocProfiler";
 	}
 
+  void setHistogramManager(GCMMPThreadProf*);
+  bool periodicDaemonExec(void);
 };
 
 

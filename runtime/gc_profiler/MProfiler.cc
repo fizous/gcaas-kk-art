@@ -2924,15 +2924,38 @@ bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 
 void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf){
 	thProf->histogramManager = new GCHistogramManager();
-
-	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-		memset((void*) &thProf->timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
-	}
-	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
-	GCPauseThreadManager::startRealTime = start_time_ns_;
-	thProf->pauseManager = new GCPauseThreadManager();
 }
 
+bool ThreadAllocProfiler::periodicDaemonExec(void) {
+	Thread* self = Thread::Current();
+  if(waitForProfileSignal()) { //we recived Signal to Shutdown
+    GCMMP_VLOG(INFO) << "ThreadAllocProfiler: signal Received " << self->GetTid() ;
+    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+
+    {
+    	MutexLock mu(self, *prof_thread_mutex_);
+    	receivedSignal_ = false;
+    }
+ //
+ //
+#if GCP_COLLECT_FOR_PROFILE
+    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+    	heap_->CollectGarbageForProfile(false);
+#endif
+    updateHeapAllocStatus();
+
+    if(getRecivedShutDown()) {
+    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+
+    } else {
+    	dumpProfData(false);
+    }
+
+  	return getRecivedShutDown();
+  } else {
+  	return false;
+  }
+}
 
 /********************************* Cohort profiling ****************/
 //CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
