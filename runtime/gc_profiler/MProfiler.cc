@@ -2699,7 +2699,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled()) {
-		return ((CohortProfiler*) mP)->getExtraProfileBytes() + allocBytes;
+		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
 	}
 	return allocBytes;
 }
