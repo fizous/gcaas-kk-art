@@ -3030,6 +3030,7 @@ inline void ThreadAllocProfiler::dumpHeapStats(void) {
 bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 	GCHistogramManager* _histMgr = NULL;
 	bool _success = true;
+	int _count = 0;
 	for (const auto& threadProf : threadProfList_) {
 		_histMgr = threadProf->histogramManager;
 		if(_histMgr == NULL)
@@ -3037,11 +3038,13 @@ bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 		_success &= _histMgr->gcpDumpHistRec(dump_file_);
 		if(!_success)
 			return false;
+		_count++;
 	}
 
-	_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	if(_count > 0) {
+		_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 				 	  			sizeof(int));
-
+	}
 	return _success;
 }
 
@@ -3049,6 +3052,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 	GCHistogramManager* _histMgr = NULL;
 	bool _success = true;
+	int _count = 0;
 	for (const auto& threadProf : threadProfList_) {
 		_histMgr = threadProf->histogramManager;
 		if(_histMgr == NULL)
@@ -3056,11 +3060,12 @@ bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 		_success &= _histMgr->gcpDumpHistAtomicRec(dump_file_);
 		if(!_success)
 			return false;
+		_count++;
 	}
-
+	if(_count > 0) {
 	_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 				 	  			sizeof(int));
-
+	}
 	return _success;
 }
 
@@ -3087,8 +3092,6 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 		_success &= dumpGlobalThreadsAtomicStats();
 	}
 
-	if(true)
-		return;
   if(isLastDump && _success) {
 	  _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
