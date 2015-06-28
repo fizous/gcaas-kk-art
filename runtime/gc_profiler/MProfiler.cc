@@ -3082,7 +3082,7 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 		_success &= dumpGlobalThreadsAtomicStats();
 	}
 
-  if(sisLastDump && _success) {
+  if(isLastDump && _success) {
 	  _success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));
