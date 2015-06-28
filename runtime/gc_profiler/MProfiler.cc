@@ -3039,6 +3039,8 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
 			_histMgr->gcpCheckForResetHist();
+			_histMgr->histRecord.pcntLive = 0.0;
+			_histMgr->histRecord.pcntTotal = 0.0;
 		}
 	}
 	//reset the histogram data here to avoid double counting
