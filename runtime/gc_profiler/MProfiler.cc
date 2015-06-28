@@ -3072,8 +3072,6 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	//dump the global entry
 	gcpUpdateGlobalHistogram();
 		//dump the global stats
-	if(true)
-		return;
 	bool _success =
 	  	dump_file_->WriteFully(&objHistograms->histRecord,
 	  			sizeof(GCPHistogramRec));
