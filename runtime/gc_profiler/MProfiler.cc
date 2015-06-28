@@ -2437,7 +2437,7 @@ void ObjectSizesProfiler::logPerfData() {
 			heap_->GetMaxAllowedFootPrint();
 
 
-	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+	for(int i = 0; i < GCHistogramManager::kGCMMPMaxHistogramEntries; i++){
 		LOG(ERROR) << "index: " << objHistograms->histogramTable[i].index << " :: cntLive=" <<
 				objHistograms->histogramTable[i].cntLive << "; cntTotal="<<
 				objHistograms->histogramTable[i].cntTotal<<"; pcntLive=" << objHistograms->histogramTable[i].pcntLive <<
@@ -2633,7 +2633,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	bool _success = true;
 	_success =
   	dump_file_->WriteFully(&objHistograms->histRecord,
-  			sizeof(GCPHistogramRecord));
+  			sizeof(GCPHistogramRec));
 
  if(_success) {
 		//dump the histogram entries
@@ -2710,7 +2710,7 @@ size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled()) {
-		return allocBytes - ((CohortProfiler*) mP)->getExtraProfileBytes();
+		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
 	}
 	return allocBytes;
 }
