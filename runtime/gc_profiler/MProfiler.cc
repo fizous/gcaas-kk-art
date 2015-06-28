@@ -3073,12 +3073,12 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	gcpUpdateGlobalHistogram();
 		//dump the global stats
 
-	GCPHistogramRec dummyRec;
-	dummyRec.index = 1;
-	dummyRec.cntLive = 1;
-	dummyRec.cntTotal = 1;
-	dummyRec.pcntLive = 1;
-	dummyRec.pcntTotal = 1;
+//	GCPHistogramRec dummyRec;
+//	dummyRec.index = 1;
+//	dummyRec.cntLive = 1;
+//	dummyRec.cntTotal = 1;
+//	dummyRec.pcntLive = 1;
+//	dummyRec.pcntTotal = 1;
 	bool _success =
 	  	dump_file_->WriteFully(&objHistograms->histRecord,
 	  			sizeof(GCPHistogramRec));
