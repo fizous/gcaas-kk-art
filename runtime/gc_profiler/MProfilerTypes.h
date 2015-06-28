@@ -152,6 +152,10 @@ public:
   bool gcpDumpHistAtomicRec(art::File*);
   bool gcpDumpHistRec(art::File*);
 
+  void setLastCohortIndex(int32_t index) {
+  	lastCohortIndex = index;
+  }
+
   void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();

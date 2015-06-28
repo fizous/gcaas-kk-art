@@ -3004,6 +3004,7 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 		}
 	}
 	//reset the histogram data here to avoid double counting
+	objHistograms->setLastCohortIndex(GCHistogramManager::kGCPLastCohortIndex.load());
 	objHistograms->gcpResetAtomicData();
 	objHistograms->gcpResetHistogramData();
 }
@@ -3037,6 +3038,25 @@ bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 }
 
 
+bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
+	GCHistogramManager* _histMgr = NULL;
+	bool _success = true;
+	for (const auto& threadProf : threadProfList_) {
+		_histMgr = threadProf->histogramManager;
+		if(_histMgr == NULL)
+			continue;
+		_success &= _histMgr->gcpDumpHistAtomicRec(dump_file_);
+		if(!_success)
+			return false;
+	}
+
+	_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+				 	  			sizeof(int));
+
+	return _success;
+}
+
+
 void ThreadAllocProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	//dump the heap stats
@@ -3049,6 +3069,7 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump){
 	  			sizeof(GCPHistogramRec));
 	if(_success) {
 		_success &= dumpGlobalThreadsStats();
+		_success &= dumpGlobalThreadsAtomicStats();
 	}
 
   if(isLastDump && _success) {
