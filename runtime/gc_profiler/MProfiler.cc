@@ -2821,7 +2821,7 @@ void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
 
 inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
 		GCPHistogramRec* globalRec) {
-	if(histRecord.cntTotal <= 0.0)
+	if(false && histRecord.cntTotal <= 0.0)
 		return;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		hisTable[i].index 				= histogramTable[i].index;
@@ -2835,8 +2835,8 @@ inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable
 inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
 		GCPHistogramRecAtomic* globalRec) {
 	int32_t total = histAtomicRecord.cntTotal.load();
-//	if(total == 0)
-//		return;
+	if(false && total == 0)
+		return;
 	globalRec->cntTotal.fetch_add(total);
 	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
