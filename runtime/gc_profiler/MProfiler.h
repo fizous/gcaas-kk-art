@@ -577,10 +577,11 @@ public:
 
 };
 
+class CohortProfiler : public ObjectSizesProfiler {
 
-//class CohortProfiler : public ObjectSizesProfiler {
-//
-//};
+};
+
+
 
 //typedef struct PACKED(4) GCPCohortRecord_S {
 //	/* cohort index */

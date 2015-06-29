@@ -102,7 +102,10 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 
 typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
-	GCHistogramManager* histRecP;
+	union {
+		GCHistogramManager* histRecP;
+		size_t objBD;
+	};
 }GCPExtraObjHeader;
 
 class /*PACKED(4)*/ GCHistogramManager {
