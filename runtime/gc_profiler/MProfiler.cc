@@ -2717,6 +2717,12 @@ GCHistogramManager::GCHistogramManager(void) : type_(GCMMP_HIST_CHILD) {
 	initHistograms();
 }
 
+GCHistogramManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
+		type_(hisMGR) {
+	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
+	initHistograms();
+}
+
 
 inline void  GCHistogramManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 	rec->cntLive++;
