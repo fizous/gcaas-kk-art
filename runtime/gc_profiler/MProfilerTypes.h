@@ -55,6 +55,12 @@ typedef enum {
 	GCMMP_GC_MAX_ACTIVITIES
 } GCMMP_ACTIVITY_ENUM;
 
+typedef enum {
+	GCMMP_HIST_NONE  = 0,
+	GCMMP_HIST_ROOT  = 1,
+	GCMMP_HIST_CHILD = 2,
+}GCMMP_HISTOGRAM_MGR_TYPE;
+
 /*
  * struct that represents the status of the heap when an event is triggered
  */
@@ -103,6 +109,7 @@ class /*PACKED(4)*/ GCHistogramManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
 	int32_t lastCohortIndex;
+	GCMMP_HISTOGRAM_MGR_TYPE type_;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHEaderSize;
@@ -115,6 +122,7 @@ public:
 
 
 	GCHistogramManager(void);
+	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE);
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);

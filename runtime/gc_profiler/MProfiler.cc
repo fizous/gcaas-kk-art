@@ -2712,9 +2712,13 @@ void GCHistogramManager::initHistograms(void){
 
 
 
-GCHistogramManager::GCHistogramManager(void) {
+GCHistogramManager::GCHistogramManager(void) : type_(GCMMP_HIST_CHILD) {
 	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
 	initHistograms();
+}
+
+GCHistogramManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE mgrType) :
+		GCHistogramManager(), type_(mgrType) {
 }
 
 inline void  GCHistogramManager::gcpAddDataToHist(GCPHistogramRec* rec) {
@@ -2784,9 +2788,11 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 
 	//todo: this does not make sense
 //	LOG(ERROR) << "Done+++histIndex a " << histIndex;
-	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
-		//we cannot remove since there was no allocation done
-		return;
+	if(type_ != GCMMP_HIST_ROOT) {
+		if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+			//we cannot remove since there was no allocation done
+			return;
+		}
 	}
 	removedFlag = gcpRemoveAtomicDataFromHist(&lastWindowHistTable[histIndex]);
 	if(removedFlag) {
@@ -2949,6 +2955,11 @@ inline bool GCHistogramManager::gcpDumpHistRec(art::File* dump_file) {
 }
 
 /********************************* Thread Alloc Profiler ****************/
+
+void ThreadAllocProfiler::initHistogram(void) {
+	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+}
 
 bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running

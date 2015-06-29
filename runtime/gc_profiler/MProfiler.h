@@ -504,7 +504,7 @@ public:
 			mirror::Object* obj);
 
 	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHEaderSize;}
-	void initHistogram(void);
+	virtual void initHistogram(void);
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
@@ -559,6 +559,7 @@ public:
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
+  void initHistogram(void);
   bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
   void dumpProfData(bool);
