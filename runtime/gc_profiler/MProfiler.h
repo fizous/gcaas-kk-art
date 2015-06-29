@@ -381,7 +381,6 @@ public:
 
 class MMUProfiler : public VMProfiler {
 public:
-
 	MMUProfiler(GCMMP_Options* opts, void* entry);
 	~MMUProfiler(){};
 
@@ -577,9 +576,9 @@ public:
 
 };
 
-class CohortProfiler : public ObjectSizesProfiler {
-
-};
+//class CohortProfiler : public ObjectSizesProfiler {
+//
+//};
 
 
 
