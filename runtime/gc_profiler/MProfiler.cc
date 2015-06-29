@@ -2791,7 +2791,7 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 
 	//todo: this does not make sense
 //	LOG(ERROR) << "Done+++histIndex a " << histIndex;
-	if(false && type_ != GCMMP_HIST_ROOT) {
+	if(type_ != GCMMP_HIST_ROOT) {
 		if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
 			//we cannot remove since there was no allocation done
 			return;
