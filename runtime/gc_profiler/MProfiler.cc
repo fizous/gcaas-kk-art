@@ -3046,7 +3046,7 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 				_histMgr->histAtomicRecord.pcntLive = 0.0;
 				_histMgr->histAtomicRecord.pcntTotal = 0.0;
 			} else {
-				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive < 1 ? 0 :
+				_histMgr->histAtomicRecord.pcntLive =
 						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
 				_histMgr->histAtomicRecord.pcntTotal =
 						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
