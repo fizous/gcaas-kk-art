@@ -2835,8 +2835,8 @@ inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable
 inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
 		GCPHistogramRecAtomic* globalRec) {
 	int32_t total = histAtomicRecord.cntTotal.load();
-	if(total < 1)
-		return;
+//	if(total == 0)
+//		return;
 	globalRec->cntTotal.fetch_add(total);
 	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
@@ -3056,11 +3056,11 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 			_histMgr->histRecord.pcntTotal =
 					(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
 
-			if(_cntAtomicTotal < 1.0) {
+			if(_cntAtomicTotal == 0) {
 				_histMgr->histAtomicRecord.pcntLive = 0.0;
 				_histMgr->histAtomicRecord.pcntTotal = 0.0;
 			} else {
-				_histMgr->histAtomicRecord.pcntLive =
+				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
 				_histMgr->histAtomicRecord.pcntTotal =
 						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
