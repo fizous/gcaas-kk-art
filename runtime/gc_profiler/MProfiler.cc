@@ -2782,6 +2782,7 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 		gcpRemoveDataFromHist(&histRecord);
 	}
 
+	//todo: this does not make sense
 //	LOG(ERROR) << "Done+++histIndex a " << histIndex;
 	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
 		//we cannot remove since there was no allocation done
@@ -2887,8 +2888,24 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 }
 
 
-void GCHistogramManager::gcpCheckForResetHist(void) {
+bool GCHistogramManager::gcpCheckForResetHist(void) {
 	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+		//reset percentages in the atomic fields
+		histAtomicRecord.pcntLive = 0.0;
+		histAtomicRecord.pcntTotal = 0.0;
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+			lastWindowHistTable[i].pcntLive = 0.0;
+			lastWindowHistTable[i].pcntTotal = 0.0;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool GCHistogramManager::gcpCheckForCompleteResetHist(void) {
+	int32_t _loadedIndex = GCHistogramManager::kGCPLastCohortIndex.load();
+	if(lastCohortIndex != _loadedIndex) {
+		setLastCohortIndex(_loadedIndex);
 		//reset percentages in the atomic fields
 		histAtomicRecord.pcntLive = 0.0;
 		histAtomicRecord.pcntTotal = 0.0;
@@ -2897,9 +2914,14 @@ void GCHistogramManager::gcpCheckForResetHist(void) {
 		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 			lastWindowHistTable[i].pcntLive = 0.0;
 			lastWindowHistTable[i].pcntTotal = 0.0;
+			lastWindowHistTable[i].cntLive.store(0);
+			lastWindowHistTable[i].cntTotal.store(0);
 		}
+		return true;
 	}
+	return false;
 }
+
 
 bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 	GCPHistogramRec dummyRec;
@@ -3039,11 +3061,48 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 }
 
 void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
+	objHistograms->gcpResetHistogramData();
 	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	bool shouldUpdate = objHistograms->gcpCheckForCompleteResetHist();
+	if(shouldUpdate) {
+		int32_t _cohortIndex =  GCHistogramManager::kGCPLastCohortIndex.load();
+		for (const auto& threadProf : threadProfList_) {
+			GCHistogramManager* _histMgr = threadProf->histogramManager;
+			if(_histMgr != NULL) {
+				_histMgr->gcpResetAtomicData();
+				_histMgr->histAtomicRecord.index = threadProf->GetTid();
+				_histMgr->setLastCohortIndex(_cohortIndex);
+			}
+		}
+	}
+
+
+	int32_t newIndex = GCPGetCalcCohortIndex();
+	bool shouldUpdate = (GCHistogramManager::kGCPLastCohortIndex.load() != newIndex);
+	if(shouldUpdate) {
+
+		for (const auto& threadProf : threadProfList_) {
+			GCHistogramManager* _histMgr = threadProf->histogramManager;
+			if(_histMgr != NULL) {
+				if(threadProf->state == GCMMP_TH_STOPPED) {
+					_histMgr->gcpResetAtomicData();
+					_histMgr->setLastCohortIndex(threadProf->GetTid());
+				} else {
+					_histMgr->gcpCheckForResetHist();
+				}
+			}
+		}
+	}
+
+
+
 	for (const auto& threadProf : threadProfList_) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
-			_histMgr->gcpCheckForResetHist();
+			if(threadProf->)
+			if(_histMgr->)
+
+
 			_histMgr->histRecord.pcntLive = 0.0;
 			_histMgr->histRecord.pcntTotal = 0.0;
 		}

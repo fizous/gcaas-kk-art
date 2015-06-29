@@ -145,7 +145,8 @@ public:
   void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
   		GCPHistogramRecAtomic* globalRec);
 
-  void gcpCheckForResetHist(void);
+  bool gcpCheckForResetHist(void);
+  bool gcpCheckForCompleteResetHist(void);
 
   bool gcpDumpHistTable(art::File*);
   bool gcpDumpHistAtomicTable(art::File*);
