@@ -2742,8 +2742,8 @@ inline bool GCHistogramManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomi
 
 bool GCHistogramManager::gcpRemoveDataFromHist(GCPHistogramRec* rec) {
 	bool modified = false;
-	if(true)
-		return false;
+//	if(true)
+//		return false;
 	if (rec->cntLive >= 1.0) {
 		rec->cntLive--;
 		modified = true;
@@ -3067,6 +3067,7 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 						(_histMgr->histRecord.cntLive * 100.0) / objHistograms->histRecord.cntLive;
 				_histMgr->histRecord.pcntTotal =
 						(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
+
 				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
 				_histMgr->histAtomicRecord.pcntTotal = _cntAtomicTotal == 0 ? 0.0 :
