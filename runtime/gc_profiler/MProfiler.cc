@@ -3075,42 +3075,6 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 			}
 		}
 	}
-
-
-	int32_t newIndex = GCPGetCalcCohortIndex();
-	bool shouldUpdate = (GCHistogramManager::kGCPLastCohortIndex.load() != newIndex);
-	if(shouldUpdate) {
-
-		for (const auto& threadProf : threadProfList_) {
-			GCHistogramManager* _histMgr = threadProf->histogramManager;
-			if(_histMgr != NULL) {
-				if(threadProf->state == GCMMP_TH_STOPPED) {
-					_histMgr->gcpResetAtomicData();
-					_histMgr->setLastCohortIndex(threadProf->GetTid());
-				} else {
-					_histMgr->gcpCheckForResetHist();
-				}
-			}
-		}
-	}
-
-
-
-	for (const auto& threadProf : threadProfList_) {
-		GCHistogramManager* _histMgr = threadProf->histogramManager;
-		if(_histMgr != NULL) {
-			if(threadProf->)
-			if(_histMgr->)
-
-
-			_histMgr->histRecord.pcntLive = 0.0;
-			_histMgr->histRecord.pcntTotal = 0.0;
-		}
-	}
-	//reset the histogram data here to avoid double counting
-	objHistograms->setLastCohortIndex(GCHistogramManager::kGCPLastCohortIndex.load());
-	objHistograms->gcpResetAtomicData();
-	objHistograms->gcpResetHistogramData();
 }
 
 
