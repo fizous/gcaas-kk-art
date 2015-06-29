@@ -3082,7 +3082,8 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 		for (const auto& threadProf : threadProfList_) {
 			GCHistogramManager* _histMgr = threadProf->histogramManager;
 			if(_histMgr != NULL) {
-				_histMgr->gcpResetAtomicData();
+				_histMgr->histAtomicRecord.cntLive.store(0);
+				_histMgr->histAtomicRecord.cntTotal.store(0);
 				_histMgr->histAtomicRecord.index = threadProf->GetTid();
 				_histMgr->setLastCohortIndex(_cohortIndex);
 			}
