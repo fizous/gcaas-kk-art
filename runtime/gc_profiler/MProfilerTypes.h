@@ -199,7 +199,7 @@ public:
   	}
   }
 
-  int generateNewSecret(){ iSecret = rand() % 1000 + 1;}
+  int generateNewSecret(){return (iSecret = rand() % 1000 + 1);}
   void setFriendISecret(int secret){ iSecret = secret;}
   bool gcpIsManagerFriend(GCHistogramManager* instMGR) {return iSecret == instMGR->iSecret;}
 
