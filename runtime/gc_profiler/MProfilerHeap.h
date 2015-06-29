@@ -25,10 +25,7 @@
 #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */
 
 
-#define GCP_MAX_COHORT_ARRAYLET_CAP				128
-#define GCP_MAX_COHORT_ROW_CAP						64
-#define GCP_COHORT_LOG										18
-#define GCP_COHORT_SIZE										262144 // 256k
+
 
 
 #if DVM_ALLOW_GCPROFILER
