@@ -3220,6 +3220,143 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 }
 
 
+/******************** GCCohortManager ***********************/
+
+GCCohortManager::GCCohortManager(void) {
+	//get the correct cohort index;
+	cohortIndex_ = 0;
+	initCohortsTable();
+}
+
+
+void GCCohortManager::addCohortRow(void) {
+	currCoRowP = (GCPCohortsRow*) calloc(1, getCoRowSZ());
+	currCoRowP->index_ = 0;
+	cohortsTable.cohortRows_.push_back(currCoRowP);
+}
+
+void GCCohortManager::addCohortRecord(void) {
+	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP) {
+		//we passed the capacity and we need a new row
+		addCohortRow();
+	}
+	currCohortP = &currCoRowP->cohorts[currCoRowP->index_];
+	currCoRowP->index_++;
+
+	currCoRowP->cohorts[currCoRowP->index_++];
+
+
+	currCoRowP = (GCPCohortsRow*) calloc(1, getCoRowSZ());
+	currCoRowP->index_ = cohortsTable.cohortRows_.size();
+	cohortsTable.cohortRows_.push_back(currCoRowP);
+}
+
+
+
+void GCCohortManager::initCohortsTable(void) {
+	cohRowSZ_ = kGCMMPMaxRowCap * sizeof(GCPCohortRecordData);
+	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
+
+	cohortsTable.index = 0;
+
+	addCohortRow();
+	addCohortRecord();
+}
+
+
+inline void GCCohortManager::addObjectToCohortRecord(size_t objSize) {
+
+	size_t sizeObjLeft = objSize;
+	size_t cohSpaceLeft = 0;
+	size_t iterFitSize = 0;
+	while(sizeObjLeft != 0) {
+		cohSpaceLeft = getSpaceLeftCohort(currCohortP);
+		if(cohSpaceLeft == 0) {
+			addCohortRecord();
+			continue;
+		}
+		iterFitSize = std::min(sizeObjLeft, cohSpaceLeft);
+		updateCohRecObj(currCohortP, iterFitSize);
+		sizeObjLeft -= iterFitSize;
+	}
+}
+
+void GCCohortManager::addObjCohorts(size_t allocatedMemory,
+				size_t objSize, mirror::Object* obj) {
+	GCPExtraObjHeader* _profHeader =
+			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
+	_profHeader->objSize = objSize;
+	//we need to calculate the correct bytes without the allocated memory
+	_profHeader->objBD = 0;
+	addObjectToCohortRecord(objSize);
+}
+
+
+void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
+	GCPExtraObjHeader* _profHeader =
+			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
+	if(_profHeader->objSize == 0) //the object was not registered
+		return;
+	size_t _startRow, _startIndex, _endRow, _endIndex = 0;
+	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
+			_profHeader->objBD, _profHeader->objSize);
+
+	GCPCohortsRow* _row = NULL;
+	GCPCohortRecordData* _firstRecP = NULL;
+	GCPCohortRecordData* _LastRecP = NULL;
+	size_t _rowIter  = _startRow;
+	size_t _colIter  = _startIndex + 1;
+	size_t _byteIter = _profHeader->objBD;
+
+	_row = cohortsTable.cohortRows_[_startRow];
+	_firstRecP = &_row->cohorts[_startIndex];
+
+	//for performance we need only to handle last and first cohort;
+	if(_startRow == _endRow && _startIndex && _endIndex) {
+		//easy case: the object resides in 1 cohort;
+		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
+	} else {
+		_row = cohortsTable.cohortRows_[_endRow];
+		//first precisely calculate the cohort boundaries
+		_LastRecP = cohortsTable.cohortRows_[_startRow];
+		updateDelCohRecObj(_LastRecP,
+				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohorSize);
+		updateDelCohRecObj(_firstRecP,
+				(kGCMMPCohorSize - (_profHeader->objBD % kGCMMPCohorSize)));
+
+		while(true) {
+			_colIter++;
+			if(_colIter == kGCMMPCohorSize) {
+				_colIter = 0;
+				_rowIter++;
+			}
+			if(_colIter == _endIndex && _endRow == _rowIter)
+				break;
+			_row = cohortsTable.cohortRows_[_rowIter];
+			_LastRecP =  &_row->cohorts[_colIter];
+			updateDelCohRecObj(_LastRecP, kGCMMPCohorSize);
+		}
+	}
+
+}
+
+
+
+GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
+		mirror::Object* obj) {
+	GCPExtraObjHeader* _profHeader =
+			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
+	if(_profHeader->objSize == 0) //the object was not registered
+		return NULL;
+	size_t _cohIndex = (_profHeader->objBD >> kGCMMPCohorSize);
+	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
+	GCPCohortsRow* _row = cohortsTable.cohortRows_[_rowIndex];
+	GCPCohortRecordData* _cohRec = _row->cohorts[_cohIndex%_rowIndex];
+
+	return _cohRec;
+
+}
+
 /********************************* Cohort profiling ****************/
 //CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
 //		ObjectSizesProfiler(argOptions, entry) {

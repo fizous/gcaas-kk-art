@@ -576,9 +576,14 @@ public:
 
 };
 
-//class CohortProfiler : public ObjectSizesProfiler {
-//
-//};
+class CohortProfiler : public ObjectSizesProfiler {
+public:
+
+	CohortProfiler(GCMMP_Options* opts, void* entry) :
+		ObjectSizesProfiler(opts, entry) {
+		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
+	}
+};
 
 
 

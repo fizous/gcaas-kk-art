@@ -108,6 +108,97 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 	};
 }GCPExtraObjHeader;
 
+
+typedef struct PACKED(4) GCPCohortRecordData_S {
+	int index_;
+	double objLiveCnt;
+	double objTotalCnt;
+	double liveSize;
+	double totalSize;
+}GCPCohortRecordData;
+
+typedef struct PACKED(4) GCPCohortsRow_S {
+	int index_;
+	GCPCohortRecordData cohorts[GCP_MAX_COHORT_ROW_CAP];
+} GCPCohortsRow;
+
+
+typedef struct PACKED(4) GCPCohortsTable_S {
+	int index;
+	std::vector<GCPCohortsRow*> cohortRows_;
+} GCPCohortsTable;
+
+
+class GCCohortManager {
+	size_t cohRowSZ_;
+	size_t cohArrSZ_;
+
+	size_t getCoRowSZ(void){return cohRowSZ_ + sizeof(int);}
+public:
+	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
+	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
+	static constexpr size_t kGCMMPCohorSize = (size_t) GCP_COHORT_SIZE;
+	GCCohortManager(void);
+	int cohortIndex_;
+
+	GCPCohortRecordData* currCohortP;
+	GCPCohortsRow*    currCoRowP;
+
+	GCPCohortsTable cohortsTable;
+
+	void initCohortsTable(void);
+	void addCohortRecord(void);
+	void addCohortRow(void);
+
+	void addObjCohorts(size_t allocatedMemory,
+					size_t objSize, mirror::Object* obj);
+	void addObjectToCohRecord(size_t objSize);
+
+	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
+	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
+
+	size_t getSpaceLeftCohort(GCPCohortRecordData* rec){return kGCMMPCohorSize - rec->totalSize;}
+
+	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
+		rec->liveSize  += fit;
+		rec->totalSize += fit;
+		rec->objLiveCnt++;
+		rec->objTotalCnt++;
+	}
+	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
+		rec->liveSize  += fit;
+		rec->totalSize += fit;
+		rec->objLiveCnt++;
+		rec->objTotalCnt++;
+	}
+
+	void updateDelCohRecObj(GCPCohortRecordData* rec, size_t fitSize) {
+		rec->liveSize  -= fitSize;
+		rec->objLiveCnt--;
+	}
+
+	void GCCohortManager::getCoAddrFromBytes(size_t* startRow,
+			size_t* startIndex, size_t* endRow, size_t* endIndex,
+			size_t bd, size_t objSize) {
+		*startIndex = (bd >> kGCMMPCohorSize);
+		*startRow = *startIndex /  kGCMMPMaxRowCap;
+
+		*endIndex = ( (bd + objSize) >> kGCMMPCohorSize );
+		*endRow = *endIndex /  kGCMMPMaxRowCap;
+	}
+
+	void GCCohortManager::getCoAddrFromBytes(size_t* startRow,
+			size_t* startIndex, size_t* endRow, size_t* endIndex,
+			size_t bd, size_t objSize) {
+		*startIndex = (bd >> kGCMMPCohorSize);
+		*startRow = *startIndex /  kGCMMPMaxRowCap;
+
+		*endIndex = ( (bd + objSize) >> kGCMMPCohorSize );
+		*endRow = *endIndex /  kGCMMPMaxRowCap;
+	}
+
+};
+
 class /*PACKED(4)*/ GCHistogramManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
