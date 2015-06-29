@@ -3036,9 +3036,6 @@ void ThreadAllocProfiler::logPerfData() {
 
 
 void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
-	//er need to reset histograms to avoid accumulating on previous cycle
-	objHistograms->gcpResetHistogramData();
-	objHistograms->gcpResetAtomicData();
 	for (const auto& threadProf : threadProfList_) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
@@ -3091,6 +3088,8 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 			}
 		}
 	}
+	objHistograms->gcpResetHistogramData();
+	objHistograms->gcpResetAtomicData();
 }
 
 
