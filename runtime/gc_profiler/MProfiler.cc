@@ -2229,6 +2229,7 @@ int MProfiler::GetGCDaemonID(void)  {
 
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
 	VMProfiler(argOptions, entry) {
+	srand (time(NULL));
 	initHistogram();
 //	memset((void*)&testLogic, 0, sizeof(GCPObjectHeaderTest));
 //	testLogic.takeTest = 1;
@@ -2713,6 +2714,7 @@ void GCHistogramManager::initHistograms(void){
 
 
 GCHistogramManager::GCHistogramManager(void) : type_(GCMMP_HIST_CHILD) {
+	generateNewSecret();
 	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
 	initHistograms();
 }
@@ -2834,17 +2836,16 @@ inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable
 
 inline void GCHistogramManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
 		GCPHistogramRecAtomic* globalRec) {
-	int32_t total = histAtomicRecord.cntTotal.load();
-	if(false && total == 0)
-		return;
-	globalRec->cntTotal.fetch_add(total);
-	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
+//	int32_t total = ;
+//	if(false && total == 0)
+//		return;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		hisTable[i].index 				= lastWindowHistTable[i].index;
 		hisTable[i].cntLive.fetch_add(lastWindowHistTable[i].cntLive.load());
 		hisTable[i].cntTotal.fetch_add(lastWindowHistTable[i].cntTotal.load());
 	}
-
+	globalRec->cntTotal.fetch_add(histAtomicRecord.cntTotal.load());
+	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
 }
 
 
@@ -3036,9 +3037,12 @@ void ThreadAllocProfiler::logPerfData() {
 
 
 void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
+	//set a new secret to make sure all the manager are not ousiders:
+	int _newSecret = objHistograms->generateNewSecret();
 	for (const auto& threadProf : threadProfList_) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
+			_histMgr->setFriendISecret(_newSecret);
 			_histMgr->gcpAggregateHistograms(objHistograms->histogramTable,
 					&objHistograms->histRecord);
 			_histMgr->gcpAggAtomicHistograms(objHistograms->lastWindowHistTable,
@@ -3051,20 +3055,23 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 	for (const auto& threadProf : threadProfList_) {
 		GCHistogramManager* _histMgr = threadProf->histogramManager;
 		if(_histMgr != NULL) {
-			_histMgr->histRecord.pcntLive =
-					(_histMgr->histRecord.cntLive * 100.0) / objHistograms->histRecord.cntLive;
-			_histMgr->histRecord.pcntTotal =
-					(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
+			_histMgr->histAtomicRecord.pcntLive = 0.0;
+			_histMgr->histAtomicRecord.pcntTotal = 0.0;
 
-	//		if(_cntAtomicTotal == 0) {
-				_histMgr->histAtomicRecord.pcntLive = 0.0;
-				_histMgr->histAtomicRecord.pcntTotal = 0.0;
-		//	} else {
+			if(!objHistograms->gcpIsManagerFriend(_histMgr)) {
+				LOG(ERROR) << "^^^^^^ Found  sneaky Histogram manager ^^^^^";
+				_histMgr->histRecord.pcntLive = 0.0;
+				_histMgr->histRecord.pcntTotal = 0.0;
+			} else {
+				_histMgr->histRecord.pcntLive =
+						(_histMgr->histRecord.cntLive * 100.0) / objHistograms->histRecord.cntLive;
+				_histMgr->histRecord.pcntTotal =
+						(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
 				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
 				_histMgr->histAtomicRecord.pcntTotal = _cntAtomicTotal == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
-		//	}
+			}
 		}
 	}
 

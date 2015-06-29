@@ -110,6 +110,8 @@ class /*PACKED(4)*/ GCHistogramManager {
 	size_t lastWindowHistSize;
 	int32_t lastCohortIndex;
 	GCMMP_HISTOGRAM_MGR_TYPE type_;
+	//secretNumber used to check if this manager is included;
+	int iSecret;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHEaderSize;
@@ -196,6 +198,11 @@ public:
   		lastWindowHistTable[i].index  = (i+1) * 1.0;
   	}
   }
+
+  int generateNewSecret(){ iSecret = rand() % 1000 + 1;}
+  void setFriendISecret(int secret){ iSecret = secret;}
+  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {return iSecret == instMGR->iSecret;}
+
 
 };//GCHistogramManager
 
