@@ -122,7 +122,7 @@ public:
 
 
 	GCHistogramManager(void);
-	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE typeP) : GCHistogramManager(){type_ = typeP;}
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
