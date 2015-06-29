@@ -3084,6 +3084,8 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 			if(_histMgr != NULL) {
 				_histMgr->histAtomicRecord.cntLive.store(0);
 				_histMgr->histAtomicRecord.cntTotal.store(0);
+				_histMgr->histAtomicRecord.pcntLive = 0.0;
+				_histMgr->histAtomicRecord.pcntTotal = 0.0;
 				_histMgr->histAtomicRecord.index = threadProf->GetTid();
 				_histMgr->setLastCohortIndex(_cohortIndex);
 			}
