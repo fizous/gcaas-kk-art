@@ -3056,15 +3056,15 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 			_histMgr->histRecord.pcntTotal =
 					(_histMgr->histRecord.cntTotal * 100.0) / objHistograms->histRecord.cntTotal;
 
-			if(_cntAtomicTotal == 0) {
+	//		if(_cntAtomicTotal == 0) {
 				_histMgr->histAtomicRecord.pcntLive = 0.0;
 				_histMgr->histAtomicRecord.pcntTotal = 0.0;
-			} else {
+		//	} else {
 				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
-				_histMgr->histAtomicRecord.pcntTotal =
+				_histMgr->histAtomicRecord.pcntTotal = _cntAtomicTotal == 0 ? 0.0 :
 						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
-			}
+		//	}
 		}
 	}
 
