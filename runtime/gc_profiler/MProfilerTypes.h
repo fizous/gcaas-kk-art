@@ -193,10 +193,10 @@ public:
 	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
 			size_t bd, size_t objSize) {
-		*startIndex = (bd >> kGCMMPCohorSize);
+		*startIndex = (bd >> GCP_COHORT_LOG);
 		*startRow = *startIndex /  kGCMMPMaxRowCap;
 
-		*endIndex = ( (bd + objSize) >> kGCMMPCohorSize );
+		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
 	}
 
