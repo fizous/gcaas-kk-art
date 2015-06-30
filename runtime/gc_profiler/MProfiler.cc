@@ -3356,7 +3356,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	for (const auto& _rowIterP : cohortsTable.cohortRows_) {
-		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
+		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
 			break;
 		_print = true;
