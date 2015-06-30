@@ -33,10 +33,6 @@ namespace art {
 
 namespace mprofiler {
 
-
-
-
-
 class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
@@ -64,7 +60,7 @@ typedef enum {
 	GCMMP_HIST_NONE  = 0,
 	GCMMP_HIST_ROOT  = 1,
 	GCMMP_HIST_CHILD = 2,
-}GCMMP_HISTOGRAM_MGR_TYPE;
+} GCMMP_HISTOGRAM_MGR_TYPE;
 
 /*
  * struct that represents the status of the heap when an event is triggered
@@ -111,7 +107,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 		GCHistogramManager* histRecP;
 		size_t objBD;
 	};
-}GCPExtraObjHeader;
+} GCPExtraObjHeader;
 
 
 typedef struct PACKED(4) GCPCohortRecordData_S {
@@ -120,7 +116,7 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 	double objTotalCnt;
 	double liveSize;
 	double totalSize;
-}GCPCohortRecordData;
+} GCPCohortRecordData;
 
 typedef struct PACKED(4) GCPCohortsRow_S {
 	int index_;
@@ -138,19 +134,23 @@ class GCCohortManager {
 	size_t cohRowSZ_;
 	size_t cohArrSZ_;
 
-	size_t getCoRowSZ(void){return cohRowSZ_ + sizeof(int);}
+	size_t getCoRowSZ(void) {
+		return cohRowSZ_ + sizeof(int);
+	}
+
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
 	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
 	static constexpr size_t kGCMMPCohorSize = (size_t) GCP_COHORT_SIZE;
-	GCCohortManager(void);
+	static AtomicInteger kGCPLastCohortIndex;
+
 	int cohortIndex_;
 
-	GCPCohortRecordData* currCohortP;
-	GCPCohortsRow*    currCoRowP;
+	GCPCohortRecordData*	currCohortP;
+	GCPCohortsRow*    		currCoRowP;
+	GCPCohortsTable 			cohortsTable;
 
-	GCPCohortsTable cohortsTable;
-
+	GCCohortManager(void);
 	void initCohortsTable(void);
 	void addCohortRecord(void);
 	void addCohortRow(void);
@@ -229,7 +229,6 @@ class /*PACKED(4)*/ GCHistogramManager {
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHeaderSize;
-	static AtomicInteger kGCPLastCohortIndex;
 	GCPHistogramRecAtomic histAtomicRecord;
 	GCPHistogramRec				histRecord;
 
@@ -252,10 +251,12 @@ public:
 
   static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
-  static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory, mirror::Object* obj) {
+  static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
+  		mirror::Object* obj) {
   	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
   			allocatedMemory - sizeof(GCPExtraObjHeader));
-  	GCPExtraObjHeader* extraHeader = reinterpret_cast<GCPExtraObjHeader*>(address);
+  	GCPExtraObjHeader* extraHeader =
+  			reinterpret_cast<GCPExtraObjHeader*>(address);
   	return extraHeader;
   }
 
@@ -308,14 +309,22 @@ public:
   	histAtomicRecord.pcntLive = 100.0;
   	histAtomicRecord.pcntTotal = 100.0;
 
-  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
   		lastWindowHistTable[i].index  = (i+1) * 1.0;
   	}
   }
 
-  int generateNewSecret(){return (iSecret = rand() % 1000 + 1);}
-  void setFriendISecret(int secret){ iSecret = secret;}
-  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {return iSecret == instMGR->iSecret;}
+  int generateNewSecret() {
+  	return (iSecret = rand() % 1000 + 1);
+  }
+
+  void setFriendISecret(int secret) {
+  	iSecret = secret;
+  }
+
+  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {
+  	return iSecret == instMGR->iSecret;
+  }
 
 
 };//GCHistogramManager

@@ -578,6 +578,7 @@ public:
 
 class CohortProfiler : public ObjectSizesProfiler {
 public:
+	GCCohortManager* cohMgr;
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
