@@ -190,7 +190,7 @@ public:
 
 	}
 
-	void GCCohortManager::getCoAddrFromBytes(size_t* startRow,
+	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
 			size_t bd, size_t objSize) {
 		*startIndex = (bd >> kGCMMPCohorSize);
@@ -200,7 +200,7 @@ public:
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
 	}
 
-	void GCCohortManager::getCoAddrFromBytes(size_t* startRow,
+	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
 			size_t bd, size_t objSize) {
 		*startIndex = (bd >> kGCMMPCohorSize);
