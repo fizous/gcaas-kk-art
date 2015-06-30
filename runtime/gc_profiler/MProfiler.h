@@ -583,6 +583,8 @@ public:
 		ObjectSizesProfiler(opts, entry) {
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
+
+  void initHistogram(void);
 };
 
 

@@ -140,14 +140,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<ThreadAllocProfiler>
 		},//Thread Allocator
-//		{
-//				 0x03,
-//				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-//				 "CohortProfiler", "Cohort Profiler",
-//				 "GCP_COHORT.log",
-//				 NULL,
-//				 &createVMProfiler<CohortProfiler>
-//		},//Cohort
+		{
+				 0x04,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				 "CohortProfiler", "Cohort Profiler",
+				 "GCP_COHORT.log",
+				 NULL,
+				 &createVMProfiler<CohortProfiler>
+		},//Cohort Profiler
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -3356,10 +3356,19 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 }
 
 /********************************* Cohort profiling ****************/
-//CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
-//		ObjectSizesProfiler(argOptions, entry) {
-//
-//}
+
+
+
+CohortProfiler::CohortProfiler(GCMMP_Options* argOptions, void* entry) :
+		ObjectSizesProfiler(argOptions, entry) {
+	LOG(ERROR) << "CohortProfiler : CohortProfiler";
+}
+
+void ThreadAllocProfiler::initHistogram(void) {
+	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+}
+
 //
 //void CohortProfiler::addCohortRecord(void) {
 //	if(currCohortRow == NULL) {
