@@ -3442,10 +3442,12 @@ void CohortProfiler::logPerfData() {
 
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
+	int _rIndex = 0;
 	for (const auto& _rowIterP : cohMgr->cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
 			break;
+		LOG(ERROR) << "++ROW: " << _rIndex;
 		int _indIter = 0;
 		while(_indIter <= _rowIterP->index_) {
 			GCPCohortRecordData* _recData = &_rowIterP->cohorts[_indIter];
@@ -3455,6 +3457,7 @@ void CohortProfiler::logPerfData() {
 					_recData->objTotalCnt;
 			_indIter++;
 		}
+		_rIndex++;
 	}
 }
 
