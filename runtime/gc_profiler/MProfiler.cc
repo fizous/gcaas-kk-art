@@ -3357,10 +3357,13 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	size_t _rowBytes = 0;
 	for (const auto& _rowIterP : cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
+		if(_rowIterP->index_ > kGCMMPMaxRowCap) {
+			LOG(ERROR) << "Index out of boundary : " << _rowIterP->index_;
+		}
 		if(_rowBytes == 0)
 			break;
 		_print = true;
-		_success &= dumpFile->WriteFully(_rowIterP, _rowBytes);
+		_success &= dumpFile->WriteFully(_rowIterP->cohorts, _rowBytes);
 	}
 
 	if(_print) {
