@@ -20,6 +20,9 @@
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
+/* window size of the dumping daya */
+#define GCP_WINDOW_RANGE_LOG							16
+
 /* number of buckets to create the histogram */
 #define GCP_MAX_COHORT_ARRAYLET_CAP				128
 #define GCP_MAX_COHORT_ROW_CAP						64

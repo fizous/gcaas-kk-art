@@ -152,6 +152,8 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
+int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
+
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
@@ -408,17 +410,19 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 
 
 
-void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Object* obj) {
+void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
+		mirror::Object* obj) {
 	Thread* thread = Thread::Current();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state != GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Allocation is not tracked because the thread is not profiled " <<
-					thread->GetTid() ;
+			GCMMP_VLOG(INFO) <<
+					"VMProfiler: Allocation is not tracked because the thread is not profiled "
+					<< thread->GetTid() ;
 			return;
 		}
 	}
-	GCPTotalAllocBytes.fetch_add(allocSpace);
+	GCPTotalAllocBytes.fetch_add(objSize);
 	if(!IsAllocWindowsSet())
 		return;
 	GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
@@ -427,8 +431,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Obj
 	double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
 	if((_newIndex) != (getAllocIndex())) {
 
-		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " << GCPTotalAllocBytes.load();
-
+		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
+				GCPTotalAllocBytes.load();
 
 		{
 			Thread* self = Thread::Current();
@@ -438,15 +442,10 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize, mirror::Obj
 	    if(hasProfDaemon()) {
 	    	prof_thread_cond_->Broadcast(self);
 	    }
-
 	    // Wake anyone who may have been waiting for the GC to complete.
-
-
 	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
 		}
-
 	}
-
 }
 
 void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {

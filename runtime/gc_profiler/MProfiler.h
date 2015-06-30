@@ -123,7 +123,6 @@ protected:
 public:
   static constexpr int kGCMMPDumpSignal 		= SIGUSR2;
   static const int kGCMMPDefaultAffinity 		= -1;
-	static constexpr int kGCMMPLogAllocWindow = 16;
 	static const int kGCMMPDumpEndMarker;
 
 	// List of profiled benchmarks in our system
@@ -141,8 +140,9 @@ public:
 
 	static const int kGCMMPMaxEventsCounts = 1024;
 
-
 	static AtomicInteger GCPTotalAllocBytes;
+
+	static int kGCMMPLogAllocWindow;
 
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
@@ -176,12 +176,6 @@ public:
 
   GCMMPHeapStatus heapStatus;
 
-  virtual int32_t getGCEventsCounts(void) {
-  	if(markerManager != NULL) return markerManager->currIndex;
-  	return 0;
-  }
-  virtual void initMarkerManager(void);
-
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - start_cpu_time_ns_;
   }
@@ -198,11 +192,9 @@ public:
   }
 
   void attachThreads(void);
-  virtual void attachSingleThread(Thread* t);
   void notifyAllocation(size_t,size_t);
   void notifyAllocation(size_t, size_t, mirror::Object*);
 //  virtual void notifyFreeing(size_t, size_t){}
-  virtual void notifyFreeing(size_t, mirror::Object*){}
   void notifyFree(size_t);
   void createProfDaemon();
 
@@ -273,33 +265,10 @@ public:
   void ProcessSignalCatcher(int);
   int initCounters(const char*);
 
-  virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
-  virtual void setPauseManager(GCMMPThreadProf* thProf) {
-  	thProf->pauseManager = NULL;
-  };
-
-  virtual void setHistogramManager(GCMMPThreadProf* thProf) {
-  	thProf->histogramManager = NULL;
-  };
-
-  size_t getRelevantAllocBytes(void);
-
-  void setThreadAffinity(art::Thread* th, bool complementary);
-
-  virtual bool createHWEvents(void) {return false;}
-  virtual bool isMarkTimeEvents(void) {return false;}
-  virtual bool isMarkHWEvents(void){return false;}
-  virtual bool dettachThread(GCMMPThreadProf*){return true;}
-
   void setProfDaemon(bool);
   void setReceivedShutDown(bool);
   bool getRecivedShutDown(void);
   bool hasProfDaemon(void);
-
-	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
-	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM) {};
-
-
 
 	void updateHeapAllocStatus(void);
 	void updateHeapPerfStatus(uint64_t, uint64_t, uint64_t);
@@ -310,6 +279,13 @@ public:
 
   void MarkWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
   void MarkEndWaitTimeEvent(GCMMPThreadProf*, GCMMP_BREAK_DOWN_ENUM);
+
+  void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
+  void setHeapHeaderConf(GC_MMPHeapConf*);
+  void dumpHeapConfigurations(GC_MMPHeapConf*);
+
+  size_t getRelevantAllocBytes(void);
+  void setThreadAffinity(art::Thread* th, bool complementary);
 
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
@@ -344,14 +320,39 @@ public:
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
-  void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
+
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
+
   static int32_t GCPGetCalcCohortIndex(void) {
   	return (GCPTotalAllocBytes.load() >> GCP_COHORT_LOG);
   }
 
-  void setHeapHeaderConf(GC_MMPHeapConf*);
-  void dumpHeapConfigurations(GC_MMPHeapConf*);
+  virtual int32_t getGCEventsCounts(void) {
+  	if(markerManager != NULL) return markerManager->currIndex;
+  	return 0;
+  }
+
+  virtual void initMarkerManager(void);
+  virtual void notifyFreeing(size_t, mirror::Object*){}
+  virtual void attachSingleThread(Thread* t);
+
+  virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
+
+  virtual void setPauseManager(GCMMPThreadProf* thProf) {
+  	thProf->pauseManager = NULL;
+  };
+
+  virtual void setHistogramManager(GCMMPThreadProf* thProf) {
+  	thProf->histogramManager = NULL;
+  };
+
+	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
+	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM) {};
+
+  virtual bool createHWEvents(void) {return false;}
+  virtual bool isMarkTimeEvents(void) {return false;}
+  virtual bool isMarkHWEvents(void){return false;}
+  virtual bool dettachThread(GCMMPThreadProf*){return true;}
 
   virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
   virtual void dumpEventMarks(void);
@@ -436,11 +437,12 @@ public:
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt);
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt);
 
-  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM);
-  virtual void DumpEventMarks(void);
 
   void dumpProfData(bool);
   void dumpHeapStats(void);
+
+  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM);
+  virtual void DumpEventMarks(void);
 
 };
 
