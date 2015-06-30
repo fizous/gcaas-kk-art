@@ -3431,6 +3431,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
+	cohMgr->gcpRemoveObject(allocatedMemory, obj);
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
