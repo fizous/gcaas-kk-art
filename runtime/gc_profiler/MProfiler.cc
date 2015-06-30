@@ -3269,6 +3269,7 @@ inline void GCCohortManager::addObjectToCohortRecord(size_t objSize) {
 	size_t sizeObjLeft = objSize;
 	size_t cohSpaceLeft = 0;
 	size_t iterFitSize = 0;
+	bool _firstCohort = true;
 	while(sizeObjLeft != 0) {
 		cohSpaceLeft = getSpaceLeftCohort(currCohortP);
 		if(cohSpaceLeft == 0) {
@@ -3276,8 +3277,12 @@ inline void GCCohortManager::addObjectToCohortRecord(size_t objSize) {
 			continue;
 		}
 		iterFitSize = std::min(sizeObjLeft, cohSpaceLeft);
-		updateCohRecObj(currCohortP, iterFitSize);
+		updateCohRecObjBytes(currCohortP, iterFitSize);
 		sizeObjLeft -= iterFitSize;
+		if(_firstCohort) {
+			updateCohRecObjCnts(currCohortP);
+			_firstCohort = false;
+		}
 	}
 }
 
@@ -3315,6 +3320,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	if(_startRow == _endRow && _startIndex && _endIndex) {
 		//easy case: the object resides in 1 cohort;
 		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
+		updateDelCohRecObjCnts(_firstRecP);
 	} else {
 		_row = cohortsTable.cohortRows_[_endRow];
 		//first precisely calculate the cohort boundaries
@@ -3323,6 +3329,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohorSize);
 		updateDelCohRecObj(_firstRecP,
 				(kGCMMPCohorSize - (_profHeader->objBD % kGCMMPCohorSize)));
+		updateDelCohRecObjCnts(_firstRecP);
 
 		while(true) {
 			_colIter++;

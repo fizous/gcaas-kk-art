@@ -170,16 +170,24 @@ public:
 		rec->objLiveCnt++;
 		rec->objTotalCnt++;
 	}
-	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
+
+	void updateCohRecObjBytes(GCPCohortRecordData* rec, size_t fit) {
 		rec->liveSize  += fit;
 		rec->totalSize += fit;
+	}
+
+	void updateCohRecObjCnts(GCPCohortRecordData* rec) {
 		rec->objLiveCnt++;
 		rec->objTotalCnt++;
 	}
 
+	void updateDelCohRecObjCnts(GCPCohortRecordData* rec) {
+		rec->objLiveCnt--;
+	}
+
 	void updateDelCohRecObj(GCPCohortRecordData* rec, size_t fitSize) {
 		rec->liveSize  -= fitSize;
-		rec->objLiveCnt--;
+
 	}
 
 	void GCCohortManager::getCoAddrFromBytes(size_t* startRow,
