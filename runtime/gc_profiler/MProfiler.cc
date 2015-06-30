@@ -3295,8 +3295,11 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
-	if(_profHeader->objSize == 0) //the object was not registered
+	if(_profHeader->objSize == 0 || _profHeader->objSize) {
+		//the object was not registered
 		return;
+	}
+
 	size_t _startRow, _startIndex, _endRow, _endIndex = 0;
 	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
 			_profHeader->objBD, _profHeader->objSize);
@@ -3308,7 +3311,6 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 
-	return;
 
 	//for performance we need only to handle last and first cohort;
 	if(_startRow == _endRow && _startIndex && _endIndex) {
@@ -3328,7 +3330,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 			incColIndex(&_rowIter, &_colIter);
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
-			_LastRecP =  getCoRecFromIndices(_endRow, _endIndex);
+			_LastRecP =  getCoRecFromIndices(_rowIter, _colIter);
 			updateDelCohRecObj(_LastRecP, kGCMMPCohorSize);
 		}
 	}
