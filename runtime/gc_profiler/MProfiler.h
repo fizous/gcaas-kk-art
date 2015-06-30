@@ -102,19 +102,15 @@ protected:
 	//Index of the profiler type we are running
 	const int index_;
 
-
-
   /* file used to dump the profiling data */
-  const char * dump_file_name_;
-  art::File* dump_file_;
+  const char * 	dump_file_name_;
+  art::File* 		dump_file_;
 
   const char			*perfName_;
 
   void InitializeProfiler(void);
 
   void DumpProfData(bool);
-
-
 
   /*
    * Guards access to the state of the profiler daemon,
@@ -123,9 +119,10 @@ protected:
   Mutex* prof_thread_mutex_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> prof_thread_cond_ GUARDED_BY(prof_thread_mutex_);
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
+
 public:
-  static constexpr int kGCMMPDumpSignal = SIGUSR2;
-  static const int kGCMMPDefaultAffinity = -1;
+  static constexpr int kGCMMPDumpSignal 		= SIGUSR2;
+  static const int kGCMMPDefaultAffinity 		= -1;
 	static constexpr int kGCMMPLogAllocWindow = 16;
 	static const int kGCMMPDumpEndMarker;
 
@@ -154,7 +151,6 @@ public:
 
 	Thread* prof_thread_;
 
-
 	Thread* main_thread_;
   // System thread used as GC Daemon.
 	Thread* gc_daemon_;
@@ -175,11 +171,10 @@ public:
   uint64_t 	start_cpu_time_ns_;
   uint64_t 	end_cpu_time_ns_;
 
-
-
-
   Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
+
+  GCMMPHeapStatus heapStatus;
 
   virtual int32_t getGCEventsCounts(void) {
   	if(markerManager != NULL) return markerManager->currIndex;
@@ -304,11 +299,8 @@ public:
 	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
 	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM) {};
 
-	GCMMPHeapStatus heapStatus;
-	virtual double getAllocIndex(){return heapStatus.index;};
-	virtual void resetHeapAllocStatus() {
-		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
-	}
+
+
 	void updateHeapAllocStatus(void);
 	void updateHeapPerfStatus(uint64_t, uint64_t, uint64_t);
 
@@ -352,30 +344,36 @@ public:
   static void MProfMarkSuspendTimeEvent(art::Thread*, art::ThreadState);
   static void MProfMarkEndSuspendTimeEvent(art::Thread*, art::ThreadState);
 
-  virtual void dumpProfData(bool) {}
-
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
+  static int32_t GCPGetCalcCohortIndex(void) {
+  	return (GCPTotalAllocBytes.load() >> GCP_COHORT_LOG);
+  }
 
   void setHeapHeaderConf(GC_MMPHeapConf*);
   void dumpHeapConfigurations(GC_MMPHeapConf*);
 
-  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
-  virtual void dumpEventMarks(void);
+//  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
+//  virtual void dumpEventMarks(void);
 
 
   virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
   virtual void DumpEventMarks(void){}
 
-  virtual void gcpAddObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
-  virtual void gcpAddObject(size_t allocatedMemory,
-  		size_t objSize, mirror::Object* obj){if(allocatedMemory == 0 || objSize ==0 || obj == NULL) return;}
+  virtual void gcpAddObject(size_t objSize, size_t allocSize) {}
+  virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
+  		mirror::Object* obj) {}
   //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
-  virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){if(sizeOffset == 0 || obj == NULL) return;}
+  virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {}
 
-  static int32_t GCPGetCalcCohortIndex(void) {
-  	return (GCPTotalAllocBytes.load() >> GCP_COHORT_LOG);
-  }
+  virtual void dumpProfData(bool) {}
+
+  virtual double getAllocIndex() {
+		return heapStatus.index;
+	}
+	virtual void resetHeapAllocStatus() {
+		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
+	}
 };
 
 
@@ -502,7 +500,10 @@ public:
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
 
-	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHeaderSize;}
+	virtual int getExtraProfileBytes(void) {
+		return GCHistogramManager::kGCMMPHeaderSize;
+	}
+
 	virtual void initHistogram(void);
 
 	bool isMarkTimeEvents(void) {return false;}
