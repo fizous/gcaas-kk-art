@@ -3392,7 +3392,7 @@ bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	cohMgr->addObject(allocatedMemory, objSize, obj);
+	cohMgr->addObjCohorts(allocatedMemory, objSize, obj);
 }
 
 void CohortProfiler::dumpProfData(bool isLastDump) {
