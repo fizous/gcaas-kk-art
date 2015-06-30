@@ -3264,7 +3264,7 @@ void GCCohortManager::initCohortsTable(void) {
 }
 
 
-inline void GCCohortManager::addObjectToCohortRecord(size_t objSize) {
+inline void GCCohortManager::addObjectToCohRecord(size_t objSize) {
 
 	size_t sizeObjLeft = objSize;
 	size_t cohSpaceLeft = 0;
@@ -3324,7 +3324,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	} else {
 		_row = cohortsTable.cohortRows_[_endRow];
 		//first precisely calculate the cohort boundaries
-		_LastRecP = cohortsTable.cohortRows_[_startRow];
+		_LastRecP = &cohortsTable.cohortRows_[_startRow];
 		updateDelCohRecObj(_LastRecP,
 				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohorSize);
 		updateDelCohRecObj(_firstRecP,
