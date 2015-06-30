@@ -128,7 +128,7 @@ typedef struct PACKED(4) GCPCohortsRow_S {
 } GCPCohortsRow;
 
 
-typedef struct PACKED(4) GCPCohortsTable_S {
+typedef struct GCPCohortsTable_S {
 	int index;
 	std::vector<GCPCohortsRow*> cohortRows_;
 } GCPCohortsTable;
