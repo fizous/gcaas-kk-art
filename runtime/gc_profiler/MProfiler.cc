@@ -3357,7 +3357,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 
 /********************************* Cohort profiling ****************/
 
-void ThreadAllocProfiler::initHistogram(void) {
+void CohortProfiler::initHistogram(void) {
 	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
 }
