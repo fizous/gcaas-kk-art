@@ -583,14 +583,14 @@ class CohortProfiler : public ObjectSizesProfiler {
 public:
 	GCCohortManager* cohMgr;
 
-	CohortProfiler(GCMMP_Options* opts, void* entry) :
+	CohortProfiler(GCMMP_Options* opts, void* entry) : cohMgr(NULL),
 		ObjectSizesProfiler(opts, entry) {
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 
   void initHistogram(void);
   void setHistogramManager(GCMMPThreadProf*);
-
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
 //  bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
 

@@ -152,8 +152,9 @@ public:
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
 	GCPCohortsTable 			cohortsTable;
+	AtomicInteger* 				allocRec_;
 
-	GCCohortManager(void);
+	GCCohortManager(AtomicInteger*);
 	void initCohortsTable(void);
 	void addCohortRecord(void);
 	void addCohortRow(void);
@@ -163,6 +164,7 @@ public:
 
 	void addObjectToCohRecord(size_t objSize);
 
+  void gcpDumpCohortData(art::File*);
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
 	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
 

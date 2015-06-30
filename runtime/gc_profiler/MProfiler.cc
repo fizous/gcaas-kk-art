@@ -3221,9 +3221,10 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 
 /******************** GCCohortManager ***********************/
 
-GCCohortManager::GCCohortManager(void) {
+GCCohortManager::GCCohortManager(AtomicInteger* allocRec) {
 	//get the correct cohort index;
 	cohortIndex_ = 0;
+	allocRec_ = allocRec;
 	initCohortsTable();
 }
 
@@ -3235,19 +3236,14 @@ void GCCohortManager::addCohortRow(void) {
 }
 
 void GCCohortManager::addCohortRecord(void) {
-	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP) {
+	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP - 1) {
 		//we passed the capacity and we need a new row
 		addCohortRow();
 	}
 	currCohortP = &currCoRowP->cohorts[currCoRowP->index_];
 	currCoRowP->index_++;
 
-	currCoRowP->cohorts[currCoRowP->index_++];
-
-
-	currCoRowP = (GCPCohortsRow*) calloc(1, getCoRowSZ());
-	currCoRowP->index_ = cohortsTable.cohortRows_.size();
-	cohortsTable.cohortRows_.push_back(currCoRowP);
+	currCohortP->index_ = VMProfiler::GCPGetCalcCohortIndex();
 }
 
 
@@ -3291,7 +3287,7 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
 	_profHeader->objSize = objSize;
 	//we need to calculate the correct bytes without the allocated memory
-	_profHeader->objBD = 0;
+	_profHeader->objBD = allocRec_->load();
 	addObjectToCohRecord(objSize);
 }
 
@@ -3354,12 +3350,32 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 
 }
 
+void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
+	bool _print   = false;
+	bool _success = true;
+	GCPCohortRecordData* _recP = NULL;
+	size_t _rowBytes = 0;
+	for (const auto& _rowIterP : cohortsTable.cohortRows_) {
+		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
+		if(_rowBytes == 0)
+			break;
+		_print = true;
+		_success &= dumpFile->WriteFully(_rowIterP, _rowBytes);
+	}
+
+	if(_print) {
+		_success &= dumpFile->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+				 	  			sizeof(int));
+	}
+}
+
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistogram(void) {
 	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
-	cohMgr = new GCCohortManager();
-	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+	cohMgr = new GCCohortManager(&GCPTotalAllocBytes);
+	//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+	kGCMMPLogAllocWindow = 18;
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
@@ -3377,8 +3393,41 @@ bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 
-void CohortProfiler::dumpProfData(bool isLastDump) {
+inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	cohMgr->addObject(allocatedMemory, objSize, obj);
+}
 
+void CohortProfiler::dumpProfData(bool isLastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	//dump the heap stats
+	dumpHeapStats();
+	//dump the global entry
+
+	cohMgr->gcpDumpCohortData(dump_file_);
+
+	gcpUpdateGlobalHistogram();
+		//dump the global stats
+
+  if(isLastDump) {
+	  bool _sucess = false;
+  	_success &=
+	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
+	 	  			sizeof(int));
+	 	if(_success) {
+	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
+	 	}
+	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	 	dump_file_->Close();
+	 	LOG(ERROR) <<  "CohortProfiler: done dumping data";
+	 	logPerfData();
+  }
+}
+
+
+inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
+		mirror::Object* obj) {
+	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
 //
