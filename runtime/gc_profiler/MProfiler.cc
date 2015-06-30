@@ -156,7 +156,7 @@ uint64_t GCPauseThreadManager::startRealTime = 0;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 AtomicInteger GCHistogramManager::kGCPLastCohortIndex;
-int GCHistogramManager::kGCMMPHEaderSize = sizeof(GCPExtraObjHeader);
+int GCHistogramManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
@@ -3156,7 +3156,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 }
 
 
-void ThreadAllocProfiler::dumpProfData(bool isLastDump){
+void ThreadAllocProfiler::dumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	//dump the heap stats
 	dumpHeapStats();
@@ -3364,6 +3364,21 @@ void CohortProfiler::initHistogram(void) {
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager = NULL;
+}
+
+
+bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "CohortProfiler -- dettaching thread pid: " <<
+				thProf->GetTid();
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
+
+
+void CohortProfiler::dumpProfData(bool isLastDump) {
+
 }
 
 //

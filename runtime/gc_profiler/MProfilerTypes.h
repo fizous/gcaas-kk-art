@@ -228,7 +228,7 @@ class /*PACKED(4)*/ GCHistogramManager {
 	int iSecret;
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
-	static int kGCMMPHEaderSize;
+	static int kGCMMPHeaderSize;
 	static AtomicInteger kGCPLastCohortIndex;
 	GCPHistogramRecAtomic histAtomicRecord;
 	GCPHistogramRec				histRecord;

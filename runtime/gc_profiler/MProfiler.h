@@ -502,7 +502,7 @@ public:
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
 
-	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHEaderSize;}
+	virtual int getExtraProfileBytes(void) {return GCHistogramManager::kGCMMPHeaderSize;}
 	virtual void initHistogram(void);
 
 	bool isMarkTimeEvents(void) {return false;}
@@ -586,6 +586,11 @@ public:
 
   void initHistogram(void);
   void setHistogramManager(GCMMPThreadProf*);
+
+//  bool periodicDaemonExec(void);
+  bool dettachThread(GCMMPThreadProf*);
+
+  void dumpProfData(bool);
 };
 
 
