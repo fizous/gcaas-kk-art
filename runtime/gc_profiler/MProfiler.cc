@@ -3236,7 +3236,7 @@ void GCCohortManager::addCohortRow(void) {
 }
 
 void GCCohortManager::addCohortRecord(void) {
-	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP - 1) {
+	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP) {
 		//we passed the capacity and we need a new row
 		addCohortRow();
 	}
@@ -3444,12 +3444,12 @@ void CohortProfiler::logPerfData() {
 	size_t _rowBytes = 0;
 	int _rIndex = 0;
 	for (const auto& _rowIterP : cohMgr->cohortsTable.cohortRows_) {
-		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
+		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
 			break;
 		LOG(ERROR) << "++ROW: " << _rIndex;
 		int _indIter = 0;
-		while(_indIter <= _rowIterP->index_) {
+		while(_indIter < _rowIterP->index_) {
 			GCPCohortRecordData* _recData = &_rowIterP->cohorts[_indIter];
 			LOG(ERROR) << "Cohort: "<< _recData->index_ << ", liveSize: " <<
 					_recData->liveSize << ", totalSize: " << _recData->totalSize <<
