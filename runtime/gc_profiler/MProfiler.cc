@@ -155,7 +155,7 @@ uint64_t GCPauseThreadManager::startRealTime = 0;
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
-AtomicInteger GCHistogramManager::kGCPLastCohortIndex;
+AtomicInteger GCCohortManager::kGCPLastCohortIndex;
 int GCHistogramManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
@@ -2254,7 +2254,7 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 
 
 void ObjectSizesProfiler::initHistogram(void) {
-	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	objHistograms = new GCHistogramManager();
 //	lastLiveGuard = 0;
 //
@@ -2504,7 +2504,7 @@ bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
-	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	//we are relaxed we do not need to lookup for the whole records
 	objHistograms->gcpCheckForResetHist();
 }
@@ -2715,13 +2715,13 @@ void GCHistogramManager::initHistograms(void){
 
 GCHistogramManager::GCHistogramManager(void) : type_(GCMMP_HIST_CHILD) {
 	generateNewSecret();
-	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
+	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
 	initHistograms();
 }
 
 GCHistogramManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		type_(hisMGR) {
-	lastCohortIndex = GCHistogramManager::kGCPLastCohortIndex.load();
+	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
 	initHistograms();
 }
 
@@ -2759,7 +2759,7 @@ inline void GCHistogramManager::addObject(size_t allocatedMemory,
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 
-	int32_t _readCohortIndex = (GCHistogramManager::kGCPLastCohortIndex.load());
+	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
 
 	if(lastCohortIndex != _readCohortIndex) {
 		lastCohortIndex = _readCohortIndex;
@@ -2794,7 +2794,7 @@ void GCHistogramManager::gcpRemoveObject(size_t histIndex) {
 	//todo: this does not make sense
 //	LOG(ERROR) << "Done+++histIndex a " << histIndex;
 	if(type_ != GCMMP_HIST_ROOT) {
-		if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+		if(lastCohortIndex != GCCohortManager::kGCPLastCohortIndex.load()){
 			//we cannot remove since there was no allocation done
 			return;
 		}
@@ -2899,7 +2899,7 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 
 
 bool GCHistogramManager::gcpCheckForResetHist(void) {
-	if(lastCohortIndex != GCHistogramManager::kGCPLastCohortIndex.load()){
+	if(lastCohortIndex != GCCohortManager::kGCPLastCohortIndex.load()){
 		//reset percentages in the atomic fields
 		histAtomicRecord.pcntLive = 0.0;
 		histAtomicRecord.pcntTotal = 0.0;
@@ -2913,7 +2913,7 @@ bool GCHistogramManager::gcpCheckForResetHist(void) {
 }
 
 bool GCHistogramManager::gcpCheckForCompleteResetHist(void) {
-	int32_t _loadedIndex = GCHistogramManager::kGCPLastCohortIndex.load();
+	int32_t _loadedIndex = GCCohortManager::kGCPLastCohortIndex.load();
 	if(lastCohortIndex != _loadedIndex) {
 		setLastCohortIndex(_loadedIndex);
 		//reset percentages in the atomic fields
@@ -2961,7 +2961,7 @@ inline bool GCHistogramManager::gcpDumpHistRec(art::File* dump_file) {
 /********************************* Thread Alloc Profiler ****************/
 
 void ThreadAllocProfiler::initHistogram(void) {
-	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
 }
 
@@ -3083,10 +3083,10 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 }
 
 void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
-	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	bool shouldUpdate = objHistograms->gcpCheckForCompleteResetHist();
 	if(shouldUpdate) {
-		int32_t _cohortIndex =  GCHistogramManager::kGCPLastCohortIndex.load();
+		int32_t _cohortIndex =  GCCohortManager::kGCPLastCohortIndex.load();
 		for (const auto& threadProf : threadProfList_) {
 			GCHistogramManager* _histMgr = threadProf->histogramManager;
 			if(_histMgr != NULL) {
@@ -3358,7 +3358,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistogram(void) {
-	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	cohMgr = new GCCohortManager();
 	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
 }
