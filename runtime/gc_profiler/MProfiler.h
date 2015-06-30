@@ -353,12 +353,12 @@ public:
   void setHeapHeaderConf(GC_MMPHeapConf*);
   void dumpHeapConfigurations(GC_MMPHeapConf*);
 
-//  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
-//  virtual void dumpEventMarks(void);
+  virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
+  virtual void dumpEventMarks(void);
 
 
-  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
-  virtual void DumpEventMarks(void){}
+//  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
+//  virtual void DumpEventMarks(void){}
 
   virtual void gcpAddObject(size_t objSize, size_t allocSize) {}
   virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
