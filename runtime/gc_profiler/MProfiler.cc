@@ -3353,7 +3353,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	bool _print   = false;
 	bool _success = true;
-	GCPCohortRecordData* _recP = NULL;
+	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	for (const auto& _rowIterP : cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
@@ -3372,10 +3372,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistogram(void) {
-	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
-	cohMgr = new GCCohortManager(&GCPTotalAllocBytes);
-	//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
-	kGCMMPLogAllocWindow = 18;
+
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
@@ -3410,7 +3407,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 		//dump the global stats
 
   if(isLastDump) {
-	  bool _sucess = false;
+	  bool _success = false;
   	_success &=
 	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
 	 	  			sizeof(int));

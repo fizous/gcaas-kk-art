@@ -596,6 +596,8 @@ public:
   void setHistogramManager(GCMMPThreadProf*);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
 //  bool periodicDaemonExec(void);
+  void gcpAddObject(size_t allocatedMemory,
+  		size_t objSize, mirror::Object* obj);
   bool dettachThread(GCMMPThreadProf*);
 
   void dumpProfData(bool);
