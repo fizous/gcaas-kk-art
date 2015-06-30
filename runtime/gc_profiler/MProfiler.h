@@ -585,6 +585,10 @@ public:
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) : cohMgr(NULL),
 		ObjectSizesProfiler(opts, entry) {
+		GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+		cohMgr = new GCCohortManager(&GCPTotalAllocBytes);
+		//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+		kGCMMPLogAllocWindow = 18;
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 
