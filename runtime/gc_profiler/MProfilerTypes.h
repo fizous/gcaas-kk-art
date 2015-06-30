@@ -205,10 +205,10 @@ public:
 
 	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
 		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
-		return _row->cohorts[index];
+		return &_row->cohorts[index];
 	}
 
-	void incColIndex(size_t* index, size_t* row) {
+	void incColIndex(size_t* row, size_t* index) {
 		size_t _col = *index + 1;
 		if(_col == kGCMMPMaxRowCap) {
 			_col = 0;

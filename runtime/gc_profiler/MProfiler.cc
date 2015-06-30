@@ -3328,7 +3328,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		updateDelCohRecObjCnts(_firstRecP);
 
 		while(true) {
-			incColIndex(&_colIter, &_rowIter);
+			incColIndex(&_rowIter, &_colIter);
 			if(_colIter == kGCMMPMaxRowCap) {
 				_colIter = 0;
 				_rowIter++;
