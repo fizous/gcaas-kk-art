@@ -3310,8 +3310,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCPCohortRecordData* _firstRecP = NULL;
 	GCPCohortRecordData* _LastRecP = NULL;
 	size_t _rowIter  = _startRow;
-	size_t _colIter  = _startIndex + 1;
-	size_t _byteIter = _profHeader->objBD;
+	size_t _colIter  = _startIndex;
 
 	_row = cohortsTable.cohortRows_[_startRow];
 	_firstRecP = &_row->cohorts[_startIndex];
@@ -3324,7 +3323,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	} else {
 		_row = cohortsTable.cohortRows_[_endRow];
 		//first precisely calculate the cohort boundaries
-		_LastRecP = &cohortsTable.cohortRows_[_startRow];
+		_LastRecP = cohortsTable.cohortRows_[_startRow];
 		updateDelCohRecObj(_LastRecP,
 				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohorSize);
 		updateDelCohRecObj(_firstRecP,
