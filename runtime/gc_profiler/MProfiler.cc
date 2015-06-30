@@ -3368,10 +3368,12 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 
 			LOG(ERROR) << "Index out of boundary : " << _rowIterP->index_;
 		}
+		_index++;
 		if(_rowBytes == 0)
 			break;
 		_print = true;
 		_success &= dumpFile->WriteFully(_rowIterP->cohorts, _rowBytes);
+
 	}
 
 	if(_print) {
