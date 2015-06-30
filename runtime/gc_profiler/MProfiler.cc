@@ -3306,14 +3306,12 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
 			_profHeader->objBD, _profHeader->objSize);
 
-	GCPCohortsRow* _row = NULL;
 	GCPCohortRecordData* _firstRecP = NULL;
 	GCPCohortRecordData* _LastRecP = NULL;
 	size_t _rowIter  = _startRow;
 	size_t _colIter  = _startIndex;
 
-	_row = cohortsTable.cohortRows_[_startRow];
-	_firstRecP = &_row->cohorts[_startIndex];
+	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 
 	//for performance we need only to handle last and first cohort;
 	if(_startRow == _endRow && _startIndex && _endIndex) {
@@ -3321,9 +3319,8 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
 		updateDelCohRecObjCnts(_firstRecP);
 	} else {
-		_row = cohortsTable.cohortRows_[_endRow];
 		//first precisely calculate the cohort boundaries
-		_LastRecP = cohortsTable.cohortRows_[_startRow];
+		_LastRecP = getCoRecFromIndices(_endRow, _endIndex);
 		updateDelCohRecObj(_LastRecP,
 				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohorSize);
 		updateDelCohRecObj(_firstRecP,
@@ -3331,15 +3328,14 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		updateDelCohRecObjCnts(_firstRecP);
 
 		while(true) {
-			_colIter++;
-			if(_colIter == kGCMMPCohorSize) {
+			incColIndex(&_colIter, &_rowIter);
+			if(_colIter == kGCMMPMaxRowCap) {
 				_colIter = 0;
 				_rowIter++;
 			}
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
-			_row = cohortsTable.cohortRows_[_rowIter];
-			_LastRecP =  &_row->cohorts[_colIter];
+			_LastRecP =  getCoRecFromIndices(_endRow, _endIndex);
 			updateDelCohRecObj(_LastRecP, kGCMMPCohorSize);
 		}
 	}

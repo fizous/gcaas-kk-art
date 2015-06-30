@@ -157,12 +157,15 @@ public:
 
 	void addObjCohorts(size_t allocatedMemory,
 					size_t objSize, mirror::Object* obj);
+
 	void addObjectToCohRecord(size_t objSize);
 
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
 	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
 
-	size_t getSpaceLeftCohort(GCPCohortRecordData* rec){return kGCMMPCohorSize - rec->totalSize;}
+	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
+		return kGCMMPCohorSize - rec->totalSize;
+	}
 
 	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
 		rec->liveSize  += fit;
@@ -198,6 +201,20 @@ public:
 
 		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
+	}
+
+	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
+		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
+		return _row->cohorts[index];
+	}
+
+	void incColIndex(size_t* index, size_t* row) {
+		size_t _col = *index + 1;
+		if(_col == kGCMMPMaxRowCap) {
+			_col = 0;
+			*row += 1;
+		}
+		*index = _col;
 	}
 
 };
