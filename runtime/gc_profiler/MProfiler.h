@@ -585,6 +585,7 @@ public:
 	}
 
   void initHistogram(void);
+  void setHistogramManager(GCMMPThreadProf*);
 };
 
 
