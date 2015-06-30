@@ -3293,7 +3293,7 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 	_profHeader->objSize = objSize;
 	//we need to calculate the correct bytes without the allocated memory
 	_profHeader->objBD = 0;
-	addObjectToCohortRecord(objSize);
+	addObjectToCohRecord(objSize);
 }
 
 
@@ -3355,10 +3355,10 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	size_t _cohIndex = (_profHeader->objBD >> kGCMMPCohorSize);
+	size_t _cohIndex = (_profHeader->objBD >> GCP_COHORT_LOG);
 	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
 	GCPCohortsRow* _row = cohortsTable.cohortRows_[_rowIndex];
-	GCPCohortRecordData* _cohRec = _row->cohorts[_cohIndex%_rowIndex];
+	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
 
 	return _cohRec;
 
