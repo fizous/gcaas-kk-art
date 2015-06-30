@@ -3329,10 +3329,6 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 
 		while(true) {
 			incColIndex(&_rowIter, &_colIter);
-			if(_colIter == kGCMMPMaxRowCap) {
-				_colIter = 0;
-				_rowIter++;
-			}
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
 			_LastRecP =  getCoRecFromIndices(_endRow, _endIndex);
