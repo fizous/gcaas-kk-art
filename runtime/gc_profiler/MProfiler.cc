@@ -3369,6 +3369,10 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	}
 }
 
+
+
+
+
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistogram(void) {
@@ -3425,6 +3429,33 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
+}
+
+void CohortProfiler::logPerfData() {
+
+	int32_t currBytes_ = GCPTotalAllocBytes.load();
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
+			heap_->GetBytesAllocated() << ", concBytes: " <<
+			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetMaxAllowedFootPrint();
+
+	//GCPCohortRecordData* _recP = NULL;
+	size_t _rowBytes = 0;
+	for (const auto& _rowIterP : cohMgr->cohortsTable.cohortRows_) {
+		_rowBytes = (_rowIterP->index_ + 1) * sizeof(GCPCohortRecordData);
+		if(_rowBytes == 0)
+			break;
+		int _indIter = 0;
+		while(_indIter <= _rowIterP->index_) {
+			GCPCohortRecordData* _recData = &_rowIterP->cohorts[_indIter];
+			LOG(ERROR) << "Cohort: "<< _recData->index_ << ", liveSize: " <<
+					_recData->liveSize << ", totalSize: " << _recData->totalSize <<
+					", objsCnt: " << _recData->objLiveCnt << ", totalObjs: " <<
+					_recData->objTotalCnt;
+			_indIter++;
+		}
+	}
 }
 
 //

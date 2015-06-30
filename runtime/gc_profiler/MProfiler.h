@@ -602,6 +602,7 @@ public:
   bool dettachThread(GCMMPThreadProf*);
 
   void dumpProfData(bool);
+  void logPerfData(void);
 };
 
 
