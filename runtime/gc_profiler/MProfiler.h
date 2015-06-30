@@ -583,7 +583,7 @@ class CohortProfiler : public ObjectSizesProfiler {
 public:
 	GCCohortManager* cohMgr;
 
-	CohortProfiler(GCMMP_Options* opts, void* entry) : cohMgr(NULL),
+	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 		cohMgr = new GCCohortManager(&GCPTotalAllocBytes);
