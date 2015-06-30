@@ -598,6 +598,7 @@ public:
 //  bool periodicDaemonExec(void);
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);
+  void gcpAddObject(size_t objSize, size_t allocSize){}
   bool dettachThread(GCMMPThreadProf*);
 
   void dumpProfData(bool);
