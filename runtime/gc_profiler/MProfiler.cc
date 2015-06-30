@@ -2973,7 +2973,7 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	return true;
 }
 
-void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf){
+void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager = new GCHistogramManager();
 	thProf->histogramManager->histRecord.index = thProf->GetTid();
 	thProf->histogramManager->histAtomicRecord.index = thProf->GetTid();
@@ -3360,6 +3360,10 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 void CohortProfiler::initHistogram(void) {
 	GCHistogramManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
+}
+
+void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
+	thProf->histogramManager = NULL;
 }
 
 //
