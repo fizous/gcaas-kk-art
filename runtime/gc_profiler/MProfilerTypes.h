@@ -209,12 +209,12 @@ public:
 	}
 
 	void incColIndex(size_t* row, size_t* index) {
-		size_t _col = *index + 1;
+		int _col = *index + 1;
 		if(_col == kGCMMPMaxRowCap) {
 			_col = 0;
 			*row += 1;
 		}
-		*index = _col;
+		*index = (size_t)_col;
 	}
 
 };
