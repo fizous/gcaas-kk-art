@@ -3285,10 +3285,10 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 				size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
+	addObjectToCohRecord(objSize);
 	_profHeader->objSize = objSize;
 	//we need to calculate the correct bytes without the allocated memory
 	_profHeader->objBD = allocRec_->load();
-	addObjectToCohRecord(objSize);
 }
 
 
