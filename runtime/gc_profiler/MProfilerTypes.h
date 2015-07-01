@@ -207,7 +207,7 @@ public:
 
 		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
-		*endIndex = (endIndex) % kGCMMPMaxRowCap
+		*endIndex = (*endIndex) % kGCMMPMaxRowCap
 	}
 
 	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
