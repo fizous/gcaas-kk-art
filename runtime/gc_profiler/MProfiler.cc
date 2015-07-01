@@ -3313,7 +3313,8 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
-		LOG(ERROR) << "NULL:::capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+		return;
 	}
 
 	//for performance we need only to handle last and first cohort;
@@ -3322,8 +3323,6 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
 		updateDelCohRecObjCnts(_firstRecP);
 	} else {
-		if (true)
-			  	return;
 		//first precisely calculate the cohort boundaries
 		_LastRecP = getCoRecFromIndices(_endRow, _endIndex);
 		updateDelCohRecObj(_LastRecP,
