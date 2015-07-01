@@ -383,8 +383,9 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
       // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
       __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
     }
-    _lastFreedBytes = InternalAllocationSize(ptr);
     GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
+    _lastFreedBytes = InternalAllocationSize(ptr);
+
     bytes_freed += _lastFreedBytes;
   }
 

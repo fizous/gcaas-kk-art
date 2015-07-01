@@ -422,14 +422,15 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 			return;
 		}
 	}
+	int32_t initValue = GCPTotalAllocBytes.load();
 	GCPTotalAllocBytes.fetch_add(objSize);
 	if(!IsAllocWindowsSet())
 		return;
-	GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
 
-	int32_t initValue = GCPTotalAllocBytes.load();
-	double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
-	if((_newIndex) != (getAllocIndex())) {
+
+	bool _newWindow = (initValue >> kGCMMPLogAllocWindow) != ((objSize + initValue)  >> kGCMMPLogAllocWindow);
+	//double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
+	if(_newWindow) {
 
 		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
 				GCPTotalAllocBytes.load();
@@ -437,6 +438,7 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 		{
 			Thread* self = Thread::Current();
 	    MutexLock mu(self, *prof_thread_mutex_);
+	    GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
 	    receivedSignal_ = true;
 
 	    if(hasProfDaemon()) {
@@ -445,6 +447,10 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 	    // Wake anyone who may have been waiting for the GC to complete.
 	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
 		}
+	} else {
+		Thread* self = Thread::Current();
+    MutexLock mu(self, *prof_thread_mutex_);
+    GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
 	}
 }
 
@@ -3288,7 +3294,7 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 	addObjectToCohRecord(objSize);
 	_profHeader->objSize = objSize;
 	//we need to calculate the correct bytes without the allocated memory
-	_profHeader->objBD = allocRec_->load();
+	_profHeader->objBD = allocRec_->load()-objSize;
 }
 
 
@@ -3451,6 +3457,8 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
+	Thread* self = Thread::Current();
+	MutexLock mu(self, *prof_thread_mutex_);
 	cohMgr->gcpRemoveObject(allocatedMemory, obj);
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
