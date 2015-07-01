@@ -2482,10 +2482,7 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
     }
  //
  //
-#if GCP_COLLECT_FOR_PROFILE
-    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    	heap_->CollectGarbageForProfile(false);
-#endif
+
     updateHeapAllocStatus();
 
     if(getRecivedShutDown()) {
@@ -2494,7 +2491,10 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
     } else {
     	dumpProfData(false);
     }
-
+#if GCP_COLLECT_FOR_PROFILE
+    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+    	heap_->CollectGarbageForProfile(false);
+#endif
   	return getRecivedShutDown();
   } else {
   	return false;
