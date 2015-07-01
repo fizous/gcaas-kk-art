@@ -3312,15 +3312,18 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	if(_startIndex >= (size_t)kGCMMPMaxRowCap || _endIndex >= (size_t)kGCMMPMaxRowCap)
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
-	if (true)
-		  	return;
+	if(_firstRecP == NULL) {
+		LOG(ERROR) << "NULL:::startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+	}
+
 	//for performance we need only to handle last and first cohort;
 	if(_startRow == _endRow && _startIndex == _endIndex) {
 		//easy case: the object resides in 1 cohort;
 		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
 		updateDelCohRecObjCnts(_firstRecP);
 	} else {
-
+		if (true)
+			  	return;
 		//first precisely calculate the cohort boundaries
 		_LastRecP = getCoRecFromIndices(_endRow, _endIndex);
 		updateDelCohRecObj(_LastRecP,
