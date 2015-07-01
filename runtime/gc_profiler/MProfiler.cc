@@ -3295,7 +3295,7 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
-	if(_profHeader->objSize == 0 || _profHeader->objSize) {
+	if(_profHeader->objSize == 0) {
 		//the object was not registered
 		return;
 	}
@@ -3313,7 +3313,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 
 
 	//for performance we need only to handle last and first cohort;
-	if(_startRow == _endRow && _startIndex && _endIndex) {
+	if(_startRow == _endRow && _startIndex == _endIndex) {
 		//easy case: the object resides in 1 cohort;
 		updateDelCohRecObj(_firstRecP, _profHeader->objSize);
 		updateDelCohRecObjCnts(_firstRecP);
