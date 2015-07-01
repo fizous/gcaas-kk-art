@@ -144,6 +144,8 @@ public:
 
 	static int kGCMMPLogAllocWindow;
 
+	static int kGCMMPLogAllocWindowDump;
+
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
 
@@ -502,7 +504,7 @@ public:
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
 
-	virtual int getExtraProfileBytes(void) {
+	static int GetExtraProfileBytes(void) {
 		return GCHistogramManager::kGCMMPHeaderSize;
 	}
 

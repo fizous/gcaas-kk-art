@@ -114,7 +114,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 
 
 typedef struct PACKED(4) GCPCohortRecordData_S {
-	int index_;
+	double index_;
 	double objLiveCnt;
 	double objTotalCnt;
 	double liveSize;

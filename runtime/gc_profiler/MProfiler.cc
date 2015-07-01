@@ -153,6 +153,7 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
+int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
@@ -393,7 +394,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 
 	int32_t _allocBytes = GCPTotalAllocBytes.load();
 
-	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindow);
+	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 	heapStatus.currAllocBytes = heap_->GetBytesAllocated();
@@ -552,7 +553,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    		}
 		    		GCMMPCPIDataDumped dataDumped;
 
-		    		dataDumped.index = ((GCPTotalAllocBytes.load()) >> kGCMMPLogAllocWindow)  * 1.0;
+		    		dataDumped.index = ((GCPTotalAllocBytes.load()) >> kGCMMPLogAllocWindowDump)  * 1.0;
 		    		dataDumped.currCycles = accData.currCycles;
 		    		dataDumped.currInstructions = accData.currInstructions;
 		    		dataDumped.currCPI =
@@ -2677,22 +2678,24 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
  * Return true only when the MProfiler is Running
  */
 size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
-	if(mP != NULL && mP->IsProfilingEnabled()) {
-		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
-	}
-	return allocBytes;
+	return allocBytes + GetExtraProfileBytes();
+//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+//	if(mP != NULL && mP->IsProfilingEnabled()) {
+//		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
+//	}
+//	return allocBytes;
 }
 
 /*
  * Return true only when the MProfiler is Running
  */
 size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
-	if(mP != NULL && mP->IsProfilingEnabled()) {
-		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
-	}
-	return allocBytes;
+	return allocBytes - GetExtraProfileBytes();
+//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+//	if(mP != NULL && mP->IsProfilingEnabled()) {
+//		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
+//	}
+//	return allocBytes;
 }
 
 void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
@@ -3436,7 +3439,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 
 	cohMgr->gcpDumpCohortData(dump_file_);
 
-	gcpUpdateGlobalHistogram();
+	//gcpUpdateGlobalHistogram();
 		//dump the global stats
 
   if(isLastDump) {
