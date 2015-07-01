@@ -3336,7 +3336,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 			incColIndex(&_rowIter, &_colIter);
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
-			if(_rowIter >= cohortsTable.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap)
+			if(_rowIter >= cohortsTable.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap){
 				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 				return;
 			}
