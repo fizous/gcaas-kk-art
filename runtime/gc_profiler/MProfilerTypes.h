@@ -211,7 +211,7 @@ public:
 	}
 
 	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
-		if(row >= cohortsTable.cohortRows_.size())
+		if(row >= cohortsTable.cohortRows_.size() || index >= (size_t)kGCMMPMaxRowCap)
 			return NULL;
 		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
 		return &_row->cohorts[index];
