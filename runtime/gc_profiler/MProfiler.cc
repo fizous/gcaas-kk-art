@@ -3313,7 +3313,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
-		LOG(ERROR) << "NULL:::startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+		LOG(ERROR) << "NULL:::capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	}
 
 	//for performance we need only to handle last and first cohort;
