@@ -422,7 +422,7 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 			return;
 		}
 	}
-	int32_t initValue = GCPTotalAllocBytes.load();
+	size_t initValue = (size_t)GCPTotalAllocBytes.load();
 	GCPTotalAllocBytes.fetch_add(objSize);
 	if(!IsAllocWindowsSet())
 		return;
