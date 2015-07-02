@@ -409,12 +409,6 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 }
 
 
-bool VMProfiler::verifyThreadNotification() {
-	return true;
-}
-
-
-
 void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 		mirror::Object* obj) {
 	if(!verifyThreadNotification())
@@ -3117,6 +3111,25 @@ inline void ThreadAllocProfiler::dumpHeapStats(void) {
 		LOG(ERROR) << "could not dump heap stats";
 	}
 }
+
+
+bool ThreadAllocProfiler::verifyThreadNotification() {
+	bool _shouldApply = true;
+	Thread* thread = Thread::Current();
+	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	if(threadProf == NULL)
+		_shouldApply = false;
+	else {
+		if(threadProf->state != GCMMP_TH_RUNNING) {
+			GCMMP_VLOG(INFO) <<
+					"VMProfiler: Allocation is not tracked because the thread is not profiled "
+					<< thread->GetTid() ;
+			_shouldApply = false;
+		}
+	}
+	return _shouldApply;
+}
+
 
 bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 	GCHistogramManager* _histMgr = NULL;
