@@ -3249,10 +3249,12 @@ void GCCohortManager::addCohortRecord(void) {
 		//we passed the capacity and we need a new row
 		addCohortRow();
 	}
+	int _index = (currCohortP == NULL) ?
+			 VMProfiler::GCPGetCalcCohortIndex() : currCohortP->index_+1;
 	currCohortP = &currCoRowP->cohorts[currCoRowP->index_];
 	currCoRowP->index_++;
 
-	currCohortP->index_ = VMProfiler::GCPGetCalcCohortIndex();
+	currCohortP->index_ = _index;
 }
 
 
@@ -3262,6 +3264,7 @@ void GCCohortManager::initCohortsTable(void) {
 	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
 
 	cohortsTable.index = 0;
+	currCohortP = NULL;
 
 	addCohortRow();
 	addCohortRecord();
