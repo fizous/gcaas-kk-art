@@ -409,20 +409,17 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 }
 
 
+bool VMProfiler::verifyThreadNotification() {
+	return true;
+}
+
 
 
 void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 		mirror::Object* obj) {
-	Thread* thread = Thread::Current();
-	GCMMPThreadProf* threadProf = thread->GetProfRec();
-	if(threadProf != NULL) {
-		if(threadProf->state != GCMMP_TH_RUNNING) {
-			GCMMP_VLOG(INFO) <<
-					"VMProfiler: Allocation is not tracked because the thread is not profiled "
-					<< thread->GetTid() ;
-			return;
-		}
-	}
+	if(!verifyThreadNotification())
+		return;
+
 	size_t initValue = (size_t)GCPTotalAllocBytes.load();
 	GCPTotalAllocBytes.fetch_add(objSize);
 	if(!IsAllocWindowsSet())
