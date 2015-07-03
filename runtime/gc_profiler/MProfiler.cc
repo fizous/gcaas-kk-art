@@ -3319,6 +3319,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 			GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
 		//the object was not registered
+		LOG(ERROR) << "---------Found none registered object";
 		return;
 	}
 
@@ -3331,7 +3332,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	size_t _rowIter  = _startRow;
 	size_t _colIter  = _startIndex;
 
-	if(_startIndex >= (size_t)kGCMMPMaxRowCap || _endIndex >= (size_t)kGCMMPMaxRowCap)
+	if(_startIndex >= (size_t) kGCMMPMaxRowCap || _endIndex >= (size_t)kGCMMPMaxRowCap)
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
