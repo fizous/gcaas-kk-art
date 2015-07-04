@@ -246,6 +246,7 @@ class GCHistogramDataManager {
 
 	GCHistogramDataManager(void);
 	GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	virtual ~GCHistogramDataManager(){}
 
 	static size_t AddMProfilingExtraBytes(size_t);
 	static size_t removeMProfilingExtraBytes(size_t);
@@ -332,6 +333,7 @@ public:
 
 	GCHistogramManager(void);
 	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	~GCHistogramManager(){};
 
 	static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
