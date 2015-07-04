@@ -3531,7 +3531,7 @@ void ClassProfiler::dumpAllClasses(void) {
 
   Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
   std::vector<uint64_t> countVector;
-  for(int _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
+  for(size_t _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
   	countVector.push_back(0);
   }
 
