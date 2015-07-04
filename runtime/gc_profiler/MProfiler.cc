@@ -3649,12 +3649,15 @@ void ClassProfiler::dumpAllClasses(void) {
 
 	int _countMine = 0;
 	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
-
+		LOG(ERROR) << "-- " << _countMine++;
+		if(it.second == NULL) {
+			LOG(ERROR) << "--------NULL";
+		}
 		//GCPHistogramRec* _recI =  it.second;
 		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
 	}
 
-	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++";
+	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++" << _countMine;
 
   std::vector<mirror::Class*> classes;
 
