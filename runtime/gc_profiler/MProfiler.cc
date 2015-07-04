@@ -3651,7 +3651,7 @@ void ClassProfiler::dumpAllClasses(void) {
 		LOG(ERROR) << "+++table class table is not NULL";
 		LOG(ERROR) << "+++table class table size is" << tablManager->classTable_.size();
 	} else {
-		LOG(ERROR) << "+++sssstable class table is null
+		LOG(ERROR) << "+++sssstable class table is null";
 	}
 
 	int _countMine = 0;
