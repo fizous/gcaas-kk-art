@@ -1976,7 +1976,7 @@ void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 }
 
 
-static void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
+void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->gcpProfObjKlass(klass, obj);
 	}
@@ -3638,6 +3638,20 @@ void ClassProfiler::dumpAllClasses(void) {
 	Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
 
 	LOG(ERROR) << "++++++++++++++++ Counting for each class++++++++++++++++++++";
+	GCClassTableManager* tablManager = getClassHistograms();
+	if(tablManager == NULL) {
+		LOG(ERROR) << "+++table manager is NULL";
+		return;
+	}
+
+	int _countMine = 0;
+	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
+		GCPHistogramRec* _recI =  it->second;
+		LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it->first << ", count=" << _recI->cntLive;
+	}
+
+
+
   std::vector<mirror::Class*> classes;
 
   Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
