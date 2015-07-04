@@ -3635,7 +3635,8 @@ void ClassProfiler::dumpAllClasses(void) {
 	//std::ostringstream os;
  // os << "Dumping the Classes::::\n";
 	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
-	Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
+	if(false)
+		Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
 
 	LOG(ERROR) << "++++++++++++++++ Counting for each class++++++++++++++++++++";
 	GCClassTableManager* tablManager = getClassHistograms();
