@@ -45,6 +45,7 @@
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
 #define GCP_RESET_LASTLIVE_DATA()
+#define GCP_PROFILE_OBJ_CLASS(klass, obj) art::mprofiler::VMProfiler::MProfObjClass(klass, obj)
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
@@ -54,6 +55,7 @@
 #define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) 									((void) 0)
 #define GCP_RESET_LASTLIVE_DATA()															((void) 0)
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)										((void) 0)
+#define GCP_PROFILE_OBJ_CLASS(klass, obj) 										((void) 0)
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
@@ -296,6 +298,7 @@ public:
 //	static void MProfNotifyAlloc(size_t,size_t);
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
+	static void MProfObjClass(mirror::Class*, mirror::Object*);
 	static void MProfNotifyFree(size_t, mirror::Object*);
 //	static void MProfNotifyFree(size_t,size_t);
 	static void MProfileSignalCatcher(int);
@@ -370,6 +373,7 @@ public:
   virtual void gcpAddObject(size_t objSize, size_t allocSize) {}
   virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
   		mirror::Object* obj) {}
+  virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){}
   //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {}
 
@@ -637,6 +641,7 @@ public:
 
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);
+  void gcpProfObjKlass(mirror::Class*, mirror::Object*);
   void gcpAddObject(size_t objSize, size_t allocSize){}
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){}
   void dumpAllClasses(void);

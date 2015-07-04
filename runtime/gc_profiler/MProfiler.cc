@@ -1975,6 +1975,13 @@ void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 	}
 }
 
+
+static void MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
+	if(VMProfiler::IsMProfRunning()) {
+		Runtime::Current()->GetMProfiler()->gcpProfObjKlass(klass, obj);
+	}
+}
+
 void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
 		size_t objSize, mirror::Object* obj) {
 	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
@@ -2752,7 +2759,6 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   for (auto it = classTable_.lower_bound(klassHash);
   		it != end && it->first == klassHash; ++it) {
   	_histRec = it->second;
-
   }
   if(_histRec == NULL) {
   	_histRec = new GCPHistogramRec();
@@ -3614,6 +3620,12 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
+inline void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
+	GCClassTableManager* classManager = getClassHistograms();
+	if(classManager != NULL)
+		classManager->addObjectClassPair(klass, obj);
+}
+
 void ClassProfiler::initHistogram(void) {
 	hitogramsData = new GCClassTableManager();
 }
