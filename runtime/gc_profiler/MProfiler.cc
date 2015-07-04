@@ -2758,8 +2758,10 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	auto search = classTable_.find(klassHash);
 	if(search != classTable_.end()) {
 		_histRec = search->second;
+		LOG(ERROR) << "Class was already inserted: " << klassHash;
 	}
   if(_histRec == NULL) {
+  	LOG(ERROR) << "inserting new class: " << klassHash;
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	classTable_.insert(std::make_pair(klassHash, _histRec));
   }
