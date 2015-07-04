@@ -41,6 +41,7 @@ class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
 class GCHistogramManager;
+class GCHistogramDataManager;
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
  * Make sure that GCMMP_GC_MAX_ACTIVITIES always at the bottom of the definition
