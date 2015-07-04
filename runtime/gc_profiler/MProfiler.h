@@ -501,7 +501,7 @@ public:
 	GCHistogramDataManager* hitogramsData;
 
 	GCHistogramManager* getObjHistograms(void) {
-		return (GCHistogramDataManager*)hitogramsData;
+		return (GCHistogramManager*)hitogramsData;
 	}
 
 
@@ -572,7 +572,7 @@ public:
 	}
 
 	GCHistogramManager* getThreadHistograms(void) {
-		return (GCHistogramDataManager*)hitogramsData;
+		return (GCHistogramManager*)hitogramsData;
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
