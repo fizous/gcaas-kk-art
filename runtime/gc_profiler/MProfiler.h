@@ -371,10 +371,10 @@ public:
 
   virtual void gcpAddObject(size_t objSize, size_t allocSize) =0;
   virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
-  		mirror::Object* obj) {}
+  		mirror::Object* obj) =0;
   virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){LOG(ERROR) << "VMProfiler::set class";}
   //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
-  virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {}
+  virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) =0;
 
   virtual void dumpProfData(bool) {}
 
