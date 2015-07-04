@@ -2761,10 +2761,10 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
 
 	GCPHistogramRec* _histRec = NULL;
-	auto search = classTable_.find(klassHash);
-	if(search != classTable_.end()) {
-		_histRec = search->second;
-	}
+//	auto search = classTable_.find(klassHash);
+//	if(search != classTable_.end()) {
+//		_histRec = search->second;
+//	}
   if(_histRec == NULL) {
   	klassHash = classTable_.size();
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
