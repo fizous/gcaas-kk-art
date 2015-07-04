@@ -2913,7 +2913,7 @@ void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
 		return;
 
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	threadHistRec->gcpRemoveObject(histIndex);
+	((GCHistogramManager*)threadHistRec)->gcpRemoveObject(histIndex);
 }
 
 inline void GCHistogramManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
