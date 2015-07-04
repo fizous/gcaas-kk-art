@@ -2741,7 +2741,7 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 
 inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
-	int32_t klassHash = klass->IdentityHashCode();
+	size_t klassHash = (size_t)klass->IdentityHashCode();
 	auto end = classTable_.end();
 	GCPHistogramRec* _histRec = NULL;
   for (auto it = classTable_.lower_bound(klassHash);
