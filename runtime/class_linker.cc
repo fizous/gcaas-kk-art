@@ -2300,6 +2300,18 @@ static mirror::ObjectArray<mirror::DexCache>* GetImageDexCaches()
   return root->AsObjectArray<mirror::DexCache>();
 }
 
+
+size_t ClassLinker::gcpGetClassHash(mirror::Class* klass) {
+	if (klass != NULL) {
+		ClassHelper kh(NULL, this);
+		kh.ChangeClass(klass);
+		const char* descriptor = kh.GetDescriptor();
+		size_t hash = Hash(descriptor);
+		return hash;
+	}
+	return 0;
+}
+
 void ClassLinker::MoveImageClassesToClassTable() {
   Thread* self = Thread::Current();
   WriterMutexLock mu(self, *Locks::classlinker_classes_lock_);

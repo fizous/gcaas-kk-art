@@ -2755,7 +2755,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
 		return;
-	size_t klassHash = (size_t)klass->IdentityHashCode();
+	size_t klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
 	if(search != classTable_.end()) {
@@ -2763,7 +2763,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	}
   if(_histRec == NULL) {
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-  	//classTable_.insert(std::make_pair(klassHash, _histRec));
+  	classTable_.insert(std::make_pair(klassHash, _histRec));
   }
 
   gcpAddDataToHist(_histRec);

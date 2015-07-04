@@ -547,7 +547,7 @@ class ClassLinker {
   // Number of times we've searched dex caches for a class. After a certain number of misses we move
   // the classes into the class_table_ to avoid dex cache based searches.
   AtomicInteger failed_dex_cache_class_lookups_;
-
+  size_t gcpGetClassHash(mirror::Class*);
   mirror::Class* LookupClassFromTableLocked(const char* descriptor,
                                             const mirror::ClassLoader* class_loader,
                                             size_t hash)
