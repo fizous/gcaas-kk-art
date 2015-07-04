@@ -3623,7 +3623,7 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 	LOG(ERROR) << " Adding object in classProfiler";
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
-inline void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
+void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	LOG(ERROR) << " inside ClassProfiler::gcpProfObjKlass";
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
