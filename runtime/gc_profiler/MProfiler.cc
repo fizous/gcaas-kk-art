@@ -2753,6 +2753,7 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 
 inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
+	LOG(ERROR) << "inside GCClassTableManager";
 	size_t klassHash = (size_t)klass->IdentityHashCode();
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
@@ -3622,7 +3623,7 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
 inline void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
-	//LOG(ERROR) << " inside gcpProfObjKlass";
+	LOG(ERROR) << " inside ClassProfiler::gcpProfObjKlass";
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		classManager->addObjectClassPair(klass, obj);
