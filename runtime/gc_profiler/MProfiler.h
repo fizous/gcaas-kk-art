@@ -372,7 +372,7 @@ public:
   virtual void gcpAddObject(size_t objSize, size_t allocSize) {}
   virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
   		mirror::Object* obj) {}
-  virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){}
+  virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){LOG(ERROR) << "VMProfiler::set class";}
   //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj) {}
 
@@ -521,7 +521,7 @@ public:
 	}
 
 	virtual void initHistogram(void);
-  void gcpProfObjKlass(mirror::Class*, mirror::Object*){}
+  void gcpProfObjKlass(mirror::Class*, mirror::Object*){ LOG(ERROR) << "ObjectSizesProfiler::set class";}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
