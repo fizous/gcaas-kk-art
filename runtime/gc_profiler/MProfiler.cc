@@ -2753,16 +2753,13 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 
 inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
-	LOG(ERROR) << "inside GCClassTableManager";
 	size_t klassHash = (size_t)klass->IdentityHashCode();
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
 	if(search != classTable_.end()) {
 		_histRec = search->second;
-		LOG(ERROR) << "Class was already inserted: " << klassHash;
 	}
   if(_histRec == NULL) {
-  	LOG(ERROR) << "inserting new class: " << klassHash;
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	classTable_.insert(std::make_pair(klassHash, _histRec));
   }
@@ -2779,7 +2776,6 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 	extraHeader->objSize = objSize;
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	LOG(ERROR) << "inside GCClassTableManager::addObject";
 	if(histIndex == 0)
 		return;
 //	 mirror::Class* _klass = obj->GetClass();
@@ -3624,7 +3620,6 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
 void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
-	LOG(ERROR) << " inside ClassProfiler::gcpProfObjKlass";
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		classManager->addObjectClassPair(klass, obj);
