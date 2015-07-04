@@ -508,12 +508,12 @@ public:
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
 
-	static size_t AddMProfilingExtraBytes(size_t);
-	static size_t removeMProfilingExtraBytes(size_t);
+	static size_t GCPAddMProfilingExtraBytes(size_t);
+	static size_t GCPRemoveMProfilingExtraBytes(size_t);
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
 
-	static int GetExtraProfileBytes(void) {
+	static int GCPGetExtraProfileBytes(void) {
 		return GCHistogramDataManager::kGCMMPHeaderSize;
 	}
 
@@ -623,7 +623,10 @@ public:
 
 class ClassProfiler : public ObjectSizesProfiler {
 public:
-	HistogramTable_S classTable_;
+
+	GCClassTableManager* getClassHistograms(void) {
+		return (GCClassTableManager*)hitogramsData;
+	}
 
 	ClassProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
@@ -639,6 +642,9 @@ public:
   void dumpAllClasses(void);
   void dumpProfData(bool);
   void logPerfData(void);
+
+
+  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
 };
 
 

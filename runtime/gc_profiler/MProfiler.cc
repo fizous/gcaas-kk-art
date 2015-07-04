@@ -2679,7 +2679,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
  * Return true only when the MProfiler is Running
  */
 size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
-	return allocBytes + GetExtraProfileBytes();
+	return allocBytes + GCPGetExtraProfileBytes();
 //	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 //	if(mP != NULL && mP->IsProfilingEnabled()) {
 //		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
@@ -2691,7 +2691,7 @@ size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
  * Return true only when the MProfiler is Running
  */
 size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
-	return allocBytes - GetExtraProfileBytes();
+	return allocBytes - GCPGetExtraProfileBytes();
 //	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 //	if(mP != NULL && mP->IsProfilingEnabled()) {
 //		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
@@ -2737,6 +2737,37 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
 
 }
+
+//inline void GCClassTableManager::addObject(size_t allocatedMemory,
+//		size_t objSize, mirror::Object* obj) {
+//	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
+//	extraHeader->objSize = objSize;
+//	extraHeader->histRecP = this;
+//	size_t histIndex = (32 - CLZ(objSize)) - 1;
+//
+//	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
+//
+//	if(lastCohortIndex != _readCohortIndex) {
+//		lastCohortIndex = _readCohortIndex;
+//		histAtomicRecord.cntLive.store(1);
+//		histAtomicRecord.cntTotal.store(1);
+//		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+//			lastWindowHistTable[i].cntTotal  = 0.0;
+//			lastWindowHistTable[i].cntLive  = 0.0;
+//		}
+//		lastWindowHistTable[histIndex].cntTotal.store(1);
+//		lastWindowHistTable[histIndex].cntLive.store(1);
+//	} else {
+//		gcpAddDataToHist(&histogramTable[histIndex]);
+//		gcpAddDataToHist(&histRecord);
+//
+//		histAtomicRecord.cntLive++;
+//		histAtomicRecord.cntTotal++;
+//		lastWindowHistTable[histIndex].cntTotal++;
+//		lastWindowHistTable[histIndex].cntLive++;
+//	}
+//}
+
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
@@ -3543,6 +3574,11 @@ void CohortProfiler::logPerfData() {
 	}
 }
 /************************ Class Loader *********************/
+
+
+inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 
 void ClassProfiler::initHistogram(void) {
 	hitogramsData = new GCClassTableManager();

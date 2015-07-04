@@ -346,14 +346,6 @@ public:
   bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
   void gcpRemoveObject(size_t);
 
-  static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
-  		mirror::Object* obj) {
-  	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-  			allocatedMemory - sizeof(GCPExtraObjHeader));
-  	GCPExtraObjHeader* extraHeader =
-  			reinterpret_cast<GCPExtraObjHeader*>(address);
-  	return extraHeader;
-  }
 
   //// methods for dumping and aggrgating /////////
   void gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
