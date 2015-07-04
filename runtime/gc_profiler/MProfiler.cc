@@ -2738,35 +2738,64 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 
 }
 
-//inline void GCClassTableManager::addObject(size_t allocatedMemory,
-//		size_t objSize, mirror::Object* obj) {
-//	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
-//	extraHeader->objSize = objSize;
-//	extraHeader->histRecP = this;
-//	size_t histIndex = (32 - CLZ(objSize)) - 1;
-//
-//	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
-//
-//	if(lastCohortIndex != _readCohortIndex) {
-//		lastCohortIndex = _readCohortIndex;
-//		histAtomicRecord.cntLive.store(1);
-//		histAtomicRecord.cntTotal.store(1);
-//		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-//			lastWindowHistTable[i].cntTotal  = 0.0;
-//			lastWindowHistTable[i].cntLive  = 0.0;
-//		}
-//		lastWindowHistTable[histIndex].cntTotal.store(1);
-//		lastWindowHistTable[histIndex].cntLive.store(1);
-//	} else {
-//		gcpAddDataToHist(&histogramTable[histIndex]);
-//		gcpAddDataToHist(&histRecord);
-//
-//		histAtomicRecord.cntLive++;
-//		histAtomicRecord.cntTotal++;
-//		lastWindowHistTable[histIndex].cntTotal++;
-//		lastWindowHistTable[histIndex].cntLive++;
-//	}
-//}
+
+inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+		mirror::Object* obj) {
+	int32_t klassHash = klass->IdentityHashCode();
+	auto end = classTable_.end();
+	GCPHistogramRec* _histRec = NULL;
+  for (auto it = classTable_.lower_bound(klassHash);
+  		it != end && it->first == klassHash; ++it) {
+  	_histRec = &it->second;
+  	_histRec->cntLive++;
+  }
+
+  if(_histRec == NULL) {
+
+  }
+
+}
+
+
+
+
+inline void GCClassTableManager::addObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
+	extraHeader->objSize = objSize;
+	extraHeader->histRecP = this;
+	size_t histIndex = (32 - CLZ(objSize)) - 1;
+
+//	 mirror::Class* _klass = obj->GetClass();
+//	 if(_klass == NULL) {
+//		 LOG(ERROR) << "XXXXXXXXX OBJECT CLASS IS NULL";
+//	 }
+//	std::make_pair(hash, klass)
+//	classTable_
+
+
+	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
+
+	if(lastCohortIndex != _readCohortIndex) {
+		lastCohortIndex = _readCohortIndex;
+		histAtomicRecord.cntLive.store(1);
+		histAtomicRecord.cntTotal.store(1);
+		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+			lastWindowHistTable[i].cntTotal  = 0.0;
+			lastWindowHistTable[i].cntLive  = 0.0;
+		}
+		lastWindowHistTable[histIndex].cntTotal.store(1);
+		lastWindowHistTable[histIndex].cntLive.store(1);
+	} else {
+		gcpAddDataToHist(&histogramTable[histIndex]);
+		gcpAddDataToHist(&histRecord);
+
+		histAtomicRecord.cntLive++;
+		histAtomicRecord.cntTotal++;
+		lastWindowHistTable[histIndex].cntTotal++;
+		lastWindowHistTable[histIndex].cntLive++;
+	}
+}
 
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){

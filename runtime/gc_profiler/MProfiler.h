@@ -636,15 +636,13 @@ public:
 	void initHistogram(void);
 
   void gcpAddObject(size_t allocatedMemory,
-  		size_t objSize, mirror::Object* obj){}
+  		size_t objSize, mirror::Object* obj);
   void gcpAddObject(size_t objSize, size_t allocSize){}
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){}
   void dumpAllClasses(void);
   void dumpProfData(bool);
   void logPerfData(void);
 
-
-  void gcpAddObject(size_t allocatedMemory, size_t objSize, mirror::Object* obj);
 };
 
 

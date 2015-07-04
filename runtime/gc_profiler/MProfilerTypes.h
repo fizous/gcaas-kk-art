@@ -111,7 +111,7 @@ typedef std::multimap<size_t, GCPHistogramRec> HistogramTable_S;
 typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
 	union {
-		GCHistogramManager* histRecP;
+		GCHistogramDataManager* histRecP;
 		size_t objBD;
 	};
 } GCPExtraObjHeader;
@@ -135,8 +135,6 @@ typedef struct GCPCohortsTable_S {
 	int index;
 	std::vector<GCPCohortsRow*> cohortRows_;
 } GCPCohortsTable;
-
-
 
 
 
@@ -320,6 +318,11 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
+
+
+	void addObject(size_t, size_t, mirror::Object*);
+	void addObjectClassPair(mirror::Class* klass,
+			mirror::Object* obj);
 };
 
 
