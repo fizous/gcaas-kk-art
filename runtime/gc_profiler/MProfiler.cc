@@ -2759,7 +2759,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	{
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
-	}
+
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
 	if(search != classTable_.end()) {
@@ -2774,6 +2774,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   }
 
   gcpAddDataToHist(_histRec);
+	}
 }
 
 
