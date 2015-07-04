@@ -2678,7 +2678,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 /*
  * Return true only when the MProfiler is Running
  */
-size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
+size_t ObjectSizesProfiler::GCPAddMProfilingExtraBytes(size_t allocBytes) {
 	return allocBytes + GCPGetExtraProfileBytes();
 //	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 //	if(mP != NULL && mP->IsProfilingEnabled()) {
@@ -2690,7 +2690,7 @@ size_t ObjectSizesProfiler::AddMProfilingExtraBytes(size_t allocBytes) {
 /*
  * Return true only when the MProfiler is Running
  */
-size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
+size_t ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(size_t allocBytes) {
 	return allocBytes - GCPGetExtraProfileBytes();
 //	VMProfiler* mP = Runtime::Current()->GetMProfiler();
 //	if(mP != NULL && mP->IsProfilingEnabled()) {
