@@ -3608,7 +3608,7 @@ void CohortProfiler::logPerfData() {
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
-
+}
 void ClassProfiler::initHistogram(void) {
 	hitogramsData = new GCClassTableManager();
 }
