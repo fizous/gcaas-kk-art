@@ -3545,7 +3545,7 @@ void CohortProfiler::logPerfData() {
 /************************ Class Loader *********************/
 
 void ClassProfiler::initHistogram(void) {
-	objHistograms = NULL;
+	hitogramsData = new GCClassTableManager();
 }
 
 //class_Linker
