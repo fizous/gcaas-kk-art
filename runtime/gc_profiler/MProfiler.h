@@ -617,7 +617,7 @@ public:
 //  bool periodicDaemonExec(void);
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);
-  void gcpAddObject(size_t objSize, size_t allocSize){}
+  void gcpAddObject(size_t, size_t){}
   bool dettachThread(GCMMPThreadProf*);
 
   void dumpProfData(bool);
@@ -642,8 +642,8 @@ public:
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);
   void gcpProfObjKlass(mirror::Class*, mirror::Object*);
-  void gcpAddObject(size_t objSize, size_t allocSize){}
-  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){}
+  void gcpAddObject(size_t, size_t){}
+  void gcpRemoveObject(size_t, mirror::Object*){}
   void dumpAllClasses(void);
   void dumpProfData(bool);
   void logPerfData(void);
