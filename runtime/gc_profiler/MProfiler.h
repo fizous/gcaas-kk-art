@@ -521,6 +521,7 @@ public:
 	}
 
 	virtual void initHistogram(void);
+  void gcpProfObjKlass(mirror::Class*, mirror::Object*){}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
