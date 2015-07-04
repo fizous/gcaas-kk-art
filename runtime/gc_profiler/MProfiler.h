@@ -41,8 +41,8 @@
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) GCP_DECLARE_ADD_PRECISE_ALLOC(x,y,z)
 #define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
-#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::AddMProfilingExtraBytes(actualSize))
-#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::removeMProfilingExtraBytes(actualSize))
+#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::GCPAddMProfilingExtraBytes(actualSize))
+#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
 #define GCP_RESET_LASTLIVE_DATA()
 #else//DVM_ALLOW_GCPROFILER
