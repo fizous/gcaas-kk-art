@@ -21,6 +21,7 @@
 #include "gc_profiler/MProfilerHeap.h"
 #include "locks.h"
 #include "os.h"
+#include "class_linker.h"
 #include "runtime.h"
 #include "ScopedLocalRef.h"
 #include "scoped_thread_state_change.h"
