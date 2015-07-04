@@ -2763,7 +2763,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	}
   if(_histRec == NULL) {
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-  	classTable_.insert(std::make_pair(klassHash, _histRec));
+  	//classTable_.insert(std::make_pair(klassHash, _histRec));
   }
 
   gcpAddDataToHist(_histRec);
@@ -3618,7 +3618,7 @@ void CohortProfiler::logPerfData() {
 
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	LOG(ERROR) << " Adding object in classProfiler";
+	//LOG(ERROR) << " Adding object in classProfiler";
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
 void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
