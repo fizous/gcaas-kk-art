@@ -3647,22 +3647,24 @@ void ClassProfiler::dumpAllClasses(void) {
 		LOG(ERROR) << "+++table manager is not NULL";
 	}
 
-	if(tablManager->classTable_ != NULL) {
-		LOG(ERROR) << "+++table class table is not NULL";
-		LOG(ERROR) << "+++table class table size is" << tablManager->classTable_.size();
-	} else {
-		LOG(ERROR) << "+++sssstable class table is null";
-	}
+	LOG(ERROR) << "+++table class size is " << tablManager->classTable_.size();
 
-	int _countMine = 0;
-	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
-		LOG(ERROR) << "-- " << _countMine++;
-		if(it.second == NULL) {
-			LOG(ERROR) << "--------NULL";
-		}
-		//GCPHistogramRec* _recI =  it.second;
-		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
-	}
+//	if(tablManager->classTable_ != NULL) {
+//		LOG(ERROR) << "+++table class table is not NULL";
+//		LOG(ERROR) << "+++table class table size is" << tablManager->classTable_.size();
+//	} else {
+//		LOG(ERROR) << "+++sssstable class table is null";
+//	}
+//
+//	int _countMine = 0;
+//	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
+//		LOG(ERROR) << "-- " << _countMine++;
+//		if(it.second == NULL) {
+//			LOG(ERROR) << "--------NULL";
+//		}
+//		//GCPHistogramRec* _recI =  it.second;
+//		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
+//	}
 
 	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++" << _countMine;
 
