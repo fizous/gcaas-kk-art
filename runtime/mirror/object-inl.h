@@ -43,6 +43,7 @@ inline void Object::SetClass(Class* new_klass) {
   // Proxy classes are held live by the class loader, and other classes are roots of the class
   // linker.
   SetFieldPtr(OFFSET_OF_OBJECT_MEMBER(Object, klass_), new_klass, false, false);
+  GCP_PROFILE_OBJ_CLASS(new_klass, this);
 }
 
 inline uint32_t Object::GetThinLockId() {
