@@ -2753,6 +2753,8 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 
 inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
+	if(klass == NULL)
+		return;
 	size_t klassHash = (size_t)klass->IdentityHashCode();
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
