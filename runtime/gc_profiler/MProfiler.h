@@ -498,7 +498,12 @@ public:
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
-	GCHistogramDataManager* objHistograms;
+	GCHistogramDataManager* hitogramsData;
+
+	GCHistogramManager* getObjHistograms(void) {
+		return (GCHistogramDataManager*)hitogramsData;
+	}
+
 
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
@@ -564,6 +569,10 @@ public:
 	ThreadAllocProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
 		LOG(ERROR) << "ThreadAllocProfiler : Constructor of ThreadAllocProfiler";
+	}
+
+	GCHistogramManager* getThreadHistograms(void) {
+		return (GCHistogramDataManager*)hitogramsData;
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
