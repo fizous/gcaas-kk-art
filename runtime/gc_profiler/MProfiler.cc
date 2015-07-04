@@ -2766,6 +2766,8 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 
+	if(histIndex ==0)
+		return;
 //	 mirror::Class* _klass = obj->GetClass();
 //	 if(_klass == NULL) {
 //		 LOG(ERROR) << "XXXXXXXXX OBJECT CLASS IS NULL";
@@ -2774,27 +2776,27 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 //	classTable_
 
 
-	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
-
-	if(lastCohortIndex != _readCohortIndex) {
-		lastCohortIndex = _readCohortIndex;
-		histAtomicRecord.cntLive.store(1);
-		histAtomicRecord.cntTotal.store(1);
-		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-			lastWindowHistTable[i].cntTotal  = 0.0;
-			lastWindowHistTable[i].cntLive  = 0.0;
-		}
-		lastWindowHistTable[histIndex].cntTotal.store(1);
-		lastWindowHistTable[histIndex].cntLive.store(1);
-	} else {
-		gcpAddDataToHist(&histogramTable[histIndex]);
-		gcpAddDataToHist(&histRecord);
-
-		histAtomicRecord.cntLive++;
-		histAtomicRecord.cntTotal++;
-		lastWindowHistTable[histIndex].cntTotal++;
-		lastWindowHistTable[histIndex].cntLive++;
-	}
+//	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
+//
+//	if(lastCohortIndex != _readCohortIndex) {
+//		lastCohortIndex = _readCohortIndex;
+//		histAtomicRecord.cntLive.store(1);
+//		histAtomicRecord.cntTotal.store(1);
+//		for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+//			lastWindowHistTable[i].cntTotal  = 0.0;
+//			lastWindowHistTable[i].cntLive  = 0.0;
+//		}
+//		lastWindowHistTable[histIndex].cntTotal.store(1);
+//		lastWindowHistTable[histIndex].cntLive.store(1);
+//	} else {
+//		gcpAddDataToHist(&histogramTable[histIndex]);
+//		gcpAddDataToHist(&histRecord);
+//
+//		histAtomicRecord.cntLive++;
+//		histAtomicRecord.cntTotal++;
+//		lastWindowHistTable[histIndex].cntTotal++;
+//		lastWindowHistTable[histIndex].cntLive++;
+//	}
 }
 
 /********************* GCHistogramManager profiling ****************/
