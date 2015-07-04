@@ -2779,7 +2779,7 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 	extraHeader->objSize = objSize;
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-
+	LOG(ERROR) << "inside GCClassTableManager::addObject";
 	if(histIndex == 0)
 		return;
 //	 mirror::Class* _klass = obj->GetClass();
@@ -3379,7 +3379,7 @@ void GCCohortManager::addCohortRecord(void) {
 
 
 void GCCohortManager::initCohortsTable(void) {
-	cohRowSZ_ = kGCMMPMaxRowCap * sizeof(GCPCohortRecordData);
+	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
 	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
 
 	cohortsTable.index = 0;
@@ -3620,6 +3620,7 @@ void CohortProfiler::logPerfData() {
 
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
+	LOG(ERROR) << " Adding object in classProfiler";
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
 inline void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
