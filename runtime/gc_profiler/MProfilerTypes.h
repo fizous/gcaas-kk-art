@@ -273,7 +273,7 @@ public:
 
   virtual void initHistograms(void) {}
   virtual void addObject(size_t allocatedMemory,
-		size_t objSize, mirror::Object* obj) {}
+		size_t objSize, mirror::Object* obj) = 0;
 
 
   void gcpAddDataToHist(GCPHistogramRec*);
