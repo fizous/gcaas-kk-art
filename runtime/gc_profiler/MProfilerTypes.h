@@ -137,6 +137,9 @@ typedef struct GCPCohortsTable_S {
 } GCPCohortsTable;
 
 
+
+
+
 class GCCohortManager {
 	size_t cohRowSZ_;
 	size_t cohArrSZ_;
@@ -303,10 +306,20 @@ class GCHistogramDataManager {
   	iSecret = secret;
   }
 
-  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {
+  bool gcpIsManagerFriend(GCHistogramDataManager* instMGR) {
   	return iSecret == instMGR->iSecret;
   }
 };//GCHistogramDataManager
+
+
+class GCClassTableManager : public GCHistogramDataManager {
+public:
+	GCClassTableManager(void);
+	GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	~GCClassTableManager(){};
+
+	HistogramTable_S classTable_;
+};
 
 
 class /*PACKED(4)*/ GCHistogramManager : public GCHistogramDataManager{
