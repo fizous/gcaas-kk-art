@@ -3528,9 +3528,14 @@ void ClassProfiler::dumpAllClasses(void) {
 
 	LOG(ERROR) << "++++++++++++++++ Counting for each class++++++++++++++++++++";
   std::vector<mirror::Class*> classes;
-  std::vector<uint64_t> countVector;
+
   Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
-  Runtime::Current()->GetHeap()->CountInstances(classes, false, &counts[0]);
+  std::vector<uint64_t> countVector;
+  for(int _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
+  	countVector.push_back(0);
+  }
+
+  Runtime::Current()->GetHeap()->CountInstances(classes, false, &countVector[0]);
   int _index = 0;
   for (const auto& _rowCountIter : countVector) {
   	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
