@@ -2708,7 +2708,7 @@ void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 
 
 
-/********************* GCHistogramManager profiling ****************/
+/********************* GCHistogramDataManager profiling ****************/
 
 
 
@@ -2725,9 +2725,18 @@ GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) 
 }
 
 
+/********************* GCClassTableManager profiling ****************/
 
 
+GCClassTableManager::GCHistogramManager(void) : GCHistogramDataManager() {
 
+}
+
+GCClassTableManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
+		GCHistogramDataManager(hisMGR) {
+
+}
+/********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
 	lastWindowHistSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecAtomic);
