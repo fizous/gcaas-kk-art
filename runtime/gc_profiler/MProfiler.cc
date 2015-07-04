@@ -1976,7 +1976,7 @@ void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 }
 
 
-static void MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
+static void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetMProfiler()->gcpProfObjKlass(klass, obj);
 	}
