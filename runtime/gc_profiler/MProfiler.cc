@@ -148,6 +148,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<CohortProfiler>
 		},//Cohort Profiler
+		{
+				 0x05,
+				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				 "ClassProfiler", "Class Profiler",
+				 "GCP_CLASS.log",
+				 NULL,
+				 &createVMProfiler<ClassProfiler>
+		},//Class Profiler
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
@@ -3507,6 +3515,22 @@ void CohortProfiler::logPerfData() {
 			_indIter++;
 		}
 		_rIndex++;
+	}
+}
+/************************ Class Loader *********************/
+//class_Linker
+void ClassProfiler::dumpAllClasses(void) {
+	Runtime::Current()->GetClassLinker()->DumpAllClasses(7);
+}
+
+void ClassProfiler::logPerfData() {
+	dumpAllClasses();
+}
+
+void ClassProfiler::dumpProfData(bool isLastDump) {
+	if(isLastDump) {
+		logPerfData();
+		dump_file_->Close();
 	}
 }
 

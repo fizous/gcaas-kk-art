@@ -612,6 +612,22 @@ public:
 };
 
 
+class ClassProfiler : public ObjectSizesProfiler {
+public:
+	ClassProfiler(GCMMP_Options* opts, void* entry) :
+		ObjectSizesProfiler(opts, entry) {
+		LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
+	}
+
+  void gcpAddObject(size_t allocatedMemory,
+  		size_t objSize, mirror::Object* obj){}
+  void gcpAddObject(size_t objSize, size_t allocSize){}
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj){}
+  void dumpAllClasses(void);
+  void dumpProfData(bool);
+  void logPerfData(void);
+};
+
 
 //typedef struct PACKED(4) GCPCohortRecord_S {
 //	/* cohort index */
