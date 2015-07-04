@@ -45,7 +45,6 @@
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
 #define GCP_RESET_LASTLIVE_DATA()
-#define GCP_PROFILE_OBJ_CLASS(klass, obj) art::mprofiler::VMProfiler::MProfObjClass(klass, obj)
 #else//DVM_ALLOW_GCPROFILER
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
@@ -55,7 +54,7 @@
 #define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) 									((void) 0)
 #define GCP_RESET_LASTLIVE_DATA()															((void) 0)
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)										((void) 0)
-#define GCP_PROFILE_OBJ_CLASS(klass, obj) 										((void) 0)
+
 #endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
