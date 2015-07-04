@@ -4243,6 +4243,14 @@ void ClassLinker::DumpAllClasses(int flags) {
   }
 }
 
+void ClassLinker::GCPGetAllClasses(
+		std::vector<mirror::Class*>& allKlasses){
+  ReaderMutexLock mu(Thread::Current(), *Locks::classlinker_classes_lock_);
+  for (const std::pair<size_t, mirror::Class*>& it : class_table_) {
+  	allKlasses.push_back(it.second);
+  }
+}
+
 void ClassLinker::GCPDumpAllClasses(int flags, std::ostream& os) {
   if (dex_cache_image_class_lookup_required_) {
     MoveImageClassesToClassTable();

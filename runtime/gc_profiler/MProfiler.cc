@@ -3525,6 +3525,16 @@ void ClassProfiler::dumpAllClasses(void) {
  // os << "Dumping the Classes::::\n";
 	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 	Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
+
+	LOG(ERROR) << "++++++++++++++++ Counting for each class++++++++++++++++++++";
+  std::vector<mirror::Class*> classes;
+  std::vector<uint64_t> countVector;
+  Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
+  Runtime::Current()->GetHeap()->CountInstances(classes, false, &counts[0]);
+  int _index = 0;
+  for (const auto& _rowCountIter : countVector) {
+  	LOG(ERROR) << "count: " << _index++ << "_rowCountIter";
+  }
 }
 
 void ClassProfiler::logPerfData() {

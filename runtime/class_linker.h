@@ -104,6 +104,10 @@ class ClassLinker {
   		LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
 			SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  void GCPGetAllClasses(
+  		std::vector<mirror::Class*>& allKlasses);
+
+
   void DumpForSigQuit(std::ostream& os)
       LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
