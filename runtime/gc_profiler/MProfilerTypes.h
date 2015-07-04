@@ -104,6 +104,10 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
+typedef std::multimap<size_t, GCPHistogramRec> HistogramTable_S;
+
+
+
 typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
 	union {
@@ -228,18 +232,99 @@ public:
 
 };
 
-class /*PACKED(4)*/ GCHistogramManager {
-	size_t totalHistogramSize;
-	size_t lastWindowHistSize;
-	int32_t lastCohortIndex;
-	GCMMP_HISTOGRAM_MGR_TYPE type_;
-	//secretNumber used to check if this manager is included;
-	int iSecret;
-public:
+
+class GCHistogramDataManager {
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHeaderSize;
-	GCPHistogramRecAtomic histAtomicRecord;
+
+	int32_t lastCohortIndex;
+	GCMMP_HISTOGRAM_MGR_TYPE type_;
 	GCPHistogramRec				histRecord;
+	GCPHistogramRecAtomic histAtomicRecord;
+	//secretNumber used to check if this manager is included;
+	int iSecret;
+
+	GCHistogramDataManager(void);
+	GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE);
+
+	static size_t AddMProfilingExtraBytes(size_t);
+	static size_t removeMProfilingExtraBytes(size_t);
+	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
+			mirror::Object* obj);
+	static int GetExtraProfileBytes(void) {
+		return GCHistogramDataManager::kGCMMPHeaderSize;
+	}
+
+  static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
+  		mirror::Object* obj) {
+  	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+  			allocatedMemory - sizeof(GCPExtraObjHeader));
+  	GCPExtraObjHeader* extraHeader =
+  			reinterpret_cast<GCPExtraObjHeader*>(address);
+  	return extraHeader;
+  }
+
+  virtual void initHistograms(void) {}
+  virtual void addObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {}
+
+
+  void setLastCohortIndex(int32_t index) {
+  	lastCohortIndex = index;
+  }
+
+  void gcpResetHistogramData() {
+  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
+  	memset((void*)histogramTable, 0, totalHistogramSize);
+
+  	histRecord.pcntLive = 100.0;
+  	histRecord.pcntTotal = 100.0;
+  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+  		histogramTable[i].index 			= (i+1) * 1.0;
+  	}
+  }
+
+  void gcpResetAtomicData() {
+  	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
+  	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
+
+
+  	histAtomicRecord.pcntLive = 100.0;
+  	histAtomicRecord.pcntTotal = 100.0;
+
+  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+  		lastWindowHistTable[i].index  = (i+1) * 1.0;
+  	}
+  }
+
+
+  void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
+  	dest->index = src->index;
+  	dest->cntLive = src->cntLive.load();
+  	dest->cntTotal = src->cntTotal.load();
+  	dest->pcntLive = src->pcntLive;
+  	dest->pcntTotal = src->pcntTotal;
+  }
+
+
+  int generateNewSecret() {
+  	return (iSecret = rand() % 1000 + 1);
+  }
+
+  void setFriendISecret(int secret) {
+  	iSecret = secret;
+  }
+
+  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {
+  	return iSecret == instMGR->iSecret;
+  }
+};//GCHistogramDataManager
+
+
+class /*PACKED(4)*/ GCHistogramManager : public GCHistogramDataManager{
+	size_t totalHistogramSize;
+	size_t lastWindowHistSize;
+public:
 
 	GCPHistogramRec histogramTable[GCP_MAX_HISTOGRAM_SIZE];
 	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
@@ -248,6 +333,8 @@ public:
 	GCHistogramManager(void);
 	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE);
 
+	static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
+
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
   void gcpAddDataToHist(GCPHistogramRec*);
@@ -255,10 +342,6 @@ public:
   bool gcpRemoveDataFromHist(GCPHistogramRec*);
   bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
   void gcpRemoveObject(size_t);
-
-
-
-  static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
   static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
   		mirror::Object* obj) {
@@ -287,17 +370,6 @@ public:
   bool gcpDumpHistAtomicRec(art::File*);
   bool gcpDumpHistRec(art::File*);
 
-  void setLastCohortIndex(int32_t index) {
-  	lastCohortIndex = index;
-  }
-
-  void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
-  	dest->index = src->index;
-  	dest->cntLive = src->cntLive.load();
-  	dest->cntTotal = src->cntTotal.load();
-  	dest->pcntLive = src->pcntLive;
-  	dest->pcntTotal = src->pcntTotal;
-  }
 
   void gcpResetHistogramData() {
   	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
@@ -322,20 +394,6 @@ public:
   		lastWindowHistTable[i].index  = (i+1) * 1.0;
   	}
   }
-
-  int generateNewSecret() {
-  	return (iSecret = rand() % 1000 + 1);
-  }
-
-  void setFriendISecret(int secret) {
-  	iSecret = secret;
-  }
-
-  bool gcpIsManagerFriend(GCHistogramManager* instMGR) {
-  	return iSecret == instMGR->iSecret;
-  }
-
-
 };//GCHistogramManager
 
 
@@ -475,6 +533,9 @@ public:
   	return (tag_ >= GCMMP_THREAD_GCDAEMON);
   }
 };
+
+
+
 } // namespace mprofiler
 } // namespace art
 

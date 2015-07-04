@@ -509,7 +509,7 @@ public:
 			mirror::Object* obj);
 
 	static int GetExtraProfileBytes(void) {
-		return GCHistogramManager::kGCMMPHeaderSize;
+		return GCHistogramDataManager::kGCMMPHeaderSize;
 	}
 
 	virtual void initHistogram(void);
@@ -614,10 +614,14 @@ public:
 
 class ClassProfiler : public ObjectSizesProfiler {
 public:
+	HistogramTable_S classTable_;
+
 	ClassProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
 		LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
 	}
+
+	void initHistogram(void);
 
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj){}

@@ -168,7 +168,7 @@ int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 AtomicInteger GCCohortManager::kGCPLastCohortIndex;
-int GCHistogramManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
+int GCHistogramDataManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
@@ -2451,7 +2451,7 @@ void ObjectSizesProfiler::logPerfData() {
 			heap_->GetMaxAllowedFootPrint();
 
 
-	for(int i = 0; i < GCHistogramManager::kGCMMPMaxHistogramEntries; i++){
+	for(int i = 0; i < GCHistogramDataManager::kGCMMPMaxHistogramEntries; i++){
 		LOG(ERROR) << "index: " << objHistograms->histogramTable[i].index << " :: cntLive=" <<
 				objHistograms->histogramTable[i].cntLive << "; cntTotal="<<
 				objHistograms->histogramTable[i].cntTotal<<"; pcntLive=" << objHistograms->histogramTable[i].pcntLive <<
@@ -2701,7 +2701,7 @@ size_t ObjectSizesProfiler::removeMProfilingExtraBytes(size_t allocBytes) {
 void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 		mirror::Object* obj) {
 	GCPExtraObjHeader* extraHeader =
-			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
+			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
 	extraHeader->histRecP = NULL;
 	extraHeader->objSize = 0;
 }
@@ -2709,6 +2709,24 @@ void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 
 
 /********************* GCHistogramManager profiling ****************/
+
+
+
+GCHistogramDataManager::GCHistogramDataManager(void) : type_(GCMMP_HIST_CHILD) {
+	generateNewSecret();
+	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
+	initHistograms();
+}
+
+GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
+		type_(hisMGR) {
+	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
+	initHistograms();
+}
+
+
+
+
 
 void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
@@ -2721,16 +2739,13 @@ void GCHistogramManager::initHistograms(void){
 
 
 
-GCHistogramManager::GCHistogramManager(void) : type_(GCMMP_HIST_CHILD) {
-	generateNewSecret();
-	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
-	initHistograms();
+GCHistogramManager::GCHistogramManager(void) : GCHistogramDataManager() {
+
 }
 
 GCHistogramManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		type_(hisMGR) {
-	lastCohortIndex = GCCohortManager::kGCPLastCohortIndex.load();
-	initHistograms();
+		GCHistogramDataManager(hisMGR) {
+
 }
 
 
@@ -3425,9 +3440,6 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 }
 
 
-
-
-
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistogram(void) {
@@ -3519,6 +3531,11 @@ void CohortProfiler::logPerfData() {
 	}
 }
 /************************ Class Loader *********************/
+
+void ClassProfiler::initHistogram(void) {
+	objHistograms = NULL;
+}
+
 //class_Linker
 void ClassProfiler::dumpAllClasses(void) {
 	//std::ostringstream os;
