@@ -20,11 +20,7 @@
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
-#if DVM_ALLOW_GCPROFILER
-#define GCP_PROFILE_OBJ_CLASS(klass, obj) art::mprofiler::VMProfiler::MProfObjClass(klass, obj)
-#else
-#define GCP_PROFILE_OBJ_CLASS(klass, obj) 										((void) 0)
-#endif
+
 
 
 /* window size of the dumping daya */

@@ -28,7 +28,7 @@
 #include "runtime.h"
 #include "throwable.h"
 #include "class-inl.h"
-#include "gc_profiler/MProfilerTypes.h"
+#include "gc_profiler/MProfiler.h"
 
 namespace art {
 namespace mirror {
