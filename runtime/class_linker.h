@@ -100,6 +100,10 @@ class ClassLinker {
       LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  void ClassLinker::GCPDumpAllClasses(int flags, std::ostream& os)
+  		LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
+			SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   void DumpForSigQuit(std::ostream& os)
       LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);

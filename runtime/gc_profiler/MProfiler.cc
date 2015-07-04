@@ -3524,7 +3524,7 @@ void ClassProfiler::dumpAllClasses(void) {
 	//std::ostringstream os;
  // os << "Dumping the Classes::::\n";
 	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
-	Runtime::Current()->GetClassLinker()->DumpForSigQuit(LOG(ERROR));
+	Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
 }
 
 void ClassProfiler::logPerfData() {

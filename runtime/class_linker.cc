@@ -4243,6 +4243,25 @@ void ClassLinker::DumpAllClasses(int flags) {
   }
 }
 
+void ClassLinker::GCPDumpAllClasses(int flags, std::ostream& os) {
+  if (dex_cache_image_class_lookup_required_) {
+    MoveImageClassesToClassTable();
+  }
+  // TODO: at the time this was written, it wasn't safe to call PrettyField with the ClassLinker
+  // lock held, because it might need to resolve a field's type, which would try to take the lock.
+  std::vector<mirror::Class*> all_classes;
+  {
+    ReaderMutexLock mu(Thread::Current(), *Locks::classlinker_classes_lock_);
+    for (const std::pair<size_t, mirror::Class*>& it : class_table_) {
+      all_classes.push_back(it.second);
+    }
+  }
+
+  for (size_t i = 0; i < all_classes.size(); ++i) {
+    all_classes[i]->DumpClass(os, flags);
+  }
+}
+
 void ClassLinker::DumpForSigQuit(std::ostream& os) {
   if (dex_cache_image_class_lookup_required_) {
     MoveImageClassesToClassTable();
