@@ -2761,7 +2761,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   	_histRec = it->second;
   }
   if(_histRec == NULL) {
-  	_histRec = new GCPHistogramRec();
+  	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	classTable_.insert(std::make_pair(klassHash, _histRec));
   }
 
