@@ -2755,7 +2755,11 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
 		return;
-	size_t klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+	size_t klassHash = 0;
+	{
+		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
+		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+	}
 	GCPHistogramRec* _histRec = NULL;
 	auto search = classTable_.find(klassHash);
 	if(search != classTable_.end()) {
