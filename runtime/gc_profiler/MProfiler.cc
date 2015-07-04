@@ -2767,7 +2767,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	}
   if(_histRec == NULL) {
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-  	classTable_.insert(std::make_pair(klassHash, _histRec));
+  	//classTable_.insert(std::make_pair(klassHash, _histRec));
   }
 
   gcpAddDataToHist(_histRec);
