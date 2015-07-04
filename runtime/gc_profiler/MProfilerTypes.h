@@ -237,6 +237,7 @@ public:
 
 
 class GCHistogramDataManager {
+public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHeaderSize;
 
