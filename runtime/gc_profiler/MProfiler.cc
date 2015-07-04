@@ -2754,12 +2754,11 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	size_t klassHash = (size_t)klass->IdentityHashCode();
-	auto end = classTable_.end();
 	GCPHistogramRec* _histRec = NULL;
-  for (auto it = classTable_.lower_bound(klassHash);
-  		it != end && it->first == klassHash; ++it) {
-  	_histRec = it->second;
-  }
+	auto search = classTable_.find(klassHash);
+	if(search != classTable_.end()) {
+		_histRec = search->second;
+	}
   if(_histRec == NULL) {
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	classTable_.insert(std::make_pair(klassHash, _histRec));
@@ -3621,9 +3620,11 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 	getClassHistograms()->addObject(allocatedMemory, objSize, obj);
 }
 inline void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
+	//LOG(ERROR) << " inside gcpProfObjKlass";
 	GCClassTableManager* classManager = getClassHistograms();
-	if(classManager != NULL)
+	if(classManager != NULL) {
 		classManager->addObjectClassPair(klass, obj);
+	}
 }
 
 void ClassProfiler::initHistogram(void) {
