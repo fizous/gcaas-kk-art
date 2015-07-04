@@ -369,7 +369,7 @@ public:
 //  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}
 //  virtual void DumpEventMarks(void){}
 
-  virtual void gcpAddObject(size_t objSize, size_t allocSize) {}
+  virtual void gcpAddObject(size_t objSize, size_t allocSize) =0;
   virtual void gcpAddObject(size_t allocatedMemory, size_t objSize,
   		mirror::Object* obj) {}
   virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){LOG(ERROR) << "VMProfiler::set class";}
