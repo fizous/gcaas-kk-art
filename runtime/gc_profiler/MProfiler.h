@@ -498,7 +498,7 @@ public:
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
-	GCHistogramManager* objHistograms;
+	GCHistogramDataManager* objHistograms;
 
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
