@@ -2728,11 +2728,11 @@ GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) 
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCHistogramManager(void) : GCHistogramDataManager() {
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
 
 }
 
-GCClassTableManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
+GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
 
 }
