@@ -2766,7 +2766,7 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 
-	if(histIndex ==0)
+	if(histIndex == 0)
 		return;
 //	 mirror::Class* _klass = obj->GetClass();
 //	 if(_klass == NULL) {
@@ -2907,7 +2907,7 @@ void GCHistogramManager::GCPRemoveObj(size_t allocatedMemory,
 
 	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
 
-	GCHistogramManager* threadHistRec = extraHeader->histRecP;
+	GCHistogramDataManager* threadHistRec = extraHeader->histRecP;
 
 	if(threadHistRec == NULL || extraHeader->objSize == 0)
 		return;
