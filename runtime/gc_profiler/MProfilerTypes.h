@@ -274,30 +274,17 @@ class GCHistogramDataManager {
   	lastCohortIndex = index;
   }
 
-  void gcpResetHistogramData() {
-  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
-  	memset((void*)histogramTable, 0, totalHistogramSize);
-
-  	histRecord.pcntLive = 100.0;
-  	histRecord.pcntTotal = 100.0;
-  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-  		histogramTable[i].index 			= (i+1) * 1.0;
-  	}
+  void gcpResetHistogramRecData(GCPHistogramRec* rec) {
+  	memset((void*)(rec), 0, sizeof(GCPHistogramRec));
+  	rec->pcntLive = 100.0;
+  	rec->pcntTotal = 100.0;
   }
 
-  void gcpResetAtomicData() {
-  	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
-  	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
-
-
-  	histAtomicRecord.pcntLive = 100.0;
-  	histAtomicRecord.pcntTotal = 100.0;
-
-  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-  		lastWindowHistTable[i].index  = (i+1) * 1.0;
-  	}
+  void gcpResetHistogramAtomicRecData(GCPHistogramRecAtomic* rec) {
+  	memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+  	rec->pcntLive = 100.0;
+  	rec->pcntTotal = 100.0;
   }
-
 
   void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
@@ -374,23 +361,16 @@ public:
 
 
   void gcpResetHistogramData() {
-  	memset((void*)(&histRecord), 0, sizeof(GCPHistogramRec));
+  	gcpResetHistogramRecData(&histRecord);
   	memset((void*)histogramTable, 0, totalHistogramSize);
-
-  	histRecord.pcntLive = 100.0;
-  	histRecord.pcntTotal = 100.0;
   	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
   		histogramTable[i].index 			= (i+1) * 1.0;
   	}
   }
 
   void gcpResetAtomicData() {
-  	memset((void*)(&histAtomicRecord), 0, sizeof(GCPHistogramRecAtomic));
+  	gcpResetHistogramAtomicRecData(&histAtomicRecord);
   	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
-
-
-  	histAtomicRecord.pcntLive = 100.0;
-  	histAtomicRecord.pcntTotal = 100.0;
 
   	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
   		lastWindowHistTable[i].index  = (i+1) * 1.0;
