@@ -3533,7 +3533,7 @@ void ClassProfiler::dumpAllClasses(void) {
   Runtime::Current()->GetHeap()->CountInstances(classes, false, &counts[0]);
   int _index = 0;
   for (const auto& _rowCountIter : countVector) {
-  	LOG(ERROR) << "count: " << _index++ << "_rowCountIter";
+  	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
   }
 }
 
