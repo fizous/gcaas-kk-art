@@ -3666,7 +3666,7 @@ void ClassProfiler::dumpAllClasses(void) {
 //		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
 //	}
 
-	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++" << _countMine;
+	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++";// << _countMine;
 
   std::vector<mirror::Class*> classes;
 
