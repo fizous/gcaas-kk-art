@@ -105,7 +105,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
-typedef std::multimap<size_t, GCPHistogramRec> HistogramTable_S;
+typedef std::multimap<size_t, GCPHistogramRec*> HistogramTable_S;
 
 
 
@@ -273,6 +273,8 @@ public:
 		size_t objSize, mirror::Object* obj) {}
 
 
+  void gcpAddDataToHist(GCPHistogramRec*);
+
   void setLastCohortIndex(int32_t index) {
   	lastCohortIndex = index;
   }
@@ -344,7 +346,7 @@ public:
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
-  void gcpAddDataToHist(GCPHistogramRec*);
+
 
   bool gcpRemoveDataFromHist(GCPHistogramRec*);
   bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);

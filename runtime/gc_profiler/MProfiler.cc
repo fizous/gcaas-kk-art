@@ -2726,6 +2726,11 @@ GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) 
 }
 
 
+inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
+	rec->cntLive++;
+	rec->cntTotal++;
+}
+
 /********************* GCClassTableManager profiling ****************/
 
 
@@ -2739,21 +2744,22 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 
-inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+inline void GCClassTableManager::addObjectClass(mirror::Class* klass,
 		mirror::Object* obj) {
 	size_t klassHash = (size_t)klass->IdentityHashCode();
 	auto end = classTable_.end();
 	GCPHistogramRec* _histRec = NULL;
   for (auto it = classTable_.lower_bound(klassHash);
   		it != end && it->first == klassHash; ++it) {
-  	_histRec = &it->second;
-  	_histRec->cntLive++;
-  }
+  	_histRec = it->second;
 
+  }
   if(_histRec == NULL) {
-
+  	_histRec = new GCPHistogramRec();
+  	classTable_.insert(std::make_pair(klassHash, _histRec));
   }
 
+  gcpAddDataToHist(_histRec);
 }
 
 
@@ -2821,10 +2827,7 @@ GCHistogramManager::GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 
-inline void  GCHistogramManager::gcpAddDataToHist(GCPHistogramRec* rec) {
-	rec->cntLive++;
-	rec->cntTotal++;
-}
+
 
 inline bool GCHistogramManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic* rec) {
 	bool modified = false;
@@ -2954,8 +2957,8 @@ inline void GCHistogramManager::gcpCalculateEntries(GCPHistogramRec* hisTable,
 	}
 }
 
-inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
-		GCPHistogramRecAtomic* globalRec) {
+inline void GCHistogramManager::gcpCalculateAtomicEntries(GCPHistogramRecAtomic*
+		hisTable, GCPHistogramRecAtomic* globalRec) {
 	int32_t cntLive = globalRec->cntLive.load();
 	int32_t cntTotal = globalRec->cntTotal.load();
 	int32_t entryTotal = 0;
