@@ -126,6 +126,7 @@ void InternTable::DisallowNewInterns() {
   allow_new_interns_ = false;
 }
 
+
 mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
   Thread* self = Thread::Current();
   MutexLock mu(self, intern_table_lock_);
@@ -183,6 +184,20 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
   }
   // Insert into the weak table.
   return Insert(weak_interns_, s, hash_code);
+}
+
+
+mprofiler::GCPHistogramRec* InternTable::GCPProfileObjKlass(size_t hashCode) {
+  for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end(); it != end; ++it) {
+  	mprofiler::GCPHistogramRec* existing_data = it->second;
+  	LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
+    return existing_data;
+  }
+  mprofiler::GCPHistogramRec* _record =
+  		(mprofiler::GCPHistogramRec*) calloc (1, sizeof(mprofiler::GCPHistogramRec));
+
+  _record = classTableProf_.insert(std::make_pair(hashCode, _record));
+  return _record;
 }
 
 mirror::String* InternTable::InternStrong(int32_t utf16_length,

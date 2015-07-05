@@ -2764,15 +2764,17 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
-		GCPHistogramRec* _histRec = NULL;
+		LOG(ERROR) << "start Hash=" << klassHash;
+		GCPHistogramRec* _histRec =
+				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
 //			LOG(ERROR) << "Found start Hash=" << klassHash;
 //			return;
 //		}
-		_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
+		//_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
 
-		LOG(ERROR) << "start Hash=" << klassHash;
-		histogramMapTable.emplace(klassHash, _histRec);
+
+		//histogramMapTable.emplace(klassHash, _histRec);
 		//classTable_.insert(std::make_pair(klassHash, klass));
 		LOG(ERROR) << "Done Hash=" << klassHash;
 	}
