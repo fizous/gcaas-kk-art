@@ -466,9 +466,9 @@ size_t DlMallocSpace::AllocationSize(const mirror::Object* obj) {
 }
 
 
-size_t DlMallocSpace::GetObjectSize(const mirror::Object* obj) {
-	return AllocationNoOverhead(obj);
-}
+//size_t DlMallocSpace::GetObjectSize(const mirror::Object* obj) {
+//	return AllocationNoOverhead(obj);
+//}
 
 size_t DlMallocSpace::Trim() {
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
