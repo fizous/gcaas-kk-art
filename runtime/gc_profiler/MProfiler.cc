@@ -2741,13 +2741,12 @@ inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(),
-		classTable_lock_("ClassHistogram Lock") {
-
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(){
+//classTable_lock_("ClassHistogram Lock")
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR), classTable_lock_("ClassHistogram Lock") {
+		GCHistogramDataManager(hisMGR),  {
 
 }
 
