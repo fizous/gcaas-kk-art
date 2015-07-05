@@ -2741,12 +2741,13 @@ inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(),
+		classTable_lock_("ClassHistogram Lock") {
 
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR) {
+		GCHistogramDataManager(hisMGR), classTable_lock_("ClassHistogram Lock") {
 
 }
 
@@ -2759,8 +2760,17 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	{
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+	}
+  Thread* self = Thread::Current();
+  MutexLock mu(self, classTable_lock_);
 
 	GCPHistogramRec* _histRec = NULL;
+
+  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
+  	_histRec = it->second;
+    break;
+  }
+
 //	auto search = classTable_.find(klassHash);
 //	if(search != classTable_.end()) {
 //		_histRec = search->second;

@@ -324,7 +324,7 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-
+	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
 	void addObjectClassPair(mirror::Class* klass,
