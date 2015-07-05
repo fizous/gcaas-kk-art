@@ -347,6 +347,7 @@ class Heap {
   space::DiscontinuousSpace* FindDiscontinuousSpaceFromObject(const mirror::Object*,
                                                               bool fail_ok) const;
   space::Space* FindSpaceFromObject(const mirror::Object*, bool fail_ok) const;
+  size_t GetObjectAllocatedSpace(const mirror::Object* obj);
 
   void DumpForSigQuit(std::ostream& os);
 
