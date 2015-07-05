@@ -2770,7 +2770,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	//if(directory_.empty()) {
 		LOG(ERROR) << "Adding the phone book:" << directory_.size();
 		size_t sizeT = directory_.size();
-		directory_.insert(std::std::make_pair(sizeT,    klass));
+		directory_.insert(std::make_pair(sizeT,    klass));
 		//directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
 		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
 		//LOG(ERROR) << "Done Adding the phone book";
