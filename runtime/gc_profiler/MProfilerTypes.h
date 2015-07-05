@@ -22,7 +22,7 @@
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
-#include "gc/accounting/gc_allocator.h"
+#include "accounting/gc_allocator.h"
 
 
 /* window size of the dumping daya */
@@ -39,6 +39,13 @@
 
 namespace art {
 
+namespace gc {
+
+namespace accounting {
+ class GCAllocator;
+}
+
+}
 namespace mprofiler {
 
 class MProfiler;
