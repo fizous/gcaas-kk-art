@@ -136,6 +136,11 @@ void LargeObjectMapSpace::Walk(DlMallocSpace::WalkCallback callback, void* arg) 
   }
 }
 
+
+size_t LargeObjectMapSpace::GetObjectSize(const mirror::Object* obj) {
+	return AllocationSize(obj);
+}
+
 bool LargeObjectMapSpace::Contains(const mirror::Object* obj) const {
   Thread* self = Thread::Current();
   if (lock_.IsExclusiveHeld(self)) {
@@ -270,6 +275,10 @@ bool FreeListSpace::Contains(const mirror::Object* obj) const {
   return mem_map_->HasAddress(obj);
 }
 
+
+size_t GetObjectSize(const mirror::Object* obj) {
+	return AllocationSize(obj);
+}
 size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
   AllocationHeader* header = GetAllocationHeader(obj);
   DCHECK(Contains(obj));

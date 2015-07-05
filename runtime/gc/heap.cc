@@ -537,6 +537,15 @@ space::Space* Heap::FindSpaceFromObject(const mirror::Object* obj, bool fail_ok)
   return FindDiscontinuousSpaceFromObject(obj, true);
 }
 
+
+size_t Heap::GetObjectAllocatedSpace(const mirror::Object* obj) {
+	space::Space* _space = FindSpaceFromObject(obj, true);
+	if(_space == NULL)
+		return 0;
+	return _space->GetObjectSize(obj);
+
+}
+
 space::ImageSpace* Heap::GetImageSpace() const {
   for (const auto& space : continuous_spaces_) {
     if (space->IsImageSpace()) {

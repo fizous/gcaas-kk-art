@@ -110,39 +110,6 @@ typedef struct GCPHistogramRecAtomic_S {
 
 
 
-
-
-
-//
-//bool operator<(Name a, Name b) { // Define less than relative to name objects.
-//   return a.get() < b.get();
-//}
-
-class PhoneNum {
-	std::string str;
-public:
-  PhoneNum() {
-     str = "";
-  }
-  PhoneNum(std::string s) {
-     str = s;
-  }
-  std::string get() {
-     return str;
-  }
-};
-
-
-class GCPHistogramClass {
-public:
-	GCPHistogramClass(void){}
-	double   index;
-	double cntLive;
-	double cntTotal;
-	double pcntLive;
-	double pcntTotal;
-};
-
 typedef struct PACKED(4) GCPHistogramRec_S {
 	double   index;
 	double cntLive;
@@ -159,6 +126,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
 	union {
 		GCHistogramDataManager* histRecP;
+		GCPHistogramRec* dataRec;
 		size_t objBD;
 	};
 } GCPExtraObjHeader;
@@ -320,6 +288,7 @@ public:
 
 
   void gcpAddDataToHist(GCPHistogramRec*);
+  void gcpRemoveDataToHist(GCPHistogramRec*);
 
   void setLastCohortIndex(int32_t index) {
   	lastCohortIndex = index;
@@ -374,7 +343,7 @@ public:
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
-	void addObjectClassPair(mirror::Class* klass,
+	bool addObjectClassPair(mirror::Class* klass,
 			mirror::Object* obj);
 
 

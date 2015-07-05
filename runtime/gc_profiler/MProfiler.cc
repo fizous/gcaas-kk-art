@@ -2743,6 +2743,10 @@ inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 	rec->cntTotal++;
 }
 
+
+inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
+	rec->cntLive--;
+}
 /********************* GCClassTableManager profiling ****************/
 
 
@@ -2756,10 +2760,10 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 
-inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+inline bool GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
-		return;
+		return false;
 	size_t klassHash = 0;
 	{
 
@@ -2780,6 +2784,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		//classTable_.insert(std::make_pair(klassHash, klass));
 		//LOG(ERROR) << "Done Hash=" << klassHash;
 	}
+	return true;
   //Thread* self = Thread::Current();
   //MutexLock mu(self, classTable_lock_);
 
@@ -3676,7 +3681,21 @@ void CohortProfiler::logPerfData() {
 	}
 }
 /************************ Class Loader *********************/
+void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
+	GCPExtraObjHeader* _profHeader =
+				GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);
+	if(_profHeader->objSize == 0) {
+		//the object was not registered
+		LOG(ERROR) << "---------Found none registered object";
+		return;
+	}
 
+	GCPHistogramRec* _dataRec = _profHeader->dataRec;
+	if(_dataRec == NULL)
+		return;
+
+	getClassHistograms()->gcpRemoveDataToHist(_dataRec);
+}
 
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
@@ -3687,6 +3706,7 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		classManager->addObjectClassPair(klass, obj);
+
 	}
 }
 
@@ -3733,19 +3753,19 @@ void ClassProfiler::dumpAllClasses(void) {
 
 	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++";// << _countMine;
 
-  std::vector<mirror::Class*> classes;
-
-  Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
-  std::vector<uint64_t> countVector;
-  for(size_t _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
-  	countVector.push_back(0);
-  }
-
-  Runtime::Current()->GetHeap()->CountInstances(classes, false, &countVector[0]);
-  int _index = 0;
-  for (const auto& _rowCountIter : countVector) {
-  	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
-  }
+//  std::vector<mirror::Class*> classes;
+//
+//  Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
+//  std::vector<uint64_t> countVector;
+//  for(size_t _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
+//  	countVector.push_back(0);
+//  }
+//
+//  Runtime::Current()->GetHeap()->CountInstances(classes, false, &countVector[0]);
+//  int _index = 0;
+//  for (const auto& _rowCountIter : countVector) {
+//  	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
+//  }
 }
 
 void ClassProfiler::logPerfData() {
