@@ -22,7 +22,7 @@
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
 
-
+#include "gc/accounting/gc_allocator.h"
 
 
 /* window size of the dumping daya */
@@ -361,7 +361,8 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-	SafeMap<size_t, mirror::Class*> histogramMapTable;
+	SafeMap<size_t, mirror::Class*, std::less<size_t>,
+	GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
