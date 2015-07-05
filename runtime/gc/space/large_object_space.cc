@@ -116,6 +116,11 @@ size_t LargeObjectMapSpace::AllocationSize(const mirror::Object* obj) {
   return found->second->Size();
 }
 
+size_t LargeObjectMapSpace::GCPGetAllocationSize(const mirror::Object* obj) {
+	return AllocationSize(obj);
+}
+
+
 size_t LargeObjectSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs) {
   size_t total = 0;
   for (size_t i = 0; i < num_ptrs; ++i) {
