@@ -2784,8 +2784,8 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   }
 
   gcpAddDataToHist(_histRec);
-	}
 }
+
 
 
 
