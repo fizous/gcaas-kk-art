@@ -109,7 +109,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 } GCPHistogramRec;
 
 typedef std::multimap<size_t, GCPHistogramRec*> HistogramTable_S;
-
+typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 
 typedef struct PACKED(4) GCPExtraObjHeader_S {
@@ -324,6 +324,7 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
+	HistogramTableTest_S classTableTest_;
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
