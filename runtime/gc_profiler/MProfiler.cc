@@ -3690,6 +3690,7 @@ void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		return;
 	}
 
+
 	GCPHistogramRec* _dataRec = _profHeader->dataRec;
 	if(_dataRec == NULL)
 		return;
@@ -3706,7 +3707,10 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		classManager->addObjectClassPair(klass, obj);
-
+		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
+		if(objSpace == 0) {
+			LOG(ERROR) << "Objectsize rturned 0: ";
+		}
 	}
 }
 

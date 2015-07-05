@@ -87,6 +87,10 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
     return result - 2 * kValgrindRedZoneBytes;
   }
 
+  size_t GCPGetAllocationSize(const mirror::Object* obj) {
+  	return AllocationSize(obj);
+  }
+
   virtual size_t Free(Thread* self, mirror::Object* ptr) {
     void* obj_after_rdz = reinterpret_cast<void*>(ptr);
     void* obj_with_rdz = reinterpret_cast<byte*>(obj_after_rdz) - kValgrindRedZoneBytes;
