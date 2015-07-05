@@ -276,9 +276,9 @@ bool FreeListSpace::Contains(const mirror::Object* obj) const {
 }
 
 
-size_t GetObjectSize(const mirror::Object* obj) {
-	return AllocationSize(obj);
-}
+//size_t GetObjectSize(const mirror::Object* obj) {
+//	return AllocationSize(obj);
+//}
 size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
   AllocationHeader* header = GetAllocationHeader(obj);
   DCHECK(Contains(obj));
