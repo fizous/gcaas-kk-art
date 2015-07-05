@@ -137,9 +137,9 @@ void LargeObjectMapSpace::Walk(DlMallocSpace::WalkCallback callback, void* arg) 
 }
 
 
-size_t LargeObjectMapSpace::GetObjectSize(const mirror::Object* obj) {
-	return AllocationSize(obj);
-}
+//size_t LargeObjectMapSpace::GetObjectSize(const mirror::Object* obj) {
+//	return AllocationSize(obj);
+//}
 
 bool LargeObjectMapSpace::Contains(const mirror::Object* obj) const {
   Thread* self = Thread::Current();

@@ -85,7 +85,7 @@ class LargeObjectMapSpace : public LargeObjectSpace {
   size_t AllocationSizeNoOverhead(const mirror::Object* obj);
   // Return the storage space required by obj.
   size_t AllocationSize(const mirror::Object* obj);
-  size_t GetObjectSize(const mirror::Object* obj);
+  //size_t GetObjectSize(const mirror::Object* obj);
   mirror::Object* Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated);
   size_t Free(Thread* self, mirror::Object* ptr);
   void Walk(DlMallocSpace::WalkCallback, void* arg) LOCKS_EXCLUDED(lock_);
