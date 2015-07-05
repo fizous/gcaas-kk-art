@@ -104,7 +104,6 @@ typedef struct GCPHistogramRecAtomic_S {
 class GCPHistogramClass {
 public:
 	GCPHistogramClass(void){}
-	~GCPHistogramClass();
 	double   index;
 	double cntLive;
 	double cntTotal;
