@@ -197,7 +197,7 @@ mprofiler::GCPHistogramRec* InternTable::GCPProfileObjKlass(size_t hashCode) {
   mprofiler::GCPHistogramRec* _record =
   		(mprofiler::GCPHistogramRec*) calloc (1, sizeof(mprofiler::GCPHistogramRec));
 
-  _record = classTableProf_.insert(std::make_pair(hashCode, _record));
+  classTableProf_.insert(std::make_pair(hashCode, _record));
   return _record;
 }
 
