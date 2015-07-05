@@ -39,13 +39,13 @@
 
 namespace art {
 
-namespace gc {
-
-namespace accounting {
- class GCAllocator;
-}
-
-}
+//namespace gc {
+//
+//namespace accounting {
+// class GCAllocator;
+//}
+//
+//}
 namespace mprofiler {
 
 class MProfiler;
