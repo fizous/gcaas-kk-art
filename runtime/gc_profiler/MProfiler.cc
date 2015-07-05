@@ -2761,8 +2761,8 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
 	}
-  Thread* self = Thread::Current();
-  MutexLock mu(self, classTable_lock_);
+  //Thread* self = Thread::Current();
+  //MutexLock mu(self, classTable_lock_);
 
 	GCPHistogramRec* _histRec = NULL;
 
