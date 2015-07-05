@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #include "locks.h"
+#include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
 #include "cutils/process_name.h"
