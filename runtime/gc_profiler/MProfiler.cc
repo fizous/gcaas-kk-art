@@ -2760,10 +2760,10 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 
-inline bool GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+inline GCPHistogramRec* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
-		return false;
+		return NULL;
 	size_t klassHash = 0;
 	{
 
@@ -2773,6 +2773,7 @@ inline bool GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		GCPHistogramRec* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
 		gcpAddDataToHist(_histRec);
+		return _histRec;
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
 //			LOG(ERROR) << "Found start Hash=" << klassHash;
 //			return;
@@ -2784,7 +2785,7 @@ inline bool GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		//classTable_.insert(std::make_pair(klassHash, klass));
 		//LOG(ERROR) << "Done Hash=" << klassHash;
 	}
-	return true;
+	return NULL;
   //Thread* self = Thread::Current();
   //MutexLock mu(self, classTable_lock_);
 
@@ -2830,10 +2831,10 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* extraHeader = GCPGetObjProfHeader(allocatedMemory, obj);
 	extraHeader->objSize = objSize;
-	extraHeader->histRecP = this;
-	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	if(histIndex == 0)
-		return;
+	extraHeader->dataRec = NULL;
+//	size_t histIndex = (32 - CLZ(objSize)) - 1;
+//	if(histIndex == 0)
+//		return;
 //	 mirror::Class* _klass = obj->GetClass();
 //	 if(_klass == NULL) {
 //		 LOG(ERROR) << "XXXXXXXXX OBJECT CLASS IS NULL";
@@ -3706,11 +3707,18 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
-		classManager->addObjectClassPair(klass, obj);
+		GCPHistogramRec* _rec = classManager->addObjectClassPair(klass, obj);
+		if(_rec == NULL) {
+			LOG(ERROR) << "Could not add the new record";
+		}
 		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
 		if(objSpace == 0) {
 			LOG(ERROR) << "Objectsize rturned 0: ";
 		}
+		GCPExtraObjHeader* _profHeader =
+					GCHistogramManager::GCPGetObjProfHeader(objSpace, obj);
+		_profHeader->dataRec = _rec;
+
 	}
 }
 

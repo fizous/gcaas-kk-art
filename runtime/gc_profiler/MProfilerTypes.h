@@ -343,7 +343,7 @@ public:
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
-	bool addObjectClassPair(mirror::Class* klass,
+	GCPHistogramRec* addObjectClassPair(mirror::Class* klass,
 			mirror::Object* obj);
 
 
