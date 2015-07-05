@@ -104,15 +104,15 @@ typedef struct GCPHistogramRecAtomic_S {
 
 
 class Name {
-  string str;
+  std::string str;
 public:
   Name() {
      str = "";
   }
-  Name(string s) {
+  Name(std::string s) {
      str = s;
   }
-  string get() {
+  std::string get() {
      return str;
   }
 
@@ -124,15 +124,15 @@ bool operator<(Name a, Name b) { // Define less than relative to name objects.
 }
 
 class PhoneNum {
-  string str;
+	std::string str;
 public:
   PhoneNum() {
      str = "";
   }
-  PhoneNum(string s) {
+  PhoneNum(std::string s) {
      str = s;
   }
-  string get() {
+  std::string get() {
      return str;
   }
 };
