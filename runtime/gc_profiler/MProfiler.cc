@@ -2765,7 +2765,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
-		LOG(ERROR) << "start Hash=" << klassHash;
+		//LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistogramRec* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
 		gcpAddDataToHist(_histRec);
@@ -2778,7 +2778,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 		//histogramMapTable.emplace(klassHash, _histRec);
 		//classTable_.insert(std::make_pair(klassHash, klass));
-		LOG(ERROR) << "Done Hash=" << klassHash;
+		//LOG(ERROR) << "Done Hash=" << klassHash;
 	}
   //Thread* self = Thread::Current();
   //MutexLock mu(self, classTable_lock_);
@@ -2859,6 +2859,18 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 //		lastWindowHistTable[histIndex].cntLive++;
 //	}
 }
+
+void GCClassTableManager::logClassTable(void){
+	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		LOG(ERROR) << "hash-- " << it.first() << ", cntLive: "
+				<< it.second()->cntLive << "; cntTotal: " << it.second()->cntTotal;
+	}
+
+	LOG(ERROR) << "+++table class size is " <<
+			Runtime::Current()->GetInternTable()->classTableProf_.size();
+}
+//
 
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
@@ -3696,9 +3708,10 @@ void ClassProfiler::dumpAllClasses(void) {
 		return;
 	} else {
 		LOG(ERROR) << "+++table manager is not NULL";
+		tablManager->logClassTable();
 	}
+	//Runtime::Current()->GetInternTable()->
 
-	LOG(ERROR) << "+++table class size is " << tablManager->classTable_.size();
 
 //	if(tablManager->classTable_ != NULL) {
 //		LOG(ERROR) << "+++table class table is not NULL";

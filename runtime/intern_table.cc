@@ -191,7 +191,7 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
 mprofiler::GCPHistogramRec* InternTable::GCPProfileObjKlass(size_t hashCode) {
   for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end(); it != end; ++it) {
   	mprofiler::GCPHistogramRec* existing_data = it->second;
-  	LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
+  	//LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
     return existing_data;
   }
   mprofiler::GCPHistogramRec* _record =

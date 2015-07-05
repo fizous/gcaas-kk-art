@@ -151,7 +151,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
-typedef std::multimap<size_t, mirror::Class*> HistogramTable_S;
+typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 
@@ -376,6 +376,9 @@ public:
 	void addObject(size_t, size_t, mirror::Object*);
 	void addObjectClassPair(mirror::Class* klass,
 			mirror::Object* obj);
+
+
+	void logClassTable(void);
 };
 
 

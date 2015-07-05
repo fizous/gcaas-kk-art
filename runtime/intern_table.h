@@ -70,10 +70,11 @@ class InternTable {
   void AllowNewInterns() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   mprofiler::GCPHistogramRec* GCPProfileObjKlass(size_t);
-
+  typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> ClassTable;
+  ClassTable classTableProf_;
  private:
   typedef std::multimap<int32_t, mirror::String*> Table;
-  typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> ClassTable;
+
 
   mirror::String* Insert(mirror::String* s, bool is_strong)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -89,7 +90,7 @@ class InternTable {
   ConditionVariable new_intern_condition_ GUARDED_BY(intern_table_lock_);
   Table strong_interns_ GUARDED_BY(intern_table_lock_);
   Table weak_interns_ GUARDED_BY(intern_table_lock_);
-  ClassTable classTableProf_;
+
 };
 
 }  // namespace art
