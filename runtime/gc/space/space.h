@@ -124,6 +124,9 @@ class Space {
 
   virtual ~Space() {}
 
+
+  // Return the storage space required by obj.
+  virtual size_t GCPAllocationSize(const mirror::Object*){return 0;}
  protected:
   Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
 
