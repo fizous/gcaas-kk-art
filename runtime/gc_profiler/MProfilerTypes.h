@@ -101,6 +101,43 @@ typedef struct GCPHistogramRecAtomic_S {
 } GCPHistogramRecAtomic;
 
 
+
+
+class Name {
+  string str;
+public:
+  Name() {
+     str = "";
+  }
+  Name(string s) {
+     str = s;
+  }
+  string get() {
+     return str;
+  }
+
+};
+
+
+bool operator<(Name a, Name b) { // Define less than relative to name objects.
+   return a.get() < b.get();
+}
+
+class PhoneNum {
+  string str;
+public:
+  PhoneNum() {
+     str = "";
+  }
+  PhoneNum(string s) {
+     str = s;
+  }
+  string get() {
+     return str;
+  }
+};
+
+
 class GCPHistogramClass {
 public:
 	GCPHistogramClass(void){}
@@ -336,6 +373,8 @@ public:
 
 	HistogramTable_S classTable_;
 	HistogramTableTest_S classTableTest_;
+	std::multimap<Name, PhoneNum> directory_;
+
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
