@@ -2768,6 +2768,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistogramRec* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
+		gcpAddDataToHist(_histRec);
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
 //			LOG(ERROR) << "Found start Hash=" << klassHash;
 //			return;
