@@ -538,7 +538,7 @@ space::Space* Heap::FindSpaceFromObject(const mirror::Object* obj, bool fail_ok)
 }
 
 
-size_t Heap::GetObjectAllocatedSpace(const mirror::Object* obj) {
+size_t Heap::GCPGetObjectAllocatedSpace(const mirror::Object* obj) {
 	space::Space* _space = FindSpaceFromObject(obj, true);
 	if(_space == NULL)
 		return 0;

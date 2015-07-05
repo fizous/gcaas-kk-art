@@ -76,6 +76,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
     return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
   }
 
+  size_t GCPGetAllocationSize(const mirror::Object*);
+
   void* MoreCore(intptr_t increment);
 
   void* GetMspace() const {
