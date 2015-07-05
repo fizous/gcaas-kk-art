@@ -360,7 +360,7 @@ public:
 
 	HistogramTable_S classTable_;
 	HistogramTableTest_S classTableTest_;
-	std::multimap<size_t, PhoneNum> directory_;
+	std::multimap<size_t, mirror::Class*> directory_;
 
 	mutable Mutex classTable_lock_;
 
