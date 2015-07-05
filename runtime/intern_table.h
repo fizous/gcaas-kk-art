@@ -19,7 +19,7 @@
 
 #include "base/mutex.h"
 #include "root_visitor.h"
-
+#include "gc_profiler/MProfilerTypes.h"
 #include <map>
 
 namespace art {
