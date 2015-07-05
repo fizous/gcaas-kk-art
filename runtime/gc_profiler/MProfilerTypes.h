@@ -369,7 +369,7 @@ public:
 
 	HistogramTable_S classTable_;
 	SafeMap<size_t, mirror::Class*, std::less<size_t>,
-	GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
+	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
