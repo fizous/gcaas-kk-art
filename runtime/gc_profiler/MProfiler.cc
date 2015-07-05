@@ -2767,13 +2767,13 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   //Thread* self = Thread::Current();
   //MutexLock mu(self, classTable_lock_);
 
-	if(directory_.empty()) {
-		LOG(ERROR) << "Adding the phone book";
-		directory_.insert(std::pair<size_t, PhoneNum>(1,    PhoneNum("555-4533")));
-		directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
-		directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
-		LOG(ERROR) << "Done Adding the phone book";
-	}
+	//if(directory_.empty()) {
+		LOG(ERROR) << "Adding the phone book:" << directory_.size();
+		directory_.insert(std::pair<size_t, PhoneNum>(directory_.size(),    PhoneNum("555-4533")));
+		//directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
+		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
+		//LOG(ERROR) << "Done Adding the phone book";
+//	}
 
 	GCPHistogramRec* _histRec = NULL;
 
