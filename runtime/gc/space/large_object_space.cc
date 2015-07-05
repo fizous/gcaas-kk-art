@@ -287,7 +287,7 @@ size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
 }
 
 size_t FreeListSpace::GCPGetAllocationSize(const mirror::Object* obj) {
-	return header->AllocationSize();
+	return AllocationSize();
 }
 
 mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
