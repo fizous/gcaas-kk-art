@@ -2761,9 +2761,10 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		return;
 	size_t klassHash = 0;
 	{
-		LOG(ERROR) << "start Hash=" << klassHash;
+
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+		LOG(ERROR) << "start Hash=" << klassHash;
 		classTable_.insert(std::make_pair(klassHash, klass));
 		LOG(ERROR) << "Done Hash=" << klassHash;
 	}
