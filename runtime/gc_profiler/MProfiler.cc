@@ -2771,7 +2771,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 
 		LOG(ERROR) << "start Hash=" << klassHash;
-		histogramMapTable.Put(klassHash, (const mirror::Class*)klass);
+		histogramMapTable.Put(klassHash, klass);
 		//classTable_.insert(std::make_pair(klassHash, klass));
 		LOG(ERROR) << "Done Hash=" << klassHash;
 	}
