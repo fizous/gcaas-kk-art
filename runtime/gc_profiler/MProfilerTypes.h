@@ -103,20 +103,7 @@ typedef struct GCPHistogramRecAtomic_S {
 
 
 
-class Name {
-  std::string str;
-public:
-  Name() {
-     str = "";
-  }
-  Name(std::string s) {
-     str = s;
-  }
-  std::string get() {
-     return str;
-  }
 
-};
 
 //
 //bool operator<(Name a, Name b) { // Define less than relative to name objects.
@@ -373,7 +360,7 @@ public:
 
 	HistogramTable_S classTable_;
 	HistogramTableTest_S classTableTest_;
-	std::multimap<Name, PhoneNum> directory_;
+	std::multimap<size_t, PhoneNum> directory_;
 
 	mutable Mutex classTable_lock_;
 

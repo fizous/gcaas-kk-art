@@ -2769,9 +2769,9 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 	if(directory_.empty()) {
 		LOG(ERROR) << "Adding the phone book";
-		directory_.insert(std::pair<Name, PhoneNum>(Name("T"),    PhoneNum("555-4533")));
-		directory_.insert(std::pair<Name, PhoneNum>(Name("T"),    PhoneNum("555-9999")));
-		directory_.insert(std::pair<Name, PhoneNum>(Name("C"),  PhoneNum("555-9678")));
+		directory_.insert(std::pair<size_t, PhoneNum>(1,    PhoneNum("555-4533")));
+		directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
+		directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
 		LOG(ERROR) << "Done Adding the phone book";
 	}
 
