@@ -118,10 +118,10 @@ public:
 
 };
 
-
-bool operator<(Name a, Name b) { // Define less than relative to name objects.
-   return a.get() < b.get();
-}
+//
+//bool operator<(Name a, Name b) { // Define less than relative to name objects.
+//   return a.get() < b.get();
+//}
 
 class PhoneNum {
 	std::string str;
