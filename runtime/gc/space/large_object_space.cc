@@ -286,6 +286,10 @@ size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
   return header->AllocationSize();
 }
 
+size_t FreeListSpace::GCPGetAllocationSize(const mirror::Object* obj) {
+	return header->AllocationSize();
+}
+
 mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
   MutexLock mu(self, lock_);
 	size_t extendedSize = num_bytes;
