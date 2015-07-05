@@ -108,7 +108,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
-typedef std::multimap<size_t, GCPHistogramRec*> HistogramTable_S;
+typedef std::multimap<size_t, GCPHistogramRec> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 

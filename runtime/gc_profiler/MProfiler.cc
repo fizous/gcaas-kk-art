@@ -2770,7 +2770,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 	GCPHistogramRec* _histRec = NULL;
 
   for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
-  	_histRec = it->second;
+  	_histRec = &it->second;
     break;
   }
 
@@ -2782,8 +2782,8 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   	klassHash = classTableTest_.size();
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	LOG(ERROR) << "start Hash=" << klassHash;
-  	if(false)
-  		classTable_.insert(std::make_pair(klassHash, _histRec));
+  	//if(false)
+  		classTable_.insert(std::make_pair(klassHash, *_histRec));
   	classTableTest_.insert(std::make_pair(klassHash, klassHash));
   	LOG(ERROR) << "Done Hash=" << klassHash;
   }
