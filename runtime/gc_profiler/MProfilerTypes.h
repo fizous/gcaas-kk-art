@@ -368,7 +368,7 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-	unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
+	std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
