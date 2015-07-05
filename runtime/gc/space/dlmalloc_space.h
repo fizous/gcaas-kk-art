@@ -62,7 +62,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
   // Return the storage space required by obj.
   virtual size_t AllocationSize(const mirror::Object* obj);
-  size_t GetObjectSize(const mirror::Object*);
+  virtual size_t GetObjectSize(const mirror::Object*);
   virtual size_t Free(Thread* self, mirror::Object* ptr);
   virtual size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
 
