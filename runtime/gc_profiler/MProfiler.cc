@@ -2768,9 +2768,9 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
   //MutexLock mu(self, classTable_lock_);
 
 	//if(directory_.empty()) {
-		LOG(ERROR) << "Adding the phone book:" << directory_.size();
-		size_t sizeT = directory_.size();
-		directory_.insert(std::make_pair(sizeT,    klass));
+		//LOG(ERROR) << "Adding the phone book:" << directory_.size();
+		//size_t sizeT = directory_.size();
+		//directory_.insert(std::make_pair(sizeT,    klass));
 		//directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
 		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
 		//LOG(ERROR) << "Done Adding the phone book";
@@ -2788,11 +2788,11 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 //		_histRec = search->second;
 //	}
   if(_histRec == NULL) {
-  	klassHash = classTableTest_.size();
+  	//klassHash = classTableTest_.size();
   	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
   	LOG(ERROR) << "start Hash=" << klassHash;
-  	if(false)
-  		classTable_.insert(std::pair<size_t, GCPHistogramClass>(klassHash, GCPHistogramClass()));
+  	//if(false)
+  		classTable_[klassHash] = _histRec;
   	classTableTest_.insert(std::make_pair(klassHash, klassHash));
   	LOG(ERROR) << "Done Hash=" << klassHash;
   }
