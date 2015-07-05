@@ -2746,7 +2746,7 @@ GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(){
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR),  {
+		GCHistogramDataManager(hisMGR)  {
 
 }
 
