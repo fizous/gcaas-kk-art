@@ -2863,8 +2863,8 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 void GCClassTableManager::logClassTable(void){
 	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistogramRec* rec = it.second();
-		LOG(ERROR) << "hash-- " << it.first() << ", cntLive: "
+		mprofiler::GCPHistogramRec* rec = it.second;
+		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
 				<< rec->cntLive << "; cntTotal: " << rec->cntTotal;
 	}
 
