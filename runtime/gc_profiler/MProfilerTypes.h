@@ -17,7 +17,7 @@
 
 #include <string>
 #include <vector>
-//#include <map>
+#include <unordered_map>
 #include <utility>
 #include "cutils/system_clock.h"
 #include "gc_profiler/MPPerfCounters.h"
@@ -368,7 +368,7 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-	SafeMap<size_t, GCPHistogramRec*> histogramMapTable;
+	unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
