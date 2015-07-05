@@ -2764,14 +2764,15 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+		GCPHistogramRec* _histRec = NULL;
 		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
 			LOG(ERROR) << "Found start Hash=" << klassHash;
 			return;
 		}
-
+		_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
 
 		LOG(ERROR) << "start Hash=" << klassHash;
-		histogramMapTable.Put(klassHash, klass);
+		histogramMapTable.Put(klassHash, _histRec);
 		//classTable_.insert(std::make_pair(klassHash, klass));
 		LOG(ERROR) << "Done Hash=" << klassHash;
 	}
@@ -2787,7 +2788,7 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		//LOG(ERROR) << "Done Adding the phone book";
 //	}
 //
-//	GCPHistogramRec* _histRec = NULL;
+//
 //
 ////  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
 ////  	_histRec = &it->second;
