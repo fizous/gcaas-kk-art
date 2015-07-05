@@ -143,7 +143,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
-typedef std::map<size_t, GCPHistogramRec*> HistogramTable_S;
+typedef std::multimap<size_t, mirror::Class*> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 
@@ -359,8 +359,6 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-	HistogramTableTest_S classTableTest_;
-	std::multimap<size_t, mirror::Class*> directory_;
 
 	mutable Mutex classTable_lock_;
 

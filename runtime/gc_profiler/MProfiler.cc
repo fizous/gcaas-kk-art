@@ -2761,8 +2761,11 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		return;
 	size_t klassHash = 0;
 	{
+		LOG(ERROR) << "start Hash=" << klassHash;
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
+		classTable_.insert(std::make_pair(klassHash, klass));
+		LOG(ERROR) << "Done Hash=" << klassHash;
 	}
   //Thread* self = Thread::Current();
   //MutexLock mu(self, classTable_lock_);
@@ -2775,30 +2778,30 @@ inline void GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
 		//LOG(ERROR) << "Done Adding the phone book";
 //	}
-
-	GCPHistogramRec* _histRec = NULL;
-
-//  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
-//  	_histRec = &it->second;
-//    break;
+//
+//	GCPHistogramRec* _histRec = NULL;
+//
+////  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
+////  	_histRec = &it->second;
+////    break;
+////  }
+//
+////	auto search = classTable_.find(klassHash);
+////	if(search != classTable_.end()) {
+////		_histRec = search->second;
+////	}
+//  if(_histRec == NULL) {
+//  	GCPHistogramRec _record;
+//  	//klassHash = classTableTest_.size();
+//  	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
+//
+//  	//if(false)
+//  	//	classTable_[klassHash] = &_record;
+//  	classTableTest_.insert(std::make_pair(klassHash, klassHash));
+//  	LOG(ERROR) << "Done Hash=" << klassHash;
 //  }
-
-//	auto search = classTable_.find(klassHash);
-//	if(search != classTable_.end()) {
-//		_histRec = search->second;
-//	}
-  if(_histRec == NULL) {
-  	GCPHistogramRec _record;
-  	//klassHash = classTableTest_.size();
-  	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-  	LOG(ERROR) << "start Hash=" << klassHash;
-  	//if(false)
-  		classTable_[klassHash] = &_record;
-  	classTableTest_.insert(std::make_pair(klassHash, klassHash));
-  	LOG(ERROR) << "Done Hash=" << klassHash;
-  }
-
-  gcpAddDataToHist(_histRec);
+//
+//  gcpAddDataToHist(_histRec);
 }
 
 
