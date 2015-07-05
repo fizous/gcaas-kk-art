@@ -100,6 +100,18 @@ typedef struct GCPHistogramRecAtomic_S {
 	double pcntTotal;
 } GCPHistogramRecAtomic;
 
+
+class GCPHistogramClass {
+public:
+	GCPHistogramClass(void){}
+	~GCPHistogramClass();
+	double   index;
+	double cntLive;
+	double cntTotal;
+	double pcntLive;
+	double pcntTotal;
+};
+
 typedef struct PACKED(4) GCPHistogramRec_S {
 	double   index;
 	double cntLive;
@@ -108,7 +120,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
-typedef std::multimap<size_t, GCPHistogramRec> HistogramTable_S;
+typedef std::multimap<size_t, GCPHistogramClass> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 
