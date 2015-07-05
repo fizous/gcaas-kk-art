@@ -8,6 +8,9 @@
 #include <string>
 #include <pthread.h>
 #include <fcntl.h>
+#include <vector>
+#include <utility>
+
 
 #include "locks.h"
 #include "base/mutex.h"
