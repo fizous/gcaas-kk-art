@@ -11,6 +11,8 @@
 #include "base/histogram.h"
 #include "base/macros.h"
 #include "base/mutex.h"
+#include "safe_map.h"
+
 #include "os.h"
 
 #include <string>
@@ -359,7 +361,7 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
-
+	SafeMap<size_t, mirror::Class*> histogramMapTable;
 	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
