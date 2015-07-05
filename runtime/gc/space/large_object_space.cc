@@ -287,7 +287,7 @@ size_t FreeListSpace::AllocationSize(const mirror::Object* obj) {
 }
 
 size_t FreeListSpace::GCPGetAllocationSize(const mirror::Object* obj) {
-  MutexLock mu(self, lock_);
+  MutexLock mu(Thread::Current(), lock_);
 	return AllocationSize(obj);
 }
 
