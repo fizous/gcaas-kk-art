@@ -2747,7 +2747,7 @@ GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(), class
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR)  {
+		GCHistogramDataManager(hisMGR) , classTable_lock_("ClassHistogram Lock") {
 
 }
 
