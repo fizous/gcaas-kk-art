@@ -285,6 +285,7 @@ public:
   virtual void initHistograms(void) {}
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
+  virtual bool gcpDumpHistRec(art::File*);
 
 
   void gcpAddDataToHist(GCPHistogramRec*);
@@ -326,6 +327,8 @@ public:
   bool gcpIsManagerFriend(GCHistogramDataManager* instMGR) {
   	return iSecret == instMGR->iSecret;
   }
+
+
 };//GCHistogramDataManager
 
 
@@ -340,7 +343,6 @@ public:
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
-	mutable Mutex classTable_lock_;
 
 	void addObject(size_t, size_t, mirror::Object*);
 	GCPHistogramRec* addObjectClassPair(mirror::Class* klass,
@@ -348,6 +350,8 @@ public:
 
 
 	void logClassTable(void);
+	void dumpClassHistograms(art::File*, bool);
+	void calculatePercentiles(void);
 };
 
 
@@ -391,7 +395,7 @@ public:
   bool gcpDumpHistTable(art::File*);
   bool gcpDumpHistAtomicTable(art::File*);
   bool gcpDumpHistAtomicRec(art::File*);
-  bool gcpDumpHistRec(art::File*);
+
 
 
   void gcpResetHistogramData() {

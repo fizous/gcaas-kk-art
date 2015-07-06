@@ -222,7 +222,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			}
 		}
 	}
-	file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
+	file->WriteFully(mprofiler::VMProfiler::GCPDumpEndMarker(file), sizeof(int));
 }
 
 
@@ -935,9 +935,7 @@ void PerfCounterProfiler::dumpProfData(bool lastDump) {
   LOG(ERROR) <<  "PerfCounterProfiler: start dumping data";
 
   if(lastDump) {
-  	bool successWrite =
-  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-  					sizeof(int));
+  	bool successWrite = GCPDumpEndMarker(dump_file_);
   	if(successWrite) {
   		dumpEventMarks();
   	} else {
@@ -954,9 +952,7 @@ void GCDaemonCPIProfiler::dumpProfData(bool lastDump) {
 
 	if(lastDump) {
 		LOG(ERROR) <<  "GCDaemonCPIProfiler: start dumping data";
-	  bool _success =
-	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	  			sizeof(int));
+	  bool _success = GCPDumpEndMarker(dump_file_);
 	  if(_success)
 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
@@ -1001,7 +997,7 @@ void VMProfiler::dumpEventMarks(void) {
 
   bool successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
   if(successWrite) {
-  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
+  	GCPDumpEndMarker(dump_file_);
   	LOG(ERROR) << "<<<< Succeeded dump to file" ;
   	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
   }
@@ -1634,12 +1630,11 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 
   if(successWrite) {
   	successWrite =
-  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-  					sizeof(uint64_t));
+  			GCPDumpEndMarker(dump_file_);
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker, sizeof(int));
+		GCPDumpEndMarker(dump_file_);
 		dump_file_->Close();
 	}
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " <<
@@ -1684,13 +1679,11 @@ void MProfiler::DumpProfData(bool isLastDump) {
 
   if(successWrite) {
   	successWrite =
-  			dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-  					sizeof(uint64_t));
+  			GCPDumpEndMarker(dump_file_);
   }
 
 	if(isLastDump) {
-		dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-				sizeof(int));
+		GCPDumpEndMarker(dump_file_);
 		dump_file_->Close();
 	}
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " <<
@@ -2655,8 +2648,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
  if(isLastDump) {
 	 _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+			 GCPDumpEndMarker(dump_file_);
 	 //dump the summary one more time
 	 _success &= getObjHistograms()->gcpDumpHistTable(dump_file_);
 //	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
@@ -2747,15 +2739,20 @@ inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
 inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
 	rec->cntLive--;
 }
+
+inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
+	return dump_file->WriteFully(&histRecord, sizeof(GCPHistogramRec));
+}
+
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(), classTable_lock_("ClassHistogram Lock"){
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
 
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR) , classTable_lock_("ClassHistogram Lock") {
+		GCHistogramDataManager(hisMGR) {
 
 }
 
@@ -2773,6 +2770,9 @@ inline GCPHistogramRec* GCClassTableManager::addObjectClassPair(mirror::Class* k
 		GCPHistogramRec* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
 		gcpAddDataToHist(_histRec);
+		//add data to global histogram
+		gcpAddDataToHist(histRec);
+
 		return _histRec;
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
 //			LOG(ERROR) << "Found start Hash=" << klassHash;
@@ -2878,6 +2878,32 @@ void GCClassTableManager::logClassTable(void){
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
 }
 //
+
+void GCClassTableManager::calculatePercentiles(void) {
+	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistogramRec* rec = it.second;
+		rec->index = it.first;
+		rec->pcntLive = rec->cntLive * 100.0 / histRecord.cntLive;
+		rec->pcntTotal = rec->cntTotal * 100.0 / histRecord.cntTotal;
+	}
+}
+
+void GCClassTableManager::dumpClassHistograms(art::File* dumpFile, bool dumpGlobalRec) {
+	if(dumpGlobalRec)
+		gcpDumpHistRec(dumpFile);
+	bool _dataWritten = false;
+	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistogramRec* _rec = it.second;
+		_dataWritten = dump_file->WriteFully(_rec, sizeof(GCPHistogramRec));
+		if(!_dataWritten)
+			break;
+	}
+	if(_dataWritten) {
+		VMProfiler::GCPDumpEndMarker(dumpFile);
+	}
+}
 
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
@@ -3064,8 +3090,7 @@ bool GCHistogramManager::gcpDumpHistTable(art::File* dump_file) {
 	 bool _success =
 	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
 	 _success &=
-			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+			 VMProfiler::GCPDumpEndMarker(dump_file);
 	 return _success;
 }
 
@@ -3114,8 +3139,7 @@ bool GCHistogramManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
 	}
 	 _success &=
-			 dump_file->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+			 VMProfiler::GCPDumpEndMarker(dump_file);
 	 return _success;
 }
 
@@ -3126,9 +3150,7 @@ inline bool GCHistogramManager::gcpDumpHistAtomicRec(art::File* dump_file) {
 	return dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
 }
 
-inline bool GCHistogramManager::gcpDumpHistRec(art::File* dump_file) {
-	return dump_file->WriteFully(&histRecord, sizeof(GCPHistogramRec));
-}
+
 
 /********************************* Thread Alloc Profiler ****************/
 
@@ -3321,8 +3343,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 	}
 
 	if(_count > 0) {
-		_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-				 	  			sizeof(int));
+		_success &= GCPDumpEndMarker(dump_file_);
 	}
 	return _success;
 }
@@ -3342,8 +3363,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 		_count++;
 	}
 	if(_count > 0) {
-		_success &= dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-				 	  			sizeof(int));
+		_success &= GCPDumpEndMarker(dump_file_);
 	}
 	return _success;
 }
@@ -3373,8 +3393,7 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump) {
 
   if(isLastDump && _success) {
 	  _success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+	  		GCPDumpEndMarker(dump_file_);
 	  //dump the summary at the end one more time
 	  _success &= dumpGlobalThreadsStats();
 	 	if(_success) {
@@ -3585,8 +3604,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	}
 
 	if(_print) {
-		_success &= dumpFile->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-				 	  			sizeof(int));
+		VMProfiler::GCPDumpEndMarker(dump_file_);
 	}
 }
 
@@ -3630,9 +3648,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 
   if(isLastDump) {
 	  bool _success = false;
-  	_success &=
-	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-	 	  			sizeof(int));
+  	_success &= GCPDumpEndMarker(dump_file_);
 	 	if(_success) {
 	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
 	 	}
@@ -3696,7 +3712,11 @@ void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	if(_dataRec == NULL)
 		return;
 
-	getClassHistograms()->gcpRemoveDataToHist(_dataRec);
+	GCClassTableManager* _mngr = getClassHistograms();
+	if(_mngr != NULL) {
+		_mngr->gcpRemoveDataToHist(_dataRec);
+		_mngr->gcpRemoveDataToHist(&_mngr->histRecord);
+	}
 }
 
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
@@ -3785,13 +3805,21 @@ void ClassProfiler::logPerfData() {
 }
 
 void ClassProfiler::dumpProfData(bool isLastDump) {
-	if(isLastDump) {
-		LOG(ERROR) << "ClassProfiler: dumpProfData with lastDump is true";
-		logPerfData();
-		dump_file_->Close();
-		LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
-	} else {
-		//LOG(ERROR) << "ClassProfiler: dumpProfData with lastDump is flase";
+	GCClassTableManager* tablManager = getClassHistograms();
+	if(tablManager != NULL) {
+		dumpHeapStats();
+		tablManager->calculatePercentiles();
+		tablManager->dumpClassHistograms(dump_file_, true);
+		// dump class data from last allocation window
+		tablManager->dumpClassHistograms(dump_file_, false);
+		if(isLastDump) {
+			GCPDumpEndMarker(dump_file_);
+			//dump data summary
+			tablManager->dumpClassHistograms(dump_file_, false);
+			logPerfData();
+			dump_file_->Close();
+			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
+		}
 	}
 }
 

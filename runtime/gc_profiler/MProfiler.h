@@ -354,6 +354,12 @@ public:
   	return true;
   }
 
+
+  static bool GCPDumpEndMarker(art::File* dumpFile){
+  	return dumpFile->WriteFully(&kGCMMPDumpEndMarker,
+   			sizeof(int));
+  }
+
 	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
 	virtual void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM) {};
 
