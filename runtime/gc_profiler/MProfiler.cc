@@ -2903,6 +2903,8 @@ void GCClassTableManager::logClassTable(void){
 	double _cntTotal = 0.0;
 	double _pcntLive = 0.0;
 	double _pcnTotal = 0.0;
+	double _pcntAtomicLive  = 0.0;
+	double _pcntAtomicTotal = 0.0;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
@@ -2910,6 +2912,11 @@ void GCClassTableManager::logClassTable(void){
 		_cntLive  += rec->dataRec_.cntLive;
 		_pcntLive += rec->dataRec_.pcntLive;
 		_pcnTotal += rec->dataRec_.pcntTotal;
+
+
+		_pcntAtomicTotal += rec->atomicDataRec_.pcntTotal;
+		_pcntAtomicLive  += rec->atomicDataRec_.pcntLive;
+
 		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
 				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal <<
 				"; pcntLive= " << rec->dataRec_.pcntLive << "; pcntTotal= " << rec->dataRec_.pcntTotal;
@@ -2925,7 +2932,9 @@ void GCClassTableManager::logClassTable(void){
 
 	LOG(ERROR) << "Aclaculated>>  cntLive: "
 			<< _cntLive << "; cntTotal: " << _cntTotal << "pcntLive:" <<
-			_pcntLive << "pcntTotal: " <<_pcnTotal ;
+			_pcntLive << "pcntTotal: " <<_pcnTotal <<
+			"atomic pcntLive = " << _pcntAtomicLive << "; atomic pcntTotal = " <<
+			_pcntAtomicTotal;
 
 
 }
