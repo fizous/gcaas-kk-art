@@ -2238,14 +2238,27 @@ int MProfiler::GetGCDaemonID(void)  {
 }
 /********************************* Object demographics profiling ****************/
 
+void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
+	srand (time(NULL));
+	if(initHistData)
+		initHistDataManager();
+	LOG(ERROR) << "ObjectSizesProfiler : initializeProfilerData";
+}
+
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
 		bool initHistogrms) :
 	VMProfiler(argOptions, entry) {
-	srand (time(NULL));
-	if(initHistogrms)
-		initHistDataManager();
-	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
+	initializeProfilerData(initHistogrms);
+	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler-B";
 }
+
+ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
+	VMProfiler(argOptions, entry) {
+	initializeProfilerData(true);
+	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler-A";
+}
+
+
 
 
 void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {

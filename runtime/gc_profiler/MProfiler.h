@@ -517,13 +517,11 @@ public:
 	ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
 			bool initHistogrms);
 
-	ObjectSizesProfiler(GCMMP_Options* opts, void* entry) :
-		(opts, entry, true) {
-		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
-	}
+	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 
 	~ObjectSizesProfiler(){};
 
+	void initializeProfilerData(bool);
 	static size_t GCPAddMProfilingExtraBytes(size_t);
 	static size_t GCPRemoveMProfilingExtraBytes(size_t);
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
