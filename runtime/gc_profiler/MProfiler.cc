@@ -3738,6 +3738,13 @@ void CohortProfiler::logPerfData() {
 	}
 }
 /************************ Class Loader *********************/
+
+ClassProfiler::ClassProfiler(GCMMP_Options* opts, void* entry) :
+	ObjectSizesProfiler(opts, entry) {
+	LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
+}
+
+
 void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 				GCHistogramManager::GCPGetObjProfHeader(allocSpace, obj);

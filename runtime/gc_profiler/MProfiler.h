@@ -638,10 +638,7 @@ public:
 		return (GCClassTableManager*)hitogramsData;
 	}
 
-	ClassProfiler(GCMMP_Options* opts, void* entry) :
-		ObjectSizesProfiler(opts, entry) {
-		LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
-	}
+	ClassProfiler(GCMMP_Options*, void*);
 
 	void initHistDataManager(void);
 
