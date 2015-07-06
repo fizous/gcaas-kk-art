@@ -2769,7 +2769,17 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 		//LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistRecData* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
+		if(_histRec == NULL) {
+			LOG(ERROR) << "GCClassTableManager:: _histRec is NULL";
+		} else {
+			LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
+		}
 		_histRec->gcpIncRecData();
+		if(histData_ == NULL) {
+			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
+		} else {
+			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
+		}
 		//update the global entry as well
 		histData_->gcpIncRecData();
 		//add data to global histogram
