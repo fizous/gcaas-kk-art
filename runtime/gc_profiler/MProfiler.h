@@ -526,7 +526,7 @@ public:
 		return GCHistogramDataManager::kGCMMPHeaderSize;
 	}
 
-	virtual void initHistogram(void);
+	virtual void initHistDataManager(void);
   void gcpProfObjKlass(mirror::Class*, mirror::Object*){ LOG(ERROR) << "ObjectSizesProfiler::set class";}
 
 	bool isMarkTimeEvents(void) {return false;}
@@ -586,7 +586,7 @@ public:
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
-  void initHistogram(void);
+  void initHistDataManager(void);
   bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
   void dumpProfData(bool);
@@ -617,7 +617,7 @@ public:
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 
-  void initHistogram(void);
+  void initHistDataManager(void);
   void setHistogramManager(GCMMPThreadProf*);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
 //  bool periodicDaemonExec(void);
@@ -643,7 +643,7 @@ public:
 		LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
 	}
 
-	void initHistogram(void);
+	void initHistDataManager(void);
 
   void gcpAddObject(size_t allocatedMemory,
   		size_t objSize, mirror::Object* obj);

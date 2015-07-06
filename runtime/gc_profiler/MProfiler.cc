@@ -2241,7 +2241,7 @@ int MProfiler::GetGCDaemonID(void)  {
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
 	VMProfiler(argOptions, entry) {
 	srand (time(NULL));
-	initHistogram();
+	initHistDataManager();
 //	memset((void*)&testLogic, 0, sizeof(GCPObjectHeaderTest));
 //	testLogic.takeTest = 1;
 
@@ -2264,7 +2264,7 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 }
 
 
-void ObjectSizesProfiler::initHistogram(void) {
+void ObjectSizesProfiler::initHistDataManager(void) {
 	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	hitogramsData = new GCHistogramManager();
 //	lastLiveGuard = 0;
@@ -3193,7 +3193,7 @@ inline bool GCHistogramManager::gcpDumpHistAtomicRec(art::File* dump_file) {
 
 /********************************* Thread Alloc Profiler ****************/
 
-void ThreadAllocProfiler::initHistogram(void) {
+void ThreadAllocProfiler::initHistDataManager(void) {
 	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	hitogramsData = new GCHistogramManager(GCMMP_HIST_ROOT);
 }
@@ -3650,7 +3650,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 
 /********************************* Cohort profiling ****************/
 
-void CohortProfiler::initHistogram(void) {
+void CohortProfiler::initHistDataManager(void) {
 
 }
 
@@ -3784,7 +3784,8 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	}
 }
 
-void ClassProfiler::initHistogram(void) {
+void ClassProfiler::initHistDataManager(void) {
+	LOG(ERROR) << "Initializing ClassProfiler::initHistDataManager";
 	hitogramsData = new GCClassTableManager();
 }
 
