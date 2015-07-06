@@ -3542,7 +3542,7 @@ GCCohortManager::GCCohortManager(AtomicInteger* allocRec) {
 	//get the correct cohort index;
 	cohortIndex_ = 0;
 	allocRec_ = allocRec;
-	initCohortsTable();
+	initHistograms();
 }
 
 
@@ -3567,7 +3567,7 @@ void GCCohortManager::addCohortRecord(void) {
 
 
 
-void GCCohortManager::initCohortsTable(void) {
+void GCCohortManager::initHistograms(void) {
 	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
 	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
 
@@ -3827,10 +3827,12 @@ void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCClassTableManager* _mngr = getClassHistograms();
 	if(_mngr != NULL) {
 		_dataRec->gcpDecRecData();
-		_dataRec->gcpDecAtomicRecData();
-		//update the global counter as well
+
 		_mngr->histData_->gcpDecRecData();
-		_mngr->histData_->gcpDecAtomicRecData();
+		if(_dataRec->gcpDecAtomicRecData()) {
+			//update the global counter as well
+			_mngr->histData_->gcpDecAtomicRecData();
+		}
 	}
 }
 

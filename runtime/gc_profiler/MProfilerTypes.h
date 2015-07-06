@@ -189,9 +189,13 @@ public:
 	void gcpDecRecData(void){
 		dataRec_.cntLive--;
 	}
-	void gcpDecAtomicRecData(void){
-		if(atomicDataRec_.cntLive > 0)
+
+	bool gcpDecAtomicRecData(void){
+		if(atomicDataRec_.cntLive > 0) {
 			atomicDataRec_.cntLive--;
+			return true;
+		}
+		return false;
 	}
 
 	void gcpIncRecData(void){
@@ -237,103 +241,6 @@ typedef struct GCPCohortsTable_S {
 	int index;
 	std::vector<GCPCohortsRow*> cohortRows_;
 } GCPCohortsTable;
-
-
-
-class GCCohortManager {
-	size_t cohRowSZ_;
-	size_t cohArrSZ_;
-
-	size_t getCoRowSZ(void) {
-		return cohRowSZ_ + sizeof(int);
-	}
-
-public:
-	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
-	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
-	static constexpr size_t kGCMMPCohorSize = (size_t) GCP_COHORT_SIZE;
-	static AtomicInteger kGCPLastCohortIndex;
-
-	int cohortIndex_;
-
-	GCPCohortRecordData*	currCohortP;
-	GCPCohortsRow*    		currCoRowP;
-	GCPCohortsTable 			cohortsTable;
-	AtomicInteger* 				allocRec_;
-
-	GCCohortManager(AtomicInteger*);
-	void initCohortsTable(void);
-	void addCohortRecord(void);
-	void addCohortRow(void);
-
-	void addObjCohorts(size_t allocatedMemory,
-					size_t objSize, mirror::Object* obj);
-
-	void addObjectToCohRecord(size_t objSize);
-
-  void gcpDumpCohortData(art::File*);
-	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
-	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
-
-	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
-		return kGCMMPCohorSize - rec->totalSize;
-	}
-
-	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
-		rec->liveSize  += fit;
-		rec->totalSize += fit;
-		rec->objLiveCnt++;
-		rec->objTotalCnt++;
-	}
-
-	void updateCohRecObjBytes(GCPCohortRecordData* rec, size_t fit) {
-		rec->liveSize  += fit;
-		rec->totalSize += fit;
-	}
-
-	void updateCohRecObjCnts(GCPCohortRecordData* rec) {
-		rec->objLiveCnt++;
-		rec->objTotalCnt++;
-	}
-
-	void updateDelCohRecObjCnts(GCPCohortRecordData* rec) {
-		rec->objLiveCnt--;
-	}
-
-	void updateDelCohRecObj(GCPCohortRecordData* rec, size_t fitSize) {
-		rec->liveSize  -= fitSize;
-
-	}
-
-	void getCoAddrFromBytes(size_t* startRow,
-			size_t* startIndex, size_t* endRow, size_t* endIndex,
-			size_t bd, size_t objSize) {
-		*startIndex = (bd >> GCP_COHORT_LOG);
-		*startRow = *startIndex /  kGCMMPMaxRowCap;
-		*startIndex = (*startIndex) % kGCMMPMaxRowCap;
-
-		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
-		*endRow = *endIndex /  kGCMMPMaxRowCap;
-		*endIndex = (*endIndex) % kGCMMPMaxRowCap;
-	}
-
-	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
-		if(row >= cohortsTable.cohortRows_.size() || index >= (size_t)kGCMMPMaxRowCap)
-			return NULL;
-		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
-		return &_row->cohorts[index];
-	}
-
-	void incColIndex(size_t* row, size_t* index) {
-		int _col = *index + 1;
-		if(_col == kGCMMPMaxRowCap) {
-			_col = 0;
-			*row += 1;
-		}
-		*index = (size_t)_col;
-	}
-
-};
 
 
 class GCHistogramDataManager {
@@ -436,6 +343,103 @@ public:
 
 
 };//GCHistogramDataManager
+
+
+class GCCohortManager : public GCHistogramDataManager {
+	size_t cohRowSZ_;
+	size_t cohArrSZ_;
+
+	size_t getCoRowSZ(void) {
+		return cohRowSZ_ + sizeof(int);
+	}
+
+public:
+	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
+	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
+	static constexpr size_t kGCMMPCohorSize = (size_t) GCP_COHORT_SIZE;
+	static AtomicInteger kGCPLastCohortIndex;
+
+	int cohortIndex_;
+
+	GCPCohortRecordData*	currCohortP;
+	GCPCohortsRow*    		currCoRowP;
+	GCPCohortsTable 			cohortsTable;
+	AtomicInteger* 				allocRec_;
+
+	GCCohortManager(AtomicInteger*);
+	void initHistograms(void);
+
+	void addCohortRecord(void);
+	void addCohortRow(void);
+
+	void addObjCohorts(size_t allocatedMemory,
+					size_t objSize, mirror::Object* obj);
+
+	void addObjectToCohRecord(size_t objSize);
+
+  void gcpDumpCohortData(art::File*);
+	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
+	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
+
+	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
+		return kGCMMPCohorSize - rec->totalSize;
+	}
+
+	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
+		rec->liveSize  += fit;
+		rec->totalSize += fit;
+		rec->objLiveCnt++;
+		rec->objTotalCnt++;
+	}
+
+	void updateCohRecObjBytes(GCPCohortRecordData* rec, size_t fit) {
+		rec->liveSize  += fit;
+		rec->totalSize += fit;
+	}
+
+	void updateCohRecObjCnts(GCPCohortRecordData* rec) {
+		rec->objLiveCnt++;
+		rec->objTotalCnt++;
+	}
+
+	void updateDelCohRecObjCnts(GCPCohortRecordData* rec) {
+		rec->objLiveCnt--;
+	}
+
+	void updateDelCohRecObj(GCPCohortRecordData* rec, size_t fitSize) {
+		rec->liveSize  -= fitSize;
+
+	}
+
+	void getCoAddrFromBytes(size_t* startRow,
+			size_t* startIndex, size_t* endRow, size_t* endIndex,
+			size_t bd, size_t objSize) {
+		*startIndex = (bd >> GCP_COHORT_LOG);
+		*startRow = *startIndex /  kGCMMPMaxRowCap;
+		*startIndex = (*startIndex) % kGCMMPMaxRowCap;
+
+		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
+		*endRow = *endIndex /  kGCMMPMaxRowCap;
+		*endIndex = (*endIndex) % kGCMMPMaxRowCap;
+	}
+
+	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
+		if(row >= cohortsTable.cohortRows_.size() || index >= (size_t)kGCMMPMaxRowCap)
+			return NULL;
+		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
+		return &_row->cohorts[index];
+	}
+
+	void incColIndex(size_t* row, size_t* index) {
+		int _col = *index + 1;
+		if(_col == kGCMMPMaxRowCap) {
+			_col = 0;
+			*row += 1;
+		}
+		*index = (size_t)_col;
+	}
+
+};
 
 
 class GCClassTableManager : public GCHistogramDataManager {
