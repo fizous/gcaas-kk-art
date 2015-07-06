@@ -2238,8 +2238,17 @@ int MProfiler::GetGCDaemonID(void)  {
 }
 /********************************* Object demographics profiling ****************/
 
-ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
+ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
+		bool initHistogrms) :
 	VMProfiler(argOptions, entry) {
+	srand (time(NULL));
+	if(initHistogrms)
+		initHistDataManager();
+	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
+}
+
+ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
+	ObjectSizesProfiler(argOptions, entry, true) {
 	srand (time(NULL));
 	initHistDataManager();
 //	memset((void*)&testLogic, 0, sizeof(GCPObjectHeaderTest));
@@ -3740,7 +3749,8 @@ void CohortProfiler::logPerfData() {
 /************************ Class Loader *********************/
 
 ClassProfiler::ClassProfiler(GCMMP_Options* opts, void* entry) :
-	ObjectSizesProfiler(opts, entry) {
+	ObjectSizesProfiler(opts, entry, false) {
+	initHistDataManager();
 	LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
 }
 

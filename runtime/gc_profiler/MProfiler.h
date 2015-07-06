@@ -514,6 +514,8 @@ public:
 	}
 
 
+	ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
+			bool initHistogrms);
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
 	~ObjectSizesProfiler(){};
 
