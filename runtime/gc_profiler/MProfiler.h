@@ -519,7 +519,6 @@ public:
 
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry, true) {
-		initHistDataManager();
 		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
 	}
 
