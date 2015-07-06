@@ -2898,19 +2898,25 @@ void GCClassTableManager::logClassTable(void){
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
 	double _cntLive = 0.0;
 	double _cntTotal = 0.0;
+	double _pcntLive = 0.0;
+	double _pcnTotal = 0.0;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
 		_cntTotal+=rec->dataRec_.cntTotal;
 		_cntLive+=rec->dataRec_.cntLive;
+		_pcntLive+=rec->dataRec_.pcntLive;
+		_pcnTotal+=rec->dataRec_.pcntTotal;
 		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
-				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal;
+				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal <<
+				"; pcntLive= " << rec->dataRec_.pcntLive << "; pcntTotal= " << rec->dataRec_.pcntTotal;
 	}
 	LOG(ERROR) << "GlobalRecord>>  cntLive: "
 			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
 
 	LOG(ERROR) << "Aclaculated>>  cntLive: "
-			<< _cntLive << "; cntTotal: " << _cntTotal;
+			<< _cntLive << "; cntTotal: " << _cntTotal << "pcntLive:" <<
+			_pcntLive << "pcntTotal: " <<_pcnTotal ;
 
 
 }
@@ -2924,14 +2930,16 @@ void GCClassTableManager::calculatePercentiles(void) {
 	}
 }
 
-void GCClassTableManager::dumpClassHistograms(art::File* dumpFile, bool dumpGlobalRec) {
+void GCClassTableManager::dumpClassHistograms(art::File* dumpFile,
+		bool dumpGlobalRec) {
 	if(dumpGlobalRec)
 		gcpDumpHistRec(dumpFile);
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* _rec = it.second;
-		_dataWritten = GCPHistRecData::GCPDumpHistRecord(dumpFile, _rec->gcpGetDataRecP());
+		_dataWritten = GCPHistRecData::GCPDumpHistRecord(dumpFile,
+				_rec->gcpGetDataRecP());
 		if(!_dataWritten)
 			break;
 	}
