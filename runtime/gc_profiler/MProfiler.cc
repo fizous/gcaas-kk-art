@@ -2265,6 +2265,7 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 
 
 void ObjectSizesProfiler::initHistDataManager(void) {
+	LOG(ERROR) << "ObjectSizesProfiler::initHistDataManager";
 	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	hitogramsData = new GCHistogramManager();
 //	lastLiveGuard = 0;
