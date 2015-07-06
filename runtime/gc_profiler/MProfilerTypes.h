@@ -166,6 +166,18 @@ public:
 		dataRec_.pcntTotal = (dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
+	void gcpUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec){
+		atomicDataRec_.pcntLive = rootRec->cntLive == 0 ? 0.0 :
+				(atomicDataRec_.cntLive * 100.0) / rootRec->cntLive;
+		atomicDataRec_.pcntTotal = rootRec->cntTotal == 0 ? 0.0 :
+				(atomicDataRec_.cntTotal * 100.0) / rootRec->cntTotal;
+	}
+
+	void gcpSafeUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec){
+		atomicDataRec_.pcntLive = (atomicDataRec_.cntLive * 100.0) / rootRec->cntLive;
+		atomicDataRec_.pcntTotal = (atomicDataRec_.cntTotal * 100.0) / rootRec->cntTotal;
+	}
+
 	void gcpZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
 		double _index = rec->index;
 	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
@@ -179,6 +191,15 @@ public:
 	void gcpIncRecData(void){
 		dataRec_.cntLive++;
 		dataRec_.cntTotal++;
+	}
+
+	void gcpIncAtomicRecData(void){
+		atomicDataRec_.cntLive++;
+		atomicDataRec_.cntTotal++;
+	}
+
+	void gcpDecAtomicRecData(void){
+		atomicDataRec_.cntLive--;
 	}
 };
 
@@ -391,6 +412,7 @@ public:
   }
 
   virtual void gcpZeorfyAllAtomicRecords(void){}
+
   void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();
@@ -437,7 +459,9 @@ public:
 
 	void logClassTable(void);
 	void dumpClassHistograms(art::File*, bool);
+	void dumpClassAtomicHistograms(art::File*);
 	void calculatePercentiles(void);
+	void calculateAtomicPercentiles(void);
 	void gcpZeorfyAllAtomicRecords(void);
 };
 

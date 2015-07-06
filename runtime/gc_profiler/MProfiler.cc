@@ -2789,6 +2789,7 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 //			//LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
 //		}
 		_histRec->gcpIncRecData();
+		_histRec->gcpIncAtomicRecData();
 //		if(histData_ == NULL) {
 //			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
 //		} else {
@@ -2796,6 +2797,8 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 //		}
 		//update the global entry as well
 		histData_->gcpIncRecData();
+		histData_->gcpIncAtomicRecData();
+
 		//add data to global histogram
 
 		return _histRec;
@@ -2922,11 +2925,29 @@ void GCClassTableManager::logClassTable(void){
 }
 //
 
-void GCClassTableManager::calculatePercentiles(void) {
+void GCClassTableManager::calculateAtomicPercentiles(void) {
+	GCPHistogramRecAtomic* _globalAtomicRec = gcpGetAtomicDataRecP();
+	bool _safe = true;
+	if(_globalAtomicRec->cntLive == 0 || _globalAtomicRec->cntTotal == 0) {
+		_safe = false;
+	}
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
-		rec->gcpUpdateRecPercentile(gcpGetDataRecP());
+		if(_safe)
+			gcpSafeUpdateAtomicRecPercentile(_globalAtomicRec);
+		else
+			rec->gcpUpdateAtomicRecPercentile(_globalAtomicRec);
+	}
+}
+
+void GCClassTableManager::calculatePercentiles(void) {
+	GCPHistogramRec* _globalRec = gcpGetDataRecP();
+	GCPHistogramRecAtomic* _globalAtomicRec = gcpGetAtomicDataRecP();
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistRecData* rec = it.second;
+		rec->gcpUpdateRecPercentile(_globalRec);
 	}
 }
 
@@ -2948,7 +2969,19 @@ void GCClassTableManager::dumpClassHistograms(art::File* dumpFile,
 	}
 }
 
-
+void GCClassTableManager::dumpClassAtomicHistograms(art::File* dumpFile) {
+	bool _dataWritten = false;
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistRecData* _rec = it.second;
+		_dataWritten = _rec->gcpDumpAtomicHistRec(dumpFile);
+		if(!_dataWritten)
+			break;
+	}
+	if(_dataWritten) {
+		VMProfiler::GCPDumpEndMarker(dumpFile);
+	}
+}
 void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	histData_->gcpZerofyHistAtomicRecData();
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
@@ -3789,8 +3822,10 @@ void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	GCClassTableManager* _mngr = getClassHistograms();
 	if(_mngr != NULL) {
 		_dataRec->gcpDecRecData();
+		_dataRec->gcpDecAtomicRecData();
 		//update the global counter as well
 		_mngr->histData_->gcpDecRecData();
+		_mngr->histData_->gcpDecAtomicRecData();
 	}
 }
 
@@ -3819,6 +3854,13 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	}
 }
 
+void ClassProfiler::gcpFinalizeHistUpdates(void) {
+	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	GCClassTableManager* classManager = getClassHistograms();
+	if(classManager == NULL)
+		return;
+	classManager->gcpZeorfyAllAtomicRecords();
+}
 void ClassProfiler::initHistDataManager(void) {
 	LOG(ERROR) << "Initializing ClassProfiler::initHistDataManager";
 	hitogramsData = new GCClassTableManager();
@@ -3886,11 +3928,12 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	GCClassTableManager* tablManager = getClassHistograms();
 	if(tablManager != NULL) {
-		tablManager->calculatePercentiles();
 		dumpHeapStats();
+		tablManager->calculatePercentiles();
+		tablManager->calculateAtomicPercentiles();
 		tablManager->dumpClassHistograms(dump_file_, true);
 		// dump class data from last allocation window
-		tablManager->dumpClassHistograms(dump_file_, false);
+		tablManager->dumpClassAtomicHistograms(dump_file_);
 		if(isLastDump) {
 			GCPDumpEndMarker(dump_file_);
 			//dump data summary
@@ -3898,6 +3941,8 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
 			logPerfData();
 			dump_file_->Close();
 			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
+		} else {
+			gcpFinalizeHistUpdates();
 		}
 	}
 }

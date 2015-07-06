@@ -655,7 +655,7 @@ public:
   void dumpAllClasses(void);
   void dumpProfData(bool);
   void logPerfData(void);
-
+  void gcpFinalizeHistUpdates(void);
 };
 
 
