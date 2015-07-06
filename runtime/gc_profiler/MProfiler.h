@@ -378,7 +378,7 @@ public:
   virtual void gcpAddObject(size_t, size_t){}
   virtual void gcpAddObject(size_t, size_t,
   		mirror::Object*){}
-  virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){LOG(ERROR) << "VMProfiler::set class";}
+  virtual void gcpProfObjKlass(mirror::Class*, mirror::Object*){/*LOG(ERROR) << "VMProfiler::set class";*/}
   //virtual void gcpRemoveObject(size_t objSize, size_t allocSize){if(objSize == 0 || allocSize ==0) return;}
   virtual void gcpRemoveObject(size_t, mirror::Object*){}
 
@@ -532,7 +532,7 @@ public:
 	}
 
 	virtual void initHistDataManager(void);
-  void gcpProfObjKlass(mirror::Class*, mirror::Object*){ LOG(ERROR) << "ObjectSizesProfiler::set class";}
+  //void gcpProfObjKlass(mirror::Class*, mirror::Object*){ LOG(ERROR) << "ObjectSizesProfiler::set class";}
 
 	bool isMarkTimeEvents(void) {return false;}
 	bool isMarkHWEvents(void) {return false;}
