@@ -1679,11 +1679,11 @@ void MProfiler::DumpProfData(bool isLastDump) {
 
   if(successWrite) {
   	successWrite =
-  			GCPDumpEndMarker(dump_file_);
+  			VMProfiler::GCPDumpEndMarker(dump_file_);
   }
 
 	if(isLastDump) {
-		GCPDumpEndMarker(dump_file_);
+		VMProfiler::GCPDumpEndMarker(dump_file_);
 		dump_file_->Close();
 	}
 	GCMMP_VLOG(INFO) << " ManagerCPUTime: " <<
