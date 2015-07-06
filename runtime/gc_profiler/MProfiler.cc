@@ -2925,7 +2925,7 @@ inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
 	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
 }
 
-inline 	bool gcpDumpAtomicHistRec(art::File* file) {
+inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	GCPHistogramRec _dummyRec;
 	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
 	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
