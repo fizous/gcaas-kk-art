@@ -279,8 +279,10 @@ public:
   }
 
   virtual void initHistograms(void) {}
+
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
+
   virtual bool gcpDumpHistRec(art::File*);
 
 
@@ -368,6 +370,8 @@ public:
 
 	GCCohortManager(AtomicInteger*);
 	void initHistograms(void);
+
+	void addObject(size_t, size_t, mirror::Object*);
 
 	void addCohortRecord(void);
 	void addCohortRow(void);

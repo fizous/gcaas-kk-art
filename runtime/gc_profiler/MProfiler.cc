@@ -3610,6 +3610,11 @@ inline void GCCohortManager::addObjectToCohRecord(size_t objSize) {
 	}
 }
 
+void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
+		mirror::Object* obj) {
+
+}
+
 void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 				size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
