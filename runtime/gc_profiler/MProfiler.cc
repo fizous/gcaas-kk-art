@@ -3604,7 +3604,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 	}
 
 	if(_print) {
-		VMProfiler::GCPDumpEndMarker(dump_file_);
+		VMProfiler::GCPDumpEndMarker(dumpFile);
 	}
 }
 
