@@ -2747,15 +2747,16 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(),
-		histData_(new GCPHistRecData(0)) {
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
-		GCHistogramDataManager(hisMGR), histData_(new GCPHistRecData(0)) {
+		GCHistogramDataManager(hisMGR) {
 }
 
-
+void GCClassTableManager::initHistograms(void) {
+	histData_ = new GCPHistRecData(0);
+}
 inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)

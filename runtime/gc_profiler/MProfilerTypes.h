@@ -423,6 +423,8 @@ public:
 	~GCClassTableManager(){};
 
 	HistogramTable_S classTable_;
+
+	void initHistograms();
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
