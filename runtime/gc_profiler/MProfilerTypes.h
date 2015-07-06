@@ -118,6 +118,80 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
+class GCPHistRecData {
+public:
+	GCPHistogramRec dataRec_;
+	GCPHistogramRecAtomic atomicDataRec_;
+
+	static void GCPCopyRecordsData(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
+  	dest->index = src->index;
+  	dest->cntLive = src->cntLive.load();
+  	dest->cntTotal = src->cntTotal.load();
+  	dest->pcntLive = src->pcntLive;
+  	dest->pcntTotal = src->pcntTotal;
+  }
+
+	void initDataRecords(size_t kIndex) {
+		memset((void*)&dataRec_, 0, sizeof(GCPHistogramRec));
+		memset((void*)&atomicDataRec_, 0, sizeof(GCPHistogramRecAtomic));
+		dataRec_.index = kIndex;
+		atomicDataRec_.index = kIndex;
+	}
+
+	GCPHistRecData(size_t kIndex){
+		initDataRecords(kIndex);
+	}
+
+
+	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
+		return file->WriteFully(rec, sizeof(GCPHistogramRec));
+	}
+
+	GCPHistogramRec* gcpGetDataRecP(void) {
+		return &dataRec_;
+	}
+
+	GCPHistogramRecAtomic* gcpGetAtomicDataRecP(void) {
+		return &atomicDataRec_;
+	}
+
+	bool gcpDumpHistRec(art::File* file) {
+		return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
+	}
+
+	bool gcpDumpAtomicHistRec(art::File* file) {
+		GCPHistogramRec _dummyRec;
+		GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
+		return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
+	}
+
+	void gcpZerofyHistAtomicRecData(void) {
+		gcpZerofyHistAtomicRecData(&atomicDataRec_);
+	}
+
+	void gcpUpdateRecPercentile(GCPHistogramRec* rootRec){
+		dataRec_.pcntLive = (dataRec_.cntLive * 100.0) / rootRec->cntLive;
+		dataRec_.pcntTotal = (dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
+	}
+
+	void gcpZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
+		double _index = rec->index;
+	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+	  rec->index = _index;
+	}
+
+	void gcpDecRecData(void){
+		dataRec_.cntLive--;
+	}
+
+	void gcpIncRecData(void){
+		dataRec_.cntLive++;
+		dataRec_.cntTotal++;
+	}
+};
+
+
+
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
@@ -126,7 +200,7 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 	size_t objSize;
 	union {
 		GCHistogramDataManager* histRecP;
-		GCPHistogramRec* dataRec;
+		GCPHistRecData* dataRec;
 		size_t objBD;
 	};
 } GCPExtraObjHeader;
@@ -256,6 +330,8 @@ public:
 
 	int32_t lastCohortIndex;
 	GCMMP_HISTOGRAM_MGR_TYPE type_;
+	GCPHistRecData*				histData_;
+
 	GCPHistogramRec				histRecord;
 	GCPHistogramRecAtomic histAtomicRecord;
 	//secretNumber used to check if this manager is included;
@@ -291,9 +367,18 @@ public:
   void gcpAddDataToHist(GCPHistogramRec*);
   void gcpRemoveDataToHist(GCPHistogramRec*);
 
+	GCPHistogramRec* gcpGetDataRecP(void) {
+		return histData_->dataRec_;
+	}
+
+	GCPHistogramRecAtomic* gcpGetAtomicDataRecP(void) {
+		return histData_->atomicDataRec_;
+	}
+
   void setLastCohortIndex(int32_t index) {
   	lastCohortIndex = index;
   }
+
 
   void gcpResetHistogramRecData(GCPHistogramRec* rec) {
   	memset((void*)(rec), 0, sizeof(GCPHistogramRec));
@@ -307,6 +392,13 @@ public:
   	rec->pcntTotal = 100.0;
   }
 
+  void gcpZerofyHistogramAtomicRecData(GCPHistogramRecAtomic* rec) {
+  	double _index = rec->index;
+  	memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+  	rec->index = _index;
+  }
+
+  virtual void gcpZeorfyAllAtomicRecords(void){}
   void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();
@@ -345,13 +437,14 @@ public:
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
 	void addObject(size_t, size_t, mirror::Object*);
-	GCPHistogramRec* addObjectClassPair(mirror::Class* klass,
+	GCPHistRecData* addObjectClassPair(mirror::Class* klass,
 			mirror::Object* obj);
 
 
 	void logClassTable(void);
 	void dumpClassHistograms(art::File*, bool);
 	void calculatePercentiles(void);
+	void gcpZeorfyAllAtomicRecords(void);
 };
 
 

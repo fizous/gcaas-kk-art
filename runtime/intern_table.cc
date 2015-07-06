@@ -188,17 +188,15 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
 }
 
 
-mprofiler::GCPHistogramRec* InternTable::GCPProfileObjKlass(size_t hashCode) {
+mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
   for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end(); it != end; ++it) {
-  	mprofiler::GCPHistogramRec* existing_data = it->second;
+  	mprofiler::GCPHistRecData* existing_data = it->second;
   	//LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
     return existing_data;
   }
-  mprofiler::GCPHistogramRec* _record =
-  		(mprofiler::GCPHistogramRec*) calloc (1, sizeof(mprofiler::GCPHistogramRec));
-
-  classTableProf_.insert(std::make_pair(hashCode, _record));
-  return _record;
+  mprofiler::GCPHistRecData* _newRec = new mprofiler::GCPHistRecData(hashCode);
+  classTableProf_.insert(std::make_pair(hashCode, _newRec));
+  return _newRec;
 }
 
 mirror::String* InternTable::InternStrong(int32_t utf16_length,

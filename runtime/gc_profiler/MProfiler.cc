@@ -2748,16 +2748,16 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 
 
 GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
-
+	histData_ = new GCPHistRecData(0);
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
-
+	histData_ = new GCPHistRecData(0);
 }
 
 
-inline GCPHistogramRec* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
 		return NULL;
@@ -2767,11 +2767,12 @@ inline GCPHistogramRec* GCClassTableManager::addObjectClassPair(mirror::Class* k
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
 		//LOG(ERROR) << "start Hash=" << klassHash;
-		GCPHistogramRec* _histRec =
+		GCPHistRecData* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
-		gcpAddDataToHist(_histRec);
+		_histRec->gcpIncRecData();
+		//update the global entry as well
+		histData_->gcpIncRecData();
 		//add data to global histogram
-		gcpAddDataToHist(&histRecord);
 
 		return _histRec;
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
@@ -2867,25 +2868,26 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 }
 
 void GCClassTableManager::logClassTable(void){
-	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
-			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistogramRec* rec = it.second;
-		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
-				<< rec->cntLive << "; cntTotal: " << rec->cntTotal;
-	}
-
+	LOG(ERROR) << "GlobalRecord>>  cntLive: "
+			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
 	LOG(ERROR) << "+++table class size is " <<
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistRecData* rec = it.second;
+		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
+				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal;
+	}
+
+
 }
 //
 
 void GCClassTableManager::calculatePercentiles(void) {
-	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistogramRec* rec = it.second;
-		rec->index = it.first;
-		rec->pcntLive = rec->cntLive * 100.0 / histRecord.cntLive;
-		rec->pcntTotal = rec->cntTotal * 100.0 / histRecord.cntTotal;
+		mprofiler::GCPHistRecData* rec = it.second;
+		rec->gcpUpdateRecPercentile(gcpGetDataRecP());
 	}
 }
 
@@ -2893,15 +2895,25 @@ void GCClassTableManager::dumpClassHistograms(art::File* dumpFile, bool dumpGlob
 	if(dumpGlobalRec)
 		gcpDumpHistRec(dumpFile);
 	bool _dataWritten = false;
-	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistogramRec* _rec = it.second;
-		_dataWritten = dumpFile->WriteFully(_rec, sizeof(GCPHistogramRec));
+		mprofiler::GCPHistRecData* _rec = it.second;
+		_dataWritten = GCPHistRecData::GCPHistRecData(dumpFile, _rec->gcpGetDataRecP());
 		if(!_dataWritten)
 			break;
 	}
 	if(_dataWritten) {
 		VMProfiler::GCPDumpEndMarker(dumpFile);
+	}
+}
+
+
+void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
+	histData_->gcpZerofyHistAtomicRecData();
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPHistRecData* _rec = it.second;
+		_rec->gcpZerofyHistAtomicRecData();
 	}
 }
 
@@ -3708,14 +3720,15 @@ void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	}
 
 
-	GCPHistogramRec* _dataRec = _profHeader->dataRec;
+	GCPHistRecData* _dataRec = _profHeader->dataRec;
 	if(_dataRec == NULL)
 		return;
 
 	GCClassTableManager* _mngr = getClassHistograms();
 	if(_mngr != NULL) {
-		_mngr->gcpRemoveDataToHist(_dataRec);
-		_mngr->gcpRemoveDataToHist(&_mngr->histRecord);
+		_dataRec->gcpDecRecData();
+		//update the global counter as well
+		_mngr->histData_->gcpDecRecData();
 	}
 }
 
@@ -3727,7 +3740,7 @@ inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
-		GCPHistogramRec* _rec = classManager->addObjectClassPair(klass, obj);
+		GCPHistRecData* _rec = classManager->addObjectClassPair(klass, obj);
 		if(_rec == NULL) {
 			LOG(ERROR) << "Could not add the new record";
 		}
