@@ -2756,11 +2756,13 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 
 
 GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
+	initHistograms();
 	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
+	initHistograms();
 	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
