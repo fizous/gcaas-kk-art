@@ -368,11 +368,11 @@ public:
   void gcpRemoveDataToHist(GCPHistogramRec*);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
-		return histData_->dataRec_;
+		return histData_->gcpGetDataRecP();
 	}
 
 	GCPHistogramRecAtomic* gcpGetAtomicDataRecP(void) {
-		return histData_->atomicDataRec_;
+		return histData_->gcpGetAtomicDataRecP();
 	}
 
   void setLastCohortIndex(int32_t index) {
