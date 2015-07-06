@@ -518,7 +518,7 @@ public:
 			bool initHistogrms);
 
 	ObjectSizesProfiler(GCMMP_Options* opts, void* entry) :
-		ObjectSizesProfiler(opts, entry, true) {
+		(opts, entry, true) {
 		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
 	}
 
