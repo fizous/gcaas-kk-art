@@ -611,18 +611,17 @@ public:
 
 class CohortProfiler : public ObjectSizesProfiler {
 public:
-	GCCohortManager* cohMgr;
 
-	GCCohortManager* getClassHistograms(void) {
-		return (GCClassTableManager*)hitogramsData;
+	GCCohortManager* getCohortManager(void) {
+		return (GCCohortManager*)hitogramsData;
 	}
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
-		ObjectSizesProfiler(opts, entry) {
+		ObjectSizesProfiler(opts, entry, false) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
-		cohMgr = new GCCohortManager(&GCPTotalAllocBytes);
 		//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
 		kGCMMPLogAllocWindow = 18;
+		initHistDataManager();
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 

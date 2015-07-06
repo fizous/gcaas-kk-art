@@ -3725,7 +3725,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistDataManager(void) {
-	hitogramsData = new GCCohortManager();
+	hitogramsData = new GCCohortManager(&GCPTotalAllocBytes);
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
@@ -3745,7 +3745,7 @@ bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	cohMgr->addObjCohorts(allocatedMemory, objSize, obj);
+	getCohortManager()->addObjCohorts(allocatedMemory, objSize, obj);
 }
 
 void CohortProfiler::dumpProfData(bool isLastDump) {
