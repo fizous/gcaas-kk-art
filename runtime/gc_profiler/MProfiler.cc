@@ -222,7 +222,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			}
 		}
 	}
-	file->WriteFully(mprofiler::VMProfiler::GCPDumpEndMarker(file), sizeof(int));
+	VMProfiler::GCPDumpEndMarker(file);
 }
 
 
@@ -2771,7 +2771,7 @@ inline GCPHistogramRec* GCClassTableManager::addObjectClassPair(mirror::Class* k
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
 		gcpAddDataToHist(_histRec);
 		//add data to global histogram
-		gcpAddDataToHist(histRec);
+		gcpAddDataToHist(&histRecord);
 
 		return _histRec;
 //		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
@@ -2896,7 +2896,7 @@ void GCClassTableManager::dumpClassHistograms(art::File* dumpFile, bool dumpGlob
 	for (const std::pair<size_t, mprofiler::GCPHistogramRec*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistogramRec* _rec = it.second;
-		_dataWritten = dump_file->WriteFully(_rec, sizeof(GCPHistogramRec));
+		_dataWritten = dumpFile->WriteFully(_rec, sizeof(GCPHistogramRec));
 		if(!_dataWritten)
 			break;
 	}
