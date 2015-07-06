@@ -3725,7 +3725,7 @@ void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistDataManager(void) {
-
+	hitogramsData = new GCCohortManager();
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {

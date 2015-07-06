@@ -613,6 +613,10 @@ class CohortProfiler : public ObjectSizesProfiler {
 public:
 	GCCohortManager* cohMgr;
 
+	GCCohortManager* getClassHistograms(void) {
+		return (GCClassTableManager*)hitogramsData;
+	}
+
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
