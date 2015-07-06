@@ -2748,15 +2748,19 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 
 
 GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
+	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
+	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
 void GCClassTableManager::initHistograms(void) {
 	histData_ = new GCPHistRecData(0);
+	LOG(ERROR) << "GCClassTableManager::initHistograms";
 }
+
 inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
