@@ -2898,7 +2898,7 @@ void GCClassTableManager::dumpClassHistograms(art::File* dumpFile, bool dumpGlob
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* _rec = it.second;
-		_dataWritten = GCPHistRecData::GCPHistRecData(dumpFile, _rec->gcpGetDataRecP());
+		_dataWritten = GCPHistRecData::GCPDumpHistRecord(dumpFile, _rec->gcpGetDataRecP());
 		if(!_dataWritten)
 			break;
 	}
