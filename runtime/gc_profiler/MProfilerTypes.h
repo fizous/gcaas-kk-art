@@ -155,11 +155,7 @@ public:
 
 	bool gcpDumpHistRec(art::File*);
 
-	bool gcpDumpAtomicHistRec(art::File* file) {
-		GCPHistogramRec _dummyRec;
-		GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
-		return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
-	}
+	bool gcpDumpAtomicHistRec(art::File*);
 
 	void gcpZerofyHistAtomicRecData(void) {
 		gcpZerofyHistAtomicRecData(&atomicDataRec_);
