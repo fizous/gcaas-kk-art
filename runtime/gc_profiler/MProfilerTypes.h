@@ -285,6 +285,7 @@ public:
 
   virtual bool gcpDumpHistRec(art::File*);
 
+  virtual void gcpDumpManagedData(art::File*, bool){}
 
   void gcpAddDataToHist(GCPHistogramRec*);
   void gcpRemoveDataToHist(GCPHistogramRec*);
@@ -372,12 +373,10 @@ public:
 	void initHistograms(void);
 
 	void addObject(size_t, size_t, mirror::Object*);
+	void gcpDumpManagedData(art::File*, bool);
 
 	void addCohortRecord(void);
 	void addCohortRow(void);
-
-	void addObjCohorts(size_t allocatedMemory,
-					size_t objSize, mirror::Object* obj);
 
 	void addObjectToCohRecord(size_t objSize);
 
@@ -466,7 +465,7 @@ public:
 
 
 	void logClassTable(void);
-	void dumpClassHistograms(art::File*, bool);
+	void gcpDumpManagedData(art::File*, bool);
 	void dumpClassAtomicHistograms(art::File*);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);

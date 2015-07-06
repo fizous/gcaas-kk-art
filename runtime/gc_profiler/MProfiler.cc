@@ -2965,7 +2965,7 @@ void GCClassTableManager::calculatePercentiles(void) {
 	}
 }
 
-void GCClassTableManager::dumpClassHistograms(art::File* dumpFile,
+void GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	if(dumpGlobalRec)
 		gcpDumpHistRec(dumpFile);
@@ -3612,11 +3612,6 @@ inline void GCCohortManager::addObjectToCohRecord(size_t objSize) {
 
 void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 		mirror::Object* obj) {
-
-}
-
-void GCCohortManager::addObjCohorts(size_t allocatedMemory,
-				size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramManager::GCPGetObjProfHeader(allocatedMemory, obj);
 	addObjectToCohRecord(objSize);
@@ -3624,6 +3619,8 @@ void GCCohortManager::addObjCohorts(size_t allocatedMemory,
 	//we need to calculate the correct bytes without the allocated memory
 	_profHeader->objBD = allocRec_->load()-objSize;
 }
+
+
 
 
 void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
@@ -3699,7 +3696,9 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 
 }
 
-void GCCohortManager::gcpDumpCohortData(art::File* dumpFile) {
+
+void GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
+		bool dumpGlobalData){
 	bool _print   = false;
 	bool _success = true;
 	//GCPCohortRecordData* _recP = NULL;
@@ -3750,7 +3749,7 @@ bool CohortProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	getCohortManager()->addObjCohorts(allocatedMemory, objSize, obj);
+	getCohortManager()->addObject(allocatedMemory, objSize, obj);
 }
 
 void CohortProfiler::dumpProfData(bool isLastDump) {
@@ -3759,7 +3758,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 	dumpHeapStats();
 	//dump the global entry
 
-	getCohortManager()->gcpDumpCohortData(dump_file_);
+	hitogramsData->gcpDumpManagedData(dump_file_, false);
 
 	//gcpUpdateGlobalHistogram();
 		//dump the global stats
