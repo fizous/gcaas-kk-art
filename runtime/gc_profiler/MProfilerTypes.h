@@ -187,6 +187,10 @@ public:
 	void gcpDecRecData(void){
 		dataRec_.cntLive--;
 	}
+	void gcpDecAtomicRecData(void){
+		if(atomicDataRec_.cntLive > 0)
+			atomicDataRec_.cntLive--;
+	}
 
 	void gcpIncRecData(void){
 		dataRec_.cntLive++;
@@ -198,9 +202,7 @@ public:
 		atomicDataRec_.cntTotal++;
 	}
 
-	void gcpDecAtomicRecData(void){
-		atomicDataRec_.cntLive--;
-	}
+
 };
 
 
