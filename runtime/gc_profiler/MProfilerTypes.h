@@ -345,7 +345,7 @@ public:
 };//GCHistogramDataManager
 
 
-class GCCohortManager : public GCHistogramDataManager {
+class GCCohortManager  {
 	size_t cohRowSZ_;
 	size_t cohArrSZ_;
 
