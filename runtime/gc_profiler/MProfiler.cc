@@ -3791,7 +3791,7 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
 		dump_file_->Close();
 		LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
 	} else {
-		LOG(ERROR) << "ClassProfiler: dumpProfData with lastDump is flase";
+		//LOG(ERROR) << "ClassProfiler: dumpProfData with lastDump is flase";
 	}
 }
 
