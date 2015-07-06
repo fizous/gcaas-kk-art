@@ -2896,12 +2896,21 @@ void GCClassTableManager::logClassTable(void){
 			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
 	LOG(ERROR) << "+++table class size is " <<
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
+	double _cntLive = 0.0;
+	double _cntTotal = 0.0;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
+		_cntTotal+=rec->dataRec_.cntTotal;
+		_cntLive+=rec->dataRec_.cntLive;
 		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
 				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal;
 	}
+	LOG(ERROR) << "GlobalRecord>>  cntLive: "
+			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
+
+	LOG(ERROR) << "Aclaculated>>  cntLive: "
+			<< _cntLive << "; cntTotal: " << _cntTotal;
 
 
 }
