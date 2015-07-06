@@ -153,9 +153,7 @@ public:
 		return &atomicDataRec_;
 	}
 
-	bool gcpDumpHistRec(art::File* file) {
-		return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
-	}
+	bool gcpDumpHistRec(art::File*);
 
 	bool gcpDumpAtomicHistRec(art::File* file) {
 		GCPHistogramRec _dummyRec;
