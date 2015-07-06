@@ -182,6 +182,8 @@ public:
 		double _index = rec->index;
 	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
 	  rec->index = _index;
+	  rec->cntLive.store(0);
+	  rec->cntTotal.store(0);
 	}
 
 	void gcpDecRecData(void){
@@ -201,11 +203,7 @@ public:
 		atomicDataRec_.cntLive++;
 		atomicDataRec_.cntTotal++;
 	}
-
-
 };
-
-
 
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
 typedef std::multimap<size_t, size_t> HistogramTableTest_S;

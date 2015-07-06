@@ -3946,9 +3946,9 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
 			logPerfData();
 			dump_file_->Close();
 			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
-		} else {
-			gcpFinalizeHistUpdates();
 		}
+		gcpFinalizeHistUpdates();
+
 	}
 }
 
