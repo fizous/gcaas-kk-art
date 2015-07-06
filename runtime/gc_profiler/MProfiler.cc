@@ -2757,18 +2757,18 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 
 GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
 	initHistograms();
-	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
+	//LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
 GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		GCHistogramDataManager(hisMGR) {
 	initHistograms();
-	LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
+	//LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
 
 void GCClassTableManager::initHistograms(void) {
 	histData_ = new GCPHistRecData(0);
-	LOG(ERROR) << "GCClassTableManager::initHistograms";
+	//LOG(ERROR) << "GCClassTableManager::initHistograms";
 }
 
 inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
@@ -2783,17 +2783,17 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 		//LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistRecData* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
-		if(_histRec == NULL) {
-			LOG(ERROR) << "GCClassTableManager:: _histRec is NULL";
-		} else {
-			LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
-		}
+//		if(_histRec == NULL) {
+//			//LOG(ERROR) << "GCClassTableManager:: _histRec is NULL";
+//		} else {
+//			//LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
+//		}
 		_histRec->gcpIncRecData();
-		if(histData_ == NULL) {
-			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
-		} else {
-			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
-		}
+//		if(histData_ == NULL) {
+//			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
+//		} else {
+//			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
+//		}
 		//update the global entry as well
 		histData_->gcpIncRecData();
 		//add data to global histogram
@@ -3786,11 +3786,11 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		GCPHistRecData* _rec = classManager->addObjectClassPair(klass, obj);
-		if(_rec == NULL) {
-			LOG(ERROR) << "Could not add the new record";
-		} else {
-			LOG(ERROR) << "new record was added";
-		}
+//		if(_rec == NULL) {
+//			LOG(ERROR) << "Could not add the new record";
+//		} else {
+//			LOG(ERROR) << "new record was added";
+//		}
 		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
 		if(objSpace == 0) {
 			LOG(ERROR) << "Objectsize rturned 0: ";

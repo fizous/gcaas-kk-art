@@ -196,13 +196,13 @@ mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
     return existing_data;
   }
   mprofiler::GCPHistRecData* _newRec = new mprofiler::GCPHistRecData(hashCode);
-  if(_newRec == NULL) {
-  	LOG(ERROR) << "_new record could not be allocated";
-  } else {
-  	LOG(ERROR) << "_new was allocated";
-  }
+//  if(_newRec == NULL) {
+//  	LOG(ERROR) << "_new record could not be allocated";
+//  } else {
+//  	LOG(ERROR) << "_new was allocated";
+//  }
   classTableProf_.insert(std::make_pair(hashCode, _newRec));
-  LOG(ERROR) << "Done with inserting _newRec";
+//  LOG(ERROR) << "Done with inserting _newRec";
   return _newRec;
 }
 
