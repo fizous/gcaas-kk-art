@@ -2749,7 +2749,7 @@ inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
 }
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
-	return dump_file->WriteFully(&histRecord, sizeof(GCPHistogramRec));
+	return dump_file->WriteFully(gcpGetDataRecP(), sizeof(GCPHistogramRec));
 }
 
 /********************* GCClassTableManager profiling ****************/
@@ -3883,10 +3883,11 @@ void ClassProfiler::logPerfData() {
 }
 
 void ClassProfiler::dumpProfData(bool isLastDump) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	GCClassTableManager* tablManager = getClassHistograms();
 	if(tablManager != NULL) {
-		dumpHeapStats();
 		tablManager->calculatePercentiles();
+		dumpHeapStats();
 		tablManager->dumpClassHistograms(dump_file_, true);
 		// dump class data from last allocation window
 		tablManager->dumpClassHistograms(dump_file_, false);
