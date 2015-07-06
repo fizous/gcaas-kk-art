@@ -2965,7 +2965,8 @@ void GCClassTableManager::calculatePercentiles(void) {
 	}
 }
 
-void GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
+
+void GCClassTableManager::dumpClassHistograms(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	if(dumpGlobalRec)
 		gcpDumpHistRec(dumpFile);
@@ -2981,6 +2982,12 @@ void GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 	if(_dataWritten) {
 		VMProfiler::GCPDumpEndMarker(dumpFile);
 	}
+}
+
+void GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
+		bool dumpGlobalRec) {
+	dumpClassHistograms(dumpFile, dumpGlobalRec);
+	dumpClassAtomicHistograms(dumpFile);
 }
 
 void GCClassTableManager::dumpClassAtomicHistograms(art::File* dumpFile) {
@@ -3951,15 +3958,14 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
 		dumpHeapStats();
 		tablManager->calculatePercentiles();
 		tablManager->calculateAtomicPercentiles();
-		tablManager->dumpClassHistograms(dump_file_, true);
+		tablManager->gcpDumpManagedData(dump_file_, true);
 		// dump class data from last allocation window
-		tablManager->dumpClassAtomicHistograms(dump_file_);
 		if(isLastDump) {
 			GCPDumpEndMarker(dump_file_);
 			//dump data summary
 			tablManager->dumpClassHistograms(dump_file_, false);
-			logPerfData();
 			dump_file_->Close();
+			logPerfData();
 			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
 		}
 		gcpFinalizeHistUpdates();

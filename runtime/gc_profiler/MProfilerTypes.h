@@ -466,6 +466,8 @@ public:
 
 	void logClassTable(void);
 	void gcpDumpManagedData(art::File*, bool);
+	void dumpClassHistograms(art::File* dumpFile,
+			bool dumpGlobalRec);
 	void dumpClassAtomicHistograms(art::File*);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
