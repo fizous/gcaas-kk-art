@@ -189,13 +189,20 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
 
 
 mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
-  for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end(); it != end; ++it) {
+  for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end();
+  		it != end; ++it) {
   	mprofiler::GCPHistRecData* existing_data = it->second;
   	//LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
     return existing_data;
   }
   mprofiler::GCPHistRecData* _newRec = new mprofiler::GCPHistRecData(hashCode);
+  if(_newRec == NULL) {
+  	LOG(ERROR) << "_new record could not be allocated";
+  } else {
+  	LOG(ERROR) << "_new was allocated";
+  }
   classTableProf_.insert(std::make_pair(hashCode, _newRec));
+  LOG(ERROR) << "Done with inserting _newRec";
   return _newRec;
 }
 
