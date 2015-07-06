@@ -2917,6 +2917,10 @@ void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	}
 }
 
+bool GCPHistRecData::GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
+	return file->WriteFully(rec, sizeof(GCPHistogramRec));
+}
+
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);

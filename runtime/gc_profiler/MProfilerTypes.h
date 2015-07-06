@@ -143,9 +143,7 @@ public:
 	}
 
 
-	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
-		return file->WriteFully(rec, sizeof(GCPHistogramRec));
-	}
+	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
 		return &dataRec_;
