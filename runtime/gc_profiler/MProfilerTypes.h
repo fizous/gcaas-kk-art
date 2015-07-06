@@ -118,6 +118,15 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 	double pcntTotal;
 } GCPHistogramRec;
 
+
+typedef struct PACKED(4) GCPCohortRecordData_S {
+	double index_;
+	double objLiveCnt;
+	double objTotalCnt;
+	double liveSize;
+	double totalSize;
+} GCPCohortRecordData;
+
 class GCPHistRecData {
 public:
 	GCPHistogramRec dataRec_;
@@ -222,15 +231,6 @@ typedef struct PACKED(4) GCPExtraObjHeader_S {
 	};
 } GCPExtraObjHeader;
 
-
-typedef struct PACKED(4) GCPCohortRecordData_S {
-	double index_;
-	double objLiveCnt;
-	double objTotalCnt;
-	double liveSize;
-	double totalSize;
-} GCPCohortRecordData;
-
 typedef struct PACKED(4) GCPCohortsRow_S {
 	int index_;
 	GCPCohortRecordData cohorts[GCP_MAX_COHORT_ROW_CAP];
@@ -265,6 +265,7 @@ public:
 	static size_t removeMProfilingExtraBytes(size_t);
 	static void GCPInitObjectProfileHeader(size_t allocatedMemory,
 			mirror::Object* obj);
+
 	static int GetExtraProfileBytes(void) {
 		return GCHistogramDataManager::kGCMMPHeaderSize;
 	}
@@ -286,6 +287,8 @@ public:
   virtual bool gcpDumpHistRec(art::File*);
 
   virtual void gcpDumpManagedData(art::File*, bool){}
+
+  virtual void gcpZeorfyAllAtomicRecords(void){}
 
   void gcpAddDataToHist(GCPHistogramRec*);
   void gcpRemoveDataToHist(GCPHistogramRec*);
@@ -321,9 +324,8 @@ public:
   	rec->index = _index;
   }
 
-  virtual void gcpZeorfyAllAtomicRecords(void){}
-
-  void static GCPCopyRecords(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
+  void static GCPCopyRecords(GCPHistogramRec* dest,
+  		GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();
   	dest->cntTotal = src->cntTotal.load();
