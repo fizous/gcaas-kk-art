@@ -516,7 +516,13 @@ public:
 
 	ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
 			bool initHistogrms);
-	ObjectSizesProfiler(GCMMP_Options* opts, void* entry);
+
+	ObjectSizesProfiler(GCMMP_Options* opts, void* entry) :
+		ObjectSizesProfiler(opts, entry, true) {
+		initHistDataManager();
+		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
+	}
+
 	~ObjectSizesProfiler(){};
 
 	static size_t GCPAddMProfilingExtraBytes(size_t);

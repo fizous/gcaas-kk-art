@@ -2247,21 +2247,6 @@ ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
 	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
 }
 
-ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
-	ObjectSizesProfiler(argOptions, entry, true) {
-	srand (time(NULL));
-	initHistDataManager();
-//	memset((void*)&testLogic, 0, sizeof(GCPObjectHeaderTest));
-//	testLogic.takeTest = 1;
-
-	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
-//	if(initCounters(perfName_) != 0) {
-//		LOG(ERROR) << "ObjectSizesProfiler : init counters returned error";
-//	} else {
-//
-//		LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler";
-//	}
-}
 
 void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager = new GCHistogramManager();
