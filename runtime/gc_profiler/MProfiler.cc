@@ -2906,13 +2906,19 @@ void GCClassTableManager::logClassTable(void){
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
-		_cntTotal+=rec->dataRec_.cntTotal;
-		_cntLive+=rec->dataRec_.cntLive;
-		_pcntLive+=rec->dataRec_.pcntLive;
-		_pcnTotal+=rec->dataRec_.pcntTotal;
+		_cntTotal += rec->dataRec_.cntTotal;
+		_cntLive  += rec->dataRec_.cntLive;
+		_pcntLive += rec->dataRec_.pcntLive;
+		_pcnTotal += rec->dataRec_.pcntTotal;
 		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
 				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal <<
 				"; pcntLive= " << rec->dataRec_.pcntLive << "; pcntTotal= " << rec->dataRec_.pcntTotal;
+
+		LOG(ERROR) << "atomic hash-- " << it.first << ", cntLive: "
+				<< rec->atomicDataRec_.cntLive << "; cntTotal: " <<
+				rec->atomicDataRec_.cntTotal << "; pcntLive= " <<
+				rec->atomicDataRec_.pcntLive << "; pcntTotal= " <<
+				rec->atomicDataRec_.pcntTotal;
 	}
 	LOG(ERROR) << "GlobalRecord>>  cntLive: "
 			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
@@ -2935,7 +2941,7 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
 		if(_safe)
-			gcpSafeUpdateAtomicRecPercentile(_globalAtomicRec);
+			rec->gcpSafeUpdateAtomicRecPercentile(_globalAtomicRec);
 		else
 			rec->gcpUpdateAtomicRecPercentile(_globalAtomicRec);
 	}
@@ -2943,7 +2949,6 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 
 void GCClassTableManager::calculatePercentiles(void) {
 	GCPHistogramRec* _globalRec = gcpGetDataRecP();
-	GCPHistogramRecAtomic* _globalAtomicRec = gcpGetAtomicDataRecP();
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPHistRecData* rec = it.second;
