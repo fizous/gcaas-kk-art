@@ -3754,7 +3754,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 	dumpHeapStats();
 	//dump the global entry
 
-	cohMgr->gcpDumpCohortData(dump_file_);
+	getCohortManager()->gcpDumpCohortData(dump_file_);
 
 	//gcpUpdateGlobalHistogram();
 		//dump the global stats
@@ -3777,7 +3777,7 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
-	cohMgr->gcpRemoveObject(allocatedMemory, obj);
+	getCohortManager()->gcpRemoveObject(allocatedMemory, obj);
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
@@ -3793,7 +3793,7 @@ void CohortProfiler::logPerfData() {
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	int _rIndex = 0;
-	for (const auto& _rowIterP : cohMgr->cohortsTable.cohortRows_) {
+	for (const auto& _rowIterP : getCohortManager()->cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
 			break;
