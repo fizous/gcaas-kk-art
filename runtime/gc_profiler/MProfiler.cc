@@ -2925,6 +2925,11 @@ inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
 	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
 }
 
+inline 	bool gcpDumpAtomicHistRec(art::File* file) {
+	GCPHistogramRec _dummyRec;
+	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
+	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
+}
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramManager::initHistograms(void){
 	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
@@ -3751,6 +3756,8 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 		GCPHistRecData* _rec = classManager->addObjectClassPair(klass, obj);
 		if(_rec == NULL) {
 			LOG(ERROR) << "Could not add the new record";
+		} else {
+			LOG(ERROR) << "new record was added";
 		}
 		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
 		if(objSpace == 0) {
