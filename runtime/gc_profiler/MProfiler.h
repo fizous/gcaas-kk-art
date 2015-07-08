@@ -329,7 +329,7 @@ public:
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   static int32_t GCPCalcCohortIndex(void) {
-  	return (GCPTotalAllocBytes.load() >> kGCMMPCohortLog);
+  	return (GCPTotalAllocBytes.load() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
   virtual int32_t getGCEventsCounts(void) {

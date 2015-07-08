@@ -276,7 +276,11 @@ public:
 	//secretNumber used to check if this manager is included;
 	int iSecret;
 
+	GCHistogramDataManager* parentManager_;
+
+
 	GCHistogramDataManager(void);
+	GCHistogramDataManager(bool, GCHistogramDataManager*);
 	GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	GCHistogramDataManager(bool);
 	virtual ~GCHistogramDataManager(){}
@@ -507,6 +511,7 @@ public:
 
 
 	GCHistogramObjSizesManager(void);
+	GCHistogramObjSizesManager(bool, GCHistogramDataManager*);
 	GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	~GCHistogramObjSizesManager(){};
 
@@ -566,6 +571,7 @@ class GCPThreadAllocManager : public GCHistogramDataManager {
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHist_;
+
 };
 
 class PACKED(4) GCPauseThreadManager {

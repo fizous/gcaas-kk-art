@@ -2740,10 +2740,20 @@ GCHistogramDataManager::GCHistogramDataManager(bool shouldInitHistograms) : type
 		initHistograms();
 }
 
+
 GCHistogramDataManager::GCHistogramDataManager(void) : type_(GCMMP_HIST_CHILD) {
 	generateNewSecret();
 	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
 	initHistograms();
+}
+
+GCHistogramDataManager::GCHistogramDataManager(bool shouldInitHistograms,
+		GCHistogramDataManager* parentManager) {
+	generateNewSecret();
+	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
+	if(shouldInitHistograms)
+		initHistograms();
+	parentManager_ = parentManager;
 }
 
 GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
@@ -3070,7 +3080,13 @@ GCHistogramObjSizesManager::GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE 
 
 }
 
+GCHistogramObjSizesManager::GCHistogramObjSizesManager(bool shouldInitHist,
+		GCHistogramDataManager* parentManager) :
+				GCHistogramDataManager(false, parentManager) {
+	if(shouldInitHist)
+		initHistograms();
 
+}
 
 
 //inline bool GCHistogramObjSizesManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic* rec) {
