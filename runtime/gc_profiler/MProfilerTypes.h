@@ -14,7 +14,7 @@
 #include "safe_map.h"
 
 #include "os.h"
-
+#include <list>
 #include <string>
 #include <vector>
 #include <utility>
