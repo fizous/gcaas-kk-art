@@ -2454,8 +2454,6 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t allocatedSpace, mirror::Ob
 
 void ObjectSizesProfiler::logPerfData() {
 
-
-
 	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
@@ -2466,10 +2464,10 @@ void ObjectSizesProfiler::logPerfData() {
 	GCHistogramObjSizesManager* _histManager = getObjHistograms();
 
 	for(int i = 0; i < GCHistogramDataManager::kGCMMPMaxHistogramEntries; i++){
-		LOG(ERROR) << "index: " << _histManager->histogramTable[i].index << " :: cntLive=" <<
-				_histManager->histogramTable[i].cntLive << "; cntTotal="<<
-				_histManager->histogramTable[i].cntTotal<<"; pcntLive=" << _histManager->histogramTable[i].pcntLive <<
-				"; pcntTotal="<< _histManager->histogramTable[i].pcntTotal;
+		LOG(ERROR) << "index: " << _histManager->sizeHistograms[i].index << " :: cntLive=" <<
+				_histManager->sizeHistograms[i].cntLive << "; cntTotal="<<
+				_histManager->sizeHistograms[i].cntTotal<<"; pcntLive=" << _histManager->sizeHistograms[i].pcntLive <<
+				"; pcntTotal="<< _histManager->sizeHistograms[i].pcntTotal;
 	}
 }
 
@@ -2528,16 +2526,17 @@ void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
   if(_newCohortIndex != getObjHistograms()->lastCohortIndex) {
   	getObjHistograms()->lastCohortIndex = GCPGetCalcCohortIndex();
   	GCCohortManager::kGCPLastCohortIndex.store(getObjHistograms()->lastCohortIndex);
-  	GCPHistRecData* _atomicRecData = getObjHistograms()->histData_;
+  	GCHistogramObjSizesManager* _manager = getObjHistograms();
+  	GCPHistRecData* _atomicRecData = _manager->histData_;
   	_atomicRecData->gcpZerofyHistAtomicRecData();
   	for(int i = 0; i < GCHistogramObjSizesManager::kGCMMPMaxHistogramEntries;
   			i++) {
-  		sizeHistograms[i].gcpZerofyHistAtomicRecData();
+  		_manager->sizeHistograms[i].gcpZerofyHistAtomicRecData();
   	}
   }
 	GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	//we are relaxed we do not need to lookup for the whole records
-	getObjHistograms()->gcpCheckForResetHist();
+	//getObjHistograms()->gcpCheckForResetHist();
 }
 
 
