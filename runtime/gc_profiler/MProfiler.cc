@@ -2381,18 +2381,10 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
-	GCPExtraObjHeader* extraHeader =
-			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
 
-	if(extraHeader->objSize == 0)
+	if(hitogramsData == NULL)
 		return;
-	GCHistogramDataManager* _histManager = extraHeader->histRecP;
-
-	if(_histManager == NULL)
-		return;
-
-	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObject(histIndex);
+	hitogramsData->removeObject(allocatedMemory, obj);
 
 
 //	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
@@ -3157,10 +3149,33 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 //	}
 }
 
+void GCHistogramObjSizesManager::removeObject(size_t allocSpace,
+		mirror::Object* obj) {
+	GCPExtraObjHeader* extraHeader =
+			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
 
-void GCHistogramObjSizesManager::gcpRemoveObject(size_t histIndex) {
+	if(extraHeader->objSize == 0)
+		return;
+	GCHistogramDataManager* _histManager = extraHeader->histRecP;
+
+	if(_histManager == NULL)
+		return;
+
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex,
+			true);
+
+}
+
+
+void GCHistogramObjSizesManager::gcpRemoveObjectFromIndex(size_t histIndex,
+		bool isAgg) {
 //	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
-	gcpAggRemoveDataFromHist(&sizeHistograms[histIndex]);
+	if(isAgg) {
+		gcpAggRemoveDataFromHist(&sizeHistograms[histIndex]);
+	} else {
+		gcpNoAggRemoveDataFromHist(&sizeHistograms[histIndex]);
+	}
 
 //	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
 //
@@ -3184,22 +3199,22 @@ void GCHistogramObjSizesManager::gcpRemoveObject(size_t histIndex) {
 }
 
 
-void GCHistogramObjSizesManager::GCPRemoveObj(size_t allocatedMemory,
-		mirror::Object* obj) {
-
-	GCPExtraObjHeader* extraHeader =
-			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
-
-	if(extraHeader->objSize == 0)
-		return;
-	GCHistogramDataManager* _histManager = extraHeader->histRecP;
-
-	if(_histManager == NULL || extraHeader->objSize == 0)
-		return;
-
-	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObject(histIndex);
-}
+//void GCHistogramObjSizesManager::GCPRemoveObj(size_t allocatedMemory,
+//		mirror::Object* obj) {
+//
+//	GCPExtraObjHeader* extraHeader =
+//			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
+//
+//	if(extraHeader->objSize == 0)
+//		return;
+//	GCHistogramDataManager* _histManager = extraHeader->histRecP;
+//
+//	if(_histManager == NULL || extraHeader->objSize == 0)
+//		return;
+//
+//	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+//	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObject(histIndex);
+//}
 
 inline void GCHistogramObjSizesManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
 		GCPHistogramRec* globalRec) {
@@ -3385,14 +3400,57 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
-	extraHeader->objSize = objSize;
-	extraHeader->histRecP = this;
+//	extraHeader->objSize = objSize;
+//	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	gcpAggAddDataToHist(&sizeHistograms[histIndex]);
+	objSizesHistMgr_->gcpNoAggAddDataToHist(&objSizesHistMgr_->sizeHistograms[histIndex]);
+}
+
+inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf) {
+	if(thProf->histogramManager_ != NULL) {
+		thProf->histogramManager_->addObject(allocatedMemory, objSize, obj);
+		//TODO: account for the global histograms:: or maybe not for now
+		addObject(allocatedMemory, objSize, obj);
+		//TODO: We should remove data from the histograms as well. But I will ignore it now
+	}
+}
+
+void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+	GCPExtraObjHeader* extraHeader =
+			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
+
+	if(extraHeader->objSize == 0)
+		return;
+	GCHistogramDataManager* _histManager = extraHeader->histRecP;
+
+	if(_histManager == NULL)
+		return;
+
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex, true);
+	objSizesHistMgr_->gcpRemoveObjectFromIndex(histIndex, false);
+}
+
+/********************************* Thread Alloc Profiler ****************/
+
+
+void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize){
+	return;
+}
+
+inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	GCMMPThreadProf* thProf = Thread::Current()->GetProfRec();
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
+		if(thProf->histogramManager_ != NULL)
+			getThreadHistManager()->addObjectForThread(allocatedMemory, objSize,
+					obj, thProf);
+	}
 }
 
 
-/********************************* Thread Alloc Profiler ****************/
 
 void ThreadAllocProfiler::initHistDataManager(void) {
 	hitogramsData = new GCPThreadAllocManager();
@@ -3658,19 +3716,6 @@ void ThreadAllocProfiler::dumpProfData(bool isLastDump) {
 
 
 
-void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
-		size_t objSize){
-	return;
-}
-
-inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
-		size_t objSize, mirror::Object* obj) {
-	GCMMPThreadProf* thProf = Thread::Current()->GetProfRec();
-	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-		if(thProf->histogramManager_ != NULL)
-			thProf->histogramManager_->addObject(allocatedMemory, objSize, obj);
-	}
-}
 
 
 /******************** GCCohortManager ***********************/

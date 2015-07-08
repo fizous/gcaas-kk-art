@@ -310,6 +310,8 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
+  virtual void removeObject(size_t,
+  	mirror::Object*){}
 
   virtual bool gcpDumpHistRec(art::File*);
 
@@ -334,6 +336,13 @@ public:
   	}
   }
 
+  virtual void gcpNoAggAddDataToHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpIncAtomicRecData();
+  	dataRec->gcpIncRecData();
+		histData_->gcpIncAtomicRecData();
+		histData_->gcpIncRecData();
+  }
+
   virtual void gcpAggRemoveDataFromHist(GCPHistRecData* dataRec) {
   	dataRec->gcpDecRecData();
   	bool _remFlag = dataRec->gcpDecAtomicRecData();
@@ -346,6 +355,13 @@ public:
   	}
   }
 
+  virtual void gcpNoAggRemoveDataFromHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpDecRecData();
+  	histData_->gcpDecRecData();
+  	bool _remFlag = dataRec->gcpDecAtomicRecData();
+		if(_remFlag)
+			histData_->gcpDecAtomicRecData();
+  }
 //  void gcpRemoveDataToHist(GCPHistogramRec*);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
@@ -546,14 +562,15 @@ public:
 	GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	~GCHistogramObjSizesManager(){};
 
-	static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
+	//static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
 
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
-  void gcpRemoveObject(size_t);
+	void removeObject(size_t, mirror::Object*);
+	void gcpRemoveObjectFromIndex(size_t, bool);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 
@@ -608,6 +625,7 @@ public:
 	/* overriden methods */
 	void initHistograms();
 	void addObject(size_t, size_t, mirror::Object*);
+	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 
 	void setThreadManager(GCMMPThreadProf*);
 };
