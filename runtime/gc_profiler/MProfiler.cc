@@ -3397,7 +3397,7 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 
 /*********************** Thread Alloc manager *****************/
 GCPThreadAllocManager::GCPThreadAllocManager(
-		const std::list<GCMMPThreadProf*>& profList) :
+		const std::vector<GCMMPThreadProf*>& profList) :
 		GCHistogramDataManager(false, NULL), thrProfList_(profList) {
 	initHistograms();
 }
