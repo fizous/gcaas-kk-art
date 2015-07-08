@@ -2462,12 +2462,13 @@ void ObjectSizesProfiler::logPerfData() {
 			heap_->GetMaxAllowedFootPrint();
 
 	GCHistogramObjSizesManager* _histManager = getObjHistograms();
-
+	GCPHistogramRec* _dataRec = NULL;
 	for(int i = 0; i < GCHistogramDataManager::kGCMMPMaxHistogramEntries; i++){
-		LOG(ERROR) << "index: " << _histManager->sizeHistograms[i].index << " :: cntLive=" <<
-				_histManager->sizeHistograms[i].cntLive << "; cntTotal="<<
-				_histManager->sizeHistograms[i].cntTotal<<"; pcntLive=" << _histManager->sizeHistograms[i].pcntLive <<
-				"; pcntTotal="<< _histManager->sizeHistograms[i].pcntTotal;
+		_dataRec = _histManager->sizeHistograms[i].gcpGetDataRecP();
+		LOG(ERROR) << "index: " << _dataRec->index << " :: cntLive=" <<
+				_dataRec->cntLive << "; cntTotal="<<
+				_dataRec->cntTotal<<"; pcntLive=" << _dataRec->pcntLive <<
+				"; pcntTotal="<< _dataRec->pcntTotal;
 	}
 }
 
