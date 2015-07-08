@@ -170,9 +170,7 @@ public:
 
 	bool gcpDumpAtomicHistRec(art::File*);
 
-	void gcpZerofyHistAtomicRecData(void) {
-		gcpZerofyHistAtomicRecData(&atomicDataRec_);
-	}
+
 
 	void gcpUpdateRecPercentile(GCPHistogramRec* rootRec){
 		dataRec_.pcntLive = (dataRec_.cntLive * 100.0) / rootRec->cntLive;
@@ -191,7 +189,7 @@ public:
 		atomicDataRec_.pcntTotal = (atomicDataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
-	void gcpZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
+	void GCPZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
 		double _index = rec->index;
 	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
 	  rec->index = _index;
