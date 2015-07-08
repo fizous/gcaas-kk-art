@@ -570,7 +570,12 @@ public:
 class GCPThreadAllocManager : public GCHistogramDataManager {
 public:
 	// a global record holder for all histograms
-	GCHistogramObjSizesManager* objSizesHist_;
+	GCHistogramObjSizesManager* objSizesHistMgr_;
+
+	GCPThreadAllocManager(void);
+
+	/* overriden methods */
+	void initHistograms();
 
 };
 

@@ -3360,6 +3360,16 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 //}
 
 
+/*********************** Thread Alloc manager *****************/
+GCPThreadAllocManager::GCPThreadAllocManager(void) :
+		GCHistogramDataManager(false, NULL) {
+	initHistograms();
+}
+
+void GCPThreadAllocManager::initHistograms() {
+	objSizesHistMgr_ = new GCHistogramObjSizesManager(true, this);
+}
+
 
 /********************************* Thread Alloc Profiler ****************/
 
