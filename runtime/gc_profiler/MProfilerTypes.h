@@ -154,7 +154,7 @@ public:
 		initDataRecords(kIndex);
 	}
 
-	GCPHistRecData(void);
+	GCPHistRecData(void) { initDataRecords(0);}
 
 	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
 
