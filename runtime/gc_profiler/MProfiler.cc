@@ -3434,7 +3434,7 @@ inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
 
 void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* extraHeader =
-			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
+			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
 
 	if(extraHeader->objSize == 0)
 		return;
@@ -3557,7 +3557,7 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 
 
 void ThreadAllocProfiler::initHistDataManager(void) {
-	hitogramsData = new GCPThreadAllocManager(threadProflist_);
+	hitogramsData = new GCPThreadAllocManager(threadProfList_);
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
 
@@ -4036,7 +4036,7 @@ void CohortProfiler::initHistDataManager(void) {
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
-	thProf->histogramManager = NULL;
+	thProf->histogramManager_ = NULL;
 }
 
 
