@@ -348,7 +348,7 @@ public:
   };
 
   virtual void setHistogramManager(GCMMPThreadProf* thProf) {
-  	thProf->histogramManager = NULL;
+  	thProf->histogramManager_ = NULL;
   };
 
   virtual bool verifyThreadNotification() {
@@ -587,8 +587,8 @@ public:
 		LOG(ERROR) << "ThreadAllocProfiler : Constructor of ThreadAllocProfiler";
 	}
 
-	GCHistogramObjSizesManager* getThreadHistograms(void) {
-		return (GCHistogramObjSizesManager*)hitogramsData;
+	GCPThreadAllocManager* getThreadHistManager(void) {
+		return (GCPThreadAllocManager*)hitogramsData;
 	}
 
   void setHistogramManager(GCMMPThreadProf*);

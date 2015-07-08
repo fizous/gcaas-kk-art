@@ -283,6 +283,9 @@ public:
 	GCHistogramDataManager(bool, GCHistogramDataManager*);
 	GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	GCHistogramDataManager(bool);
+
+	void initManager(GCHistogramDataManager*, bool);
+
 	virtual ~GCHistogramDataManager(){}
 
 	static size_t AddMProfilingExtraBytes(size_t);
@@ -314,8 +317,36 @@ public:
 
   virtual void gcpZeorfyAllAtomicRecords(void){}
 
-  void gcpAddDataToHist(GCPHistogramRec*);
-  void gcpRemoveDataToHist(GCPHistogramRec*);
+  virtual void gcpSetRecordIndices(int ind) {
+  	histData_->atomicDataRec_.index.store(ind);
+  	histData_->dataRec_.index = ind;
+  }
+
+  virtual void gcpAggAddDataToHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpIncAtomicRecData();
+  	dataRec->gcpIncRecData();
+  	//upate the global records till the root
+  	GCHistogramDataManager* _managerIter = this;
+  	while(_managerIter != NULL) {
+  		_managerIter->histData_->gcpIncAtomicRecData();
+  		_managerIter->histData_->gcpIncRecData();
+  		_managerIter = _managerIter->parentManager_;
+  	}
+  }
+
+  virtual void gcpAggRemoveDataFromHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpDecRecData();
+  	bool _remFlag = dataRec->gcpDecAtomicRecData();
+  	GCHistogramDataManager* _managerIter = this;
+  	while(_managerIter != NULL) {
+  		_managerIter->histData_->gcpDecRecData();
+  		if(_remFlag)
+  			_managerIter->histData_->gcpDecAtomicRecData();
+  		_managerIter = _managerIter->parentManager_;
+  	}
+  }
+
+//  void gcpRemoveDataToHist(GCPHistogramRec*);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
 		return histData_->gcpGetDataRecP();
@@ -577,6 +608,8 @@ public:
 	/* overriden methods */
 	void initHistograms();
 
+
+	void setThreadManager(GCMMPThreadProf*);
 };
 
 class PACKED(4) GCPauseThreadManager {
@@ -651,7 +684,7 @@ class GCMMPThreadProf {
 	GCMMP_ProfileActivity lifeTime_;
 public:
 	GCPauseThreadManager* pauseManager;
-	GCHistogramObjSizesManager* histogramManager;
+	GCHistogramDataManager* histogramManager_;
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 	static VMProfiler* mProfiler;

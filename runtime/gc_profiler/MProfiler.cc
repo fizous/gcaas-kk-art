@@ -2262,7 +2262,7 @@ ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry)
 
 
 void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
-	thProf->histogramManager = new GCHistogramObjSizesManager();
+	thProf->histogramManager_ = NULL;
 }
 
 MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
@@ -2381,7 +2381,21 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
-	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
+	GCPExtraObjHeader* extraHeader =
+			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
+
+	if(extraHeader->objSize == 0)
+		return;
+	GCHistogramDataManager* _histManager = extraHeader->histRecP;
+
+	if(_histManager == NULL)
+		return;
+
+	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObject(histIndex);
+
+
+//	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
 //	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
 //	objHistograms->(allocatedMemory, objSize, obj);
 //
@@ -2734,44 +2748,43 @@ void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 
 
 GCHistogramDataManager::GCHistogramDataManager(bool shouldInitHistograms) : type_(GCMMP_HIST_CHILD) {
-	generateNewSecret();
-	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
-	if(shouldInitHistograms)
-		initHistograms();
+	initManager(NULL, shouldInitHistograms);
 }
 
 
 GCHistogramDataManager::GCHistogramDataManager(void) : type_(GCMMP_HIST_CHILD) {
-	generateNewSecret();
-	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
-	initHistograms();
+	initManager(NULL, true);
 }
 
 GCHistogramDataManager::GCHistogramDataManager(bool shouldInitHistograms,
 		GCHistogramDataManager* parentManager) {
-	generateNewSecret();
-	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
-	if(shouldInitHistograms)
-		initHistograms();
-	parentManager_ = parentManager;
+	initManager(parentManager, shouldInitHistograms);
 }
 
 GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		type_(hisMGR) {
+	initManager(NULL, true);
+}
+
+
+void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
+		bool initHistograms) {
+	generateNewSecret();
+	parentManager_ = pManager;
 	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
-	initHistograms();
+	if(initHistograms)
+		initHistograms();
 }
 
-
-inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
-	rec->cntLive++;
-	rec->cntTotal++;
-}
-
-
-inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
-	rec->cntLive--;
-}
+//inline void GCHistogramDataManager::gcpAddDataToHist(GCPHistogramRec* rec) {
+//	rec->cntLive++;
+//	rec->cntTotal++;
+//}
+//
+//
+//inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
+//	rec->cntLive--;
+//}
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 	return dump_file->WriteFully(gcpGetDataRecP(), sizeof(GCPHistogramRec));
@@ -3120,11 +3133,8 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 
 //	int32_t _readCohortIndex = (GCHistogramDataManager::kGCPLastCohortIndex.load());
 
-	histData_->gcpIncAtomicRecData();
-	sizeHistograms[histIndex].gcpIncAtomicRecData();
+	gcpAggAddDataToHist(&sizeHistograms[histIndex]);
 
-	histData_->gcpIncRecData();
-	sizeHistograms[histIndex].gcpIncRecData();
 
 //	if(lastCohortIndex != _readCohortIndex) {
 //		lastCohortIndex = _readCohortIndex;
@@ -3150,12 +3160,7 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 
 void GCHistogramObjSizesManager::gcpRemoveObject(size_t histIndex) {
 //	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
-	sizeHistograms[histIndex].gcpDecRecData();
-	histData_->gcpDecRecData();
-
-	if(sizeHistograms[histIndex].gcpDecAtomicRecData()) {
-		histData_->gcpDecAtomicRecData();
-	}
+	gcpAggRemoveDataFromHist(&sizeHistograms[histIndex]);
 
 //	bool removedFlag = gcpRemoveDataFromHist(&histogramTable[histIndex]);
 //
@@ -3371,10 +3376,15 @@ void GCPThreadAllocManager::initHistograms() {
 }
 
 
+void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
+	thProf->histogramManager_ = new GCHistogramObjSizesManager(true, this);
+	thProf->histogramManager_->gcpSetRecordIndices(thProf->GetTid());
+}
+
 /********************************* Thread Alloc Profiler ****************/
 
 void ThreadAllocProfiler::initHistDataManager(void) {
-	hitogramsData = new GCHistogramObjSizesManager(GCMMP_HIST_ROOT);
+	hitogramsData = new GCPThreadAllocManager();
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
 
@@ -3387,9 +3397,10 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
-	thProf->histogramManager = new GCHistogramObjSizesManager();
-	thProf->histogramManager->histRecord.index = thProf->GetTid();
-	thProf->histogramManager->histAtomicRecord.index = thProf->GetTid();
+	GCPThreadAllocManager* _manager = getThreadHistManager();
+	if(_manager == NULL)
+		return;
+	_manager->setThreadManager(thProf);
 }
 
 bool ThreadAllocProfiler::periodicDaemonExec(void) {
@@ -3397,7 +3408,6 @@ bool ThreadAllocProfiler::periodicDaemonExec(void) {
   if(waitForProfileSignal()) { //we recived Signal to Shutdown
     GCMMP_VLOG(INFO) << "ThreadAllocProfiler: signal Received " << self->GetTid() ;
     //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-
     {
     	MutexLock mu(self, *prof_thread_mutex_);
     	receivedSignal_ = false;
@@ -3646,8 +3656,8 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCMMPThreadProf* thProf = Thread::Current()->GetProfRec();
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-		if(thProf->histogramManager != NULL)
-			thProf->histogramManager->addObject(allocatedMemory, objSize, obj);
+		if(thProf->histogramManager_ != NULL)
+			thProf->histogramManager_->addObject(allocatedMemory, objSize, obj);
 	}
 }
 
