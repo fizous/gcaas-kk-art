@@ -634,9 +634,9 @@ class GCPThreadAllocManager : public GCHistogramDataManager {
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
-	ThreadProfList_S thrProfList_;
+	std::list<GCMMPThreadProf*>& thrProfList_;
 
-	GCPThreadAllocManager(ThreadProfList_S);
+	GCPThreadAllocManager(std::list<GCMMPThreadProf*>&);
 
 
 	void gcpFinalizeProfileCycle(void);
