@@ -3605,7 +3605,7 @@ bool ThreadAllocProfiler::periodicDaemonExec(void) {
  //
 #if GCP_COLLECT_FOR_PROFILE
     	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    	heap_->CollectGarbageForProfile(false);
+    	heap_->CollectGarbageForProfile(true);
 #endif
     updateHeapAllocStatus();
 
