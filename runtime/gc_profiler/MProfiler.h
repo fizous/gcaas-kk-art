@@ -578,8 +578,8 @@ public:
 
 class ThreadAllocProfiler : public ObjectSizesProfiler {
 
-	bool dumpGlobalThreadsStats(void);
-	bool dumpGlobalThreadsAtomicStats(void);
+//	bool dumpGlobalThreadsStats(void);
+//	bool dumpGlobalThreadsAtomicStats(void);
 public:
 
 	ThreadAllocProfiler(GCMMP_Options* opts, void* entry) :

@@ -3757,45 +3757,45 @@ bool ThreadAllocProfiler::verifyThreadNotification() {
 }
 
 
-bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
-	GCHistogramObjSizesManager* _histMgr = NULL;
-	bool _success = true;
-	int _count = 0;
-	for (const auto& threadProf : threadProfList_) {
-		_histMgr = threadProf->histogramManager;
-		if(_histMgr == NULL)
-			continue;
-		_success &= _histMgr->gcpDumpHistRec(dump_file_);
-		if(!_success)
-			return false;
-		_count++;
-	}
-
-	if(_count > 0) {
-		_success &= GCPDumpEndMarker(dump_file_);
-	}
-	return _success;
-}
-
-
-bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
-	GCHistogramObjSizesManager* _histMgr = NULL;
-	bool _success = true;
-	int _count = 0;
-	for (const auto& threadProf : threadProfList_) {
-		_histMgr = threadProf->histogramManager;
-		if(_histMgr == NULL)
-			continue;
-		_success &= _histMgr->gcpDumpHistAtomicTable(dump_file_);
-		if(!_success)
-			return false;
-		_count++;
-	}
-	if(_count > 0) {
-		_success &= GCPDumpEndMarker(dump_file_);
-	}
-	return _success;
-}
+//bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
+//	GCHistogramObjSizesManager* _histMgr = NULL;
+//	bool _success = true;
+//	int _count = 0;
+//	for (const auto& threadProf : threadProfList_) {
+//		_histMgr = threadProf->histogramManager_;
+//		if(_histMgr == NULL)
+//			continue;
+//		_success &= _histMgr->gcpDumpHistRec(dump_file_);
+//		if(!_success)
+//			return false;
+//		_count++;
+//	}
+//
+//	if(_count > 0) {
+//		_success &= GCPDumpEndMarker(dump_file_);
+//	}
+//	return _success;
+//}
+//
+//
+//bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
+//	GCHistogramObjSizesManager* _histMgr = NULL;
+//	bool _success = true;
+//	int _count = 0;
+//	for (const auto& threadProf : threadProfList_) {
+//		_histMgr = threadProf->histogramManager_;
+//		if(_histMgr == NULL)
+//			continue;
+//		_success &= _histMgr->gcpDumpHistAtomicTable(dump_file_);
+//		if(!_success)
+//			return false;
+//		_count++;
+//	}
+//	if(_count > 0) {
+//		_success &= GCPDumpEndMarker(dump_file_);
+//	}
+//	return _success;
+//}
 
 
 //void ThreadAllocProfiler::dumpProfData(bool isLastDump) {

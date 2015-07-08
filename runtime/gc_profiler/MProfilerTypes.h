@@ -643,11 +643,14 @@ public:
 	/* overriden methods */
 	void initHistograms();
 	void addObject(size_t, size_t, mirror::Object*);
+	void removeObject(size_t, mirror::Object*);
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 	void setThreadManager(GCMMPThreadProf*);
 	void gcpZeorfyAllAtomicRecords(void);
   bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
+	void calculatePercentiles(void);
+	void calculateAtomicPercentiles(void);
 };
 
 class PACKED(4) GCPauseThreadManager {
