@@ -3091,8 +3091,8 @@ GCHistogramObjSizesManager::GCHistogramObjSizesManager(bool shouldInitHist,
 
 void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 
-  int32_t _newCohortIndex = GCPCalcCohortIndex();
-  if(_newCohortIndex != VMProfiler::GCPGetLastManagedCohort()) {
+  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  if(_newCohortIndex != GCPGetLastManagedCohort()) {
   	gcpZeorfyAllAtomicRecords();
   	GCPSetLastManagedCohort(_newCohortIndex);
   }
