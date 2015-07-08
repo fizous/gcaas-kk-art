@@ -3528,7 +3528,7 @@ void GCPThreadAllocManager::gcpZeorfyAllAtomicRecords() {
 	histData_->gcpZerofyHistAtomicRecData();
 }
 
-bool GCPThreadAllocManager::gcpFinalizeProfileCycle(){
+void GCPThreadAllocManager::gcpFinalizeProfileCycle(){
 	int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
 	if(_newCohortIndex != GCPGetLastManagedCohort()) {
 		gcpZeorfyAllAtomicRecords();
