@@ -3174,6 +3174,13 @@ void GCHistogramObjSizesManager::removeObject(size_t allocSpace,
 
 }
 
+void GCHistogramObjSizesManager::gcpRemoveObjFromEntriesWIndex(size_t histIndex) {
+//	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
+	GCPHistRecData* _recData = &sizeHistograms[histIndex];
+	_recData->gcpDecRecData();
+	_recData->gcpDecAtomicRecData();
+}
+
 
 void GCHistogramObjSizesManager::gcpRemoveObjectFromIndex(size_t histIndex,
 		bool isAgg) {
@@ -3396,19 +3403,20 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 
 
 /*********************** Thread Alloc manager *****************/
-GCPThreadAllocManager::GCPThreadAllocManager(
-		const std::vector<GCMMPThreadProf*>& profList) :
-		GCHistogramDataManager(false, NULL), thrProfList_(profList) {
+GCPThreadAllocManager::GCPThreadAllocManager(void) :
+		GCHistogramDataManager(false, NULL) {
 	initHistograms();
 }
 
 void GCPThreadAllocManager::initHistograms() {
-	objSizesHistMgr_ = new GCHistogramObjSizesManager(true, this);
+	objSizesHistMgr_ = new GCHistogramObjSizesManager(true, NULL);
+	histData_ = objSizesHistMgr_->histData_;
 }
 
 
 void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
-	thProf->histogramManager_ = new GCHistogramObjSizesManager(true, this);
+	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
+			objSizesHistMgr_);
 	thProf->histogramManager_->gcpSetRecordIndices(thProf->GetTid());
 }
 
@@ -3419,7 +3427,7 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 //	extraHeader->objSize = objSize;
 //	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	objSizesHistMgr_->gcpNoAggAddDataToHist(&objSizesHistMgr_->sizeHistograms[histIndex]);
+	objSizesHistMgr_->gcpNoAggAddSingleDataToHist(&objSizesHistMgr_->sizeHistograms[histIndex]);
 }
 
 inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
@@ -3445,12 +3453,13 @@ void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj)
 
 	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
 	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex, true);
-	objSizesHistMgr_->gcpRemoveObjectFromIndex(histIndex, false);
+	objSizesHistMgr_->gcpRemoveObjFromEntriesWIndex(histIndex);
 }
 
 inline void GCPThreadAllocManager::calculatePercentiles(void) {
 	GCPHistogramRec* _globalRec = histData_->gcpGetDataRecP();
-	for (const auto& threadProf : thrProfList_) {
+	for (const auto& threadProf :
+			Runtime::Current()->GetMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
@@ -3466,7 +3475,8 @@ inline void GCPThreadAllocManager::calculateAtomicPercentiles(void) {
 	if(_cntLive == 0 || _cntTotal == 0) {
 		_safeFlag = false;
 	}
-	for (const auto& threadProf : thrProfList_) {
+	for (const auto& threadProf :
+			Runtime::Current()->GetMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
@@ -3483,7 +3493,8 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 	if(dumpGlobalRec) {
 		histData_->gcpDumpHistRec(dump_file);
 	}
-	for (const auto& threadProf : thrProfList_) {
+	for (const auto& threadProf :
+			Runtime::Current()->GetMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
@@ -3503,7 +3514,8 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 bool GCPThreadAllocManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 //	GCPHistogramRec dummyRec;
 		bool _success = false;
-		for (const auto& threadProf : thrProfList_) {
+		for (const auto& threadProf :
+				Runtime::Current()->GetMProfiler()->threadProfList_) {
 			GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 			if(_histMgr == NULL)
 				continue;
@@ -3519,13 +3531,14 @@ bool GCPThreadAllocManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 
 
 void GCPThreadAllocManager::gcpZeorfyAllAtomicRecords() {
-	for (const auto& threadProf : thrProfList_) {
+	for (const auto& threadProf :
+			Runtime::Current()->GetMProfiler()->threadProfList_) {
 		if(threadProf->histogramManager_ != NULL) {
 			threadProf->histogramManager_->gcpZeorfyAllAtomicRecords();
 		}
 	}
 	objSizesHistMgr_->gcpZeorfyAllAtomicRecords();
-	histData_->gcpZerofyHistAtomicRecData();
+//	histData_->gcpZerofyHistAtomicRecData();
 }
 
 void GCPThreadAllocManager::gcpFinalizeProfileCycle(){

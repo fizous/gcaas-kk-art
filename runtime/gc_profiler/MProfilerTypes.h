@@ -345,6 +345,11 @@ public:
 		histData_->gcpIncRecData();
   }
 
+  virtual void gcpNoAggAddSingleDataToHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpIncAtomicRecData();
+  	dataRec->gcpIncRecData();
+  }
+
   virtual void gcpAggRemoveDataFromHist(GCPHistRecData* dataRec) {
   	dataRec->gcpDecRecData();
   	bool _remFlag = dataRec->gcpDecAtomicRecData();
@@ -585,6 +590,8 @@ public:
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
 	void removeObject(size_t, mirror::Object*);
 	void gcpRemoveObjectFromIndex(size_t, bool);
+	void gcpRemoveObjFromEntriesWIndex(size_t);
+
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 
@@ -634,9 +641,8 @@ class GCPThreadAllocManager : public GCHistogramDataManager {
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
-	std::vector<GCMMPThreadProf*> thrProfList_;
 
-	GCPThreadAllocManager(const  std::vector<GCMMPThreadProf*>&);
+	GCPThreadAllocManager(void);
 
 
 	void gcpFinalizeProfileCycle(void);
