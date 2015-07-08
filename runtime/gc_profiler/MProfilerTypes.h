@@ -51,7 +51,7 @@ class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;
-class GCHistogramManager;
+class GCHistogramObjSizesManager;
 class GCHistogramDataManager;
 /*
  * enum of the events we are profiling per mutator. we can look for activities.
@@ -132,7 +132,8 @@ public:
 	GCPHistogramRec dataRec_;
 	GCPHistogramRecAtomic atomicDataRec_;
 
-	static void GCPCopyRecordsData(GCPHistogramRec* dest, GCPHistogramRecAtomic* src) {
+	static void GCPCopyRecordsData(GCPHistogramRec* dest,
+			GCPHistogramRecAtomic* src) {
   	dest->index = src->index;
   	dest->cntLive = src->cntLive.load();
   	dest->cntTotal = src->cntTotal.load();
@@ -147,10 +148,13 @@ public:
 		atomicDataRec_.index = kIndex;
 	}
 
+
+
 	GCPHistRecData(size_t kIndex){
 		initDataRecords(kIndex);
 	}
 
+	GCPHistRecData(void);
 
 	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
 
@@ -193,6 +197,14 @@ public:
 	  rec->index = _index;
 	  rec->cntLive.store(0);
 	  rec->cntTotal.store(0);
+	}
+
+	void gcpZerofyHistAtomicRecData(void) {
+		double _index = atomicDataRec_.index;
+	  memset((void*)(&atomicDataRec_), 0, sizeof(GCPHistogramRecAtomic));
+	  atomicDataRec_.index = _index;
+	  atomicDataRec_.cntLive.store(0);
+	  atomicDataRec_.cntTotal.store(0);
 	}
 
 	void gcpDecRecData(void){
@@ -259,6 +271,7 @@ public:
 
 	GCHistogramDataManager(void);
 	GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	GCHistogramDataManager(bool);
 	virtual ~GCHistogramDataManager(){}
 
 	static size_t AddMProfilingExtraBytes(size_t);
@@ -477,28 +490,33 @@ public:
 };
 
 
-class /*PACKED(4)*/ GCHistogramManager : public GCHistogramDataManager{
+class GCHistogramObjSizesManager : public GCHistogramDataManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
 public:
+	GCPHistRecData sizeHistograms[GCP_MAX_HISTOGRAM_SIZE];
+
+
 
 	GCPHistogramRec histogramTable[GCP_MAX_HISTOGRAM_SIZE];
 	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
 
 
-	GCHistogramManager(void);
-	GCHistogramManager(GCMMP_HISTOGRAM_MGR_TYPE);
-	~GCHistogramManager(){};
+	GCHistogramObjSizesManager(void);
+	GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	~GCHistogramObjSizesManager(){};
 
 	static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
 
-
-  bool gcpRemoveDataFromHist(GCPHistogramRec*);
-  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
+//  bool gcpRemoveDataFromHist(GCPHistogramRec*);
+//  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
   void gcpRemoveObject(size_t);
+	void calculatePercentiles(void);
+	void calculateAtomicPercentiles(void);
+
 
 
   //// methods for dumping and aggrgating /////////
@@ -506,17 +524,17 @@ public:
   		GCPHistogramRecAtomic* globalRec);
   void gcpAggregateHistograms(GCPHistogramRec* hisTable,
   		GCPHistogramRec* globalRec);
-  void gcpCalculateEntries(GCPHistogramRec* hisTable,
-  		GCPHistogramRec* globalRec);
-  void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
-  		GCPHistogramRecAtomic* globalRec);
+//  void gcpCalculateEntries(GCPHistogramRec* hisTable,
+//  		GCPHistogramRec* globalRec);
+//  void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
+//  		GCPHistogramRecAtomic* globalRec);
 
   bool gcpCheckForResetHist(void);
   bool gcpCheckForCompleteResetHist(void);
 
-  bool gcpDumpHistTable(art::File*);
+  bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
-  bool gcpDumpHistAtomicRec(art::File*);
+  //bool gcpDumpHistAtomicRec(art::File*);
 
 
 
@@ -611,7 +629,7 @@ class GCMMPThreadProf {
 	GCMMP_ProfileActivity lifeTime_;
 public:
 	GCPauseThreadManager* pauseManager;
-	GCHistogramManager* histogramManager;
+	GCHistogramObjSizesManager* histogramManager;
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 	static VMProfiler* mProfiler;
