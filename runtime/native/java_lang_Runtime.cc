@@ -29,8 +29,8 @@ namespace art {
 
 static void Runtime_gc(JNIEnv*, jclass) {
   if (Runtime::Current()->IsExplicitGcDisabled()) {
-      LOG(INFO) << "Explicit GC skipped.";
-      return;
+  	GCMMP_VLOG(INFO) << "Explicit GC skipped.";
+    return;
   }
   Runtime::Current()->GetHeap()->CollectGarbage(false);
 }

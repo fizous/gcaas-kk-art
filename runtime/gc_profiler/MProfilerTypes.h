@@ -257,8 +257,16 @@ class GCHistogramDataManager {
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
 	static int kGCMMPHeaderSize;
+	static AtomicInteger kGCPLastCohortIndex;
 
-	int32_t lastCohortIndex;
+	int32_t GCPGetLastManagedCohort() {
+		return kGCPLastCohortIndex.load();
+	}
+
+	void GCPSetLastManagedCohort(int32_t newIndex) {
+		kGCPLastCohortIndex.store(newIndex);
+	}
+
 	GCMMP_HISTOGRAM_MGR_TYPE type_;
 	GCPHistRecData*				histData_;
 
@@ -312,9 +320,9 @@ public:
 		return histData_->gcpGetAtomicDataRecP();
 	}
 
-  void setLastCohortIndex(int32_t index) {
-  	lastCohortIndex = index;
-  }
+//  void setLastCohortIndex(int32_t index) {
+//  	lastCohortIndex = index;
+//  }
 
 
   void gcpResetHistogramRecData(GCPHistogramRec* rec) {
@@ -372,10 +380,7 @@ class GCCohortManager : public GCHistogramDataManager {
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
 	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
-	static constexpr size_t kGCMMPCohorSize = (size_t) GCP_COHORT_SIZE;
-	static AtomicInteger kGCPLastCohortIndex;
-
-	int cohortIndex_;
+	static constexpr size_t kGCMMPCohortSize = (size_t) GCP_COHORT_SIZE;
 
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
@@ -398,7 +403,7 @@ public:
 	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
 
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
-		return kGCMMPCohorSize - rec->totalSize;
+		return kGCMMPCohortSize - rec->totalSize;
 	}
 
 	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
@@ -527,8 +532,8 @@ public:
 //  void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
 //  		GCPHistogramRecAtomic* globalRec);
 
-  bool gcpCheckForResetHist(void);
-  bool gcpCheckForCompleteResetHist(void);
+//  bool gcpCheckForResetHist(void);
+//  bool gcpCheckForCompleteResetHist(void);
 
   bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
@@ -552,8 +557,15 @@ public:
   		lastWindowHistTable[i].index  = (i+1) * 1.0;
   	}
   }
-};//GCHistogramManager
+};//GCHistogramObjSizesManager
 
+
+
+class GCPThreadAllocManager : public GCHistogramDataManager {
+public:
+	// a global record holder for all histograms
+	GCHistogramObjSizesManager* objSizesHist_;
+};
 
 class PACKED(4) GCPauseThreadManager {
 	 GCPauseThreadMarker* curr_marker_;
