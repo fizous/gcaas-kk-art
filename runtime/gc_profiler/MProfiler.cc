@@ -2768,11 +2768,11 @@ GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) 
 
 
 void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
-		bool initHistograms) {
+		bool shouldInitHist) {
 	generateNewSecret();
 	parentManager_ = pManager;
 	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
-	if(initHistograms)
+	if(shouldInitHist)
 		initHistograms();
 }
 
@@ -3447,7 +3447,7 @@ void ThreadAllocProfiler::logPerfData() {
 
 	GCPHistogramRec* _tempRec = NULL;
 	for (const auto& threadProf : threadProfList_) {
-		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager;
+		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr != NULL) {
 			_tempRec = &_histMgr->histRecord;
 			LOG(ERROR) << "index: " << _tempRec->index << " :: cntLive=" <<
@@ -3464,7 +3464,7 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 	GCHistogramObjSizesManager* _histManager = getThreadHistograms();
 	int _newSecret = _histManager->generateNewSecret();
 	for (const auto& threadProf : threadProfList_) {
-		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager;
+		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr != NULL) {
 			_histMgr->setFriendISecret(_newSecret);
 			_histMgr->gcpAggregateHistograms(_histManager->histogramTable,
@@ -3477,7 +3477,7 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 	int32_t _cntAtomicTotal = _histManager->histAtomicRecord.cntTotal.load();
 	int32_t _cntAtomicLive = _histManager->histAtomicRecord.cntLive.load();
 	for (const auto& threadProf : threadProfList_) {
-		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager;
+		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr != NULL) {
 			_histMgr->histAtomicRecord.pcntLive = 0.0;
 			_histMgr->histAtomicRecord.pcntTotal = 0.0;
@@ -3514,7 +3514,7 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 	if(shouldUpdate) {
 		//int32_t _cohortIndex =  GCHistogramDataManager::kGCPLastCohortIndex.load();
 		for (const auto& threadProf : threadProfList_) {
-			GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager;
+			GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
 			if(_histMgr != NULL) {
 				_histMgr->histAtomicRecord.cntLive.store(0);
 				_histMgr->histAtomicRecord.cntTotal.store(0);
