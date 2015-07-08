@@ -543,7 +543,7 @@ public:
 	bool periodicDaemonExec(void);
 	void dumpProfData(bool);
   void dumpHeapStats(void);
-  void logPerfData(void);
+  virtual void gcpLogPerfData(void);
 
 
   void setHistogramManager(GCMMPThreadProf*);
@@ -595,13 +595,13 @@ public:
   void initHistDataManager(void);
   bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
-  void dumpProfData(bool);
-  void dumpHeapStats(void);
+  //void dumpProfData(bool);
+  //void dumpHeapStats(void);
 
   void gcpUpdateGlobalHistogram(void);
   void gcpFinalizeHistUpdates(void);
 
-  void logPerfData(void);
+  void gcpLogPerfData(void);
 
   void gcpAddObject(size_t objSize, size_t allocSize);
   void gcpAddObject(size_t allocatedMemory,
@@ -636,7 +636,7 @@ public:
   bool dettachThread(GCMMPThreadProf*);
 
   void dumpProfData(bool);
-  void logPerfData(void);
+  void gcpLogPerfData(void);
 };
 
 
@@ -658,7 +658,7 @@ public:
   void gcpRemoveObject(size_t, mirror::Object*);
   void dumpAllClasses(void);
   void dumpProfData(bool);
-  void logPerfData(void);
+  void gcpLogPerfData(void);
   void gcpFinalizeHistUpdates(void);
 };
 

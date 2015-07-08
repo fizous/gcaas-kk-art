@@ -226,6 +226,8 @@ public:
 		atomicDataRec_.cntLive++;
 		atomicDataRec_.cntTotal++;
 	}
+
+
 };
 
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
@@ -362,6 +364,13 @@ public:
 		if(_remFlag)
 			histData_->gcpDecAtomicRecData();
   }
+
+
+  virtual void calculateAtomicPercentiles(void) {}
+  virtual void calculatePercentiles(void) {}
+  virtual bool gcpDumpHistTable(art::File*, bool){return true;}
+  virtual bool gcpDumpHistAtomicTable(art::File*){return true;}
+	virtual void gcpFinalizeProfileCycle(void){}
 //  void gcpRemoveDataToHist(GCPHistogramRec*);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
@@ -417,7 +426,11 @@ public:
   	return iSecret == instMGR->iSecret;
   }
 
-
+	void gcpLogDataRecord(std::ostream& os) {
+		os << "index: "<< dataRec_.index<< ";cntLive: " << dataRec_.cntLive <<
+				"; cntTotal: "<< dataRec_.cntTotal<< "; pcntLive: " <<
+				dataRec_.pcntLive << "; pcntTotal: " << dataRec_.pcntTotal;
+	}
 };//GCHistogramDataManager
 
 
@@ -593,7 +606,8 @@ public:
   bool gcpDumpHistAtomicTable(art::File*);
   //bool gcpDumpHistAtomicRec(art::File*);
 
-
+  void gcpFinalizeProfileCycle(void);
+  void gcpZeorfyAllAtomicRecords(void);
 
   void gcpResetHistogramData() {
   	gcpResetHistogramRecData(&histRecord);
@@ -613,21 +627,26 @@ public:
   }
 };//GCHistogramObjSizesManager
 
-
+typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
+	ThreadProfList_S thrProfList_;
 
-	GCPThreadAllocManager(void);
+	GCPThreadAllocManager(ThreadProfList_S);
 
+
+	void gcpFinalizeProfileCycle(void);
 	/* overriden methods */
 	void initHistograms();
 	void addObject(size_t, size_t, mirror::Object*);
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
-
 	void setThreadManager(GCMMPThreadProf*);
+	void gcpZeorfyAllAtomicRecords(void);
+  bool gcpDumpHistTable(art::File*, bool);
+  bool gcpDumpHistAtomicTable(art::File*);
 };
 
 class PACKED(4) GCPauseThreadManager {
@@ -683,6 +702,11 @@ public:
 		 return (ev_count_ > 0);
 	 }
 	 void DumpProfData(void* args);
+
+	 void calculateAtomicPercentiles(void);
+	 void calculatePercentiles(void);
+
+
 }; // Class GCPauseThreadManager
 
 
