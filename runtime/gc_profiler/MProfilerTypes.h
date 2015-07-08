@@ -427,9 +427,10 @@ public:
   }
 
 	void gcpLogDataRecord(std::ostream& os) {
-		os << "index: "<< dataRec_.index<< ";cntLive: " << dataRec_.cntLive <<
-				"; cntTotal: "<< dataRec_.cntTotal<< "; pcntLive: " <<
-				dataRec_.pcntLive << "; pcntTotal: " << dataRec_.pcntTotal;
+		GCPHistogramRec* _dataRec = &histData_->dataRec_;
+		os << "index: "<< _dataRec->index<< ";cntLive: " << _dataRec->cntLive <<
+				"; cntTotal: "<< _dataRec->cntTotal<< "; pcntLive: " <<
+				_dataRec->pcntLive << "; pcntTotal: " << _dataRec->pcntTotal;
 	}
 };//GCHistogramDataManager
 
