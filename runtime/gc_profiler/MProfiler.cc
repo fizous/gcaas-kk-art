@@ -2325,7 +2325,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	getObjHistograms()->addObject(allocatedMemory, objSize, obj);
+	hitogramsData->addObject(allocatedMemory, objSize, obj);
 //	int32_t readVal = lastLiveGuard;
 
 //	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
@@ -3380,6 +3380,17 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager_ = new GCHistogramObjSizesManager(true, this);
 	thProf->histogramManager_->gcpSetRecordIndices(thProf->GetTid());
 }
+
+inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
+		size_t objSize, mirror::Object* obj) {
+	GCPExtraObjHeader* extraHeader =
+			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
+	extraHeader->objSize = objSize;
+	extraHeader->histRecP = this;
+	size_t histIndex = (32 - CLZ(objSize)) - 1;
+	gcpAggAddDataToHist(&sizeHistograms[histIndex]);
+}
+
 
 /********************************* Thread Alloc Profiler ****************/
 

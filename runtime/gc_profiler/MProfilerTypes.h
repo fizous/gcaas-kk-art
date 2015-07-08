@@ -607,7 +607,7 @@ public:
 
 	/* overriden methods */
 	void initHistograms();
-
+	void addObject(size_t, size_t, mirror::Object*);
 
 	void setThreadManager(GCMMPThreadProf*);
 };
