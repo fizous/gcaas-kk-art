@@ -3406,11 +3406,13 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 GCPThreadAllocManager::GCPThreadAllocManager(void) :
 		GCHistogramDataManager(false, NULL) {
 	initHistograms();
+	LOG(ERROR) << "GCPThreadAllocManager : GCPThreadAllocManager";
 }
 
 void GCPThreadAllocManager::initHistograms() {
 	objSizesHistMgr_ = new GCHistogramObjSizesManager(true, NULL);
 	histData_ = objSizesHistMgr_->histData_;
+	LOG(ERROR) << "GCPThreadAllocManager : initHistograms";
 }
 
 
@@ -3571,6 +3573,7 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 
 void ThreadAllocProfiler::initHistDataManager(void) {
 	hitogramsData = new GCPThreadAllocManager();
+	LOG(ERROR) << "ThreadAllocProfiler : initHistDataManager";
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
 

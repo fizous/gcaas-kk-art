@@ -583,7 +583,8 @@ class ThreadAllocProfiler : public ObjectSizesProfiler {
 public:
 
 	ThreadAllocProfiler(GCMMP_Options* opts, void* entry) :
-		ObjectSizesProfiler(opts, entry) {
+		ObjectSizesProfiler(opts, entry, false) {
+		initHistDataManager();
 		LOG(ERROR) << "ThreadAllocProfiler : Constructor of ThreadAllocProfiler";
 	}
 
