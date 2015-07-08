@@ -3102,7 +3102,7 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 
-	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
+//	int32_t _readCohortIndex = (GCCohortManager::kGCPLastCohortIndex.load());
 
 	histData_->gcpIncAtomicRecData();
 	sizeHistograms[histIndex].gcpIncAtomicRecData();
@@ -3550,7 +3550,7 @@ bool ThreadAllocProfiler::dumpGlobalThreadsAtomicStats(void) {
 		_histMgr = threadProf->histogramManager;
 		if(_histMgr == NULL)
 			continue;
-		_success &= _histMgr->gcpDumpHistAtomicRec(dump_file_);
+		_success &= _histMgr->gcpDumpHistAtomicTable(dump_file_);
 		if(!_success)
 			return false;
 		_count++;
