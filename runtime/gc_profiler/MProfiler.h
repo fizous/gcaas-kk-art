@@ -148,8 +148,6 @@ public:
 
 	static int kGCMMPLogAllocWindowDump;
 
-	static int kGCMMPCohortLog;
-
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
 

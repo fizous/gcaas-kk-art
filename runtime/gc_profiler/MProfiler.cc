@@ -168,7 +168,7 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
-int VMProfiler::kGCMMPCohortLog = kGCMMPDefaultCohortLog;
+int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
@@ -3768,7 +3768,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	size_t _cohIndex = (_profHeader->objBD >> VMProfiler::kGCMMPCohortLog);
+	size_t _cohIndex = (_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
 	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
 	GCPCohortsRow* _row = cohortsTable.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];

@@ -256,8 +256,9 @@ typedef struct GCPCohortsTable_S {
 class GCHistogramDataManager {
 public:
 	static constexpr int kGCMMPMaxHistogramEntries = GCP_MAX_HISTOGRAM_SIZE;
-	static int kGCMMPHeaderSize;
+	static int 	kGCMMPHeaderSize;
 	static AtomicInteger kGCPLastCohortIndex;
+	static int kGCMMPCohortLog;
 
 	int32_t GCPGetLastManagedCohort() {
 		return kGCPLastCohortIndex.load();
@@ -435,11 +436,11 @@ public:
 	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
 			size_t bd, size_t objSize) {
-		*startIndex = (bd >> VMProfiler::kGCMMPCohortLog);
+		*startIndex = (bd >> kGCMMPCohortLog);
 		*startRow = *startIndex /  kGCMMPMaxRowCap;
 		*startIndex = (*startIndex) % kGCMMPMaxRowCap;
 
-		*endIndex = ( (bd + objSize) >> VMProfiler::kGCMMPCohortLog);
+		*endIndex = ( (bd + objSize) >> kGCMMPCohortLog);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
 		*endIndex = (*endIndex) % kGCMMPMaxRowCap;
 	}
