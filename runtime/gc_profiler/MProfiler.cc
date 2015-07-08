@@ -168,7 +168,7 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
-
+int VMProfiler::kGCMMPCohortLog = kGCMMPDefaultCohortLog;
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
@@ -2523,7 +2523,7 @@ bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
 }
 
 void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
-  int32_t _newCohortIndex = GCPGetCalcCohortIndex();
+  int32_t _newCohortIndex = GCPCalcCohortIndex();
   GCHistogramObjSizesManager* _manager = getObjHistograms();
   if(_newCohortIndex != _manager->GCPGetLastManagedCohort()) {
   	GCPHistRecData* _atomicRecData = _manager->histData_;
@@ -2735,20 +2735,20 @@ void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
 
 GCHistogramDataManager::GCHistogramDataManager(bool shouldInitHistograms) : type_(GCMMP_HIST_CHILD) {
 	generateNewSecret();
-	GCPSetLastManagedCohort(GCPGetCalcCohortIndex);
+	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
 	if(shouldInitHistograms)
 		initHistograms();
 }
 
 GCHistogramDataManager::GCHistogramDataManager(void) : type_(GCMMP_HIST_CHILD) {
 	generateNewSecret();
-	GCPSetLastManagedCohort(GCPGetCalcCohortIndex);
+	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
 	initHistograms();
 }
 
 GCHistogramDataManager::GCHistogramDataManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 		type_(hisMGR) {
-	GCPSetLastManagedCohort(GCPGetCalcCohortIndex);
+	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
 	initHistograms();
 }
 
@@ -3473,7 +3473,7 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 	//GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	GCHistogramObjSizesManager* _histManager = getThreadHistograms();
-	_histManager->GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
+	_histManager->GCPSetLastManagedCohort(GCPCalcCohortIndex());
 	bool shouldUpdate = _histManager->gcpCheckForCompleteResetHist();
 	if(shouldUpdate) {
 		int32_t _cohortIndex =  GCHistogramDataManager::kGCPLastCohortIndex.load();
@@ -3648,7 +3648,7 @@ void GCCohortManager::addCohortRecord(void) {
 		addCohortRow();
 	}
 	int _index = (currCohortP == NULL) ?
-			 VMProfiler::GCPGetCalcCohortIndex() : currCohortP->index_+1;
+			 VMProfiler::GCPCalcCohortIndex() : currCohortP->index_+1;
 	currCohortP = &currCoRowP->cohorts[currCoRowP->index_];
 	currCoRowP->index_++;
 
@@ -3768,7 +3768,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	size_t _cohIndex = (_profHeader->objBD >> GCP_COHORT_LOG);
+	size_t _cohIndex = (_profHeader->objBD >> VMProfiler::kGCMMPCohortLog);
 	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
 	GCPCohortsRow* _row = cohortsTable.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
@@ -3960,7 +3960,7 @@ void ClassProfiler::gcpFinalizeHistUpdates(void) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager == NULL)
 		return;
-	int32_t _newIndex = GCPGetCalcCohortIndex();
+	int32_t _newIndex = GCPCalcCohortIndex();
 	if(_newIndex != classManager->GCPGetLastManagedCohort()) {
 		classManager->gcpZeorfyAllAtomicRecords();
 		classManager->GCPSetLastManagedCohort(_newIndex);

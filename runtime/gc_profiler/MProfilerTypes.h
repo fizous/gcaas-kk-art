@@ -435,11 +435,11 @@ public:
 	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
 			size_t bd, size_t objSize) {
-		*startIndex = (bd >> GCP_COHORT_LOG);
+		*startIndex = (bd >> VMProfiler::kGCMMPCohortLog);
 		*startRow = *startIndex /  kGCMMPMaxRowCap;
 		*startIndex = (*startIndex) % kGCMMPMaxRowCap;
 
-		*endIndex = ( (bd + objSize) >> GCP_COHORT_LOG);
+		*endIndex = ( (bd + objSize) >> VMProfiler::kGCMMPCohortLog);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
 		*endIndex = (*endIndex) % kGCMMPMaxRowCap;
 	}

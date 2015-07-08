@@ -122,8 +122,9 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
-  static constexpr int kGCMMPDumpSignal 		= SIGUSR2;
-  static const int kGCMMPDefaultAffinity 		= -1;
+  static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
+  static constexpr int kGCMMPDefaultCohortLog = GCP_COHORT_LOG;
+  static const int kGCMMPDefaultAffinity 			= -1;
 	static const int kGCMMPDumpEndMarker;
 
 	// List of profiled benchmarks in our system
@@ -146,6 +147,8 @@ public:
 	static int kGCMMPLogAllocWindow;
 
 	static int kGCMMPLogAllocWindowDump;
+
+	static int kGCMMPCohortLog;
 
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
@@ -327,8 +330,8 @@ public:
 
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
-  static int32_t GCPGetCalcCohortIndex(void) {
-  	return (GCPTotalAllocBytes.load() >> GCP_COHORT_LOG);
+  static int32_t GCPCalcCohortIndex(void) {
+  	return (GCPTotalAllocBytes.load() >> kGCMMPCohortLog);
   }
 
   virtual int32_t getGCEventsCounts(void) {
@@ -618,7 +621,7 @@ public:
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry, false) {
-		GCCohortManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+		GCCohortManager::kGCPLastCohortIndex.store(GCPCalcCohortIndex());
 		//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
 		kGCMMPLogAllocWindow = 18;
 		initHistDataManager();
