@@ -3570,7 +3570,7 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 
 
 void ThreadAllocProfiler::initHistDataManager(void) {
-	hitogramsData = new GCPThreadAllocManager(threadProfList_);
+	hitogramsData = new GCPThreadAllocManager();
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
 
