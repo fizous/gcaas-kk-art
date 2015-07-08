@@ -3398,8 +3398,7 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 /*********************** Thread Alloc manager *****************/
 GCPThreadAllocManager::GCPThreadAllocManager(
 		ThreadProfList_S profList) :
-		GCHistogramDataManager(false, NULL) {
-	thrProfList_ = profList;
+		GCHistogramDataManager(false, NULL), thrProfList_(profList) {
 	initHistograms();
 }
 
