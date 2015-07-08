@@ -3502,7 +3502,7 @@ void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
 	_histManager->GCPSetLastManagedCohort(GCPCalcCohortIndex());
 	bool shouldUpdate = _histManager->gcpCheckForCompleteResetHist();
 	if(shouldUpdate) {
-		int32_t _cohortIndex =  GCHistogramDataManager::kGCPLastCohortIndex.load();
+		//int32_t _cohortIndex =  GCHistogramDataManager::kGCPLastCohortIndex.load();
 		for (const auto& threadProf : threadProfList_) {
 			GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager;
 			if(_histMgr != NULL) {
