@@ -2843,6 +2843,8 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 			gcpIncPairRecData(_profHeader->objSize, _histRec);
 
 			_profHeader->dataRec = _histRec;
+		} else {
+			LOG(ERROR) << "GCClassTableManager::addObjectClassPair -- histRec is NULL ";
 		}
 		return _histRec;
 	}
