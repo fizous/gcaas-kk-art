@@ -252,17 +252,22 @@ public:
 	}
 };
 
-class GCPPairHistogramRecords : public GCPHistRecData{
+class GCPPairHistogramRecords : public GCPHistRecData {
+private:
+	mirror::Class* _klzz;
 public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
 
 	GCPPairHistogramRecords(void);
 
-	GCPPairHistogramRecords(size_t id) :
+	GCPPairHistogramRecords(size_t id) : _klzz(NULL),
 		countData_(id), sizeData_(id) {
 	}
 
+	GCPPairHistogramRecords(size_t id, mirror::Class* klass) :
+		_klzz(klass), countData_(id), sizeData_(id) {
+	}
 
 	void gcpPairSetRecordIndices(size_t kIndex) {
 		countData_.initDataRecords(kIndex);
@@ -307,17 +312,9 @@ public:
 		sizeData_.gcpUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
 	}
 
-	void gcpPairUpdateAtomicPercentiles(GCPPairHistogramRecords* globalRec,
-			bool safeCnt, bool safeSpace) {
-		if(safeCnt)
-			countData_.gcpSafeUpdateAtomicRecPercentile(globalRec->countData_.gcpGetAtomicDataRecP());
-		else
-			countData_.gcpUpdateAtomicRecPercentile(
-				globalRec->countData_.gcpGetAtomicDataRecP());
-		if(safeSpace)
-			sizeData_.gcpSafeUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
-		else
-			sizeData_.gcpUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
+	void gcpPairUpdateAtomicPercentiles(GCPPairHistogramRecords* globalRec) {
+		countData_.gcpUpdateAtomicRecPercentile(globalRec->countData_.gcpGetAtomicDataRecP());
+		sizeData_.gcpUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
 	}
 
 	void gcpZerofyPairHistAtomicRecData(void) {
@@ -677,6 +674,8 @@ public:
 
 
 class GCClassTableManager : public GCHistogramDataManager {
+private:
+	void printClassNames(void);
 public:
 
 

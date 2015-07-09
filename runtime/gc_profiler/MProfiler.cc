@@ -3049,23 +3049,23 @@ void GCClassTableManager::logManagedData(void){
 void GCClassTableManager::calculateAtomicPercentiles(void) {
 	GCPPairHistogramRecords* _globalHolder =
 			(GCPPairHistogramRecords*)histData_;
-	GCPHistogramRecAtomic* _globalCntAtomicRec =
-			&_globalHolder->countData_.atomicDataRec_;
-	GCPHistogramRecAtomic* _globalSizeAtomicRec =
-			&_globalHolder->sizeData_.atomicDataRec_;
-	bool _safeCounts = true;
-	bool _safeSpace = true;
-	if(_globalCntAtomicRec->cntLive == 0 || _globalCntAtomicRec->cntTotal == 0) {
-		_safeCounts = false;
-	}
-	if(_globalSizeAtomicRec->cntLive == 0 || _globalSizeAtomicRec->cntTotal == 0) {
-		_safeSpace = false;
-	}
+//	GCPHistogramRecAtomic* _globalCntAtomicRec =
+//			&_globalHolder->countData_.atomicDataRec_;
+//	GCPHistogramRecAtomic* _globalSizeAtomicRec =
+//			&_globalHolder->sizeData_.atomicDataRec_;
+//	bool _safeCounts = true;
+//	bool _safeSpace = true;
+//	if(_globalCntAtomicRec->cntLive == 0 || _globalCntAtomicRec->cntTotal == 0) {
+//		_safeCounts = false;
+//	}
+//	if(_globalSizeAtomicRec->cntLive == 0 || _globalSizeAtomicRec->cntTotal == 0) {
+//		_safeSpace = false;
+//	}
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
-		_rec->gcpPairUpdateAtomicPercentiles(_globalHolder, _safeCounts, _safeSpace);
+		_rec->gcpPairUpdateAtomicPercentiles(_globalHolder/*, _safeCounts, _safeSpace*/);
 	}
 }
 
@@ -3181,7 +3181,15 @@ void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	}
 }
 
-
+void GCClassTableManager::printClassNames(void) {
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		mirror::Class* _klass = Runtime::Current()->GetClassLinker()->
+		_rec->gcpZerofyPairHistAtomicRecData();
+	}
+}
 
 
 /********************* GCHistogramManager profiling ****************/
