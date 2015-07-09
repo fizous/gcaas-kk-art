@@ -3085,7 +3085,7 @@ bool GCClassTableManager::dumpClassCntHistograms(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	if(dumpGlobalRec) {
 		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
-		GCPHistRecData::GCPDumpHistRecord(dumpFile, _record->countData_.gcpGetDataRecP());
+		_record->countData_.gcpDumpHistRec(dumpFile);
 	}
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
@@ -3107,7 +3107,7 @@ bool GCClassTableManager::dumpClassSizeHistograms(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	if(dumpGlobalRec) {
 		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
-		GCPHistRecData::GCPDumpHistRecord(dumpFile, _record->sizeData_.gcpGetDataRecP());
+		_record->sizeData_.gcpDumpHistRec(dumFile);
 	}
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
