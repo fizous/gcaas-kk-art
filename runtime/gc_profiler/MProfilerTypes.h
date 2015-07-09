@@ -793,6 +793,10 @@ public:
 	void gcpZeorfyAllAtomicRecords(void);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
+
+
+	bool gcpDumpHistTable(art::File*, bool);
+	bool gcpDumpHistAtomicTable(art::File*);
 };
 
 class PACKED(4) GCPauseThreadManager {
