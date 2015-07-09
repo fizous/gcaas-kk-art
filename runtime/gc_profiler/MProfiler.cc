@@ -3107,7 +3107,7 @@ bool GCClassTableManager::dumpClassSizeHistograms(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	if(dumpGlobalRec) {
 		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
-		_record->sizeData_.gcpDumpHistRec(dumFile);
+		_record->sizeData_.gcpDumpHistRec(dumpFile);
 	}
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
