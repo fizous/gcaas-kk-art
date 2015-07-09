@@ -283,7 +283,7 @@ public:
 		if(space < sizeData_.dataRec_.cntLive) {
 			sizeData_.gcpDecRecData(space);
 			countData_.gcpDecRecData();
-			return true
+			return true;
 		}
 		return false;
 	}
