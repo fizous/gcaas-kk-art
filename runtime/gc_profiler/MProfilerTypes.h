@@ -182,6 +182,13 @@ public:
 		dataRec_.pcntTotal = (dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
+	void gcpUnsafeUpdateRecPercentile(GCPHistogramRec* rootRec){
+		dataRec_.pcntLive = rootRec->cntLive == 0.0 ? 0.0 :
+				(dataRec_.cntLive * 100.0) / rootRec->cntLive;
+		dataRec_.pcntTotal = rootRec->cntTotal == 0.0 ? 0.0 :
+				(dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
+	}
+
 	void gcpUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec){
 		atomicDataRec_.pcntLive = rootRec->cntLive == 0 ? 0.0 :
 				(atomicDataRec_.cntLive * 100.0) / rootRec->cntLive;
@@ -313,8 +320,9 @@ public:
 	}
 
 	void gcpPairUpdatePercentiles(GCPPairHistogramRecords* globalRec) {
-		countData_.gcpUpdateRecPercentile(globalRec->countData_.gcpGetDataRecP());
-		sizeData_.gcpUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
+
+		countData_.gcpUnsafeUpdateRecPercentile(globalRec->countData_.gcpGetDataRecP());
+		sizeData_.gcpUnsafeUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
 	}
 
 	void gcpPairUpdateAtomicPercentiles(GCPPairHistogramRecords* globalRec) {
