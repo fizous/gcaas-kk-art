@@ -3039,7 +3039,8 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 	}
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPPairHistogramRecords* _rec = it.second;
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
 		_rec->gcpPairUpdateAtomicPercentiles(_globalHolder, _safeCounts, _safeSpace);
 	}
 }
