@@ -3194,7 +3194,7 @@ void GCClassTableManager::printClassNames(void) {
 			LOG(ERROR) << "XXXX NULL Hash: " << it.first;
 		else {
 			gcpLogDataRecord(LOG(ERROR)<< "Name: " <<
-					PrettyClass(_klass),
+					_rec->getClassPrettyName(),
 					_rec->countData_.gcpGetDataRecP());
 		}
 //		mirror::Class* _klass = Runtime::Current()->GetClassLinker()->

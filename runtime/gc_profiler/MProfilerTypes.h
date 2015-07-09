@@ -255,6 +255,7 @@ public:
 class GCPPairHistogramRecords : public GCPHistRecData {
 private:
 	mirror::Class* klzz_;
+	std::string klzzName_;
 public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
@@ -266,7 +267,8 @@ public:
 	}
 
 	GCPPairHistogramRecords(size_t id, mirror::Class* klass) :
-		klzz_(klass), countData_(id), sizeData_(id) {
+		klzz_(klass), klzzName_(PrettyClass(klass)),
+		countData_(id), sizeData_(id) {
 	}
 
 	void gcpPairSetRecordIndices(size_t kIndex) {
@@ -323,6 +325,8 @@ public:
 	}
 
 	mirror::Class* getClassP(){return klzz_;}
+	std::string& getClassPrettyName(){return klzzName_;}
+
 };
 
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
