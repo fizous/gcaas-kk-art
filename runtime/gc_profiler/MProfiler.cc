@@ -3047,7 +3047,8 @@ void GCClassTableManager::logManagedData(void){
 			"atomic pcntLive = " << _pcntAtomicLive << "; atomic pcntTotal = " <<
 			_pcntAtomicTotal;
 
-
+	LOG(ERROR) << "=============== PRinting Class Names ==============";
+	printClassNames();
 }
 //
 
