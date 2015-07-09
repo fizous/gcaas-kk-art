@@ -69,7 +69,7 @@ class InternTable {
   void DisallowNewInterns() EXCLUSIVE_LOCKS_REQUIRED(Locks::mutator_lock_);
   void AllowNewInterns() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  mprofiler::GCPHistRecData* GCPProfileObjKlass(size_t);
+  mprofiler::GCPHistRecData* GCPProfileObjKlass(size_t, mirror::Class*);
   typedef std::multimap<size_t, mprofiler::GCPHistRecData*> ClassTable;
   ClassTable classTableProf_;
  private:

@@ -2828,7 +2828,8 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 		klassHash = Runtime::Current()->GetClassLinker()->gcpGetClassHash(klass);
 		//LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistRecData* _histRec =
-				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
+				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash,
+						klass);
 
 		if(_histRec != NULL) {
 			size_t objSpace =
@@ -2977,7 +2978,8 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 }
 
 void GCClassTableManager::logManagedData(void){
-	GCPPairHistogramRecords* _dataRec = (GCPPairHistogramRecords*) histData_;
+	GCPPairHistogramRecords* _dataRec =
+			(GCPPairHistogramRecords*) histData_;
 
 	LOG(ERROR) << "GlobalRecord>>  Counts";
 	gcpLogDataRecord(LOG(ERROR),
@@ -3186,8 +3188,16 @@ void GCClassTableManager::printClassNames(void) {
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
-		mirror::Class* _klass = Runtime::Current()->GetClassLinker()->
-		_rec->gcpZerofyPairHistAtomicRecData();
+
+		mirror::Class* _klass = getClassP();
+		if(_klass == NULL)
+			LOG(ERROR) << "XXXX NULL Hash: " << it.first;
+		else {
+			LOG(ERROR) << gcpLogDataRecord(LOG(ERROR)<< "Name: " << Class::PrettyClass(_klass->get),
+					_rec->countData_.gcpGetDataRecP());
+		}
+//		mirror::Class* _klass = Runtime::Current()->GetClassLinker()->
+//		_rec->gcpZerofyPairHistAtomicRecData();
 	}
 }
 

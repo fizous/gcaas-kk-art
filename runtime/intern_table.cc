@@ -188,7 +188,8 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
 }
 
 
-mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
+mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode,
+		mirror::Class* klass) {
   for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end();
   		it != end; ++it) {
   	mprofiler::GCPHistRecData* existing_data = it->second;
@@ -196,7 +197,7 @@ mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
     return existing_data;
   }
   mprofiler::GCPHistRecData* _newRec =
-  		new mprofiler::GCPPairHistogramRecords(hashCode);
+  		new mprofiler::GCPPairHistogramRecords(hashCode, klass);
 //  if(_newRec == NULL) {
 //  	LOG(ERROR) << "_new record could not be allocated";
 //  } else {
