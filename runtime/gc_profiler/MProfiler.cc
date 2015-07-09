@@ -2980,10 +2980,10 @@ void GCClassTableManager::logManagedData(void){
 	GCPPairHistogramRecords* _dataRec = (GCPPairHistogramRecords*) histData_;
 
 	LOG(ERROR) << "GlobalRecord>>  Counts";
-	LOG(ERROR) << gcpLogDataRecord(LOG(ERROR),
+	gcpLogDataRecord(LOG(ERROR),
 			_dataRec->countData_.gcpGetDataRecP());
 	LOG(ERROR) << "GlobalRecord>>  Sizes";
-	LOG(ERROR) << gcpLogDataRecord(LOG(ERROR),
+	gcpLogDataRecord(LOG(ERROR),
 			_dataRec->sizeData_.gcpGetDataRecP());
 
 	LOG(ERROR) << "+++table class size is " <<
