@@ -2868,7 +2868,7 @@ inline void GCClassTableManager::removeObject(size_t allocSpace, mirror::Object*
 	GCPExtraObjHeader* _profHeader =
 				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
-		LOG(ERROR) << "--------- GCClassTableManager::removeObject: Found none registered object";
+		GCMMP_VLOG(INFO) << "--------- GCClassTableManager::removeObject: Found none registered object";
 		return;
 	}
 	GCPHistRecData* _dataRec = _profHeader->dataRec;
