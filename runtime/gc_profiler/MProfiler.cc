@@ -4091,7 +4091,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 }
 
 
-void GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
+bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData){
 	bool _print   = false;
 	bool _success = true;
@@ -4115,8 +4115,9 @@ void GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 	}
 
 	if(_print) {
-		VMProfiler::GCPDumpEndMarker(dumpFile);
+		return VMProfiler::GCPDumpEndMarker(dumpFile);
 	}
+	return false;
 }
 
 
@@ -4350,27 +4351,27 @@ void ClassProfiler::gcpLogPerfData() {
 	dumpAllClasses();
 }
 
-void ClassProfiler::dumpProfData(bool isLastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-	GCClassTableManager* tablManager = getClassHistograms();
-	if(tablManager != NULL) {
-		dumpHeapStats();
-//		tablManager->calculatePercentiles();
-//		tablManager->calculateAtomicPercentiles();
-		tablManager->gcpDumpManagedData(dump_file_, true);
-		// dump class data from last allocation window
-		if(isLastDump) {
-			GCPDumpEndMarker(dump_file_);
-			//dump data summary
-			tablManager->dumpClassHistograms(dump_file_, false);
-			dump_file_->Close();
-			gcpLogPerfData();
-			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
-		}
-		gcpFinalizeHistUpdates();
-
-	}
-}
+//void ClassProfiler::dumpProfData(bool isLastDump) {
+//  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+//	GCClassTableManager* tablManager = getClassHistograms();
+//	if(tablManager != NULL) {
+//		dumpHeapStats();
+////		tablManager->calculatePercentiles();
+////		tablManager->calculateAtomicPercentiles();
+//		tablManager->gcpDumpManagedData(dump_file_, true);
+//		// dump class data from last allocation window
+//		if(isLastDump) {
+//			GCPDumpEndMarker(dump_file_);
+//			//dump data summary
+//			tablManager->gcpDumpSummaryManagedData(dump_file_);
+//			dump_file_->Close();
+//			gcpLogPerfData();
+//			LOG(ERROR) << "ClassProfiler: Terminating dumpProfData with lastDump is true";
+//		}
+//		gcpFinalizeHistUpdates();
+//
+//	}
+//}
 
 //
 //void CohortProfiler::addCohortRecord(void) {
