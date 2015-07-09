@@ -709,6 +709,7 @@ public:
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool dumpClassCntHistograms(art::File* dumpFile,
 			bool dumpGlobalRec);
+	void gcpFinalizeProfileCycle(void);
 	bool dumpClassSizeHistograms(art::File* dumpFile,
 			bool dumpGlobalRec);
 	bool dumpClassAtomicCntHistograms(art::File*);

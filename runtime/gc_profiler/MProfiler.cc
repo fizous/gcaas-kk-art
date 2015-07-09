@@ -3188,6 +3188,16 @@ void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	}
 }
 
+void GCClassTableManager::gcpFinalizeProfileCycle(void) {
+
+  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  if(_newCohortIndex != GCPGetLastManagedCohort()) {
+  	gcpZeorfyAllAtomicRecords();
+  	GCPSetLastManagedCohort(_newCohortIndex);
+  }
+}
+
+
 void GCClassTableManager::printClassNames(void) {
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
@@ -4371,14 +4381,10 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 }
 
 void ClassProfiler::gcpFinalizeHistUpdates(void) {
-	GCClassTableManager* classManager = getClassHistograms();
-	if(classManager == NULL)
-		return;
-	int32_t _newIndex = GCPCalcCohortIndex();
-	if(_newIndex != classManager->GCPGetLastManagedCohort()) {
-		classManager->gcpZeorfyAllAtomicRecords();
-		classManager->GCPSetLastManagedCohort(_newIndex);
-	}
+	GCClassTableManager* _manager = getClassHistograms();
+  if(_manager == NULL)
+  	return;
+  _manager->gcpFinalizeProfileCycle();
 }
 
 void ClassProfiler::initHistDataManager(void) {
