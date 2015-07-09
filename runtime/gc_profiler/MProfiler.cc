@@ -2701,7 +2701,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
 	 		gcpLogPerfData();
  } else {
-
+	 gcpLogPerfData();
 		 gcpFinalizeHistUpdates();
 //		 gcpFinalizeHistUpdates();
 		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
@@ -3026,19 +3026,20 @@ void GCClassTableManager::logManagedData(void){
 		_pcntAtomicTotal += _cntRecord->atomicDataRec_.pcntTotal;
 		_pcntAtomicLive  += _cntRecord->atomicDataRec_.pcntLive;
 
+		if(false) {
+				LOG(ERROR) << "hash-- " << it.first;
+				//LOG(ERROR) <<;
+				gcpLogDataRecord(LOG(ERROR) << "Count>> ", &_cntRecord->dataRec_);
+				//LOG(ERROR) <<"dataSize:";
+				gcpLogDataRecord(LOG(ERROR) << "Space>> ", &_spaceRecord->dataRec_);
 
-		LOG(ERROR) << "hash-- " << it.first;
-		//LOG(ERROR) <<;
-		gcpLogDataRecord(LOG(ERROR) << "Count>> ", &_cntRecord->dataRec_);
-		//LOG(ERROR) <<"dataSize:";
-		gcpLogDataRecord(LOG(ERROR) << "Space>> ", &_spaceRecord->dataRec_);
 
-
-		LOG(ERROR) << "atomic hash-- " << it.first <<"; cntLive= " <<
-				_cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
-				_cntRecord->atomicDataRec_.cntTotal << "; pcntLive= " <<
-				_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
-				_cntRecord->atomicDataRec_.pcntTotal;
+				LOG(ERROR) << "atomic hash-- " << it.first <<"; cntLive= " <<
+						_cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
+						_cntRecord->atomicDataRec_.cntTotal << "; pcntLive= " <<
+						_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
+						_cntRecord->atomicDataRec_.pcntTotal;
+		}
 	}
 
 	LOG(ERROR) << "Aclaculated>>  cntLive: "
