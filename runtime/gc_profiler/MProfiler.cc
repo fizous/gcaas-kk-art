@@ -3035,10 +3035,6 @@ void GCClassTableManager::logManagedData(void){
 				_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
 				_cntRecord->atomicDataRec_.pcntTotal;
 	}
-	LOG(ERROR) << "GlobalRecord Cnt>>>> :";
-	gcpLogDataRecord(LOG(ERROR), &(((GCPPairHistogramRecords*) histData_)->countData_.dataRec_));
-	LOG(ERROR) << "GlobalRecord Space>>>> :";
-	gcpLogDataRecord(LOG(ERROR), &(((GCPPairHistogramRecords*) histData_)->sizeData_.dataRec_));
 
 	LOG(ERROR) << "Aclaculated>>  cntLive: "
 			<< _cntLive << "; cntTotal: " << _cntTotal << "pcntLive:" <<
