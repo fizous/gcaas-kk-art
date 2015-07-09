@@ -280,21 +280,24 @@ public:
 	}
 
 	bool gcpPairDecRecData(size_t space){
-		if(space < sizeData_.dataRec_.cntLive) {
-			sizeData_.gcpDecRecData(space);
-			countData_.gcpDecRecData();
-			return true;
+		if(((double)space) < sizeData_.dataRec_.cntLive) {
+			if(countData_.dataRec_.cntLive > 0) {
+				sizeData_.gcpDecRecData(space);
+				countData_.gcpDecRecData();
+				return true;
+			}
 		}
 		return false;
 	}
 
-	bool gcpPairDecAtomicRecData(size_t space){
+	bool gcpPairDecAtomicRecData(size_t space) {
 		if(sizeData_.atomicDataRec_.cntLive.load() > (int32_t)space) {
-			if(sizeData_.gcpDecAtomicRecData(space)) {
-				countData_.gcpDecAtomicRecData();
-				return true;
+			if(countData_.atomicDataRec_.cntLive.load() > 0) {
+				if(sizeData_.gcpDecAtomicRecData(space)) {
+					countData_.gcpDecAtomicRecData();
+					return true;
+				}
 			}
-			return false;
 		}
 		return false;
 	}

@@ -2977,8 +2977,15 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 }
 
 void GCClassTableManager::logManagedData(void){
-	LOG(ERROR) << "GlobalRecord>>  cntLive: "
-			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
+	GCPPairHistogramRecords* _dataRec = (GCPPairHistogramRecords*) histData_;
+
+	LOG(ERROR) << "GlobalRecord>>  Counts";
+	LOG(ERROR) << gcpLogDataRecord(LOG(ERROR),
+			_dataRec->countData_.gcpGetDataRecP());
+	LOG(ERROR) << "GlobalRecord>>  Sizes";
+	LOG(ERROR) << gcpLogDataRecord(LOG(ERROR),
+			_dataRec->sizeData_.gcpGetDataRecP());
+
 	LOG(ERROR) << "+++table class size is " <<
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
 	double _cntLive = 0.0;
@@ -3017,10 +3024,10 @@ void GCClassTableManager::logManagedData(void){
 
 
 		LOG(ERROR) << "hash-- " << it.first;
-		LOG(ERROR) <<"dataCnt:";
-		gcpLogDataRecord(LOG(ERROR), &_cntRecord->dataRec_);
-		LOG(ERROR) <<"dataSize:";
-		gcpLogDataRecord(LOG(ERROR), &_spaceRecord->dataRec_);
+		//LOG(ERROR) <<;
+		gcpLogDataRecord(LOG(ERROR) << "Count>> ", &_cntRecord->dataRec_);
+		//LOG(ERROR) <<"dataSize:";
+		gcpLogDataRecord(LOG(ERROR) << "Space>> ", &_spaceRecord->dataRec_);
 
 
 		LOG(ERROR) << "atomic hash-- " << it.first << _cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
@@ -3157,7 +3164,7 @@ bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
 	_success &= dumpClassAtomicCntHistograms(dumpFile);
-	_success &= dumpClassSizeHistograms(dumpFile, true);
+	_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
 	_success &= dumpClassAtomicSizeHistograms(dumpFile);
 	return _success;
 }
