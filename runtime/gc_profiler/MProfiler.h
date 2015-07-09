@@ -511,10 +511,10 @@ public:
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
-	GCHistogramDataManager* hitogramsData;
+	GCHistogramDataManager* hitogramsData_;
 
 	GCHistogramObjSizesManager* getObjHistograms(void) {
-		return (GCHistogramObjSizesManager*)hitogramsData;
+		return (GCHistogramObjSizesManager*) hitogramsData_;
 	}
 
 
@@ -592,7 +592,7 @@ public:
 	}
 
 	GCPThreadAllocManager* getThreadHistManager(void) {
-		return (GCPThreadAllocManager*)hitogramsData;
+		return (GCPThreadAllocManager*)hitogramsData_;
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
@@ -618,7 +618,7 @@ class CohortProfiler : public ObjectSizesProfiler {
 public:
 
 	GCCohortManager* getCohortManager(void) {
-		return (GCCohortManager*)hitogramsData;
+		return (GCCohortManager*)hitogramsData_;
 	}
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
@@ -648,7 +648,7 @@ class ClassProfiler : public ObjectSizesProfiler {
 public:
 
 	GCClassTableManager* getClassHistograms(void) {
-		return (GCClassTableManager*)hitogramsData;
+		return (GCClassTableManager*) hitogramsData_;
 	}
 
 	ClassProfiler(GCMMP_Options*, void*);

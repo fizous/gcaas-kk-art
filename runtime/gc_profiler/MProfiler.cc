@@ -168,13 +168,13 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
-int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 AtomicInteger GCHistogramDataManager::kGCPLastCohortIndex;
+int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 int GCHistogramDataManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
-
+size_t GCHistogramDataManager::kGCMMPCohortSize = (size_t) (1 << GCHistogramDataManager::kGCMMPCohortLog);
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
 inline uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {
@@ -658,6 +658,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 		}
 		if(_found) {
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
+			GCHistogramDataManager::GCPUpdateCohortSize();
 			VMProfiler::kGCMMPLogAllocWindow = argOptions->alloc_window_log_;
 			setProfDaemon(false);
 			const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
@@ -2275,7 +2276,7 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 
 void ObjectSizesProfiler::initHistDataManager(void) {
 	LOG(ERROR) << "ObjectSizesProfiler::initHistDataManager";
-	hitogramsData = new GCHistogramObjSizesManager();
+	hitogramsData_ = new GCHistogramObjSizesManager();
 //	GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 //	lastLiveGuard = 0;
 //
@@ -2327,7 +2328,7 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
-	hitogramsData->addObject(allocatedMemory, objSize, obj);
+	hitogramsData_->addObject(allocatedMemory, objSize, obj);
 //	int32_t readVal = lastLiveGuard;
 
 //	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
@@ -2384,9 +2385,9 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 
-	if(hitogramsData == NULL)
+	if(hitogramsData_ == NULL)
 		return;
-	hitogramsData->removeObject(allocatedMemory, obj);
+	hitogramsData_->removeObject(allocatedMemory, obj);
 
 
 //	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
@@ -2646,8 +2647,8 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 		//dump the histogram entries
 	 gcpUpdateGlobalHistogram();
 
-	 _success &= hitogramsData->gcpDumpHistTable(dump_file_ ,true);
-	 _success &= hitogramsData->gcpDumpHistAtomicTable(dump_file_);
+	 _success &= hitogramsData_->gcpDumpHistTable(dump_file_ ,true);
+	 _success &= hitogramsData_->gcpDumpHistAtomicTable(dump_file_);
 //	 _success =
 //	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
 //
@@ -2670,7 +2671,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 _success &=
 			 GCPDumpEndMarker(dump_file_);
 	 //dump the summary one more time
-	 _success &= hitogramsData->gcpDumpHistTable(dump_file_, false);
+	 _success &= hitogramsData_->gcpDumpHistTable(dump_file_, false);
 //	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
 //	 _success &=
 //	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
@@ -2782,7 +2783,8 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(false) {
+GCClassTableManager::GCClassTableManager(void) :
+		GCHistogramDataManager(false) {
 	initHistograms();
 	//LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }
@@ -2794,7 +2796,10 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 void GCClassTableManager::initHistograms(void) {
-	histData_ = new GCPHistRecData(0);
+	globalClassStats_ = new GCPPairHistogramRecords(0);
+	/* no need for histData_ */
+	histData_ = NULL;
+	//histData_ = new GCPHistRecData(0);
 	//LOG(ERROR) << "GCClassTableManager::initHistograms";
 }
 
@@ -3574,7 +3579,7 @@ inline void ThreadAllocProfiler::gcpAddObject(size_t allocatedMemory,
 
 
 void ThreadAllocProfiler::initHistDataManager(void) {
-	hitogramsData = new GCPThreadAllocManager();
+	hitogramsData_ = new GCPThreadAllocManager();
 	LOG(ERROR) << "ThreadAllocProfiler : initHistDataManager";
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
@@ -4050,7 +4055,7 @@ void GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 /********************************* Cohort profiling ****************/
 
 void CohortProfiler::initHistDataManager(void) {
-	hitogramsData = new GCCohortManager(&GCPTotalAllocBytes);
+	hitogramsData_ = new GCCohortManager(&GCPTotalAllocBytes);
 }
 
 void CohortProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
@@ -4079,7 +4084,7 @@ void CohortProfiler::dumpProfData(bool isLastDump) {
 	dumpHeapStats();
 	//dump the global entry
 
-	hitogramsData->gcpDumpManagedData(dump_file_, false);
+	hitogramsData_->gcpDumpManagedData(dump_file_, false);
 
 	//gcpUpdateGlobalHistogram();
 		//dump the global stats
@@ -4118,6 +4123,7 @@ void CohortProfiler::gcpLogPerfData() {
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	int _rIndex = 0;
+	LOG(ERROR) << "cohortRows_: "<< getCohortManager()->cohortsTable.cohortRows_;
 	for (const auto& _rowIterP : getCohortManager()->cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
@@ -4209,7 +4215,7 @@ void ClassProfiler::gcpFinalizeHistUpdates(void) {
 
 void ClassProfiler::initHistDataManager(void) {
 	LOG(ERROR) << "Initializing ClassProfiler::initHistDataManager";
-	hitogramsData = new GCClassTableManager();
+	hitogramsData_ = new GCClassTableManager();
 }
 
 //class_Linker

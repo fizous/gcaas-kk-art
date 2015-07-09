@@ -207,8 +207,20 @@ public:
 	  atomicDataRec_.cntTotal.store(0);
 	}
 
+	void gcpDecRecData(size_t space){
+		dataRec_.cntLive -= space;
+	}
+
 	void gcpDecRecData(void){
 		dataRec_.cntLive--;
+	}
+
+	bool gcpDecAtomicRecData(size_t space){
+		if(atomicDataRec_.cntLive > (int32_t)space) {
+			atomicDataRec_.cntLive.fetch_sub(space);
+			return true;
+		}
+		return false;
 	}
 
 	bool gcpDecAtomicRecData(void){
@@ -217,6 +229,11 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	void gcpIncRecData(size_t space){
+		dataRec_.cntLive += space;
+		dataRec_.cntTotal += space;
 	}
 
 	void gcpIncRecData(void){
@@ -228,18 +245,56 @@ public:
 		atomicDataRec_.cntLive++;
 		atomicDataRec_.cntTotal++;
 	}
+
+	void gcpIncAtomicRecData(size_t space){
+		atomicDataRec_.cntLive.fetch_add(space);
+		atomicDataRec_.cntTotal.fetch_add(space);
+	}
 };
 
-class GCPPairHistogramRecords {
+class GCPPairHistogramRecords : public GCPHistRecData{
 public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
 
 	GCPPairHistogramRecords(void);
 
-	void gcpSetRecordIndices(size_t kIndex) {
+	GCPPairHistogramRecords(size_t id) :
+		countData_(id), sizeData_(id) {
+	}
+
+
+	void gcpPairSetRecordIndices(size_t kIndex) {
 		countData_.initDataRecords(kIndex);
 		sizeData_.initDataRecords(kIndex);
+	}
+
+	void gcpPairIncRecData(size_t space){
+		countData_.gcpIncRecData();
+		sizeData_.gcpIncRecData(space);
+	}
+
+	void gcpPairIncAtomicRecData(size_t space){
+		countData_.gcpIncAtomicRecData();
+		sizeData_.gcpIncAtomicRecData(space);
+	}
+
+	void gcpPairDecRecData(size_t space){
+		if(space < sizeData_.dataRec_.cntLive) {
+			sizeData_.gcpDecRecData(space);
+			countData_.gcpDecRecData();
+		}
+	}
+
+	bool gcpPairDecAtomicRecData(size_t space){
+		if(sizeData_.atomicDataRec_.cntLive.load() > (int32_t)space) {
+			if(sizeData_.gcpDecAtomicRecData(space)) {
+				countData_.gcpDecAtomicRecData();
+				return true;
+			}
+			return false;
+		}
+		return false;
 	}
 };
 
@@ -274,6 +329,7 @@ public:
 	static int 	kGCMMPHeaderSize;
 	static AtomicInteger kGCPLastCohortIndex;
 	static int kGCMMPCohortLog;
+	static size_t kGCMMPCohortSize;
 
 	int32_t GCPGetLastManagedCohort() {
 		return kGCPLastCohortIndex.load();
@@ -321,6 +377,9 @@ public:
   	return extraHeader;
   }
 
+  static void GCPUpdateCohortSize() {
+  	kGCMMPCohortSize = (size_t)  (1 << kGCMMPCohortLog);
+  }
   virtual void initHistograms(void) {}
 
   virtual void addObject(size_t allocatedMemory,
@@ -464,7 +523,6 @@ class GCCohortManager : public GCHistogramDataManager {
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
 	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
-	static constexpr size_t kGCMMPCohortSize = (size_t) GCP_COHORT_SIZE;
 
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
@@ -550,25 +608,27 @@ public:
 class GCClassTableManager : public GCHistogramDataManager {
 public:
 	/* keep information about classes per space*/
-	GCPHistRecData*				spaceHistData_;
+	GCPPairHistogramRecords* globalClassStats_;
+
+
+	GCPHistRecData* addObjectClassPair(mirror::Class* klass,
+				mirror::Object* obj);
 
 	GCClassTableManager(void);
 	GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	~GCClassTableManager(){};
 
-
-
-	HistogramTable_S classTable_;
-
 	void initHistograms();
+	HistogramTable_S classTable_;
+	void addObject(size_t, size_t, mirror::Object*);
+
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
-	void addObject(size_t, size_t, mirror::Object*);
-	GCPHistRecData* addObjectClassPair(mirror::Class* klass,
-			mirror::Object* obj);
+
+
 
 
 	void logClassTable(void);
