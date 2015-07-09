@@ -2993,9 +2993,9 @@ void GCClassTableManager::logManagedData(void){
 
 
 		LOG(ERROR) << "hash-- " << it.first;
-		"dataCnt:";
+		LOG(ERROR) <<"dataCnt:";
 		gcpLogDataRecord(LOG(ERROR), &_cntRecord->dataRec_);
-		"dataSize:";
+		LOG(ERROR) <<"dataSize:";
 		gcpLogDataRecord(LOG(ERROR), &_spaceRecord->dataRec_);
 
 
