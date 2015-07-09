@@ -195,7 +195,8 @@ mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode) {
   	//LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
     return existing_data;
   }
-  mprofiler::GCPHistRecData* _newRec = new mprofiler::GCPHistRecData(hashCode);
+  mprofiler::GCPHistRecData* _newRec =
+  		new mprofiler::GCPPairHistogramRecords(hashCode);
 //  if(_newRec == NULL) {
 //  	LOG(ERROR) << "_new record could not be allocated";
 //  } else {

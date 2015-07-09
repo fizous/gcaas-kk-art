@@ -2796,9 +2796,8 @@ GCClassTableManager::GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE hisMGR) :
 }
 
 void GCClassTableManager::initHistograms(void) {
-	globalClassStats_ = new GCPPairHistogramRecords(0);
 	/* no need for histData_ */
-	histData_ = NULL;
+	histData_ = new GCPPairHistogramRecords(0);
 	//histData_ = new GCPHistRecData(0);
 	//LOG(ERROR) << "GCClassTableManager::initHistograms";
 }
@@ -2820,16 +2819,16 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 //		} else {
 //			//LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
 //		}
-		_histRec->gcpIncRecData();
-		_histRec->gcpIncAtomicRecData();
-//		if(histData_ == NULL) {
-//			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
-//		} else {
-//			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
-//		}
-		//update the global entry as well
-		histData_->gcpIncRecData();
-		histData_->gcpIncAtomicRecData();
+//		_histRec->gcpIncRecData();
+//		_histRec->gcpIncAtomicRecData();
+////		if(histData_ == NULL) {
+////			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
+////		} else {
+////			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
+////		}
+//		//update the global entry as well
+//		histData_->gcpIncRecData();
+//		histData_->gcpIncAtomicRecData();
 
 		//add data to global histogram
 
@@ -2884,7 +2883,19 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 }
 
 
-
+inline void GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+	GCPExtraObjHeader* _profHeader =
+				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
+	if(_profHeader->objSize == 0) {
+		LOG(ERROR) << "--------- GCClassTableManager::removeObject: Found none registered object";
+		return;
+	}
+	GCPHistRecData* _dataRec = _profHeader->dataRec;
+	if(_dataRec == NULL)
+		return;
+	gcpDecPairRecData(_profHeader->objSize, _dataRec);
+	gcpDecAtomicPairRecData(_profHeader->objSize, _dataRec);
+}
 
 
 inline void GCClassTableManager::addObject(size_t allocatedMemory,
@@ -4123,7 +4134,8 @@ void CohortProfiler::gcpLogPerfData() {
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	int _rIndex = 0;
-	LOG(ERROR) << "cohortRows_: "<< getCohortManager()->cohortsTable.cohortRows_;
+	LOG(ERROR) << "cohortRows_: "<< getCohortManager()->cohortsTable.cohortRows_.size() <<
+			"; index: " << getCohortManager()->cohortsTable.index;
 	for (const auto& _rowIterP : getCohortManager()->cohortsTable.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		if(_rowBytes == 0)
@@ -4150,31 +4162,33 @@ ClassProfiler::ClassProfiler(GCMMP_Options* opts, void* entry) :
 }
 
 
-void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
-	GCPExtraObjHeader* _profHeader =
-				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
-	if(_profHeader->objSize == 0) {
-		//the object was not registered
-		LOG(ERROR) << "---------Found none registered object";
-		return;
-	}
-
-
-	GCPHistRecData* _dataRec = _profHeader->dataRec;
-	if(_dataRec == NULL)
-		return;
-
-	GCClassTableManager* _mngr = getClassHistograms();
-	if(_mngr != NULL) {
-		_dataRec->gcpDecRecData();
-
-		_mngr->histData_->gcpDecRecData();
-		if(_dataRec->gcpDecAtomicRecData()) {
-			//update the global counter as well
-			_mngr->histData_->gcpDecAtomicRecData();
-		}
-	}
-}
+//void ClassProfiler::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
+//	GCPExtraObjHeader* _profHeader =
+//				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
+//	if(_profHeader->objSize == 0) {
+//		//the object was not registered
+//		LOG(ERROR) << "---------Found none registered object";
+//		return;
+//	}
+//
+//
+//	GCPHistRecData* _dataRec = _profHeader->dataRec;
+//	if(_dataRec == NULL)
+//		return;
+//
+//	GCClassTableManager* _mngr = getClassHistograms();
+//	if(_mngr != NULL) {
+//		_mngr->
+//		_mngr->
+////		_dataRec->gcpDecRecData();
+////
+////		_mngr->histData_->gcpDecRecData(_profHeader->objSize);
+////		if(_dataRec->gcpDecAtomicRecData()) {
+////			//update the global counter as well
+////			_mngr->histData_->gcpDecAtomicRecData();
+////		}
+//	}
+//}
 
 inline void ClassProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
@@ -4197,6 +4211,9 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 		}
 		GCPExtraObjHeader* _profHeader =
 					GCHistogramObjSizesManager::GCPGetObjProfHeader(objSpace, obj);
+		classManager->gcpIncAtomicPairRecData(_profHeader->objSize, _rec);
+		classManager->gcpIncPairRecData(_profHeader->objSize, _rec);
+
 		_profHeader->dataRec = _rec;
 
 	}

@@ -279,11 +279,13 @@ public:
 		sizeData_.gcpIncAtomicRecData(space);
 	}
 
-	void gcpPairDecRecData(size_t space){
+	bool gcpPairDecRecData(size_t space){
 		if(space < sizeData_.dataRec_.cntLive) {
 			sizeData_.gcpDecRecData(space);
 			countData_.gcpDecRecData();
+			return true
 		}
+		return false;
 	}
 
 	bool gcpPairDecAtomicRecData(size_t space){
@@ -442,7 +444,43 @@ public:
 			histData_->gcpDecAtomicRecData();
   }
 
+  virtual void gcpIncPairRecData(size_t space, GCPHistRecData* rec) {
+  	GCPPairHistogramRecords* _globalRec =
+  			(GCPPairHistogramRecords*) histData_;
+  	GCPPairHistogramRecords* _localRec =
+  			(GCPPairHistogramRecords*) rec;
+  	_localRec->gcpPairIncRecData(space);
+  	_globalRec->gcpPairIncRecData(space);
+  }
 
+  virtual void gcpIncAtomicPairRecData(size_t space, GCPHistRecData* rec) {
+  	GCPPairHistogramRecords* _globalRec =
+  			(GCPPairHistogramRecords*) histData_;
+  	GCPPairHistogramRecords* _localRec =
+  			(GCPPairHistogramRecords*) rec;
+  	_localRec->gcpPairIncAtomicRecData(space);
+  	_globalRec->gcpPairIncAtomicRecData(space);
+  }
+
+  virtual void gcpDecPairRecData(size_t space, GCPHistRecData* rec) {
+  	GCPPairHistogramRecords* _globalRec =
+  			(GCPPairHistogramRecords*) histData_;
+  	GCPPairHistogramRecords* _localRec =
+  			(GCPPairHistogramRecords*) rec;
+  	if(_localRec->gcpPairDecRecData(space)) {
+  		_globalRec->gcpPairDecRecData(space);
+  	}
+  }
+
+  virtual void gcpDecAtomicPairRecData(size_t space, GCPHistRecData* rec) {
+  	GCPPairHistogramRecords* _globalRec =
+  			(GCPPairHistogramRecords*) histData_;
+  	GCPPairHistogramRecords* _localRec =
+  			(GCPPairHistogramRecords*) rec;
+  	if(_localRec->gcpPairDecAtomicRecData(space)) {
+  		_globalRec->gcpPairDecAtomicRecData(space);
+  	}
+  }
   virtual void calculateAtomicPercentiles(void) {}
   virtual void calculatePercentiles(void) {}
   virtual bool gcpDumpHistTable(art::File*, bool){return true;}
@@ -607,8 +645,6 @@ public:
 
 class GCClassTableManager : public GCHistogramDataManager {
 public:
-	/* keep information about classes per space*/
-	GCPPairHistogramRecords* globalClassStats_;
 
 
 	GCPHistRecData* addObjectClassPair(mirror::Class* klass,
@@ -621,7 +657,7 @@ public:
 	void initHistograms();
 	HistogramTable_S classTable_;
 	void addObject(size_t, size_t, mirror::Object*);
-
+  void removeObject(size_t, mirror::Object*);
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,

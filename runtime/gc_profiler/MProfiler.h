@@ -659,7 +659,7 @@ public:
   		size_t objSize, mirror::Object* obj);
   void gcpProfObjKlass(mirror::Class*, mirror::Object*);
   void gcpAddObject(size_t, size_t){}
-  void gcpRemoveObject(size_t, mirror::Object*);
+//  void gcpRemoveObject(size_t, mirror::Object*);
   void dumpAllClasses(void);
   void dumpProfData(bool);
   void gcpLogPerfData(void);
