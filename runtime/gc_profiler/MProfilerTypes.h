@@ -130,9 +130,10 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 
 
 class GCPHistRecData {
-public:
+protected:
 	GCPHistogramRec dataRec_;
 	GCPHistogramRecAtomic atomicDataRec_;
+public:
 
 	static void GCPCopyRecordsData(GCPHistogramRec* dest,
 			GCPHistogramRecAtomic* src) {
