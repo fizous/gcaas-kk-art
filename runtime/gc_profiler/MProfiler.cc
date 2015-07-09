@@ -3113,6 +3113,22 @@ bool GCClassTableManager::dumpClassAtomicSizeHistograms(art::File* dumpFile) {
 	return false;
 }
 
+bool GCClassTableManager::dumpClassAtomicCntHistograms(art::File* dumpFile) {
+	bool _dataWritten = false;
+	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		_dataWritten = _rec->countData_.gcpDumpAtomicHistRec(dumpFile);
+		if(!_dataWritten)
+			break;
+	}
+	if(_dataWritten) {
+		return VMProfiler::GCPDumpEndMarker(dumpFile);
+	}
+	return false;
+}
+
 bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
