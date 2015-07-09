@@ -2782,7 +2782,7 @@ inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 /********************* GCClassTableManager profiling ****************/
 
 
-GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager() {
+GCClassTableManager::GCClassTableManager(void) : GCHistogramDataManager(false) {
 	initHistograms();
 	//LOG(ERROR) << "GCClassTableManager::GCClassTableManager";
 }

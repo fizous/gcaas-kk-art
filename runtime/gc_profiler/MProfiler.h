@@ -625,7 +625,7 @@ public:
 		ObjectSizesProfiler(opts, entry, false) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPCalcCohortIndex());
 		//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
-		kGCMMPLogAllocWindow = 18;
+		//kGCMMPLogAllocWindow = 18;
 		initHistDataManager();
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}

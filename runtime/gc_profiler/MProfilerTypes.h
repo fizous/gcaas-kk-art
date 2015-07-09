@@ -127,6 +127,8 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 	double totalSize;
 } GCPCohortRecordData;
 
+
+
 class GCPHistRecData {
 public:
 	GCPHistogramRec dataRec_;
@@ -226,8 +228,19 @@ public:
 		atomicDataRec_.cntLive++;
 		atomicDataRec_.cntTotal++;
 	}
+};
 
+class GCPPairHistogramRecords {
+public:
+	GCPHistRecData countData_;
+	GCPHistRecData sizeData_;
 
+	GCPPairHistogramRecords(void);
+
+	void gcpSetRecordIndices(size_t kIndex) {
+		countData_.initDataRecords(kIndex);
+		sizeData_.initDataRecords(kIndex);
+	}
 };
 
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
@@ -536,9 +549,14 @@ public:
 
 class GCClassTableManager : public GCHistogramDataManager {
 public:
+	/* keep information about classes per space*/
+	GCPHistRecData*				spaceHistData_;
+
 	GCClassTableManager(void);
 	GCClassTableManager(GCMMP_HISTOGRAM_MGR_TYPE);
 	~GCClassTableManager(){};
+
+
 
 	HistogramTable_S classTable_;
 
