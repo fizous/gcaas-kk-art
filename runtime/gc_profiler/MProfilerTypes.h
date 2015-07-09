@@ -571,6 +571,12 @@ public:
 				"; cntTotal: "<< _dataRec->cntTotal<< "; pcntLive: " <<
 				_dataRec->pcntLive << "; pcntTotal: " << _dataRec->pcntTotal;
 	}
+
+	void gcpLogDataRecord(std::ostream& os, GCPHistogramRec* _dataRec) {
+		os << "index: "<< _dataRec->index<< ";cntLive: " << _dataRec->cntLive <<
+				"; cntTotal: "<< _dataRec->cntTotal<< "; pcntLive: " <<
+				_dataRec->pcntLive << "; pcntTotal: " << _dataRec->pcntTotal;
+	}
 };//GCHistogramDataManager
 
 

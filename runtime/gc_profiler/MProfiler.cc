@@ -2991,26 +2991,23 @@ void GCClassTableManager::logManagedData(void){
 		_pcntAtomicTotal += _cntRecord->atomicDataRec_.pcntTotal;
 		_pcntAtomicLive  += _cntRecord->atomicDataRec_.pcntLive;
 
-		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
-				<< _cntRecord->dataRec_.cntLive << "; cntTotal: " <<
-				_cntRecord->dataRec_.cntTotal <<
-				"; pcntLive= " << _cntRecord->dataRec_.pcntLive <<
-				"; pcntTotal= " << _cntRecord->dataRec_.pcntTotal;
 
-		LOG(ERROR) << "---space " << it.first << ", cntLive: "
-				<< _spaceRecord->dataRec_.cntLive << "; cntTotal: " <<
-				_spaceRecord->dataRec_.cntTotal <<
-				"; pcntLive= " << _spaceRecord->dataRec_.pcntLive <<
-				"; pcntTotal= " << _spaceRecord->dataRec_.pcntTotal;
+		LOG(ERROR) << "hash-- " << it.first;
+		"dataCnt:";
+		gcpLogDataRecord(LOG(ERROR), &_cntRecord->dataRec_);
+		"dataSize:";
+		gcpLogDataRecord(LOG(ERROR), &_spaceRecord->dataRec_);
 
-		LOG(ERROR) << "atomic hash-- " << it.first << ", cntLive: "
-				<< _cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
+
+		LOG(ERROR) << "atomic hash-- " << it.first << _cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
 				_cntRecord->atomicDataRec_.cntTotal << "; pcntLive= " <<
 				_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
 				_cntRecord->atomicDataRec_.pcntTotal;
 	}
-	LOG(ERROR) << "GlobalRecord>>  cntLive: "
-			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
+	LOG(ERROR) << "GlobalRecord Cnt>>>> :";
+	gcpLogDataRecord(LOG(ERROR), &(((GCPPairHistogramRecords*) histData_)->countData_.dataRec_));
+	LOG(ERROR) << "GlobalRecord Space>>>> :";
+	gcpLogDataRecord(LOG(ERROR), &(((GCPPairHistogramRecords*) histData_)->sizeData_.dataRec_));
 
 	LOG(ERROR) << "Aclaculated>>  cntLive: "
 			<< _cntLive << "; cntTotal: " << _cntTotal << "pcntLive:" <<
