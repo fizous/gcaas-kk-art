@@ -130,10 +130,10 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 
 
 class GCPHistRecData {
-protected:
+
+public:
 	GCPHistogramRec dataRec_;
 	GCPHistogramRecAtomic atomicDataRec_;
-public:
 
 	static void GCPCopyRecordsData(GCPHistogramRec* dest,
 			GCPHistogramRecAtomic* src) {
@@ -143,6 +143,9 @@ public:
   	dest->pcntLive = src->pcntLive;
   	dest->pcntTotal = src->pcntTotal;
   }
+
+	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
+
 
 	void initDataRecords(size_t kIndex) {
 		memset((void*)&dataRec_, 0, sizeof(GCPHistogramRec));
@@ -159,7 +162,6 @@ public:
 
 	GCPHistRecData(void) { initDataRecords(0);}
 
-	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
 
 	GCPHistogramRec* gcpGetDataRecP(void) {
 		return &dataRec_;
