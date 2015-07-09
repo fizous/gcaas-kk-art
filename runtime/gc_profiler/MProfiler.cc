@@ -3031,7 +3031,7 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 			&_globalHolder->sizeData_.atomicDataRec_;
 	bool _safeCounts = true;
 	bool _safeSpace = true;
-	if(_globalcntAtomicRec->cntLive == 0 || _globalcntAtomicRec->cntTotal == 0) {
+	if(_globalCntAtomicRec->cntLive == 0 || _globalCntAtomicRec->cntTotal == 0) {
 		_safeCounts = false;
 	}
 	if(_globalSizeAtomicRec->cntLive == 0 || _globalSizeAtomicRec->cntTotal == 0) {
@@ -3040,7 +3040,7 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec = it.second;
-		_rec->gcpPairUpdateAtomicPercentiles(_safeCounts, _safeSpace);
+		_rec->gcpPairUpdateAtomicPercentiles(_globalHolder, _safeCounts, _safeSpace);
 	}
 }
 
