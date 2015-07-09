@@ -663,7 +663,7 @@ public:
   void dumpAllClasses(void);
   //void dumpProfData(bool);
   void gcpLogPerfData(void);
-  void gcpUpdateGlobalHistogram(void);
+  //void gcpUpdateGlobalHistogram(void);
   void gcpFinalizeHistUpdates(void);
 };
 
