@@ -298,6 +298,29 @@ public:
 		}
 		return false;
 	}
+
+	void gcpPairUpdatePercentiles(GCPPairHistogramRecords* globalRec) {
+		countData_.gcpUpdateRecPercentile(globalRec->countData_.gcpGetDataRecP());
+		sizeData_.gcpUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
+	}
+
+	void gcpPairUpdateAtomicPercentiles(GCPPairHistogramRecords* globalRec,
+			bool safeCnt, bool safeSpace) {
+		if(safeCnt)
+			countData_.gcpSafeUpdateAtomicRecPercentile(globalRec->countData_.gcpGetAtomicDataRecP());
+		else
+			countData_.gcpUpdateAtomicRecPercentile(
+				globalRec->countData_.gcpGetAtomicDataRecP());
+		if(safeSpace)
+			sizeData_.gcpSafeUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
+		else
+			sizeData_.gcpUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
+	}
+
+	void gcpZerofyPairHistAtomicRecData(void) {
+		countData_.gcpZerofyHistAtomicRecData();
+		sizeData_.gcpZerofyHistAtomicRecData();
+	}
 };
 
 typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
@@ -391,7 +414,8 @@ public:
 
   virtual bool gcpDumpHistRec(art::File*);
 
-  virtual void gcpDumpManagedData(art::File*, bool){}
+  virtual bool gcpDumpManagedData(art::File*, bool){return true;}
+  virtual bool gcpDumpSummaryManagedData(art::File*){return true;}
 
   virtual void gcpZeorfyAllAtomicRecords(void){}
 
@@ -571,7 +595,7 @@ public:
 	void initHistograms(void);
 
 	void addObject(size_t, size_t, mirror::Object*);
-	void gcpDumpManagedData(art::File*, bool);
+	bool gcpDumpManagedData(art::File*, bool);
 
 	void addCohortRecord(void);
 	void addCohortRow(void);
@@ -655,7 +679,7 @@ public:
 	~GCClassTableManager(){};
 
 	void initHistograms();
-	HistogramTable_S classTable_;
+
 	void addObject(size_t, size_t, mirror::Object*);
   void removeObject(size_t, mirror::Object*);
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
@@ -663,15 +687,12 @@ public:
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
-
-
-
-
-	void logClassTable(void);
-	void gcpDumpManagedData(art::File*, bool);
-	void dumpClassHistograms(art::File* dumpFile,
+	void logManagedData(void);
+	bool gcpDumpManagedData(art::File*, bool);
+	bool gcpDumpSummaryManagedData(art::File*);
+	bool dumpClassCntHistograms(art::File* dumpFile,
 			bool dumpGlobalRec);
-	void dumpClassAtomicHistograms(art::File*);
+	bool dumpClassAtomicCntHistograms(art::File*);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 	void gcpZeorfyAllAtomicRecords(void);
@@ -726,6 +747,9 @@ public:
 
   bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
+
+	bool gcpDumpManagedData(art::File*, bool);
+  bool gcpDumpSummaryManagedData(art::File*);
   //bool gcpDumpHistAtomicRec(art::File*);
 
   void gcpFinalizeProfileCycle(void);
@@ -767,8 +791,6 @@ public:
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 	void setThreadManager(GCMMPThreadProf*);
 	void gcpZeorfyAllAtomicRecords(void);
-  bool gcpDumpHistTable(art::File*, bool);
-  bool gcpDumpHistAtomicTable(art::File*);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 };

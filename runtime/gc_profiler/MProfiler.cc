@@ -2239,6 +2239,22 @@ int MProfiler::GetGCDaemonID(void)  {
 	}
 	return 0;
 }
+
+/**************************** GCPHistRecData *********************************/
+bool GCPHistRecData::GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
+	return file->WriteFully(rec, sizeof(GCPHistogramRec));
+}
+
+inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
+	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
+}
+
+inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
+	GCPHistogramRec _dummyRec;
+	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
+	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
+}
+
 /********************************* Object demographics profiling ****************/
 
 void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
@@ -2581,8 +2597,8 @@ void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
 
 void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 	//we do not need to aggregate since we have only one histogram
-	getObjHistograms()->calculatePercentiles();
-	getObjHistograms()->calculateAtomicPercentiles();
+	hitogramsData_->calculatePercentiles();
+	hitogramsData_->calculateAtomicPercentiles();
 }
 
 //inline void ObjectSizesProfiler::gcpAggregateGlobalRecs(GCPHistogramRecord* globalRec,
@@ -2645,10 +2661,9 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 // if(_success) {
 	bool _success = true;
 		//dump the histogram entries
-	 gcpUpdateGlobalHistogram();
+	gcpUpdateGlobalHistogram();
 
-	 _success &= hitogramsData_->gcpDumpHistTable(dump_file_ ,true);
-	 _success &= hitogramsData_->gcpDumpHistAtomicTable(dump_file_);
+	_success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
 //	 _success =
 //	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
 //
@@ -2671,7 +2686,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 	 _success &=
 			 GCPDumpEndMarker(dump_file_);
 	 //dump the summary one more time
-	 _success &= hitogramsData_->gcpDumpHistTable(dump_file_, false);
+	 _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
 //	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
 //	 _success &=
 //	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
@@ -2937,7 +2952,7 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 //	}
 }
 
-void GCClassTableManager::logClassTable(void){
+void GCClassTableManager::logManagedData(void){
 	LOG(ERROR) << "GlobalRecord>>  cntLive: "
 			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
 	LOG(ERROR) << "+++table class size is " <<
@@ -2948,27 +2963,51 @@ void GCClassTableManager::logClassTable(void){
 	double _pcnTotal = 0.0;
 	double _pcntAtomicLive  = 0.0;
 	double _pcntAtomicTotal = 0.0;
+
+	double _spaceLive = 0.0;
+	double _spaceTotal = 0.0;
+	double _pcntSpaceLive = 0.0;
+	double _pcnSpaceTotal = 0.0;
+
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* rec = it.second;
-		_cntTotal += rec->dataRec_.cntTotal;
-		_cntLive  += rec->dataRec_.cntLive;
-		_pcntLive += rec->dataRec_.pcntLive;
-		_pcnTotal += rec->dataRec_.pcntTotal;
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*)it.second;
+		GCPHistRecData* _cntRecord = &_rec->countData_;
+		GCPHistRecData* _spaceRecord = &_rec->sizeData_;
 
 
-		_pcntAtomicTotal += rec->atomicDataRec_.pcntTotal;
-		_pcntAtomicLive  += rec->atomicDataRec_.pcntLive;
+
+		_cntTotal += _cntRecord->dataRec_.cntTotal;
+		_cntLive  += _cntRecord->dataRec_.cntLive;
+		_pcntLive += _cntRecord->dataRec_.pcntLive;
+		_pcnTotal += _cntRecord->dataRec_.pcntTotal;
+
+		_spaceLive += _spaceRecord->dataRec_.cntTotal;
+		_spaceTotal += _spaceRecord->dataRec_.cntLive;
+		_pcntSpaceLive += _spaceRecord->dataRec_.pcntLive;
+		_pcnSpaceTotal += _spaceRecord->dataRec_.pcntTotal;
+
+		_pcntAtomicTotal += _cntRecord->atomicDataRec_.pcntTotal;
+		_pcntAtomicLive  += _cntRecord->atomicDataRec_.pcntLive;
 
 		LOG(ERROR) << "hash-- " << it.first << ", cntLive: "
-				<< rec->dataRec_.cntLive << "; cntTotal: " << rec->dataRec_.cntTotal <<
-				"; pcntLive= " << rec->dataRec_.pcntLive << "; pcntTotal= " << rec->dataRec_.pcntTotal;
+				<< _cntRecord->dataRec_.cntLive << "; cntTotal: " <<
+				_cntRecord->dataRec_.cntTotal <<
+				"; pcntLive= " << _cntRecord->dataRec_.pcntLive <<
+				"; pcntTotal= " << _cntRecord->dataRec_.pcntTotal;
+
+		LOG(ERROR) << "---space " << it.first << ", cntLive: "
+				<< _spaceRecord->dataRec_.cntLive << "; cntTotal: " <<
+				_spaceRecord->dataRec_.cntTotal <<
+				"; pcntLive= " << _spaceRecord->dataRec_.pcntLive <<
+				"; pcntTotal= " << _spaceRecord->dataRec_.pcntTotal;
 
 		LOG(ERROR) << "atomic hash-- " << it.first << ", cntLive: "
-				<< rec->atomicDataRec_.cntLive << "; cntTotal: " <<
-				rec->atomicDataRec_.cntTotal << "; pcntLive= " <<
-				rec->atomicDataRec_.pcntLive << "; pcntTotal= " <<
-				rec->atomicDataRec_.pcntTotal;
+				<< _cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
+				_cntRecord->atomicDataRec_.cntTotal << "; pcntLive= " <<
+				_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
+				_cntRecord->atomicDataRec_.pcntTotal;
 	}
 	LOG(ERROR) << "GlobalRecord>>  cntLive: "
 			<< histData_->dataRec_.cntLive << "; cntTotal: " << histData_->dataRec_.cntTotal;
@@ -2984,90 +3023,98 @@ void GCClassTableManager::logClassTable(void){
 //
 
 void GCClassTableManager::calculateAtomicPercentiles(void) {
-	GCPHistogramRecAtomic* _globalAtomicRec = gcpGetAtomicDataRecP();
-	bool _safe = true;
-	if(_globalAtomicRec->cntLive == 0 || _globalAtomicRec->cntTotal == 0) {
-		_safe = false;
+	GCPPairHistogramRecords* _globalHolder =
+			(GCPPairHistogramRecords*)histData_;
+	GCPHistogramRecAtomic* _globalCntAtomicRec =
+			&_globalHolder->countData_.atomicDataRec_;
+	GCPHistogramRecAtomic* _globalSizeAtomicRec =
+			&_globalHolder->sizeData_.atomicDataRec_;
+	bool _safeCounts = true;
+	bool _safeSpace = true;
+	if(_globalcntAtomicRec->cntLive == 0 || _globalcntAtomicRec->cntTotal == 0) {
+		_safeCounts = false;
+	}
+	if(_globalSizeAtomicRec->cntLive == 0 || _globalSizeAtomicRec->cntTotal == 0) {
+		_safeSpace = false;
 	}
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* rec = it.second;
-		if(_safe)
-			rec->gcpSafeUpdateAtomicRecPercentile(_globalAtomicRec);
-		else
-			rec->gcpUpdateAtomicRecPercentile(_globalAtomicRec);
+		mprofiler::GCPPairHistogramRecords* _rec = it.second;
+		_rec->gcpPairUpdateAtomicPercentiles(_safeCounts, _safeSpace);
 	}
 }
 
 void GCClassTableManager::calculatePercentiles(void) {
-	GCPHistogramRec* _globalRec = gcpGetDataRecP();
+	GCPPairHistogramRecords* _globalHolder =
+			(GCPPairHistogramRecords*)histData_;
+	GCPPairHistogramRecords* _recData = NULL;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* rec = it.second;
-		rec->gcpUpdateRecPercentile(_globalRec);
+		_recData = (GCPPairHistogramRecords*) it.second;
+		_recData->gcpPairUpdatePercentiles(_globalHolder);
 	}
 }
 
 
-void GCClassTableManager::dumpClassHistograms(art::File* dumpFile,
+bool GCClassTableManager::dumpClassCntHistograms(art::File* dumpFile,
 		bool dumpGlobalRec) {
-	if(dumpGlobalRec)
-		gcpDumpHistRec(dumpFile);
+	if(dumpGlobalRec) {
+		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+		GCPHistRecData::GCPDumpHistRecord(dumpFile, _record->countData_.gcpGetDataRecP());
+	}
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* _rec = it.second;
-		_dataWritten = GCPHistRecData::GCPDumpHistRecord(dumpFile,
-				_rec->gcpGetDataRecP());
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		_dataWritten = _rec->countData_.gcpDumpHistRec(dumpFile);
 		if(!_dataWritten)
 			break;
 	}
 	if(_dataWritten) {
-		VMProfiler::GCPDumpEndMarker(dumpFile);
+		return VMProfiler::GCPDumpEndMarker(dumpFile);
 	}
+	return false;
 }
 
-void GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
+bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
-	dumpClassHistograms(dumpFile, dumpGlobalRec);
-	dumpClassAtomicHistograms(dumpFile);
+	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
+	_success &= dumpClassAtomicCntHistograms(dumpFile);
+	return _success;
 }
 
-void GCClassTableManager::dumpClassAtomicHistograms(art::File* dumpFile) {
+bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
+	return dumpClassCntHistograms(dumpFile, false);
+}
+
+bool GCClassTableManager::dumpClassAtomicCntHistograms(art::File* dumpFile) {
 	bool _dataWritten = false;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* _rec = it.second;
-		_dataWritten = _rec->gcpDumpAtomicHistRec(dumpFile);
+		GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		_dataWritten = _rec->countData_.gcpDumpAtomicHistRec(dumpFile);
 		if(!_dataWritten)
 			break;
 	}
 	if(_dataWritten) {
-		VMProfiler::GCPDumpEndMarker(dumpFile);
+		return VMProfiler::GCPDumpEndMarker(dumpFile);
 	}
+	return false;
 }
+
 void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
-	histData_->gcpZerofyHistAtomicRecData();
+	((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistAtomicRecData();
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
-		mprofiler::GCPHistRecData* _rec = it.second;
-		_rec->gcpZerofyHistAtomicRecData();
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		_rec->gcpZerofyPairHistAtomicRecData();
 	}
 }
 
-bool GCPHistRecData::GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
-	return file->WriteFully(rec, sizeof(GCPHistogramRec));
-}
 
-inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
-	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
-}
-
-inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
-	GCPHistogramRec _dummyRec;
-	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
-	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
-}
 
 
 /********************* GCHistogramManager profiling ****************/
@@ -3336,6 +3383,16 @@ inline void GCHistogramObjSizesManager::calculateAtomicPercentiles(void) {
 }
 
 
+bool GCHistogramObjSizesManager::gcpDumpSummaryManagedData(art::File* dump_file) {
+	return gcpDumpHistTable(dump_file, false);
+}
+
+bool GCHistogramObjSizesManager::gcpDumpManagedData(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _success = gcpDumpHistTable(dump_file, dumpGlobalRec);
+	_success &= gcpDumpHistAtomicTable(dump_file);
+	return _success;
+}
 
 bool GCHistogramObjSizesManager::gcpDumpHistTable(art::File* dump_file,
 		bool dumpGlobalRec) {
@@ -4250,7 +4307,7 @@ void ClassProfiler::dumpAllClasses(void) {
 		return;
 	} else {
 		LOG(ERROR) << "+++table manager is not NULL";
-		tablManager->logClassTable();
+		tablManager->logManagedData();
 	}
 	//Runtime::Current()->GetInternTable()->
 
@@ -4298,8 +4355,8 @@ void ClassProfiler::dumpProfData(bool isLastDump) {
 	GCClassTableManager* tablManager = getClassHistograms();
 	if(tablManager != NULL) {
 		dumpHeapStats();
-		tablManager->calculatePercentiles();
-		tablManager->calculateAtomicPercentiles();
+//		tablManager->calculatePercentiles();
+//		tablManager->calculateAtomicPercentiles();
 		tablManager->gcpDumpManagedData(dump_file_, true);
 		// dump class data from last allocation window
 		if(isLastDump) {
