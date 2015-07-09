@@ -2636,84 +2636,23 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
   ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
-
-  //gcpAggregateGlobalRecs(&globalRecord, histogramTable, false);
-
- // bool forceAtomicity = true;
-  //if(isLastDump) forceAtomicity = false;
-  //gcpAggregateGlobalRecs(&lastLiveRecord, lastLiveTable, forceAtomicity);
-//  //get the percentage of each histogram entry
-//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-//		if(histogramTable[i].cntTotal < 1.0)
-//			continue;
-//		histogramTable[i].pcntLive = (histogramTable[i].cntLive * 100.0) / globalRecord.cntLive;
-//		histogramTable[i].pcntTotal = (histogramTable[i].cntTotal * 100.0) / globalRecord.cntTotal;
-//	}
-
-	//dump the heap stats
-	dumpHeapStats();
-	//dump the global entry
-
-//	_success =
-//  	dump_file_->WriteFully(&getObjHistograms()->histRecord,
-//  			sizeof(GCPHistogramRec));
-
-// if(_success) {
-	bool _success = true;
-		//dump the histogram entries
-	gcpUpdateGlobalHistogram();
-
-	_success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
-//	 _success =
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-
-//	 _success =
-//	   	dump_file_->WriteFully(lastLiveTable, totalHistogramSize);
-
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-
-
-
- //}
-
- if(isLastDump) {
-	 _success &=
-			 GCPDumpEndMarker(dump_file_);
-	 //dump the summary one more time
-	 _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
-//	 _success &= objHistograms->gcpDumpHistAtomicTable(dump_file_);
-//	 _success &=
-//	   	dump_file_->WriteFully(histogramTable, totalHistogramSize);
-//	 _success &=
-//	 	  	dump_file_->WriteFully(&mprofiler::VMProfiler::kGCMMPDumpEndMarker,
-//	 	  			sizeof(int));
-	 	  if(_success) {
-	 	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
-	 	  }
-	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-	 		dump_file_->Close();
-	 		LOG(ERROR) <<  "ObjectSizesProfiler: done dumping data";
-	 		gcpLogPerfData();
- } else {
-	 gcpLogPerfData();
-		 gcpFinalizeHistUpdates();
-//		 gcpFinalizeHistUpdates();
-		// gcpResetLastLive(&lastLiveRecord, lastLiveTable);
-
-
- }
-
-
-
- if(!_success) {
-	 LOG(ERROR) <<  "ObjectSizesProfiler: XXXX Error dumping data";
- }
+  dumpHeapStats();
+  bool _success = true;
+  gcpUpdateGlobalHistogram();
+  _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
+  if(isLastDump) {
+ 	  _success &= GCPDumpEndMarker(dump_file_);
+ 	  //dump the summary one more time
+ 	  _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
+ 	  if(!_success) {
+ 	  	LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
+ 	  }
+ 	  dump_file_->Close();
+ 	  gcpLogPerfData();
+ 	 LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
+  } else {
+  	 gcpFinalizeHistUpdates();
+  }
 }
 /*
  * Return true only when the MProfiler is Running
