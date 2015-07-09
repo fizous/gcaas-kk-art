@@ -698,7 +698,11 @@ public:
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool dumpClassCntHistograms(art::File* dumpFile,
 			bool dumpGlobalRec);
+	bool dumpClassSizeHistograms(art::File* dumpFile,
+			bool dumpGlobalRec);
 	bool dumpClassAtomicCntHistograms(art::File*);
+	bool dumpClassAtomicSizeHistograms(art::File*);
+
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 	void gcpZeorfyAllAtomicRecords(void);
