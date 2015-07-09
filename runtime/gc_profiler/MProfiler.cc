@@ -3032,7 +3032,8 @@ void GCClassTableManager::logManagedData(void){
 		gcpLogDataRecord(LOG(ERROR) << "Space>> ", &_spaceRecord->dataRec_);
 
 
-		LOG(ERROR) << "atomic hash-- " << it.first << _cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
+		LOG(ERROR) << "atomic hash-- " << it.first <<"; cntLive= " <<
+				_cntRecord->atomicDataRec_.cntLive << "; cntTotal: " <<
 				_cntRecord->atomicDataRec_.cntTotal << "; pcntLive= " <<
 				_cntRecord->atomicDataRec_.pcntLive << "; pcntTotal= " <<
 				_cntRecord->atomicDataRec_.pcntTotal;
