@@ -3189,7 +3189,7 @@ void GCClassTableManager::printClassNames(void) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
 
-		mirror::Class* _klass = getClassP();
+		mirror::Class* _klass = _rec->getClassP();
 		if(_klass == NULL)
 			LOG(ERROR) << "XXXX NULL Hash: " << it.first;
 		else {
