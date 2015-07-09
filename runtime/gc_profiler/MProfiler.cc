@@ -2829,73 +2829,97 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 		//LOG(ERROR) << "start Hash=" << klassHash;
 		GCPHistRecData* _histRec =
 				Runtime::Current()->GetInternTable()->GCPProfileObjKlass(klassHash);
-//		if(_histRec == NULL) {
-//			//LOG(ERROR) << "GCClassTableManager:: _histRec is NULL";
-//		} else {
-//			//LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
-//		}
-//		_histRec->gcpIncRecData();
-//		_histRec->gcpIncAtomicRecData();
-////		if(histData_ == NULL) {
-////			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
-////		} else {
-////			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
-////		}
-//		//update the global entry as well
-//		histData_->gcpIncRecData();
-//		histData_->gcpIncAtomicRecData();
 
-		//add data to global histogram
+		if(_histRec != NULL) {
+			size_t objSpace =
+					Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
+			if(objSpace == 0) {
+				LOG(ERROR) << "Objectsize rturned 0: ";
+			}
+			GCPExtraObjHeader* _profHeader =
+					GCHistogramDataManager::GCPGetObjProfHeader(objSpace, obj);
+			gcpIncAtomicPairRecData(_profHeader->objSize, _histRec);
+			gcpIncPairRecData(_profHeader->objSize, _histRec);
 
+			_profHeader->dataRec = _histRec;
+		}
 		return _histRec;
-//		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
-//			LOG(ERROR) << "Found start Hash=" << klassHash;
-//			return;
-//		}
-		//_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-
-
-		//histogramMapTable.emplace(klassHash, _histRec);
-		//classTable_.insert(std::make_pair(klassHash, klass));
-		//LOG(ERROR) << "Done Hash=" << klassHash;
 	}
 	return NULL;
-  //Thread* self = Thread::Current();
-  //MutexLock mu(self, classTable_lock_);
-
-	//if(directory_.empty()) {
-		//LOG(ERROR) << "Adding the phone book:" << directory_.size();
-		//size_t sizeT = directory_.size();
-		//directory_.insert(std::make_pair(sizeT,    klass));
-		//directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
-		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
-		//LOG(ERROR) << "Done Adding the phone book";
-//	}
-//
-//
-//
-////  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
-////  	_histRec = &it->second;
-////    break;
-////  }
-//
-////	auto search = classTable_.find(klassHash);
-////	if(search != classTable_.end()) {
-////		_histRec = search->second;
-////	}
-//  if(_histRec == NULL) {
-//  	GCPHistogramRec _record;
-//  	//klassHash = classTableTest_.size();
-//  	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
-//
-//  	//if(false)
-//  	//	classTable_[klassHash] = &_record;
-//  	classTableTest_.insert(std::make_pair(klassHash, klassHash));
-//  	LOG(ERROR) << "Done Hash=" << klassHash;
-//  }
-//
-//  gcpAddDataToHist(_histRec);
 }
+
+
+
+//
+//
+//
+////		if(_histRec == NULL) {
+////			//LOG(ERROR) << "GCClassTableManager:: _histRec is NULL";
+////		} else {
+////			//LOG(ERROR) << "GCClassTableManager:: _histRec is not NULL";
+////		}
+////		_histRec->gcpIncRecData();
+////		_histRec->gcpIncAtomicRecData();
+//////		if(histData_ == NULL) {
+//////			LOG(ERROR) << "GCClassTableManager:: histData_ is NULL";
+//////		} else {
+//////			LOG(ERROR) << "GCClassTableManager:: histData_ is not NULL";
+//////		}
+////		//update the global entry as well
+////		histData_->gcpIncRecData();
+////		histData_->gcpIncAtomicRecData();
+//
+//		//add data to global histogram
+//
+//		return _histRec;
+////		for (auto it = histogramMapTable.find(klassHash), end = histogramMapTable.end(); it != end; ++it) {
+////			LOG(ERROR) << "Found start Hash=" << klassHash;
+////			return;
+////		}
+//		//_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
+//
+//
+//		//histogramMapTable.emplace(klassHash, _histRec);
+//		//classTable_.insert(std::make_pair(klassHash, klass));
+//		//LOG(ERROR) << "Done Hash=" << klassHash;
+//	}
+//	return NULL;
+//  //Thread* self = Thread::Current();
+//  //MutexLock mu(self, classTable_lock_);
+//
+//	//if(directory_.empty()) {
+//		//LOG(ERROR) << "Adding the phone book:" << directory_.size();
+//		//size_t sizeT = directory_.size();
+//		//directory_.insert(std::make_pair(sizeT,    klass));
+//		//directory_.insert(std::pair<size_t, PhoneNum>(2,    PhoneNum("555-9999")));
+//		//directory_.insert(std::pair<size_t, PhoneNum>(3,  PhoneNum("555-9678")));
+//		//LOG(ERROR) << "Done Adding the phone book";
+////	}
+////
+////
+////
+//////  for (auto it = classTable_.find(klassHash), end = classTable_.end(); it != end; ++it) {
+//////  	_histRec = &it->second;
+//////    break;
+//////  }
+////
+//////	auto search = classTable_.find(klassHash);
+//////	if(search != classTable_.end()) {
+//////		_histRec = search->second;
+//////	}
+////  if(_histRec == NULL) {
+////  	GCPHistogramRec _record;
+////  	//klassHash = classTableTest_.size();
+////  	_histRec = (GCPHistogramRec*) calloc(1, sizeof(GCPHistogramRec));
+////
+////  	//if(false)
+////  	//	classTable_[klassHash] = &_record;
+////  	classTableTest_.insert(std::make_pair(klassHash, klassHash));
+////  	LOG(ERROR) << "Done Hash=" << klassHash;
+////  }
+////
+////  gcpAddDataToHist(_histRec);
+//}
 
 
 inline void GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
@@ -4298,21 +4322,23 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 	GCClassTableManager* classManager = getClassHistograms();
 	if(classManager != NULL) {
 		GCPHistRecData* _rec = classManager->addObjectClassPair(klass, obj);
+		if(_rec == NULL)
+			LOG(ERROR) << "ClassProfiler::gcpProfObjKlass NULL record";
 //		if(_rec == NULL) {
 //			LOG(ERROR) << "Could not add the new record";
 //		} else {
 //			LOG(ERROR) << "new record was added";
 //		}
-		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
-		if(objSpace == 0) {
-			LOG(ERROR) << "Objectsize rturned 0: ";
-		}
-		GCPExtraObjHeader* _profHeader =
-					GCHistogramObjSizesManager::GCPGetObjProfHeader(objSpace, obj);
-		classManager->gcpIncAtomicPairRecData(_profHeader->objSize, _rec);
-		classManager->gcpIncPairRecData(_profHeader->objSize, _rec);
-
-		_profHeader->dataRec = _rec;
+//		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
+//		if(objSpace == 0) {
+//			LOG(ERROR) << "Objectsize rturned 0: ";
+//		}
+//		GCPExtraObjHeader* _profHeader =
+//					GCHistogramObjSizesManager::GCPGetObjProfHeader(objSpace, obj);
+//		classManager->gcpIncAtomicPairRecData(_profHeader->objSize, _rec);
+//		classManager->gcpIncPairRecData(_profHeader->objSize, _rec);
+//
+//		_profHeader->dataRec = _rec;
 
 	}
 }
