@@ -125,6 +125,9 @@ public:
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
   static constexpr int kGCMMPDefaultCohortLog = GCP_COHORT_LOG;
   static const int kGCMMPDefaultAffinity 			= -1;
+//	static const unsigned int kGCMMPEnableProfiling = 0;
+  static const int kGCMMPDisableMProfile = 999;
+  static const int kGCMMPDefaultGrowMethod = 0;
 	static const int kGCMMPDumpEndMarker;
 
 	// List of profiled benchmarks in our system
@@ -631,8 +634,8 @@ public:
   void setHistogramManager(GCMMPThreadProf*);
   void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
 //  bool periodicDaemonExec(void);
-  void gcpAddObject(size_t allocatedMemory,
-  		size_t objSize, mirror::Object* obj);
+  void gcpAddObject(size_t allocatedMemory, size_t objSize,
+  		mirror::Object* obj);
   void gcpAddObject(size_t, size_t){}
   bool dettachThread(GCMMPThreadProf*);
 
@@ -811,7 +814,7 @@ private:
 
 public:
 	static constexpr int kGCMMPDumpSignal = SIGUSR2;
-	static const unsigned int kGCMMPEnableProfiling = 0;
+//	static const unsigned int kGCMMPEnableProfiling = 0;
   static const int kGCMMPDisableMProfile = 999;
   static const int kGCMMPDefaultGrowMethod = 0;
   static const int kGCMMPMAXThreadCount = 64;
@@ -891,9 +894,6 @@ public:
 
   VMProfiler* vmProfile;
 }; //class MProfiler
-
-
-
 
 
 }  // namespace mprofiler

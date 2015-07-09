@@ -657,6 +657,8 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
+			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
+			VMProfiler::kGCMMPLogAllocWindow = argOptions->alloc_window_log_;
 			setProfDaemon(false);
 			const GCMMPProfilingEntry* profEntry = &VMProfiler::profilTypes[_loop];
 			resetHeapAllocStatus();

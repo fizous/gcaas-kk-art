@@ -28,6 +28,8 @@ typedef struct GCMMP_Options_s {
 	int mprofile_grow_method_;
 	int mprofile_gc_affinity_;
 	int gcp_type_;
+	int cohort_log_;
+	int alloc_window_log_;
 } GCMMP_Options;
 
 /**

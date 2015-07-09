@@ -324,13 +324,16 @@ size_t ParseIntegerOrDie(const std::string& s) {
 
 void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprofiler_opts){
 	mprofiler_opts->mprofile_type_=
-			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
+			art::mprofiler::VMProfiler::kGCMMPDisableMProfile;
 	mprofiler_opts->mprofile_grow_method_=
-			art::mprofiler::MProfiler::kGCMMPDefaultGrowMethod;
+			art::mprofiler::VMProfiler::kGCMMPDefaultGrowMethod;
 	mprofiler_opts->mprofile_gc_affinity_ =
-			art::mprofiler::MProfiler::kGCMMPDefaultAffinity;
+			art::mprofiler::VMProfiler::kGCMMPDefaultAffinity;
 	mprofiler_opts->gcp_type_ =
-			art::mprofiler::MProfiler::kGCMMPDisableMProfile;
+			art::mprofiler::VMProfiler::kGCMMPDisableMProfile;
+	mprofiler_opts->cohort_log_ =
+			art::mprofiler::VMProfiler::kGCMMPDefaultCohortLog;
+	mprofiler_opts->alloc_window_log_ = GCP_WINDOW_RANGE_LOG;
 }
 
 
@@ -368,17 +371,21 @@ bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
 	} else if (StartsWith(option, "-Xgcp.")) {
 		std::vector<std::string> mprofile_options;
 		Split(option.substr(strlen("-Xgcp.")), '.', mprofile_options);
+		bool _returnVal = false;
 		for (size_t i = 0; i < mprofile_options.size(); ++i) {
 			if (mprofile_options[i] == "window") {
-
+				mprofiler_opts->alloc_window_log_= atoi(mprofile_options[++i].c_str());
+				_returnVal = true;
 			} else if (mprofile_options[i] == "type") {
 	  		mprofiler_opts->gcp_type_ = atoi(mprofile_options[++i].c_str());
 	      LOG(INFO) << "Parsing -Xgcp option: " << mprofiler_opts->gcp_type_;
-	      return true;
-			} else if (mprofile_options[i] == "cohort") {
-
+	      _returnVal = true;
+			} else if (mprofile_options[i] == "cohort") { //cohort log
+				mprofiler_opts->cohort_log_ = atoi(mprofile_options[++i].c_str());
+				_returnVal = true;
 			}
 		}
+		return _returnVal;
 	}
 
 	return false;
