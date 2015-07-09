@@ -3193,7 +3193,7 @@ void GCClassTableManager::printClassNames(void) {
 		if(_klass == NULL)
 			LOG(ERROR) << "XXXX NULL Hash: " << it.first;
 		else {
-			LOG(ERROR) << gcpLogDataRecord(LOG(ERROR)<< "Name: " <<
+			gcpLogDataRecord(LOG(ERROR)<< "Name: " <<
 					PrettyClass(_klass),
 					_rec->countData_.gcpGetDataRecP());
 		}
