@@ -297,14 +297,12 @@ public:
 	}
 
 	bool gcpPairDecRecData(size_t space){
-	//	if(((double)space) < sizeData_.dataRec_.cntLive) {
-	//		if(countData_.dataRec_.cntLive > 0) {
-				sizeData_.gcpDecRecData(space);
-				countData_.gcpDecRecData();
-		//		return true;
-	//		}
-	//	}
-		return true;
+		if(countData_.dataRec_.cntLive > 0) {
+			countData_.gcpDecRecData();
+			sizeData_.gcpDecRecData(space);
+			return true;
+		}
+		return false;
 	}
 
 	bool gcpPairDecAtomicRecData(size_t space) {
@@ -509,9 +507,9 @@ public:
   	GCPPairHistogramRecords* _localRec =
   			(GCPPairHistogramRecords*) rec;
   	if(_localRec->gcpPairDecRecData(space)) {
-
+  		_globalRec->gcpPairDecRecData(space);
   	}
-  	_globalRec->gcpPairDecRecData(space);
+
   }
 
   virtual void gcpDecAtomicPairRecData(size_t space, GCPHistRecData* rec) {
