@@ -297,16 +297,14 @@ public:
 	}
 
 	bool gcpPairDecRecData(size_t space){
-		bool shouldRemove = false;
-		if(((double)space) < sizeData_.dataRec_.cntLive) {
-			sizeData_.gcpDecRecData(space);
-			shouldRemove = true;
-		}
-		if(countData_.dataRec_.cntLive > 0) {
-			countData_.gcpDecRecData();
-			shouldRemove = true;
-		}
-		return shouldRemove;
+	//	if(((double)space) < sizeData_.dataRec_.cntLive) {
+	//		if(countData_.dataRec_.cntLive > 0) {
+				sizeData_.gcpDecRecData(space);
+				countData_.gcpDecRecData();
+		//		return true;
+	//		}
+	//	}
+		return true;
 	}
 
 	bool gcpPairDecAtomicRecData(size_t space) {
@@ -510,9 +508,10 @@ public:
   			(GCPPairHistogramRecords*) histData_;
   	GCPPairHistogramRecords* _localRec =
   			(GCPPairHistogramRecords*) rec;
-  	if(_globalRec->gcpPairDecRecData(space)){
-  		_localRec->gcpPairDecRecData(space);
+  	if(_localRec->gcpPairDecRecData(space)) {
+
   	}
+  	_globalRec->gcpPairDecRecData(space);
   }
 
   virtual void gcpDecAtomicPairRecData(size_t space, GCPHistRecData* rec) {
@@ -520,8 +519,8 @@ public:
   			(GCPPairHistogramRecords*) histData_;
   	GCPPairHistogramRecords* _localRec =
   			(GCPPairHistogramRecords*) rec;
-  	if(_globalRec->gcpPairDecAtomicRecData(space)) {
-  		_localRec->gcpPairDecAtomicRecData(space);
+  	if(_localRec->gcpPairDecAtomicRecData(space)) {
+  		_globalRec->gcpPairDecAtomicRecData(space);
   	}
   }
   virtual void calculateAtomicPercentiles(void) {}
