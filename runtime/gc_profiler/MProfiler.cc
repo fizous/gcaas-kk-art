@@ -2634,9 +2634,9 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 
 
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
-	gcpUpdateGlobalHistogram();
-	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	gcpUpdateGlobalHistogram();
   dumpHeapStats();
   bool _success = true;
   _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
@@ -3112,15 +3112,17 @@ bool GCClassTableManager::dumpClassAtomicSizeHistograms(art::File* dumpFile) {
 
 bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
-	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
-	_success &= dumpClassAtomicCntHistograms(dumpFile);
+	bool _success = true;
+	//bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
+	//_success &= dumpClassAtomicCntHistograms(dumpFile);
 	//_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
 	//_success &= dumpClassAtomicSizeHistograms(dumpFile);
 	return _success;
 }
 
 bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
-	return dumpClassCntHistograms(dumpFile, false);
+	return true;
+	//return dumpClassCntHistograms(dumpFile, false);
 }
 
 
