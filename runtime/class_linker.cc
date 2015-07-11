@@ -123,6 +123,15 @@ static void WrapExceptionInInitializer() SHARED_LOCKS_REQUIRED(Locks::mutator_lo
   }
 }
 
+static uint64_t HashLong(const char* s) {
+  // This is the java.lang.String hashcode for convenience, not interoperability.
+	uint64_t hash = 0;
+  for (; *s != '\0'; ++s) {
+    hash = hash * 31 + *s;
+  }
+  return hash;
+}
+
 static size_t Hash(const char* s) {
   // This is the java.lang.String hashcode for convenience, not interoperability.
   size_t hash = 0;
@@ -2301,12 +2310,12 @@ static mirror::ObjectArray<mirror::DexCache>* GetImageDexCaches()
 }
 
 
-size_t ClassLinker::gcpGetClassHash(mirror::Class* klass) {
+uint64_t ClassLinker::gcpGetClassHash(mirror::Class* klass) {
 	if (klass != NULL) {
 		ClassHelper kh(NULL, this);
 		kh.ChangeClass(klass);
 		const char* descriptor = kh.GetDescriptor();
-		size_t hash = Hash(descriptor);
+		uint64_t hash = HashLong(descriptor);
 		return hash;
 	}
 	return 0;

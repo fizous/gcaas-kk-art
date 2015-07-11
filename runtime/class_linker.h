@@ -365,7 +365,7 @@ class ClassLinker {
       LOCKS_EXCLUDED(Locks::classlinker_classes_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  size_t gcpGetClassHash(mirror::Class*)
+  uint64_t gcpGetClassHash(mirror::Class*)
   SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
  private:
   explicit ClassLinker(InternTable*);

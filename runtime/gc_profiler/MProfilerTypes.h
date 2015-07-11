@@ -101,7 +101,7 @@ typedef struct EventMarkerManager_S {
 
 
 typedef struct GCPHistogramRecAtomic_S {
-	AtomicInteger   index;
+	uint64_t   		index;
 	AtomicInteger cntLive;
 	AtomicInteger cntTotal;
 	double pcntLive;
@@ -147,7 +147,7 @@ public:
 	static bool GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec);
 
 
-	void initDataRecords(size_t kIndex) {
+	void initDataRecords(uint64_t kIndex) {
 		memset((void*)&dataRec_, 0, sizeof(GCPHistogramRec));
 		memset((void*)&atomicDataRec_, 0, sizeof(GCPHistogramRecAtomic));
 		dataRec_.index = kIndex;
@@ -156,7 +156,7 @@ public:
 
 
 
-	GCPHistRecData(size_t kIndex){
+	GCPHistRecData(uint64_t kIndex){
 		initDataRecords(kIndex);
 	}
 
@@ -272,16 +272,16 @@ public:
 
 	GCPPairHistogramRecords(void);
 
-	GCPPairHistogramRecords(size_t id) : klzz_(NULL),
+	GCPPairHistogramRecords(uint64_t id) : klzz_(NULL),
 		countData_(id), sizeData_(id) {
 	}
 
-	GCPPairHistogramRecords(size_t id, mirror::Class* klass) :
+	GCPPairHistogramRecords(uint64_t id, mirror::Class* klass) :
 		klzz_(klass), klzzName_(PrettyClass(klass)),
 		countData_(id), sizeData_(id) {
 	}
 
-	void gcpPairSetRecordIndices(size_t kIndex) {
+	void gcpPairSetRecordIndices(uint64_t kIndex) {
 		countData_.initDataRecords(kIndex);
 		sizeData_.initDataRecords(kIndex);
 	}
@@ -338,8 +338,8 @@ public:
 
 };
 
-typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
-typedef std::multimap<size_t, size_t> HistogramTableTest_S;
+//typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
+//typedef std::multimap<size_t, size_t> HistogramTableTest_S;
 
 
 typedef struct PACKED(4) GCPExtraObjHeader_S {
@@ -434,8 +434,8 @@ public:
 
   virtual void gcpZeorfyAllAtomicRecords(void){}
 
-  virtual void gcpSetRecordIndices(int ind) {
-  	histData_->atomicDataRec_.index.store(ind);
+  virtual void gcpSetRecordIndices(uint64_t ind) {
+  	histData_->atomicDataRec_.index = ind;
   	histData_->dataRec_.index = ind;
   }
 

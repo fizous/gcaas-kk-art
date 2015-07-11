@@ -2761,7 +2761,7 @@ inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* kl
 		mirror::Object* obj) {
 	if(klass == NULL)
 		return NULL;
-	size_t klassHash = 0;
+	uint64_t klassHash = 0;
 	{
 
 		ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);

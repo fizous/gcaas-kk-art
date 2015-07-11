@@ -188,7 +188,7 @@ mirror::String* InternTable::Insert(mirror::String* s, bool is_strong) {
 }
 
 
-mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(size_t hashCode,
+mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(uint64_t hashCode,
 		mirror::Class* klass) {
   for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end();
   		it != end; ++it) {
