@@ -3114,8 +3114,8 @@ bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
 	_success &= dumpClassAtomicCntHistograms(dumpFile);
-	//_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
-	//_success &= dumpClassAtomicSizeHistograms(dumpFile);
+	_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
+	_success &= dumpClassAtomicSizeHistograms(dumpFile);
 	return _success;
 }
 

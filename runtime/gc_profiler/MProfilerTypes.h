@@ -320,17 +320,17 @@ public:
 	void gcpPairUpdatePercentiles(GCPPairHistogramRecords* globalRec) {
 
 		countData_.gcpUnsafeUpdateRecPercentile(globalRec->countData_.gcpGetDataRecP());
-		//sizeData_.gcpUnsafeUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
+		sizeData_.gcpUnsafeUpdateRecPercentile(globalRec->sizeData_.gcpGetDataRecP());
 	}
 
 	void gcpPairUpdateAtomicPercentiles(GCPPairHistogramRecords* globalRec) {
 		countData_.gcpUpdateAtomicRecPercentile(globalRec->countData_.gcpGetAtomicDataRecP());
-		//sizeData_.gcpUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
+		sizeData_.gcpUpdateAtomicRecPercentile(globalRec->sizeData_.gcpGetAtomicDataRecP());
 	}
 
 	void gcpZerofyPairHistAtomicRecData(void) {
 		countData_.gcpZerofyHistAtomicRecData();
-		//sizeData_.gcpZerofyHistAtomicRecData();
+		sizeData_.gcpZerofyHistAtomicRecData();
 	}
 
 	mirror::Class* getClassP(){return klzz_;}
