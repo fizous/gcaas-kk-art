@@ -183,9 +183,9 @@ public:
 	}
 
 	void gcpUnsafeUpdateRecPercentile(GCPHistogramRec* rootRec){
-		dataRec_.pcntLive = rootRec->cntLive == 0.0 ? 0.0 :
+		dataRec_.pcntLive = (rootRec->cntLive < 1) ? 0.0 :
 				(dataRec_.cntLive * 100.0) / rootRec->cntLive;
-		dataRec_.pcntTotal = rootRec->cntTotal == 0.0 ? 0.0 :
+		dataRec_.pcntTotal = (rootRec->cntTotal < 1) ? 0.0 :
 				(dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 

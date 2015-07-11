@@ -3020,6 +3020,8 @@ void GCClassTableManager::calculatePercentiles(void) {
 	GCPPairHistogramRecords* _globalHolder =
 			(GCPPairHistogramRecords*)histData_;
 	GCPPairHistogramRecords* _recData = NULL;
+	LOG(ERROR) << "GCClassTable::calculatePercentiles::" <<
+			_globalHolder->countData_.dataRec_.cntLive;
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		_recData = (GCPPairHistogramRecords*) it.second;
