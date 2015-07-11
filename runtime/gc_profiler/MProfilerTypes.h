@@ -267,8 +267,8 @@ private:
 	mirror::Class* klzz_;
 	std::string klzzName_;
 public:
-	volatile GCPHistRecData countData_;
-	volatile GCPHistRecData sizeData_;
+	GCPHistRecData countData_;
+	GCPHistRecData sizeData_;
 
 	GCPPairHistogramRecords(void);
 
