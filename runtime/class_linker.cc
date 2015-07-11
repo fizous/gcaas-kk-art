@@ -129,7 +129,7 @@ static uint64_t HashLong(const char* s) {
   for (; *s != '\0'; ++s) {
     hash = hash * 31 + *s;
   }
-  return hash;
+  return (hash & 0x00000000FFFFFFFF);
 }
 
 static size_t Hash(const char* s) {
