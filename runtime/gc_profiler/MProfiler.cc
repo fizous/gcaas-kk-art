@@ -2944,7 +2944,7 @@ void GCClassTableManager::logManagedData(void){
 	double _pcntSpaceLive = 0.0;
 	double _pcnSpaceTotal = 0.0;
 
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*)it.second;
@@ -3008,7 +3008,7 @@ void GCClassTableManager::calculateAtomicPercentiles(void) {
 //	if(_globalSizeAtomicRec->cntLive == 0 || _globalSizeAtomicRec->cntTotal == 0) {
 //		_safeSpace = false;
 //	}
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3025,7 +3025,7 @@ void GCClassTableManager::calculatePercentiles(void) {
 	//LOG(ERROR) << "GCClassTable::calculatePercentiles::";
 	//LOG(ERROR) << "Counts record:";
 	//gcpLogDataRecord(LOG(ERROR), _globalHolder->countData_.gcpGetDataRecP());
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		_recData = (GCPPairHistogramRecords*) it.second;
 		_recData->gcpPairUpdatePercentiles(_globalHolder);
@@ -3040,7 +3040,7 @@ bool GCClassTableManager::dumpClassCntHistograms(art::File* dumpFile,
 		_record->countData_.gcpDumpHistRec(dumpFile);
 	}
 	bool _dataWritten = false;
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3057,7 +3057,7 @@ bool GCClassTableManager::dumpClassCntHistograms(art::File* dumpFile,
 
 bool GCClassTableManager::dumpClassAtomicCntHistograms(art::File* dumpFile) {
 	bool _dataWritten = false;
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3078,7 +3078,7 @@ bool GCClassTableManager::dumpClassSizeHistograms(art::File* dumpFile,
 		_record->sizeData_.gcpDumpHistRec(dumpFile);
 	}
 	bool _dataWritten = false;
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3094,7 +3094,7 @@ bool GCClassTableManager::dumpClassSizeHistograms(art::File* dumpFile,
 
 bool GCClassTableManager::dumpClassAtomicSizeHistograms(art::File* dumpFile) {
 	bool _dataWritten = false;
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3126,7 +3126,7 @@ bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
 
 void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistAtomicRecData();
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
@@ -3145,7 +3145,7 @@ void GCClassTableManager::gcpFinalizeProfileCycle(void) {
 
 
 void GCClassTableManager::printClassNames(void) {
-	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
