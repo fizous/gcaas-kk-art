@@ -267,8 +267,8 @@ private:
 	mirror::Class* klzz_;
 	std::string klzzName_;
 public:
-	GCPHistRecData countData_;
-	GCPHistRecData sizeData_;
+	volatile GCPHistRecData countData_;
+	volatile GCPHistRecData sizeData_;
 
 	GCPPairHistogramRecords(void);
 
@@ -714,6 +714,7 @@ public:
 	void logManagedData(void);
 	bool gcpDumpManagedData(art::File*, bool);
 	bool gcpDumpSummaryManagedData(art::File*);
+	void dumpProfData(bool);
 	bool dumpClassCntHistograms(art::File* dumpFile,
 			bool dumpGlobalRec);
 	void gcpFinalizeProfileCycle(void);
