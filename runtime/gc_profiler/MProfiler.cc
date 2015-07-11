@@ -2651,7 +2651,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
  	  gcpLogPerfData();
  	 LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
-  	gcpLogPerfData();
+  //	gcpLogPerfData();
   	 gcpFinalizeHistUpdates();
   }
 }
