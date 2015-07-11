@@ -111,7 +111,7 @@ typedef struct GCPHistogramRecAtomic_S {
 
 
 typedef struct PACKED(4) GCPHistogramRec_S {
-	double   index;
+	uint64_t   index;
 	double cntLive;
 	double cntTotal;
 	double pcntLive;
@@ -120,7 +120,7 @@ typedef struct PACKED(4) GCPHistogramRec_S {
 
 
 typedef struct PACKED(4) GCPCohortRecordData_S {
-	double index_;
+	uint64_t index_;
 	double objLiveCnt;
 	double objTotalCnt;
 	double liveSize;
@@ -202,7 +202,7 @@ public:
 	}
 
 	void GCPZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
-		double _index = rec->index;
+		uint64_t _index = rec->index;
 	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
 	  rec->index = _index;
 	  rec->cntLive.store(0);
@@ -210,7 +210,7 @@ public:
 	}
 
 	void gcpZerofyHistAtomicRecData(void) {
-		double _index = atomicDataRec_.index;
+		uint64_t _index = atomicDataRec_.index;
 	  memset((void*)(&atomicDataRec_), 0, sizeof(GCPHistogramRecAtomic));
 	  atomicDataRec_.index = _index;
 	  atomicDataRec_.cntLive.store(0);
