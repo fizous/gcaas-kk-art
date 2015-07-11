@@ -192,9 +192,12 @@ mprofiler::GCPHistRecData* InternTable::GCPProfileObjKlass(uint64_t hashCode,
 		mirror::Class* klass) {
   for (auto it = classTableProf_.find(hashCode), end = classTableProf_.end();
   		it != end; ++it) {
-  	mprofiler::GCPHistRecData* existing_data = it->second;
+  	mprofiler::GCPPairHistogramRecords* existing_data =
+  			(mprofiler::GCPPairHistogramRecords*)it->second;
+  	if(existing_data->getClassP() == klass)
+  		return existing_data;
   	//LOG(ERROR) << "found data inside GCPProfileObjKlass: " <<  hashCode;
-    return existing_data;
+
   }
   mprofiler::GCPHistRecData* _newRec =
   		new mprofiler::GCPPairHistogramRecords(hashCode, klass);

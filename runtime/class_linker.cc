@@ -125,7 +125,7 @@ static void WrapExceptionInInitializer() SHARED_LOCKS_REQUIRED(Locks::mutator_lo
 
 static uint64_t HashLong(const char* s) {
   // This is the java.lang.String hashcode for convenience, not interoperability.
-	uint64_t hash = 0;
+	size_t hash = 0;
   for (; *s != '\0'; ++s) {
     hash = hash * 31 + *s;
   }
