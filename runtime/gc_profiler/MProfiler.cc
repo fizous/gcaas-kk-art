@@ -3123,28 +3123,6 @@ bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
 	return dumpClassCntHistograms(dumpFile, false);
 }
 
-void GCClassTableManager::dumpProfData(bool isLastDump){
-	gcpUpdateGlobalHistogram();
-	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-
-  dumpHeapStats();
-  bool _success = true;
-  _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
-  if(isLastDump) {
- 	  _success &= GCPDumpEndMarker(dump_file_);
- 	  //dump the summary one more time
- 	  _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
- 	  if(!_success) {
- 	  	LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
- 	  }
- 	  dump_file_->Close();
- 	  gcpLogPerfData();
- 	 LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
-  } else {
-  	gcpLogPerfData();
-  	 gcpFinalizeHistUpdates();
-  }
-}
 
 void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 	((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistAtomicRecData();
