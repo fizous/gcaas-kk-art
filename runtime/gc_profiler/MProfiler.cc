@@ -2634,11 +2634,12 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 
 
 void ObjectSizesProfiler::dumpProfData(bool isLastDump){
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	gcpUpdateGlobalHistogram();
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
   dumpHeapStats();
   bool _success = true;
-  gcpUpdateGlobalHistogram();
+
   _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
   if(isLastDump) {
  	  _success &= GCPDumpEndMarker(dump_file_);
