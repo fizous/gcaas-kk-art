@@ -3022,8 +3022,8 @@ void GCClassTableManager::calculatePercentiles(void) {
 	GCPPairHistogramRecords* _globalHolder =
 			(GCPPairHistogramRecords*)histData_;
 	GCPPairHistogramRecords* _recData = NULL;
-	LOG(ERROR) << "GCClassTable::calculatePercentiles::";
-	LOG(ERROR) << "Counts record:";
+	//LOG(ERROR) << "GCClassTable::calculatePercentiles::";
+	//LOG(ERROR) << "Counts record:";
 	gcpLogDataRecord(LOG(ERROR), _globalHolder->countData_.gcpGetDataRecP());
 	for (const std::pair<size_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
@@ -3113,15 +3113,14 @@ bool GCClassTableManager::dumpClassAtomicSizeHistograms(art::File* dumpFile) {
 bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	bool _success = dumpClassCntHistograms(dumpFile, dumpGlobalRec);
-	//_success &= dumpClassAtomicCntHistograms(dumpFile);
-	//_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
-	//_success &= dumpClassAtomicSizeHistograms(dumpFile);
+	_success &= dumpClassAtomicCntHistograms(dumpFile);
+	_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
+	_success &= dumpClassAtomicSizeHistograms(dumpFile);
 	return _success;
 }
 
 bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
-	return true;
-	//return dumpClassCntHistograms(dumpFile, false);
+	return dumpClassCntHistograms(dumpFile, false);
 }
 
 
