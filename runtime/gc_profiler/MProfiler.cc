@@ -3777,6 +3777,7 @@ void GCPThreadAllocManager::logManagedData(void) {
 }
 
 bool GCPThreadAllocManager::gcpDumpCSVData(void) {
+	int _indexIter = 0;
 	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr =
 				threadProf->histogramManager_;
