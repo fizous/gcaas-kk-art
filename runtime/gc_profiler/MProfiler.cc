@@ -3200,7 +3200,7 @@ GCHistogramObjSizesManager::GCHistogramObjSizesManager(bool shouldInitHist,
 void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords(void) {
 	((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistAtomicRecData();
 	for (int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		sizeHistograms_[i].gcpZerofyHistAtomicRecData();
+		sizeHistograms_[i].gcpZerofyPairHistAtomicRecData();
 	}
 }
 
