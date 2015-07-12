@@ -354,6 +354,10 @@ public:
   	thProf->histogramManager_ = NULL;
   };
 
+  virtual void setThHistogramManager(GCMMPThreadProf* thProf, Thread* thread) {
+  	setHistogramManager(thProf);
+  }
+
   virtual bool verifyThreadNotification() {
   	return true;
   }
@@ -596,6 +600,7 @@ public:
 	}
 
   void setHistogramManager(GCMMPThreadProf*);
+  void setThHistogramManager(GCMMPThreadProf*, Thread*);
   void initHistDataManager(void);
 //  bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
@@ -612,6 +617,8 @@ public:
   		size_t objSize, mirror::Object* obj);
 
   bool verifyThreadNotification(void);
+
+  void setThreadProfName(GCMMPThreadProf*, Thread*);
 };
 
 class CohortProfiler : public ObjectSizesProfiler {

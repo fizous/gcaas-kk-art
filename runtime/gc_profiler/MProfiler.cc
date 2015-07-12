@@ -275,7 +275,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
 	vmProfiler->setPauseManager(this);
-	vmProfiler->setHistogramManager(this);
+	vmProfiler->setThHistogramManager(this, thread);
 	state = GCMMP_TH_RUNNING;
 
 	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
@@ -2255,6 +2255,10 @@ inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
 }
 
+inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
+		Thread* thread) {
+	thread->GetThreadName(referenceName_);
+}
 /********************************* Object demographics profiling ****************/
 
 void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
@@ -3152,7 +3156,7 @@ void GCClassTableManager::printClassNames(void) {
 			LOG(ERROR) << "XXXX NULL Hash: " << it.first;
 		else {
 			gcpLogDataRecord(LOG(ERROR)<< "Name: " <<
-					_rec->getClassPrettyName(),
+					_rec->getRefrenecePrettyName(),
 					_rec->countData_.gcpGetDataRecP());
 		}
 //		mirror::Class* _klass = Runtime::Current()->GetClassLinker()->
@@ -3607,6 +3611,19 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 			thProf->GetTid() & 0x00000000FFFFFFFF);
 }
 
+
+
+void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf,
+		Thread* thread) {
+	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
+			objSizesHistMgr_);
+	thProf->histogramManager_->gcpSetPairRecordIndices(
+			thProf->GetTid() & 0x00000000FFFFFFFF);
+	GCPPairHistogramRecords* _mainRec =
+			(GCPPairHistogramRecords*) thProf->histogramManager_;
+	_mainRec->setRefreneceNameFromThread(thread);
+}
+
 inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 //	GCPExtraObjHeader* extraHeader =
@@ -3884,6 +3901,11 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	_manager->setThreadManager(thProf);
 }
 
+void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
+		Thread* thread) {
+	setHistogramManager(thProf);
+
+}
 //bool ThreadAllocProfiler::periodicDaemonExec(void) {
 //	Thread* self = Thread::Current();
 //  if(waitForProfileSignal()) { //we recived Signal to Shutdown

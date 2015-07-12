@@ -265,7 +265,7 @@ public:
 class GCPPairHistogramRecords : public GCPHistRecData {
 private:
 	mirror::Class* klzz_;
-	std::string klzzName_;
+	std::string referenceName_;
 public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
@@ -280,8 +280,13 @@ public:
 	}
 
 	GCPPairHistogramRecords(uint64_t id, mirror::Class* klass) :
-		klzz_(klass), klzzName_(PrettyClass(klass)),
+		klzz_(klass), referenceName_(PrettyClass(klass)),
 		countData_(id), sizeData_(id) {
+	}
+
+	GCPPairHistogramRecords(uint64_t id, Thread* th) :
+		klzz_(NULL), countData_(id), sizeData_(id) {
+		th->GetThreadName(referenceName_);
 	}
 
 	void gcpPairSetRecordIndices(uint64_t kIndex) {
@@ -337,8 +342,8 @@ public:
 	}
 
 	mirror::Class* getClassP(){return klzz_;}
-	std::string& getClassPrettyName(){return klzzName_;}
-
+	std::string& getRefrenecePrettyName(){return referenceName_;}
+	void setRefreneceNameFromThread(Thread*);
 };
 
 //typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
@@ -931,7 +936,15 @@ public:
 	bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
-};
+};//GCPThreadAllocManager
+
+
+
+
+
+
+
+
 
 class PACKED(4) GCPauseThreadManager {
 	 GCPauseThreadMarker* curr_marker_;
