@@ -3717,35 +3717,35 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	_manager->setThreadManager(thProf);
 }
 
-bool ThreadAllocProfiler::periodicDaemonExec(void) {
-	Thread* self = Thread::Current();
-  if(waitForProfileSignal()) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "ThreadAllocProfiler: signal Received " << self->GetTid() ;
-    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-    {
-    	MutexLock mu(self, *prof_thread_mutex_);
-    	receivedSignal_ = false;
-    }
- //
- //
-#if GCP_COLLECT_FOR_PROFILE
-    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    	heap_->CollectGarbageForProfile(true);
-#endif
-    updateHeapAllocStatus();
-
-    if(getRecivedShutDown()) {
-    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
-
-    } else {
-    	dumpProfData(false);
-    }
-
-  	return getRecivedShutDown();
-  } else {
-  	return false;
-  }
-}
+//bool ThreadAllocProfiler::periodicDaemonExec(void) {
+//	Thread* self = Thread::Current();
+//  if(waitForProfileSignal()) { //we recived Signal to Shutdown
+//    GCMMP_VLOG(INFO) << "ThreadAllocProfiler: signal Received " << self->GetTid() ;
+//    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+//    {
+//    	MutexLock mu(self, *prof_thread_mutex_);
+//    	receivedSignal_ = false;
+//    }
+// //
+// //
+//#if GCP_COLLECT_FOR_PROFILE
+//    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+//    	heap_->CollectGarbageForProfile(true);
+//#endif
+//    updateHeapAllocStatus();
+//
+//    if(getRecivedShutDown()) {
+//    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+//
+//    } else {
+//    	dumpProfData(false);
+//    }
+//
+//  	return getRecivedShutDown();
+//  } else {
+//  	return false;
+//  }
+//}
 
 //gcpAggregateHistograms(GCPHistogramRec* hisTable,
 //		GCPHistogramRec* globalRec)

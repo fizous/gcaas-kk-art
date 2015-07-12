@@ -597,7 +597,7 @@ public:
 
   void setHistogramManager(GCMMPThreadProf*);
   void initHistDataManager(void);
-  bool periodicDaemonExec(void);
+//  bool periodicDaemonExec(void);
   bool dettachThread(GCMMPThreadProf*);
   //void dumpProfData(bool);
   //void dumpHeapStats(void);
