@@ -934,6 +934,8 @@ public:
 	bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
+
+	bool gcpDumpCSVData(void);
 };//GCPThreadAllocManager
 
 

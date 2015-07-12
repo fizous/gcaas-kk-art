@@ -3772,9 +3772,27 @@ void GCPThreadAllocManager::logManagedData(void) {
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
+	LOG(ERROR) << "<<gcpDumpCSVData>>";
+	gcpDumpCSVData();
 }
 
-
+bool GCPThreadAllocManager::gcpDumpCSVData(void) {
+	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramDataManager* _histMgr =
+				threadProf->histogramManager_;
+		if(_histMgr != NULL) {
+			LOG(ERROR) << "-- thread index: " << _indexIter++;
+			GCHistogramObjSizesManager* _thrDataManager =
+					(GCHistogramObjSizesManager*)_histMgr;
+			if(_thrDataManager == NULL)
+				continue;
+			GCPPairHistogramRecords* _record =
+					(GCPPairHistogramRecords*) _thrDataManager->histData_;
+			LOG(ERROR) << "name: " << _record->getRefrenecePrettyName();
+			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+		}
+	}
+}
 bool GCPThreadAllocManager::gcpDumpHistAtomicSpaceTable(art::File* dump_file) {
 	bool _success = false;
 	for (const auto& threadProf :
