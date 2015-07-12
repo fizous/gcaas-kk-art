@@ -123,7 +123,7 @@ protected:
 
 public:
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
-  static constexpr int kGCMMPDefaultCohortLog = GCP_COHORT_LOG;
+  static constexpr int kGCMMPDefaultCohortLog = GCP_DEFAULT_COHORT_LOG;
   static const int kGCMMPDefaultAffinity 			= -1;
 //	static const unsigned int kGCMMPEnableProfiling = 0;
   static const int kGCMMPDisableMProfile = 999;

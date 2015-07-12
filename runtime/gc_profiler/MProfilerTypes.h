@@ -28,10 +28,10 @@
 #define GCP_WINDOW_RANGE_LOG							16
 
 /* number of buckets to create the histogram */
-#define GCP_MAX_COHORT_ARRAYLET_CAP				128
+//#define GCP_MAX_COHORT_ARRAYLET_CAP				128
 #define GCP_MAX_COHORT_ROW_CAP						64
-#define GCP_COHORT_LOG										18
-#define GCP_COHORT_SIZE										262144 // 256k
+#define GCP_DEFAULT_COHORT_LOG						18
+#define GCP_DEAFULT_COHORT_SIZE						262144 // 256k
 
 #define GCP_MAX_HISTOGRAM_SIZE						32
 #define GCMMP_GCPAUSE_ARRAY_SIZE					32
@@ -702,7 +702,7 @@ class GCCohortManager : public GCHistogramDataManager {
 	uint64_t calcNewCohortIndex();
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
-	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
+	//static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
 
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
