@@ -4176,7 +4176,7 @@ void GCCohortManager::addCohortRecord(void) {
 
 
 void GCCohortManager::initHistograms(void) {
-//	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
+	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
 //	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
 
 	cohortsTable_.index = 0;
