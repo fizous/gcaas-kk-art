@@ -3793,6 +3793,7 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
+	return true;
 }
 bool GCPThreadAllocManager::gcpDumpHistAtomicSpaceTable(art::File* dump_file) {
 	bool _success = false;
