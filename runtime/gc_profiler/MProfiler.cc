@@ -2647,7 +2647,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
  	  }
  	  dump_file_->Close();
  	  gcpLogPerfData();
- 	 LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
+ 	  LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
     dumpHeapStats();
     _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
@@ -3342,18 +3342,18 @@ void GCHistogramObjSizesManager::gcpRemoveObjectFromIndex(size_t histIndex,
 //	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObject(histIndex);
 //}
 
-inline void GCHistogramObjSizesManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
-		GCPHistogramRec* globalRec) {
-	if(false && histRecord.cntTotal <= 0.0)
-		return;
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-		hisTable[i].index 				= histogramTable[i].index;
-		hisTable[i].cntLive 			+= histogramTable[i].cntLive;
-		hisTable[i].cntTotal 		  += histogramTable[i].cntTotal;
-	}
-	globalRec->cntLive 	+= histRecord.cntLive;
-	globalRec->cntTotal += histRecord.cntTotal;
-}
+//inline void GCHistogramObjSizesManager::gcpAggregateHistograms(GCPHistogramRec* hisTable,
+//		GCPHistogramRec* globalRec) {
+//	if(false && histRecord.cntTotal <= 0.0)
+//		return;
+//	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+//		hisTable[i].index 				= histogramTable[i].index;
+//		hisTable[i].cntLive 			+= histogramTable[i].cntLive;
+//		hisTable[i].cntTotal 		  += histogramTable[i].cntTotal;
+//	}
+//	globalRec->cntLive 	+= histRecord.cntLive;
+//	globalRec->cntTotal += histRecord.cntTotal;
+//}
 
 void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords() {
 	histData_->gcpZerofyHistAtomicRecData();
@@ -3363,19 +3363,19 @@ void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords() {
 	}
 }
 
-inline void GCHistogramObjSizesManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
-		GCPHistogramRecAtomic* globalRec) {
-//	int32_t total = ;
-//	if(false && total == 0)
-//		return;
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-		hisTable[i].index 				= lastWindowHistTable[i].index;
-		hisTable[i].cntLive.fetch_add(lastWindowHistTable[i].cntLive.load());
-		hisTable[i].cntTotal.fetch_add(lastWindowHistTable[i].cntTotal.load());
-	}
-	globalRec->cntTotal.fetch_add(histAtomicRecord.cntTotal.load());
-	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
-}
+//inline void GCHistogramObjSizesManager::gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
+//		GCPHistogramRecAtomic* globalRec) {
+////	int32_t total = ;
+////	if(false && total == 0)
+////		return;
+//	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+//		hisTable[i].index 				= lastWindowHistTable[i].index;
+//		hisTable[i].cntLive.fetch_add(lastWindowHistTable[i].cntLive.load());
+//		hisTable[i].cntTotal.fetch_add(lastWindowHistTable[i].cntTotal.load());
+//	}
+//	globalRec->cntTotal.fetch_add(histAtomicRecord.cntTotal.load());
+//	globalRec->cntLive.fetch_add(histAtomicRecord.cntLive.load());
+//}
 
 
 inline void GCHistogramObjSizesManager::calculatePercentiles(void) {

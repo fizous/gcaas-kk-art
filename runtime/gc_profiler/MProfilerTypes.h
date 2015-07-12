@@ -736,8 +736,8 @@ public:
 
 
 
-	GCPHistogramRec histogramTable[GCP_MAX_HISTOGRAM_SIZE];
-	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
+//	GCPHistogramRec histogramTable[GCP_MAX_HISTOGRAM_SIZE];
+//	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
 
 
 	GCHistogramObjSizesManager(void);
@@ -762,10 +762,10 @@ public:
 
 
   //// methods for dumping and aggrgating /////////
-  void gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
-  		GCPHistogramRecAtomic* globalRec);
-  void gcpAggregateHistograms(GCPHistogramRec* hisTable,
-  		GCPHistogramRec* globalRec);
+//  void gcpAggAtomicHistograms(GCPHistogramRecAtomic* hisTable,
+//  		GCPHistogramRecAtomic* globalRec);
+//  void gcpAggregateHistograms(GCPHistogramRec* hisTable,
+//  		GCPHistogramRec* globalRec);
 //  void gcpCalculateEntries(GCPHistogramRec* hisTable,
 //  		GCPHistogramRec* globalRec);
 //  void gcpCalculateAtomicEntries(GCPHistogramRecAtomic* hisTable,
@@ -784,22 +784,22 @@ public:
   void gcpFinalizeProfileCycle(void);
   void gcpZeorfyAllAtomicRecords(void);
 
-  void gcpResetHistogramData() {
-  	gcpResetHistogramRecData(&histRecord);
-  	memset((void*)histogramTable, 0, totalHistogramSize);
-  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-  		histogramTable[i].index 			= (i+1) * 1.0;
-  	}
-  }
+//  void gcpResetHistogramData() {
+//  	gcpResetHistogramRecData(&histRecord);
+//  	memset((void*)histogramTable, 0, totalHistogramSize);
+//  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+//  		histogramTable[i].index 			= (i+1) * 1.0;
+//  	}
+//  }
 
-  void gcpResetAtomicData() {
-  	gcpResetHistogramAtomicRecData(&histAtomicRecord);
-  	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
-
-  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-  		lastWindowHistTable[i].index  = (i+1) * 1.0;
-  	}
-  }
+//  void gcpResetAtomicData() {
+//  	gcpResetHistogramAtomicRecData(&histAtomicRecord);
+//  	memset((void*)lastWindowHistTable, 0, lastWindowHistSize);
+//
+//  	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+//  		lastWindowHistTable[i].index  = (i+1) * 1.0;
+//  	}
+//  }
 };//GCHistogramObjSizesManager
 
 typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
