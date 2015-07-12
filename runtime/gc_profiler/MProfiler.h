@@ -639,7 +639,7 @@ public:
   void gcpAddObject(size_t, size_t){}
   bool dettachThread(GCMMPThreadProf*);
 
-  void dumpProfData(bool);
+  //void dumpProfData(bool);
   void gcpLogPerfData(void);
 };
 

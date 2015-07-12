@@ -4158,16 +4158,15 @@ GCCohortManager::GCCohortManager(AtomicInteger* allocRec) :
 void GCCohortManager::addCohortRow(void) {
 	currCoRowP = (GCPCohortsRow*) calloc(1, getCoRowSZ());
 	currCoRowP->index_ = 0;
-	cohortsTable.cohortRows_.push_back(currCoRowP);
+	cohortsTable_.cohortRows_.push_back(currCoRowP);
 }
 
 void GCCohortManager::addCohortRecord(void) {
-	if(currCoRowP->index_ == GCP_MAX_COHORT_ROW_CAP) {
+	if(currCoRowP->index_ == kGCMMPMaxRowCap) {
 		//we passed the capacity and we need a new row
 		addCohortRow();
 	}
-	int _index = (currCohortP == NULL) ?
-			 VMProfiler::GCPCalcCohortIndex() : currCohortP->index_+1;
+	uint64_t _index = calcNewCohortIndex();
 	currCohortP = &currCoRowP->cohorts[currCoRowP->index_];
 	currCoRowP->index_++;
 
@@ -4177,10 +4176,10 @@ void GCCohortManager::addCohortRecord(void) {
 
 
 void GCCohortManager::initHistograms(void) {
-	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
-	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
+//	cohRowSZ_ = kGCMMPMaxRowCap   * sizeof(GCPCohortRecordData);
+//	cohArrSZ_ = kGCMMPMaxTableCap * sizeof(GCPCohortsRow*);
 
-	cohortsTable.index = 0;
+	cohortsTable_.index = 0;
 	currCohortP = NULL;
 
 	addCohortRow();
@@ -4217,7 +4216,7 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 	addObjectToCohRecord(objSize);
 	_profHeader->objSize = objSize;
 	//we need to calculate the correct bytes without the allocated memory
-	_profHeader->objBD = allocRec_->load()-objSize;
+	_profHeader->objBD = calcObjBD(objSize);
 }
 
 
@@ -4245,7 +4244,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
-		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 		return;
 	}
 
@@ -4268,8 +4267,8 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 			incColIndex(&_rowIter, &_colIter);
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
-			if(_rowIter >= cohortsTable.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap){
-				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+			if(_rowIter >= cohortsTable_.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap){
+				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 				return;
 			}
 			_LastRecP =  getCoRecFromIndices(_rowIter, _colIter);
@@ -4289,7 +4288,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 		return NULL;
 	size_t _cohIndex = (_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
 	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
-	GCPCohortsRow* _row = cohortsTable.cohortRows_[_rowIndex];
+	GCPCohortsRow* _row = cohortsTable_.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
 
 	return _cohRec;
@@ -4300,32 +4299,48 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData){
 	bool _print   = false;
-	bool _success = true;
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
 	//LOG(ERROR) << "dumpRows----";
-	int _index = 0;
-	for (const auto& _rowIterP : cohortsTable.cohortRows_) {
+	for (const auto& _rowIterP : cohortsTable_.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
 		//LOG(ERROR) << _index << "::dump Row: " << _rowIterP->index_;
 		if(_rowIterP->index_ > kGCMMPMaxRowCap) {
-
 			LOG(ERROR) << "Index out of boundary : " << _rowIterP->index_;
 		}
-		_index++;
 		if(_rowBytes == 0)
 			break;
-		_print = true;
-		_success &= dumpFile->WriteFully(_rowIterP->cohorts, _rowBytes);
-
+		_print = dumpFile->WriteFully(_rowIterP->cohorts, _rowBytes);
+		if(!_print)
+			break;
 	}
 
-	if(_print) {
-		return VMProfiler::GCPDumpEndMarker(dumpFile);
-	}
-	return false;
+	if(_print)
+		_print &= VMProfiler::GCPDumpEndMarker(dumpFile);
+
+	return _print;
 }
 
+
+void GCCohortManager::logManagedData(void) {
+	size_t _rowBytes = 0;
+	LOG(ERROR) << "Count of Cohort Rows: "<< cohortsTable_.cohortRows_.size() <<
+			"; table index: " << cohortsTable_.index;
+	int _rIndex = 0;
+	for (const auto& _rowIterP : cohortsTable_.cohortRows_) {
+		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
+		if(_rowBytes == 0)
+			break;
+		LOG(ERROR) << "++ROW: " << _rIndex;
+		int _indIter = 0;
+		while(_indIter < _rowIterP->index_) {
+			GCPCohortRecordData* _recData = &_rowIterP->cohorts[_indIter];
+			gcpLogDataRecord(LOG(ERROR), _recData);
+			_indIter++;
+		}
+		_rIndex++;
+	}
+}
 
 /********************************* Cohort profiling ****************/
 
@@ -4353,29 +4368,29 @@ inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 	getCohortManager()->addObject(allocatedMemory, objSize, obj);
 }
 
-void CohortProfiler::dumpProfData(bool isLastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-	//dump the heap stats
-	dumpHeapStats();
-	//dump the global entry
-
-	hitogramsData_->gcpDumpManagedData(dump_file_, false);
-
-	//gcpUpdateGlobalHistogram();
-		//dump the global stats
-
-  if(isLastDump) {
-	  bool _success = false;
-  	_success &= GCPDumpEndMarker(dump_file_);
-	 	if(_success) {
-	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
-	 	}
-	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-	 	dump_file_->Close();
-	 	LOG(ERROR) <<  "CohortProfiler: done dumping data";
-	 	gcpLogPerfData();
-  }
-}
+//void CohortProfiler::dumpProfData(bool isLastDump) {
+//  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+//	//dump the heap stats
+//	dumpHeapStats();
+//	//dump the global entry
+//
+//	hitogramsData_->gcpDumpManagedData(dump_file_, false);
+//
+//	//gcpUpdateGlobalHistogram();
+//		//dump the global stats
+//
+//  if(isLastDump) {
+//	  bool _success = false;
+//  	_success &= GCPDumpEndMarker(dump_file_);
+//	 	if(_success) {
+//	 		LOG(ERROR) << "<<<< Succeeded dump to file" ;
+//	 	}
+//	 	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+//	 	dump_file_->Close();
+//	 	LOG(ERROR) <<  "CohortProfiler: done dumping data";
+//	 	gcpLogPerfData();
+//  }
+//}
 
 
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
@@ -4386,8 +4401,10 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
-void CohortProfiler::gcpLogPerfData() {
 
+
+
+void CohortProfiler::gcpLogPerfData() {
 	int32_t currBytes_ = GCPTotalAllocBytes.load();
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< currBytes_ << ", currBytes: " <<
@@ -4395,27 +4412,10 @@ void CohortProfiler::gcpLogPerfData() {
 			heap_->GetConcStartBytes() << ", footPrint: " <<
 			heap_->GetMaxAllowedFootPrint();
 
-	//GCPCohortRecordData* _recP = NULL;
-	size_t _rowBytes = 0;
-	int _rIndex = 0;
-	LOG(ERROR) << "cohortRows_: "<< getCohortManager()->cohortsTable.cohortRows_.size() <<
-			"; index: " << getCohortManager()->cohortsTable.index;
-	for (const auto& _rowIterP : getCohortManager()->cohortsTable.cohortRows_) {
-		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
-		if(_rowBytes == 0)
-			break;
-		LOG(ERROR) << "++ROW: " << _rIndex;
-		int _indIter = 0;
-		while(_indIter < _rowIterP->index_) {
-			GCPCohortRecordData* _recData = &_rowIterP->cohorts[_indIter];
-			LOG(ERROR) << "Cohort: "<< _recData->index_ << ", liveSize: " <<
-					_recData->liveSize << ", totalSize: " << _recData->totalSize <<
-					", objsCnt: " << _recData->objLiveCnt << ", totalObjs: " <<
-					_recData->objTotalCnt;
-			_indIter++;
-		}
-		_rIndex++;
-	}
+	GCCohortManager* _coManager = getCohortManager();
+	if(_coManager == NULL)
+		return;
+	_coManager->logManagedData();
 }
 /************************ Class Loader *********************/
 

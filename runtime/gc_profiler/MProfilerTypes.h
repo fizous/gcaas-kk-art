@@ -670,15 +670,38 @@ public:
 				"; cntTotal: "<< _dataRec->cntTotal<< "; pcntLive: " <<
 				_dataRec->pcntLive << "; pcntTotal: " << _dataRec->pcntTotal;
 	}
+
+	void gcpLogDataRecord(std::ostream& os, GCPCohortRecordData* _dataRec) {
+		os << "index: "<< StringPrintf("%llu",_dataRec->index_) <<
+				"; liveSize: " << _dataRec->liveSize <<
+				"; totalSize: "<< _dataRec->totalSize <<
+				"; liveObj: " << _dataRec->objLiveCnt <<
+				"; totalObj: " << _dataRec->objTotalCnt;
+	}
 };//GCHistogramDataManager
 
 
 class GCCohortManager : public GCHistogramDataManager {
-	size_t cohRowSZ_;
-	size_t cohArrSZ_;
+//	size_t cohRowSZ_;
+//	size_t cohArrSZ_;
+//
+//	size_t getCoRowSZ(void) {
+//		return cohRowSZ_ + sizeof(int);
+//	}
 
-	size_t getCoRowSZ(void) {
-		return cohRowSZ_ + sizeof(int);
+	size_t calcObjBD(size_t objSize) {
+		return allocRec_->load() - objSize;
+	}
+
+	uint64_t calcNewCohortIndex() {
+		if(currCohortP == NULL) {
+			return (VMProfiler::GCPCalcCohortIndex() & 0x00000000FFFFFFFF);
+		}
+		return (currCohortP->index_+1);
+	}
+
+	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
+		return kGCMMPCohortSize - rec->totalSize;
 	}
 
 public:
@@ -687,7 +710,7 @@ public:
 
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
-	GCPCohortsTable 			cohortsTable;
+	GCPCohortsTable 			cohortsTable_;
 	AtomicInteger* 				allocRec_;
 
 	GCCohortManager(AtomicInteger*);
@@ -695,7 +718,7 @@ public:
 
 	void addObject(size_t, size_t, mirror::Object*);
 	bool gcpDumpManagedData(art::File*, bool);
-
+	void logManagedData(void);
 	void addCohortRecord(void);
 	void addCohortRow(void);
 
@@ -704,10 +727,6 @@ public:
   void gcpDumpCohortData(art::File*);
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
 	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
-
-	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
-		return kGCMMPCohortSize - rec->totalSize;
-	}
 
 	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
 		rec->liveSize  += fit;
@@ -748,9 +767,9 @@ public:
 	}
 
 	GCPCohortRecordData* getCoRecFromIndices(size_t row, size_t index) {
-		if(row >= cohortsTable.cohortRows_.size() || index >= (size_t)kGCMMPMaxRowCap)
+		if(row >= cohortsTable_.cohortRows_.size() || index >= (size_t)kGCMMPMaxRowCap)
 			return NULL;
-		GCPCohortsRow* _row = cohortsTable.cohortRows_[row];
+		GCPCohortsRow* _row = cohortsTable_.cohortRows_[row];
 		return &_row->cohorts[index];
 	}
 
