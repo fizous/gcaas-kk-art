@@ -3916,7 +3916,9 @@ void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 	setHistogramManager(thProf);
 	if(thProf->histogramManager_ == NULL)
 		return;
-	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid();
+  std::string name;
+  thread->GetThreadName(name);
+	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid() << ", " << name;
 	GCPPairHistogramRecords* _threadProfRec =
 			(GCPPairHistogramRecords*) thProf->histogramManager_;
 	_threadProfRec->setRefreneceNameFromThread(thread);
