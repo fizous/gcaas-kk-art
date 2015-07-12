@@ -270,7 +270,10 @@ public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
 
-	GCPPairHistogramRecords(void);
+	GCPPairHistogramRecords(void) : klzz_(NULL),
+		countData_(0), sizeData_(0) {
+
+	}
 
 	GCPPairHistogramRecords(uint64_t id) : klzz_(NULL),
 		countData_(id), sizeData_(id) {
