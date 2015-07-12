@@ -3913,6 +3913,8 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
 	setHistogramManager(thProf);
+	if(thProf->histogramManager_ == NULL)
+		return;
 	GCPPairHistogramRecords* _threadProfRec =
 			(GCPPairHistogramRecords*) thProf->histogramManager_;
 	_threadProfRec->setRefreneceNameFromThread(thread);
