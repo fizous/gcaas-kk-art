@@ -439,17 +439,7 @@ public:
   	histData_->dataRec_.index = ind;
   }
 
-  virtual void gcpAggAddDataToHist(GCPHistRecData* dataRec) {
-  	dataRec->gcpIncAtomicRecData();
-  	dataRec->gcpIncRecData();
-  	//upate the global records till the root
-  	GCHistogramDataManager* _managerIter = this;
-  	while(_managerIter != NULL) {
-  		_managerIter->histData_->gcpIncAtomicRecData();
-  		_managerIter->histData_->gcpIncRecData();
-  		_managerIter = _managerIter->parentManager_;
-  	}
-  }
+
 
   virtual void gcpNoAggAddDataToHist(GCPHistRecData* dataRec) {
   	dataRec->gcpIncAtomicRecData();
@@ -483,6 +473,17 @@ public:
 			histData_->gcpDecAtomicRecData();
   }
 
+  virtual void gcpAggAddDataToHist(GCPHistRecData* dataRec) {
+  	dataRec->gcpIncAtomicRecData();
+  	dataRec->gcpIncRecData();
+  	//upate the global records till the root
+  	GCHistogramDataManager* _managerIter = this;
+  	while(_managerIter != NULL) {
+  		_managerIter->histData_->gcpIncAtomicRecData();
+  		_managerIter->histData_->gcpIncRecData();
+  		_managerIter = _managerIter->parentManager_;
+  	}
+  }
   virtual void gcpIncPairRecData(size_t space, GCPHistRecData* rec) {
   	GCPPairHistogramRecords* _globalRec =
   			(GCPPairHistogramRecords*) histData_;
@@ -490,6 +491,20 @@ public:
   			(GCPPairHistogramRecords*) rec;
   	_localRec->gcpPairIncRecData(space);
   	_globalRec->gcpPairIncRecData(space);
+  }
+
+  virtual void gcpAggIncPairRecData(size_t space, GCPHistRecData* rec) {
+//  	GCPPairHistogramRecords* _localRec =
+//  			(GCPPairHistogramRecords*) rec;
+  	gcpIncPairRecData(space, rec);
+  	//upate the global records till the root
+  	GCHistogramDataManager* _managerIter = parentManager_;
+  	while(_managerIter != NULL) {
+    	GCPPairHistogramRecords* _globalRec =
+    			(GCPPairHistogramRecords*) _managerIter->histData_;
+    	_globalRec->gcpIncPairRecData(space);
+  		_managerIter = _managerIter->parentManager_;
+  	}
   }
 
   virtual void gcpIncAtomicPairRecData(size_t space, GCPHistRecData* rec) {
@@ -501,26 +516,73 @@ public:
   	_globalRec->gcpPairIncAtomicRecData(space);
   }
 
-  virtual void gcpDecPairRecData(size_t space, GCPHistRecData* rec) {
+  virtual void gcpAggIncAtomicPairRecData(size_t space, GCPHistRecData* rec) {
+  	gcpIncAtomicPairRecData(space, rec);
+  	//upate the global records till the root
+  	GCHistogramDataManager* _managerIter = parentManager_;
+  	while(_managerIter != NULL) {
+    	GCPPairHistogramRecords* _globalRec =
+    			(GCPPairHistogramRecords*) _managerIter->histData_;
+    	_globalRec->gcpIncAtomicPairRecData(space);
+  		_managerIter = _managerIter->parentManager_;
+  	}
+  }
+
+
+  virtual bool gcpAggDecPairRecData(size_t space, GCPHistRecData* rec) {
+  	bool _remFlag = gcpPairDecRecData(space, rec);
+  	if(_remFlag) {
+    	GCHistogramDataManager* _managerIter = parentManager_;
+    	while(_managerIter != NULL) {
+    		GCPPairHistogramRecords* pRec =
+    				(GCPPairHistogramRecords*)parentManager_->histData_
+    		if(!pRec->gcpPairDecRecData(space))
+    			break;
+    		_managerIter = _managerIter->parentManager_;
+    	}
+  	}
+  	return _remFlag;
+  }
+
+  virtual bool gcpDecPairRecData(size_t space, GCPHistRecData* rec) {
   	GCPPairHistogramRecords* _globalRec =
   			(GCPPairHistogramRecords*) histData_;
   	GCPPairHistogramRecords* _localRec =
   			(GCPPairHistogramRecords*) rec;
   	if(_localRec->gcpPairDecRecData(space)) {
   		_globalRec->gcpPairDecRecData(space);
+  		return true;
   	}
+  	return false;
 
   }
 
-  virtual void gcpDecAtomicPairRecData(size_t space, GCPHistRecData* rec) {
+  virtual bool gcpDecAtomicPairRecData(size_t space, GCPHistRecData* rec) {
   	GCPPairHistogramRecords* _globalRec =
   			(GCPPairHistogramRecords*) histData_;
   	GCPPairHistogramRecords* _localRec =
   			(GCPPairHistogramRecords*) rec;
   	if(_localRec->gcpPairDecAtomicRecData(space)) {
   		_globalRec->gcpPairDecAtomicRecData(space);
+  		return true;
   	}
+  	return false;
   }
+
+  virtual bool gcpAggDecAtomicPairRecDat(size_t space, GCPHistRecData* dataRec) {
+  	bool _remFlag = gcpDecAtomicPairRecData(space, dataRec);
+  	//bool _remFlag = dataRec->gcpDecAtomicPairRecData();
+  	GCHistogramDataManager* _managerIter = parentManager_;
+  	while(_managerIter != NULL) {
+  		GCPPairHistogramRecords* pRec =
+  				(GCPPairHistogramRecords*)parentManager_->histData_
+  		if(!pRec->gcpDecAtomicRecData())
+  			break;
+  		_managerIter = _managerIter->parentManager_;
+  	}
+  	return _remFlag;
+  }
+
   virtual void calculateAtomicPercentiles(void) {}
   virtual void calculatePercentiles(void) {}
   virtual bool gcpDumpHistTable(art::File*, bool){return true;}
@@ -732,6 +794,14 @@ class GCHistogramObjSizesManager : public GCHistogramDataManager {
 	size_t totalHistogramSize;
 	size_t lastWindowHistSize;
 public:
+	GCPPairHistogramRecords sizeHistograms_[kGCMMPMaxHistogramEntries];
+	GCHistogramObjSizesManager(void);
+	GCHistogramObjSizesManager(bool, GCHistogramDataManager*);
+	GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE);
+	~GCHistogramObjSizesManager(){};
+
+
+
 	GCPHistRecData sizeHistograms[GCP_MAX_HISTOGRAM_SIZE];
 
 
@@ -740,10 +810,7 @@ public:
 //	GCPHistogramRecAtomic lastWindowHistTable[GCP_MAX_HISTOGRAM_SIZE];
 
 
-	GCHistogramObjSizesManager(void);
-	GCHistogramObjSizesManager(bool, GCHistogramDataManager*);
-	GCHistogramObjSizesManager(GCMMP_HISTOGRAM_MGR_TYPE);
-	~GCHistogramObjSizesManager(){};
+
 
 	//static void GCPRemoveObj(size_t allocatedMemory, mirror::Object* obj);
 
@@ -753,7 +820,7 @@ public:
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
 	void removeObject(size_t, mirror::Object*);
-	void gcpRemoveObjectFromIndex(size_t, bool);
+	void gcpRemoveObjectFromIndex(size_t, size_t, bool);
 	void gcpRemoveObjFromEntriesWIndex(size_t);
 
 	void calculatePercentiles(void);
@@ -776,8 +843,11 @@ public:
 
   bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
+  bool gcpDumpHistAtomicSpaceTable(art::File*);
+	bool gcpDumpHistSpaceTable(art::File*, bool);
 
 	bool gcpDumpManagedData(art::File*, bool);
+
   bool gcpDumpSummaryManagedData(art::File*);
   //bool gcpDumpHistAtomicRec(art::File*);
 
