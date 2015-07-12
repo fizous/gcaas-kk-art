@@ -3612,18 +3612,6 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 }
 
 
-
-void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf,
-		art::Thread* thread) {
-	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
-			objSizesHistMgr_);
-	thProf->histogramManager_->gcpSetPairRecordIndices(
-			thProf->GetTid() & 0x00000000FFFFFFFF);
-	GCPPairHistogramRecords* _mainRec =
-			(GCPPairHistogramRecords*) thProf->histogramManager_;
-	_mainRec->setRefreneceNameFromThread(thread);
-}
-
 inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 //	GCPExtraObjHeader* extraHeader =
@@ -3899,12 +3887,15 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	if(_manager == NULL)
 		return;
 	_manager->setThreadManager(thProf);
+
 }
 
 void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
 	setHistogramManager(thProf);
-
+	GCPPairHistogramRecords* _threadProfRec =
+			(GCPPairHistogramRecords*) thProf->histogramManager_;
+	_threadProfRec->setRefreneceNameFromThread(thread);
 }
 //bool ThreadAllocProfiler::periodicDaemonExec(void) {
 //	Thread* self = Thread::Current();
