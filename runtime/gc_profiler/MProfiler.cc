@@ -3614,7 +3614,7 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 
 
 void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf,
-		Thread* thread) {
+		art::Thread* thread) {
 	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
 			objSizesHistMgr_);
 	thProf->histogramManager_->gcpSetPairRecordIndices(
