@@ -682,28 +682,24 @@ public:
 
 
 class GCCohortManager : public GCHistogramDataManager {
-//	size_t cohRowSZ_;
-//	size_t cohArrSZ_;
-//
-//	size_t getCoRowSZ(void) {
-//		return cohRowSZ_ + sizeof(int);
-//	}
+	size_t cohRowSZ_;
+	size_t cohArrSZ_;
+
+	size_t getCoRowSZ(void) {
+		return cohRowSZ_ + sizeof(int);
+	}
 
 	size_t calcObjBD(size_t objSize) {
 		return allocRec_->load() - objSize;
 	}
 
-	uint64_t calcNewCohortIndex() {
-		if(currCohortP == NULL) {
-			return (VMProfiler::GCPCalcCohortIndex() & 0x00000000FFFFFFFF);
-		}
-		return (currCohortP->index_+1);
-	}
+
 
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
 		return kGCMMPCohortSize - rec->totalSize;
 	}
 
+	uint64_t calcNewCohortIndex();
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
 	static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;

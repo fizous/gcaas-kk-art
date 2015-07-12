@@ -4186,6 +4186,12 @@ void GCCohortManager::initHistograms(void) {
 	addCohortRecord();
 }
 
+inline uint64_t GCCohortManager::calcNewCohortIndex() {
+	if(currCohortP == NULL) {
+		return (VMProfiler::GCPCalcCohortIndex() & 0x00000000FFFFFFFF);
+	}
+	return (currCohortP->index_+1);
+}
 
 inline void GCCohortManager::addObjectToCohRecord(size_t objSize) {
 
