@@ -3297,7 +3297,7 @@ void GCHistogramObjSizesManager::gcpRemoveObjFromEntriesWIndex(size_t histIndex,
 //	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
 	GCPPairHistogramRecords* _recData = &sizeHistograms_[histIndex];
 	_recData->gcpPairDecRecData(objSpace);
-	_recData->gcpPairDecAtomicRecData(space);
+	_recData->gcpPairDecAtomicRecData(objSpace);
 }
 
 
@@ -3630,7 +3630,8 @@ void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj)
 	size_t histIndex = (32 - CLZ(_extraHeader->objSize)) - 1;
 	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex,
 			_extraHeader->objSize,	true);
-	objSizesHistMgr_->gcpRemoveObjFromEntriesWIndex(histIndex);
+	objSizesHistMgr_->gcpRemoveObjFromEntriesWIndex(histIndex,
+			_extraHeader->objSize);
 }
 
 inline void GCPThreadAllocManager::calculatePercentiles(void) {
