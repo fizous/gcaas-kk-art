@@ -3441,7 +3441,7 @@ void GCHistogramObjSizesManager::logManagedData(void) {
 	LOG(ERROR) << "Dumping Entries Record:";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
 		_dataRec = &sizeHistograms_[i];
-		gcpLogDataRecord(LOG(ERROR), &_globalRec->countData_.dataRec_);
+		gcpLogDataRecord(LOG(ERROR), &_dataRec->countData_.dataRec_);
 	}
 }
 
