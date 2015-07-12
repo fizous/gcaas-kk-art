@@ -502,7 +502,7 @@ public:
   	while(_managerIter != NULL) {
     	GCPPairHistogramRecords* _globalRec =
     			(GCPPairHistogramRecords*) _managerIter->histData_;
-    	_globalRec->gcpIncPairRecData(space);
+    	_globalRec->gcpPairIncRecData(space);
   		_managerIter = _managerIter->parentManager_;
   	}
   }
@@ -523,7 +523,7 @@ public:
   	while(_managerIter != NULL) {
     	GCPPairHistogramRecords* _globalRec =
     			(GCPPairHistogramRecords*) _managerIter->histData_;
-    	_globalRec->gcpIncAtomicPairRecData(space);
+    	_globalRec->gcpPairIncAtomicRecData(space);
   		_managerIter = _managerIter->parentManager_;
   	}
   }
