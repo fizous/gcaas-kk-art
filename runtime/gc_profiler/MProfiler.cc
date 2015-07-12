@@ -3647,7 +3647,7 @@ inline void GCPThreadAllocManager::calculatePercentiles(void) {
 }
 
 inline void GCPThreadAllocManager::calculateAtomicPercentiles(void) {
-	GCPPairHistogramRecords* _globalRec = (GCPPairHistogramRecords*)histData_;
+	GCPPairHistogramRecords* _globalRec = (GCPPairHistogramRecords*) histData_;
 	for (const auto& threadProf :
 			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
