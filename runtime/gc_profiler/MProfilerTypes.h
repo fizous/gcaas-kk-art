@@ -45,6 +45,8 @@ namespace art {
 //}
 //
 //}
+class Thread;
+
 namespace mprofiler {
 
 class MProfiler;
@@ -284,10 +286,6 @@ public:
 		countData_(id), sizeData_(id) {
 	}
 
-	GCPPairHistogramRecords(uint64_t id, Thread* th) :
-		klzz_(NULL), countData_(id), sizeData_(id) {
-		th->GetThreadName(referenceName_);
-	}
 
 	void gcpPairSetRecordIndices(uint64_t kIndex) {
 		countData_.initDataRecords(kIndex);
@@ -343,7 +341,7 @@ public:
 
 	mirror::Class* getClassP(){return klzz_;}
 	std::string& getRefrenecePrettyName(){return referenceName_;}
-	void setRefreneceNameFromThread(Thread*);
+	void setRefreneceNameFromThread(art::Thread*);
 };
 
 //typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
