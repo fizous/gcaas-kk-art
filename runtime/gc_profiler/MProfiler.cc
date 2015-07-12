@@ -3453,6 +3453,8 @@ bool GCHistogramObjSizesManager::gcpDumpManagedData(art::File* dump_file,
 		bool dumpGlobalRec) {
 	bool _success = gcpDumpHistTable(dump_file, dumpGlobalRec);
 	_success &= gcpDumpHistAtomicTable(dump_file);
+	_success &= gcpDumpHistSpaceTable(dump_file, dumpGlobalRec);
+	_success &= gcpDumpHistAtomicSpaceTable(dump_file);
 	return _success;
 }
 
