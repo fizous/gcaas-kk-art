@@ -582,7 +582,7 @@ public:
   	GCHistogramDataManager* _managerIter = parentManager_;
   	while(_managerIter != NULL) {
   		GCPPairHistogramRecords* pRec =
-  				(GCPPairHistogramRecords*)parentManager_->histData_
+  				(GCPPairHistogramRecords*)parentManager_->histData_;
   		if(!pRec->gcpDecAtomicRecData())
   			break;
   		_managerIter = _managerIter->parentManager_;
