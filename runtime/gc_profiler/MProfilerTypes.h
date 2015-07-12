@@ -453,6 +453,13 @@ public:
   	dataRec->gcpIncRecData();
   }
 
+  virtual void gcpNoAggAddSingleDataToPairHist(size_t space,
+  		GCPHistRecData* dataRec) {
+  	GCPPairHistogramRecords* _pairRec = (GCPPairHistogramRecords*) dataRec;
+  	_pairRec->gcpPairIncAtomicRecData(space);
+  	_pairRec->gcpPairIncRecData(space);
+  }
+
   virtual void gcpAggRemoveDataFromHist(GCPHistRecData* dataRec) {
   	dataRec->gcpDecRecData();
   	bool _remFlag = dataRec->gcpDecAtomicRecData();
@@ -821,7 +828,7 @@ public:
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
 	void removeObject(size_t, mirror::Object*);
 	void gcpRemoveObjectFromIndex(size_t, size_t, bool);
-	void gcpRemoveObjFromEntriesWIndex(size_t);
+	void gcpRemoveObjFromEntriesWIndex(size_t, size_t);
 
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
@@ -893,7 +900,8 @@ public:
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 
-
+	bool gcpDumpManagedData(art::File*, bool);
+	bool gcpDumpSummaryManagedData(art::File*);
 	bool gcpDumpHistTable(art::File*, bool);
 	bool gcpDumpHistAtomicTable(art::File*);
 };

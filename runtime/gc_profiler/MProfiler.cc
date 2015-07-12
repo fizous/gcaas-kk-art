@@ -1756,7 +1756,7 @@ void MProfiler::ProcessSignalCatcher(int signalVal) {
 
 void VMProfiler::MProfileSignalCatcher(int signalVal) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->ProcessSignalCatcher(signalVal);
+		Runtime::Current()->GetVMProfiler()->ProcessSignalCatcher(signalVal);
 	}
 }
 
@@ -1935,7 +1935,7 @@ void VMProfiler::PreForkPreparation() {
  * Return true only when the MProfiler is Running
  */
 inline bool VMProfiler::IsMProfRunning() {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingRunning();
 	return false;
@@ -1945,7 +1945,7 @@ inline bool VMProfiler::IsMProfRunning() {
  * Return true only when the MProfiler is Running for HW events
  */
 inline bool VMProfiler::IsMProfHWRunning() {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingHWEvent();
 	return false;
@@ -1956,7 +1956,7 @@ inline bool VMProfiler::IsMProfHWRunning() {
  */
 void VMProfiler::MProfAttachThread(art::Thread* th) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->attachSingleThread(th);
+		Runtime::Current()->GetVMProfiler()->attachSingleThread(th);
 	}
 }
 
@@ -1972,14 +1972,14 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 
 void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyFreeing(allocSpace, obj);
+		Runtime::Current()->GetVMProfiler()->notifyFreeing(allocSpace, obj);
 	}
 }
 
 
 void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->gcpProfObjKlass(klass, obj);
+		Runtime::Current()->GetVMProfiler()->gcpProfObjKlass(klass, obj);
 	}
 }
 
@@ -1987,7 +1987,7 @@ void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
 		size_t objSize, mirror::Object* obj) {
 	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
+		Runtime::Current()->GetVMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
 	}
 }
 
@@ -2039,7 +2039,7 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 void VMProfiler::MProfDetachThread(art::Thread* th) {
 	if(VMProfiler::IsMProfRunning()) {
 		GCMMP_VLOG(INFO) << "VMProfiler: Detaching thid: " << th->GetTid();
-		if(Runtime::Current()->GetMProfiler()->dettachThread(th->GetProfRec())) {
+		if(Runtime::Current()->GetVMProfiler()->dettachThread(th->GetProfRec())) {
 			th->SetProfRec(NULL);
 			GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << th->GetTid();
 		}
@@ -2059,54 +2059,54 @@ inline void VMProfiler::MarkEndWaitTimeEvent(GCMMPThreadProf* profRec,
 
 void VMProfiler::MProfMarkStartConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
-		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
+		Runtime::Current()->GetVMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
+		Runtime::Current()->GetVMProfiler()->addEventMarker(GCMMP_GC_DAEMON);
 	}
 }
 
 void VMProfiler::MProfMarkEndConcGCHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
+		Runtime::Current()->GetVMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
 	}
 }
 
 
 void VMProfiler::MProfMarkStartTrimHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
-		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_TRIM);
+		Runtime::Current()->GetVMProfiler()->addHWStartEvent(GCMMP_GC_BRK_NONE);
+		Runtime::Current()->GetVMProfiler()->addEventMarker(GCMMP_GC_TRIM);
 	}
 }
 
 void VMProfiler::MProfMarkEndTrimHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
+		Runtime::Current()->GetVMProfiler()->addHWEndEvent(GCMMP_GC_BRK_NONE);
 	}
 }
 
 
 void VMProfiler::MProfMarkStartAllocGCHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_MALLOC);
-		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
+		Runtime::Current()->GetVMProfiler()->addEventMarker(GCMMP_GC_MALLOC);
+		Runtime::Current()->GetVMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 void VMProfiler::MProfMarkEndAllocGCHWEvent(void){
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
+		Runtime::Current()->GetVMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_HAT);
 	}
 }
 
 void VMProfiler::MProfMarkStartExplGCHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addEventMarker(GCMMP_GC_EXPLICIT);
-		Runtime::Current()->GetMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
+		Runtime::Current()->GetVMProfiler()->addEventMarker(GCMMP_GC_EXPLICIT);
+		Runtime::Current()->GetVMProfiler()->addHWStartEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
 void VMProfiler::MProfMarkEndExplGCHWEvent(void) {
 	if(VMProfiler::IsMProfHWRunning()) {
-		Runtime::Current()->GetMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
+		Runtime::Current()->GetVMProfiler()->addHWEndEvent(GCMMP_GC_BRK_GC_EXPL);
 	}
 }
 
@@ -2118,7 +2118,7 @@ void VMProfiler::MProfMarkWaitTimeEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
+			Runtime::Current()->GetVMProfiler()->MarkWaitTimeEvent(thProf, GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
 /*
@@ -2128,7 +2128,7 @@ void VMProfiler::MProfMarkEndWaitTimeEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_WAIT_CONC);
 	}
 }
@@ -2137,7 +2137,7 @@ void VMProfiler::MProfMarkGCHatTimeEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_HAT);
 	}
 }
@@ -2146,7 +2146,7 @@ void VMProfiler::MProfMarkEndGCHatTimeEvent(art::Thread* th){
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_HAT);
 	}
 }
@@ -2156,7 +2156,7 @@ void VMProfiler::MProfMarkGCExplTimeEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_EXPL);
 	}
 }
@@ -2165,7 +2165,7 @@ void VMProfiler::MProfMarkEndGCExplTimeEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_GC_EXPL);
 	}
 }
@@ -2174,7 +2174,7 @@ void VMProfiler::MProfMarkStartSafePointEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_SAFEPOINT);
 	}
 }
@@ -2183,7 +2183,7 @@ void VMProfiler::MProfMarkEndSafePointEvent(art::Thread* th) {
 	if(VMProfiler::IsMProfilingTimeEvent()) {
 		GCMMPThreadProf* thProf = th->GetProfRec();
 		if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING)
-			Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
+			Runtime::Current()->GetVMProfiler()->MarkEndWaitTimeEvent(thProf,
 					GCMMP_GC_BRK_SAFEPOINT);
 	}
 }
@@ -2193,7 +2193,7 @@ void VMProfiler::MProfMarkSuspendTimeEvent(art::Thread* th, art::ThreadState thS
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-				Runtime::Current()->GetMProfiler()->MarkWaitTimeEvent(thProf,
+				Runtime::Current()->GetVMProfiler()->MarkWaitTimeEvent(thProf,
 						GCMMP_GC_BRK_SUSPENSION);
 				return;
 			}
@@ -2207,7 +2207,7 @@ void VMProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState 
 		if(thState == kSuspended) {
 			GCMMPThreadProf* thProf = th->GetProfRec();
 			if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) {
-				Runtime::Current()->GetMProfiler()->MarkEndWaitTimeEvent(thProf,
+				Runtime::Current()->GetVMProfiler()->MarkEndWaitTimeEvent(thProf,
 						GCMMP_GC_BRK_SUSPENSION);
 			}
 		}
@@ -2219,7 +2219,7 @@ void VMProfiler::MProfMarkEndSuspendTimeEvent(art::Thread* th, art::ThreadState 
  * Return true only when the MProfiler is Running
  */
 inline bool VMProfiler::IsMProfilingTimeEvent() {
-	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled())
 		return mP->IsProfilingTimeEvent();
 	return false;
@@ -3292,11 +3292,12 @@ void GCHistogramObjSizesManager::removeObject(size_t allocSpace,
 
 }
 
-void GCHistogramObjSizesManager::gcpRemoveObjFromEntriesWIndex(size_t histIndex) {
+void GCHistogramObjSizesManager::gcpRemoveObjFromEntriesWIndex(size_t histIndex,
+		size_t objSpace) {
 //	LOG(ERROR) << "passing+++histIndex << " <<histIndex;
-	GCPHistRecData* _recData = &sizeHistograms[histIndex];
-	_recData->gcpDecRecData();
-	_recData->gcpDecAtomicRecData();
+	GCPPairHistogramRecords* _recData = &sizeHistograms_[histIndex];
+	_recData->gcpPairDecRecData(objSpace);
+	_recData->gcpPairDecAtomicRecData(space);
 }
 
 
@@ -3602,7 +3603,7 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 //	extraHeader->objSize = objSize;
 //	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	objSizesHistMgr_->gcpNoAggAddSingleDataToHist(&objSizesHistMgr_->sizeHistograms[histIndex]);
+	objSizesHistMgr_->gcpNoAggAddSingleDataToPairHist(objSize, &objSizesHistMgr_->sizeHistograms_[histIndex]);
 }
 
 inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
@@ -3616,100 +3617,118 @@ inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
 }
 
 void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
-	GCPExtraObjHeader* extraHeader =
+	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
 
-	if(extraHeader->objSize == 0)
+	if(_extraHeader->objSize == 0)
 		return;
-	GCHistogramDataManager* _histManager = extraHeader->histRecP;
+	GCHistogramDataManager* _histManager = _extraHeader->histRecP;
 
 	if(_histManager == NULL)
 		return;
 
-	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex, true);
+	size_t histIndex = (32 - CLZ(_extraHeader->objSize)) - 1;
+	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex,
+			_extraHeader->objSize,	true);
 	objSizesHistMgr_->gcpRemoveObjFromEntriesWIndex(histIndex);
 }
 
 inline void GCPThreadAllocManager::calculatePercentiles(void) {
-	GCPHistogramRec* _globalRec = histData_->gcpGetDataRecP();
+	GCPPairHistogramRecords* _globalRec = (GCPPairHistogramRecords*)histData_;
 	for (const auto& threadProf :
-			Runtime::Current()->GetMProfiler()->threadProfList_) {
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
-		_histMgr->histData_->gcpUpdateRecPercentile(_globalRec);
+		GCPPairHistogramRecords* _recP =
+				(GCPPairHistogramRecords*) _histMgr->histData_;
+		_recP->gcpPairUpdatePercentiles(_globalRec);
 	}
 }
 
 inline void GCPThreadAllocManager::calculateAtomicPercentiles(void) {
-	GCPHistogramRecAtomic* _globalRec = histData_->gcpGetAtomicDataRecP();
-	int32_t _cntLive = _globalRec->cntLive.load();
-	int32_t _cntTotal = _globalRec->cntTotal.load();
-	bool _safeFlag = true;
-	if(_cntLive == 0 || _cntTotal == 0) {
-		_safeFlag = false;
-	}
+	GCPPairHistogramRecords* _globalRec = (GCPPairHistogramRecords*)histData_;
 	for (const auto& threadProf :
-			Runtime::Current()->GetMProfiler()->threadProfList_) {
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
-		if(_safeFlag)
-			_histMgr->histData_->gcpSafeUpdateAtomicRecPercentile(_globalRec);
-		else
-			_histMgr->histData_->gcpUpdateAtomicRecPercentile(_globalRec);
+		GCPPairHistogramRecords* _recP =
+				(GCPPairHistogramRecords*) _histMgr->histData_;
+		_recP->gcpPairUpdateAtomicPercentiles(_globalRec);
 	}
+
+//	GCPHistogramRecAtomic* _globalRec = histData_->gcpGetAtomicDataRecP();
+//	int32_t _cntLive = _globalRec->cntLive.load();
+//	int32_t _cntTotal = _globalRec->cntTotal.load();
+//	bool _safeFlag = true;
+//	if(_cntLive == 0 || _cntTotal == 0) {
+//		_safeFlag = false;
+//	}
+//	for (const auto& threadProf :
+//			Runtime::Current()->GetVMProfiler()->threadProfList_) {
+//		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
+//		if(_histMgr == NULL)
+//			continue;
+//		if(_safeFlag)
+//			_histMgr->histData_->gcpSafeUpdateAtomicRecPercentile(_globalRec);
+//		else
+//			_histMgr->histData_->gcpUpdateAtomicRecPercentile(_globalRec);
+//	}
 }
 
 bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 		bool dumpGlobalRec) {
-	bool _success = false;
+	bool _dataWritten = false;
 	if(dumpGlobalRec) {
-		histData_->gcpDumpHistRec(dump_file);
+		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+		_dataWritten = _record->countData_.gcpDumpHistRec(dump_file);
 	} else {
 		LOG(ERROR) << "We used to call GCPThreadAllocManager::gcpDumpHistTable";
 	}
 	for (const auto& threadProf :
-			Runtime::Current()->GetMProfiler()->threadProfList_) {
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
 		if(_histMgr == NULL)
 			continue;
-		_success = _histMgr->histData_->gcpDumpHistRec(dump_file);
-		if(!_success)
+		GCPPairHistogramRecords* _record =
+				(GCPPairHistogramRecords*)_histMgr->histData_;
+		_dataWritten = _record->countData_.gcpDumpHistRec(dump_file);
+		if(!_dataWritten)
 			break;
 	}
-	if(_success)
-		_success &=
+	if(_dataWritten)
+		_dataWritten &=
 			 VMProfiler::GCPDumpEndMarker(dump_file);
-	 return _success;
+	 return _dataWritten;
 }
 
 
 
 
 bool GCPThreadAllocManager::gcpDumpHistAtomicTable(art::File* dump_file) {
-//	GCPHistogramRec dummyRec;
-		bool _success = false;
-		for (const auto& threadProf :
-				Runtime::Current()->GetMProfiler()->threadProfList_) {
-			GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
-			if(_histMgr == NULL)
-				continue;
-			_success = _histMgr->histData_->gcpDumpAtomicHistRec(dump_file);
-			if(!_success)
-				break;
-		}
-		if(_success)
-			_success &=
-				 VMProfiler::GCPDumpEndMarker(dump_file);
-		 return _success;
+	bool _success = false;
+	for (const auto& threadProf :
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
+		if(_histMgr == NULL)
+			continue;
+		GCPPairHistogramRecords* _record =
+				(GCPPairHistogramRecords*)_histMgr->histData_;
+		_success = _record->countData_.gcpDumpAtomicHistRec(dump_file);
+		if(!_success)
+			break;
+	}
+	if(_success)
+		_success &=
+				VMProfiler::GCPDumpEndMarker(dump_file);
+	return _success;
 }
 
 
 void GCPThreadAllocManager::gcpZeorfyAllAtomicRecords() {
 	for (const auto& threadProf :
-			Runtime::Current()->GetMProfiler()->threadProfList_) {
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		if(threadProf->histogramManager_ != NULL) {
 			threadProf->histogramManager_->gcpZeorfyAllAtomicRecords();
 		}
@@ -3724,6 +3743,19 @@ void GCPThreadAllocManager::gcpFinalizeProfileCycle(){
 		gcpZeorfyAllAtomicRecords();
 		GCPSetLastManagedCohort(_newCohortIndex);
 	}
+}
+
+bool GCPThreadAllocManager::gcpDumpManagedData(art::File* dumpFile,
+		bool dumpGlobalRec) {
+	bool _success = gcpDumpHistTable(dumpFile, dumpGlobalRec);
+	_success &= gcpDumpHistAtomicTable(dumpFile);
+//	_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
+//	_success &= dumpClassAtomicSizeHistograms(dumpFile);
+	return _success;
+}
+
+bool GCPThreadAllocManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
+	return gcpDumpHistTable(dumpFile, false);
 }
 
 /********************************* Thread Alloc Profiler ****************/
@@ -4708,7 +4740,7 @@ void ClassProfiler::gcpLogPerfData() {
 
 void dvmGCMMProfPerfCounters(const char* vmName){
 	art::mprofiler::VMProfiler* mProfiler =
-			art::Runtime::Current()->GetMProfiler();
+			art::Runtime::Current()->GetVMProfiler();
 	if(mProfiler != NULL) {
 		mProfiler->GCMMProfPerfCounters(vmName);
 	}

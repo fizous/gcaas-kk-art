@@ -290,7 +290,7 @@ class Runtime {
     return heap_;
   }
 
-  mprofiler::VMProfiler* GetMProfiler() const {
+  mprofiler::VMProfiler* GetVMProfiler() const {
     return mprofiler_;
   }
 
