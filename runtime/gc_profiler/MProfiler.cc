@@ -3646,7 +3646,8 @@ void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj)
 }
 
 inline void GCPThreadAllocManager::calculatePercentiles(void) {
-	GCPPairHistogramRecords* _globalRec = (GCPPairHistogramRecords*)histData_;
+	GCPPairHistogramRecords* _globalRec =
+			(GCPPairHistogramRecords*)objSizesHistMgr_->histData_;
 	for (const auto& threadProf :
 			Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
@@ -3693,7 +3694,8 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 		bool dumpGlobalRec) {
 	bool _dataWritten = false;
 	if(dumpGlobalRec) {
-		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+		GCPPairHistogramRecords* _record =
+				(GCPPairHistogramRecords*) objSizesHistMgr_->histData_;
 		_dataWritten = _record->countData_.gcpDumpHistRec(dump_file);
 	} else {
 		LOG(ERROR) << "We used to call GCPThreadAllocManager::gcpDumpHistTable";
@@ -3720,7 +3722,8 @@ bool GCPThreadAllocManager::gcpDumpHistSpaceTable(art::File* dump_file,
 		bool dumpGlobalRec) {
 	bool _dataWritten = false;
 	if(dumpGlobalRec) {
-		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*)
+				objSizesHistMgr_->histData_;
 		_dataWritten = _record->sizeData_.gcpDumpHistRec(dump_file);
 	} else {
 		LOG(ERROR) << "We used to call GCPThreadAllocManager::gcpDumpHistTable";
@@ -3829,6 +3832,8 @@ bool GCPThreadAllocManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalRec) {
 	bool _success = gcpDumpHistTable(dumpFile, dumpGlobalRec);
 	_success &= gcpDumpHistAtomicTable(dumpFile);
+	_success = gcpDumpHistSpaceTable(dumpFile, dumpGlobalRec);
+	_success &= gcpDumpHistAtomicSpaceTable(dumpFile);
 //	_success &= dumpClassSizeHistograms(dumpFile, dumpGlobalRec);
 //	_success &= dumpClassAtomicSizeHistograms(dumpFile);
 	return _success;
