@@ -430,6 +430,7 @@ public:
   virtual void removeObject(size_t,
   	mirror::Object*){}
 
+  virtual void logManagedData(void) {}
   virtual bool gcpDumpHistRec(art::File*);
 
   virtual bool gcpDumpManagedData(art::File*, bool) {return true;}
@@ -855,7 +856,7 @@ public:
   bool gcpDumpHistAtomicTable(art::File*);
   bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
-
+	void logManagedData(void);
 	bool gcpDumpManagedData(art::File*, bool);
 
   bool gcpDumpSummaryManagedData(art::File*);
@@ -907,6 +908,8 @@ public:
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool gcpDumpHistTable(art::File*, bool);
 	bool gcpDumpHistAtomicTable(art::File*);
+
+	void logManagedData(void);
 };
 
 class PACKED(4) GCPauseThreadManager {

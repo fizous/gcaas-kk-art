@@ -2477,6 +2477,9 @@ inline void ObjectSizesProfiler::notifyFreeing(size_t allocatedSpace, mirror::Ob
 //	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 //}
 
+
+
+
 void ObjectSizesProfiler::gcpLogPerfData() {
 
 	int32_t currBytes_ = GCPTotalAllocBytes.load();
@@ -2487,14 +2490,8 @@ void ObjectSizesProfiler::gcpLogPerfData() {
 			heap_->GetMaxAllowedFootPrint();
 
 	GCHistogramObjSizesManager* _histManager = getObjHistograms();
-	GCPHistogramRec* _dataRec = NULL;
-	for(int i = 0; i < GCHistogramDataManager::kGCMMPMaxHistogramEntries; i++){
-		_dataRec = _histManager->sizeHistograms[i].gcpGetDataRecP();
-		LOG(ERROR) << "index: " << _dataRec->index << " :: cntLive=" <<
-				_dataRec->cntLive << "; cntTotal="<<
-				_dataRec->cntTotal<<"; pcntLive=" << _dataRec->pcntLive <<
-				"; pcntTotal="<< _dataRec->pcntTotal;
-	}
+	if(_histManager != NULL)
+		_histManager->logManagedData();
 }
 
 bool ObjectSizesProfiler::waitForProfileSignal(void) {
@@ -3435,6 +3432,18 @@ inline void GCHistogramObjSizesManager::calculateAtomicPercentiles(void) {
 
 }
 
+void GCHistogramObjSizesManager::logManagedData(void) {
+	GCPPairHistogramRecords* _globalRec =
+			(GCPPairHistogramRecords*) histData_;
+	GCPPairHistogramRecords* _dataRec = NULL;
+	LOG(ERROR) << "Dumping global Record:";
+	gcpLogDataRecord(LOG(ERROR), &_globalRec->countData_.dataRec_);
+	LOG(ERROR) << "Dumping Entries Record:";
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+		_dataRec = &sizeHistograms_[i];
+		gcpLogDataRecord(LOG(ERROR), &_globalRec->countData_.dataRec_);
+	}
+}
 
 bool GCHistogramObjSizesManager::gcpDumpSummaryManagedData(art::File* dump_file) {
 	return gcpDumpHistTable(dump_file, false);
@@ -3704,6 +3713,29 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 	 return _dataWritten;
 }
 
+void GCPThreadAllocManager::logManagedData(void) {
+	LOG(ERROR) << "<<Dumping Global Record>>>";
+	GCPPairHistogramRecords* _record =
+						(GCPPairHistogramRecords*) histData_;
+	gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+
+	LOG(ERROR) << "<<Dumping Thread Records>>";
+	int _indexIter = 0;
+	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramDataManager* _histMgr =
+				threadProf->histogramManager_;
+		if(_histMgr != NULL) {
+			LOG(ERROR) << "-- thread index: " << _indexIter++;
+			GCHistogramObjSizesManager* _thrDataManager =
+					(GCHistogramObjSizesManager*)_histMgr;
+			if(_thrDataManager == NULL)
+				continue;
+			GCPPairHistogramRecords* _record =
+					(GCPPairHistogramRecords*) _thrDataManager->histData_;
+			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+		}
+	}
+}
 
 
 
@@ -3833,6 +3865,7 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 //gcpAggregateHistograms(GCPHistogramRec* hisTable,
 //		GCPHistogramRec* globalRec)
 
+
 void ThreadAllocProfiler::gcpLogPerfData() {
 
 	int32_t currBytes_ = GCPTotalAllocBytes.load();
@@ -3843,23 +3876,11 @@ void ThreadAllocProfiler::gcpLogPerfData() {
 			heap_->GetMaxAllowedFootPrint();
 
 	GCPThreadAllocManager* _dataMgr = getThreadHistManager();
-	LOG(ERROR) << "<<Dumping Global Record>>>";
+
 	if(_dataMgr != NULL) {
-		//dump _globalData
-		_dataMgr->gcpLogDataRecord(LOG(ERROR));
+		_dataMgr->logManagedData();
 	}
 
-	LOG(ERROR) << "<<Dumping Thread Records>>";
-	int _indexIter = 0;
-	for (const auto& threadProf : threadProfList_) {
-		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
-		if(_histMgr != NULL) {
-			LOG(ERROR) << "-- thread index: " << _indexIter++;
-			GCHistogramObjSizesManager* _thrDataManager =
-					(GCHistogramObjSizesManager*)_histMgr;
-			_thrDataManager->gcpLogDataRecord(LOG(ERROR));
-		}
-	}
 }
 
 
