@@ -682,12 +682,12 @@ public:
 
 
 class GCCohortManager : public GCHistogramDataManager {
-	size_t cohRowSZ_;
-	size_t cohArrSZ_;
-
-	size_t getCoRowSZ(void) {
-		return cohRowSZ_ + sizeof(int);
-	}
+//	size_t cohRowSZ_;
+//	size_t cohArrSZ_;
+//
+//	size_t getCoRowSZ(void) {
+//		return cohRowSZ_ + sizeof(int);
+//	}
 
 	size_t calcObjBD(size_t objSize) {
 		return allocRec_->load() - objSize;
