@@ -909,7 +909,8 @@ public:
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool gcpDumpHistTable(art::File*, bool);
 	bool gcpDumpHistAtomicTable(art::File*);
-
+	bool gcpDumpHistAtomicSpaceTable(art::File*);
+	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
 };
 

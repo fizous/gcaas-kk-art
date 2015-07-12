@@ -3715,6 +3715,33 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 	 return _dataWritten;
 }
 
+
+bool GCPThreadAllocManager::gcpDumpHistSpaceTable(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _dataWritten = false;
+	if(dumpGlobalRec) {
+		GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+		_dataWritten = _record->sizeData_.gcpDumpHistRec(dump_file);
+	} else {
+		LOG(ERROR) << "We used to call GCPThreadAllocManager::gcpDumpHistTable";
+	}
+	for (const auto& threadProf :
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
+		if(_histMgr == NULL)
+			continue;
+		GCPPairHistogramRecords* _record =
+				(GCPPairHistogramRecords*)_histMgr->histData_;
+		_dataWritten = _record->sizeData_.gcpDumpHistRec(dump_file);
+		if(!_dataWritten)
+			break;
+	}
+	if(_dataWritten)
+		_dataWritten &=
+			 VMProfiler::GCPDumpEndMarker(dump_file);
+	 return _dataWritten;
+}
+
 void GCPThreadAllocManager::logManagedData(void) {
 	LOG(ERROR) << "<<Dumping Global Record>>>";
 	GCPPairHistogramRecords* _record =
@@ -3740,6 +3767,24 @@ void GCPThreadAllocManager::logManagedData(void) {
 }
 
 
+bool GCPThreadAllocManager::gcpDumpHistAtomicSpaceTable(art::File* dump_file) {
+	bool _success = false;
+	for (const auto& threadProf :
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramDataManager* _histMgr = threadProf->histogramManager_;
+		if(_histMgr == NULL)
+			continue;
+		GCPPairHistogramRecords* _record =
+				(GCPPairHistogramRecords*)_histMgr->histData_;
+		_success = _record->sizeData_.gcpDumpAtomicHistRec(dump_file);
+		if(!_success)
+			break;
+	}
+	if(_success)
+		_success &=
+				VMProfiler::GCPDumpEndMarker(dump_file);
+	return _success;
+}
 
 bool GCPThreadAllocManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 	bool _success = false;
