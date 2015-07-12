@@ -443,7 +443,11 @@ public:
   	histData_->dataRec_.index = ind;
   }
 
-
+  virtual void gcpSetPairRecordIndices(uint64_t ind) {
+  	GCPPairHistogramRecords* _rec =
+  			(GCPPairHistogramRecords*) histData_;
+  	_rec->gcpPairSetRecordIndices(ind);
+  }
 
   virtual void gcpNoAggAddDataToHist(GCPHistRecData* dataRec) {
   	dataRec->gcpIncAtomicRecData();
@@ -802,8 +806,8 @@ public:
 
 
 class GCHistogramObjSizesManager : public GCHistogramDataManager {
-	size_t totalHistogramSize;
-	size_t lastWindowHistSize;
+//	size_t totalHistogramSize;
+//	size_t lastWindowHistSize;
 public:
 	GCPPairHistogramRecords sizeHistograms_[kGCMMPMaxHistogramEntries];
 	GCHistogramObjSizesManager(void);
@@ -884,7 +888,7 @@ public:
 //  }
 };//GCHistogramObjSizesManager
 
-typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
+//typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
 public:

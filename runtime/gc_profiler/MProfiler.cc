@@ -2280,9 +2280,9 @@ ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry)
 
 
 
-void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
-	thProf->histogramManager_ = NULL;
-}
+//void ObjectSizesProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
+//	thProf->histogramManager_ = NULL;
+//}
 
 MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "ObjectSizesProfiler: creating hwCount";
@@ -3163,8 +3163,8 @@ void GCClassTableManager::printClassNames(void) {
 
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramObjSizesManager::initHistograms(void) {
-	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
-	lastWindowHistSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecAtomic);
+//	totalHistogramSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRec);
+//	lastWindowHistSize = kGCMMPMaxHistogramEntries * sizeof(GCPHistogramRecAtomic);
 
 	/* initialize the global record */
 	histData_ = new GCPPairHistogramRecords(0);
@@ -3603,7 +3603,7 @@ void GCPThreadAllocManager::initHistograms() {
 void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
 			objSizesHistMgr_);
-	thProf->histogramManager_->gcpSetRecordIndices(
+	thProf->histogramManager_->gcpSetPairRecordIndices(
 			thProf->GetTid() & 0x00000000FFFFFFFF);
 }
 

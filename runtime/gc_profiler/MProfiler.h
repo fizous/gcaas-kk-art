@@ -549,7 +549,7 @@ public:
   virtual void gcpLogPerfData(void);
 
 
-  void setHistogramManager(GCMMPThreadProf*);
+//  void setHistogramManager(GCMMPThreadProf*);
 
 	MPPerfCounter* createHWCounter(Thread*);
 
