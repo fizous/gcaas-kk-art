@@ -3541,7 +3541,8 @@ void GCPThreadAllocManager::initHistograms() {
 void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 	thProf->histogramManager_ = new GCHistogramObjSizesManager(true,
 			objSizesHistMgr_);
-	thProf->histogramManager_->gcpSetRecordIndices(thProf->GetTid());
+	thProf->histogramManager_->gcpSetRecordIndices(
+			thProf->GetTid() & 0x00000000FFFFFFFF);
 }
 
 inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,

@@ -397,7 +397,7 @@ public:
 
 	void initManager(GCHistogramDataManager*, bool);
 
-	virtual ~GCHistogramDataManager(){}
+	virtual ~GCHistogramDataManager() {}
 
 	static size_t AddMProfilingExtraBytes(size_t);
 	static size_t removeMProfilingExtraBytes(size_t);
@@ -429,10 +429,10 @@ public:
 
   virtual bool gcpDumpHistRec(art::File*);
 
-  virtual bool gcpDumpManagedData(art::File*, bool){return true;}
-  virtual bool gcpDumpSummaryManagedData(art::File*){return true;}
+  virtual bool gcpDumpManagedData(art::File*, bool) {return true;}
+  virtual bool gcpDumpSummaryManagedData(art::File*) {return true;}
 
-  virtual void gcpZeorfyAllAtomicRecords(void){}
+  virtual void gcpZeorfyAllAtomicRecords(void) {}
 
   virtual void gcpSetRecordIndices(uint64_t ind) {
   	histData_->atomicDataRec_.index = ind;
@@ -554,7 +554,7 @@ public:
   }
 
   void gcpZerofyHistogramAtomicRecData(GCPHistogramRecAtomic* rec) {
-  	double _index = rec->index;
+  	uint64_t _index = rec->index;
   	memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
   	rec->index = _index;
   }
