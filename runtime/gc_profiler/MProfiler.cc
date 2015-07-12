@@ -2637,9 +2637,7 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
 
 	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	gcpUpdateGlobalHistogram();
-  dumpHeapStats();
   bool _success = true;
-  _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
   if(isLastDump) {
  	  _success &= GCPDumpEndMarker(dump_file_);
  	  //dump the summary one more time
@@ -2651,8 +2649,10 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump){
  	  gcpLogPerfData();
  	 LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
+    dumpHeapStats();
+    _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
   //	gcpLogPerfData();
-  	 gcpFinalizeHistUpdates();
+  	gcpFinalizeHistUpdates();
   }
 }
 /*
