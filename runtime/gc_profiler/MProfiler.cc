@@ -3563,7 +3563,7 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicTable(art::File* dump_file) {
 //	GCPHistogramRec dummyRec;
 	bool _success = false;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
-		_success = sizeHistograms[i].gcpDumpAtomicHistRec(dump_file);
+		_success = sizeHistograms_[i].countData_.gcpDumpAtomicHistRec(dump_file);
 		if(!_success)
 			break;
 //		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);

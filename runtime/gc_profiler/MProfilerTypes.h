@@ -813,7 +813,7 @@ public:
 
 
 
-	GCPHistRecData sizeHistograms[GCP_MAX_HISTOGRAM_SIZE];
+	//GCPHistRecData sizeHistograms[GCP_MAX_HISTOGRAM_SIZE];
 
 
 
