@@ -3617,6 +3617,8 @@ bool GCPThreadAllocManager::gcpDumpHistTable(art::File* dump_file,
 	bool _success = false;
 	if(dumpGlobalRec) {
 		histData_->gcpDumpHistRec(dump_file);
+	} else {
+		LOG(ERROR) << "We used to call GCPThreadAllocManager::gcpDumpHistTable";
 	}
 	for (const auto& threadProf :
 			Runtime::Current()->GetMProfiler()->threadProfList_) {
