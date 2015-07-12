@@ -537,7 +537,7 @@ public:
 
 
   virtual bool gcpAggDecPairRecData(size_t space, GCPHistRecData* rec) {
-  	bool _remFlag = gcpPairDecRecData(space, rec);
+  	bool _remFlag = gcpDecPairRecData(space, rec);
   	if(_remFlag) {
     	GCHistogramDataManager* _managerIter = parentManager_;
     	while(_managerIter != NULL) {
