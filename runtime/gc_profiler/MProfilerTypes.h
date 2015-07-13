@@ -267,11 +267,6 @@ public:
 class GCPPairHistogramRecords : public GCPHistRecData {
 private:
 	mirror::Class* klzz_;
-	union {
-		GCHistogramDataManager* histRecP;
-		GCPHistRecData* dataRec;
-		size_t objBD;
-	};
 	std::string referenceName_;
 	char * referenceStringName_;
 public:
@@ -279,16 +274,19 @@ public:
 	GCPHistRecData sizeData_;
 
 	GCPPairHistogramRecords(void) : klzz_(NULL),
+		referenceStringName_(NULL),
 		countData_(0), sizeData_(0) {
 
 	}
 
 	GCPPairHistogramRecords(uint64_t id) : klzz_(NULL),
+		referenceStringName_(NULL),
 		countData_(id), sizeData_(id) {
 	}
 
 	GCPPairHistogramRecords(uint64_t id, mirror::Class* klass) :
 		klzz_(klass), referenceName_(PrettyClass(klass)),
+		referenceStringName_(NULL),
 		countData_(id), sizeData_(id) {
 	}
 
@@ -347,7 +345,8 @@ public:
 
 	mirror::Class* getClassP(){return klzz_;}
 	std::string& getRefrenecePrettyName(){return referenceName_;}
-	void setRefreneceNameFromThread(art::Thread*);
+	char* getReferenceStringName(void){return referenceStringName_;}
+	void setRefreneceNameFromThread(pid_t);
 };
 
 //typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;

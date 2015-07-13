@@ -2255,16 +2255,12 @@ inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
 }
 
-inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
-		Thread* thread) {
-	std::string _tempName;
-	thread->GetThreadName(_tempName);
+inline char* GCPPairHistogramRecords::setRefreneceNameFromThread(
+		pid_t pid) {
+	std::string _tempName (GetThreadName(pid));
 	referenceStringName_ = new char [_tempName.length()+1];
 	std::strcpy (referenceStringName_, _tempName.c_str());
-	LOG(ERROR) << "Copied into firld" << referenceStringName_;
-	LOG(ERROR) << "System NAme: " << GetThreadName(thread->GetTid());
-	//referenceName_ = std::string(cstr);
-	//LOG(ERROR) << "reference name is: " << referenceName_;
+	return referenceStringName_;
 }
 /********************************* Object demographics profiling ****************/
 
@@ -3796,7 +3792,11 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				continue;
 			GCPPairHistogramRecords* _record =
 					(GCPPairHistogramRecords*) _thrDataManager->histData_;
-			LOG(ERROR) << "name: " << _record->getRefrenecePrettyName();
+			char* threadNameP = _record->getReferenceStringName();
+			if(threadNameP == NULL) {
+				threadNameP = _record->setRefreneceNameFromThread(threadProf->GetTid());
+			}
+			LOG(ERROR) << "name: " << threadNameP;
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
@@ -3915,14 +3915,14 @@ void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
 	LOG(ERROR) << "setThHistogramManager: " << thread->GetTid();
 	setHistogramManager(thProf);
-	if(thProf->histogramManager_ == NULL)
-		return;
-  std::string name;
-  thread->GetThreadName(name);
-	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid() << ", " << name;
-	GCPPairHistogramRecords* _threadProfRec =
-			(GCPPairHistogramRecords*) thProf->histogramManager_;
-	_threadProfRec->setRefreneceNameFromThread(thread);
+//	if(thProf->histogramManager_ == NULL)
+//		return;
+//  std::string name;
+//  thread->GetThreadName(name);
+//	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid() << ", " << name;
+//	GCPPairHistogramRecords* _threadProfRec =
+//			(GCPPairHistogramRecords*) thProf->histogramManager_;
+//	_threadProfRec->setRefreneceNameFromThread(thread);
 }
 //bool ThreadAllocProfiler::periodicDaemonExec(void) {
 //	Thread* self = Thread::Current();
@@ -4096,8 +4096,13 @@ bool ThreadAllocProfiler::verifyThreadNotification() {
 bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		/*GCMMP_VLOG(INFO)*/ LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
-		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
 		thProf->state = GCMMP_TH_STOPPED;
+		GCPPairHistogramRecords* _threadProfRec =
+				(GCPPairHistogramRecords*) thProf->histogramManager_;
+		if(_threadProfRec == NULL)
+			return true;
+		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
+//		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
 	}
 	return true;
 }
