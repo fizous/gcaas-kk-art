@@ -2259,11 +2259,11 @@ inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 		Thread* thread) {
 	std::string _tempName;
 	thread->GetThreadName(_tempName);
-	char * cstr = new char [_tempName.length()+1];
-	std::strcpy (cstr, _tempName.c_str());
-	LOG(ERROR) << "Copied into tempName";
-	referenceName_ = std::string(cstr);
-	LOG(ERROR) << "reference name is: " << referenceName_;
+	referenceStringName_ = new char [_tempName.length()+1];
+	std::strcpy (referenceStringName_, _tempName.c_str());
+	LOG(ERROR) << "Copied into firld" << referenceStringName_;
+	//referenceName_ = std::string(cstr);
+	//LOG(ERROR) << "reference name is: " << referenceName_;
 }
 /********************************* Object demographics profiling ****************/
 
