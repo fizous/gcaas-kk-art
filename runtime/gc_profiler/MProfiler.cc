@@ -3756,28 +3756,30 @@ bool GCPThreadAllocManager::gcpDumpHistSpaceTable(art::File* dump_file,
 }
 
 void GCPThreadAllocManager::logManagedData(void) {
-	LOG(ERROR) << "<<Dumping Global Record>>>";
-	GCPPairHistogramRecords* _record =
-						(GCPPairHistogramRecords*) histData_;
-	gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+	if(false) {
+		LOG(ERROR) << "<<Dumping Global Record>>>";
+		GCPPairHistogramRecords* _record =
+							(GCPPairHistogramRecords*) histData_;
+		gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 
-	LOG(ERROR) << "<<Dumping Thread Records>>";
-	int _indexIter = 0;
-	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
-		GCHistogramDataManager* _histMgr =
-				threadProf->histogramManager_;
-		if(_histMgr != NULL) {
-			LOG(ERROR) << "-- thread index: " << _indexIter++;
-			GCHistogramObjSizesManager* _thrDataManager =
-					(GCHistogramObjSizesManager*)_histMgr;
-			if(_thrDataManager == NULL)
-				continue;
-			GCPPairHistogramRecords* _record =
-					(GCPPairHistogramRecords*) _thrDataManager->histData_;
-			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+		LOG(ERROR) << "<<Dumping Thread Records>>";
+		int _indexIter = 0;
+		for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
+			GCHistogramDataManager* _histMgr =
+					threadProf->histogramManager_;
+			if(_histMgr != NULL) {
+				LOG(ERROR) << "-- thread index: " << _indexIter++;
+				GCHistogramObjSizesManager* _thrDataManager =
+						(GCHistogramObjSizesManager*)_histMgr;
+				if(_thrDataManager == NULL)
+					continue;
+				GCPPairHistogramRecords* _record =
+						(GCPPairHistogramRecords*) _thrDataManager->histData_;
+				gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
+			}
 		}
+		LOG(ERROR) << "<<gcpDumpCSVData>>";
 	}
-	LOG(ERROR) << "<<gcpDumpCSVData>>";
 	gcpDumpCSVData();
 }
 

@@ -687,6 +687,8 @@ public:
 				"; liveObj: " << _dataRec->objLiveCnt <<
 				"; totalObj: " << _dataRec->objTotalCnt;
 	}
+
+	virtual bool gcpDumpCSVData(void) {return true;}
 };//GCHistogramDataManager
 
 
