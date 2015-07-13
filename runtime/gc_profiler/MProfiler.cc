@@ -3794,14 +3794,15 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				continue;
 			GCPPairHistogramRecords* _record =
 					(GCPPairHistogramRecords*) _thrDataManager->histData_;
-			char** threadNameP;
-			_record->getReferenceStringName(threadNameP);
-			if(*threadNameP == NULL) {
+			char* threadNameP = NULL;
+
+			_record->getReferenceStringName(&threadNameP);
+			if(threadNameP == NULL) {
 				_record->setRefreneceNameFromThread(threadProf->GetTid());
-				_record->getReferenceStringName(threadNameP);
+				_record->getReferenceStringName(&threadNameP);
 				LOG(ERROR) << "set in final stage";
 			}
-			LOG(ERROR) << "name: " << *threadNameP;
+			LOG(ERROR) << "name: " << threadNameP;
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
