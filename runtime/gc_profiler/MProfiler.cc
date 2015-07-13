@@ -3901,13 +3901,7 @@ void ThreadAllocProfiler::initHistDataManager(void) {
 	//GCPSetLastManagedCohort(GCPGetCalcCohortIndex());
 }
 
-bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
-	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
-		thProf->state = GCMMP_TH_STOPPED;
-	}
-	return true;
-}
+
 
 void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 	GCPThreadAllocManager* _manager = getThreadHistManager();
@@ -4101,12 +4095,20 @@ bool ThreadAllocProfiler::verifyThreadNotification() {
 
 bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
+		/*GCMMP_VLOG(INFO)*/ LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
 		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
 		thProf->state = GCMMP_TH_STOPPED;
 	}
 	return true;
 }
+
+//bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
+//	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+//		GCMMP_VLOG(INFO) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
+//		thProf->state = GCMMP_TH_STOPPED;
+//	}
+//	return true;
+//}
 
 //bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 //	GCHistogramObjSizesManager* _histMgr = NULL;
