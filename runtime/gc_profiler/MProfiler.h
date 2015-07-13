@@ -617,7 +617,7 @@ public:
   		size_t objSize, mirror::Object* obj);
 
   bool verifyThreadNotification(void);
-
+  bool dettachThread(GCMMPThreadProf*);
   void setThreadProfName(GCMMPThreadProf*, Thread*);
 };
 

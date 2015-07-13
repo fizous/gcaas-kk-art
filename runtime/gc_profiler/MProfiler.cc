@@ -4099,6 +4099,14 @@ bool ThreadAllocProfiler::verifyThreadNotification() {
 	return _shouldApply;
 }
 
+bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
+	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
+		GCMMP_VLOG(INFO) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
+		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
+		thProf->state = GCMMP_TH_STOPPED;
+	}
+	return true;
+}
 
 //bool ThreadAllocProfiler::dumpGlobalThreadsStats(void) {
 //	GCHistogramObjSizesManager* _histMgr = NULL;
