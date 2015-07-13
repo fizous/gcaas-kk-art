@@ -346,7 +346,7 @@ public:
 	mirror::Class* getClassP(){return klzz_;}
 	std::string& getRefrenecePrettyName(){return referenceName_;}
 	char* getReferenceStringName(void){return referenceStringName_;}
-	void setRefreneceNameFromThread(pid_t);
+	char* setRefreneceNameFromThread(pid_t);
 };
 
 //typedef std::multimap<size_t, mprofiler::GCPHistogramRec*> HistogramTable_S;
