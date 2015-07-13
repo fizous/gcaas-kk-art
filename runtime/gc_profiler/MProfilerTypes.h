@@ -345,7 +345,7 @@ public:
 
 	mirror::Class* getClassP(){return klzz_;}
 	std::string& getRefrenecePrettyName(){return referenceName_;}
-	char* getReferenceStringName(void){return referenceStringName_;}
+	char* getReferenceStringName(void) volatile {return referenceStringName_;}
 	char* setRefreneceNameFromThread(pid_t);
 };
 
