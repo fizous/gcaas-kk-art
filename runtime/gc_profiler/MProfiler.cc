@@ -2260,7 +2260,7 @@ inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 	std::string _tempName;
 	thread->GetThreadName(_tempName);
 	LOG(ERROR) << "Copied into tempName";
-	referenceName_ = _tempName;
+	referenceName_(_tempName);
 }
 /********************************* Object demographics profiling ****************/
 
