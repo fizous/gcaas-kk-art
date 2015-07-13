@@ -4104,7 +4104,7 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		/*GCMMP_VLOG(INFO)*/ LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
 		thProf->state = GCMMP_TH_STOPPED;
 		GCPPairHistogramRecords* _threadProfRec =
-				(GCPPairHistogramRecords*) thProf->histogramManager_;
+				(GCPPairHistogramRecords*) thProf->histogramManager_->histData_;
 		if(_threadProfRec == NULL) {
 			LOG(ERROR) << "Found record NULL: " << thProf->GetTid();
 			return true;
