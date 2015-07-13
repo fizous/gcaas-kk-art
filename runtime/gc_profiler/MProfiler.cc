@@ -3802,10 +3802,11 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				_record->getReferenceStringName(&threadNameP);
 				//LOG(ERROR) << "set in final stage";
 			}
-			LOG(ERROR) << "ThreadAllocIndex:" << threadProf->GetTid() <<
+			LOG(ERROR) << "ThreadAllocIndex:" <<
+					StringPrintf("%llu",threadProf->GetTid()) <<
 					"; ThreadAllocName:" << threadNameP <<
-					"; ThreadTotalObjCnt:" << _record->countData_.dataRec_.cntTotal <<
-					"; ThreadTotalSpace:" << _record->sizeData_.dataRec_.cntTotal;
+					"; ThreadTotalObjCnt:" << StringPrintf("%.0f",_record->countData_.dataRec_.cntTotal) <<
+					"; ThreadTotalSpace:" << StringPrintf("%.0f",_record->sizeData_.dataRec_.cntTotal);
 //			LOG(ERROR) << "ThreadAllocName: " << threadNameP;
 //			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
@@ -3923,7 +3924,7 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 
 void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
-	LOG(ERROR) << "setThHistogramManager: " << thread->GetTid() << ", " << GetThreadName(thread->GetTid());
+	//LOG(ERROR) << "setThHistogramManager: " << thread->GetTid() << ", " << GetThreadName(thread->GetTid());
 	setHistogramManager(thProf);
 //	if(thProf->histogramManager_ == NULL)
 //		return;
