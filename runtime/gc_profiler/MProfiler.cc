@@ -3913,7 +3913,7 @@ void ThreadAllocProfiler::setHistogramManager(GCMMPThreadProf* thProf) {
 
 void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
-	LOG(ERROR) << "setThHistogramManager: " << thread->GetTid();
+	LOG(ERROR) << "setThHistogramManager: " << thread->GetTid() << ", " << GetThreadName(thread->GetTid());
 	setHistogramManager(thProf);
 //	if(thProf->histogramManager_ == NULL)
 //		return;
@@ -4102,7 +4102,7 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		if(_threadProfRec == NULL)
 			return true;
 		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
-//		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
+		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
 	}
 	return true;
 }
