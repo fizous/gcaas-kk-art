@@ -3803,8 +3803,8 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				//LOG(ERROR) << "set in final stage";
 			}
 			LOG(ERROR) << "ThreadAllocIndex:" << threadProf->GetTid() <<
-					"; ThreadAllocName:" << threadNameP;
-					"; ThreadTotalObjCnt:" << _record->countData_.dataRec_.cntTotal;
+					"; ThreadAllocName:" << threadNameP <<
+					"; ThreadTotalObjCnt:" << _record->countData_.dataRec_.cntTotal <<
 					"; ThreadTotalSpace:" << _record->sizeData_.dataRec_.cntTotal;
 //			LOG(ERROR) << "ThreadAllocName: " << threadNameP;
 //			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
