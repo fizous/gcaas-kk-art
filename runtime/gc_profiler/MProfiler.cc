@@ -2260,9 +2260,9 @@ inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 	std::string _tempName (GetThreadName(pid));
 	referenceStringName_ = new char [_tempName.length()+1];
 	std::strcpy (referenceStringName_, _tempName.c_str());
-	LOG(ERROR) << "+++setting name for pid: "<< pid << ": " <<
-			referenceStringName_ <<
-			", sysName:" << GetThreadName(pid);
+//	LOG(ERROR) << "+++setting name for pid: "<< pid << ": " <<
+//			referenceStringName_ <<
+//			", sysName:" << GetThreadName(pid);
 }
 /********************************* Object demographics profiling ****************/
 
@@ -3800,7 +3800,7 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 			if(threadNameP == NULL) {
 				_record->setRefreneceNameFromThread(threadProf->GetTid());
 				_record->getReferenceStringName(&threadNameP);
-				LOG(ERROR) << "set in final stage";
+				//LOG(ERROR) << "set in final stage";
 			}
 			LOG(ERROR) << "name: " << threadNameP;
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
@@ -4101,7 +4101,7 @@ bool ThreadAllocProfiler::verifyThreadNotification() {
 
 bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		/*GCMMP_VLOG(INFO)*/ LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
+		/*GCMMP_VLOG(INFO)*/ //LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
 		thProf->state = GCMMP_TH_STOPPED;
 		GCPPairHistogramRecords* _threadProfRec =
 				(GCPPairHistogramRecords*) thProf->histogramManager_->histData_;
@@ -4109,7 +4109,10 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 			LOG(ERROR) << "Found record NULL: " << thProf->GetTid();
 			return true;
 		}
-		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
+		char* threadNameP = NULL;
+		_threadProfRec->getReferenceStringName(&threadNameP);
+		if(threadNameP == NULL)
+			_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
 
 	}
 	return true;
