@@ -2255,7 +2255,7 @@ inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
 }
 
-inline char* GCPPairHistogramRecords::setRefreneceNameFromThread(
+inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 		pid_t pid) {
 	std::string _tempName (GetThreadName(pid));
 	referenceStringName_ = new char [_tempName.length()+1];
@@ -2263,7 +2263,6 @@ inline char* GCPPairHistogramRecords::setRefreneceNameFromThread(
 	LOG(ERROR) << "+++setting name for pid: "<< pid << ": " <<
 			referenceStringName_ <<
 			", sysName:" << GetThreadName(pid);
-	return referenceStringName_;
 }
 /********************************* Object demographics profiling ****************/
 
@@ -3795,12 +3794,14 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				continue;
 			GCPPairHistogramRecords* _record =
 					(GCPPairHistogramRecords*) _thrDataManager->histData_;
-			char* threadNameP = _record->getReferenceStringName();
-			if(threadNameP == NULL) {
-				threadNameP = _record->setRefreneceNameFromThread(threadProf->GetTid());
+			char** threadNameP;
+			_record->getReferenceStringName(threadNameP);
+			if(*threadNameP == NULL) {
+				_record->setRefreneceNameFromThread(threadProf->GetTid());
+				_record->getReferenceStringName(threadNameP);
 				LOG(ERROR) << "set in final stage";
 			}
-			LOG(ERROR) << "name: " << threadNameP;
+			LOG(ERROR) << "name: " << *threadNameP;
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
