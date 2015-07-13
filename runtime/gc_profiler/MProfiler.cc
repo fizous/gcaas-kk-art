@@ -3788,10 +3788,6 @@ bool GCPThreadAllocManager::gcpDumpTotalSummaryCSVData(void) {
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal);
-	return true;
-}
-
-bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
 
 	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
 		GCPHistRecData* _countDataP =
@@ -3804,27 +3800,37 @@ bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
 				StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
 				"; HistogramEntryObjSize:"<<
 				StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
-		for (const auto& threadProf :
-				Runtime::Current()->GetVMProfiler()->threadProfList_) {
-			GCHistogramObjSizesManager* _thrDataManager =
-								(GCHistogramObjSizesManager*)threadProf->histogramManager_;
-			GCPPairHistogramRecords* _threadMainRecord =
-					(GCPPairHistogramRecords*) _thrDataManager->histData_;
-			_countDataP = &_thrDataManager->sizeHistograms_[i].countData_;
-			_sizeDataP = &_thrDataManager->sizeHistograms_[i].sizeData_;
-			LOG(ERROR) << "ThreadIndex:"<<
-					StringPrintf("%llu", _threadMainRecord->countData_.dataRec_.index) <<
-					"; objectsCnt:"<<
-					StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
-					"; ObjectsSize:"<<
-					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
-		}
 	}
 	return true;
 }
 
+bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
+	GCPHistRecData* _countDataP = NULL;
+	GCPHistRecData* _sizeDataP  = NULL;
+	for (const auto& threadProf :
+			Runtime::Current()->GetVMProfiler()->threadProfList_) {
+		GCHistogramObjSizesManager* _thrDataManager =
+							(GCHistogramObjSizesManager*)threadProf->histogramManager_;
+		GCPPairHistogramRecords* _threadMainRecord =
+				(GCPPairHistogramRecords*) _thrDataManager->histData_;
+		for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
+			_countDataP = &_thrDataManager->sizeHistograms_[i].countData_;
+			_sizeDataP = &_thrDataManager->sizeHistograms_[i].sizeData_;
+			LOG(ERROR) << "ThreadIndex:"<<
+					StringPrintf("%llu", _threadMainRecord->countData_.dataRec_.index) <<
+					"; histIndex:"  << StringPrintf("%llu", _countDataP->dataRec_.index) <<
+					"; objectsCnt:" <<
+					StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
+					"; ObjectsSize:"<<
+					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
+		}
+
+	}
+
+	return true;
+}
+
 bool GCPThreadAllocManager::gcpDumpCSVData(void) {
-	//int _indexIter = 0;
 	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr =
 				threadProf->histogramManager_;
@@ -3855,6 +3861,10 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 	}
 	gcpDumpTotalSummaryCSVData();
 	gcpDumpThreadHistogramCSVData();
+	//int _indexIter = 0;
+
+
+
 	return true;
 }
 bool GCPThreadAllocManager::gcpDumpHistAtomicSpaceTable(art::File* dump_file) {
