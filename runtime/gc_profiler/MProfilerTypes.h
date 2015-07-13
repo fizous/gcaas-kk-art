@@ -668,7 +668,8 @@ public:
 
 	void gcpLogDataRecord(std::ostream& os) {
 		GCPHistogramRec* _dataRec = &histData_->dataRec_;
-		os << "index: "<< StringPrintf("%llu",_dataRec->index) << ";cntLive: " << _dataRec->cntLive <<
+		os << "index: "<< StringPrintf("%llu",_dataRec->index) <<
+				";cntLive: " << _dataRec->cntLive <<
 				"; cntTotal: "<< _dataRec->cntTotal<< "; pcntLive: " <<
 				_dataRec->pcntLive << "; pcntTotal: " << _dataRec->pcntTotal;
 	}

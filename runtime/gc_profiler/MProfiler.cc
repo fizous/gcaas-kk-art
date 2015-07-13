@@ -3782,12 +3782,12 @@ void GCPThreadAllocManager::logManagedData(void) {
 }
 
 bool GCPThreadAllocManager::gcpDumpCSVData(void) {
-	int _indexIter = 0;
+	//int _indexIter = 0;
 	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr =
 				threadProf->histogramManager_;
 		if(_histMgr != NULL) {
-			LOG(ERROR) << "-- thread index: " << _indexIter++;
+			//LOG(ERROR) << "-- thread index: " << _indexIter++;
 			GCHistogramObjSizesManager* _thrDataManager =
 					(GCHistogramObjSizesManager*)_histMgr;
 			if(_thrDataManager == NULL)
