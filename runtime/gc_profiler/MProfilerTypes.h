@@ -942,6 +942,8 @@ public:
 	void logManagedData(void);
 
 	bool gcpDumpCSVData(void);
+	bool gcpDumpTotalSummaryCSVData(void);
+	bool gcpDumpThreadHistogramCSVData(void);
 };//GCPThreadAllocManager
 
 

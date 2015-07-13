@@ -3781,6 +3781,47 @@ void GCPThreadAllocManager::logManagedData(void) {
 	gcpDumpCSVData();
 }
 
+bool GCPThreadAllocManager::gcpDumpTotalSummaryCSVData(void) {
+	GCPPairHistogramRecords* pairData =
+			(GCPPairHistogramRecords*)objSizesHistMgr_->histData_;
+	LOG(ERROR) << "TotalAllocObjects:" <<
+			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
+			"; TotalAllocSpace:" <<
+			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal);
+	return true;
+}
+
+bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
+
+	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
+		GCPHistRecData* _countDataP =
+				&objSizesHistMgr_->sizeHistograms_[i].countData_;
+		GCPHistRecData* _sizeDataP =
+				&objSizesHistMgr_->sizeHistograms_[i].sizeData_;
+		LOG(ERROR) << "HistogramEntryIndex:"<<
+				StringPrintf("%llu", _countDataP->dataRec_.index) <<
+				"; HistogramEntryObjCnt:"<<
+				StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
+				"; HistogramEntryObjSize:"<<
+				StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
+		for (const auto& threadProf :
+				Runtime::Current()->GetVMProfiler()->threadProfList_) {
+			GCHistogramObjSizesManager* _thrDataManager =
+								(GCHistogramObjSizesManager*)threadProf->histogramManager_;
+			GCPPairHistogramRecords* _threadMainRecord =
+					(GCPPairHistogramRecords*) _thrDataManager->histData_;
+			_countDataP = &_thrDataManager->sizeHistograms_[i].countData_;
+			_sizeDataP = &_thrDataManager->sizeHistograms_[i].sizeData_;
+			LOG(ERROR) << "ThreadIndex:"<<
+					StringPrintf("%llu", _threadMainRecord->countData_.dataRec_.index) <<
+					"; objectsCnt:"<<
+					StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
+					"; ObjectsSize:"<<
+					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
+		}
+	}
+}
+
 bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 	//int _indexIter = 0;
 	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
@@ -3811,6 +3852,8 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 //			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
+	gcpDumpTotalSummaryCSVData();
+	gcpDumpThreadHistogramCSVData();
 	return true;
 }
 bool GCPThreadAllocManager::gcpDumpHistAtomicSpaceTable(art::File* dump_file) {
