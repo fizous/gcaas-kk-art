@@ -2262,6 +2262,7 @@ inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 	referenceStringName_ = new char [_tempName.length()+1];
 	std::strcpy (referenceStringName_, _tempName.c_str());
 	LOG(ERROR) << "Copied into firld" << referenceStringName_;
+	LOG(ERROR) << "System NAme: " << GetThreadName(thread->GetTid());
 	//referenceName_ = std::string(cstr);
 	//LOG(ERROR) << "reference name is: " << referenceName_;
 }

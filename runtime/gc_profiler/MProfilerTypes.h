@@ -267,8 +267,11 @@ public:
 class GCPPairHistogramRecords : public GCPHistRecData {
 private:
 	mirror::Class* klzz_;
-	std::string referenceName_;
-	char * referenceStringName_;
+	union {
+		std::string referenceName_;
+		char * referenceStringName_;
+	};
+
 public:
 	GCPHistRecData countData_;
 	GCPHistRecData sizeData_;
