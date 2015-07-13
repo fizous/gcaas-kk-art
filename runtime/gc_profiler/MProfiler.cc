@@ -3820,6 +3820,7 @@ bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
 					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
 		}
 	}
+	return true;
 }
 
 bool GCPThreadAllocManager::gcpDumpCSVData(void) {
