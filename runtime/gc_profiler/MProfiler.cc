@@ -2260,6 +2260,9 @@ inline char* GCPPairHistogramRecords::setRefreneceNameFromThread(
 	std::string _tempName (GetThreadName(pid));
 	referenceStringName_ = new char [_tempName.length()+1];
 	std::strcpy (referenceStringName_, _tempName.c_str());
+	LOG(ERROR) << "+++setting name for pid: "<< pid << ": " <<
+			referenceStringName_ <<
+			", sysName:" << GetThreadName(pid);
 	return referenceStringName_;
 }
 /********************************* Object demographics profiling ****************/
@@ -3795,6 +3798,7 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 			char* threadNameP = _record->getReferenceStringName();
 			if(threadNameP == NULL) {
 				threadNameP = _record->setRefreneceNameFromThread(threadProf->GetTid());
+				LOG(ERROR) << "set in final stage";
 			}
 			LOG(ERROR) << "name: " << threadNameP;
 			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
@@ -4099,10 +4103,12 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		thProf->state = GCMMP_TH_STOPPED;
 		GCPPairHistogramRecords* _threadProfRec =
 				(GCPPairHistogramRecords*) thProf->histogramManager_;
-		if(_threadProfRec == NULL)
+		if(_threadProfRec == NULL) {
+			LOG(ERROR) << "Found record NULL: " << thProf->GetTid();
 			return true;
+		}
 		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
-		LOG(ERROR) << "---System Name: " << GetThreadName(thProf->GetTid());
+
 	}
 	return true;
 }
