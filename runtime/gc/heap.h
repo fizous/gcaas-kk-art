@@ -288,7 +288,7 @@ class Heap {
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/, const mirror::Object* /*new_value*/) {
-#if DVM_ALLOW_GCPROFILER
+#if ART_USE_GC_PROFILER
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
@@ -297,7 +297,7 @@ class Heap {
   // Write barrier for array operations that update many field positions
   void WriteBarrierArray(const mirror::Object* dst, int /*start_offset*/,
                          size_t /*length TODO: element_count or byte_count?*/) {
-#if DVM_ALLOW_GCPROFILER
+#if ART_USE_GC_PROFILER
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
