@@ -1758,11 +1758,11 @@ void Heap::PreSweepingGcVerification(collector::GarbageCollector* gc) {
     }
   }
 }
-#if DVM_ALLOW_GCPROFILER
+
 void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
-#endif
+
 void Heap::PostGcVerification(collector::GarbageCollector* gc) {
   if (verify_system_weaks_) {
     Thread* self = Thread::Current();
