@@ -34,6 +34,9 @@
 #include "safe_map.h"
 #include "thread_pool.h"
 
+#include "gc_profiler/MProfilerTypes.h"
+
+
 namespace art {
 
 class ConditionVariable;
@@ -68,6 +71,10 @@ namespace space {
   class Space;
   class SpaceTest;
 }  // namespace space
+
+#if DVM_ALLOW_GCPROFILER
+#else
+#endif
 
 class AgeCardVisitor {
  public:
