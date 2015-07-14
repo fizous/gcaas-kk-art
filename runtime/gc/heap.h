@@ -34,8 +34,6 @@
 #include "safe_map.h"
 #include "thread_pool.h"
 
-#include "gc_profiler/MProfilerTypes.h"
-
 namespace art {
 
 class ConditionVariable;
@@ -49,11 +47,7 @@ namespace mirror {
   class Object;
 }  // namespace mirror
 
-#if DVM_ALLOW_GCPROFILER
-namespace mprofiler {
-  class GCHistogramDataManager;
-}
-#endif
+
 
 namespace gc {
 namespace accounting {
@@ -287,12 +281,16 @@ class Heap {
   }
 
   void RecordFree(size_t freed_objects, size_t freed_bytes);
+#if DVM_ALLOW_GCPROFILER
+  void gcpIncMutationCnt(void);
+#endif
+
 
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/, const mirror::Object* /*new_value*/) {
 #if DVM_ALLOW_GCPROFILER
-  	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
+  	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
   }
@@ -301,7 +299,7 @@ class Heap {
   void WriteBarrierArray(const mirror::Object* dst, int /*start_offset*/,
                          size_t /*length TODO: element_count or byte_count?*/) {
 #if DVM_ALLOW_GCPROFILER
-  	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
+  	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
   }
