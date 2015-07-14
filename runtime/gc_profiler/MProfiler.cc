@@ -2468,7 +2468,11 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 }
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
-	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	bool successWrite = dump_file_->WriteFully(&heapStatus,
+			sizeof(GCMMPHeapStatus));
+	int32_t _mutations = GCHistogramDataManager::GCPTotalMutationsCount.load();
+	successWrite &= dump_file_->WriteFully(&mutations_,
+				sizeof(int32_t));
 	if(successWrite) {
 
 	} else {
