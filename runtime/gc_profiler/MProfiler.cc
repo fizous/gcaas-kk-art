@@ -2927,8 +2927,7 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 }
 
 void GCClassTableManager::logManagedData(void){
-	if(true)
-		return;
+
 	GCPPairHistogramRecords* _dataRec =
 			(GCPPairHistogramRecords*) histData_;
 
@@ -2941,6 +2940,10 @@ void GCClassTableManager::logManagedData(void){
 
 	LOG(ERROR) << "+++table class size is " <<
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
+
+	LOG(ERROR) << "TotalMutations: " << GCPTotalMutationsCount.load();
+	if(true)
+		return;
 	double _cntLive = 0.0;
 	double _cntTotal = 0.0;
 	double _pcntLive = 0.0;
@@ -3473,6 +3476,7 @@ inline void GCHistogramObjSizesManager::calculateAtomicPercentiles(void) {
 }
 
 void GCHistogramObjSizesManager::logManagedData(void) {
+	LOG(ERROR) << "TotalMutations: " << GCPTotalMutationsCount.load();
 	GCPPairHistogramRecords* _globalRec =
 			(GCPPairHistogramRecords*) histData_;
 	GCPPairHistogramRecords* _dataRec = NULL;
@@ -3808,6 +3812,7 @@ bool GCPThreadAllocManager::gcpDumpHistSpaceTable(art::File* dump_file,
 }
 
 void GCPThreadAllocManager::logManagedData(void) {
+	LOG(ERROR) << "TotalMutations: " << GCPTotalMutationsCount.load();
 	if(false) {
 		LOG(ERROR) << "<<Dumping Global Record>>>";
 		GCPPairHistogramRecords* _record =
@@ -4497,6 +4502,7 @@ void GCCohortManager::logManagedData(void) {
 	size_t _rowBytes = 0;
 	LOG(ERROR) << "Count of Cohort Rows: "<< cohortsTable_.cohortRows_.size() <<
 			"; table index: " << cohortsTable_.index;
+	LOG(ERROR) << "TotalMutations: " << GCPTotalMutationsCount.load();
 	int _rIndex = 0;
 	for (const auto& _rowIterP : cohortsTable_.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
@@ -4723,6 +4729,16 @@ void ClassProfiler::dumpAllClasses(void) {
 }
 
 void ClassProfiler::gcpLogPerfData() {
+
+	GCClassTableManager* tablManager = getClassHistograms();
+	if(tablManager == NULL) {
+		LOG(ERROR) << "+++table manager is NULL";
+		return;
+	} else {
+		LOG(ERROR) << "+++table manager is not NULL";
+		tablManager->logManagedData();
+	}
+
 	if(false)
 		dumpAllClasses();
 }
