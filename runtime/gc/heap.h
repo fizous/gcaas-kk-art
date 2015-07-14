@@ -50,6 +50,12 @@ namespace mirror {
   class Object;
 }  // namespace mirror
 
+#if DVM_ALLOW_GCPROFILER
+namespace mprofiler {
+  class ObjectSizesProfiler;
+}
+#endif
+
 namespace gc {
 namespace accounting {
   class HeapBitmap;
@@ -72,11 +78,6 @@ namespace space {
   class SpaceTest;
 }  // namespace space
 
-#if DVM_ALLOW_GCPROFILER
-namespace mprofiler {
-  class ObjectSizesProfiler;
-}
-#endif
 
 class AgeCardVisitor {
  public:
@@ -292,7 +293,7 @@ class Heap {
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/, const mirror::Object* /*new_value*/) {
 #if DVM_ALLOW_GCPROFILER
-  	ObjectSizesProfiler::GCPIncMutations();
+  	art::mprofiler::ObjectSizesProfiler::GCPIncMutations();
 #endif
     card_table_->MarkCard(dst);
   }
@@ -301,7 +302,7 @@ class Heap {
   void WriteBarrierArray(const mirror::Object* dst, int /*start_offset*/,
                          size_t /*length TODO: element_count or byte_count?*/) {
 #if DVM_ALLOW_GCPROFILER
-  	ObjectSizesProfiler::GCPIncMutations();
+  	art::mprofiler::ObjectSizesProfiler::GCPIncMutations();
 #endif
     card_table_->MarkCard(dst);
   }
