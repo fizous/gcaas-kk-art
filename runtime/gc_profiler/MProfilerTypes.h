@@ -815,6 +815,7 @@ public:
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
 	void logManagedData(void);
+	bool gcpDumpCSVData(void);
 	bool gcpDumpManagedData(art::File*, bool);
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool dumpClassCntHistograms(art::File* dumpFile,

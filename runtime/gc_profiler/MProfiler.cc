@@ -2925,6 +2925,8 @@ inline void GCClassTableManager::addObject(size_t allocatedMemory,
 }
 
 void GCClassTableManager::logManagedData(void){
+	if(true)
+		return;
 	GCPPairHistogramRecords* _dataRec =
 			(GCPPairHistogramRecords*) histData_;
 
@@ -3124,6 +3126,9 @@ bool GCClassTableManager::gcpDumpManagedData(art::File* dumpFile,
 	return _success;
 }
 
+
+
+
 bool GCClassTableManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
 	return dumpClassCntHistograms(dumpFile, false);
 }
@@ -3168,6 +3173,22 @@ void GCClassTableManager::printClassNames(void) {
 	}
 }
 
+
+
+bool GCClassTableManager::gcpDumpCSVData(void) {
+	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
+			Runtime::Current()->GetInternTable()->classTableProf_) {
+		mprofiler::GCPPairHistogramRecords* _rec =
+				(GCPPairHistogramRecords*) it.second;
+		GCPHistogramRec* countP = _rec->countData_.gcpGetDataRecP();
+		GCPHistogramRec* sizeP = _rec->sizeData_.gcpGetDataRecP();
+		LOG(ERROR) << "clzIndex:" << StringPrintf("%llu", countP->index) <<
+				"; TotalObjsCnt:" <<  	StringPrintf("%.0f", countP->cntTotal) <<
+				"; TotalSpace:" <<  	StringPrintf("%.0f", sizeP->cntTotal) <<
+				"; name:" << _rec->getRefrenecePrettyName();
+	}
+	return true;
+}
 
 /********************* GCHistogramManager profiling ****************/
 void GCHistogramObjSizesManager::initHistograms(void) {
@@ -4691,7 +4712,8 @@ void ClassProfiler::dumpAllClasses(void) {
 }
 
 void ClassProfiler::gcpLogPerfData() {
-	dumpAllClasses();
+	if(false)
+		dumpAllClasses();
 }
 
 //void ClassProfiler::dumpProfData(bool isLastDump) {
