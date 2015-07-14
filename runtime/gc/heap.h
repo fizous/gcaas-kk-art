@@ -281,9 +281,8 @@ class Heap {
   }
 
   void RecordFree(size_t freed_objects, size_t freed_bytes);
-#if DVM_ALLOW_GCPROFILER
+
   void gcpIncMutationCnt(void);
-#endif
 
 
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
