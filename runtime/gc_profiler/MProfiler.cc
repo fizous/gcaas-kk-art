@@ -2471,7 +2471,7 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 	bool successWrite = dump_file_->WriteFully(&heapStatus,
 			sizeof(GCMMPHeapStatus));
 	int32_t _mutations = GCHistogramDataManager::GCPTotalMutationsCount.load();
-	successWrite &= dump_file_->WriteFully(&mutations_,
+	successWrite &= dump_file_->WriteFully(&_mutations,
 				sizeof(int32_t));
 	if(successWrite) {
 
