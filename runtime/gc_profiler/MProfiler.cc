@@ -3182,7 +3182,8 @@ bool GCClassTableManager::gcpDumpCSVData(void) {
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal);
-
+			"; LoadedClasses:" <<
+			StringPrintf("%zd", Runtime::Current()->GetInternTable()->classTableProf_.size());
 	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
