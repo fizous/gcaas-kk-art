@@ -301,7 +301,7 @@ class Heap {
   void WriteBarrierArray(const mirror::Object* dst, int /*start_offset*/,
                          size_t /*length TODO: element_count or byte_count?*/) {
 #if DVM_ALLOW_GCPROFILER
-  	art::mprofiler::ObjectSizesProfiler::GCPIncMutations();
+  	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 #endif
     card_table_->MarkCard(dst);
   }
