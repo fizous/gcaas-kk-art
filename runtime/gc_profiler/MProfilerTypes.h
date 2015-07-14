@@ -887,6 +887,7 @@ public:
   bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
+	bool gcpDumpCSVData(void);
 
 	bool gcpDumpManagedData(art::File*, bool);
   bool gcpDumpSummaryManagedData(art::File*);
