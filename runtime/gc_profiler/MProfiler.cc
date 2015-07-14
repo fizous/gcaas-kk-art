@@ -171,7 +171,7 @@ int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
-AtomicInteger ObjectSizesProfiler::GCPTotalMutationsCount;
+AtomicInteger GCHistogramDataManager::GCPTotalMutationsCount;
 AtomicInteger GCHistogramDataManager::kGCPLastCohortIndex;
 int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 int GCHistogramDataManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
@@ -2269,7 +2269,7 @@ inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
 
 void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
 	srand (time(NULL));
-	GCPTotalMutationsCount.store(0);
+	GCHistogramDataManager::GCPTotalMutationsCount.store(0);
 	if(initHistData)
 		initHistDataManager();
 	LOG(ERROR) << "ObjectSizesProfiler : initializeProfilerData";

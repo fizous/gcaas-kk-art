@@ -516,7 +516,6 @@ public:
 class ObjectSizesProfiler : public VMProfiler {
 public:
 	GCHistogramDataManager* hitogramsData_;
-	static AtomicInteger GCPTotalMutationsCount;
 
 	GCHistogramObjSizesManager* getObjHistograms(void) {
 		return (GCHistogramObjSizesManager*) hitogramsData_;
@@ -538,10 +537,6 @@ public:
 
 	static int GCPGetExtraProfileBytes(void) {
 		return GCHistogramDataManager::kGCMMPHeaderSize;
-	}
-
-	static void GCPIncMutations() {
-		GCPTotalMutationsCount++;
 	}
 
 	virtual void initHistDataManager(void);

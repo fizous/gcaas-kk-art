@@ -381,6 +381,7 @@ public:
 	static AtomicInteger kGCPLastCohortIndex;
 	static int kGCMMPCohortLog;
 	static size_t kGCMMPCohortSize;
+	static AtomicInteger GCPTotalMutationsCount;
 
 	int32_t GCPGetLastManagedCohort() {
 		return kGCPLastCohortIndex.load();
@@ -417,6 +418,10 @@ public:
 
 	static int GetExtraProfileBytes(void) {
 		return GCHistogramDataManager::kGCMMPHeaderSize;
+	}
+
+	static void GCPIncMutations() {
+		GCPTotalMutationsCount++;
 	}
 
   static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,

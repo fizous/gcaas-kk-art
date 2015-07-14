@@ -35,7 +35,6 @@
 #include "thread_pool.h"
 
 #include "gc_profiler/MProfilerTypes.h"
-#include "gc_profiler/MProfiler.h"
 
 namespace art {
 
@@ -52,7 +51,7 @@ namespace mirror {
 
 #if DVM_ALLOW_GCPROFILER
 namespace mprofiler {
-  class ObjectSizesProfiler;
+  class GCHistogramDataManager;
 }
 #endif
 
@@ -293,7 +292,7 @@ class Heap {
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/, const mirror::Object* /*new_value*/) {
 #if DVM_ALLOW_GCPROFILER
-  	art::mprofiler::ObjectSizesProfiler::GCPIncMutations();
+  	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 #endif
     card_table_->MarkCard(dst);
   }
