@@ -20,7 +20,7 @@
 #include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
-
+#include "offsets.h"
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
