@@ -658,6 +658,8 @@ public:
   void gcpLogPerfData(void);
 };
 
+
+/**************** Ref Distance Profiler********************/
 class RefDistanceProfiler : public CohortProfiler {
 public:
 
@@ -670,10 +672,9 @@ public:
 		initHistDataManager();
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
-
 };
 
-
+/**************** ClassProfiler Profiler********************/
 class ClassProfiler : public ObjectSizesProfiler {
 public:
 

@@ -162,14 +162,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<ClassProfiler>
 		},//Class Profiler
-		/*{
+		{
 				 0x06,
 				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_MUTATIONS_WINDOWS,
-				 "ClassProfiler", "Ref Distance Profiler",
+				 "RefDistanceProfiler", "Ref Distance Profiler",
 				 "GCP_REF_DISTANCES.log",
 				 NULL,
-				 &createVMProfiler<ClassProfiler>
-		},*///Class Profiler
+				 &createVMProfiler<RefDistanceProfiler>
+		},//RefDistance Profiler
 };//profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
