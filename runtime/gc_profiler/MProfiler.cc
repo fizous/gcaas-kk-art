@@ -1957,7 +1957,7 @@ inline bool VMProfiler::IsMProfRunning() {
  * Return true only when the MProfiler is Running
  */
 inline bool VMProfiler::MProfRefDistance(const mirror::Object* dst,
-		const mirror::Object* new_value) {
+		uint32_t member_offset, const mirror::Object* new_value) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingRunning()) {
 		RefDistanceProfiler* refProfiler = (RefDistanceProfiler*) mP;

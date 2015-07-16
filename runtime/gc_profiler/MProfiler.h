@@ -70,6 +70,7 @@ namespace art {
 class ConditionVariable;
 class Mutex;
 class Thread;
+class MembersOffset;
 
 namespace mirror{
 class Object;
@@ -302,8 +303,7 @@ public:
   size_t getRelevantAllocBytes(void);
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  static bool MProfRefDistance(const mirror::Object*,
-  		const mirror::Object*);
+  static bool MProfRefDistance(const mirror::Object*, uint32_t, const mirror::Object*);
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
