@@ -534,6 +534,19 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 			thProf->GetTid() & 0x00000000FFFFFFFF);
 }
 
+void GCPThreadAllocManager::dettachThread(GCMMPThreadProf* thProf) {
+	GCPPairHistogramRecords* _threadProfRec =
+			(GCPPairHistogramRecords*) thProf->histogramManager_->histData_;
+	if(_threadProfRec == NULL) {
+		LOG(ERROR) << "Found record NULL: " << thProf->GetTid();
+		return true;
+	}
+	char* threadNameP = NULL;
+	_threadProfRec->getReferenceStringName(&threadNameP);
+	if(threadNameP == NULL)
+		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
+}
+
 
 inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {

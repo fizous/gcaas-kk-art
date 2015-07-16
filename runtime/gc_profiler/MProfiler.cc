@@ -2237,30 +2237,6 @@ int MProfiler::GetGCDaemonID(void)  {
 	return 0;
 }
 
-/**************************** GCPHistRecData *********************************/
-bool GCPHistRecData::GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
-	return file->WriteFully(rec, sizeof(GCPHistogramRec));
-}
-
-inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
-	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
-}
-
-inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
-	GCPHistogramRec _dummyRec;
-	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
-	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
-}
-
-inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
-		pid_t pid) {
-	std::string _tempName (GetThreadName(pid));
-	referenceStringName_ = new char [_tempName.length()+1];
-	std::strcpy (referenceStringName_, _tempName.c_str());
-//	LOG(ERROR) << "+++setting name for pid: "<< pid << ": " <<
-//			referenceStringName_ <<
-//			", sysName:" << GetThreadName(pid);
-}
 
 /********************************* Object demographics profiling ****************/
 
@@ -2917,17 +2893,10 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
 		/*GCMMP_VLOG(INFO)*/ //LOG(ERROR) << "ThreadAllocProfiler -- dettaching thread pid: " << thProf->GetTid();
 		thProf->state = GCMMP_TH_STOPPED;
-		GCPPairHistogramRecords* _threadProfRec =
-				(GCPPairHistogramRecords*) thProf->histogramManager_->histData_;
-		if(_threadProfRec == NULL) {
-			LOG(ERROR) << "Found record NULL: " << thProf->GetTid();
-			return true;
-		}
-		char* threadNameP = NULL;
-		_threadProfRec->getReferenceStringName(&threadNameP);
-		if(threadNameP == NULL)
-			_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
 
+		GCPThreadAllocManager* _manager = getThreadHistManager();
+		if(_manager != NULL)
+			return _manager->dettachThread(thProf);
 	}
 	return true;
 }

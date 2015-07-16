@@ -938,6 +938,7 @@ public:
 	void removeObject(size_t, mirror::Object*);
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 	void setThreadManager(GCMMPThreadProf*);
+	bool dettachThreadFromManager(GCMMPThreadProf*);
 	void gcpZeorfyAllAtomicRecords(void);
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
