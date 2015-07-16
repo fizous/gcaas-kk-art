@@ -58,9 +58,9 @@ LIBART_COMMON_SRC_FILES := \
 	gc/space/image_space.cc \
 	gc/space/large_object_space.cc \
 	gc/space/space.cc \
+	gc_profiler/MProfilerTypes.cc \
 	gc_profiler/MProfiler.cc \
 	gc_profiler/MPPerfCounters.cc \
-	gc_profiler/MProfilerTypes.cc \
 	hprof/hprof.cc \
 	image.cc \
 	indirect_reference_table.cc \
