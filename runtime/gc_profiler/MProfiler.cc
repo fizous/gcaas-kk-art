@@ -2896,7 +2896,7 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 		GCPThreadAllocManager* _manager = getThreadHistManager();
 		if(_manager != NULL)
-			return _manager->dettachThread(thProf);
+			return _manager->dettachThreadFromManager(thProf);
 	}
 	return true;
 }
