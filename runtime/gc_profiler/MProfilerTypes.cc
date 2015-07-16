@@ -141,7 +141,7 @@ void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 //}
 
 
-void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
+inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);

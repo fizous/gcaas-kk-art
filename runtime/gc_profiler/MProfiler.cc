@@ -441,13 +441,13 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 
 	size_t initValue = (size_t)GCPTotalAllocBytes.load();
 	GCPTotalAllocBytes.fetch_add(objSize);
-	if(!IsAllocWindowsSet())
-		return;
+//	if(!IsAllocWindowsSet())
+//		return;
 
 
 	bool _newWindow = (initValue >> kGCMMPLogAllocWindow) != ((objSize + initValue)  >> kGCMMPLogAllocWindow);
 	//double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
-	if(_newWindow) {
+	if(_newWindow && IsAllocWindowsSet()) {
 
 		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
 				GCPTotalAllocBytes.load();
