@@ -298,7 +298,7 @@ public:
   size_t getRelevantAllocBytes(void);
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  static bool MProfRefDistance(const mirror::Object*, MemberOffset,
+  static bool MProfRefDistance(const mirror::Object*, art::MemberOffset,
   		const mirror::Object*);
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
