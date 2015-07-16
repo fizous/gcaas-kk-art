@@ -693,8 +693,15 @@ public:
 				"; totalObj: " << _dataRec->objTotalCnt;
 	}
 
-	virtual bool gcpDumpCSVData(std::ostringstream&) {return true;}
 	virtual bool gcpDumpCSVGlobalDataSummary(std::ostringstream&) {return true;}
+	virtual bool gcpDumpCSVCoreTables(std::ostringstream&) {return true;}
+
+	virtual bool gcpDumpCSVData(std::ostringstream& outputStream) {
+		bool _success = gcpDumpCSVGlobalDataSummary(outputStream);
+		_success = gcpDumpCSVCoreTables(outputStream);
+		return _success;
+	}
+
 };//GCHistogramDataManager
 
 
@@ -821,7 +828,7 @@ public:
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
 	void logManagedData(void);
-	bool gcpDumpCSVData(std::ostringstream&);
+
 	bool gcpDumpManagedData(art::File*, bool);
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool dumpClassCntHistograms(art::File* dumpFile,
@@ -835,6 +842,9 @@ public:
 	void calculatePercentiles(void);
 	void calculateAtomicPercentiles(void);
 	void gcpZeorfyAllAtomicRecords(void);
+
+	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
+	bool gcpDumpCSVCoreTables(std::ostringstream&);
 };
 
 
@@ -894,8 +904,8 @@ public:
   bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
-	bool gcpDumpCSVData(std::ostringstream&);
 	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
+	bool gcpDumpCSVCoreTables(std::ostringstream&);
 
 	bool gcpDumpManagedData(art::File*, bool);
   bool gcpDumpSummaryManagedData(art::File*);
@@ -927,7 +937,7 @@ public:
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
 protected:
-	bool gcpDumpTotalSummaryCSVData(std::ostringstream&);
+	bool gcpDumpThreadHistogramCSVData(std::ostringstream&);
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
@@ -955,9 +965,9 @@ public:
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
 
-	bool gcpDumpCSVData(std::ostringstream&);
 	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
-	bool gcpDumpThreadHistogramCSVData(std::ostringstream&);
+	bool gcpDumpCSVCoreTables(std::ostringstream&);
+	bool gcpDumpCSVData(std::ostringstream&);
 };//GCPThreadAllocManager
 
 
