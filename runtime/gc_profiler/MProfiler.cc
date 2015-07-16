@@ -38,6 +38,12 @@
 
 
 namespace art {
+class MemmberOffset;
+
+namespace mirror {
+class Object;
+}
+
 namespace mprofiler {
 
 const char * VMProfiler::benchmarks[] = {
