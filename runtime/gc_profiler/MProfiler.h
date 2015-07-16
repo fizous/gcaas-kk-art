@@ -623,16 +623,50 @@ public:
 
 class CohortProfiler : public ObjectSizesProfiler {
 public:
-
 	GCCohortManager* getCohortManager(void) {
 		return (GCCohortManager*)hitogramsData_;
 	}
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry, false) {
+		initializeCohortProfilerData(opts, entry, true);
+	}
+
+	CohortProfiler(GCMMP_Options* opts, void* entry, bool initHists) :
+		ObjectSizesProfiler(opts, entry, false) {
+		initializeCohortProfilerData(opts, entry, initHists);
+	}
+
+	void initializeCohortProfilerData(GCMMP_Options* opts, void* entry,
+			bool shouldInitHists) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPCalcCohortIndex());
-		//objHistograms = new GCHistogramManager(GCMMP_HIST_ROOT);
-		//kGCMMPLogAllocWindow = 18;
+		if(shouldInitHists)
+			initHistDataManager();
+		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
+	}
+
+  void initHistDataManager(void);
+  void setHistogramManager(GCMMPThreadProf*);
+  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
+//  bool periodicDaemonExec(void);
+  void gcpAddObject(size_t allocatedMemory, size_t objSize,
+  		mirror::Object* obj);
+  void gcpAddObject(size_t, size_t){}
+  bool dettachThread(GCMMPThreadProf*);
+
+  //void dumpProfData(bool);
+  void gcpLogPerfData(void);
+};
+/*
+class RefDistanceProfiler : public CohortProfiler {
+public:
+
+	GCCohortManager* getCohortManager(void) {
+		return (GCCohortManager*)hitogramsData_;
+	}
+
+	RefDistanceProfiler(GCMMP_Options* opts, void* entry) :
+		CohortProfiler(opts, entry, false) {
 		initHistDataManager();
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
@@ -649,7 +683,7 @@ public:
   //void dumpProfData(bool);
   void gcpLogPerfData(void);
 };
-
+*/
 
 class ClassProfiler : public ObjectSizesProfiler {
 public:

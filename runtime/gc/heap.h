@@ -284,10 +284,26 @@ class Heap {
 
   void gcpIncMutationCnt(void);
 
-
+#if ART_USE_GC_PROFILER_REF_DIST
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.
-  void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/, const mirror::Object* /*new_value*/) {
+  void WriteBarrierField(const mirror::Object* dst, MemberOffset offset,
+  		const mirror::Object* new_value) {
+  	gcpIncMutationCnt();
+    card_table_->MarkCard(dst);
+  }
+
+  // Write barrier for array operations that update many field positions
+  void WriteBarrierArray(const mirror::Object* dst, int start_offset /*start_offset*/,
+                         size_t length/*length TODO: element_count or byte_count?*/) {
+  	gcpIncMutationCnt();
+    card_table_->MarkCard(dst);
+  }
+#else
+  // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
+  // The call is not needed if NULL is stored in the field.
+  void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/,
+  		const mirror::Object* /*new_value*/) {
 #if ART_USE_GC_PROFILER
   	gcpIncMutationCnt();
 #endif
@@ -302,6 +318,8 @@ class Heap {
 #endif
     card_table_->MarkCard(dst);
   }
+#endif
+
 
   accounting::CardTable* GetCardTable() const {
     return card_table_.get();

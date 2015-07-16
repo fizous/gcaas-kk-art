@@ -84,7 +84,8 @@ typedef enum GCMMPFlagsEnum_s {
 	GCMMP_FLAGS_HAS_DAEMON = 2,		 //does it possess a daemon thread
 	GCMMP_FLAGS_ATTACH_PROF_DAEMON = 4, // should we attach the profile daemon
 	GCMMP_FLAGS_MARK_ALLOC_WINDOWS = 8, //should we mark the allocation chunks
-	GCMMP_FLAGS_ATTACH_GCDAEMON = 16
+	GCMMP_FLAGS_ATTACH_GCDAEMON = 16,
+	GCMMP_FLAGS_MARK_MUTATIONS_WINDOWS = 32 //should we mark the mutations chunks
 } GCMMPFlagsEnum;
 
 

@@ -730,7 +730,7 @@ bool GCPThreadAllocManager::gcpDumpCSVGlobalDataSummary(
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal) <<
-			", threadCount:" << StringPrintf("%zd",
+			"; threadCount:" << StringPrintf("%zd",
 					Runtime::Current()->GetVMProfiler()->threadProfList_.size()) << "\n";
 
 	return objSizesHistMgr_->gcpDumpCSVCoreTables(outputStream);
