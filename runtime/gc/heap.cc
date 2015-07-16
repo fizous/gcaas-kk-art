@@ -1765,7 +1765,7 @@ void Heap::gcpIncMutationCnt(void) {
 
 void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
 		const mirror::Object* new_value) {
-	VMProfiler::MProfRefDistance(dst, offset, new_value);
+	art::mprofiler::VMProfiler::MProfRefDistance(dst, offset, new_value);
 }
 
 void Heap::PostGcVerification(collector::GarbageCollector* gc) {
