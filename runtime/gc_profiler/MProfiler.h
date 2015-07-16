@@ -243,6 +243,10 @@ public:
   	return (flags_ & GCMMP_FLAGS_MARK_ALLOC_WINDOWS);
   }
 
+  bool IsMutationsWindowsSet() {
+  	return (flags_ & GCMMP_FLAGS_MARK_MUTATIONS_WINDOWS);
+  }
+
   bool IsProfilingTimeEvent() {
     return IsProfilingRunning() && isMarkTimeEvents();
   }
@@ -294,6 +298,8 @@ public:
   size_t getRelevantAllocBytes(void);
   void setThreadAffinity(art::Thread* th, bool complementary);
 
+  static bool MProfRefDistance(const mirror::Object*, MemberOffset,
+  		const mirror::Object*);
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
@@ -672,6 +678,8 @@ public:
 		initHistDataManager();
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
+
+	void gcpProfilerDistance(void);
 };
 
 /**************** ClassProfiler Profiler********************/

@@ -1946,6 +1946,20 @@ inline bool VMProfiler::IsMProfRunning() {
 	return false;
 }
 
+
+/*
+ * Return true only when the MProfiler is Running
+ */
+inline bool VMProfiler::MProfRefDistance(const mirror::Object* dst,
+		MemberOffset offset, const mirror::Object* new_value) {
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+	if(mP != NULL && mP->IsProfilingRunning()) {
+		RefDistanceProfiler* refProfiler = (RefDistanceProfiler*) mp;
+		refProfiler->gcpProfilerDistance();
+		return true;
+	}
+	return false;
+}
 /*
  * Return true only when the MProfiler is Running for HW events
  */
@@ -3485,6 +3499,11 @@ void ClassProfiler::gcpLogPerfData() {
 //inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
 //	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 //}
+
+/******************* ref distance profiler ******************/
+void RefDistanceProfiler::gcpProfilerDistance(void) {
+
+}
 
 }// namespace mprofiler
 }// namespace art

@@ -284,6 +284,10 @@ class Heap {
 
   void gcpIncMutationCnt(void);
 
+
+  void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
+  		const mirror::Object* new_value);
+
 #if ART_USE_GC_PROFILER_REF_DIST
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.

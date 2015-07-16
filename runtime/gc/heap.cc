@@ -1763,6 +1763,11 @@ void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
 
+void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
+		const mirror::Object* new_value) {
+	VMProfiler::MProfRefDistance(dst, offset, new_value);
+}
+
 void Heap::PostGcVerification(collector::GarbageCollector* gc) {
   if (verify_system_weaks_) {
     Thread* self = Thread::Current();
