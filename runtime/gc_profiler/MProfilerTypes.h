@@ -824,7 +824,7 @@ public:
 
 	GCRefDistanceManager(AtomicInteger*);
 
-	void resetCurrentCounters(AtomicInteger*);
+	void resetCurrentCounters();
 };
 
 

@@ -1111,6 +1111,14 @@ void GCRefDistanceManager::initDistanceArray(void) {
 	}
 }
 
+
+void GCRefDistanceManager::resetCurrentCounters(void) {
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		posRefDist_[i].resetLiveData();
+		negRefDist_[i].resetLiveData();
+	}
+}
+
 /********************* GCHistogramDataManager profiling ****************/
 
 
