@@ -1954,7 +1954,7 @@ inline bool VMProfiler::MProfRefDistance(const mirror::Object* dst,
 		MemberOffset offset, const mirror::Object* new_value) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingRunning()) {
-		RefDistanceProfiler* refProfiler = (RefDistanceProfiler*) mp;
+		RefDistanceProfiler* refProfiler = (RefDistanceProfiler*) mP;
 		refProfiler->gcpProfilerDistance();
 		return true;
 	}
