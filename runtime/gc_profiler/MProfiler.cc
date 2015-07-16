@@ -1956,12 +1956,12 @@ inline bool VMProfiler::IsMProfRunning() {
 /*
  * Return true only when the MProfiler is Running
  */
-inline bool VMProfiler::MProfRefDistance(const mirror::Object* dst,
+bool VMProfiler::MProfRefDistance(const mirror::Object* dst,
 		uint32_t member_offset, const mirror::Object* new_value) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingRunning()) {
 		RefDistanceProfiler* refProfiler = (RefDistanceProfiler*) mP;
-		refProfiler->gcpProfilerDistance();
+		refProfiler->gcpProfilerDistance(dst, member_offset, new_value);
 		return true;
 	}
 	return false;
@@ -3507,7 +3507,8 @@ void ClassProfiler::gcpLogPerfData() {
 //}
 
 /******************* ref distance profiler ******************/
-void RefDistanceProfiler::gcpProfilerDistance(void) {
+void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
+		uint32_t member_offset, const mirror::Object* new_value) {
 
 }
 

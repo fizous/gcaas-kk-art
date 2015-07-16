@@ -683,7 +683,8 @@ public:
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 
-	void gcpProfilerDistance(void);
+	void gcpProfilerDistance(const mirror::Object* dst,
+			uint32_t member_offset, const mirror::Object* new_value);
 };
 
 /**************** ClassProfiler Profiler********************/
