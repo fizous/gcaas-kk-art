@@ -534,7 +534,7 @@ void GCPThreadAllocManager::setThreadManager(GCMMPThreadProf* thProf) {
 			thProf->GetTid() & 0x00000000FFFFFFFF);
 }
 
-void GCPThreadAllocManager::dettachThread(GCMMPThreadProf* thProf) {
+bool GCPThreadAllocManager::dettachThreadFromManager(GCMMPThreadProf* thProf) {
 	GCPPairHistogramRecords* _threadProfRec =
 			(GCPPairHistogramRecords*) thProf->histogramManager_->histData_;
 	if(_threadProfRec == NULL) {
@@ -545,6 +545,7 @@ void GCPThreadAllocManager::dettachThread(GCMMPThreadProf* thProf) {
 	_threadProfRec->getReferenceStringName(&threadNameP);
 	if(threadNameP == NULL)
 		_threadProfRec->setRefreneceNameFromThread(thProf->GetTid());
+	return true;
 }
 
 
