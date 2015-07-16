@@ -71,6 +71,10 @@ class ConditionVariable;
 class Mutex;
 class Thread;
 
+namespace mirror{
+class Object;
+}
+
 namespace mprofiler {
 class VMProfiler;
 class ObjectSizesProfiler;
@@ -298,7 +302,8 @@ public:
   size_t getRelevantAllocBytes(void);
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  static bool MProfRefDistance(const art::mirror::Object*, const art::mirror::Object*);
+  static bool MProfRefDistance(const mirror::Object*,
+  		const mirror::Object*);
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
