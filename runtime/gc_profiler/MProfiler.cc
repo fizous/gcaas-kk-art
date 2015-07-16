@@ -34,6 +34,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "utils.h"
+#include "offsets.h"
 //#include "scoped_thread_state_change.h"
 
 
