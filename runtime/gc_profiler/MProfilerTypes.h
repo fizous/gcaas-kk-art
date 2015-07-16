@@ -706,6 +706,7 @@ public:
 
 
 class GCCohortManager : public GCHistogramDataManager {
+protected:
 	size_t cohRowSZ_;
 //	size_t cohArrSZ_;
 //
@@ -716,8 +717,6 @@ class GCCohortManager : public GCHistogramDataManager {
 	size_t calcObjBD(size_t objSize) {
 		return allocRec_->load() - objSize;
 	}
-
-
 
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
 		return kGCMMPCohortSize - rec->totalSize;
@@ -802,6 +801,32 @@ public:
 		*index = (size_t)_col;
 	}
 
+};
+
+
+class GCPDistanceRecord {
+public:
+	uint64_t index_;
+	AtomicInteger live_;
+	AtomicInteger total_;
+
+	GCPDistanceRecord(void);
+
+	void resetLiveData(){
+		live_.store(0);
+	}
+};
+
+class GCRefDistanceManager : public GCCohortManager {
+protected:
+	void initDistanceArray(void);
+public:
+	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
+	GCPDistanceRecord negRefDist_[kGCMMPMaxHistogramEntries];
+
+	GCRefDistanceManager(AtomicInteger*);
+
+	void resetCurrentCounters(AtomicInteger*);
 };
 
 

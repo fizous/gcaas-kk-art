@@ -899,6 +899,7 @@ GCCohortManager::GCCohortManager(AtomicInteger* allocRec) :
 }
 
 
+
 void GCCohortManager::addCohortRow(void) {
 	currCoRowP = (GCPCohortsRow*) calloc(1, getCoRowSZ());
 	currCoRowP->index_ = 0;
@@ -1093,6 +1094,22 @@ void GCCohortManager::logManagedData(void) {
 	}
 }
 
+
+/*********************** GCRefDistanceManager **************************/
+
+GCRefDistanceManager::GCRefDistanceManager(AtomicInteger* atomicInt) :
+		GCCohortManager(atomicInt) {
+	initDistanceArray();
+}
+
+void GCRefDistanceManager::initDistanceArray(void) {
+	uint64_t _index = 0;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		_index = (uint64_t)((i) & (0x00000000FFFFFFFF));
+		posRefDist_[i].index_ = _index;
+		negRefDist_[i].index_ = _index;
+	}
+}
 
 /********************* GCHistogramDataManager profiling ****************/
 

@@ -3507,10 +3507,22 @@ void ClassProfiler::gcpLogPerfData() {
 //}
 
 /******************* ref distance profiler ******************/
+
+GCRefDistanceManager::GCRefDistanceManager(AtomicInteger* atomicInt) :
+		GCCohortManager(atomicInt) {
+
+}
+
 void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 		uint32_t member_offset, const mirror::Object* new_value) {
 
 }
+
+void RefDistanceProfiler::initHistDataManager(void) {
+	hitogramsData_ = new GCRefDistanceManager(&GCPTotalAllocBytes);
+	LOG(ERROR) << "RefDistanceProfiler::initHistDataManager";
+}
+
 
 }// namespace mprofiler
 }// namespace art

@@ -673,10 +673,6 @@ public:
 class RefDistanceProfiler : public CohortProfiler {
 public:
 
-	GCCohortManager* getCohortManager(void) {
-		return (GCCohortManager*)hitogramsData_;
-	}
-
 	RefDistanceProfiler(GCMMP_Options* opts, void* entry) :
 		CohortProfiler(opts, entry, false) {
 		initHistDataManager();
@@ -685,6 +681,8 @@ public:
 
 	void gcpProfilerDistance(const mirror::Object* dst,
 			uint32_t member_offset, const mirror::Object* new_value);
+
+	void initHistDataManager(void);
 };
 
 /**************** ClassProfiler Profiler********************/
