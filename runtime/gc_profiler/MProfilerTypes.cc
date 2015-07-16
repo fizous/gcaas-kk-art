@@ -405,26 +405,39 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicSpaceTable(
 	return _dataWritten;
 }
 
-bool GCHistogramObjSizesManager::gcpDumpCSVData(void) {
+
+bool GCHistogramObjSizesManager::gcpDumpCSVGlobalDataSummary(
+		std::ostream& outputStream) {
 	GCPPairHistogramRecords* pairData =
 			(GCPPairHistogramRecords*) histData_;
-	LOG(ERROR) << "TotalAllocObjects:" <<
+	outputStream << "TotalAllocObjects:" <<
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal);
+
+	return true;
+}
+
+bool GCHistogramObjSizesManager::gcpDumpCSVData(void) {
+	std::ostream outputStream = LOG(ERROR);
+  bool _success = true;
+	GCPPairHistogramRecords* pairData =
+			(GCPPairHistogramRecords*) histData_;
+	_success &= gcpDumpCSVGlobalDataSummary(outputStream);
 
 	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
 		GCPHistRecData* _countDataP =
 				&sizeHistograms_[i].countData_;
 		GCPHistRecData* _sizeDataP =
 				&sizeHistograms_[i].sizeData_;
-		LOG(ERROR) << "HistogramEntryIndex:"<<
+		outputStream << "HistogramEntryIndex:"<<
 				StringPrintf("%llu", _countDataP->dataRec_.index) <<
 				"; HistogramEntryObjCnt:"<<
 				StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
 				"; HistogramEntryObjSize:"<<
 				StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
 	}
+	outputStream.flush();
 	return true;
 }
 
@@ -713,6 +726,21 @@ void GCPThreadAllocManager::logManagedData(void) {
 		}
 		LOG(ERROR) << "<<gcpDumpCSVData>>";
 	}
+}
+
+
+bool GCPThreadAllocManager::gcpDumpCSVGlobalDataSummary(
+		std::ostream& outputStream) {
+	GCPPairHistogramRecords* pairData =
+			(GCPPairHistogramRecords*) histData_;
+	outputStream << "TotalAllocObjects:" <<
+			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
+			"; TotalAllocSpace:" <<
+			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal) <<
+			", threadCount:" << StringPrintf("%zd",
+					Runtime::Current()->GetVMProfiler()->threadProfList_.size());
+
+	return objSizesHistMgr_->gcpDumpCSVData();
 }
 
 bool GCPThreadAllocManager::gcpDumpTotalSummaryCSVData(void) {

@@ -694,6 +694,7 @@ public:
 	}
 
 	virtual bool gcpDumpCSVData(void) {return true;}
+	virtual bool gcpDumpCSVGlobalDataSummary(std::ostream&) {return true;}
 };//GCHistogramDataManager
 
 
@@ -894,6 +895,7 @@ public:
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
 	bool gcpDumpCSVData(void);
+	bool gcpDumpCSVGlobalDataSummary(std::ostream&);
 
 	bool gcpDumpManagedData(art::File*, bool);
   bool gcpDumpSummaryManagedData(art::File*);
@@ -924,6 +926,7 @@ public:
 //typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
+	bool gcpDumpTotalSummaryCSVData(void);
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
@@ -952,7 +955,7 @@ public:
 	void logManagedData(void);
 
 	bool gcpDumpCSVData(void);
-	bool gcpDumpTotalSummaryCSVData(void);
+	bool gcpDumpCSVGlobalDataSummary(std::ostream&);
 	bool gcpDumpThreadHistogramCSVData(void);
 };//GCPThreadAllocManager
 
