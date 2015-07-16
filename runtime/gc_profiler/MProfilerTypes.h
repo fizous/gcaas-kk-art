@@ -810,8 +810,6 @@ public:
 	AtomicInteger live_;
 	AtomicInteger total_;
 
-	GCPDistanceRecord(void);
-
 	void resetLiveData(){
 		live_.store(0);
 	}
