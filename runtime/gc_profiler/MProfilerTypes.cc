@@ -421,8 +421,6 @@ bool GCHistogramObjSizesManager::gcpDumpCSVGlobalDataSummary(
 bool GCHistogramObjSizesManager::gcpDumpCSVData(void) {
 	std::ostream outputStream = LOG(ERROR);
   bool _success = true;
-	GCPPairHistogramRecords* pairData =
-			(GCPPairHistogramRecords*) histData_;
 	_success &= gcpDumpCSVGlobalDataSummary(outputStream);
 
 	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {

@@ -926,6 +926,7 @@ public:
 //typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
+protected:
 	bool gcpDumpTotalSummaryCSVData(void);
 public:
 	// a global record holder for all histograms
