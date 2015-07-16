@@ -2626,7 +2626,9 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump) {
  	  	LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
  	  }
  	  dump_file_->Close();
- 	  hitogramsData_->gcpDumpCSVData();
+ 	  std::ostringstream outputStream
+ 	  hitogramsData_->gcpDumpCSVData(outputStream);
+ 	  LOG(ERROR) << outputStream;
  	  gcpLogPerfData();
  	  LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {

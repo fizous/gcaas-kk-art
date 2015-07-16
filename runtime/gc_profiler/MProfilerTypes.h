@@ -693,8 +693,8 @@ public:
 				"; totalObj: " << _dataRec->objTotalCnt;
 	}
 
-	virtual bool gcpDumpCSVData(void) {return true;}
-	virtual bool gcpDumpCSVGlobalDataSummary(std::ostream&) {return true;}
+	virtual bool gcpDumpCSVData(std::ostringstream&) {return true;}
+	virtual bool gcpDumpCSVGlobalDataSummary(std::ostringstream&) {return true;}
 };//GCHistogramDataManager
 
 
@@ -821,7 +821,7 @@ public:
 //	gc::accounting::GCAllocator<std::pair<size_t,mirror::Class*>>> histogramMapTable;
 
 	void logManagedData(void);
-	bool gcpDumpCSVData(void);
+	bool gcpDumpCSVData(std::ostringstream&);
 	bool gcpDumpManagedData(art::File*, bool);
 	bool gcpDumpSummaryManagedData(art::File*);
 	bool dumpClassCntHistograms(art::File* dumpFile,
@@ -894,8 +894,8 @@ public:
   bool gcpDumpHistAtomicSpaceTable(art::File*);
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
-	bool gcpDumpCSVData(void);
-	bool gcpDumpCSVGlobalDataSummary(std::ostream&);
+	bool gcpDumpCSVData(std::ostringstream&);
+	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
 
 	bool gcpDumpManagedData(art::File*, bool);
   bool gcpDumpSummaryManagedData(art::File*);
@@ -927,7 +927,7 @@ public:
 
 class GCPThreadAllocManager : public GCHistogramDataManager {
 protected:
-	bool gcpDumpTotalSummaryCSVData(void);
+	bool gcpDumpTotalSummaryCSVData(std::ostringstream&);
 public:
 	// a global record holder for all histograms
 	GCHistogramObjSizesManager* objSizesHistMgr_;
@@ -955,9 +955,9 @@ public:
 	bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
 
-	bool gcpDumpCSVData(void);
-	bool gcpDumpCSVGlobalDataSummary(std::ostream&);
-	bool gcpDumpThreadHistogramCSVData(void);
+	bool gcpDumpCSVData(std::ostringstream&);
+	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
+	bool gcpDumpThreadHistogramCSVData(std::ostringstream&);
 };//GCPThreadAllocManager
 
 

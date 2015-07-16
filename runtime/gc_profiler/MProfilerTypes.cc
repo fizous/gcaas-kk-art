@@ -407,19 +407,18 @@ bool GCHistogramObjSizesManager::gcpDumpHistAtomicSpaceTable(
 
 
 bool GCHistogramObjSizesManager::gcpDumpCSVGlobalDataSummary(
-		std::ostream& outputStream) {
+		std::ostringstream& outputStream) {
 	GCPPairHistogramRecords* pairData =
 			(GCPPairHistogramRecords*) histData_;
 	outputStream << "TotalAllocObjects:" <<
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
-			"; TotalAllocSpace:" <<
-			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal);
+			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal) << "\n";
 
 	return true;
 }
 
-bool GCHistogramObjSizesManager::gcpDumpCSVData(void) {
-	std::ostream outputStream = LOG(ERROR);
+bool GCHistogramObjSizesManager::gcpDumpCSVData(
+		std::ostringstream& outputStream) {
   bool _success = true;
 	_success &= gcpDumpCSVGlobalDataSummary(outputStream);
 
@@ -433,9 +432,8 @@ bool GCHistogramObjSizesManager::gcpDumpCSVData(void) {
 				"; HistogramEntryObjCnt:"<<
 				StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
 				"; HistogramEntryObjSize:"<<
-				StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
+				StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal) << "\n";
 	}
-	outputStream.flush();
 	return true;
 }
 
@@ -728,7 +726,7 @@ void GCPThreadAllocManager::logManagedData(void) {
 
 
 bool GCPThreadAllocManager::gcpDumpCSVGlobalDataSummary(
-		std::ostream& outputStream) {
+		std::ostringstream& outputStream) {
 	GCPPairHistogramRecords* pairData =
 			(GCPPairHistogramRecords*) histData_;
 	outputStream << "TotalAllocObjects:" <<
@@ -736,16 +734,18 @@ bool GCPThreadAllocManager::gcpDumpCSVGlobalDataSummary(
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal) <<
 			", threadCount:" << StringPrintf("%zd",
-					Runtime::Current()->GetVMProfiler()->threadProfList_.size());
+					Runtime::Current()->GetVMProfiler()->threadProfList_.size()) << "\n";
 
-	return objSizesHistMgr_->gcpDumpCSVData();
+	return objSizesHistMgr_->gcpDumpCSVData(outputStream);
 }
 
-bool GCPThreadAllocManager::gcpDumpTotalSummaryCSVData(void) {
-	return objSizesHistMgr_->gcpDumpCSVData();
+bool GCPThreadAllocManager::gcpDumpTotalSummaryCSVData(
+		std::ostringstream& outputStream) {
+	return objSizesHistMgr_->gcpDumpCSVData(outputStream);
 }
 
-bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
+bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(
+		std::ostringstream& outputStream) {
 	GCPHistRecData* _countDataP = NULL;
 	GCPHistRecData* _sizeDataP  = NULL;
 	for (const auto& threadProf :
@@ -757,13 +757,13 @@ bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
 		for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
 			_countDataP = &_thrDataManager->sizeHistograms_[i].countData_;
 			_sizeDataP = &_thrDataManager->sizeHistograms_[i].sizeData_;
-			LOG(ERROR) << "ThreadIndex:"<<
+			outputStream << "ThreadIndex:"<<
 					StringPrintf("%llu", _threadMainRecord->countData_.dataRec_.index) <<
 					"; histIndex:"  << StringPrintf("%llu", _countDataP->dataRec_.index) <<
 					"; objectsCnt:" <<
 					StringPrintf("%.0f", _countDataP->dataRec_.cntTotal) <<
 					"; ObjectsSize:"<<
-					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal);
+					StringPrintf("%.0f", _sizeDataP->dataRec_.cntTotal) <<"\n";
 		}
 
 	}
@@ -771,7 +771,7 @@ bool GCPThreadAllocManager::gcpDumpThreadHistogramCSVData(void) {
 	return true;
 }
 
-bool GCPThreadAllocManager::gcpDumpCSVData(void) {
+bool GCPThreadAllocManager::gcpDumpCSVData(std::ostringstream& outputStream) {
 	for (const auto& threadProf : Runtime::Current()->GetVMProfiler()->threadProfList_) {
 		GCHistogramDataManager* _histMgr =
 				threadProf->histogramManager_;
@@ -791,17 +791,17 @@ bool GCPThreadAllocManager::gcpDumpCSVData(void) {
 				_record->getReferenceStringName(&threadNameP);
 				//LOG(ERROR) << "set in final stage";
 			}
-			LOG(ERROR) << "ThreadAllocIndex:" <<
+			outputStream << "ThreadAllocIndex:" <<
 					StringPrintf("%llu", _record->countData_.dataRec_.index) <<
 					"; ThreadAllocName:" << threadNameP <<
 					"; ThreadTotalObjCnt:" << StringPrintf("%.0f",_record->countData_.dataRec_.cntTotal) <<
-					"; ThreadTotalSpace:" << StringPrintf("%.0f",_record->sizeData_.dataRec_.cntTotal);
+					"; ThreadTotalSpace:" << StringPrintf("%.0f",_record->sizeData_.dataRec_.cntTotal) << "\n";
 //			LOG(ERROR) << "ThreadAllocName: " << threadNameP;
 //			gcpLogDataRecord(LOG(ERROR), &_record->countData_.dataRec_);
 		}
 	}
-	gcpDumpTotalSummaryCSVData();
-	gcpDumpThreadHistogramCSVData();
+	gcpDumpTotalSummaryCSVData(outputStream);
+	gcpDumpThreadHistogramCSVData(outputStream);
 	//int _indexIter = 0;
 
 
@@ -1574,26 +1574,26 @@ void GCClassTableManager::printClassNames(void) {
 
 
 
-bool GCClassTableManager::gcpDumpCSVData(void) {
+bool GCClassTableManager::gcpDumpCSVData(std::ostringstream& outputStream) {
 	GCPPairHistogramRecords* pairData =
 			(GCPPairHistogramRecords*) histData_;
-	LOG(ERROR) << "TotalAllocObjects:" <<
+	outputStream << "TotalAllocObjects:" <<
 			StringPrintf("%.0f", pairData->countData_.dataRec_.cntTotal) <<
 			"; TotalAllocSpace:" <<
 			StringPrintf("%.0f", pairData->sizeData_.dataRec_.cntTotal) <<
 			"; LoadedClasses:" <<
 			StringPrintf("%zd",
-					Runtime::Current()->GetInternTable()->classTableProf_.size());
+					Runtime::Current()->GetInternTable()->classTableProf_.size()) << "\n";
 	for (const std::pair<uint64_t, mprofiler::GCPHistRecData*>& it :
 			Runtime::Current()->GetInternTable()->classTableProf_) {
 		mprofiler::GCPPairHistogramRecords* _rec =
 				(GCPPairHistogramRecords*) it.second;
 		GCPHistogramRec* countP = _rec->countData_.gcpGetDataRecP();
 		GCPHistogramRec* sizeP = _rec->sizeData_.gcpGetDataRecP();
-		LOG(ERROR) << "clzIndex:" << StringPrintf("%llu", countP->index) <<
+		outputStream << "clzIndex:" << StringPrintf("%llu", countP->index) <<
 				"; TotalObjsCnt:" <<  	StringPrintf("%.0f", countP->cntTotal) <<
 				"; TotalSpace:" <<  	StringPrintf("%.0f", sizeP->cntTotal) <<
-				"; name:" << _rec->getRefrenecePrettyName();
+				"; name:" << _rec->getRefrenecePrettyName() << "\n";
 	}
 	return true;
 }
