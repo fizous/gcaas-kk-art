@@ -172,8 +172,6 @@ int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 
-
-
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 
 inline uint64_t GCPauseThreadManager::GetRelevantRealTime(void)  {

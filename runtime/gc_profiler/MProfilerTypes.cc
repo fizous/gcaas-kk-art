@@ -545,7 +545,7 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 	objSizesHistMgr_->gcpNoAggAddSingleDataToPairHist(objSize, &objSizesHistMgr_->sizeHistograms_[histIndex]);
 }
 
-inline void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
+void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj, GCMMPThreadProf* thProf) {
 	if(thProf->histogramManager_ != NULL) {
 		thProf->histogramManager_->addObject(allocatedMemory, objSize, obj);
@@ -1118,7 +1118,7 @@ void GCClassTableManager::initHistograms(void) {
 	//LOG(ERROR) << "GCClassTableManager::initHistograms";
 }
 
-inline GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
+GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 		mirror::Object* obj) {
 	if(klass == NULL)
 		return NULL;
