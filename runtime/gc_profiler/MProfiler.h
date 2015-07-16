@@ -657,7 +657,7 @@ public:
   //void dumpProfData(bool);
   void gcpLogPerfData(void);
 };
-/*
+
 class RefDistanceProfiler : public CohortProfiler {
 public:
 
@@ -671,19 +671,8 @@ public:
 		LOG(ERROR) << "CohortProfiler : Constructor of CohortProfiler";
 	}
 
-  void initHistDataManager(void);
-  void setHistogramManager(GCMMPThreadProf*);
-  void gcpRemoveObject(size_t sizeOffset, mirror::Object* obj);
-//  bool periodicDaemonExec(void);
-  void gcpAddObject(size_t allocatedMemory, size_t objSize,
-  		mirror::Object* obj);
-  void gcpAddObject(size_t, size_t){}
-  bool dettachThread(GCMMPThreadProf*);
-
-  //void dumpProfData(bool);
-  void gcpLogPerfData(void);
 };
-*/
+
 
 class ClassProfiler : public ObjectSizesProfiler {
 public:
