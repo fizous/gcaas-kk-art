@@ -1127,10 +1127,10 @@ void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
 void GCRefDistanceManager::logManagedData(void) {
 	LOG(ERROR) << "----dumping Positive----------";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%d",posRefDist_[i].total_);
+		LOG(ERROR) << i << ": " << StringPrintf("%d",posRefDist_[i].total_.load());
 	}
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_);
+		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_.load());
 	}
 }
 
