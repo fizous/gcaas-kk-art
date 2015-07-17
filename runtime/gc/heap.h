@@ -298,9 +298,9 @@ class Heap {
   }
 
   // Write barrier for array operations that update many field positions
-  void WriteBarrierArray(const mirror::Object* dst, int start_offset /*start_offset*/,
-                         size_t length/*length TODO: element_count or byte_count?*/) {
-  	gcpIncMutationCnt();
+  void WriteBarrierArray(const mirror::Object* dst, int /*start_offset*/,
+                         size_t /*length TODO: element_count or byte_count?*/) {
+  	//gcpIncMutationCnt();
     card_table_->MarkCard(dst);
   }
 #else
