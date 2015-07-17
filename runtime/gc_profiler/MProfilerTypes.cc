@@ -1140,7 +1140,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 	size_t allocatedSpace =
 			Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(sourceObj);
 	if(allocatedSpace == 0) {
-		LOG(ERROR) << "Skipping Allocated space of source is zero";
+		GCMMP_VLOG(INFO) << "Skipping Allocated space of source is zero";
 		return;
 	}
 
@@ -1157,7 +1157,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 	allocatedSpace =
 				Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(oldObj);
 	if(allocatedSpace == 0) {
-		LOG(ERROR) << "Skipping Allocated space of sink is zero";
+		GCMMP_VLOG(INFO) << "Skipping Allocated space of sink is zero";
 		return;
 	}
 	GCPExtraObjHeader* _sinkProfHeader =
