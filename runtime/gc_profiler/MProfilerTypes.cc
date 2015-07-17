@@ -1183,8 +1183,8 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		directionCase = 0;
 	} else {
 		if(_sourceProfHeader->objBD < _sinkProfHeader->objBD) { //switch
-			oldObj = sourceObj;
-			youngObj = sinkObj;
+			oldObj = const_cast<mirror::Object*>(sourceObj);
+			youngObj = const_cast<mirror::Object*>(sinkObj);
 			_oldProfHeader = _sourceProfHeader;
 			_youngProfHeader = _sinkProfHeader;
 			directionCase = -1;
