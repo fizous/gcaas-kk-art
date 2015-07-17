@@ -1144,7 +1144,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		return;
 	}
 
-	mirror::Object* youngObj = reinterpret_cast<mirror::Object*>(sourceObj);
+	mirror::Object* youngObj = const_cast<mirror::Object*>(sourceObj);
 
 	GCPExtraObjHeader* _sourceProfHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, youngObj);
@@ -1153,7 +1153,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		GCMMP_VLOG(INFO)  << "---------Found the source as none registered object";
 		return;
 	}
-	mirror::Object* oldObj = reinterpret_cast<mirror::Object*>(sinkObj);
+	mirror::Object* oldObj = const_cast<mirror::Object*>(sinkObj);
 	allocatedSpace =
 				Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(oldObj);
 	if(allocatedSpace == 0) {
