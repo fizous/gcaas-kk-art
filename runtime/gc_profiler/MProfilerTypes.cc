@@ -1161,7 +1161,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		return;
 	}
 	GCPExtraObjHeader* _sinkProfHeader =
-			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, oldObjb);
+			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, oldObj);
 	if(_sinkProfHeader->objSize == 0) {
 		//the object was not registered
 		GCMMP_VLOG(INFO)  << "---------Found the sink as none registered object";
