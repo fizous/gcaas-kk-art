@@ -364,7 +364,7 @@ public:
   	thProf->histogramManager_ = NULL;
   };
 
-  virtual void setThHistogramManager(GCMMPThreadProf* thProf, Thread* thread) {
+  virtual void setThHistogramManager(GCMMPThreadProf* thProf, Thread*) {
   	setHistogramManager(thProf);
   }
 
@@ -639,16 +639,15 @@ public:
 
 	CohortProfiler(GCMMP_Options* opts, void* entry) :
 		ObjectSizesProfiler(opts, entry, false) {
-		initializeCohortProfilerData(opts, entry, true);
+		initializeCohortProfilerData(true);
 	}
 
 	CohortProfiler(GCMMP_Options* opts, void* entry, bool initHists) :
 		ObjectSizesProfiler(opts, entry, false) {
-		initializeCohortProfilerData(opts, entry, initHists);
+		initializeCohortProfilerData(initHists);
 	}
 
-	void initializeCohortProfilerData(GCMMP_Options* opts, void* entry,
-			bool shouldInitHists) {
+	void initializeCohortProfilerData(bool shouldInitHists) {
 		GCCohortManager::kGCPLastCohortIndex.store(GCPCalcCohortIndex());
 		if(shouldInitHists)
 			initHistDataManager();
