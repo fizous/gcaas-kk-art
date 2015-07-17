@@ -1763,7 +1763,7 @@ void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
 
-void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
+void Heap::gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
 		const mirror::Object* new_value) {
 	mprofiler::VMProfiler::MProfRefDistance(dst, offset.Uint32Value(), new_value);
 }
