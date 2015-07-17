@@ -1143,30 +1143,33 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		LOG(ERROR) << "Skipping Allocated space of source is zero";
 		return;
 	}
+
+	mirror::Object* youngObj = reinterpret_cast<mirror::Object*>(sourceObj);
+
 	GCPExtraObjHeader* _sourceProfHeader =
-			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, sourceObj);
+			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, youngObj);
 	if(_sourceProfHeader->objSize == 0) {
 		//the object was not registered
 		GCMMP_VLOG(INFO)  << "---------Found the source as none registered object";
 		return;
 	}
-
+	mirror::Object* oldObj = reinterpret_cast<mirror::Object*>(sinkObj);
 	allocatedSpace =
-				Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(sinkObj);
+				Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(oldObj);
 	if(allocatedSpace == 0) {
 		LOG(ERROR) << "Skipping Allocated space of sink is zero";
 		return;
 	}
 	GCPExtraObjHeader* _sinkProfHeader =
-			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, sinkObj);
+			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, oldObjb);
 	if(_sinkProfHeader->objSize == 0) {
 		//the object was not registered
 		GCMMP_VLOG(INFO)  << "---------Found the sink as none registered object";
 		return;
 	}
 
-	const mirror::Object* oldObj = sinkObj;
-	const mirror::Object* youngObj = sourceObj;
+
+
 	GCPExtraObjHeader* _oldProfHeader = _sinkProfHeader;
 	GCPExtraObjHeader* _youngProfHeader = _sourceProfHeader;
 
