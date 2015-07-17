@@ -3033,21 +3033,21 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 	GCRefDistanceManager* _manager = getDistanceProfManager();
 	if(_manager == NULL)
 		return;
-	Thread* self = Thread::Current();
-	{
-		MutexLock mu(self, *prof_thread_mutex_);
-		int32_t currMutationCnt =
+	int32_t currMutationCnt =
 				GCHistogramDataManager::GCPTotalMutationsCount.load();
-		GCHistogramDataManager::GCPIncMutations();
-		_manager->profileDistance(dst, member_offset, new_value);
-		if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
-				currMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
-		  receivedSignal_ = true;
+	GCHistogramDataManager::GCPIncMutations();
+	_manager->profileDistance(dst, member_offset, new_value);
+	if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
+			currMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
+		Thread* self = Thread::Current();
+		{
+			MutexLock mu(self, *prof_thread_mutex_);
+			receivedSignal_ = true;
 		  if(hasProfDaemon()) {
 		    prof_thread_cond_->Broadcast(self);
 		  }
 		  // Wake anyone who may have been waiting for the GC to complete.
-		  GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for gcpProfilerDistance:" <<
+		 GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for gcpProfilerDistance:" <<
 		  		self->GetTid() ;
 		}
 	}
