@@ -1767,12 +1767,12 @@ void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 		size_t length) {
 	if(LIKELY(!mprofiler::VMProfiler::IsMProfRunning()))
 			return;
-	mirror::Class* klass = obj->GetClass();
+	mirror::Class* klass = dst->GetClass();
 	if(klass == NULL)
 		return;
 	if (UNLIKELY(klass->IsArrayClass())) {
 		if (klass->IsObjectArrayClass()) {
-			mirror::ObjectArray<mirror::Object>* array =
+			const mirror::ObjectArray<mirror::Object>* array =
 					dst->AsObjectArray<mirror::Object>();
 			for (size_t i = elementPos; i < length; ++i) {
 				 const mirror::Object* element =
