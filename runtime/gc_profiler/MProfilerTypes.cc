@@ -1127,10 +1127,10 @@ void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
 void GCRefDistanceManager::logManagedData(void) {
 	LOG(ERROR) << "----dumping Positive----------";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%f",posRefDist_[i].total_);
+		LOG(ERROR) << i << ": " << StringPrintf("%d",posRefDist_[i].total_);
 	}
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%f",negRefDist_[i].total_);
+		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_);
 	}
 }
 
@@ -1165,8 +1165,8 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		return;
 	}
 
-	mirror::Object* oldObj = sinkObj;
-	mirror::Object* youngObj = sourceObj;
+	const mirror::Object* oldObj = sinkObj;
+	const mirror::Object* youngObj = sourceObj;
 	GCPExtraObjHeader* _oldProfHeader = _sinkProfHeader;
 	GCPExtraObjHeader* _youngProfHeader = _sourceProfHeader;
 

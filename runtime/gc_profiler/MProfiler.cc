@@ -3042,7 +3042,7 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 		GCHistogramDataManager::GCPIncMutations();
 		_manager->profileDistance(dst, member_offset, new_value);
 		if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
-				currMutationCnt % GCHistogramDataManager::kGCMMPMutationWindowSize == 0) {
+				currMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
 		  receivedSignal_ = true;
 		  if(hasProfDaemon()) {
 		    prof_thread_cond_->Broadcast(self);
