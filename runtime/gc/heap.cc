@@ -1765,8 +1765,9 @@ void Heap::gcpIncMutationCnt(void) {
 
 void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 		size_t length) {
-	if(LIKELY(!mprofiler::VMProfiler::IsMProfRunning()))
-			return;
+	mprofiler::VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+	if(LIKELY(mP == NULL || !mP->IsProfilingRunning()))
+		return;
 	mirror::Class* klass = dst->GetClass();
 	if(klass == NULL)
 		return;
