@@ -1119,6 +1119,128 @@ void GCRefDistanceManager::resetCurrentCounters(void) {
 	}
 }
 
+void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
+	resetCurrentCounters();
+}
+
+
+void GCRefDistanceManager::logManagedData(void) {
+	LOG(ERROR) << "----dumping Positive----------";
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		LOG(ERROR) << i << ": " << StringPrintf("%f",posRefDist_[i].total_);
+	}
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		LOG(ERROR) << i << ": " << StringPrintf("%f",negRefDist_[i].total_);
+	}
+}
+
+void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
+		uint32_t member_offset, const mirror::Object* sinkObj) {
+	//we only measure distance if both objects are registered in the profiler
+	size_t allocatedSpace =
+			Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(sourceObj);
+	if(allocatedSpace == 0) {
+		LOG(ERROR) << "Skipping Allocated space of source is zero";
+		return;
+	}
+	GCPExtraObjHeader* _sourceProfHeader =
+			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, sourceObj);
+	if(_sourceProfHeader->objSize == 0) {
+		//the object was not registered
+		GCMMP_VLOG(INFO)  << "---------Found the source as none registered object";
+		return;
+	}
+
+	allocatedSpace =
+				Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(sinkObj);
+	if(allocatedSpace == 0) {
+		LOG(ERROR) << "Skipping Allocated space of sink is zero";
+		return;
+	}
+	GCPExtraObjHeader* _sinkProfHeader =
+			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedSpace, sinkObj);
+	if(_sinkProfHeader->objSize == 0) {
+		//the object was not registered
+		GCMMP_VLOG(INFO)  << "---------Found the sink as none registered object";
+		return;
+	}
+
+	mirror::Object* oldObj = sinkObj;
+	mirror::Object* youngObj = sourceObj;
+	GCPExtraObjHeader* _oldProfHeader = _sinkProfHeader;
+	GCPExtraObjHeader* _youngProfHeader = _sourceProfHeader;
+
+	int directionCase = 1;
+	size_t _refDistanceIndex = 0;
+	size_t _refDistance = 0;
+
+
+	if(sourceObj == sinkObj) {
+		//special case when self reference
+		directionCase = 0;
+	} else {
+		if(_sourceProfHeader->objBD < _sinkProfHeader->objBD) { //switch
+			oldObj = sourceObj;
+			youngObj = sinkObj;
+			_oldProfHeader = _sourceProfHeader;
+			_youngProfHeader = _sinkProfHeader;
+			directionCase = -1;
+		}
+		size_t _startRowOld, _startIndexOld, _endRowOld, _endIndexOld = 0;
+		size_t _startRowYoung, _startIndexYoung, _endRowYoung, _endIndexYoung = 0;
+		getCoAddrFromBytes(&_startRowOld, &_startIndexOld, &_endRowOld,
+				&_endIndexOld, _oldProfHeader->objBD, _oldProfHeader->objSize);
+		getCoAddrFromBytes(&_startRowYoung, &_startIndexYoung, &_endRowYoung,
+				&_endIndexYoung, _youngProfHeader->objBD, _youngProfHeader->objSize);
+		GCPCohortRecordData* _oldCohortRecP =
+				getCoRecFromIndices(_endRowOld, _endIndexOld);
+		double _oldPopFactor = _oldCohortRecP->liveSize / _oldCohortRecP->totalSize;
+		size_t _oldBoundary =
+				(_oldProfHeader->objBD + _oldProfHeader->objSize) % kGCMMPCohortSize;
+		size_t _youngBoundary =
+				(_youngProfHeader->objBD) % kGCMMPCohortSize;
+		if(_endRowOld == _startRowYoung && _endIndexOld == _startIndexYoung) {
+			//special case when both objects in the same cohort
+			_refDistance = (size_t) (_oldPopFactor * (_youngBoundary - _oldBoundary));
+		} else {
+			_refDistance += (size_t)((kGCMMPCohortSize - _oldBoundary) * _oldPopFactor);
+			GCPCohortRecordData*_youngCohortRecP =
+							getCoRecFromIndices(_startRowYoung, _startIndexYoung);
+			double _youngPopFactor =
+					_youngCohortRecP->liveSize / _youngCohortRecP->totalSize;
+			_refDistance +=  (size_t)(_youngPopFactor * _youngBoundary);
+			size_t _rowIter = _endRowOld, _colIter = _endIndexOld;
+			GCPCohortRecordData* _cohorRecIter = NULL;
+			while(true) {
+				incColIndex(&_rowIter, &_colIter);
+				if(_colIter == _startIndexYoung && _startRowYoung == _rowIter)
+					break;
+				_cohorRecIter =  getCoRecFromIndices(_rowIter, _colIter);
+				_refDistance +=  (size_t)(_cohorRecIter->liveSize);
+			}
+		}
+	}
+
+	if(directionCase == -1) {
+		_refDistance += _oldProfHeader->objSize - member_offset;
+	} else if (directionCase == 1) {
+		_refDistance += member_offset + _oldProfHeader->objSize;
+	} else {
+		_refDistance += member_offset;
+		selReferenceStats_.live_++;
+	}
+	_refDistanceIndex = (32 - CLZ(_refDistance));
+	if(directionCase == -1) {
+		negRefDist_[_refDistanceIndex].live_++;
+		negRefDist_[_refDistanceIndex].total_++;
+	} else {
+		posRefDist_[_refDistanceIndex].live_++;
+		posRefDist_[_refDistanceIndex].total_++;
+	}
+	selReferenceStats_.total_++;
+}
+
+
 /********************* GCHistogramDataManager profiling ****************/
 
 

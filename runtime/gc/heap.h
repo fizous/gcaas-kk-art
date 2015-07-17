@@ -293,7 +293,7 @@ class Heap {
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset offset,
   		const mirror::Object* new_value) {
-  	gcpIncMutationCnt();
+  	gcpIncMutationCnt(dst, offset, new_value);
     card_table_->MarkCard(dst);
   }
 

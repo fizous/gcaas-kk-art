@@ -182,7 +182,7 @@ uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
-
+size_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZE;
 VMProfiler* GCMMPThreadProf::mProfiler = NULL;
 AtomicInteger VMProfiler::GCPTotalAllocBytes;
 
@@ -3025,6 +3025,40 @@ bool ThreadAllocProfiler::dettachThread(GCMMPThreadProf* thProf) {
 //}
 
 
+/******************* ref distance profiler ******************/
+
+
+void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
+		uint32_t member_offset, const mirror::Object* new_value) {
+	GCRefDistanceManager* _manager = getDistanceProfManager();
+	if(_manager == NULL)
+		return;
+	int32_t currMutationCnt = 0;
+	Thread* self = Thread::Current();
+	{
+		MutexLock mu(self, *prof_thread_mutex_);
+		int32_t currMutationCnt =
+				GCHistogramDataManager::GCPTotalMutationsCount.load();
+		GCHistogramDataManager::GCPIncMutations();
+		_manager->profileDistance(dst, member_offset, new_value);
+		if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
+				currMutationCnt % GCHistogramDataManager::kGCMMPMutationWindowSize == 0) {
+		  receivedSignal_ = true;
+		  if(hasProfDaemon()) {
+		    prof_thread_cond_->Broadcast(self);
+		  }
+		  // Wake anyone who may have been waiting for the GC to complete.
+		  GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for gcpProfilerDistance:" <<
+		  		self->GetTid() ;
+		}
+	}
+}
+
+void RefDistanceProfiler::initHistDataManager(void) {
+	hitogramsData_ = new GCRefDistanceManager(&GCPTotalAllocBytes);
+	LOG(ERROR) << "RefDistanceProfiler::initHistDataManager";
+}
+
 
 
 
@@ -3251,6 +3285,9 @@ void ClassProfiler::gcpLogPerfData() {
 	if(false)
 		dumpAllClasses();
 }
+
+
+
 
 //void ClassProfiler::dumpProfData(bool isLastDump) {
 //  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
@@ -3505,19 +3542,6 @@ void ClassProfiler::gcpLogPerfData() {
 //inline void CohortProfiler::notifyFreeing(size_t objSize, size_t allocSize) {
 //	GCP_DECLARE_REMOVE_ALLOC(objSize, allocSize);
 //}
-
-/******************* ref distance profiler ******************/
-
-
-void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
-		uint32_t member_offset, const mirror::Object* new_value) {
-
-}
-
-void RefDistanceProfiler::initHistDataManager(void) {
-	hitogramsData_ = new GCRefDistanceManager(&GCPTotalAllocBytes);
-	LOG(ERROR) << "RefDistanceProfiler::initHistDataManager";
-}
 
 
 }// namespace mprofiler

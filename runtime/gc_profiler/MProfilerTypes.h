@@ -26,6 +26,7 @@
 
 /* window size of the dumping daya */
 #define GCP_WINDOW_RANGE_LOG							16
+#define GCP_MUTATIONS_WINDOW_SIZE					5000
 
 /* number of buckets to create the histogram */
 //#define GCP_MAX_COHORT_ARRAYLET_CAP				128
@@ -819,12 +820,21 @@ class GCRefDistanceManager : public GCCohortManager {
 protected:
 	void initDistanceArray(void);
 public:
+	static size_t kGCMMPMutationWindowSize;
 	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
 	GCPDistanceRecord negRefDist_[kGCMMPMaxHistogramEntries];
+	GCPDistanceRecord selReferenceStats_;
 
 	GCRefDistanceManager(AtomicInteger*);
 
 	void resetCurrentCounters();
+
+	void profileDistance(const mirror::Object*,
+			uint32_t, const mirror::Object*);
+
+	void gcpFinalizeProfileCycle(void);
+
+	void logManagedData(void);
 };
 
 
