@@ -1129,6 +1129,7 @@ void GCRefDistanceManager::logManagedData(void) {
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 		LOG(ERROR) << i << ": " << StringPrintf("%d",posRefDist_[i].total_.load());
 	}
+	LOG(ERROR) << "----dumping Negative----------";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_.load());
 	}
