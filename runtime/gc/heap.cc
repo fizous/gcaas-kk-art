@@ -1774,14 +1774,19 @@ void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 		if (klass->IsObjectArrayClass()) {
 			const mirror::ObjectArray<mirror::Object>* array =
 					dst->AsObjectArray<mirror::Object>();
+			MemberOffset
+			dst_offset(DataOffset(sizeof(mirror::Object*)).Int32Value() +
+					elementPos * sizeof(mirror::Object*));
 			for (size_t i = elementPos; i < length; ++i) {
-				 const mirror::Object* element =
-						 array->GetWithoutChecks(static_cast<int32_t>(i));
-				 if(element == NULL)
+//				 const mirror::Object* element =
+//						 array->GetWithoutChecks(static_cast<int32_t>(i));
+				mirror::Object* object = dst->GetFieldObject<Object*>(dst_offset, false);
+				if(object == NULL)
 					 continue;
 				 size_t width = sizeof(mirror::Object*);
-				 MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-				 mprofiler::VMProfiler::MProfRefDistance(dst, offset.Uint32Value(), element);
+				 //MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+				 mprofiler::VMProfiler::MProfRefDistance(dst, dst_offset.Uint32Value(), object);
+				 dst_offset = MemberOffset(dst_offset.Uint32Value() + sizeof(mirror::Object*));
 			}
 		}
 	}
