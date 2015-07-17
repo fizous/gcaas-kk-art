@@ -3033,7 +3033,6 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 	GCRefDistanceManager* _manager = getDistanceProfManager();
 	if(_manager == NULL)
 		return;
-	int32_t currMutationCnt = 0;
 	Thread* self = Thread::Current();
 	{
 		MutexLock mu(self, *prof_thread_mutex_);
