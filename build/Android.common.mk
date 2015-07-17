@@ -46,9 +46,10 @@ endif
 
 
 #
-# Used to ART GC PRofiler
+# Used to ART GC Profiler
 #
 ART_USE_GC_PROFILER := false
+ART_USE_GC_PROFILER_REF_DIST := false
 ifneq ($(wildcard art/ART_USE_GC_PROFILER),)
 $(info Enabling ART_USE_GC_PROFILER because of existence of art/ART_USE_GC_PROFILER)
 ART_USE_GC_PROFILER := true
@@ -57,6 +58,13 @@ ifeq ($(WITH_ART_USE_GC_PROFILER), true)
 ART_USE_GC_PROFILER := true
 endif
 
+ifneq ($(wildcard art/ART_USE_GC_PROFILER_REF_DIST),)
+$(info Enabling ART_USE_GC_PROFILER_REF_DIST because of existence of art/ART_USE_GC_PROFILER_REF_DIST)
+ART_USE_GC_PROFILER_REF_DIST := true
+endif
+ifeq ($(WITH_ART_USE_GC_PROFILER_REF_DIST), true)
+ART_USE_GC_PROFILER_REF_DIST := true
+endif
 #
 # Used to enable smart mode
 #
@@ -138,6 +146,9 @@ ifeq ($(ART_USE_GC_PROFILER),true)
   art_cflags += -DART_USE_GC_PROFILER=1
 endif
 
+ifeq ($(ART_USE_GC_PROFILER_REF_DIST),true)
+  art_cflags += -DART_USE_GC_PROFILER_REF_DIST=1
+endif
 
 ifeq ($(ART_SEA_IR_MODE),true)
   art_cflags += -DART_SEA_IR_MODE=1
