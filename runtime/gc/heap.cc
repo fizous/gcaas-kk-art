@@ -1763,9 +1763,34 @@ void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
 
+void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
+		size_t length) {
+	if(LIKELY(!mprofiler::VMProfiler::IsMProfRunning()))
+			return;
+	mirror::Class* klass = obj->GetClass();
+	if(klass == NULL)
+		return;
+	if (UNLIKELY(klass->IsArrayClass())) {
+		if (klass->IsObjectArrayClass()) {
+			mirror::ObjectArray<mirror::Object>* array =
+					dst->AsObjectArray<mirror::Object>();
+			for (size_t i = elementPos; i < length; ++i) {
+				 const mirror::Object* element =
+						 array->GetWithoutChecks(static_cast<int32_t>(i));
+				 if(element == NULL)
+					 continue;
+				 size_t width = sizeof(mirror::Object*);
+				 MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+				 mprofiler::VMProfiler::MProfRefDistance(dst, offset.Uint32Value(), element);
+			}
+		}
+	}
+}
+
+
 void Heap::gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
 		const mirror::Object* new_value) {
-	mprofiler::VMProfiler::MProfRefDistance(dst, offset.Uint32Value(), new_value);
+
 }
 
 void Heap::PostGcVerification(collector::GarbageCollector* gc) {
