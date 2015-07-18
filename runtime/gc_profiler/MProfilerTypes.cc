@@ -1110,6 +1110,9 @@ void GCRefDistanceManager::initDistanceArray(void) {
 		posRefDist_[i].index_ = _index;
 		negRefDist_[i].index_ = -_index;
 	}
+	mutationStats_.index_ = 0.0;
+	selReferenceStats_.index_ = 1.0;
+
 }
 
 
@@ -1259,34 +1262,45 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 
 		double _selfRefPercTotal = 0.0;
 		double _selfRefPercLastWindow = 0.0;
-		copyToDisplayRecord(&_recDisplayMuts, &mutationStats_);
-		_recDisplayMuts.index_ = mutationStats_.total_.load() * 1.0;
-		_success = dumpFile->WriteFully(&_recDisplayMuts, sizeof(GCPDistanceRecDisplay));
-		copyToDisplayRecord(&_recDisplaySelfMuts, &selReferenceStats_);
-		_recDisplaySelfMuts.index_ = mutationStats_.total_.load() * 1.0;
-		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, sizeof(GCPDistanceRecDisplay));
 
+		double _totalPercTotal = 0.0;
+		double _totalPercLastWindow = 0.0;
+
+		copyToDisplayRecord(&_recDisplayMuts, &mutationStats_);
+		copyToDisplayRecord(&_recDisplaySelfMuts, &selReferenceStats_);
+
+//		_recDisplayMuts.index_ = mutationStats_.total_.load() * 1.0;
+//		_recDisplaySelfMuts.index_ = mutationStats_.total_.load() * 1.0;
 		if(_recDisplayMuts.live_ != 0) {
 			_selfRefPercLastWindow =
 					(1.0 * _recDisplaySelfMuts.live_) / _recDisplayMuts.live_;
 		}
-		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
 		if(_recDisplayMuts.total_ != 0) {
 			_selfRefPercTotal = (1.0 * _recDisplaySelfMuts.total_) / _recDisplayMuts.total_;
 		}
-		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
+		_totalPercTotal = 100.0 - _selfRefPercTotal;
+		_totalPercLastWindow = 100.0 - _selfRefPercLastWindow;
 
-		_selfRefPercLastWindow = 100.0 - _selfRefPercLastWindow;
-		_selfRefPercTotal = 100.0 - _selfRefPercTotal;
+		_success = dumpFile->WriteFully(&_recDisplayMuts, sizeof(GCPDistanceRecDisplay));
+		_success &= dumpFile->WriteFully(&_totalPercLastWindow, sizeof(double));
+		_success &= dumpFile->WriteFully(&_totalPercTotal, sizeof(double));
+
+
+
+		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, sizeof(GCPDistanceRecDisplay));
 		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
 		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
+
+		if(_success)
+			_success &= VMProfiler::GCPDumpEndMarker(dumpFile);
+
 		if(!_success) {
 			LOG(ERROR) << "error dumping global record in GCRefDistanceManager::gcpDumpHistTable";
 		}
 	}
-	copyArrayForDisplay(negRefDist_);
-	_success = dumpFile->WriteFully(arrayDisplay_,
-			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
+//	copyArrayForDisplay(negRefDist_);
+//	_success = dumpFile->WriteFully(arrayDisplay_,
+//			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
 	copyArrayForDisplay(posRefDist_);
 	_success &= dumpFile->WriteFully(arrayDisplay_,
 			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
