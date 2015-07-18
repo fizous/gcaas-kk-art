@@ -1254,11 +1254,32 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		bool dumpGlobalData) {
 	bool _success   = false;
 	if(dumpGlobalData) {
-		GCPDistanceRecDisplay _recDisplay;
-		copyToDisplayRecord(&_recDisplay, &mutationStats_);
-		_success = dumpFile->WriteFully(&_recDisplay, sizeof(GCPDistanceRecDisplay));
-		copyToDisplayRecord(&_recDisplay, &selReferenceStats_);
-		_success &= dumpFile->WriteFully(&_recDisplay, sizeof(GCPDistanceRecDisplay));
+		GCPDistanceRecDisplay _recDisplayMuts;
+		GCPDistanceRecDisplay _recDisplaySelfMuts;
+
+		double _selfRefPercTotal = 0.0;
+		double _selfRefPercLastWindow = 0.0;
+		copyToDisplayRecord(&_recDisplayMuts, &mutationStats_);
+		_recDisplayMuts.index_ = mutationStats_.total_.load() * 1.0;
+		_success = dumpFile->WriteFully(&_recDisplayMuts, sizeof(GCPDistanceRecDisplay));
+		copyToDisplayRecord(&_recDisplaySelfMuts, &selReferenceStats_);
+		_recDisplaySelfMuts.index_ = mutationStats_.total_.load() * 1.0;
+		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, sizeof(GCPDistanceRecDisplay));
+
+		if(_recDisplayMuts.live_ != 0) {
+			_selfRefPercLastWindow =
+					(1.0 * _recDisplaySelfMuts.live_) / _recDisplayMuts.live_;
+		}
+		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
+		if(_recDisplayMuts.total_ != 0) {
+			_selfRefPercTotal = (1.0 * _recDisplaySelfMuts.total_.) / _recDisplayMuts.total_;
+		}
+		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
+
+		_selfRefPercLastWindow = 100.0 - _selfRefPercLastWindow;
+		_selfRefPercTotal = 100.0 - _selfRefPercTotal;
+		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
+		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
 		if(!_success) {
 			LOG(ERROR) << "error dumping global record in GCRefDistanceManager::gcpDumpHistTable";
 		}

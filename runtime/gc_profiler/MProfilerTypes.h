@@ -837,6 +837,7 @@ protected:
 			copyToDisplayRecord(&arrayDisplay_[iter], &arrRefs[iter]);
 		}
 	}
+
 public:
 	static size_t kGCMMPMutationWindowSize;
 	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
