@@ -833,7 +833,7 @@ protected:
 		dist->total_ = (size_t)src->total_.load();
 	}
 	void copyArrayForDisplay(GCPDistanceRecord arrRefs[]){
-		for(size_t iter = 0; iter < kGCMMPMaxHistogramEntries; iter++) {
+		for(int iter = 0; iter < kGCMMPMaxHistogramEntries; iter++) {
 			copyToDisplayRecord(&arrayDisplay_[iter], &arrRefs[iter]);
 		}
 	}
