@@ -838,6 +838,11 @@ protected:
 		}
 	}
 
+	void logRecDisplay(GCPDistanceRecDisplay* recDisplay) {
+		LOG(ERROR) << "index:" << StringPrintf("%f", recDisplay->index_) <<
+				"; live:" << recDisplay->live_ << "; total:" << recDisplay->total_;
+	}
+
 public:
 	static size_t kGCMMPMutationWindowSize;
 	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];

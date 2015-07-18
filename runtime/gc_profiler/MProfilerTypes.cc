@@ -1257,6 +1257,7 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		bool dumpGlobalData) {
 	bool _success   = false;
 	if(dumpGlobalData) {
+		LOG(ERROR) << "-----summary-----";
 		GCPDistanceRecDisplay _recDisplayMuts;
 		GCPDistanceRecDisplay _recDisplaySelfMuts;
 
@@ -1285,12 +1286,18 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		_success &= dumpFile->WriteFully(&_totalPercLastWindow, sizeof(double));
 		_success &= dumpFile->WriteFully(&_totalPercTotal, sizeof(double));
 
+		logRecDisplay(&_recDisplayMuts);
+		LOG(ERROR) << "lastWindowPerc:" << StringPrintf("%f", _totalPercLastWindow)
+				<< "; totalPerc:" << StringPrintf("%f", _totalPercTotal);
 
 
 		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, sizeof(GCPDistanceRecDisplay));
 		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
 		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
 
+		logRecDisplay(&_recDisplaySelfMuts);
+		LOG(ERROR) << "lastWindowPerc:" << StringPrintf("%f", _selfRefPercLastWindow)
+				<< "; totalPerc:" << StringPrintf("%f", _selfRefPercTotal);
 		if(_success)
 			_success &= VMProfiler::GCPDumpEndMarker(dumpFile);
 
