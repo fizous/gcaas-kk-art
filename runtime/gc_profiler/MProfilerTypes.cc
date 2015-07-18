@@ -1272,7 +1272,7 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		}
 		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
 		if(_recDisplayMuts.total_ != 0) {
-			_selfRefPercTotal = (1.0 * _recDisplaySelfMuts.total_.) / _recDisplayMuts.total_;
+			_selfRefPercTotal = (1.0 * _recDisplaySelfMuts.total_) / _recDisplayMuts.total_;
 		}
 		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
 
