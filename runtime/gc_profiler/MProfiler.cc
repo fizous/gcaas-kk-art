@@ -3059,7 +3059,16 @@ void RefDistanceProfiler::initHistDataManager(void) {
 }
 
 
+void RefDistanceProfiler::gcpFinalizeHistUpdates(void) {
+	GCRefDistanceManager* _manager = getDistanceProfManager();
+  if(_manager == NULL)
+  	return;
+  _manager->gcpFinalizeProfileCycle();
 
+	//GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	//we are relaxed we do not need to lookup for the whole records
+	//getObjHistograms()->gcpCheckForResetHist();
+}
 
 /********************************* Cohort profiling ****************/
 

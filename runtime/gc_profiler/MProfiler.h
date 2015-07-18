@@ -685,6 +685,7 @@ public:
 		return (GCRefDistanceManager*) hitogramsData_;
 	}
 	void initHistDataManager(void);
+	void gcpFinalizeHistUpdates(void);
 };
 
 /**************** ClassProfiler Profiler********************/
