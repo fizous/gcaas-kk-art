@@ -1296,9 +1296,9 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 			LOG(ERROR) << "error dumping global record in GCRefDistanceManager::gcpDumpHistTable";
 		}
 	}
-//	copyArrayForDisplay(negRefDist_);
-//	_success = dumpFile->WriteFully(arrayDisplay_,
-//			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
+	copyArrayForDisplay(negRefDist_);
+	_success = dumpFile->WriteFully(arrayDisplay_,
+			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
 	copyArrayForDisplay(posRefDist_);
 	_success &= dumpFile->WriteFully(arrayDisplay_,
 			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
