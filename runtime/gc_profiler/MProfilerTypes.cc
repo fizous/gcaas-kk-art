@@ -1130,16 +1130,7 @@ void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
 }
 
 
-void GCRefDistanceManager::logManagedData(void) {
-	LOG(ERROR) << "----dumping Positive----------";
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%d",posRefDist_[i].total_.load());
-	}
-	LOG(ERROR) << "----dumping Negative----------";
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_.load());
-	}
-}
+
 
 void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		uint32_t member_offset, const mirror::Object* sinkObj) {
@@ -1316,6 +1307,16 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 	return _success;
 }
 
+void GCRefDistanceManager::logManagedData(void) {
+	LOG(ERROR) << "----dumping Positive----------";
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		logRecDisplay(&arrayDisplay_[i]);
+	}
+	LOG(ERROR) << "----dumping Negative----------";
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_.load());
+	}
+}
 
 bool GCRefDistanceManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData) {
