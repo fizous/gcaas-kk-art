@@ -1049,6 +1049,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 
 bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData){
+
 	bool _print   = false;
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
@@ -1103,11 +1104,11 @@ GCRefDistanceManager::GCRefDistanceManager(AtomicInteger* atomicInt) :
 }
 
 void GCRefDistanceManager::initDistanceArray(void) {
-	uint64_t _index = 0;
+	double _index = 0.0;
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		_index = (uint64_t)((i) & (0x00000000FFFFFFFF));
+		_index = i * 1.0;/*(uint64_t)((i) & (0x00000000FFFFFFFF));*/
 		posRefDist_[i].index_ = _index;
-		negRefDist_[i].index_ = _index;
+		negRefDist_[i].index_ = -_index;
 	}
 }
 
@@ -1117,6 +1118,8 @@ void GCRefDistanceManager::resetCurrentCounters(void) {
 		posRefDist_[i].resetLiveData();
 		negRefDist_[i].resetLiveData();
 	}
+	mutationStats_.resetLiveData();
+	selReferenceStats_.resetLiveData();
 }
 
 void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
@@ -1232,6 +1235,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 	} else {
 		_refDistance += member_offset;
 		selReferenceStats_.live_++;
+		selReferenceStats_.total_++;
 	}
 	_refDistanceIndex = (32 - CLZ(_refDistance));
 	if(directionCase == -1) {
@@ -1241,9 +1245,42 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		posRefDist_[_refDistanceIndex].live_++;
 		posRefDist_[_refDistanceIndex].total_++;
 	}
-	selReferenceStats_.total_++;
+
+	mutationStats_.live_++;
+	mutationStats_.total_++;
 }
 
+bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
+		bool dumpGlobalData) {
+	bool _success   = false;
+	if(dumpGlobalData) {
+		GCPDistanceRecDisplay _recDisplay;
+		copyToDisplayRecord(&_recDisplay, &mutationStats_);
+		_success = dumpFile->WriteFully(&_recDisplay, sizeof(GCPDistanceRecDisplay));
+		copyToDisplayRecord(&_recDisplay, &selReferenceStats_);
+		_success &= dumpFile->WriteFully(&_recDisplay, sizeof(GCPDistanceRecDisplay));
+		if(!_success) {
+			LOG(ERROR) << "error dumping global record in GCRefDistanceManager::gcpDumpHistTable";
+		}
+	}
+	copyArrayForDisplay(negRefDist_);
+	_success = dumpFile->WriteFully(arrayDisplay_,
+			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
+	copyArrayForDisplay(posRefDist_);
+	_success &= dumpFile->WriteFully(arrayDisplay_,
+			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
+	if(_success)
+		_success &= VMProfiler::GCPDumpEndMarker(dumpFile);
+	return _success;
+}
+
+
+bool GCRefDistanceManager::gcpDumpManagedData(art::File* dumpFile,
+		bool dumpGlobalData) {
+	LOG(ERROR) << "dumping reference distances";
+	bool _success = gcpDumpHistTable(dumpFile, dumpGlobalData);
+	return _success;
+}
 
 /********************* GCHistogramDataManager profiling ****************/
 

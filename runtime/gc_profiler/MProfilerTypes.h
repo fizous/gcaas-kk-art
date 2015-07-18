@@ -807,7 +807,7 @@ public:
 
 class GCPDistanceRecord {
 public:
-	uint64_t index_;
+	double index_;
 	AtomicInteger live_;
 	AtomicInteger total_;
 
@@ -816,14 +816,35 @@ public:
 	}
 };
 
+typedef struct PACKED(4) GCPDistanceRecDisplay_S {
+	double index_;
+	size_t live_;
+	size_t total_;
+}  GCPDistanceRecDisplay;
+
 class GCRefDistanceManager : public GCCohortManager {
 protected:
 	void initDistanceArray(void);
+
+	void copyToDisplayRecord(GCPDistanceRecDisplay* dist,
+			GCPDistanceRecord* src) {
+		dist->index_ = src->index_;
+		dist->live_ = (size_t)src->live_.load();
+		dist->total_ = (size_t)src->total_.load();
+	}
+	void copyArrayForDisplay(GCPDistanceRecord arrRefs[]){
+		for(size_t iter = 0; iter < kGCMMPMaxHistogramEntries; iter++) {
+			copyToDisplayRecord(&arrayDisplay_[iter], &arrRefs[iter]);
+		}
+	}
 public:
 	static size_t kGCMMPMutationWindowSize;
 	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
 	GCPDistanceRecord negRefDist_[kGCMMPMaxHistogramEntries];
+
+	GCPDistanceRecDisplay arrayDisplay_[kGCMMPMaxHistogramEntries];
 	GCPDistanceRecord selReferenceStats_;
+	GCPDistanceRecord mutationStats_;
 
 	GCRefDistanceManager(AtomicInteger*);
 
@@ -835,6 +856,9 @@ public:
 	void gcpFinalizeProfileCycle(void);
 
 	void logManagedData(void);
+
+	bool gcpDumpManagedData(art::File*, bool);
+	bool gcpDumpHistTable(art::File*, bool);
 };
 
 
