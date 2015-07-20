@@ -92,9 +92,9 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   CHECK(found != mem_maps_.end()) << "Attempted to free large object which was not live";
   DCHECK_GE(num_bytes_allocated_, found->second->Size());
   size_t allocation_size = found->second->Size();
-  size_t objectSize = allocation_size;//AllocationSizeNoOverhead(ptr);
+  //size_t objectSize = allocation_size;//AllocationSizeNoOverhead(ptr);
   num_bytes_allocated_ -= allocation_size;
-  GCMMP_HANDLE_FINE_PRECISE_FREE(objectSize, ptr);
+  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, ptr);
   --num_objects_allocated_;
   delete found->second;
   mem_maps_.erase(found);
