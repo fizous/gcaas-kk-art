@@ -178,8 +178,8 @@ int SignalCatcher::WaitForSignal(Thread* self, SignalSet& signals) {
   if (!ShouldHalt()) {
     // Let the user know we got the signal, just in case the system's too screwed for us to
     // actually do what they want us to do...
-    LOG(INFO) << *self << ": reacting to signal " << signal_number;
-
+    //LOG(INFO) << *self << ": reacting to signal " << signal_number;
+  	LOG(INFO) << "threadid="<<self->GetTid() << ": reacting to signal " << signal_number;
     // If anyone's holding locks (which might prevent us from getting back into state Runnable), say so...
     Runtime::Current()->DumpLockHolders(LOG(INFO));
   }
