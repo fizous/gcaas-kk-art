@@ -53,7 +53,8 @@ const char * VMProfiler::benchmarks[] = {
 			"com.antutu.ABenchMark",
 			"com.android.cm3",
 			"purdue.gcbench",
-			"com.pandora.android"
+			"com.pandora.android",
+			"com.android.browser"
 			//"com.android.systemui"  //we can add this to the profiled targets
 			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
 };
