@@ -54,7 +54,8 @@ const char * VMProfiler::benchmarks[] = {
 			"com.android.cm3",
 			"purdue.gcbench",
 			"com.pandora.android",
-			"com.android.browser"
+			"com.android.browser",
+			"com.rovio.angrybirds"
 			//"com.android.systemui"  //we can add this to the profiled targets
 			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
 };
