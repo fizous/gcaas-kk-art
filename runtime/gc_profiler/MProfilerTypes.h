@@ -719,11 +719,24 @@ protected:
 		return allocRec_->load() - objSize;
 	}
 
+	size_t calcObjLifeTime(size_t objBD) {
+		return allocRec_->load() - objBD;
+	}
+
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
 		return kGCMMPCohortSize - rec->totalSize;
 	}
 
 	uint64_t calcNewCohortIndex();
+
+	bool gcpDumpSizeHistAtomicLifeTable(art::File*,
+			bool);
+	bool gcpDumpCntHistAtomicLifeTable(art::File*,
+			bool);
+	bool gcpDumpSizeHistLifeTable(art::File*,
+			bool);
+	bool gcpDumpCntHistLifeTable(art::File*,
+			bool);
 public:
 	static constexpr int kGCMMPMaxRowCap 		= GCP_MAX_COHORT_ROW_CAP;
 	//static constexpr int kGCMMPMaxTableCap 	= GCP_MAX_COHORT_ARRAYLET_CAP;
@@ -732,6 +745,8 @@ public:
 	GCPCohortsRow*    		currCoRowP;
 	GCPCohortsTable 			cohortsTable_;
 	AtomicInteger* 				allocRec_;
+
+	GCPPairHistogramRecords lifeTimeHistograms_[kGCMMPMaxHistogramEntries];
 
 	GCCohortManager(AtomicInteger*);
 	void initHistograms(void);
@@ -747,6 +762,8 @@ public:
   void gcpDumpCohortData(art::File*);
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
 	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
+	void gcpFinalizeProfileCycle(void);
+	void gcpZeorfyAllAtomicRecords(void);
 
 	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
 		rec->liveSize  += fit;

@@ -929,6 +929,10 @@ void GCCohortManager::initHistograms(void) {
 
 	addCohortRow();
 	addCohortRecord();
+
+	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
+		lifeTimeHistograms_[i].gcpPairSetRecordIndices((uint64_t)((i+1) & (0x00000000FFFFFFFF)));
+	}
 }
 
 inline uint64_t GCCohortManager::calcNewCohortIndex() {
@@ -981,6 +985,10 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 		GCMMP_VLOG(INFO)  << "---------Found none registered object";
 		return;
 	}
+	size_t lifeTime = calcObjLifeTime(_profHeader->objBD);
+	size_t histIndex = (32 - CLZ(lifeTime)) - 1;
+	lifeTimeHistograms_[histIndex].gcpPairIncRecData(_profHeader->objSize);
+	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(_profHeader->objSize);
 
 	size_t _startRow, _startIndex, _endRow, _endIndex = 0;
 	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
@@ -1046,10 +1054,84 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 
 }
 
+bool GCCohortManager::gcpDumpSizeHistAtomicLifeTable(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _dataWritten = false;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		_dataWritten = lifeTimeHistograms_[i].sizeData_.gcpDumpAtomicHistRec(dump_file);
+		if(!_dataWritten)
+			break;
+//		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//		 _success &=
+//		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+//	 bool _success =
+//	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	if(_dataWritten)
+		_dataWritten &=
+			 VMProfiler::GCPDumpEndMarker(dump_file);
+	 return _dataWritten;
+}
+
+bool GCCohortManager::gcpDumpCntHistAtomicLifeTable(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _dataWritten = false;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		_dataWritten = lifeTimeHistograms_[i].countData_.gcpDumpAtomicHistRec(dump_file);
+		if(!_dataWritten)
+			break;
+//		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//		 _success &=
+//		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+//	 bool _success =
+//	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	if(_dataWritten)
+		_dataWritten &=
+			 VMProfiler::GCPDumpEndMarker(dump_file);
+	 return _dataWritten;
+}
+
+bool GCCohortManager::gcpDumpSizeHistLifeTable(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _dataWritten = false;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		_dataWritten = lifeTimeHistograms_[i].sizeData_.gcpDumpHistRec(dump_file);
+		if(!_dataWritten)
+			break;
+//		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//		 _success &=
+//		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+//	 bool _success =
+//	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	if(_dataWritten)
+		_dataWritten &=
+			 VMProfiler::GCPDumpEndMarker(dump_file);
+	 return _dataWritten;
+}
+
+bool GCCohortManager::gcpDumpCntHistLifeTable(art::File* dump_file,
+		bool dumpGlobalRec) {
+	bool _dataWritten = false;
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		_dataWritten = lifeTimeHistograms_[i].countData_.gcpDumpHistRec(dump_file);
+		if(!_dataWritten)
+			break;
+//		GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//		 _success &=
+//		   	dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+	}
+//	 bool _success =
+//	   	dump_file->WriteFully(histogramTable, totalHistogramSize);
+	if(_dataWritten)
+		_dataWritten &=
+			 VMProfiler::GCPDumpEndMarker(dump_file);
+	 return _dataWritten;
+}
 
 bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData){
-
 	bool _print   = false;
 	//GCPCohortRecordData* _recP = NULL;
 	size_t _rowBytes = 0;
@@ -1069,6 +1151,11 @@ bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 
 	if(_print)
 		_print &= VMProfiler::GCPDumpEndMarker(dumpFile);
+
+	_print &= gcpDumpCntHistLifeTable(dumpFile, false);
+	_print &= gcpDumpSizeHistLifeTable(dumpFile, false);
+	//_print &= gcpDumpCntHistAtomicLifeTable(dumpFile, false);
+	//_print &= gcpDumpSizeHistAtomicLifeTable(dumpFile, false);
 
 	return _print;
 }
@@ -1093,6 +1180,20 @@ void GCCohortManager::logManagedData(void) {
 		}
 		_rIndex++;
 	}
+}
+
+void GCCohortManager::gcpZeorfyAllAtomicRecords(void) {
+	for (int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		lifeTimeHistograms_[i].gcpZerofyPairHistAtomicRecData();
+	}
+}
+
+void GCCohortManager::gcpFinalizeProfileCycle(void) {
+  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  if(_newCohortIndex != GCPGetLastManagedCohort()) {
+  	gcpZeorfyAllAtomicRecords();
+  	GCPSetLastManagedCohort(_newCohortIndex);
+  }
 }
 
 
