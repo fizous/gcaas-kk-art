@@ -641,6 +641,22 @@ CPUFreqProfiler::CPUFreqProfiler(GCMMP_Options* argOptions, void* entry):
 
 
 
+void VMProfiler::createAppList(GCMMP_Options* argOptions) {
+	if(argOptions->app_list_path_ == NULL)
+		return;
+
+  std::string _file_lines;
+  if (!ReadFileToString(argOptions->app_list_path_, &_file_lines)) {
+    LOG(ERROR) << "(couldn't read " << argOptions->app_list_path_ << ")\n";
+    return;
+  }
+  Split(_file_lines, '\n', app_list_);
+  LOG(ERROR) << "---dump list of packages---";
+  for (size_t i = 0; i < app_list_.size(); ++i) {
+  	LOG(ERROR) << app_list_[i];
+  }
+}
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				index_(argOptions->mprofile_type_),
 				enabled_((argOptions->mprofile_type_ != MProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != MProfiler::kGCMMPDisableMProfile)),
@@ -671,6 +687,9 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
+
+
+
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
 			VMProfiler::kGCMMPLogAllocWindow = argOptions->alloc_window_log_;
@@ -1927,10 +1946,10 @@ void MProfiler::OpenDumpFile() {
 
 void VMProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
-		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
-			if (strcmp(name, benchmarks[i]) == 0) {
+		for (size_t i = 0; i < app_list_.size(); i++) {
+			if (strcmp(name, app_list_[i].c_str()) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " <<
-						GCMMP_ARRAY_SIZE(benchmarks);
+						app_list_.size();
 				GCMMPThreadProf::mProfiler = this;
 				startProfiling();
 				//InitializeProfiler();

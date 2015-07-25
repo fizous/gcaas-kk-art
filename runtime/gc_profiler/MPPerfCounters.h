@@ -24,6 +24,7 @@ namespace art {
 namespace mprofiler {
 
 typedef struct GCMMP_Options_s {
+	std::string app_list_path_;
 	int mprofile_type_;
 	int mprofile_grow_method_;
 	int mprofile_gc_affinity_;

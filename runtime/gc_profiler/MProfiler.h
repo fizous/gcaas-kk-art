@@ -156,6 +156,8 @@ public:
 
 	static int kGCMMPLogAllocWindowDump;
 
+	std::vector<std::string> app_list_;
+
 	const bool enabled_;
 	// System thread used as main (thread id = 1).
 
@@ -211,6 +213,7 @@ public:
   void createProfDaemon();
 
   VMProfiler(GCMMP_Options*, void*);
+  void createAppList(GCMMP_Options*);
 	virtual ~VMProfiler(){}
 
 	static void* runDaemon(void* arg);

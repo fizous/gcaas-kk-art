@@ -323,9 +323,17 @@ size_t ParseIntegerOrDie(const std::string& s) {
 }
 
 void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprofiler_opts){
-	mprofiler_opts->mprofile_type_=
+
+	const char* _bench_list_path = getenv("GC_PROFILE_BENCHMARK_LIST");
+	if(_bench_list_path != NULL) {
+		mprofiler_opts->app_list_path_;
+		LOG(ERROR) << "XXXXXXX Environment variable bench list set to: " << mprofiler_opts->app_list_path_;
+	} else {
+		LOG(ERROR) << "XXXXXXX Environment variable is set to NULL";
+	}
+	mprofiler_opts->mprofile_type_ =
 			art::mprofiler::VMProfiler::kGCMMPDisableMProfile;
-	mprofiler_opts->mprofile_grow_method_=
+	mprofiler_opts->mprofile_grow_method_ =
 			art::mprofiler::VMProfiler::kGCMMPDefaultGrowMethod;
 	mprofiler_opts->mprofile_gc_affinity_ =
 			art::mprofiler::VMProfiler::kGCMMPDefaultAffinity;
