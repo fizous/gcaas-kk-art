@@ -326,7 +326,7 @@ void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprof
 
 	const char* _bench_list_path = getenv("GC_PROFILE_BENCHMARK_LIST");
 	if(_bench_list_path != NULL) {
-		mprofiler_opts->app_list_path_;
+		mprofiler_opts->app_list_path_ = _bench_list_path;
 		LOG(ERROR) << "XXXXXXX Environment variable bench list set to: " << mprofiler_opts->app_list_path_;
 	} else {
 		LOG(ERROR) << "XXXXXXX Environment variable is set to NULL";

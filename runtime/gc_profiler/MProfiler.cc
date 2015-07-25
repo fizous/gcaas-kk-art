@@ -689,7 +689,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 		if(_found) {
 
 
-
+			createAppList(argOptions);
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
 			VMProfiler::kGCMMPLogAllocWindow = argOptions->alloc_window_log_;
