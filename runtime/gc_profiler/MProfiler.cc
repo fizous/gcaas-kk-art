@@ -648,7 +648,12 @@ void VMProfiler::createAppList(GCMMP_Options* argOptions) {
   std::string _file_lines;
   if (!ReadFileToString(argOptions->app_list_path_, &_file_lines)) {
     LOG(ERROR) << "(couldn't read " << argOptions->app_list_path_ << ")\n";
-    return;
+    if (!ReadFileToString("/data/anr/benchmarks/apps.list", &_file_lines)) {
+    	LOG(ERROR) << "(couldn't read /data/anr/benchmarks/apps.list)\n";
+    	return;
+    } else {
+    	LOG(ERROR) << "(succeeded /data/anr/benchmarks/apps.list)\n";
+    }
   }
   Split(_file_lines, '\n', app_list_);
   LOG(ERROR) << "---dump list of packages---";
