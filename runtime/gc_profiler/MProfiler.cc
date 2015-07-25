@@ -687,8 +687,6 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
-
-
 			createAppList(argOptions);
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
@@ -1946,6 +1944,26 @@ void MProfiler::OpenDumpFile() {
 
 void VMProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
+
+		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
+			if (strcmp(name, benchmarks[i]) == 0) {
+				LOG(ERROR)<< "MVProfiler found a target VM " << name << " " <<
+						i;
+				LOG(ERROR) << "size of app list is " << app_list_.size();
+				if(app_list_.size() > 0) {
+					if (strcmp(name, app_list_[i].c_str()) != 0) {
+						LOG(ERROR) << "we could not match" << app_list_.size();
+					} else {
+						LOG(ERROR) << "we could  match" << app_list_.size();
+					}
+				}
+				GCMMPThreadProf::mProfiler = this;
+				startProfiling();
+				//InitializeProfiler();
+				return;
+			}
+		}
+
 		for (size_t i = 0; i < app_list_.size(); i++) {
 			if (strcmp(name, app_list_[i].c_str()) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " <<
