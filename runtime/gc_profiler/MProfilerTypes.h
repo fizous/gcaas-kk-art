@@ -263,8 +263,8 @@ public:
 	}
 
 	static void GCPIncAtomicRecData(GCPHistogramRecAtomic* rec) {
-		rec->cntLive.cntLive++;
-		rec->cntTotal.cntTotal++;
+		rec->cntLive++;
+		rec->cntTotal++;
 	}
 
 	void gcpIncAtomicRecData(void){
