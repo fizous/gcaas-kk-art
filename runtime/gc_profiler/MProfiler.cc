@@ -179,6 +179,7 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				 NULL,
 				 &createVMProfiler<RefDistanceProfiler>
 		},//RefDistance Profiler
+};//VMProfiler::profilTypes
 
 uint64_t GCPauseThreadManager::startCPUTime = 0;
 uint64_t GCPauseThreadManager::startRealTime = 0;
@@ -3189,7 +3190,7 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
-	accountFreeing(getCohortManager()->gcpRemoveObject(allocatedMemory, obj));
+	accountFreeing(getCohortManager()->removeObject(allocatedMemory, obj));
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
