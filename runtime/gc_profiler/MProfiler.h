@@ -103,6 +103,7 @@ class GCMMPHeapIntegral {
 	double gcCPULoad_;
 	double gcCPUIdleLoad_;
 
+public:
 	GCMMPHeapIntegral(void): lastHeapSize_(0), lastTime_(0),	accIntegral_(0),
 			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {}
 
