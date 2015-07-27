@@ -181,15 +181,17 @@ void GCHistogramObjSizesManager::removeObject(size_t allocSpace,
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
 
 	if(_extraHeader->objSize == 0)
-		return;
+		return 0;
 	GCHistogramDataManager* _histManager = _extraHeader->histRecP;
 
 	if(_histManager == NULL)
-		return;
+		return 0;
 
 	size_t histIndex = (32 - CLZ(_extraHeader->objSize)) - 1;
 	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex,
 			_extraHeader->objSize, true);
+
+	return _extraHeader->objSize;
 
 }
 
@@ -575,22 +577,23 @@ void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
 	}
 }
 
-void GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+size_t GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
 
 	if(_extraHeader->objSize == 0)
-		return;
+		return 0;
 	GCHistogramDataManager* _histManager = _extraHeader->histRecP;
 
 	if(_histManager == NULL)
-		return;
+		return 0;
 
 	size_t histIndex = (32 - CLZ(_extraHeader->objSize)) - 1;
 	((GCHistogramObjSizesManager*)_histManager)->gcpRemoveObjectFromIndex(histIndex,
 			_extraHeader->objSize,	true);
 	objSizesHistMgr_->gcpRemoveObjFromEntriesWIndex(histIndex,
 			_extraHeader->objSize);
+	return _extraHeader->objSize;
 }
 
 inline void GCPThreadAllocManager::calculatePercentiles(void) {
@@ -977,13 +980,13 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 
 
 
-void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
+size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
 		//the object was not registered
 		GCMMP_VLOG(INFO)  << "---------Found none registered object";
-		return;
+		return 0;
 	}
 	size_t lifeTime = calcObjLifeTime(_profHeader->objBD);
 	size_t histIndex = (32 - CLZ(lifeTime)) - 1;
@@ -1004,7 +1007,7 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
 		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
-		return;
+		return 0;
 	}
 
 	//for performance we need only to handle last and first cohort;
@@ -1034,6 +1037,8 @@ void GCCohortManager::gcpRemoveObject(size_t allocSpace, mirror::Object* obj) {
 			updateDelCohRecObj(_LastRecP, kGCMMPCohortSize);
 		}
 	}
+
+	return _profHeader->objSize;
 
 }
 
@@ -1604,18 +1609,20 @@ GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 //}
 
 
-inline void GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+inline size_t GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
 		GCMMP_VLOG(INFO) << "--------- GCClassTableManager::removeObject: Found none registered object";
-		return;
+		return 0;
 	}
 	GCPHistRecData* _dataRec = _profHeader->dataRec;
 	if(_dataRec == NULL)
-		return;
+		return 0;
 	gcpDecPairRecData(_profHeader->objSize, _dataRec);
 	gcpDecAtomicPairRecData(_profHeader->objSize, _dataRec);
+
+	return _profHeader->objSize;
 }
 
 

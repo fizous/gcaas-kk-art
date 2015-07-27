@@ -228,13 +228,7 @@ public:
 		dataRec_.cntLive--;
 	}
 
-	bool gcpDecAtomicRecData(size_t space){
-		if(atomicDataRec_.cntLive > (int32_t)space) {
-			atomicDataRec_.cntLive.fetch_sub(space);
-			return true;
-		}
-		return false;
-	}
+
 
 	bool gcpDecAtomicRecData(void){
 		if(atomicDataRec_.cntLive > 0) {
@@ -254,15 +248,38 @@ public:
 		dataRec_.cntTotal++;
 	}
 
+
+	static bool GCPDecAtomicRecData(size_t space, GCPHistogramRecAtomic* rec) {
+		if(rec->cntLive > (int32_t)space) {
+			rec->cntLive.fetch_sub(space);
+			return true;
+		}
+		return false;
+	}
+
+
+	bool gcpDecAtomicRecData(size_t space){
+		return GCPDecAtomicRecData(space, &atomicDataRec_);
+	}
+
+	static void GCPIncAtomicRecData(GCPHistogramRecAtomic* rec) {
+		rec->cntLive.cntLive++;
+		rec->cntTotal.cntTotal++;
+	}
+
 	void gcpIncAtomicRecData(void){
-		atomicDataRec_.cntLive++;
-		atomicDataRec_.cntTotal++;
+		GCPIncAtomicRecData(&atomicDataRec_);
+	}
+
+	static void GCPIncAtomicRecData(size_t space, GCPHistogramRecAtomic* rec) {
+		rec->cntLive.fetch_add(space);
+		rec->cntTotal.fetch_add(space);
 	}
 
 	void gcpIncAtomicRecData(size_t space){
-		atomicDataRec_.cntLive.fetch_add(space);
-		atomicDataRec_.cntTotal.fetch_add(space);
+		GCPIncAtomicRecData(space, &atomicDataRec_);
 	}
+
 };
 
 class GCPPairHistogramRecords : public GCPHistRecData {
@@ -441,8 +458,8 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
-  virtual void removeObject(size_t,
-  	mirror::Object*){}
+  virtual size_t removeObject(size_t,
+  	mirror::Object*) {return 0;}
 
   virtual void logManagedData(void) {}
   virtual bool gcpDumpHistRec(art::File*);
@@ -761,7 +778,7 @@ public:
 
   void gcpDumpCohortData(art::File*);
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
-	void gcpRemoveObject(size_t allocSpace, mirror::Object* obj);
+	size_t removeObject(size_t allocSpace, mirror::Object* obj);
 	void gcpFinalizeProfileCycle(void);
 	void gcpZeorfyAllAtomicRecords(void);
 

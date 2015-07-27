@@ -40,7 +40,7 @@
 #define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
 #define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) GCP_DECLARE_ADD_PRECISE_ALLOC(x,y,z)
-#define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
+#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::GCPAddMProfilingExtraBytes(actualSize))
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
@@ -51,7 +51,7 @@
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
-#define GCMMP_HANDLE_FINE_PRECISE_FREE(x,y) 									((void) 0)
+#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) 									((void) 0)
 #define GCP_RESET_LASTLIVE_DATA()															((void) 0)
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)										((void) 0)
 
@@ -92,6 +92,62 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 	GCMMPDumpCurrentUsage dumpMethod;
 	VMProfilerConstructor creator_;
 }GCMMPProfilingEntry;
+
+
+/* struct to keep track of integrals (area under curve for the heap volume)*/
+typedef struct GC_MMPHeapIntegral_S {
+	size_t lastHeapSize_; /* the heap from which we start measuring */
+	size_t lastTime_;		 /* the point we last check the integration */
+	double accIntegral_;  /* accumulative integral */
+	double gcCounts_;
+	double gcCPULoad_;
+	double gcCPUIdleLoad_;
+} GC_MMPHeapIntegral;
+
+
+class GCMMPHeapIntegral {
+	size_t lastHeapSize_; /* the heap from which we start measuring */
+	size_t lastTime_;		 /* the point we last check the integration */
+	double accIntegral_;  /* accumulative integral */
+	double gcCounts_;
+	double gcCPULoad_;
+	double gcCPUIdleLoad_;
+
+	GCMMPHeapIntegral(void): lastHeapSize_(0), lastTime_(0),	accIntegral_(0),
+			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {}
+
+	void gcpPreCollectionMark(GCPHistogramRecAtomic* allocationRec){
+		size_t deltaAllocBytes =
+				((size_t) allocationRec->cntTotal.load()) - lastTime_;
+
+
+		size_t _currBytes =  (size_t)allocationRec->cntLive.load();
+		size_t _maxHeapP = _currBytes;
+		size_t _minHeapP = lastHeapSize_;
+
+		if(lastHeapSize_ > _currBytes) {
+			_minHeapP = _currBytes;
+			_maxHeapP = lastHeapSize_;
+		}
+
+		double _extraSpace = 0.5 * (_maxHeapP - _minHeapP);
+
+		_extraSpace += deltaAllocBytes * _minHeapP;
+		accIntegral_ += _extraSpace;
+		gcCounts_++;
+	}
+
+	void gcpPostCollectionMark(GCPHistogramRecAtomic* allocationRec) {
+		lastTime_ = (size_t) allocationRec->cntTotal.load();
+		lastHeapSize_ = allocationRec->cntLive.load();
+	}
+
+	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
+		heapStatus->heapIntegral = accIntegral_;
+		heapStatus->gcCounts = gcCounts_;
+	}
+};//GCMMPHeapIntegral
+
 
 
 template <typename T>
@@ -150,7 +206,9 @@ public:
 
 	static const int kGCMMPMaxEventsCounts = 1024;
 
-	static AtomicInteger GCPTotalAllocBytes;
+	//static AtomicInteger GCPTotalAllocBytes;
+
+	static GCPHistogramRecAtomic allocatedBytesData;
 
 	static int kGCMMPLogAllocWindow;
 
@@ -190,6 +248,9 @@ public:
 
   GCMMPHeapStatus heapStatus;
 
+
+  GCMMPHeapIntegral heapIntegral_;
+
   uint64_t GetRelevantCPUTime(void) const {
   	return ProcessTimeNS() - start_cpu_time_ns_;
   }
@@ -221,6 +282,7 @@ public:
   bool IsProfilingEnabled() const {
     return enabled_;
   }
+
   bool IsCreateProfDaemon() const {
     return (flags_ & GCMMP_FLAGS_CREATE_DAEMON);
   }
@@ -275,6 +337,13 @@ public:
 		gc_trimmer_ = thread;
 	}
 
+	void accountFreeing(size_t objSize) {
+		GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
+	}
+
+	void accountAllocating(size_t objSize) {
+		GCPHistRecData::GCPIncAtomicRecData(objSize, &allocatedBytesData);
+	}
 
   void OpenDumpFile(void);
   void InitCommonData(void);
@@ -306,7 +375,8 @@ public:
   size_t getRelevantAllocBytes(void);
   void setThreadAffinity(art::Thread* th, bool complementary);
 
-  static bool MProfRefDistance(const mirror::Object*, uint32_t, const mirror::Object*);
+  static bool MProfRefDistance(const mirror::Object*, uint32_t,
+  		const mirror::Object*);
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
@@ -328,7 +398,8 @@ public:
   static void MProfMarkEndAllocGCHWEvent(void);
   static void MProfMarkStartExplGCHWEvent(void);
   static void MProfMarkEndExplGCHWEvent(void);
-
+  static void MProfMarkPreCollection(void);
+  static void MProfMarkPostCollection(void);
 
   static void MProfMarkWaitTimeEvent(art::Thread*);
   static void MProfMarkEndWaitTimeEvent(art::Thread*);
@@ -345,7 +416,7 @@ public:
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   static int32_t GCPCalcCohortIndex(void) {
-  	return (GCPTotalAllocBytes.load() >> GCHistogramDataManager::kGCMMPCohortLog);
+  	return (allocatedBytesData.cntTotal.load() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
   virtual int32_t getGCEventsCounts(void) {
@@ -354,7 +425,11 @@ public:
   }
 
   virtual void initMarkerManager(void);
-  virtual void notifyFreeing(size_t, mirror::Object*){}
+
+  virtual void notifyFreeing(size_t, mirror::Object*) {
+  	GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
+  }
+
   virtual void attachSingleThread(Thread* t);
 
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
@@ -905,14 +980,6 @@ public:
 
   void ForEach(void (*callback)(GCMMPThreadProf*, void*), void* context);
   bool MainProfDaemonExec(void);
-
-
-
-
-
-
-
-
 
   void ProcessSignalCatcher(int);
 

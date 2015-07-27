@@ -1147,7 +1147,7 @@ void Heap::GetReferringObjects(mirror::Object* o, int32_t max_count,
 void Heap::CollectGarbageForProfile(bool clear_soft_references) {
 	 Thread* self = Thread::Current();
 	  //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
-	  mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
+//	  mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
 	  WaitForConcurrentGcToComplete(self);
 	  CollectGarbageInternal(collector::kGcTypeFull, kGcCauseProfile, clear_soft_references);
 }
@@ -1260,6 +1260,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
       //       Not doing at the moment to ensure soft references are cleared.
     }
   }
+
+  mprofiler::VMProfiler::MProfMarkPreCollection();
   gc_complete_lock_->AssertNotHeld(self);
 
   if (gc_cause == kGcCauseForAlloc && Runtime::Current()->HasStatsEnabled()) {
@@ -1344,6 +1346,7 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
 
   {
       MutexLock mu(self, *gc_complete_lock_);
+      mprofiler::VMProfiler::MProfMarkPostCollection();
       is_gc_running_ = false;
       last_gc_type_ = gc_type;
       // Wake anyone who may have been waiting for the GC to complete.

@@ -139,7 +139,7 @@ class Runtime {
     bool sea_ir_mode_;
 
 
-    mprofiler::GCMMP_Options mprofiler_options_;
+    mprofiler::GCMMP_Options vmprofiler_options_;
     static void InitMProfilerParser(mprofiler::GCMMP_Options*);
     static bool ParseMProfileOption(const std::string&,
     		mprofiler::GCMMP_Options*);
@@ -291,7 +291,7 @@ class Runtime {
   }
 
   mprofiler::VMProfiler* GetVMProfiler() const {
-    return mprofiler_;
+    return vmprofiler_;
   }
 
   InternTable* GetInternTable() const {
@@ -529,7 +529,7 @@ class Runtime {
   // As returned by ClassLoader.getSystemClassLoader().
   jobject system_class_loader_;
 public:
-  mprofiler::VMProfiler* mprofiler_;
+  mprofiler::VMProfiler* vmprofiler_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };
