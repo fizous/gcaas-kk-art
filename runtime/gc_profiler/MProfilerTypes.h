@@ -974,7 +974,7 @@ public:
 
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
-	void removeObject(size_t, mirror::Object*);
+	size_t removeObject(size_t, mirror::Object*);
 	void gcpRemoveObjectFromIndex(size_t, size_t, bool);
 	void gcpRemoveObjFromEntriesWIndex(size_t, size_t);
 
