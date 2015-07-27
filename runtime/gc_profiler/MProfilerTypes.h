@@ -458,8 +458,7 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
-  virtual size_t removeObject(size_t,
-  	mirror::Object*) {return 0;}
+  virtual size_t removeObject(size_t, mirror::Object*) {return 0;}
 
   virtual void logManagedData(void) {}
   virtual bool gcpDumpHistRec(art::File*);
