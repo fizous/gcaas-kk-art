@@ -94,17 +94,7 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 }GCMMPProfilingEntry;
 
 
-/* struct to keep track of integrals (area under curve for the heap volume)*/
-typedef struct GC_MMPHeapIntegral_S {
-	size_t lastHeapSize_; /* the heap from which we start measuring */
-	size_t lastTime_;		 /* the point we last check the integration */
-	double accIntegral_;  /* accumulative integral */
-	double gcCounts_;
-	double gcCPULoad_;
-	double gcCPUIdleLoad_;
-} GC_MMPHeapIntegral;
-
-
+/* class to keep track of integrals (area under curve for the heap volume)*/
 class GCMMPHeapIntegral {
 	size_t lastHeapSize_; /* the heap from which we start measuring */
 	size_t lastTime_;		 /* the point we last check the integration */
@@ -426,8 +416,8 @@ public:
 
   virtual void initMarkerManager(void);
 
-  virtual void notifyFreeing(size_t, mirror::Object*) {
-  	GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
+  virtual void notifyFreeing(size_t objSize, mirror::Object*) {
+  	accountFreeing(objSize, &allocatedBytesData);
   }
 
   virtual void attachSingleThread(Thread* t);
@@ -436,11 +426,11 @@ public:
 
   virtual void setPauseManager(GCMMPThreadProf* thProf) {
   	thProf->pauseManager = NULL;
-  };
+  }
 
   virtual void setHistogramManager(GCMMPThreadProf* thProf) {
   	thProf->histogramManager_ = NULL;
-  };
+  }
 
   virtual void setThHistogramManager(GCMMPThreadProf* thProf, Thread*) {
   	setHistogramManager(thProf);
