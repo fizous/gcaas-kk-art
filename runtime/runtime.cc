@@ -466,7 +466,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->method_trace_file_ = "/data/method-trace-file.bin";
   parsed->method_trace_file_size_ = 10 * MB;
 
-  Runtime::ParsedOptions::InitMProfilerParser(&parsed->mprofiler_options_);
+  Runtime::ParsedOptions::InitMProfilerParser(&parsed->vmprofiler_options_);
 
   for (size_t i = 0; i < options.size(); ++i) {
     const std::string option(options[i].first);
@@ -617,8 +617,8 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
           LOG(WARNING) << "Ignoring unknown -Xgc option: " << gc_options[i];
         }
       }
-    } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->mprofiler_options_)) {
-    	if(parsed->mprofiler_options_.mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
+    } else if (Runtime::ParsedOptions::ParseMProfileOption(option, &parsed->vmprofiler_options_)) {
+    	if(parsed->vmprofiler_options_.mprofile_grow_method_ & art::mprofiler::GC_GROW_METHOD_FG_GC) {
     		 parsed->is_concurrent_gc_enabled_ = false;
     		 LOG(INFO) << "XXX Disable concurrent GC";
     	}
@@ -719,7 +719,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
     }
   }
 
-	if(parsed->mprofiler_options_.gcp_type_ !=
+	if(parsed->vmprofiler_options_.gcp_type_ !=
 			art::mprofiler::MProfiler::kGCMMPDisableMProfile) {
   	if(GCP_OFF_CONCURRENT_GC()) {
   		parsed->is_concurrent_gc_enabled_ = false;
