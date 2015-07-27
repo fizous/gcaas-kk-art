@@ -350,6 +350,10 @@ public:
   bool hasProfDaemon(void);
 
 	void updateHeapAllocStatus(void);
+	int GCPGetCalculateStartBytes(void);
+	int GCPGetCalculateMAXFootPrint(void);
+
+
 	void updateHeapPerfStatus(uint64_t, uint64_t, uint64_t);
 
 	void PreForkPreparation(void);

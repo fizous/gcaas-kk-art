@@ -408,6 +408,21 @@ void VMProfiler::startProfiling(void) {
 }
 
 
+
+inline int VMProfiler::GCPGetCalculateStartBytes(void) {
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+	int _diffLiveConc = heap_->GetConcStartBytes() - heap_->GetBytesAllocated();
+	return _diffLiveConc;
+}
+
+inline int VMProfiler::GCPGetCalculateMAXFootPrint(void) {
+	gc::Heap* heap_ = Runtime::Current()->GetHeap();
+	int _diffLiveConc = heap_->GetMaxAllowedFootPrint() - heap_->GetBytesAllocated();
+	return _diffLiveConc;
+}
+
+
+
 inline void VMProfiler::updateHeapAllocStatus(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 
@@ -418,8 +433,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 	heapStatus.currAllocBytes = (size_t) allocatedBytesData.cntLive.load();//heap_->GetBytesAllocated();
-	heapStatus.concurrentStartBytes = heap_->GetConcStartBytes();
-	heapStatus.currFootPrint = heap_->GetMaxAllowedFootPrint();
+	heapStatus.concurrentStartBytes = heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
+	heapStatus.currFootPrint = heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();
 	heapStatus.softLimit = 0;//heap_->GetMaxMemory();
 	heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
 
