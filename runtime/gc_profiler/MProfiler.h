@@ -417,7 +417,7 @@ public:
   virtual void initMarkerManager(void);
 
   virtual void notifyFreeing(size_t objSize, mirror::Object*) {
-  	accountFreeing(objSize, &allocatedBytesData);
+  	accountFreeing(objSize);
   }
 
   virtual void attachSingleThread(Thread* t);
