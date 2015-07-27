@@ -1314,44 +1314,6 @@ VMProfiler* VMProfiler::CreateVMprofiler(GCMMP_Options* opts) {
 	return profiler;
 }
 
-// Member functions definitions including constructor
-MProfiler::MProfiler(GCMMP_Options* argOptions)
-		: index_(argOptions->mprofile_type_),
-		main_thread_(NULL),
-		gc_daemon_(NULL),
-		prof_thread_(NULL),
-		gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
-		enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile)),
-		running_(false),
-		receivedSignal_(false),
-		start_heap_bytes_(0)
-{
-//	if(IsProfilingEnabled()) {
-//		size_t _loop = 0;
-//		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
-//			if(MProfiler::profilTypes[_loop].id_ == index_)
-//				break; //found
-//		}
-//		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
-//			LOG(ERROR) << "MProfiler : Performance type is not supported";
-//		}
-//		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
-//		flags_ = profEntry->flags_;
-//		dump_file_name_ = profEntry->logFile_;
-//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
-//		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
-//		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
-//																									*prof_thread_mutex_));
-//		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
-//		GCMMP_VLOG(INFO) << "MProfiler Created";
-//
-//	} else {
-//		flags_ = 0;
-//		dump_file_name_ = NULL;
-//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
-//	}
-
-}
 
 
 
@@ -3632,6 +3594,44 @@ int MProfiler::GetGCDaemonID(void)  {
 		return gc_daemon_->GetTid();
 	}
 	return 0;
+}
+// Member functions definitions including constructor
+MProfiler::MProfiler(GCMMP_Options* argOptions)
+		: index_(argOptions->mprofile_type_),
+		main_thread_(NULL),
+		gc_daemon_(NULL),
+		prof_thread_(NULL),
+		gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
+		enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile)),
+		running_(false),
+		receivedSignal_(false),
+		start_heap_bytes_(0)
+{
+//	if(IsProfilingEnabled()) {
+//		size_t _loop = 0;
+//		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
+//			if(MProfiler::profilTypes[_loop].id_ == index_)
+//				break; //found
+//		}
+//		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
+//			LOG(ERROR) << "MProfiler : Performance type is not supported";
+//		}
+//		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+//		flags_ = profEntry->flags_;
+//		dump_file_name_ = profEntry->logFile_;
+//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
+//		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
+//		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
+//																									*prof_thread_mutex_));
+//		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
+//		GCMMP_VLOG(INFO) << "MProfiler Created";
+//
+//	} else {
+//		flags_ = 0;
+//		dump_file_name_ = NULL;
+//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
+//	}
+
 }
 
 #endif // removing MProfiler class

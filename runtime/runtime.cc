@@ -720,7 +720,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   }
 
 	if(parsed->vmprofiler_options_.gcp_type_ !=
-			art::mprofiler::MProfiler::kGCMMPDisableMProfile) {
+			art::mprofiler::VMProfiler::kGCMMPDisableMProfile) {
   	if(GCP_OFF_CONCURRENT_GC()) {
   		parsed->is_concurrent_gc_enabled_ = false;
   		LOG(INFO) << "XXXX Disable Concurrent gc for GC Prof";
