@@ -1153,15 +1153,16 @@ public:
 	GCHistogramDataManager* histogramManager_;
 	/* markers used to set the temporary information to start an event */
 	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
-	static VMProfiler* mProfiler;
+	static VMProfiler* vmProfiler;
 	volatile GCMMPThreadProfState state;
 	GCMMPThProfileTag tag_;
-
-	GCMMPThreadProf(MProfiler*, Thread*);
 	GCMMPThreadProf(VMProfiler*, Thread*);
+#if 0
+	GCMMPThreadProf(MProfiler*, Thread*);
+#endif
 	~GCMMPThreadProf(void);
 
-  void Destroy(MProfiler*);
+  void Destroy(VMProfiler*);
 
   pid_t GetTid() const {
     return pid;

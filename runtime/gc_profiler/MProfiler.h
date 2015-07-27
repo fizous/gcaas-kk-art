@@ -51,7 +51,7 @@
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
-#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) 									((void) 0)
+#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) 	art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
 #define GCP_RESET_LASTLIVE_DATA()															((void) 0)
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)										((void) 0)
 

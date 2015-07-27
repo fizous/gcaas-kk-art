@@ -186,7 +186,7 @@ uint64_t GCPauseThreadManager::startRealTime = 0;
 int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 size_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZE;
-VMProfiler* GCMMPThreadProf::mProfiler = NULL;
+VMProfiler* GCMMPThreadProf::vmProfiler = NULL;
 GCPHistogramRecAtomic VMProfiler::allocatedBytesData;
 
 
@@ -293,7 +293,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	vmProfiler->setThHistogramManager(this, thread);
 	state = GCMMP_TH_RUNNING;
 
-	lifeTime_.startMarker = GCMMPThreadProf::mProfiler->GetRelevantRealTime();
+	lifeTime_.startMarker = GCMMPThreadProf::vmProfiler->GetRelevantRealTime();
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
@@ -307,7 +307,7 @@ void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
 	thProf->pauseManager = new GCPauseThreadManager();
 }
 
-
+#if 0
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	: pid(thread->GetTid()),
 	  suspendedGC(false),
@@ -329,7 +329,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	lifeTime_.finalMarker = 0;
 	GCMMP_VLOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
-
+#endif
 GCMMPThreadProf::~GCMMPThreadProf() {
 
 }
@@ -344,7 +344,7 @@ bool GCMMPThreadProf::StopTimeProfiling(void) {
 	return false;
 }
 
-void GCMMPThreadProf::Destroy(MProfiler* mProfiler) {
+void GCMMPThreadProf::Destroy(VMProfiler* mProfiler) {
 
 }
 
@@ -1622,7 +1622,7 @@ void VMProfiler::GCMMProfPerfCounters(const char* name) {
 			if (strcmp(name, app_list_[i].c_str()) == 0) {
 				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " <<
 						app_list_.size();
-				GCMMPThreadProf::mProfiler = this;
+				GCMMPThreadProf::vmProfiler = this;
 				startProfiling();
 				//InitializeProfiler();
 				return;
