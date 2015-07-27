@@ -918,7 +918,7 @@ public:
 	void initHistograms();
 
 	void addObject(size_t, size_t, mirror::Object*);
-  void removeObject(size_t, mirror::Object*);
+  size_t removeObject(size_t, mirror::Object*);
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
@@ -1046,7 +1046,7 @@ public:
 	/* overriden methods */
 	void initHistograms();
 	void addObject(size_t, size_t, mirror::Object*);
-	void removeObject(size_t, mirror::Object*);
+	size_t removeObject(size_t, mirror::Object*);
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 	void setThreadManager(GCMMPThreadProf*);
 	bool dettachThreadFromManager(GCMMPThreadProf*);
