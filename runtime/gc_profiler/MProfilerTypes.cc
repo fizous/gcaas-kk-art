@@ -1031,7 +1031,7 @@ size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 				break;
 			if(_rowIter >= cohortsTable_.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap){
 				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
-				return;
+				return 0;
 			}
 			_LastRecP =  getCoRecFromIndices(_rowIter, _colIter);
 			updateDelCohRecObj(_LastRecP, kGCMMPCohortSize);
