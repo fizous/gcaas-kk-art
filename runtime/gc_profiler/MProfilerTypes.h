@@ -50,7 +50,6 @@ class Thread;
 
 namespace mprofiler {
 
-class MProfiler;
 class VMProfiler;
 class GCMMPThreadProf;
 class MPPerfCounter;

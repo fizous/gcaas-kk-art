@@ -1365,9 +1365,9 @@ static void GCMMPKillThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	}
 }
 
-static void GCMMPResetThreadField(Thread* t, void* arg) {
-	t->SetProfRec(NULL);
-}
+//static void GCMMPResetThreadField(Thread* t, void* arg) {
+//	t->SetProfRec(NULL);
+//}
 
 
 
@@ -1577,12 +1577,12 @@ void VMProfiler::MProfileSignalCatcher(int signalVal) {
 
 
 
-static void GCMMPAttachThread(Thread* t, void* arg) {
-	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
-	if(mProfiler != NULL) {
-		mProfiler->AttachThread(t);
-	}
-}
+//static void GCMMPAttachThread(Thread* t, void* arg) {
+//	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
+//	if(mProfiler != NULL) {
+//		mProfiler->AttachThread(t);
+//	}
+//}
 
 
 
