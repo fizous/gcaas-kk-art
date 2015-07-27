@@ -230,7 +230,7 @@ void Runtime::Abort() {
 
 bool Runtime::PreZygoteFork() {
   heap_->PreZygoteFork();
-  mprofiler_->PreForkPreparation();
+  vmprofiler_->PreForkPreparation();
   return true;
 }
 
