@@ -846,6 +846,8 @@ public:
 //	}
 //};
 
+
+#if 0
 class MProfiler {
 private:
 
@@ -1001,7 +1003,7 @@ public:
 
   VMProfiler* vmProfile;
 }; //class MProfiler
-
+#endif //romove mprofiler class
 
 }  // namespace mprofiler
 }  // namespace gc
