@@ -618,7 +618,7 @@ class PACKED(4) Thread {
     return old_state;
   }
   friend class SignalCatcher;  // For SetStateUnsafe.
-  friend class mprofiler::MProfiler;  // For SetStateUnsafe.
+  friend class mprofiler::VMProfiler;  // For SetStateUnsafe.
   friend class Dbg;  // F or SetStateUnsafe.
 
   void VerifyStackImpl() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
