@@ -175,7 +175,7 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 //	}
 }
 
-void GCHistogramObjSizesManager::removeObject(size_t allocSpace,
+size_t GCHistogramObjSizesManager::removeObject(size_t allocSpace,
 		mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
