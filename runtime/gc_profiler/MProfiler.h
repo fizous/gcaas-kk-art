@@ -58,6 +58,7 @@
 	  (extendedSize = actualSize)
   #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) ((void) 0)
   #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)							 ((void) 0)
+  #define GCP_PROFILE_OBJ_CLASS(klass, obj)                ((void) 0)
   #if (ART_USE_GC_DEFAULT_PROFILER)
     #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
 		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
