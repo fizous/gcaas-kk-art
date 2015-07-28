@@ -433,8 +433,10 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 	heapStatus.currAllocBytes = (size_t) allocatedBytesData.cntLive.load();//heap_->GetBytesAllocated();
-	heapStatus.concurrentStartBytes = heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
-	heapStatus.currFootPrint = heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();
+	heapStatus.concurrentStartBytes =
+			heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
+	heapStatus.currFootPrint =
+			heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();
 	heapStatus.softLimit = 0;//heap_->GetMaxMemory();
 	heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
 
@@ -482,6 +484,7 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 	}
 }
 
+#if 0
 void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
 	allocatedBytesData.cntTotal.fetch_add(allocSize);
 	if(!IsAllocWindowsSet())
@@ -516,6 +519,7 @@ void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
 
 	}
 }
+#endif
 
 inline void PerfCounterProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	Thread* self = Thread::Current();
@@ -580,7 +584,8 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		    		}
 		    		GCMMPCPIDataDumped dataDumped;
 
-		    		dataDumped.index = ((allocatedBytesData.cntTotal.load()) >> kGCMMPLogAllocWindowDump)  * 1.0;
+		    		dataDumped.index =
+		    				((allocatedBytesData.cntTotal.load()) >> kGCMMPLogAllocWindowDump)  * 1.0;
 		    		dataDumped.currCycles = accData.currCycles;
 		    		dataDumped.currInstructions = accData.currInstructions;
 		    		dataDumped.currCPI =
@@ -688,7 +693,8 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				}
 			}
 		} else {
-			for(size_t _loopI = 0; _loopI < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes); _loopI++) {
+			for(size_t _loopI = 0; _loopI < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes);
+					_loopI++) {
 				if(VMProfiler::profilTypes[_loopI].id_ == index_) {
 					_found = true;
 					break;
@@ -1205,7 +1211,8 @@ void* VMProfiler::runDaemon(void* arg) {
     MutexLock mu(self, *mProfiler->prof_thread_mutex_);
     if(!mProfiler->IsProfilingRunning()) {
 
-    	LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " << self->GetTid();
+    	LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " <<
+    			self->GetTid();
     	mProfiler->prof_thread_ = self;
     	mProfiler->InitCommonData();
     } else {
@@ -1684,7 +1691,8 @@ void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
 		size_t objSize, mirror::Object* obj) {
 	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetVMProfiler()->notifyAllocation(allocatedSpace, objSize, obj);
+		Runtime::Current()->GetVMProfiler()->notifyAllocation(allocatedSpace,
+				objSize, obj);
 	}
 }
 

@@ -46,8 +46,8 @@
 #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
 #define GCP_RESET_LASTLIVE_DATA()
 #else//DVM_ALLOW_GCPROFILER
-#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) ((void) 0)
-#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) ((void) 0)
+#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) 									((void) 0)
+#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) 									((void) 0)
 #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
 #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
 #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
@@ -258,7 +258,9 @@ public:
   }
 
   void attachThreads(void);
+#if 0
   void notifyAllocation(size_t,size_t);
+#endif
   void notifyAllocation(size_t, size_t, mirror::Object*);
 //  virtual void notifyFreeing(size_t, size_t){}
   void notifyFree(size_t);
@@ -515,6 +517,7 @@ public:
 
   void AddEventMarker(GCMMP_ACTIVITY_ENUM);
   void DumpEventMarks(void);
+  bool isMarkHWEvents(void) {return true;}
 
 
 };
