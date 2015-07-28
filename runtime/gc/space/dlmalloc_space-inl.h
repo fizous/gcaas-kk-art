@@ -67,7 +67,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     if(calculatedSize != checkingSize)
     	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
 
-    art::mprofiler::VMProfiler::MProfNotifyAlloc(allocSpaceWithProfHeader, num_bytes, result);
+    GCMMP_NOTIFY_ALLOCATION(allocSpaceWithProfHeader, num_bytes, result);
     ++total_objects_allocated_;
     ++num_objects_allocated_;
   }

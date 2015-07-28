@@ -179,26 +179,26 @@ public:
 
 
 
-	void gcpUpdateRecPercentile(GCPHistogramRec* rootRec){
+	void gcpUpdateRecPercentile(GCPHistogramRec* rootRec) {
 		dataRec_.pcntLive = (dataRec_.cntLive * 100.0) / rootRec->cntLive;
 		dataRec_.pcntTotal = (dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
-	void gcpUnsafeUpdateRecPercentile(GCPHistogramRec* rootRec){
+	void gcpUnsafeUpdateRecPercentile(GCPHistogramRec* rootRec) {
 		dataRec_.pcntLive = (rootRec->cntLive < 1) ? 0.0 :
 				(dataRec_.cntLive * 100.0) / rootRec->cntLive;
 		dataRec_.pcntTotal = (rootRec->cntTotal < 1) ? 0.0 :
 				(dataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
-	void gcpUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec){
+	void gcpUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec) {
 		atomicDataRec_.pcntLive = rootRec->cntLive == 0 ? 0.0 :
 				(atomicDataRec_.cntLive * 100.0) / rootRec->cntLive;
 		atomicDataRec_.pcntTotal = rootRec->cntTotal == 0 ? 0.0 :
 				(atomicDataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}
 
-	void gcpSafeUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec){
+	void gcpSafeUpdateAtomicRecPercentile(GCPHistogramRecAtomic* rootRec) {
 		atomicDataRec_.pcntLive = (atomicDataRec_.cntLive * 100.0) / rootRec->cntLive;
 		atomicDataRec_.pcntTotal = (atomicDataRec_.cntTotal * 100.0) / rootRec->cntTotal;
 	}

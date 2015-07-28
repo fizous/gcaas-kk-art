@@ -48,8 +48,19 @@ endif
 #
 # Used to ART GC Profiler
 #
+ART_USE_GC_DEFAULT_PROFILER := false
 ART_USE_GC_PROFILER := false
 ART_USE_GC_PROFILER_REF_DIST := false
+ART_GC_PROFILER_VERBOSE := false
+
+ifneq ($(wildcard art/ART_USE_GC_DEFAULT_PROFILER),)
+$(info Enabling ART_USE_GC_DEFAULT_PROFILER because of existence of art/ART_USE_GC_DEFAULT_PROFILER)
+ART_USE_GC_DEFAULT_PROFILER := true
+endif
+ifeq ($(WITH_ART_USE_GC_DEFAULT_PROFILER), true)
+ART_USE_GC_DEFAULT_PROFILER := true
+endif
+
 ifneq ($(wildcard art/ART_USE_GC_PROFILER),)
 $(info Enabling ART_USE_GC_PROFILER because of existence of art/ART_USE_GC_PROFILER)
 ART_USE_GC_PROFILER := true
@@ -64,6 +75,14 @@ ART_USE_GC_PROFILER_REF_DIST := true
 endif
 ifeq ($(WITH_ART_USE_GC_PROFILER_REF_DIST), true)
 ART_USE_GC_PROFILER_REF_DIST := true
+endif
+
+ifneq ($(wildcard art/ART_GC_PROFILER_VERBOSE),)
+$(info Enabling ART_GC_PROFILER_VERBOSE because of existence of art/ART_GC_PROFILER_VERBOSE)
+ART_GC_PROFILER_VERBOSE := true
+endif
+ifeq ($(WITH_ART_GC_PROFILER_VERBOSE), true)
+ART_GC_PROFILER_VERBOSE := true
 endif
 #
 # Used to enable smart mode
@@ -140,14 +159,32 @@ art_cflags := \
 
 ifeq ($(ART_SMALL_MODE),true)
   art_cflags += -DART_SMALL_MODE=1
+else
+	art_cflags += -DART_SMALL_MODE=0
 endif
 
 ifeq ($(ART_USE_GC_PROFILER),true)
   art_cflags += -DART_USE_GC_PROFILER=1
+else
+	art_cflags += -DART_USE_GC_PROFILER=0
+endif
+
+ifeq ($(ART_USE_GC_DEFAULT_PROFILER),true)
+  art_cflags += -DART_USE_GC_DEFAULT_PROFILER=1
+else
+	art_cflags += -DART_USE_GC_DEFAULT_PROFILER=0
 endif
 
 ifeq ($(ART_USE_GC_PROFILER_REF_DIST),true)
   art_cflags += -DART_USE_GC_PROFILER_REF_DIST=1
+else
+	art_cflags += -DART_USE_GC_PROFILER_REF_DIST=0
+endif
+
+ifeq ($(ART_GC_PROFILER_VERBOSE),true)
+  art_cflags += -DART_GC_PROFILER_VERBOSE=1
+else
+	art_cflags += -DART_GC_PROFILER_VERBOSE=0
 endif
 
 ifeq ($(ART_SEA_IR_MODE),true)

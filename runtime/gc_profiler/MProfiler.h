@@ -24,46 +24,64 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
-#define VERBOSE_PROFILER 0
 /* log information. used to monitor the flow of the profiler.*/
-#define GCMMP_VLOG(severity) if (VERBOSE_PROFILER) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+#define GCMMP_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
 
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
 
 
-/** definitions for logging and error reporting  **/
-#define GCMMP_ALLOW_PROFILE 								0
+#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+  #define GCP_DISABLE_CONC_COLLECT					1 /* turn off ConcurrentGC */
+  #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
+  #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */
+  #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z)                \
+	  (gcpAddObject(x,y,z))
+  #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
+	  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
+  #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)	        \
+	  (extendedSize = art::mprofiler::ObjectSizesProfiler::GCPAddMProfilingExtraBytes(actualSize))
+  #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)      \
+	  (modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
+  #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)                    \
+	  (ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
+  #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
+	  art::mprofiler::VMProfiler::MProfNotifyAlloc(allocatedSpace, objSize, obj)
+  #define GCP_PROFILE_OBJ_CLASS(klass, obj)                     \
+	  art::mprofiler::VMProfiler::MProfObjClass(klass, obj)
+#else // NOT (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+  #define GCP_DISABLE_CONC_COLLECT					0 /* turn off ConcurrentGC */
+  #define GCP_DISABLE_EXPL_COLLECT					0 /* turn off explicit GC */
+  #define GCP_COLLECT_FOR_PROFILE					  0 /* collect on each allocation window */
+  #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z)           ((void) 0)
+  #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)           \
+	  (extendedSize = actualSize)
+  #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) ((void) 0)
+  #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)							 ((void) 0)
+  #if (ART_USE_GC_DEFAULT_PROFILER)
+    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
+		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
+    #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
+	    art::mprofiler::VMProfiler::MProfNotifyAlloc(allocatedSpace, objSize, obj)
+  #else // NOT (ART_USE_GC_DEFAULT_PROFILER)
+    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
+		  ((void) 0)
+    #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
+		  ((void) 0)
+  #endif//ART_USE_GC_DEFAULT_PROFILER
+#endif//ART_USE_GC_PROFILER
+
+#define GCP_OFF_CONCURRENT_GC()			(GCP_DISABLE_CONC_COLLECT)
+#define GCP_OFF_EXPLICIT_GC()			  (GCP_DISABLE_EXPL_COLLECT)
 
 
-#if DVM_ALLOW_GCPROFILER
-#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) art::mprofiler::VMProfiler::MProfNotifyFree(x,y)
-#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) GCP_DECLARE_ADD_ALLOC(x,y)
-#define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) GCP_DECLARE_ADD_PRECISE_ALLOC(x,y,z)
-#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
-#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)						(extendedSize = art::mprofiler::ObjectSizesProfiler::GCPAddMProfilingExtraBytes(actualSize))
-#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)						(modifiedSize = art::mprofiler::ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(actualSize))
-#define GCP_RESET_OBJ_PROFILER_HEADER(x,y)				(ObjectSizesProfiler::GCPInitObjectProfileHeader(x,y))
-#define GCP_RESET_LASTLIVE_DATA()
-#else//DVM_ALLOW_GCPROFILER
-#define GCMMP_HANDLE_FINE_GRAINED_FREE(x,y) 									((void) 0)
-#define GCMMP_HANDLE_FINE_GRAINED_ALLOC(x,y) 									((void) 0)
-#define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)					((void) 0)
-#define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)			((void) 0)
-#define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z) 								((void) 0)
-#define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize) 	art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
-#define GCP_RESET_LASTLIVE_DATA()															((void) 0)
-#define GCP_RESET_OBJ_PROFILER_HEADER(x,y)										((void) 0)
 
-#endif//DVM_ALLOW_GCPROFILER
 /*
  * Checks if the VM is one of the profiled Benchmarks.
  *
  * Note: found that the VM name was set multiple times. I have no idea
  */
 void dvmGCMMProfPerfCounters(const char*);
-
-
 
 
 namespace art {

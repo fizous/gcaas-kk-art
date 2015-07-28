@@ -78,7 +78,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
   *bytes_allocated = allocation_size;
   num_bytes_allocated_ += allocation_size;
   total_bytes_allocated_ += allocation_size;
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(allocation_size, num_bytes, obj);
+  GCMMP_NOTIFY_ALLOCATION(allocation_size, num_bytes, obj);
   ++num_objects_allocated_;
   ++total_objects_allocated_;
   return obj;
@@ -347,7 +347,7 @@ mirror::Object* FreeListSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
   }
   new_header->SetPrevFree(0);
   new_header->SetAllocationSize(allocation_size);
-  art::mprofiler::VMProfiler::MProfNotifyAlloc(extendedSize, num_bytes, new_header->GetObjectAddress());
+  GCMMP_NOTIFY_ALLOCATION(extendedSize, num_bytes, new_header->GetObjectAddress());
   return new_header->GetObjectAddress();
 }
 

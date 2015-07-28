@@ -324,7 +324,7 @@ class Heap {
 #endif
     card_table_->MarkCard(dst);
   }
-#endif
+#endif //ART_USE_GC_PROFILER_REF_DIST
 
 
   accounting::CardTable* GetCardTable() const {
