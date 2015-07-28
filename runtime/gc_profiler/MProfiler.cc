@@ -47,18 +47,18 @@ class Object;
 namespace mprofiler {
 
 const char * VMProfiler::benchmarks[] = {
-			"com.aurorasoftworks.quadrant.ui.professional",
-			"purdue.specjvm98",
-			"purdue.dacapo",
-			"com.antutu.ABenchMark",
-			"com.android.cm3",
-			"purdue.gcbench",
-			"com.pandora.android",
-			"com.android.browser",
-			"com.rovio.angrybirds",
-			"bbc.mobile.news.ww"
-			//"com.android.systemui"  //we can add this to the profiled targets
-			//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
+		"com.aurorasoftworks.quadrant.ui.professional",
+		"purdue.specjvm98",
+		"purdue.dacapo",
+		"com.antutu.ABenchMark",
+		"com.android.cm3",
+		"purdue.gcbench",
+		"com.pandora.android",
+		"com.android.browser",
+		"com.rovio.angrybirds",
+		"bbc.mobile.news.ww"
+		//"com.android.systemui"  //we can add this to the profiled targets
+		//"com.android.launcher" // the problem with this service is its lack of permissions to access Sdcard
 };
 
 
@@ -68,116 +68,116 @@ const char * VMProfiler::gcMMPRootPath[] = {
 
 const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 		{
-				 0x00,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "CYCLES", "Perf Counter of CPU over a given period of time",
-				 "PERF_CPU_USAGE.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x00,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"CYCLES", "Perf Counter of CPU over a given period of time",
+				"PERF_CPU_USAGE.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//Cycles
 		{
-				 0x01,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "INSTRUCTIONS", "Perf Counter of Instructions over a given period of time",
-				 "PERF_INSTRUCTIONS.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x01,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"INSTRUCTIONS", "Perf Counter of Instructions over a given period of time",
+				"PERF_INSTRUCTIONS.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//Instructions
 		{
-				 0x02,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "L1I_ACCESS", "Perf Counter of L1I_ACCESS over a given period of time",
-				 "PERF_IL1_ACCESS.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x02,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"L1I_ACCESS", "Perf Counter of L1I_ACCESS over a given period of time",
+				"PERF_IL1_ACCESS.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//L1I_ACCESS
 		{
-				 0x03,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "L1I_MISS", "Perf Counter of L1I_MISS over a given period of time",
-				 "PERF_IL1_MISS.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x03,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"L1I_MISS", "Perf Counter of L1I_MISS over a given period of time",
+				"PERF_IL1_MISS.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//L1I_MISS
 		{
-				 0x04,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "L1D_ACCESS", "Perf Counter of L1D_ACCESS over a given period of time",
-				 "PERF_DL1_ACCESS.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x04,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"L1D_ACCESS", "Perf Counter of L1D_ACCESS over a given period of time",
+				"PERF_DL1_ACCESS.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//L1D_ACCESS
 		{
-				 0x05,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "L1D_MISS", "Perf Counter of L1D_MISS over a given period of time",
-				 "PERF_DL1_MISS.log",
-				 NULL,
-				 &createVMProfiler<PerfCounterProfiler>
+				0x05,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"L1D_MISS", "Perf Counter of L1D_MISS over a given period of time",
+				"PERF_DL1_MISS.log",
+				NULL,
+				&createVMProfiler<PerfCounterProfiler>
 		},//L1D_MISS
 		{
-				 0x0B,
-				 0,
-				 "FREQ_MONITOR", "CPU Frequency Monitoring",
-				 "FREQ_MONITOR_PROF.log",
-				 NULL,
-				 &createVMProfiler<CPUFreqProfiler>
+				0x0B,
+				0,
+				"FREQ_MONITOR", "CPU Frequency Monitoring",
+				"FREQ_MONITOR_PROF.log",
+				NULL,
+				&createVMProfiler<CPUFreqProfiler>
 		},//FREQ_MONITOR
 		{
-				 0x0D,
-				 GCMMP_FLAGS_CREATE_DAEMON,
-				 "MMU", "MMU over a given period of time",
-				 "PERF_MMU_REF.log",
-				 NULL,
-				 &createVMProfiler<MMUProfiler>
+				0x0D,
+				GCMMP_FLAGS_CREATE_DAEMON,
+				"MMU", "MMU over a given period of time",
+				"PERF_MMU_REF.log",
+				NULL,
+				&createVMProfiler<MMUProfiler>
 		},//MMU
 		{
-				 0x12,
-				 GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
-				 "GCCPI", "Measure CPI for GC daemon",
-				 "CPI_GC.log",
-				 NULL,
-				 &createVMProfiler<GCDaemonCPIProfiler>
+				0x12,
+				GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON,
+				"GCCPI", "Measure CPI for GC daemon",
+				"CPI_GC.log",
+				NULL,
+				&createVMProfiler<GCDaemonCPIProfiler>
 		},//GCCPI
 		{
-				 0x02,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "ObjectSizesProfiler", "Object Histogram Profiler",
-				 "GCP_HISTOGRAM.log",
-				 NULL,
-				 &createVMProfiler<ObjectSizesProfiler>
+				0x02,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"ObjectSizesProfiler", "Object Histogram Profiler",
+				"GCP_HISTOGRAM.log",
+				NULL,
+				&createVMProfiler<ObjectSizesProfiler>
 		},//Objects Histograms
 		{
-				 0x03,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "ThreadAllocatorProfiler", "Thread Allocator Profiler",
-				 "GCP_ALLOC_THREADS.log",
-				 NULL,
-				 &createVMProfiler<ThreadAllocProfiler>
+				0x03,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"ThreadAllocatorProfiler", "Thread Allocator Profiler",
+				"GCP_ALLOC_THREADS.log",
+				NULL,
+				&createVMProfiler<ThreadAllocProfiler>
 		},//Thread Allocator
 		{
-				 0x04,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "CohortProfiler", "Cohort Profiler",
-				 "GCP_COHORT.log",
-				 NULL,
-				 &createVMProfiler<CohortProfiler>
+				0x04,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"CohortProfiler", "Cohort Profiler",
+				"GCP_COHORT.log",
+				NULL,
+				&createVMProfiler<CohortProfiler>
 		},//Cohort Profiler
 		{
-				 0x05,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
-				 "ClassProfiler", "Class Profiler",
-				 "GCP_CLASS.log",
-				 NULL,
-				 &createVMProfiler<ClassProfiler>
+				0x05,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
+				"ClassProfiler", "Class Profiler",
+				"GCP_CLASS.log",
+				NULL,
+				&createVMProfiler<ClassProfiler>
 		},//Class Profiler
 		{
-				 0x06,
-				 GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_MUTATIONS_WINDOWS,
-				 "RefDistanceProfiler", "Ref Distance Profiler",
-				 "GCP_REF_DISTANCES.log",
-				 NULL,
-				 &createVMProfiler<RefDistanceProfiler>
+				0x06,
+				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_MUTATIONS_WINDOWS,
+				"RefDistanceProfiler", "Ref Distance Profiler",
+				"GCP_REF_DISTANCES.log",
+				NULL,
+				&createVMProfiler<RefDistanceProfiler>
 		},//RefDistance Profiler
 };//VMProfiler::profilTypes
 
@@ -276,17 +276,17 @@ uint64_t GCMMPThreadProf::getDataPerfCounter(void) {
 
 
 GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
-	: pid(thread->GetTid()),
-	  suspendedGC(false),
-	  pauseManager(NULL),
-	  state(GCMMP_TH_STARTING) {
+: pid(thread->GetTid()),
+	suspendedGC(false),
+	pauseManager(NULL),
+	state(GCMMP_TH_STARTING) {
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
-//	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-//		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
-//	}
+	//	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+	//		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+	//	}
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
-//	pauseManager = new GCPauseThreadManager();
+	//	pauseManager = new GCPauseThreadManager();
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
 	vmProfiler->setPauseManager(this);
@@ -309,10 +309,10 @@ void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
 
 #if 0
 GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
-	: pid(thread->GetTid()),
-	  suspendedGC(false),
-	  pauseManager(NULL),
-	  state(GCMMP_TH_STARTING) {
+: pid(thread->GetTid()),
+	suspendedGC(false),
+	pauseManager(NULL),
+	state(GCMMP_TH_STARTING) {
 
 	GCMMP_VLOG(INFO) << "MPRofiler: Initializing arrayBreaks for " << thread->GetTid();
 
@@ -388,7 +388,7 @@ MPPerfCounter* GCDaemonCPIProfiler::createHWCounter(Thread* thread) {
 //}
 
 inline bool VMProfiler::IsProfilerThread(Thread* th) const {
-  return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
+	return (prof_thread_ != NULL && prof_thread_->GetTid() == th->GetTid());
 }
 
 
@@ -454,8 +454,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 
 	size_t initValue = (size_t)allocatedBytesData.cntTotal.load();
 	accountAllocating(objSize);
-//	if(!IsAllocWindowsSet())
-//		return;
+	//	if(!IsAllocWindowsSet())
+	//		return;
 
 
 	bool _newWindow = (initValue >> kGCMMPLogAllocWindow) != ((objSize + initValue)  >> kGCMMPLogAllocWindow);
@@ -467,20 +467,20 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 
 		{
 			Thread* self = Thread::Current();
-	    MutexLock mu(self, *prof_thread_mutex_);
-	    GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
-	    receivedSignal_ = true;
+			MutexLock mu(self, *prof_thread_mutex_);
+			GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
+			receivedSignal_ = true;
 
-	    if(hasProfDaemon()) {
-	    	prof_thread_cond_->Broadcast(self);
-	    }
-	    // Wake anyone who may have been waiting for the GC to complete.
-	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
+			if(hasProfDaemon()) {
+				prof_thread_cond_->Broadcast(self);
+			}
+			// Wake anyone who may have been waiting for the GC to complete.
+			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
 		}
 	} else {
 		Thread* self = Thread::Current();
-    MutexLock mu(self, *prof_thread_mutex_);
-    GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
+		MutexLock mu(self, *prof_thread_mutex_);
+		GCMMP_HANDLE_FINE_PRECISE_ALLOC(allocSpace, objSize, obj);
 	}
 }
 
@@ -504,17 +504,17 @@ void VMProfiler::notifyAllocation(size_t objSize, size_t allocSize) {
 
 		{
 			Thread* self = Thread::Current();
-	    MutexLock mu(self, *prof_thread_mutex_);
-	    receivedSignal_ = true;
+			MutexLock mu(self, *prof_thread_mutex_);
+			receivedSignal_ = true;
 
-	    if(hasProfDaemon()) {
-	    	prof_thread_cond_->Broadcast(self);
-	    }
+			if(hasProfDaemon()) {
+				prof_thread_cond_->Broadcast(self);
+			}
 
-	    // Wake anyone who may have been waiting for the GC to complete.
+			// Wake anyone who may have been waiting for the GC to complete.
 
 
-	    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
+			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" << self->GetTid() ;
 		}
 
 	}
@@ -537,10 +537,10 @@ inline void GCDaemonCPIProfiler::addHWStartEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
 		if(evt == GCMMP_GC_BRK_NONE) {
 			pid_t _pid = _profRec->GetTid();
-		  for (const auto& profRec : threadProfList_) {
-		    if(profRec->GetTid() == _pid)
-		    	profRec->perf_record_->addStartEvent(evt);
-		  }
+			for (const auto& profRec : threadProfList_) {
+				if(profRec->GetTid() == _pid)
+					profRec->perf_record_->addStartEvent(evt);
+			}
 		}
 	}
 }
@@ -561,43 +561,43 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 		if(evt == GCMMP_GC_BRK_NONE) {
 			pid_t _pid = _profRec->GetTid();
 			int _index = 0;
-		  for (const auto& profRec : threadProfList_) {
-		    if(profRec->GetTid() == _pid) {
-		    	_index++;
-		    	//LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
-//		    	profRec->perf_record_->addEndEventNOSpecial(evt);
-		    	if(_index == 2) {
-		    		accData.currInstructions =
-		    				profRec->perf_record_->addEndEventNOSpecial(evt);
-		    		accData.instructions = profRec->perf_record_->data;
-		    	} else {
-		    		accData.currCycles =
-		    				profRec->perf_record_->addEndEventNOSpecial(evt);
-		    		accData.cycles = profRec->perf_record_->data;
+			for (const auto& profRec : threadProfList_) {
+				if(profRec->GetTid() == _pid) {
+					_index++;
+					//LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
+					//		    	profRec->perf_record_->addEndEventNOSpecial(evt);
+					if(_index == 2) {
+						accData.currInstructions =
+								profRec->perf_record_->addEndEventNOSpecial(evt);
+						accData.instructions = profRec->perf_record_->data;
+					} else {
+						accData.currCycles =
+								profRec->perf_record_->addEndEventNOSpecial(evt);
+						accData.cycles = profRec->perf_record_->data;
 
-		    	}
+					}
 
 
-		    	if(_index == 2) {
-		    		if(accData.currInstructions == 0) {
-		    			return;
-		    		}
-		    		GCMMPCPIDataDumped dataDumped;
+					if(_index == 2) {
+						if(accData.currInstructions == 0) {
+							return;
+						}
+						GCMMPCPIDataDumped dataDumped;
 
-		    		dataDumped.index =
-		    				((allocatedBytesData.cntTotal.load()) >> kGCMMPLogAllocWindowDump)  * 1.0;
-		    		dataDumped.currCycles = accData.currCycles;
-		    		dataDumped.currInstructions = accData.currInstructions;
-		    		dataDumped.currCPI =
-		    				(dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
-		    		dataDumped.averageCPI =
-		    				(accData.cycles * 1.0) / accData.instructions;
+						dataDumped.index =
+								((allocatedBytesData.cntTotal.load()) >> kGCMMPLogAllocWindowDump)  * 1.0;
+						dataDumped.currCycles = accData.currCycles;
+						dataDumped.currInstructions = accData.currInstructions;
+						dataDumped.currCPI =
+								(dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
+						dataDumped.averageCPI =
+								(accData.cycles * 1.0) / accData.instructions;
 
-		    		dumpCPIStats(&dataDumped);
-		    		break;
-		    	}
-		    }
-		  }
+						dumpCPIStats(&dataDumped);
+						break;
+					}
+				}
+			}
 
 		}
 	}
@@ -633,13 +633,13 @@ bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
 		if(thProf->GetPerfRecord() != NULL) {
 			pid_t _id = thProf->GetTid();
 			int32_t _currBytes = allocatedBytesData.cntTotal.load();
-		  for (const auto& profRec : threadProfList_) {
-		    if(profRec->GetTid() == _id) {
-		    	profRec->readPerfCounter(_currBytes);
-		    	profRec->perf_record_->ClosePerfLib();
-		    	profRec->state = GCMMP_TH_STOPPED;
-		    }
-		  }
+			for (const auto& profRec : threadProfList_) {
+				if(profRec->GetTid() == _id) {
+					profRec->readPerfCounter(_currBytes);
+					profRec->perf_record_->ClosePerfLib();
+					profRec->state = GCMMP_TH_STOPPED;
+				}
+			}
 		}
 	}
 	return true;
@@ -647,7 +647,7 @@ bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 
 CPUFreqProfiler::CPUFreqProfiler(GCMMP_Options* argOptions, void* entry):
-		VMProfiler(argOptions, entry){
+				VMProfiler(argOptions, entry){
 
 	LOG(ERROR) << "VMProfiler : CPUFreqProfiler";
 }
@@ -658,29 +658,29 @@ void VMProfiler::createAppList(GCMMP_Options* argOptions) {
 	if(argOptions->app_list_path_ == NULL)
 		return;
 
-  std::string _file_lines;
-  if (!ReadFileToString(argOptions->app_list_path_, &_file_lines)) {
-    LOG(ERROR) << "(couldn't read " << argOptions->app_list_path_ << ")\n";
-    	return;
-  }
-  Split(_file_lines, '\n', app_list_);
-//  LOG(ERROR) << "---dump list of packages---";
-//  for (size_t i = 0; i < app_list_.size(); ++i) {
-//  	LOG(ERROR) << app_list_[i];
-//  }
-//  LOG(ERROR) << "<<<<<<dump list of packages>>>>>>>";
+	std::string _file_lines;
+	if (!ReadFileToString(argOptions->app_list_path_, &_file_lines)) {
+		LOG(ERROR) << "(couldn't read " << argOptions->app_list_path_ << ")\n";
+		return;
+	}
+	Split(_file_lines, '\n', app_list_);
+	//  LOG(ERROR) << "---dump list of packages---";
+	//  for (size_t i = 0; i < app_list_.size(); ++i) {
+	//  	LOG(ERROR) << app_list_[i];
+	//  }
+	//  LOG(ERROR) << "<<<<<<dump list of packages>>>>>>>";
 }
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
-				index_(argOptions->mprofile_type_),
-				enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != VMProfiler::kGCMMPDisableMProfile)),
-				gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
-				prof_thread_(NULL),
-				main_thread_(NULL),
-				gc_daemon_(NULL),
-				running_(false),
-				receivedSignal_(false),
-				start_heap_bytes_(0) {
+						index_(argOptions->mprofile_type_),
+						enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != VMProfiler::kGCMMPDisableMProfile)),
+						gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
+						prof_thread_(NULL),
+						main_thread_(NULL),
+						gc_daemon_(NULL),
+						running_(false),
+						receivedSignal_(false),
+						start_heap_bytes_(0) {
 	if(IsProfilingEnabled()) {
 		int _loop = 0;
 		bool _found = false;
@@ -693,9 +693,9 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 				}
 			}
 		} else {
-			for(size_t _loopI = 0; _loopI < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes);
-					_loopI++) {
-				if(VMProfiler::profilTypes[_loopI].id_ == index_) {
+			for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(VMProfiler::profilTypes);
+					_loop++) {
+				if(VMProfiler::profilTypes[_loop].id_ == index_) {
 					_found = true;
 					break;
 				}
@@ -714,7 +714,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			perfName_ = profEntry->name_;
 			prof_thread_mutex_ = new Mutex("MProfile Thread lock");
 			prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
-																										*prof_thread_mutex_));
+					*prof_thread_mutex_));
 			setReceivedShutDown(false);
 		} else {
 			LOG(ERROR) << "VMprofile index is not supported";
@@ -725,20 +725,20 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 
 void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 
-  bool successWrite = dump_file_->WriteFully(heapConf, sizeof(GC_MMPHeapConf));
-  if(!successWrite) {
-  	LOG(ERROR) << "VMProfiler : dumpHeapConfigurations error writing heap header";
-  } else {
-  	LOG(ERROR) << "VMProfiler: heap header.. start: " << heapConf->startSize
-  			<< "growthLimit= "<< heapConf->growthLimit <<", uptime= "
+	bool successWrite = dump_file_->WriteFully(heapConf, sizeof(GC_MMPHeapConf));
+	if(!successWrite) {
+		LOG(ERROR) << "VMProfiler : dumpHeapConfigurations error writing heap header";
+	} else {
+		LOG(ERROR) << "VMProfiler: heap header.. start: " << heapConf->startSize
+				<< "growthLimit= "<< heapConf->growthLimit <<", uptime= "
 				<< heapConf->elapsedUPTimeNS;
-  }
+	}
 }
 
 void VMProfiler::InitCommonData() {
 	OpenDumpFile();
 
-//	GCPTotalAllocBytes = 0;
+	//	GCPTotalAllocBytes = 0;
 
 	memset((void*)&allocatedBytesData, 0, sizeof(GCPHistogramRecAtomic));
 	allocatedBytesData.cntLive.store(0);
@@ -774,13 +774,13 @@ void VMProfiler::OpenDumpFile() {
 
 
 		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
-	  if (fd == -1) {
-	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
-	    continue;
-	  }
-    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
-    dump_file_ = new File(fd, std::string(dump_file_name_));
-    return;
+		if (fd == -1) {
+			PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
+			continue;
+		}
+		GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+		dump_file_ = new File(fd, std::string(dump_file_name_));
+		return;
 	}
 }
 
@@ -823,18 +823,18 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
 	} else {
-//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-//			setGcTrimmer(thread);
-//			setThreadAffinity(thread, false);
-//			if(!IsAttachGCDaemon()) {
-//				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
-//				return;
-//			}
-//			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
-//			_tag = GCMMP_THREAD_GCTRIM;
-//		} else {
-			return;
-		}
+		//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+		//			setGcTrimmer(thread);
+		//			setThreadAffinity(thread, false);
+		//			if(!IsAttachGCDaemon()) {
+		//				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+		//				return;
+		//			}
+		//			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+		//			_tag = GCMMP_THREAD_GCTRIM;
+		//		} else {
+		return;
+	}
 	//}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
@@ -949,7 +949,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		_address->currTime = GetRelevantRealTime();
 	}
 	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
-			 LOG(ERROR) << "Index of events exceeds the maximum allowed";
+		LOG(ERROR) << "Index of events exceeds the maximum allowed";
 	}
 }
 
@@ -959,59 +959,59 @@ void VMProfiler::initMarkerManager(void) {
 	evt_manager_lock_ = new Mutex("Event manager lock");
 	Thread* self = Thread::Current();
 	{
-	  MutexLock mu(self, *evt_manager_lock_);
+		MutexLock mu(self, *evt_manager_lock_);
 		if(!isMarkHWEvents()) {
 			markerManager = NULL;
 			LOG(ERROR) <<  "no need to initialize event manager ";
 			return;
 		}
-	  size_t capacity =
+		size_t capacity =
 				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-	  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL,
-	  		capacity, PROT_READ | PROT_WRITE));
-	  markerManager->currIndex = 0;
-	  if (mem_map.get() == NULL) {
-	    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-	        << PrettySize(capacity);
-	    return;
-	  } else {
-	    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-	        << PrettySize(capacity);
-	  }
-	  markerManager->markers = (EventMarker*)(mem_map->Begin());
+		UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL,
+				capacity, PROT_READ | PROT_WRITE));
+		markerManager->currIndex = 0;
+		if (mem_map.get() == NULL) {
+			LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+					<< PrettySize(capacity);
+			return;
+		} else {
+			LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+					<< PrettySize(capacity);
+		}
+		markerManager->markers = (EventMarker*)(mem_map->Begin());
 
-	  //mem_map.release();
+		//mem_map.release();
 	}
 }
 
 
 void PerfCounterProfiler::dumpProfData(bool lastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-  LOG(ERROR) <<  "PerfCounterProfiler: start dumping data";
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	LOG(ERROR) <<  "PerfCounterProfiler: start dumping data";
 
-  if(lastDump) {
-  	bool successWrite = GCPDumpEndMarker(dump_file_);
-  	if(successWrite) {
-  		dumpEventMarks();
-  	} else {
-  		LOG(ERROR) << "PerfCounterProfiler:: could not dump the event marker after heap stats";
-  	}
-    dump_file_->Close();
-  }
+	if(lastDump) {
+		bool successWrite = GCPDumpEndMarker(dump_file_);
+		if(successWrite) {
+			dumpEventMarks();
+		} else {
+			LOG(ERROR) << "PerfCounterProfiler:: could not dump the event marker after heap stats";
+		}
+		dump_file_->Close();
+	}
 
 }
 
 
 void GCDaemonCPIProfiler::dumpProfData(bool lastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
 	if(lastDump) {
 		LOG(ERROR) <<  "GCDaemonCPIProfiler: start dumping data";
-	  bool _success = GCPDumpEndMarker(dump_file_);
-	  if(_success)
-	  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
-	  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+		bool _success = GCPDumpEndMarker(dump_file_);
+		if(_success)
+			LOG(ERROR) << "<<<< Succeeded dump to file" ;
+		//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
 		dump_file_->Close();
 		LOG(ERROR) <<  "GCDaemonCPIProfiler: done dumping data";
 	}
@@ -1020,8 +1020,8 @@ void GCDaemonCPIProfiler::dumpProfData(bool lastDump) {
 
 
 void CPUFreqProfiler::dumpProfData(bool lastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-  LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	LOG(ERROR) <<  "CPUFreqProfiler: start dumping data";
 	dumpEventMarks();
 	if(lastDump) {
 		dump_file_->Close();
@@ -1051,12 +1051,12 @@ void VMProfiler::dumpEventMarks(void) {
 
 	size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
 
-  bool successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
-  if(successWrite) {
-  	GCPDumpEndMarker(dump_file_);
-  	LOG(ERROR) << "<<<< Succeeded dump to file" ;
-  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-  }
+	bool successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
+	if(successWrite) {
+		GCPDumpEndMarker(dump_file_);
+		LOG(ERROR) << "<<<< Succeeded dump to file" ;
+		//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	}
 
 	LOG(ERROR) << "<<<< total written: " << dataLength <<
 			", Sizeof(EventMarker):"<< sizeof(EventMarker)
@@ -1133,55 +1133,55 @@ inline void GCDaemonCPIProfiler::dumpCPIStats(GCMMPCPIDataDumped* dataD) {
 
 bool PerfCounterProfiler::periodicDaemonExec(void) {
 	Thread* self = Thread::Current();
-  // Check if GC is running holding gc_complete_lock_.
-  MutexLock mu(self, *prof_thread_mutex_);
-  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-  {
-  	prof_thread_cond_->Wait(self);
-  }
-  if(receivedSignal_) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
-    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-    updateHeapAllocStatus();
-    getPerfData();
-    dumpHeapStats();
-    receivedSignal_ = false;
+	// Check if GC is running holding gc_complete_lock_.
+	MutexLock mu(self, *prof_thread_mutex_);
+	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+	{
+		prof_thread_cond_->Wait(self);
+	}
+	if(receivedSignal_) { //we recived Signal to Shutdown
+		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+		updateHeapAllocStatus();
+		getPerfData();
+		dumpHeapStats();
+		receivedSignal_ = false;
 
-    if(getRecivedShutDown()) {
-    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
-    	logPerfData();
-    }
-  	return getRecivedShutDown();
-  } else {
-  	return false;
-  }
+		if(getRecivedShutDown()) {
+			LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+			logPerfData();
+		}
+		return getRecivedShutDown();
+	} else {
+		return false;
+	}
 }
 
 
 
 bool MMUProfiler::periodicDaemonExec(void){
 	Thread* self = Thread::Current();
-  // Check if GC is running holding gc_complete_lock_.
-  MutexLock mu(self, *prof_thread_mutex_);
-  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-  {
-  	prof_thread_cond_->Wait(self);
-  }
-  if(receivedSignal_) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
-    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-    //updateHeapAllocStatus();
-    //getPerfData();
-    receivedSignal_ = false;
+	// Check if GC is running holding gc_complete_lock_.
+	MutexLock mu(self, *prof_thread_mutex_);
+	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+	{
+		prof_thread_cond_->Wait(self);
+	}
+	if(receivedSignal_) { //we recived Signal to Shutdown
+		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+		//updateHeapAllocStatus();
+		//getPerfData();
+		receivedSignal_ = false;
 
-    if(getRecivedShutDown()) {
-    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
-    	//logPerfData();
-    }
-  	return getRecivedShutDown();
-  } else {
-  	return false;
-  }
+		if(getRecivedShutDown()) {
+			LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+			//logPerfData();
+		}
+		return getRecivedShutDown();
+	} else {
+		return false;
+	}
 }
 
 
@@ -1189,55 +1189,55 @@ void* VMProfiler::runDaemon(void* arg) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
 
 
-  Runtime* runtime = Runtime::Current();
+	Runtime* runtime = Runtime::Current();
 
-  mProfiler->setProfDaemon(
-  		runtime->AttachCurrentThread("VMProfile", true,
-  				runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler()));
+	mProfiler->setProfDaemon(
+			runtime->AttachCurrentThread("VMProfile", true,
+					runtime->GetSystemThreadGroup(),
+					!runtime->IsCompiler()));
 
-  CHECK(mProfiler->hasProfDaemon());
+	CHECK(mProfiler->hasProfDaemon());
 
-  if(!mProfiler->hasProfDaemon())
-  	return NULL;
+	if(!mProfiler->hasProfDaemon())
+		return NULL;
 
-  LOG(ERROR) << "starting the profiler daemon";
+	LOG(ERROR) << "starting the profiler daemon";
 
-  mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
-  Thread* self = Thread::Current();
-  DCHECK_NE(self->GetState(), kRunnable);
-  {
+	mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
+	Thread* self = Thread::Current();
+	DCHECK_NE(self->GetState(), kRunnable);
+	{
 
-    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    if(!mProfiler->IsProfilingRunning()) {
+		MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+		if(!mProfiler->IsProfilingRunning()) {
 
-    	LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " <<
-    			self->GetTid();
-    	mProfiler->prof_thread_ = self;
-    	mProfiler->InitCommonData();
-    } else {
-    	 GCMMP_VLOG(INFO) << "VMProfiler: Profiler was already created";
-    }
+			LOG(ERROR) << "VMProfiler: Assigning profID to profDaemon " <<
+					self->GetTid();
+			mProfiler->prof_thread_ = self;
+			mProfiler->InitCommonData();
+		} else {
+			GCMMP_VLOG(INFO) << "VMProfiler: Profiler was already created";
+		}
 
-    mProfiler->prof_thread_cond_->Broadcast(self);
-  }
-
-
-  GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Created and Leaving";
+		mProfiler->prof_thread_cond_->Broadcast(self);
+	}
 
 
-  while(!mProfiler->getRecivedShutDown()) {
-    // Check if GC is running holding gc_complete_lock_.
-    mProfiler->periodicDaemonExec();
+	GCMMP_VLOG(INFO) << "VMProfiler: Profiler Daemon Created and Leaving";
 
-  }
-  LOG(ERROR) << "the daemon exiting the loop";
-  //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
-  //ThreadState old_state =
-  //self->SetStateUnsafe(kRunnable);
-  mProfiler->ShutdownProfiling();
 
-  return NULL;
+	while(!mProfiler->getRecivedShutDown()) {
+		// Check if GC is running holding gc_complete_lock_.
+		mProfiler->periodicDaemonExec();
+
+	}
+	LOG(ERROR) << "the daemon exiting the loop";
+	//const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
+	//ThreadState old_state =
+	//self->SetStateUnsafe(kRunnable);
+	mProfiler->ShutdownProfiling();
+
+	return NULL;
 }
 
 void VMProfiler::attachThreads(){
@@ -1259,25 +1259,25 @@ size_t VMProfiler::getRelevantAllocBytes(void) {
 
 void VMProfiler::createProfDaemon(){
 	//if(IsCreateProfDaemon()) { //create daemon
-	  // Create a raw pthread; its start routine will attach to the runtime.
-		Thread* self = Thread::Current();
-		MutexLock mu(self, *prof_thread_mutex_);
-		GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler Daemon";
-	  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &runDaemon, this),
-	  		"VMProfiler Daemon thread");
+	// Create a raw pthread; its start routine will attach to the runtime.
+	Thread* self = Thread::Current();
+	MutexLock mu(self, *prof_thread_mutex_);
+	GCMMP_VLOG(INFO) << "VMProfiler: Creating VMProfiler Daemon";
+	CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &runDaemon, this),
+			"VMProfiler Daemon thread");
 
-	  while (prof_thread_ == NULL) {
-	  	prof_thread_cond_->Wait(self);
-	  }
-	  prof_thread_cond_->Broadcast(self);
+	while (prof_thread_ == NULL) {
+		prof_thread_cond_->Wait(self);
+	}
+	prof_thread_cond_->Broadcast(self);
 
-	  GCMMP_VLOG(INFO) << "VMProfiler: Caller is leaving now";
+	GCMMP_VLOG(INFO) << "VMProfiler: Caller is leaving now";
 
-//	}
+	//	}
 }
 
 GCDaemonCPIProfiler::GCDaemonCPIProfiler(GCMMP_Options* argOptions, void* entry) :
-	VMProfiler(argOptions, entry) {
+			VMProfiler(argOptions, entry) {
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "GCDaemonCPIProfiler : init counters returned error";
 	} else {
@@ -1288,7 +1288,7 @@ GCDaemonCPIProfiler::GCDaemonCPIProfiler(GCMMP_Options* argOptions, void* entry)
 
 PerfCounterProfiler::PerfCounterProfiler(GCMMP_Options* argOptions,
 		void* entry) :
-		VMProfiler(argOptions, entry) {
+				VMProfiler(argOptions, entry) {
 	//GCMMPProfilingEntry* _entry = (GCMMPProfilingEntry*) entry;
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "PerfCounterProfiler : init counters returned error";
@@ -1308,7 +1308,7 @@ int VMProfiler::initCounters(const char* evtName){
 
 
 MMUProfiler::MMUProfiler(GCMMP_Options* argOptions, void* entry):
-		VMProfiler(argOptions, entry){
+				VMProfiler(argOptions, entry){
 
 	LOG(ERROR) << "VMProfiler : MMUProfiler";
 }
@@ -1370,7 +1370,7 @@ void VMProfiler::setThreadAffinity(art::Thread* th, bool complementary) {
 			CPU_SET(_cpu_id, &mask);
 		}
 		if(sched_setaffinity(th->GetTid(),
-												sizeof(mask), &mask) != 0) {
+				sizeof(mask), &mask) != 0) {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
@@ -1405,60 +1405,60 @@ void VMProfiler::setHeapHeaderConf(GC_MMPHeapConf* heapConf) {
 }
 
 void VMProfiler::ShutdownProfiling(void) {
-//	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
+	//	LOG(ERROR) << "ShutDownProfiling:" << Thread::Current()->GetTid();
 
-	 if(IsProfilingRunning()) {
-		 LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
-			end_heap_bytes_ = getRelevantAllocBytes();
-			end_cpu_time_ns_ = GetRelevantCPUTime();
-			end_time_ns_ = NanoTime();
-
-
-			dumpProfData(true);
+	if(IsProfilingRunning()) {
+		LOG(ERROR) << "VMProfiler: shutting down " << Thread::Current()->GetTid() ;
+		end_heap_bytes_ = getRelevantAllocBytes();
+		end_cpu_time_ns_ = GetRelevantCPUTime();
+		end_time_ns_ = NanoTime();
 
 
-			//Runtime* runtime = Runtime::Current();
+		dumpProfData(true);
 
-			Thread* self = Thread::Current();
-			{
-				//ThreadList* thread_list = Runtime::Current()->GetThreadList();
-				MutexLock mu(self, *Locks::thread_list_lock_);
-				ForEach(GCMMPKillThreadProf, this);
-				//thread_list->ForEach(GCMMPResetThreadField, this);
-			}
 
-			setIsProfilingRunning(false);
+		//Runtime* runtime = Runtime::Current();
 
-			if(hasProfDaemon()) {
-				Runtime* runtime = Runtime::Current();
-				runtime->DetachCurrentThread();
-				setProfDaemon(false);
-			}
-	 }
+		Thread* self = Thread::Current();
+		{
+			//ThreadList* thread_list = Runtime::Current()->GetThreadList();
+			MutexLock mu(self, *Locks::thread_list_lock_);
+			ForEach(GCMMPKillThreadProf, this);
+			//thread_list->ForEach(GCMMPResetThreadField, this);
+		}
+
+		setIsProfilingRunning(false);
+
+		if(hasProfDaemon()) {
+			Runtime* runtime = Runtime::Current();
+			runtime->DetachCurrentThread();
+			setProfDaemon(false);
+		}
+	}
 }
 
 static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
 	if(vmProfiler != NULL) {
 
-		 GCPauseThreadManager* mgr = profRec->getPauseMgr();
-		 if(!mgr->HasData())
-			 return;
-		 art::File* f = vmProfiler->GetDumpFile();
-		 int _pid = profRec->GetTid();
-		 int _type = profRec->getThreadTag();
-		 f->WriteFully(&_pid, sizeof(int));
-		 f->WriteFully(&_type, sizeof(int));
-		 if(profRec->GetEndTime() == 0) {
-			 profRec->GetliveTimeInfo()->finalMarker =
-					 vmProfiler->end_time_ns_ - vmProfiler->start_time_ns_;
-		 }
-		 f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
+		GCPauseThreadManager* mgr = profRec->getPauseMgr();
+		if(!mgr->HasData())
+			return;
+		art::File* f = vmProfiler->GetDumpFile();
+		int _pid = profRec->GetTid();
+		int _type = profRec->getThreadTag();
+		f->WriteFully(&_pid, sizeof(int));
+		f->WriteFully(&_type, sizeof(int));
+		if(profRec->GetEndTime() == 0) {
+			profRec->GetliveTimeInfo()->finalMarker =
+					vmProfiler->end_time_ns_ - vmProfiler->start_time_ns_;
+		}
+		f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
 
-		 GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
+		GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 
-		 mgr->DumpProfData(vmProfiler);
-		 GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
+		mgr->DumpProfData(vmProfiler);
+		GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
 
 
 	}
@@ -1466,37 +1466,37 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 
 
 void MMUProfiler::dumpProfData(bool isLastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 
-  LOG(ERROR) <<  "dumping for MMU";
-  GCMMP_VLOG(INFO) << " Dumping the commin information ";
-  bool successWrite = false;
-//  dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-//  if(successWrite) {
-//  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-//  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-//  }
-//  if(successWrite) {
-//  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
-//  }
+	LOG(ERROR) <<  "dumping for MMU";
+	GCMMP_VLOG(INFO) << " Dumping the commin information ";
+	bool successWrite = false;
+	//  dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+	//  if(successWrite) {
+	//  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+	//  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	//  }
+	//  if(successWrite) {
+	//  	successWrite = dump_file_->WriteFully(&start_cpu_time_ns_, sizeof(uint64_t));
+	//  }
 
-  GCMMP_VLOG(INFO) << " Dumping the MMU information ";
+	GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
-  successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
 
 
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&end_time_ns_, sizeof(uint64_t));
-  }
-  LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; endTime is: " << end_time_ns_;
-  if(successWrite) {
-  	ForEach(GCMMPDumpMMUThreadProf, this);
-  }
+	if(successWrite) {
+		successWrite = dump_file_->WriteFully(&end_time_ns_, sizeof(uint64_t));
+	}
+	LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; endTime is: " << end_time_ns_;
+	if(successWrite) {
+		ForEach(GCMMPDumpMMUThreadProf, this);
+	}
 
-  if(successWrite) {
-  	successWrite =
-  			GCPDumpEndMarker(dump_file_);
-  }
+	if(successWrite) {
+		successWrite =
+				GCPDumpEndMarker(dump_file_);
+	}
 
 	if(isLastDump) {
 		GCPDumpEndMarker(dump_file_);
@@ -1521,22 +1521,22 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 void VMProfiler::ProcessSignalCatcher(int signalVal) {
 	if(signalVal == kGCMMPDumpSignal) {
 		Thread* self = Thread::Current();
-    MutexLock mu(self, *prof_thread_mutex_);
-    receivedSignal_ = true;
-    setReceivedShutDown(true);
+		MutexLock mu(self, *prof_thread_mutex_);
+		receivedSignal_ = true;
+		setReceivedShutDown(true);
 
 
-    if(hasProfDaemon()){
-    	LOG(ERROR) << "processSignalCatcher found that there is profDaemon";
-    } else {
-    	LOG(ERROR) << "processSignalCatcher shutting Down";
-    	ShutdownProfiling();
-    }
+		if(hasProfDaemon()){
+			LOG(ERROR) << "processSignalCatcher found that there is profDaemon";
+		} else {
+			LOG(ERROR) << "processSignalCatcher shutting Down";
+			ShutdownProfiling();
+		}
 
-    // Wake anyone who may have been waiting for the GC to complete.
-    prof_thread_cond_->Broadcast(self);
+		// Wake anyone who may have been waiting for the GC to complete.
+		prof_thread_cond_->Broadcast(self);
 
-    GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
+		GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
 	}
 }
 
@@ -1547,7 +1547,7 @@ void VMProfiler::setProfDaemon(bool val)  {
 
 
 inline bool VMProfiler::hasProfDaemon()  {
-  return has_profDaemon_;
+	return has_profDaemon_;
 }
 
 
@@ -1573,9 +1573,9 @@ void VMProfiler::MProfileSignalCatcher(int signalVal) {
 
 void VMProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*),
 		void* context) {
-  for (const auto& profRec : threadProfList_) {
-    callback(profRec, context);
-  }
+	for (const auto& profRec : threadProfList_) {
+		callback(profRec, context);
+	}
 }
 
 
@@ -1583,24 +1583,24 @@ void VMProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*),
 void VMProfiler::GCMMProfPerfCounters(const char* name) {
 	if(IsProfilingEnabled()) {
 
-//		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
-//			if (strcmp(name, benchmarks[i]) == 0) {
-//				LOG(ERROR)<< "MVProfiler found a target VM " << name << " " <<
-//						i;
-//				LOG(ERROR) << "size of app list is " << app_list_.size();
-//				if(app_list_.size() > 0) {
-//					if (strcmp(name, app_list_[i].c_str()) != 0) {
-//						LOG(ERROR) << "we could not match" << app_list_.size();
-//					} else {
-//						LOG(ERROR) << "we could  match" << app_list_.size();
-//					}
-//				}
-//				GCMMPThreadProf::mProfiler = this;
-//				startProfiling();
-//				//InitializeProfiler();
-//				return;
-//			}
-//		}
+		//		for (size_t i = 0; i < GCMMP_ARRAY_SIZE(benchmarks); i++) {
+		//			if (strcmp(name, benchmarks[i]) == 0) {
+		//				LOG(ERROR)<< "MVProfiler found a target VM " << name << " " <<
+		//						i;
+		//				LOG(ERROR) << "size of app list is " << app_list_.size();
+		//				if(app_list_.size() > 0) {
+		//					if (strcmp(name, app_list_[i].c_str()) != 0) {
+		//						LOG(ERROR) << "we could not match" << app_list_.size();
+		//					} else {
+		//						LOG(ERROR) << "we could  match" << app_list_.size();
+		//					}
+		//				}
+		//				GCMMPThreadProf::mProfiler = this;
+		//				startProfiling();
+		//				//InitializeProfiler();
+		//				return;
+		//			}
+		//		}
 
 		for (size_t i = 0; i < app_list_.size(); i++) {
 			if (strcmp(name, app_list_[i].c_str()) == 0) {
@@ -1927,13 +1927,13 @@ void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
 
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry,
 		bool initHistogrms) :
-	VMProfiler(argOptions, entry) {
+			VMProfiler(argOptions, entry) {
 	initializeProfilerData(initHistogrms);
 	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler-B";
 }
 
 ObjectSizesProfiler::ObjectSizesProfiler(GCMMP_Options* argOptions, void* entry) :
-	VMProfiler(argOptions, entry) {
+			VMProfiler(argOptions, entry) {
 	initializeProfilerData(true);
 	LOG(ERROR) << "ObjectSizesProfiler : ObjectSizesProfiler-A";
 }
@@ -1952,29 +1952,29 @@ MPPerfCounter* ObjectSizesProfiler::createHWCounter(Thread* thread) {
 void ObjectSizesProfiler::initHistDataManager(void) {
 	LOG(ERROR) << "ObjectSizesProfiler::initHistDataManager";
 	hitogramsData_ = new GCHistogramObjSizesManager();
-//	GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
-//	lastLiveGuard = 0;
-//
-//	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
-//	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
-//	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
-//
-//	globalRecord.pcntLive = 100.0;
-//	globalRecord.pcntTotal = 100.0;
-//
-//	lastLiveRecord.pcntLive = 100.0;
-//	lastLiveRecord.pcntTotal = 100.0;
-//
-//	memset((void*)histogramTable, 0, totalHistogramSize);
-//	memset((void*)lastLiveTable, 0, totalHistogramSize);
-//
-//
-//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
-//		histogramTable[i].index = (i+1) * 1.0;
-//		lastLiveTable[i].index = (i+1) * 1.0;
-//	}
-//
-//	lastCohortIndex = 0;
+	//	GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
+	//	lastLiveGuard = 0;
+	//
+	//	totalHistogramSize = GCP_MAX_HISTOGRAM_SIZE * sizeof(GCPHistogramRecord);
+	//	memset((void*)(&globalRecord), 0, sizeof(GCPHistogramRecord));
+	//	memset((void*)(&lastLiveRecord), 0, sizeof(GCPHistogramRecord));
+	//
+	//	globalRecord.pcntLive = 100.0;
+	//	globalRecord.pcntTotal = 100.0;
+	//
+	//	lastLiveRecord.pcntLive = 100.0;
+	//	lastLiveRecord.pcntTotal = 100.0;
+	//
+	//	memset((void*)histogramTable, 0, totalHistogramSize);
+	//	memset((void*)lastLiveTable, 0, totalHistogramSize);
+	//
+	//
+	//	for(size_t i = 0; i < GCMMP_ARRAY_SIZE(histogramTable); i++){
+	//		histogramTable[i].index = (i+1) * 1.0;
+	//		lastLiveTable[i].index = (i+1) * 1.0;
+	//	}
+	//
+	//	lastCohortIndex = 0;
 }
 
 
@@ -2004,28 +2004,28 @@ inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 inline void ObjectSizesProfiler::gcpAddObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	hitogramsData_->addObject(allocatedMemory, objSize, obj);
-//	int32_t readVal = lastLiveGuard;
+	//	int32_t readVal = lastLiveGuard;
 
-//	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
-//		readVal = lastLiveGuard;
-//	}
-//
-//
-//	gcpAddDataToHist(&lastLiveTable[histIndex]);
-//	gcpAddDataToHist(&lastLiveRecord);
+	//	while(UNLIKELY(android_atomic_cas(0, 2, &lastLiveGuard) != 0)) {
+	//		readVal = lastLiveGuard;
+	//	}
+	//
+	//
+	//	gcpAddDataToHist(&lastLiveTable[histIndex]);
+	//	gcpAddDataToHist(&lastLiveRecord);
 
-//	do {
-//		readVal = 2;
-//	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+	//	do {
+	//		readVal = 2;
+	//	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
 
-//	if(false && globalRecord.cntTotal > 10000) {
-//		if(testLogic.takeTest == 1) {
-//			testLogic.takeTest = 2;
-//			testLogic.obj = obj;
-//			testLogic.headerReplica.objSize = objSize;
-//			LOG(ERROR) << " ##### testRecord: obj: " << obj << " with size: " << testLogic.headerReplica.objSize;
-//		}
-//	}
+	//	if(false && globalRecord.cntTotal > 10000) {
+	//		if(testLogic.takeTest == 1) {
+	//			testLogic.takeTest = 2;
+	//			testLogic.obj = obj;
+	//			testLogic.headerReplica.objSize = objSize;
+	//			LOG(ERROR) << " ##### testRecord: obj: " << obj << " with size: " << testLogic.headerReplica.objSize;
+	//		}
+	//	}
 }
 
 
@@ -2065,54 +2065,54 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 	accountFreeing(hitogramsData_->removeObject(allocatedMemory, obj));
 
 
-//	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
-//	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
-//	objHistograms->(allocatedMemory, objSize, obj);
-//
-//	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
-//			allocatedMemory - sizeof(GCPObjectExtraHeader));
-//	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
-//	if(extraHeader->objSize == 0) {
-//		//LOG(ERROR) << "skipping object with size 0";
-//		return;
-//	}
-//	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
-//	if(false && testLogic.takeTest == 2) {
-//		if(testLogic.obj == obj) {
-//			testLogic.takeTest = 3;
-//			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
-//		}
-//	}
-//
-//	if(histogramTable[histIndex].cntLive >= 1.0 ) {
-//		histogramTable[histIndex].cntLive--;
-//		globalRecord.cntLive--;
-//	}
-//
-//	//int32_t readVal = 0;
-//
-//
-//	if(lastLiveGuard != 1) {
-//		if(lastLiveTable[histIndex].cntLive >= 1.0) {
-//			lastLiveTable[histIndex].cntLive--;
-//			if(lastLiveRecord.cntLive >= 1.0)
-//				lastLiveRecord.cntLive--;
-//		}
-//	}
-//
-////	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
-////		readVal = 0;
-////	}
-//
-//
-//
-////	do {
-////		readVal = 2;
-////	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
-//
-////	if(false && allocSize == objSize) {
-////			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
-////	}
+	//	GCHistogramObjSizesManager::GCPRemoveObj(allocatedMemory, obj);
+	//	//LOG(ERROR) << "ObjectSizesProfiler::remove--> " << allocatedMemory;
+	//	objHistograms->(allocatedMemory, objSize, obj);
+	//
+	//	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+	//			allocatedMemory - sizeof(GCPObjectExtraHeader));
+	//	GCPObjectExtraHeader* extraHeader = reinterpret_cast<GCPObjectExtraHeader*>(address);
+	//	if(extraHeader->objSize == 0) {
+	//		//LOG(ERROR) << "skipping object with size 0";
+	//		return;
+	//	}
+	//	size_t histIndex = (32 - CLZ(extraHeader->objSize)) - 1;
+	//	if(false && testLogic.takeTest == 2) {
+	//		if(testLogic.obj == obj) {
+	//			testLogic.takeTest = 3;
+	//			LOG(ERROR) << " ##### testRecord: removeobj: " << obj << " with size: " << extraHeader->objSize << ", vs captured: " << testLogic.headerReplica.objSize;
+	//		}
+	//	}
+	//
+	//	if(histogramTable[histIndex].cntLive >= 1.0 ) {
+	//		histogramTable[histIndex].cntLive--;
+	//		globalRecord.cntLive--;
+	//	}
+	//
+	//	//int32_t readVal = 0;
+	//
+	//
+	//	if(lastLiveGuard != 1) {
+	//		if(lastLiveTable[histIndex].cntLive >= 1.0) {
+	//			lastLiveTable[histIndex].cntLive--;
+	//			if(lastLiveRecord.cntLive >= 1.0)
+	//				lastLiveRecord.cntLive--;
+	//		}
+	//	}
+	//
+	////	while(UNLIKELY(android_atomic_cas(readVal, 2, &lastLiveGuard) != 0)) {
+	////		readVal = 0;
+	////	}
+	//
+	//
+	//
+	////	do {
+	////		readVal = 2;
+	////	} while (UNLIKELY(android_atomic_cas(readVal, 0, &lastLiveGuard) != 0));
+	//
+	////	if(false && allocSize == objSize) {
+	////			LOG(ERROR) << "<<<< weird: both sizes are equal: " << allocSize;
+	////	}
 }
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
@@ -2120,7 +2120,7 @@ inline void ObjectSizesProfiler::dumpHeapStats(void) {
 			sizeof(GCMMPHeapStatus));
 	int32_t _mutations = GCHistogramDataManager::GCPTotalMutationsCount.load();
 	successWrite &= dump_file_->WriteFully(&_mutations,
-				sizeof(int32_t));
+			sizeof(int32_t));
 	if(successWrite) {
 
 	} else {
@@ -2159,44 +2159,44 @@ void ObjectSizesProfiler::gcpLogPerfData() {
 
 bool ObjectSizesProfiler::waitForProfileSignal(void) {
 	Thread* self = Thread::Current();
-  // Check if GC is running holding gc_complete_lock_.
-  MutexLock mu(self, *prof_thread_mutex_);
-  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-  {
-  	prof_thread_cond_->Wait(self);
-  }
-  return receivedSignal_;
+	// Check if GC is running holding gc_complete_lock_.
+	MutexLock mu(self, *prof_thread_mutex_);
+	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+	{
+		prof_thread_cond_->Wait(self);
+	}
+	return receivedSignal_;
 }
 
 bool ObjectSizesProfiler::periodicDaemonExec(void) {
 	Thread* self = Thread::Current();
-  if(waitForProfileSignal()) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "ObjectSizesProfiler: signal Received " << self->GetTid() ;
-    //LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+	if(waitForProfileSignal()) { //we recived Signal to Shutdown
+		GCMMP_VLOG(INFO) << "ObjectSizesProfiler: signal Received " << self->GetTid() ;
+		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
 
-    {
-    	MutexLock mu(self, *prof_thread_mutex_);
-    	receivedSignal_ = false;
-    }
- //
- //
+		{
+			MutexLock mu(self, *prof_thread_mutex_);
+			receivedSignal_ = false;
+		}
+		//
+		//
 
-    updateHeapAllocStatus();
+		updateHeapAllocStatus();
 
-    if(getRecivedShutDown()) {
-    	LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+		if(getRecivedShutDown()) {
+			LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
 
-    } else {
-    	dumpProfData(false);
-    }
+		} else {
+			dumpProfData(false);
+		}
 #if GCP_COLLECT_FOR_PROFILE
-    	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-    	heap_->CollectGarbageForProfile(true);
+		gc::Heap* heap_ = Runtime::Current()->GetHeap();
+		heap_->CollectGarbageForProfile(true);
 #endif
-  	return getRecivedShutDown();
-  } else {
-  	return false;
-  }
+		return getRecivedShutDown();
+	} else {
+		return false;
+	}
 }
 
 bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
@@ -2211,10 +2211,10 @@ bool ObjectSizesProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 
 void ObjectSizesProfiler::gcpFinalizeHistUpdates(void) {
-  GCHistogramObjSizesManager* _manager = getObjHistograms();
-  if(_manager == NULL)
-  	return;
-  _manager->gcpFinalizeProfileCycle();
+	GCHistogramObjSizesManager* _manager = getObjHistograms();
+	if(_manager == NULL)
+		return;
+	_manager->gcpFinalizeProfileCycle();
 
 	//GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	//we are relaxed we do not need to lookup for the whole records
@@ -2294,26 +2294,26 @@ void ObjectSizesProfiler::gcpUpdateGlobalHistogram(void) {
 void ObjectSizesProfiler::dumpProfData(bool isLastDump) {
 	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
 	gcpUpdateGlobalHistogram();
-  bool _success = true;
-  if(isLastDump) {
- 	  _success &= GCPDumpEndMarker(dump_file_);
- 	  //dump the summary one more time
- 	  _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
- 	  if(!_success) {
- 	  	LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
- 	  }
- 	  dump_file_->Close();
- 	  std::ostringstream outputStream;
- 	  hitogramsData_->gcpDumpCSVData(outputStream);
- 	  LOG(ERROR) << outputStream.str();
- 	  gcpLogPerfData();
- 	  LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
-  } else {
-    dumpHeapStats();
-    _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
-  //	gcpLogPerfData();
-  	gcpFinalizeHistUpdates();
-  }
+	bool _success = true;
+	if(isLastDump) {
+		_success &= GCPDumpEndMarker(dump_file_);
+		//dump the summary one more time
+		_success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
+		if(!_success) {
+			LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
+		}
+		dump_file_->Close();
+		std::ostringstream outputStream;
+		hitogramsData_->gcpDumpCSVData(outputStream);
+		LOG(ERROR) << outputStream.str();
+		gcpLogPerfData();
+		LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
+	} else {
+		dumpHeapStats();
+		_success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
+		//	gcpLogPerfData();
+		gcpFinalizeHistUpdates();
+	}
 }
 
 /*
@@ -2321,11 +2321,11 @@ void ObjectSizesProfiler::dumpProfData(bool isLastDump) {
  */
 size_t ObjectSizesProfiler::GCPAddMProfilingExtraBytes(size_t allocBytes) {
 	return allocBytes + GCPGetExtraProfileBytes();
-//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
-//	if(mP != NULL && mP->IsProfilingEnabled()) {
-//		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
-//	}
-//	return allocBytes;
+	//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	//	if(mP != NULL && mP->IsProfilingEnabled()) {
+	//		return ((ObjectSizesProfiler*) mP)->getExtraProfileBytes() + allocBytes;
+	//	}
+	//	return allocBytes;
 }
 
 /*
@@ -2333,11 +2333,11 @@ size_t ObjectSizesProfiler::GCPAddMProfilingExtraBytes(size_t allocBytes) {
  */
 size_t ObjectSizesProfiler::GCPRemoveMProfilingExtraBytes(size_t allocBytes) {
 	return allocBytes - GCPGetExtraProfileBytes();
-//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
-//	if(mP != NULL && mP->IsProfilingEnabled()) {
-//		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
-//	}
-//	return allocBytes;
+	//	VMProfiler* mP = Runtime::Current()->GetMProfiler();
+	//	if(mP != NULL && mP->IsProfilingEnabled()) {
+	//		return allocBytes - ((ObjectSizesProfiler*) mP)->getExtraProfileBytes();
+	//	}
+	//	return allocBytes;
 }
 
 void ObjectSizesProfiler::GCPInitObjectProfileHeader(size_t allocatedMemory,
@@ -2390,14 +2390,14 @@ void ThreadAllocProfiler::setThHistogramManager(GCMMPThreadProf* thProf,
 		Thread* thread) {
 	//LOG(ERROR) << "setThHistogramManager: " << thread->GetTid() << ", " << GetThreadName(thread->GetTid());
 	setHistogramManager(thProf);
-//	if(thProf->histogramManager_ == NULL)
-//		return;
-//  std::string name;
-//  thread->GetThreadName(name);
-//	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid() << ", " << name;
-//	GCPPairHistogramRecords* _threadProfRec =
-//			(GCPPairHistogramRecords*) thProf->histogramManager_;
-//	_threadProfRec->setRefreneceNameFromThread(thread);
+	//	if(thProf->histogramManager_ == NULL)
+	//		return;
+	//  std::string name;
+	//  thread->GetThreadName(name);
+	//	LOG(ERROR) << "setThHistogramManager: calling set reference name:" << thread->GetTid() << ", " << name;
+	//	GCPPairHistogramRecords* _threadProfRec =
+	//			(GCPPairHistogramRecords*) thProf->histogramManager_;
+	//	_threadProfRec->setRefreneceNameFromThread(thread);
 }
 //bool ThreadAllocProfiler::periodicDaemonExec(void) {
 //	Thread* self = Thread::Current();
@@ -2458,59 +2458,59 @@ void ThreadAllocProfiler::gcpUpdateGlobalHistogram(void) {
 	_manager->calculatePercentiles();
 	_manager->calculateAtomicPercentiles();
 
-//
-//
-//	//set a new secret to make sure all the manager are not ousiders:
-//	GCHistogramObjSizesManager* _histManager = getThreadHistograms();
-//	int _newSecret = _histManager->generateNewSecret();
-//	for (const auto& threadProf : threadProfList_) {
-//		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
-//		if(_histMgr != NULL) {
-//			_histMgr->setFriendISecret(_newSecret);
-//			_histMgr->gcpAggregateHistograms(_histManager->histogramTable,
-//					&_histManager->histRecord);
-//			_histMgr->gcpAggAtomicHistograms(_histManager->lastWindowHistTable,
-//					&_histManager->histAtomicRecord);
-//		}
-//	}
-//
-//	int32_t _cntAtomicTotal = _histManager->histAtomicRecord.cntTotal.load();
-//	int32_t _cntAtomicLive = _histManager->histAtomicRecord.cntLive.load();
-//	for (const auto& threadProf : threadProfList_) {
-//		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
-//		if(_histMgr != NULL) {
-//			_histMgr->histAtomicRecord.pcntLive = 0.0;
-//			_histMgr->histAtomicRecord.pcntTotal = 0.0;
-//
-//			if(!_histManager->gcpIsManagerFriend(_histMgr)) {
-//				LOG(ERROR) << "^^^^^^ Found  sneaky Histogram manager ^^^^^";
-//				_histMgr->histRecord.pcntLive = 0.0;
-//				_histMgr->histRecord.pcntTotal = 0.0;
-//			} else {
-//				_histMgr->histRecord.pcntLive =
-//						(_histMgr->histRecord.cntLive * 100.0) / _histManager->histRecord.cntLive;
-//				_histMgr->histRecord.pcntTotal =
-//						(_histMgr->histRecord.cntTotal * 100.0) / _histManager->histRecord.cntTotal;
-//
-//				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
-//						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
-//				_histMgr->histAtomicRecord.pcntTotal = _cntAtomicTotal == 0 ? 0.0 :
-//						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
-//			}
-//		}
-//	}
+	//
+	//
+	//	//set a new secret to make sure all the manager are not ousiders:
+	//	GCHistogramObjSizesManager* _histManager = getThreadHistograms();
+	//	int _newSecret = _histManager->generateNewSecret();
+	//	for (const auto& threadProf : threadProfList_) {
+	//		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
+	//		if(_histMgr != NULL) {
+	//			_histMgr->setFriendISecret(_newSecret);
+	//			_histMgr->gcpAggregateHistograms(_histManager->histogramTable,
+	//					&_histManager->histRecord);
+	//			_histMgr->gcpAggAtomicHistograms(_histManager->lastWindowHistTable,
+	//					&_histManager->histAtomicRecord);
+	//		}
+	//	}
+	//
+	//	int32_t _cntAtomicTotal = _histManager->histAtomicRecord.cntTotal.load();
+	//	int32_t _cntAtomicLive = _histManager->histAtomicRecord.cntLive.load();
+	//	for (const auto& threadProf : threadProfList_) {
+	//		GCHistogramObjSizesManager* _histMgr = threadProf->histogramManager_;
+	//		if(_histMgr != NULL) {
+	//			_histMgr->histAtomicRecord.pcntLive = 0.0;
+	//			_histMgr->histAtomicRecord.pcntTotal = 0.0;
+	//
+	//			if(!_histManager->gcpIsManagerFriend(_histMgr)) {
+	//				LOG(ERROR) << "^^^^^^ Found  sneaky Histogram manager ^^^^^";
+	//				_histMgr->histRecord.pcntLive = 0.0;
+	//				_histMgr->histRecord.pcntTotal = 0.0;
+	//			} else {
+	//				_histMgr->histRecord.pcntLive =
+	//						(_histMgr->histRecord.cntLive * 100.0) / _histManager->histRecord.cntLive;
+	//				_histMgr->histRecord.pcntTotal =
+	//						(_histMgr->histRecord.cntTotal * 100.0) / _histManager->histRecord.cntTotal;
+	//
+	//				_histMgr->histAtomicRecord.pcntLive = _cntAtomicLive == 0 ? 0.0 :
+	//						(_histMgr->histAtomicRecord.cntLive.load() * 100.0) / _cntAtomicLive;
+	//				_histMgr->histAtomicRecord.pcntTotal = _cntAtomicTotal == 0 ? 0.0 :
+	//						(_histMgr->histAtomicRecord.cntTotal.load() * 100.0) / _cntAtomicTotal;
+	//			}
+	//		}
+	//	}
 
-//	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
-//			&objHistograms->histRecord);
-//	objHistograms->gcpCalculateAtomicEntries(objHistograms->lastWindowHistTable,
-//			&objHistograms->histAtomicRecord);
+	//	objHistograms->gcpCalculateEntries(objHistograms->histogramTable,
+	//			&objHistograms->histRecord);
+	//	objHistograms->gcpCalculateAtomicEntries(objHistograms->lastWindowHistTable,
+	//			&objHistograms->histAtomicRecord);
 }
 
 void ThreadAllocProfiler::gcpFinalizeHistUpdates(void) {
-  GCPThreadAllocManager* _manager = getThreadHistManager();
-  if(_manager == NULL)
-  	return;
-  _manager->gcpFinalizeProfileCycle();
+	GCPThreadAllocManager* _manager = getThreadHistManager();
+	if(_manager == NULL)
+		return;
+	_manager->gcpFinalizeProfileCycle();
 
 	//GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	//we are relaxed we do not need to lookup for the whole records
@@ -2683,7 +2683,7 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 	if(_manager == NULL)
 		return;
 	int32_t currMutationCnt =
-				GCHistogramDataManager::GCPTotalMutationsCount.load();
+			GCHistogramDataManager::GCPTotalMutationsCount.load();
 	GCHistogramDataManager::GCPIncMutations();
 	_manager->profileDistance(dst, member_offset, new_value);
 	if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
@@ -2692,12 +2692,12 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 		{
 			MutexLock mu(self, *prof_thread_mutex_);
 			receivedSignal_ = true;
-		  if(hasProfDaemon()) {
-		    prof_thread_cond_->Broadcast(self);
-		  }
-		  // Wake anyone who may have been waiting for the GC to complete.
-		 GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for gcpProfilerDistance:" <<
-		  		self->GetTid() ;
+			if(hasProfDaemon()) {
+				prof_thread_cond_->Broadcast(self);
+			}
+			// Wake anyone who may have been waiting for the GC to complete.
+			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for gcpProfilerDistance:" <<
+					self->GetTid() ;
 		}
 	}
 }
@@ -2710,9 +2710,9 @@ void RefDistanceProfiler::initHistDataManager(void) {
 
 void RefDistanceProfiler::gcpFinalizeHistUpdates(void) {
 	GCRefDistanceManager* _manager = getDistanceProfManager();
-  if(_manager == NULL)
-  	return;
-  _manager->gcpFinalizeProfileCycle();
+	if(_manager == NULL)
+		return;
+	_manager->gcpFinalizeProfileCycle();
 
 	//GCHistogramDataManager::kGCPLastCohortIndex.store(GCPGetCalcCohortIndex());
 	//we are relaxed we do not need to lookup for the whole records
@@ -2797,7 +2797,7 @@ void CohortProfiler::gcpLogPerfData() {
 /************************ Class Loader *********************/
 
 ClassProfiler::ClassProfiler(GCMMP_Options* opts, void* entry) :
-	ObjectSizesProfiler(opts, entry, false) {
+			ObjectSizesProfiler(opts, entry, false) {
 	initHistDataManager();
 	LOG(ERROR) << "ClassProfiler : Constructor of ClassProfiler";
 }
@@ -2843,30 +2843,30 @@ void ClassProfiler::gcpProfObjKlass(mirror::Class* klass, mirror::Object* obj) {
 		GCPHistRecData* _rec = classManager->addObjectClassPair(klass, obj);
 		if(_rec == NULL)
 			LOG(ERROR) << "ClassProfiler::gcpProfObjKlass NULL record";
-//		if(_rec == NULL) {
-//			LOG(ERROR) << "Could not add the new record";
-//		} else {
-//			LOG(ERROR) << "new record was added";
-//		}
-//		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
-//		if(objSpace == 0) {
-//			LOG(ERROR) << "Objectsize rturned 0: ";
-//		}
-//		GCPExtraObjHeader* _profHeader =
-//					GCHistogramObjSizesManager::GCPGetObjProfHeader(objSpace, obj);
-//		classManager->gcpIncAtomicPairRecData(_profHeader->objSize, _rec);
-//		classManager->gcpIncPairRecData(_profHeader->objSize, _rec);
-//
-//		_profHeader->dataRec = _rec;
+		//		if(_rec == NULL) {
+		//			LOG(ERROR) << "Could not add the new record";
+		//		} else {
+		//			LOG(ERROR) << "new record was added";
+		//		}
+		//		size_t objSpace =  Runtime::Current()->GetHeap()->GCPGetObjectAllocatedSpace(obj);
+		//		if(objSpace == 0) {
+		//			LOG(ERROR) << "Objectsize rturned 0: ";
+		//		}
+		//		GCPExtraObjHeader* _profHeader =
+		//					GCHistogramObjSizesManager::GCPGetObjProfHeader(objSpace, obj);
+		//		classManager->gcpIncAtomicPairRecData(_profHeader->objSize, _rec);
+		//		classManager->gcpIncPairRecData(_profHeader->objSize, _rec);
+		//
+		//		_profHeader->dataRec = _rec;
 
 	}
 }
 
 void ClassProfiler::gcpFinalizeHistUpdates(void) {
 	GCClassTableManager* _manager = getClassHistograms();
-  if(_manager == NULL)
-  	return;
-  _manager->gcpFinalizeProfileCycle();
+	if(_manager == NULL)
+		return;
+	_manager->gcpFinalizeProfileCycle();
 }
 
 void ClassProfiler::initHistDataManager(void) {
@@ -2877,7 +2877,7 @@ void ClassProfiler::initHistDataManager(void) {
 //class_Linker
 void ClassProfiler::dumpAllClasses(void) {
 	//std::ostringstream os;
- // os << "Dumping the Classes::::\n";
+	// os << "Dumping the Classes::::\n";
 	ReaderMutexLock mu(Thread::Current(), *Locks::mutator_lock_);
 	if(false)
 		Runtime::Current()->GetClassLinker()->GCPDumpAllClasses(7, LOG(ERROR));
@@ -2894,38 +2894,38 @@ void ClassProfiler::dumpAllClasses(void) {
 	//Runtime::Current()->GetInternTable()->
 
 
-//	if(tablManager->classTable_ != NULL) {
-//		LOG(ERROR) << "+++table class table is not NULL";
-//		LOG(ERROR) << "+++table class table size is" << tablManager->classTable_.size();
-//	} else {
-//		LOG(ERROR) << "+++sssstable class table is null";
-//	}
-//
-//	int _countMine = 0;
-//	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
-//		LOG(ERROR) << "-- " << _countMine++;
-//		if(it.second == NULL) {
-//			LOG(ERROR) << "--------NULL";
-//		}
-//		//GCPHistogramRec* _recI =  it.second;
-//		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
-//	}
+	//	if(tablManager->classTable_ != NULL) {
+	//		LOG(ERROR) << "+++table class table is not NULL";
+	//		LOG(ERROR) << "+++table class table size is" << tablManager->classTable_.size();
+	//	} else {
+	//		LOG(ERROR) << "+++sssstable class table is null";
+	//	}
+	//
+	//	int _countMine = 0;
+	//	for (const std::pair<size_t, GCPHistogramRec*>& it : tablManager->classTable_) {
+	//		LOG(ERROR) << "-- " << _countMine++;
+	//		if(it.second == NULL) {
+	//			LOG(ERROR) << "--------NULL";
+	//		}
+	//		//GCPHistogramRec* _recI =  it.second;
+	//		//LOG(ERROR) << "-- " <<_countMine++<<"  :: "<< it.first << ", count=" << _recI->cntLive;
+	//	}
 
 	LOG(ERROR) << "++++++++++++++++ Done Counting for each class++++++++++++++++++++";// << _countMine;
 
-//  std::vector<mirror::Class*> classes;
-//
-//  Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
-//  std::vector<uint64_t> countVector;
-//  for(size_t _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
-//  	countVector.push_back(0);
-//  }
-//
-//  Runtime::Current()->GetHeap()->CountInstances(classes, false, &countVector[0]);
-//  int _index = 0;
-//  for (const auto& _rowCountIter : countVector) {
-//  	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
-//  }
+	//  std::vector<mirror::Class*> classes;
+	//
+	//  Runtime::Current()->GetClassLinker()->GCPGetAllClasses(classes);
+	//  std::vector<uint64_t> countVector;
+	//  for(size_t _indexIter = 0; _indexIter < classes.size(); _indexIter++) {
+	//  	countVector.push_back(0);
+	//  }
+	//
+	//  Runtime::Current()->GetHeap()->CountInstances(classes, false, &countVector[0]);
+	//  int _index = 0;
+	//  for (const auto& _rowCountIter : countVector) {
+	//  	LOG(ERROR) << "count: " << _index++ << ": " << _rowCountIter;
+	//  }
 }
 
 void ClassProfiler::gcpLogPerfData() {
@@ -3277,34 +3277,34 @@ void MProfiler::SetMProfileFlags(void) {
 	OpenDumpFile();
 	AttachThreads();
 	running_ = true;
-//	size_t capacity = MProfiler::kGCMMPMAXThreadCount * sizeof(GCMMPThreadProf);
-//  UniquePtr<GCMMPThreadProf> mem_threads_allocated(MemMap::MapAnonymous(
-//  		"thredProfileRegion", NULL, capacity, PROT_READ | PROT_WRITE));
+	//	size_t capacity = MProfiler::kGCMMPMAXThreadCount * sizeof(GCMMPThreadProf);
+	//  UniquePtr<GCMMPThreadProf> mem_threads_allocated(MemMap::MapAnonymous(
+	//  		"thredProfileRegion", NULL, capacity, PROT_READ | PROT_WRITE));
 
 }
 
 MProfiler::~MProfiler() {
 	if(prof_thread_mutex_ != NULL)
 		delete prof_thread_mutex_;
-  CHECK_PTHREAD_CALL(pthread_kill, (pthread_, SIGQUIT), "MProfiler shutdown");
-  CHECK_PTHREAD_CALL(pthread_join, (pthread_, NULL), "MProfiler shutdown");
+	CHECK_PTHREAD_CALL(pthread_kill, (pthread_, SIGQUIT), "MProfiler shutdown");
+	CHECK_PTHREAD_CALL(pthread_join, (pthread_, NULL), "MProfiler shutdown");
 }
 
 bool MProfiler::MainProfDaemonExec(){
 	Thread* self = Thread::Current();
-  // Check if GC is running holding gc_complete_lock_.
-  MutexLock mu(self, *prof_thread_mutex_);
-  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
-  ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-  {
-  	prof_thread_cond_->Wait(self);
-  }
-  if(receivedSignal_) { //we recived Signal to Shutdown
-    GCMMP_VLOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
-  	return true;
-  } else {
-  	return false;
-  }
+	// Check if GC is running holding gc_complete_lock_.
+	MutexLock mu(self, *prof_thread_mutex_);
+	GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Is going to Wait";
+	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+	{
+		prof_thread_cond_->Wait(self);
+	}
+	if(receivedSignal_) { //we recived Signal to Shutdown
+		GCMMP_VLOG(INFO) << "MProfiler: signal Received " << self->GetTid() ;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void MProfiler::RemoveThreadProfile(GCMMPThreadProf* thProfRec) {
@@ -3323,84 +3323,84 @@ void* MProfiler::Run(void* arg) {
 	MProfiler* mProfiler = reinterpret_cast<MProfiler*>(arg);
 
 
-  Runtime* runtime = Runtime::Current();
+	Runtime* runtime = Runtime::Current();
 
-  mProfiler->hasProfDaemon_ =
-  		runtime->AttachCurrentThread("MProfile Daemon", true,
-  				runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler());
+	mProfiler->hasProfDaemon_ =
+			runtime->AttachCurrentThread("MProfile Daemon", true,
+					runtime->GetSystemThreadGroup(),
+					!runtime->IsCompiler());
 
-  CHECK(mProfiler->hasProfDaemon_);
+	CHECK(mProfiler->hasProfDaemon_);
 
-  if(!mProfiler->hasProfDaemon_)
-  	return NULL;
+	if(!mProfiler->hasProfDaemon_)
+		return NULL;
 
-  mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
-  Thread* self = Thread::Current();
-  DCHECK_NE(self->GetState(), kRunnable);
-  {
+	mProfiler->flags_ |= GCMMP_FLAGS_HAS_DAEMON;
+	Thread* self = Thread::Current();
+	DCHECK_NE(self->GetState(), kRunnable);
+	{
 
-    MutexLock mu(self, *mProfiler->prof_thread_mutex_);
-    if(!mProfiler->running_) {
+		MutexLock mu(self, *mProfiler->prof_thread_mutex_);
+		if(!mProfiler->running_) {
 
-      GCMMP_VLOG(INFO) << "MProfiler: Assigning profID to profDaemon " <<
-      		self->GetTid();
-    	mProfiler->prof_thread_ = self;
-    	mProfiler->SetMProfileFlags();
-    } else {
-    	 GCMMP_VLOG(INFO) << "MProfiler: Profiler was already created";
-    }
+			GCMMP_VLOG(INFO) << "MProfiler: Assigning profID to profDaemon " <<
+					self->GetTid();
+			mProfiler->prof_thread_ = self;
+			mProfiler->SetMProfileFlags();
+		} else {
+			GCMMP_VLOG(INFO) << "MProfiler: Profiler was already created";
+		}
 
-    mProfiler->prof_thread_cond_->Broadcast(self);
-  }
-
-
-  GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
+		mProfiler->prof_thread_cond_->Broadcast(self);
+	}
 
 
-  while(true) {
-    // Check if GC is running holding gc_complete_lock_.
-    if(mProfiler->MainProfDaemonExec())
-    	break;
-  }
-  //const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
-  //ThreadState old_state =
-  //self->SetStateUnsafe(kRunnable);
-  mProfiler->ShutdownProfiling();
+	GCMMP_VLOG(INFO) << "MProfiler: Profiler Daemon Created and Leaving";
 
-  return NULL;
+
+	while(true) {
+		// Check if GC is running holding gc_complete_lock_.
+		if(mProfiler->MainProfDaemonExec())
+			break;
+	}
+	//const char* old_cause = self->StartAssertNoThreadSuspension("Handling SIGQUIT");
+	//ThreadState old_state =
+	//self->SetStateUnsafe(kRunnable);
+	mProfiler->ShutdownProfiling();
+
+	return NULL;
 
 }
 
 void MProfiler::DumpProfData(bool isLastDump) {
-  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
-  GCMMP_VLOG(INFO) << " Dumping the commin information ";
-  bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
-  	//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
-  }
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
-  }
+	ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+	GCMMP_VLOG(INFO) << " Dumping the commin information ";
+	bool successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+	if(successWrite) {
+		successWrite = dump_file_->WriteFully(&start_heap_bytes_, sizeof(size_t));
+		//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	}
+	if(successWrite) {
+		successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+	}
 
-  GCMMP_VLOG(INFO) << " Dumping the MMU information ";
+	GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
-  }
-  if(successWrite) {
-  	successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
-  }
+	if(successWrite) {
+		successWrite = dump_file_->WriteFully(&cpu_time_ns_, sizeof(uint64_t));
+	}
+	if(successWrite) {
+		successWrite = dump_file_->WriteFully(&end_cpu_time_ns_, sizeof(uint64_t));
+	}
 
-  if(successWrite) {
-  	ForEach(GCMMPDumpMMUThreadProf, this);
-  }
+	if(successWrite) {
+		ForEach(GCMMPDumpMMUThreadProf, this);
+	}
 
-  if(successWrite) {
-  	successWrite =
-  			VMProfiler::GCPDumpEndMarker(dump_file_);
-  }
+	if(successWrite) {
+		successWrite =
+				VMProfiler::GCPDumpEndMarker(dump_file_);
+	}
 
 	if(isLastDump) {
 		VMProfiler::GCPDumpEndMarker(dump_file_);
@@ -3419,47 +3419,47 @@ void MProfiler::DumpProfData(bool isLastDump) {
 			", cuuBytes = " << GetRelevantAllocBytes();
 }
 void MProfiler::CreateProfilerDaemon(void) {
-  // Create a raw pthread; its start routine will attach to the runtime.
+	// Create a raw pthread; its start routine will attach to the runtime.
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
 
-  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this),
-  		"MProfiler Daemon thread");
+	CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this),
+			"MProfiler Daemon thread");
 
-  while (prof_thread_ == NULL) {
-  	prof_thread_cond_->Wait(self);
-  }
-  prof_thread_cond_->Broadcast(self);
+	while (prof_thread_ == NULL) {
+		prof_thread_cond_->Wait(self);
+	}
+	prof_thread_cond_->Broadcast(self);
 
-  GCMMP_VLOG(INFO) << "MProfiler: Caller is leaving now";
+	GCMMP_VLOG(INFO) << "MProfiler: Caller is leaving now";
 
 }
 
 void MProfiler::ProcessSignalCatcher(int signalVal) {
 	vmProfile->ProcessSignalCatcher(signalVal);
-//	if(signalVal == kGCMMPDumpSignal) {
-//		Thread* self = Thread::Current();
-//    MutexLock mu(self, *prof_thread_mutex_);
-//    receivedSignal_ = true;
-//
-//    if(!hasProfDaemon_) {
-//    	ShutdownProfiling();
-//    }
-//
-//    // Wake anyone who may have been waiting for the GC to complete.
-//    prof_thread_cond_->Broadcast(self);
-//
-//    GCMMP_VLOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
-//	}
+	//	if(signalVal == kGCMMPDumpSignal) {
+	//		Thread* self = Thread::Current();
+	//    MutexLock mu(self, *prof_thread_mutex_);
+	//    receivedSignal_ = true;
+	//
+	//    if(!hasProfDaemon_) {
+	//    	ShutdownProfiling();
+	//    }
+	//
+	//    // Wake anyone who may have been waiting for the GC to complete.
+	//    prof_thread_cond_->Broadcast(self);
+	//
+	//    GCMMP_VLOG(INFO) << "MProfiler: Sent the signal " << self->GetTid() ;
+	//	}
 }
 
 
 bool MProfiler::ProfiledThreadsContain(Thread* thread) {
 	pid_t tId = thread->GetTid();
 	for (const auto& threadProf : threadProflist_) {
-    if (threadProf->GetTid() == tId) {
-      return true;
-    }
+		if (threadProf->GetTid() == tId) {
+			return true;
+		}
 	}
 	return false;
 }
@@ -3472,68 +3472,68 @@ void MProfiler::AttachThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread:" << thread->GetTid();
 	vmProfile->attachSingleThread(thread);
 
-//	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
-//	GCMMPThreadProf* threadProf = thread->GetProfRec();
-//	if(threadProf != NULL) {
-//		if(threadProf->state == GCMMP_TH_RUNNING) {
-//			GCMMP_VLOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
-//			return;
-//		}
-//	}
-//	if(thread->GetTid() == prof_thread_->GetTid()) {
-//		if(!IsAttachProfDaemon()) {
-//			GCMMP_VLOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
-//			return;
-//		}
-//	}
-//
-//	std::string thread_name;
-//	thread->GetThreadName(thread_name);
-//
-//
-//
-//
-//	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
-//		gc_daemon_ = thread;
-//		SetThreadAffinity(thread, false);
-//		if(!IsAttachGCDaemon()) {
-//			GCMMP_VLOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
-//			return;
-//		}
-//	} else {
-//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-//			gc_trimmer_ = thread;
-//			SetThreadAffinity(thread, false);
-//			if(!IsAttachGCDaemon()) {
-//				GCMMP_VLOG(INFO) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
-//				return;
-//			}
-//		} else if(thread_name.compare("main") == 0) { //that's the main thread
-//				main_thread_ = thread;
-//		}
-//		SetThreadAffinity(thread, true);
-//	}
-//
-//	GCMMP_VLOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
-//	threadProf = new GCMMPThreadProf(this, thread);
-//	threadProflist_.push_back(threadProf);
-//	thread->SetProfRec(threadProf);
+	//	GCMMP_VLOG(INFO) << "MProfiler: Attaching thread Late " << thread->GetTid();
+	//	GCMMPThreadProf* threadProf = thread->GetProfRec();
+	//	if(threadProf != NULL) {
+	//		if(threadProf->state == GCMMP_TH_RUNNING) {
+	//			GCMMP_VLOG(INFO) << "MPRofiler: The Thread was already attached " << thread->GetTid() ;
+	//			return;
+	//		}
+	//	}
+	//	if(thread->GetTid() == prof_thread_->GetTid()) {
+	//		if(!IsAttachProfDaemon()) {
+	//			GCMMP_VLOG(INFO) << "MProfiler: Skipping profDaemon attached " << thread->GetTid() ;
+	//			return;
+	//		}
+	//	}
+	//
+	//	std::string thread_name;
+	//	thread->GetThreadName(thread_name);
+	//
+	//
+	//
+	//
+	//	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+	//		gc_daemon_ = thread;
+	//		SetThreadAffinity(thread, false);
+	//		if(!IsAttachGCDaemon()) {
+	//			GCMMP_VLOG(INFO) << "MProfiler: Skipping GCDaemon threadProf for " << thread->GetTid() << thread_name;
+	//			return;
+	//		}
+	//	} else {
+	//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+	//			gc_trimmer_ = thread;
+	//			SetThreadAffinity(thread, false);
+	//			if(!IsAttachGCDaemon()) {
+	//				GCMMP_VLOG(INFO) << "MProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+	//				return;
+	//			}
+	//		} else if(thread_name.compare("main") == 0) { //that's the main thread
+	//				main_thread_ = thread;
+	//		}
+	//		SetThreadAffinity(thread, true);
+	//	}
+	//
+	//	GCMMP_VLOG(INFO) << "MProfiler: Initializing threadProf for " << thread->GetTid() << thread_name;
+	//	threadProf = new GCMMPThreadProf(this, thread);
+	//	threadProflist_.push_back(threadProf);
+	//	thread->SetProfRec(threadProf);
 }
 
 bool MProfiler::DettachThread(GCMMPThreadProf* threadProf) {
 	if(threadProf != NULL) {
-//		GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
+		//		GCMMP_VLOG(INFO) << "MProfiler: Detaching thread from List " << threadProf->GetTid();
 		return threadProf->StopTimeProfiling();
 	}
 	return false;
 }
 
 void MProfiler::AttachThreads() {
-//
-//	 thread_list->SuspendAll();
-//	 thread_list()->ForEach(GCMMPAttachThread, this);
-//
-//	 thread_list->ResumeAll();
+	//
+	//	 thread_list->SuspendAll();
+	//	 thread_list()->ForEach(GCMMPAttachThread, this);
+	//
+	//	 thread_list->ResumeAll();
 
 	Thread* self = Thread::Current();
 	GCMMP_VLOG(INFO) << "MProfiler: Attaching All threads " << self->GetTid();
@@ -3548,27 +3548,27 @@ void MProfiler::AttachThreads() {
 
 void MProfiler::ForEach(void (*callback)(GCMMPThreadProf*, void*),
 		void* context) {
-  for (const auto& profRec : threadProflist_) {
-    callback(profRec, context);
-  }
+	for (const auto& profRec : threadProflist_) {
+		callback(profRec, context);
+	}
 }
 
 void MProfiler::OpenDumpFile() {
-//	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
-//		char str[256];
-//		strcpy(str, gcMMPRootPath[i]);
-//		strcat(str, dump_file_name_);
-//
-//
-//		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
-//	  if (fd == -1) {
-//	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
-//	    continue;
-//	  }
-//    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
-//    dump_file_ = new File(fd, std::string(dump_file_name_));
-//    return;
-//	}
+	//	for (size_t i = 0; i < GCMMP_ARRAY_SIZE(gcMMPRootPath); i++) {
+	//		char str[256];
+	//		strcpy(str, gcMMPRootPath[i]);
+	//		strcat(str, dump_file_name_);
+	//
+	//
+	//		int fd = open(str, O_RDWR | O_APPEND | O_CREAT, 0777);
+	//	  if (fd == -1) {
+	//	    PLOG(ERROR) << "Unable to open MProfile Output file '" << str << "'";
+	//	    continue;
+	//	  }
+	//    GCMMP_VLOG(INFO) << "opened  Successsfully MProfile Output file '" << str << "'";
+	//    dump_file_ = new File(fd, std::string(dump_file_name_));
+	//    return;
+	//	}
 }
 
 
@@ -3587,7 +3587,7 @@ void MProfiler::SetThreadAffinity(art::Thread* th, bool complementary) {
 			CPU_SET(_cpu_id, &mask);
 		}
 		if(sched_setaffinity(th->GetTid(),
-												sizeof(mask), &mask) != 0) {
+				sizeof(mask), &mask) != 0) {
 			if(complementary) {
 				GCMMP_VLOG(INFO) << "GCMMP: Complementary";
 			}
@@ -3620,40 +3620,40 @@ int MProfiler::GetGCDaemonID(void)  {
 }
 // Member functions definitions including constructor
 MProfiler::MProfiler(GCMMP_Options* argOptions)
-		: index_(argOptions->mprofile_type_),
-		main_thread_(NULL),
-		gc_daemon_(NULL),
-		prof_thread_(NULL),
-		gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
-		enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile)),
-		running_(false),
-		receivedSignal_(false),
-		start_heap_bytes_(0)
+: index_(argOptions->mprofile_type_),
+	main_thread_(NULL),
+	gc_daemon_(NULL),
+	prof_thread_(NULL),
+	gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
+	enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile)),
+	running_(false),
+	receivedSignal_(false),
+	start_heap_bytes_(0)
 {
-//	if(IsProfilingEnabled()) {
-//		size_t _loop = 0;
-//		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
-//			if(MProfiler::profilTypes[_loop].id_ == index_)
-//				break; //found
-//		}
-//		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
-//			LOG(ERROR) << "MProfiler : Performance type is not supported";
-//		}
-//		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
-//		flags_ = profEntry->flags_;
-//		dump_file_name_ = profEntry->logFile_;
-//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
-//		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
-//		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
-//																									*prof_thread_mutex_));
-//		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
-//		GCMMP_VLOG(INFO) << "MProfiler Created";
-//
-//	} else {
-//		flags_ = 0;
-//		dump_file_name_ = NULL;
-//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
-//	}
+	//	if(IsProfilingEnabled()) {
+	//		size_t _loop = 0;
+	//		for(_loop = 0; _loop < GCMMP_ARRAY_SIZE(MProfiler::profilTypes); _loop++) {
+	//			if(MProfiler::profilTypes[_loop].id_ == index_)
+	//				break; //found
+	//		}
+	//		if(_loop >= GCMMP_ARRAY_SIZE(MProfiler::profilTypes)) {
+	//			LOG(ERROR) << "MProfiler : Performance type is not supported";
+	//		}
+	//		const GCMMPProfilingEntry* profEntry = &MProfiler::profilTypes[_loop];
+	//		flags_ = profEntry->flags_;
+	//		dump_file_name_ = profEntry->logFile_;
+	//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Enabled";
+	//		prof_thread_mutex_ = new Mutex("MProfile Thread lock");
+	//		prof_thread_cond_.reset(new ConditionVariable("MProfile Thread condition variable",
+	//																									*prof_thread_mutex_));
+	//		vmProfile = profEntry->creator_(argOptions, (void*)profEntry);
+	//		GCMMP_VLOG(INFO) << "MProfiler Created";
+	//
+	//	} else {
+	//		flags_ = 0;
+	//		dump_file_name_ = NULL;
+	//		GCMMP_VLOG(INFO) << "MProfiler Profiling is Disabled";
+	//	}
 
 }
 
