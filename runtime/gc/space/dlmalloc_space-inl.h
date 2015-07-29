@@ -58,16 +58,18 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     *bytes_allocated = allocation_size;
     num_bytes_allocated_ += allocation_size;
     total_bytes_allocated_ += allocation_size;
-    //Fizo: should tune this
-    size_t allocSpaceWithProfHeader = AllocationNoOverhead(result);
+
     size_t tempSize = AllocationNoOverhead(result);
     GCP_REMOVE_EXTRA_BYTES(tempSize, calculatedSize);
     GCP_REMOVE_EXTRA_BYTES(allocation_size - kChunkOverhead, checkingSize);
 
     if(calculatedSize != checkingSize)
-    	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize << ", allocSize: "<< allocation_size<<", checkingSize: "<< checkingSize<<" != calculatedSize: " << calculatedSize << "; diff="<< checkingSize - calculatedSize;
-
-    GCMMP_NOTIFY_ALLOCATION(allocSpaceWithProfHeader, num_bytes, result);
+    	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize <<
+			", allocSize: " << allocation_size << ", checkingSize: " << checkingSize
+			<< " != calculatedSize: " << calculatedSize << "; diff=" <<
+			checkingSize - calculatedSize;
+    //Fizo: should tune this
+    GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result), num_bytes, result);
     ++total_objects_allocated_;
     ++num_objects_allocated_;
   }
