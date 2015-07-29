@@ -64,7 +64,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     GCP_REMOVE_EXTRA_BYTES(allocation_size - kChunkOverhead, checkingSize);
 
     if(calculatedSize != checkingSize)
-    	LOG(ERROR) << "NumBytes= "<<num_bytes<<", Usable size:" << tempSize <<
+    	LOG(ERROR) << "NumBytes= " << num_bytes << ", Usable size:" << tempSize <<
 			", allocSize: " << allocation_size << ", checkingSize: " << checkingSize
 			<< " != calculatedSize: " << calculatedSize << "; diff=" <<
 			checkingSize - calculatedSize;

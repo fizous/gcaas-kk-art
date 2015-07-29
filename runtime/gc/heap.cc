@@ -153,6 +153,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (!image_file_name.empty()) {
     space::ImageSpace* image_space = space::ImageSpace::Create(image_file_name);
     CHECK(image_space != NULL) << "Failed to create space for " << image_file_name;
+    GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " <<   image_file_name;
     AddContinuousSpace(image_space);
     // Oat files referenced by image files immediately follow them in memory, ensure alloc space
     // isn't going to get in the middle
@@ -163,6 +164,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
           reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(oat_file_end_addr),
                                           kPageSize));
     }
+  } else {
+  	GCMMP_VLOG(INFO) << "HeapCreation: image file name was empty: ";
   }
 
   alloc_space_ = space::DlMallocSpace::Create(Runtime::Current()->IsZygote() ? "zygote space" : "alloc space",
