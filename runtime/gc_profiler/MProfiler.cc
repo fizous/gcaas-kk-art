@@ -765,7 +765,7 @@ void VMProfiler::InitSharedLocks() {
 void VMProfiler::InitCommonData() {
 #if ART_GC_PROFILER_SERVICE
 	GCMMP_VLOG(INFO) << "GCService: InitCommon Data";
-	GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
+	//GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
 
 	InitSharedLocks();
 #endif
