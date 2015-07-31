@@ -193,6 +193,9 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
+  Mutex* gc_service_mu_;
+  void InitSharedLocks();
+
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
   static constexpr int kGCMMPDefaultCohortLog = GCP_DEFAULT_COHORT_LOG;
   static const int kGCMMPDefaultAffinity 			= -1;
@@ -502,6 +505,9 @@ public:
 	virtual void resetHeapAllocStatus() {
 		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
 	}
+
+
+
 };
 
 

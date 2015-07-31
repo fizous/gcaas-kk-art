@@ -736,7 +736,27 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 	}
 }
 
+
+void VMProfiler::InitSharedLocks() {
+	int fd = ashmem_create_region("SharedLockingRegion", 1024);
+	if(fd == 0) {
+		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+	  if(gc_service_mu_ != MAP_FAILED) {
+	  	GCMMP_VLOG(INFO) << "GCService: succeeded to create hared memory";
+	  } else {
+	  	GCMMP_VLOG(INFO) << "GCService: Failed to create hared memory";
+	  }
+	}
+}
+
 void VMProfiler::InitCommonData() {
+#if ART_GC_PROFILER_SERVICE
+	GCMMP_VLOG(INFO) << "GCService: InitCommon Data";
+	GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
+
+	InitSharedLocks();
+#endif
+
 	OpenDumpFile();
 
 	//	GCPTotalAllocBytes = 0;
