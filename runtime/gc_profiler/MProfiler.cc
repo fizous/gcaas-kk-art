@@ -743,12 +743,12 @@ void VMProfiler::InitSharedLocks() {
                                                  PROT_READ | PROT_WRITE));
 
   if (mu_mem_map.get() == NULL) {
-    LOG(ERROR) << "Failed to allocate pages for alloc space (" << SharedLockingRegion << ") of size "
+    LOG(ERROR) << "Failed to allocate pages for alloc space (" << "SharedLockingRegion" << ") of size "
         << PrettySize(1024);
     return;
   }
 
-  MemMap* mem_map_ptr = mem_map.release();
+  MemMap* mem_map_ptr = mu_mem_map.release();
   gc_service_mu_ = reinterpret_cast<Mutex*>(mem_map_ptr);
 
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
