@@ -738,15 +738,28 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 
 
 void VMProfiler::InitSharedLocks() {
-	int fd = ashmem_create_region("SharedLockingRegion", 1024);
-	if(fd == 0) {
-		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
-	  if(gc_service_mu_ != MAP_FAILED) {
-	  	GCMMP_VLOG(INFO) << "GCService: succeeded to create hared memory";
-	  } else {
-	  	GCMMP_VLOG(INFO) << "GCService: Failed to create hared memory";
-	  }
-	}
+
+  UniquePtr<MemMap> mu_mem_map(MemMap::MapSharedMemoryAnonymous("SharedLockingRegion", NULL, 1024,
+                                                 PROT_READ | PROT_WRITE));
+
+  if (mu_mem_map.get() == NULL) {
+    LOG(ERROR) << "Failed to allocate pages for alloc space (" << SharedLockingRegion << ") of size "
+        << PrettySize(1024);
+    return;
+  }
+
+  MemMap* mem_map_ptr = mem_map.release();
+  gc_service_mu_ = reinterpret_cast<Mutex*>(mem_map_ptr);
+
+//	int fd = ashmem_create_region("SharedLockingRegion", 1024);
+//	if(fd == 0) {
+//		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+//	  if(gc_service_mu_ != MAP_FAILED) {
+//	  	GCMMP_VLOG(INFO) << "GCService: succeeded to create hared memory";
+//	  } else {
+//	  	GCMMP_VLOG(INFO) << "GCService: Failed to create hared memory";
+//	  }
+//	}
 }
 
 void VMProfiler::InitCommonData() {

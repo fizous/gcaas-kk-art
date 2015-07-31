@@ -67,6 +67,42 @@ static void CheckMapRequest(byte* addr, size_t byte_count) {
 static void CheckMapRequest(byte*, size_t) { }
 #endif
 
+
+
+MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
+  size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
+  CheckMapRequest(addr, page_aligned_byte_count);
+
+#ifdef USE_ASHMEM
+  // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
+  // prefixed "dalvik-".
+  std::string debug_friendly_name("dalvik-");
+  debug_friendly_name += name;
+  ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
+  int flags = MAP_SHARED;
+  if (fd.get() == -1) {
+    PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    return NULL;
+  }
+#else
+  ScopedFd fd(-1);
+  int flags = MAP_SHARED | MAP_ANONYMOUS;
+#endif
+
+  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
+                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
+                << "\n" << maps;
+    return NULL;
+  }
+  return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
+}
+
+
+
 MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
