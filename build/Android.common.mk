@@ -52,6 +52,16 @@ ART_USE_GC_DEFAULT_PROFILER := false
 ART_USE_GC_PROFILER := false
 ART_USE_GC_PROFILER_REF_DIST := false
 ART_GC_PROFILER_VERBOSE := false
+ART_GC_PROFILER_SERVICE := false
+
+ifneq ($(wildcard art/ART_GC_PROFILER_SERVICE),)
+$(info Enabling ART_GC_PROFILER_SERVICE because of existence of art/ART_GC_PROFILER_SERVICE)
+ART_GC_PROFILER_SERVICE := true
+endif
+ifeq ($(WITH_ART_GC_PROFILER_SERVICE), true)
+ART_GC_PROFILER_SERVICE := true
+endif
+
 
 ifneq ($(wildcard art/ART_USE_GC_DEFAULT_PROFILER),)
 $(info Enabling ART_USE_GC_DEFAULT_PROFILER because of existence of art/ART_USE_GC_DEFAULT_PROFILER)
@@ -84,6 +94,7 @@ endif
 ifeq ($(WITH_ART_GC_PROFILER_VERBOSE), true)
 ART_GC_PROFILER_VERBOSE := true
 endif
+
 #
 # Used to enable smart mode
 #
@@ -185,6 +196,12 @@ ifeq ($(ART_GC_PROFILER_VERBOSE),true)
   art_cflags += -DART_GC_PROFILER_VERBOSE=1
 else
 	art_cflags += -DART_GC_PROFILER_VERBOSE=0
+endif
+
+ifeq ($(ART_GC_PROFILER_SERVICE),true)
+  art_cflags += -DART_GC_PROFILER_SERVICE=1
+else
+	art_cflags += -DART_GC_PROFILER_SERVICE=0
 endif
 
 ifeq ($(ART_SEA_IR_MODE),true)
