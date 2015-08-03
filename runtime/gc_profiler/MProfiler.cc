@@ -758,7 +758,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			return;
 		}
 		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
-		LOG(ERROR) << "GCService: the mutex object was initialized";
+		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = " << mP->gc_service_mu_->getFileDescr();
 
 
 		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
