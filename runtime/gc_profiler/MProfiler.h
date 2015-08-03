@@ -16,12 +16,13 @@
 #include "os.h"
 #include "base/logging.h"
 #include "thread_state.h"
+#include "cutils/SharedProcessMutex.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
-#include "cutils/SharedProcessMutex.h"
+
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -87,6 +88,7 @@ void dvmGCMMProfPerfCounters(const char*);
 
 
 namespace art {
+class SharedProcessMutex;
 class ConditionVariable;
 class Mutex;
 class Thread;
