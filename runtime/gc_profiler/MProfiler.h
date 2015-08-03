@@ -21,6 +21,7 @@
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
+#include "cutils/SharedProcessMutex.h"
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -193,7 +194,7 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
-  Mutex* gc_service_mu_;
+  SharedProcessMutex* gc_service_mu_;
   void InitSharedLocks();
 
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;

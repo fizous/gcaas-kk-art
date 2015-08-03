@@ -16,6 +16,7 @@
 #include "base/mutex.h"
 #include "base/unix_file/fd_file.h"
 #include "cutils/sched_policy.h"
+#include "cutils/SharedProcessMutex.h"
 #include "cutils/process_name.h"
 #include "cutils/system_clock.h"
 #include "gc/heap.h"
@@ -749,7 +750,11 @@ void VMProfiler::InitSharedLocks() {
   }
 
   MemMap* mem_map_ptr = mu_mem_map.release();
-  gc_service_mu_ = reinterpret_cast<Mutex*>(mem_map_ptr);
+  SharedProcMutex* _mutexStructAddress =
+  		reinterpret_cast<SharedProcMutex*>(mem_map_ptr);
+
+
+  gc_service_mu_ = new SharedProcessMutex(_mutexStructAddress, "SharedGCProfileMutex");
 
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
 //	if(fd == 0) {
@@ -764,10 +769,12 @@ void VMProfiler::InitSharedLocks() {
 
 void VMProfiler::InitCommonData() {
 #if ART_GC_PROFILER_SERVICE
-	GCMMP_VLOG(INFO) << "GCService: InitCommon Data";
+	GCMMP_VLOG(INFO) << "GCService: before calling shared locks initialization";
 	//GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
 
 	InitSharedLocks();
+
+	GCMMP_VLOG(INFO) << "GCService: After calling shared locks initialization";
 #endif
 
 	OpenDumpFile();
