@@ -38,6 +38,10 @@
 //#include "scoped_thread_state_change.h"
 
 
+namespace android {
+class SharedProcessMutex;
+}
+
 namespace art {
 class MemmberOffset;
 
@@ -704,6 +708,14 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
+#if ART_GC_PROFILER_SERVICE
+	GCMMP_VLOG(INFO) << "GCService: initializing shared lock";
+	//GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
+
+	InitSharedLocks();
+
+	GCMMP_VLOG(INFO) << "GCService: Done initializing shared lock";
+#endif
 			createAppList(argOptions);
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
@@ -750,11 +762,12 @@ void VMProfiler::InitSharedLocks() {
   }
 
   MemMap* mem_map_ptr = mu_mem_map.release();
-  SharedProcMutex* _mutexStructAddress =
-  		reinterpret_cast<SharedProcMutex*>(mem_map_ptr);
+  android::SharedProcMutex* _mutexStructAddress =
+  		reinterpret_cast<android::SharedProcMutex*>(mem_map_ptr);
 
 
-  gc_service_mu_ = new SharedProcessMutex(_mutexStructAddress, "SharedGCProfileMutex");
+  gc_service_mu_ =
+  		new android::SharedProcessMutex(_mutexStructAddress, "SharedGCProfileMutex");
 
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
 //	if(fd == 0) {
@@ -768,14 +781,6 @@ void VMProfiler::InitSharedLocks() {
 }
 
 void VMProfiler::InitCommonData() {
-#if ART_GC_PROFILER_SERVICE
-	GCMMP_VLOG(INFO) << "GCService: before calling shared locks initialization";
-	//GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
-
-	InitSharedLocks();
-
-	GCMMP_VLOG(INFO) << "GCService: After calling shared locks initialization";
-#endif
 
 	OpenDumpFile();
 

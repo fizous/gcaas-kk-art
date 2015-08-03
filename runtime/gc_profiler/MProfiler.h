@@ -87,8 +87,11 @@
 void dvmGCMMProfPerfCounters(const char*);
 
 
-namespace art {
+namespace android {
 class SharedProcessMutex;
+}//namesspace android
+
+namespace art {
 class ConditionVariable;
 class Mutex;
 class Thread;
@@ -196,7 +199,7 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
-  SharedProcessMutex* gc_service_mu_;
+  android::SharedProcessMutex* gc_service_mu_;
   void InitSharedLocks();
 
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
