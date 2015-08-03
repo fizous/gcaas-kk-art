@@ -78,10 +78,10 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t by
   // prefixed "dalvik-".
   std::string debug_friendly_name("dalvik-");
   debug_friendly_name += name;
-  ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
+  int fd = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
   int flags = MAP_SHARED;
   if (fd.get() == -1) {
-    PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
   }
 #else
@@ -93,7 +93,7 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t by
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
+    LOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
                 << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
                 << "\n" << maps;
     return NULL;

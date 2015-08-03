@@ -752,13 +752,13 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 
 void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
-	LOG(ERROR) << "GCService: HAVE_PTHREADS: " << LOG(ERROR) << HAVE_PTHREADS;
-	LOG(ERROR) << "GCService: ART_USE_FUTEXES: " << LOG(ERROR) << ART_USE_FUTEXES;
 	if(mP != NULL && mP->IsProfilingEnabled()) {
 		if(mP->gc_service_mu_ == NULL) {
 			LOG(ERROR) << "GCService: the mutex object was not initialized";
 			return;
 		}
+		LOG(ERROR) << "GCService: HAVE_PTHREADS: " <<
+				mP->gc_service_mu_ ->HasPTHREADS()?  "true" : "false";
 		LOG(ERROR) << "GCService: the mutex object was initialized";
 		int resultLock = mP->gc_service_mu_->trylock();
 		if(resultLock == 0) {
