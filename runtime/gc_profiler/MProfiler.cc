@@ -777,6 +777,13 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 
 void VMProfiler::InitSharedLocks() {
 
+	if(!Runtime::Current()->IsZygote()){
+		LOG(ERROR) << "GCService: Not zygote we will not initialize the shared pages";
+		return;
+	}
+	LOG(ERROR) << "GCService: <<<<< Zygote Initialization >>>>>>";
+
+
   UniquePtr<MemMap> mu_mem_map(MemMap::MapSharedMemoryAnonymous("SharedLockingRegion", NULL, 1024,
                                                  PROT_READ | PROT_WRITE));
 
