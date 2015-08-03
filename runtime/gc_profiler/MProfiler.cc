@@ -757,8 +757,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			LOG(ERROR) << "GCService: the mutex object was not initialized";
 			return;
 		}
-		LOG(ERROR) << "GCService: HAVE_PTHREADS: " <<
-				mP->gc_service_mu_->HasPTHREADS()?  "true" : "false";
+		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
 		LOG(ERROR) << "GCService: the mutex object was initialized";
 		int resultLock = mP->gc_service_mu_->trylock();
 		if(resultLock == 0) {
