@@ -460,8 +460,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       PLOG(FATAL) << "setresuid(" << uid << ") failed";
     }
 
-    LOG(ERROR) << "GCService: Forking child pid: " << pid;
-    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex();
 #if defined(__linux__)
     if (NeedsNoRandomizeWorkaround()) {
         // Work around ARM kernel ASLR lossage (http://b/5817320).
@@ -510,7 +508,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     self->InitAfterFork();
 
     EnableDebugFeatures(debug_flags);
-
+    LOG(ERROR) << "GCService: Forking child pid: " << getpid();
+    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex();
     UnsetSigChldHandler();
     runtime->DidForkFromZygote();
   } else if (pid > 0) {
