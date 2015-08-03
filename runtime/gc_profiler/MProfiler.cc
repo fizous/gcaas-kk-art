@@ -752,19 +752,23 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 
 void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+	LOG(ERROR) << "GCService: HAVE_PTHREADS: " << LOG(ERROR) << HAVE_PTHREADS;
+	LOG(ERROR) << "GCService: ART_USE_FUTEXES: " << LOG(ERROR) << ART_USE_FUTEXES;
 	if(mP != NULL && mP->IsProfilingEnabled()) {
 		if(mP->gc_service_mu_ == NULL) {
 			LOG(ERROR) << "GCService: the mutex object was not initialized";
 			return;
 		}
 		LOG(ERROR) << "GCService: the mutex object was initialized";
-		if(!mP->gc_service_mu_->trylock()) {
-			LOG(ERROR) << "GCService: we locked the global heap mutex";
+		int resultLock = mP->gc_service_mu_->trylock();
+		if(resultLock == 0) {
+			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
 			LOG(ERROR) << "GCService: current instance Counter = " <<
 					mP->gc_service_mu_->incrementInstanceCounter();
-			mP->gc_service_mu_->unlock();
+			resultLock = mP->gc_service_mu_->unlock();
+			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
 		} else {
-			LOG(ERROR) << "GCService: we could not lock the global heap mutex";
+			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
 		}
 	} else {
 		LOG(ERROR) << "GCService: MProfiler is NULL";
