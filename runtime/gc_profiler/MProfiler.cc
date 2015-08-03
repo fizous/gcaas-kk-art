@@ -817,7 +817,7 @@ void VMProfiler::InitSharedLocks() {
   gc_service_mu_ =
   		new android::SharedProcessMutex(_mutexStructAddress, fileDescript,
   				"SharedGCProfileMutex");
-
+  LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< " << gc_service_mu_->getFileDescr();
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
 //	if(fd == 0) {
 //		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
