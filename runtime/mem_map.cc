@@ -79,11 +79,13 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t by
   std::string debug_friendly_name("dalvik-");
   debug_friendly_name += name;
   int fd = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
+
   int flags = MAP_SHARED;
   if (fd  == -1) {
     LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
   }
+  ashmem_pin_region(fd, 0, 0);
 #else
   //ScopedFd fd(-1);
   int fd = -1;
