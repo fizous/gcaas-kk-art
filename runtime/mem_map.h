@@ -39,7 +39,8 @@ class MemMap {
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
-  static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr, size_t byte_count, int prot);
+  static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
+  		size_t byte_count, int prot, int* fileDescriptor);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -56,6 +57,8 @@ class MemMap {
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapFileAtAddress(
       byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
+
+  static MemMap* MapSharedProcessFile(byte* addr, int prot, int flags, int fd);
 
   // Releases the memory mapping
   ~MemMap();

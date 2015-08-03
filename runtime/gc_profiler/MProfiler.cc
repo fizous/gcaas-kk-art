@@ -759,6 +759,20 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 		}
 		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
 		LOG(ERROR) << "GCService: the mutex object was initialized";
+
+
+		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
+				MAP_SHARED, mP->gc_service_mu_->getFileDescr());
+
+		if(mu_mem_map == NULL) {
+			LOG(ERROR) << "GCService: Error  opening file descriptor" ;
+			return;
+		}
+		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
+	  android::SharedProcMutex* _mutexStructAddress =
+	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
+		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
+
 		int resultLock = mP->gc_service_mu_->trylock();
 		if(resultLock == 0) {
 			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
@@ -783,9 +797,12 @@ void VMProfiler::InitSharedLocks() {
 	}
 	LOG(ERROR) << "GCService: <<<<< Zygote Initialization >>>>>>";
 
+	int fileDescript = 0;
 
-  MemMap* mu_mem_map = MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
-                                                 PROT_READ | PROT_WRITE);
+  MemMap* mu_mem_map =
+  		MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
+                                                 PROT_READ | PROT_WRITE,
+																								 &fileDescript);
 
   if (mu_mem_map == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << "SharedLockingRegion" << ") of size "
@@ -798,7 +815,8 @@ void VMProfiler::InitSharedLocks() {
 
 
   gc_service_mu_ =
-  		new android::SharedProcessMutex(_mutexStructAddress, "SharedGCProfileMutex");
+  		new android::SharedProcessMutex(_mutexStructAddress, fileDescript,
+  				"SharedGCProfileMutex");
 
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
 //	if(fd == 0) {

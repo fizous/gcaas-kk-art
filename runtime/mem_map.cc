@@ -69,7 +69,8 @@ static void CheckMapRequest(byte*, size_t) { }
 
 
 
-MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
+MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
+		size_t byte_count, int prot, int* fileDescriptor) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
 
@@ -139,6 +140,38 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
     return NULL;
   }
   return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
+}
+
+
+MemMap* MemMap::MapSharedProcessFile(byte* addr, int prot, int flags, int fd) {
+  // Adjust 'offset' to be page-aligned as required by mmap.
+  int page_offset = start % kPageSize;
+  off_t page_aligned_offset = start - page_offset;
+  // Adjust 'byte_count' to be page-aligned as we will map this anyway.
+  size_t page_aligned_byte_count = RoundUp(1024, kPageSize);
+  // The 'addr' is modified (if specified, ie non-null) to be page aligned to the file but not
+  // necessarily to virtual memory. mmap will page align 'addr' for us.
+  byte* page_aligned_addr = (addr == NULL) ? NULL : (addr - page_offset);
+
+  byte* actual = reinterpret_cast<byte*>(mmap(NULL,
+                                              page_aligned_byte_count,
+                                              prot,
+                                              flags,
+                                              fd,
+                                              page_aligned_offset));
+
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(page_aligned_addr)
+                << ", " << page_aligned_byte_count
+                << ", " << prot << ", " << flags << ", " << fd << ", " << page_aligned_offset
+                << ") failed\n" << maps;
+    return NULL;
+  }
+  return new MemMap("file", actual + page_offset, 1024, actual, page_aligned_byte_count,
+                    prot);
+
 }
 
 MemMap* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
