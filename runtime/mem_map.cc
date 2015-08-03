@@ -147,7 +147,7 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
 
 MemMap* MemMap::MapSharedProcessFile(byte* addr, int prot, int flags, int fd) {
   // Adjust 'offset' to be page-aligned as required by mmap.
-  int page_offset = start % kPageSize;
+  int page_offset = 0;
   off_t page_aligned_offset = start - page_offset;
   // Adjust 'byte_count' to be page-aligned as we will map this anyway.
   size_t page_aligned_byte_count = RoundUp(1024, kPageSize);
