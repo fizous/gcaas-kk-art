@@ -784,18 +784,17 @@ void VMProfiler::InitSharedLocks() {
 	LOG(ERROR) << "GCService: <<<<< Zygote Initialization >>>>>>";
 
 
-  UniquePtr<MemMap> mu_mem_map(MemMap::MapSharedMemoryAnonymous("SharedLockingRegion", NULL, 1024,
-                                                 PROT_READ | PROT_WRITE));
+  MemMap* mu_mem_map = MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
+                                                 PROT_READ | PROT_WRITE);
 
-  if (mu_mem_map.get() == NULL) {
+  if (mu_mem_map == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << "SharedLockingRegion" << ") of size "
         << PrettySize(1024);
     return;
   }
 
-  MemMap* mem_map_ptr = mu_mem_map.release();
   android::SharedProcMutex* _mutexStructAddress =
-  		reinterpret_cast<android::SharedProcMutex*>(mem_map_ptr);
+  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
 
 
   gc_service_mu_ =
