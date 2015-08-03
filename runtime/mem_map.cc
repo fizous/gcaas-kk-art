@@ -169,7 +169,7 @@ MemMap* MemMap::MapSharedProcessFile(byte* addr, int prot, int flags, int fd) {
                 << ") failed\n" << maps;
     return NULL;
   }
-  return new MemMap("file", actual + page_offset, 1024, actual, page_aligned_byte_count,
+  return new MemMap("file", actual, 1024, actual, page_aligned_byte_count,
                     prot);
 
 }
