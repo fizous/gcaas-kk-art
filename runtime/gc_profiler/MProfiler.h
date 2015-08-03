@@ -201,6 +201,7 @@ protected:
 public:
   android::SharedProcessMutex* gc_service_mu_;
   void InitSharedLocks();
+  static void GCPInitVMInstanceHeapMutex(void);
 
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
   static constexpr int kGCMMPDefaultCohortLog = GCP_DEFAULT_COHORT_LOG;

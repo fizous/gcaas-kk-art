@@ -36,6 +36,7 @@
 #include "ScopedPrimitiveArray.h"
 #include "ScopedUtfChars.h"
 #include "thread.h"
+#include "gc_profiler/MProfiler.h"
 
 #if defined(HAVE_PRCTL)
 #include <sys/prctl.h>
@@ -459,6 +460,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       PLOG(FATAL) << "setresuid(" << uid << ") failed";
     }
 
+    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex();
 #if defined(__linux__)
     if (NeedsNoRandomizeWorkaround()) {
         // Work around ARM kernel ASLR lossage (http://b/5817320).

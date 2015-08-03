@@ -750,6 +750,28 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 }
 
 
+void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled()) {
+		if(mP->gc_service_mu_ == NULL) {
+			LOG(ERROR) << "GCService: the mutex object was not initialized";
+			return;
+		}
+		LOG(ERROR) << "GCService: the mutex object was initialized";
+		if(!mP->gc_service_mu_->trylock()) {
+			LOG(ERROR) << "GCService: we locked the global heap mutex";
+			LOG(ERROR) << "GCService: current instance Counter = " <<
+					mP->gc_service_mu_->incrementInstanceCounter();
+			mP->gc_service_mu_->unlock();
+		} else {
+			LOG(ERROR) << "GCService: we could not lock the global heap mutex";
+		}
+	} else {
+		LOG(ERROR) << "GCService: MProfiler is NULL";
+	}
+
+}
+
 void VMProfiler::InitSharedLocks() {
 
   UniquePtr<MemMap> mu_mem_map(MemMap::MapSharedMemoryAnonymous("SharedLockingRegion", NULL, 1024,
