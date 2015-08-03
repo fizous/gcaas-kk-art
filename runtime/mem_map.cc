@@ -80,21 +80,22 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr, size_t by
   debug_friendly_name += name;
   int fd = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
   int flags = MAP_SHARED;
-  if (fd.get() == -1) {
+  if (fd  == -1) {
     LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
   }
 #else
-  ScopedFd fd(-1);
+  //ScopedFd fd(-1);
+  int fd = -1;
   int flags = MAP_SHARED | MAP_ANONYMOUS;
 #endif
 
-  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
+  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd, 0));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     LOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
+                << ", " << prot << ", " << flags << ", " << fd << ", 0) failed for " << name
                 << "\n" << maps;
     return NULL;
   }
