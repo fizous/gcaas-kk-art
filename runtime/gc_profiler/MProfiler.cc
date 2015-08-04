@@ -770,7 +770,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 		}
 		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
 		mP->gcservice_mem_ =
-	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
+	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
 		LOG(ERROR) << "GCService: current instance Counter = " <<
 				++mP->gcservice_mem_->instanceCounter_;
 
@@ -815,13 +815,14 @@ void VMProfiler::InitSharedLocks() {
   }
 
   gcservice_mem_ =
-  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
+  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
 
 
   gc_service_mu_ =
   		new android::SharedProcessMutex(gcservice_mem_, fileDescript,
   				"SharedGCProfileMutex");
-  LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< " << gc_service_mu_->getFileDescr();
+  LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< "
+  		<< gc_service_mu_->getFileDescr();
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
 //	if(fd == 0) {
 //		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
