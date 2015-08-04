@@ -758,21 +758,32 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			return;
 		}
 		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
-		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = " << mP->gc_service_mu_->getFileDescr();
+		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = "
+				<< mP->gc_service_mu_->getFileDescr();
 
-
-		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
-				MAP_SHARED, mP->gc_service_mu_->getFileDescr());
-
-		if(mu_mem_map == NULL) {
-			LOG(ERROR) << "GCService: Error  opening file descriptor" ;
-			return;
+		int resultLock = mP->gc_service_mu_->trylock();
+		if(resultLock == 0) {
+			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
+			LOG(ERROR) << "GCService: current instance Counter = " <<
+							mP->gc_service_mu_->incrementInstanceCounter();
+			resultLock = mP->gc_service_mu_->unlock();
+			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
+		} else {
+			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
 		}
-		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
-		mP->gcservice_mem_ =
-	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
-		LOG(ERROR) << "GCService: current instance Counter = " <<
-				++mP->gcservice_mem_->instanceCounter_;
+
+//		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
+//				MAP_SHARED, mP->gc_service_mu_->getFileDescr());
+//
+//		if(mu_mem_map == NULL) {
+//			LOG(ERROR) << "GCService: Error  opening file descriptor" ;
+//			return;
+//		}
+//		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
+//		mP->gcservice_mem_ =
+//	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
+//		LOG(ERROR) << "GCService: current instance Counter = " <<
+//				++mP->gcservice_mem_->instanceCounter_;
 
 //	  mP->gcservice_mem_
 //		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
