@@ -769,20 +769,24 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			return;
 		}
 		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
-	  android::SharedProcMutex* _mutexStructAddress =
+		gcservice_mem_ =
 	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
-		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
+		LOG(ERROR) << "GCService: current instance Counter = " <<
+				++gcservice_mem_->instanceCounter_;
 
-		int resultLock = mP->gc_service_mu_->trylock();
-		if(resultLock == 0) {
-			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
-			LOG(ERROR) << "GCService: current instance Counter = " <<
-					mP->gc_service_mu_->incrementInstanceCounter();
-			resultLock = mP->gc_service_mu_->unlock();
-			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
-		} else {
-			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
-		}
+//	  mP->gcservice_mem_
+//		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
+
+		//int resultLock = mP->gc_service_mu_->trylock();
+//		if(resultLock == 0) {
+//			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
+//			LOG(ERROR) << "GCService: current instance Counter = " <<
+//					mP->gc_service_mu_->incrementInstanceCounter();
+//			resultLock = mP->gc_service_mu_->unlock();
+//			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
+//		} else {
+//			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
+//		}
 	} else {
 		LOG(ERROR) << "GCService: MProfiler is NULL";
 	}
@@ -810,12 +814,12 @@ void VMProfiler::InitSharedLocks() {
     return;
   }
 
-  android::SharedProcMutex* _mutexStructAddress =
+  gcservice_mem_ =
   		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
 
 
   gc_service_mu_ =
-  		new android::SharedProcessMutex(_mutexStructAddress, fileDescript,
+  		new android::SharedProcessMutex(gcservice_mem_, fileDescript,
   				"SharedGCProfileMutex");
   LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< " << gc_service_mu_->getFileDescr();
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
