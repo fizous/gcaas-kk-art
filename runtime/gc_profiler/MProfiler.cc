@@ -769,10 +769,10 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			return;
 		}
 		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
-		gcservice_mem_ =
+		mP->gcservice_mem_ =
 	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map);
 		LOG(ERROR) << "GCService: current instance Counter = " <<
-				++gcservice_mem_->instanceCounter_;
+				++mP->gcservice_mem_->instanceCounter_;
 
 //	  mP->gcservice_mem_
 //		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
