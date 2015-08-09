@@ -428,15 +428,15 @@ pid_t Runtime::GCPForkGCService(void) {
 
 
 		Runtime* runtime = Runtime::Current();
-		runtime->is_zygote_ = false;
 		// Our system thread ID, etc, has changed so reset Thread state.
 		Thread* self = Thread::Current();
 		self->InitAfterFork();
 
 		//EnableDebugFeatures(debug_flags);
 		GCMMP_VLOG(INFO) << "GCService: gcservice is being forked: " << getpid();
-		GCP_INIT_SHARED_HEAP_MUTEX;
+//		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
+		runtime->is_gcservice_ = true;
 		runtime->DidForkFromZygote();
 		set_process_name("GCService");
 		GCPRunGCService();
@@ -552,10 +552,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		self->InitAfterFork();
 
 		EnableDebugFeatures(debug_flags);
-		GCMMP_VLOG(INFO) << "GCService: Forking child pid: " << getpid();
-		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
+		GCP_INIT_SHARED_HEAP_MUTEX;
 	} else if (pid > 0) {
 		// the parent process
 	}

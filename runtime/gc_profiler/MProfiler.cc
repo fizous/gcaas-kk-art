@@ -799,6 +799,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 	GCMMP_VLOG(INFO) << "gcservice leaving: the main loop " << self->GetTid()<<
 			", instance counter = " << gc_service_mu_->getInstanceCounter();
 }
+
 void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled()) {

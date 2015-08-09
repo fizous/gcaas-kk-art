@@ -531,6 +531,7 @@ class Runtime {
   jobject system_class_loader_;
 public:
   mprofiler::VMProfiler* vmprofiler_;
+  bool is_gcservice_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };

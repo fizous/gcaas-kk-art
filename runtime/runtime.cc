@@ -73,6 +73,7 @@ Runtime* Runtime::instance_ = NULL;
 Runtime::Runtime()
     : is_compiler_(false),
       is_zygote_(false),
+			is_gcservice_(false),
       is_concurrent_gc_enabled_(true),
       is_explicit_gc_disabled_(false),
       default_stack_size_(0),
