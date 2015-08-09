@@ -759,17 +759,19 @@ void VMProfiler::runGCServiceDaemon(void) {
 		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
 		return;
 	}
-	int resultLock = 0;
+	if(false) {
+		int resultLock = 0;
 
-	while((resultLock = gc_service_mu_->lock()) == 0) {
-		gc_service_mu_->setGCServiceProcess(true);
-		int _oldCount = gc_service_mu_->getInstanceCounter();
-		while(_oldCount == gc_service_mu_->getInstanceCounter())
-			gc_service_mu_->waitConditional();
-		GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
-				", instance counter = " << gc_service_mu_->getInstanceCounter();
-		gc_service_mu_->signalConVariable();
-		gc_service_mu_->unlock();
+		while((resultLock = gc_service_mu_->lock()) == 0) {
+			gc_service_mu_->setGCServiceProcess(true);
+			int _oldCount = gc_service_mu_->getInstanceCounter();
+			while(_oldCount == gc_service_mu_->getInstanceCounter())
+				gc_service_mu_->waitConditional();
+			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
+					", instance counter = " << gc_service_mu_->getInstanceCounter();
+			gc_service_mu_->signalConVariable();
+			gc_service_mu_->unlock();
+		}
 	}
 
 	GCMMP_VLOG(INFO) << "gcservice leaving: the main loop " << self->GetTid()<<
