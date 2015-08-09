@@ -742,30 +742,6 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 	}
 }
 
-bool MMUProfiler::periodicDaemonExec(void){
-	Thread* self = Thread::Current();
-	// Check if GC is running holding gc_complete_lock_.
-	MutexLock mu(self, *prof_thread_mutex_);
-	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-	{
-		prof_thread_cond_->Wait(self);
-	}
-	if(receivedSignal_) { //we recived Signal to Shutdown
-		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
-		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
-		//updateHeapAllocStatus();
-		//getPerfData();
-		receivedSignal_ = false;
-
-		if(getRecivedShutDown()) {
-			LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
-			//logPerfData();
-		}
-		return getRecivedShutDown();
-	} else {
-		return false;
-	}
-}
 
 void VMProfiler::GCPRunGCService(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
