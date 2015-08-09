@@ -785,7 +785,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 	}
 	int resultLock = 0;
 
-	while((resultLock = gc_service_mu_->trylock()) == 0) {
+	while((resultLock = gc_service_mu_->lock()) == 0) {
 		gc_service_mu_->setGCServiceProcess(true);
 		int _oldCount = gc_service_mu_->getInstanceCounter();
 		while(_oldCount == gc_service_mu_->getInstanceCounter())
