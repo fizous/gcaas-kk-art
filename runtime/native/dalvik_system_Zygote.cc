@@ -401,6 +401,96 @@ static bool NeedsNoRandomizeWorkaround() {
 #endif
 }
 #endif
+//
+//
+//pid_t GCPForkGCService() {
+//  //for the GCService
+//	uid_t _uid = getuid();
+//	gid_t _gid = getgid();
+//	pid_t _pid = fork();
+//	if (_pid == 0) {
+//		//child process
+//
+//		gMallocLeakZygoteChild = 1;
+//
+//		// Keep capabilities across UID change, unless we're staying root.
+//		if (uid != 0) {
+//			EnableKeepCapabilities();
+//		}
+//
+//		DropCapabilitiesBoundingSet();
+//
+//		if (!MountEmulatedStorage(_uid, MOUNT_EXTERNAL_MULTIUSER_ALL)) {
+//			PLOG(WARNING) << "Failed to mount emulated storage";
+//			if (errno == ENOTCONN || errno == EROFS) {
+//				// When device is actively encrypting, we get ENOTCONN here
+//				// since FUSE was mounted before the framework restarted.
+//				// When encrypted device is booting, we get EROFS since
+//				// FUSE hasn't been created yet by init.
+//				// In either case, continue without external storage.
+//			} else {
+//				LOG(FATAL) << "Cannot continue without emulated storage";
+//			}
+//		}
+//
+//		SetGids(env, javaGids);
+//
+//		SetRLimits(env, javaRlimits);
+//
+//		int rc = setresgid(gid, gid, gid);
+//		if (rc == -1) {
+//			PLOG(FATAL) << "setresgid(" << gid << ") failed";
+//		}
+//
+//		rc = setresuid(uid, uid, uid);
+//		if (rc == -1) {
+//			PLOG(FATAL) << "setresuid(" << uid << ") failed";
+//		}
+//
+//		SetCapabilities(permittedCapabilities, effectiveCapabilities);
+//
+//		SetSchedulerPolicy();
+//#if defined(HAVE_ANDROID_OS)
+//		{  // NOLINT(whitespace/braces)
+//			const char* se_info_c_str = NULL;
+//			UniquePtr<ScopedUtfChars> se_info;
+//			if (java_se_info != NULL) {
+//				se_info.reset(new ScopedUtfChars(env, java_se_info));
+//				se_info_c_str = se_info->c_str();
+//				CHECK(se_info_c_str != NULL);
+//			}
+//			const char* se_name_c_str = NULL;
+//			UniquePtr<ScopedUtfChars> se_name;
+//			if (java_se_name != NULL) {
+//				se_name.reset(new ScopedUtfChars(env, java_se_name));
+//				se_name_c_str = se_name->c_str();
+//				CHECK(se_name_c_str != NULL);
+//			}
+//			rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
+//			if (rc == -1) {
+//				PLOG(FATAL) << "selinux_android_setcontext(" << uid << ", "
+//						<< (is_system_server ? "true" : "false") << ", "
+//						<< "\"" << se_info_c_str << "\", \"" << se_name_c_str << "\") failed";
+//			}
+//		}
+//#else
+//		UNUSED(is_system_server);
+//		UNUSED(java_se_info);
+//		UNUSED(java_se_name);
+//#endif
+//
+//		// Our system thread ID, etc, has changed so reset Thread state.
+//		self->InitAfterFork();
+//
+//		EnableDebugFeatures(debug_flags);
+//		GCMMP_VLOG(INFO) << "GCService: Forking child pid: " << getpid();
+//		GCP_INIT_SHARED_HEAP_MUTEX;
+//		UnsetSigChldHandler();
+//		Runtime::Current()->DidForkFromZygote();
+//	} else {
+//
+//	}
+//}
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,

@@ -824,10 +824,12 @@ bool Runtime::Start() {
   Thread::FinishStartup();
 
   if (is_zygote_) {
+  	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
     if (!InitZygote()) {
       return false;
     }
   } else {
+  	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> DidForkFromZygote: " << getpid();
     DidForkFromZygote();
   }
 

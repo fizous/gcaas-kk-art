@@ -825,6 +825,18 @@ void VMProfiler::InitSharedLocks() {
   gc_service_mu_ =
   		new android::SharedProcessMutex(gcservice_mem_, fileDescript,
   				"SharedGCProfileMutex");
+
+  //for the GCService
+	pid_t pid = fork();
+	if (pid == 0) {
+		//child process
+		// The child process.
+		gMallocLeakZygoteChild = 1;
+	} else {
+
+	}
+
+
   LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< "
   		<< gc_service_mu_->getFileDescr();
 //	int fd = ashmem_create_region("SharedLockingRegion", 1024);
