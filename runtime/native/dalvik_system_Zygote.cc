@@ -439,9 +439,10 @@ pid_t Runtime::GCPForkGCService(void) {
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
 		set_process_name("GCService");
-  } else {
-  	GCMMP_VLOG(INFO) << "GCService: zygote initializing gcService pid: " << getpid();
+		GCPRunGCService();
+		return getpid();
   }
+  GCMMP_VLOG(INFO) << "GCService: zygote initializing gcService pid: " << getpid();
   return 0;
 }
 

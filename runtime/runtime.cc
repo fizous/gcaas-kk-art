@@ -803,6 +803,13 @@ jobject CreateSystemClassLoader() {
   return env->NewGlobalRef(system_class_loader.get());
 }
 
+
+void Runtime::GCPRunGCService(void){
+	GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
+	 mprofiler::VMProfiler::GCPRunGCService();
+	 GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+}
+
 bool Runtime::Start() {
   VLOG(startup) << "Runtime::Start entering";
 
@@ -841,7 +848,7 @@ bool Runtime::Start() {
 
 
   if (is_zygote_) {//fork gcservice
-  	GCMMP_VLOG(INFO) << " GCService: Runtime::Created after zygote " << GCPForkGCService();
+  	GCPForkGCService();
   }
   VLOG(startup) << "Runtime::Start exiting";
 

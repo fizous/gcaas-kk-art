@@ -742,12 +742,72 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 	}
 }
 
+bool MMUProfiler::periodicDaemonExec(void){
+	Thread* self = Thread::Current();
+	// Check if GC is running holding gc_complete_lock_.
+	MutexLock mu(self, *prof_thread_mutex_);
+	ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+	{
+		prof_thread_cond_->Wait(self);
+	}
+	if(receivedSignal_) { //we recived Signal to Shutdown
+		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
+		//updateHeapAllocStatus();
+		//getPerfData();
+		receivedSignal_ = false;
 
+		if(getRecivedShutDown()) {
+			LOG(ERROR) << "received shutdown tid: " <<  self->GetTid();
+			//logPerfData();
+		}
+		return getRecivedShutDown();
+	} else {
+		return false;
+	}
+}
+
+void VMProfiler::GCPRunGCService(void) {
+	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+	if(mP != NULL && mP->IsProfilingEnabled()) {
+		if(mP->gc_service_mu_ == NULL) {
+			LOG(ERROR) << "GCService: the mutex object was not initialized";
+			return;
+		}
+		mP->runGCServiceDaemon();
+	}
+}
+void VMProfiler::runGCServiceDaemon(void) {
+	Thread* self = Thread::Current();
+	if(gc_service_mu_ == NULL) {
+		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
+		return;
+	}
+	int resultLock = 0;
+
+	while((resultLock = gc_service_mu_->trylock()) == 0) {
+		gc_service_mu_->setGCServiceProcess(true);
+		int _oldCount = gc_service_mu_->getInstanceCounter();
+		while(_oldCount == gc_service_mu_->getInstanceCounter())
+			gc_service_mu_->waitConditional();
+		GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
+				", instance counter = " << gc_service_mu_->getInstanceCounter();
+		gc_service_mu_->signalConVariable();
+		gc_service_mu_->unlock();
+	}
+
+	GCMMP_VLOG(INFO) << "gcservice leaving: the main loop " << self->GetTid()<<
+			", instance counter = " << gc_service_mu_->getInstanceCounter();
+}
 void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
 	if(mP != NULL && mP->IsProfilingEnabled()) {
 		if(mP->gc_service_mu_ == NULL) {
 			LOG(ERROR) << "GCService: the mutex object was not initialized";
+			return;
+		}
+		if(mP->gc_service_mu_->isGCServiceProcess()) {
+			GCMMP_VLOG(INFO) << " GCService: Skipps its own initialization";
 			return;
 		}
 		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
@@ -759,6 +819,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
 			LOG(ERROR) << "GCService: current instance Counter = " <<
 							mP->gc_service_mu_->incrementInstanceCounter();
+			gc_service_mu_->signalConVariable();
 			resultLock = mP->gc_service_mu_->unlock();
 			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
 		} else {
