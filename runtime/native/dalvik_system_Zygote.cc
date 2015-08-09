@@ -409,7 +409,7 @@ pid_t Runtime::GCPForkGCService(void) {
 	gid_t _gid = getgid();
 	pid_t _pid = fork();
 	GCMMP_VLOG(INFO) << "GCService: Forkingggggg " << getpid();
-  if (pid == 0) {
+  if (_pid == 0) {
     // child process of the GCService
 
     // change process groups, so we don't get reaped by ProcessManager
