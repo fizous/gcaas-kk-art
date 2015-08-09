@@ -401,6 +401,7 @@ class Runtime {
   bool PreZygoteFork();
   bool InitZygote();
   void DidForkFromZygote();
+  pid_t GCPForkGCService(void);
 
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;

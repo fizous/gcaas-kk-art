@@ -839,6 +839,10 @@ bool Runtime::Start() {
 
   self->GetJniEnv()->locals.AssertEmpty();
 
+
+  if (is_zygote_) {//fork gcservice
+
+  }
   VLOG(startup) << "Runtime::Start exiting";
 
   finished_starting_ = true;
