@@ -73,7 +73,6 @@ Runtime* Runtime::instance_ = NULL;
 Runtime::Runtime()
     : is_compiler_(false),
       is_zygote_(false),
-			is_gcservice_(false),
       is_concurrent_gc_enabled_(true),
       is_explicit_gc_disabled_(false),
       default_stack_size_(0),
@@ -102,7 +101,8 @@ Runtime::Runtime()
       use_compile_time_class_path_(false),
       main_thread_group_(NULL),
       system_thread_group_(NULL),
-      system_class_loader_(NULL) {
+      system_class_loader_(NULL),
+			is_gcservice_(false) {
   for (int i = 0; i < Runtime::kLastCalleeSaveType; i++) {
     callee_save_methods_[i] = NULL;
   }
