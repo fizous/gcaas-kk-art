@@ -82,7 +82,10 @@
 	  GCMMP_VLOG(INFO) << "GCService: initializing shared lock";      \
 	  InitSharedLocks();																							\
 	  GCMMP_VLOG(INFO) << "GCService: Done initializing shared lock";
+  #define GCP_FORK_GCSERVICE												    		  			\
+	  GCPForkGCService();
 #else
+  #define GCP_FORK_GCSERVICE												    				((void) 0)
   #define GCP_INIT_SHARED_HEAP_MUTEX												    ((void) 0)
   #define GCP_INIT_VMPROFILER_SHARED_DATA												((void) 0)
 #endif//ART_GC_PROFILER_SERVICE

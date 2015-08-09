@@ -848,7 +848,7 @@ bool Runtime::Start() {
 
 
   if (is_zygote_) {//fork gcservice
-  	GCPForkGCService();
+  	GCP_FORK_GCSERVICE;
   }
   VLOG(startup) << "Runtime::Start exiting";
 
