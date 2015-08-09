@@ -432,7 +432,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		Thread* self = Thread::Current();
 		self->InitAfterFork();
 
-		EnableDebugFeatures(debug_flags);
+		//EnableDebugFeatures(debug_flags);
 		GCMMP_VLOG(INFO) << "GCService: gcservice is being forked: " << getpid();
 		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
