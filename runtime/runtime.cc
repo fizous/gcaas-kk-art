@@ -841,7 +841,7 @@ bool Runtime::Start() {
 
 
   if (is_zygote_) {//fork gcservice
-
+  	GCMMP_VLOG(INFO) << " GCService: Runtime::Created after zygote " << GCPForkGCService();
   }
   VLOG(startup) << "Runtime::Start exiting";
 
