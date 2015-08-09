@@ -508,8 +508,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     self->InitAfterFork();
 
     EnableDebugFeatures(debug_flags);
-    LOG(ERROR) << "GCService: Forking child pid: " << getpid();
-    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex();
+    GCMMP_VLOG(INFO) << "GCService: Forking child pid: " << getpid();
+    GCP_INIT_SHARED_HEAP_MUTEX;
     UnsetSigChldHandler();
     runtime->DidForkFromZygote();
   } else if (pid > 0) {

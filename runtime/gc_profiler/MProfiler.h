@@ -74,6 +74,20 @@
   #endif//ART_USE_GC_DEFAULT_PROFILER
 #endif//ART_USE_GC_PROFILER
 
+
+#if ART_GC_PROFILER_SERVICE
+  #define GCP_INIT_SHARED_HEAP_MUTEX																\
+    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex()
+  #define GCP_INIT_VMPROFILER_SHARED_DATA											      \
+	  GCMMP_VLOG(INFO) << "GCService: initializing shared lock";      \
+	  InitSharedLocks();																							\
+	  GCMMP_VLOG(INFO) << "GCService: Done initializing shared lock";
+#else
+  #define GCP_INIT_VMPROFILER_SHARED_DATA												((void) 0)
+  #define GCP_INIT_SHARED_HEAP_MUTEX												    ((void) 0)
+#endif//ART_GC_PROFILER_SERVICE
+
+
 #define GCP_OFF_CONCURRENT_GC()			(GCP_DISABLE_CONC_COLLECT)
 #define GCP_OFF_EXPLICIT_GC()			  (GCP_DISABLE_EXPL_COLLECT)
 

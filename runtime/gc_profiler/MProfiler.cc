@@ -708,14 +708,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
-#if ART_GC_PROFILER_SERVICE
-	GCMMP_VLOG(INFO) << "GCService: initializing shared lock";
-	//GCMMP_VLOG(INFO) << "GCService: result of Mutex PRocess shared: " <<  sysconf(_SC_THREAD_PROCESS_SHARED);
-
-	InitSharedLocks();
-
-	GCMMP_VLOG(INFO) << "GCService: Done initializing shared lock";
-#endif
+			GCP_INIT_VMPROFILER_SHARED_DATA;
 			createAppList(argOptions);
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
