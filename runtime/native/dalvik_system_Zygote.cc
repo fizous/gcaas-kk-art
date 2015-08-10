@@ -457,16 +457,16 @@ pid_t Runtime::GCPForkGCService(void) {
 #endif
 		SetSchedulerPolicy();
 
-#if defined(HAVE_ANDROID_OS)
-		{  // NOLINT(whitespace/braces)
-			rc = selinux_android_setcontext(_uid, 0, "platform", "GCService");
-			if (rc == -1) {
-				PLOG(FATAL) << "selinux_android_setcontext(" << _uid << ", "
-						<< (0 ? "true" : "false") << ", "
-						<< "\"" << "platform" << "\", \"" << "GCService" << "\") failed";
-			}
-		}
-#endif
+//#if defined(HAVE_ANDROID_OS)
+//		{  // NOLINT(whitespace/braces)
+//			rc = selinux_android_setcontext(_uid, 0, "platform", "GCService");
+//			if (rc == -1) {
+//				PLOG(FATAL) << "selinux_android_setcontext(" << _uid << ", "
+//						<< (0 ? "true" : "false") << ", "
+//						<< "\"" << "platform" << "\", \"" << "GCService" << "\") failed";
+//			}
+//		}
+//#endif
 
 		Runtime* runtime = Runtime::Current();
 		// Our system thread ID, etc, has changed so reset Thread state.
