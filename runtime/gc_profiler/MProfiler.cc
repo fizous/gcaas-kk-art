@@ -782,7 +782,6 @@ void VMProfiler::runGCServiceDaemon(void) {
 		if(resultLock != 0) {
 			GCMMP_VLOG(INFO) << "gcservice Could not lock the mutex " << self->GetTid()<<
 						", instance counter = " << gc_service_mu_->getInstanceCounter();
-			break;
 		}
 	}
 
