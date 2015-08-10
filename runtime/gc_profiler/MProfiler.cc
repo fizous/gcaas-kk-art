@@ -774,9 +774,9 @@ void VMProfiler::runGCServiceDaemon(void) {
 
 				_isNameSet = true;
 			}
-			set_process_name("GCService");
 			gc_service_mu_->signalConVariable();
 			gc_service_mu_->unlock();
+			set_process_name("GCService");
 		}
 	}
 
