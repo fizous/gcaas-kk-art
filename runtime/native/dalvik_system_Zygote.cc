@@ -413,27 +413,27 @@ pid_t Runtime::GCPForkGCService(void) {
   if (_pid == 0) {
     // child process of the GCService
 		// The child process.
-		gMallocLeakZygoteChild = 1;
-
-		// Keep capabilities across UID change, unless we're staying root.
-		if (_uid != 0) {
-			EnableKeepCapabilities();
-		}
-
-		DropCapabilitiesBoundingSet();
-
-		if (!MountEmulatedStorage(_uid, MOUNT_EXTERNAL_MULTIUSER_ALL/*MOUNT_EXTERNAL_NONE*/)) {
-			PLOG(WARNING) << "Failed to mount emulated storage";
-			if (errno == ENOTCONN || errno == EROFS) {
-				// When device is actively encrypting, we get ENOTCONN here
-				// since FUSE was mounted before the framework restarted.
-				// When encrypted device is booting, we get EROFS since
-				// FUSE hasn't been created yet by init.
-				// In either case, continue without external storage.
-			} else {
-				LOG(FATAL) << "Cannot continue without emulated storage";
-			}
-		}
+//		gMallocLeakZygoteChild = 1;
+//
+//		// Keep capabilities across UID change, unless we're staying root.
+//		if (_uid != 0) {
+//			EnableKeepCapabilities();
+//		}
+//
+//		DropCapabilitiesBoundingSet();
+//
+//		if (!MountEmulatedStorage(_uid, MOUNT_EXTERNAL_MULTIUSER_ALL/*MOUNT_EXTERNAL_NONE*/)) {
+//			PLOG(WARNING) << "Failed to mount emulated storage";
+//			if (errno == ENOTCONN || errno == EROFS) {
+//				// When device is actively encrypting, we get ENOTCONN here
+//				// since FUSE was mounted before the framework restarted.
+//				// When encrypted device is booting, we get EROFS since
+//				// FUSE hasn't been created yet by init.
+//				// In either case, continue without external storage.
+//			} else {
+//				LOG(FATAL) << "Cannot continue without emulated storage";
+//			}
+//		}
     // change process groups, so we don't get reaped by ProcessManager
     setpgid(0, 0);
     int rc = setresgid(_gid, _gid, _gid);
