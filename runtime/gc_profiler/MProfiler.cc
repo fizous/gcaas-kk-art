@@ -467,8 +467,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 	//double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
 	if(_newWindow && IsAllocWindowsSet()) {
 
-		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
-				allocatedBytesData.cntTotal.load();
+//		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
+//				allocatedBytesData.cntTotal.load();
 
 		{
 			Thread* self = Thread::Current();
@@ -480,8 +480,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 				prof_thread_cond_->Broadcast(self);
 			}
 			// Wake anyone who may have been waiting for the GC to complete.
-			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" <<
-					self->GetTid() ;
+			//GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" <<
+			//		self->GetTid() ;
 		}
 	} else {
 		Thread* self = Thread::Current();
