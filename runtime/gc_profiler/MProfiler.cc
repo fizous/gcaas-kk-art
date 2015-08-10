@@ -759,7 +759,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
 		return;
 	}
-	if(false) {
+	if(true) {
 		int resultLock = 0;
 
 		while((resultLock = gc_service_mu_->lock()) == 0) {
