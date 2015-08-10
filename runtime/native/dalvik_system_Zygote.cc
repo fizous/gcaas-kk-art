@@ -425,7 +425,22 @@ pid_t Runtime::GCPForkGCService(void) {
 			PLOG(FATAL) << "gcservice: setresuid(" << _uid << ") failed";
 		}
 
+		SetSchedulerPolicy();
 
+#if defined(HAVE_ANDROID_OS)
+		{  // NOLINT(whitespace/braces)
+			rc = selinux_android_setcontext(_uid, 0, "platform", "GCService");
+			if (rc == -1) {
+				PLOG(FATAL) << "selinux_android_setcontext(" << uid << ", "
+						<< (is_system_server ? "true" : "false") << ", "
+						<< "\"" << "platform" << "\", \"" << "GCService" << "\") failed";
+			}
+		}
+#else
+		UNUSED(is_system_server);
+		UNUSED(java_se_info);
+		UNUSED(java_se_name);
+#endif
 
 		Runtime* runtime = Runtime::Current();
 		// Our system thread ID, etc, has changed so reset Thread state.
