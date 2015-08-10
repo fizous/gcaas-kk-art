@@ -436,10 +436,6 @@ pid_t Runtime::GCPForkGCService(void) {
 						<< "\"" << "platform" << "\", \"" << "GCService" << "\") failed";
 			}
 		}
-#else
-		UNUSED(is_system_server);
-		UNUSED(java_se_info);
-		UNUSED(java_se_name);
 #endif
 
 		Runtime* runtime = Runtime::Current();
