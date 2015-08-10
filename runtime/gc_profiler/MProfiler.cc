@@ -770,7 +770,10 @@ void VMProfiler::runGCServiceDaemon(void) {
 			GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
 								", instance counter = " << gc_service_mu_->getInstanceCounter();
 			while(_flag) {
-				gc_service_mu_->waitConditional();
+				ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+				{
+					gc_service_mu_->waitConditional();
+				}
 				int _newCount = gc_service_mu_->getInstanceCounter();
 				GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
 									", instance counter = " <<
