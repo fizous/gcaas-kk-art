@@ -774,6 +774,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 				{
 					gc_service_mu_->waitConditional();
 				}
+				_flag = false;
 				int _newCount = gc_service_mu_->getInstanceCounter();
 				GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
 									", instance counter = " <<
@@ -781,6 +782,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 				if(_oldCount != _newCount) {
 					_flag = false;
 				}
+
 			}
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
 					", instance counter = " << gc_service_mu_->getInstanceCounter();
