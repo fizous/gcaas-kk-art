@@ -771,9 +771,10 @@ void VMProfiler::runGCServiceDaemon(void) {
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
 					", instance counter = " << gc_service_mu_->getInstanceCounter();
 			if (!_isNameSet) {
-				set_process_name("GCService");
+
 				_isNameSet = true;
 			}
+			set_process_name("GCService");
 			gc_service_mu_->signalConVariable();
 			gc_service_mu_->unlock();
 		}
