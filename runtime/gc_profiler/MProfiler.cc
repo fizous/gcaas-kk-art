@@ -679,6 +679,8 @@ void VMProfiler::createAppList(GCMMP_Options* argOptions) {
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 						index_(argOptions->mprofile_type_),
+						gc_service_mu_(NULL),
+						gcservice_mem_(NULL),
 						enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != VMProfiler::kGCMMPDisableMProfile)),
 						gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
 						prof_thread_(NULL),
@@ -767,7 +769,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 		while(resultLock == 0) {
 			_flag = true;
 			gc_service_mu_->setGCServiceProcess(true);
-			GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
+			GCMMP_VLOG(INFO) << "gcservice loop-0: " << self->GetTid()<<
 								", instance counter = " << gc_service_mu_->getInstanceCounter();
 			while(_flag) {
 				ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
@@ -776,7 +778,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 				}
 				_flag = false;
 				int _newCount = gc_service_mu_->getInstanceCounter();
-				GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
+				GCMMP_VLOG(INFO) << "gcservice loop-1: " << self->GetTid()<<
 									", instance counter = " <<
 									gc_service_mu_->getInstanceCounter() <<", oldCounter = " << _oldCount;
 				if(_oldCount != _newCount) {
