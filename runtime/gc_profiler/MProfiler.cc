@@ -765,7 +765,8 @@ void VMProfiler::runGCServiceDaemon(void) {
 		int _oldCount = gc_service_mu_->getInstanceCounter();
 		while((resultLock = gc_service_mu_->lock()) == 0) {
 			gc_service_mu_->setGCServiceProcess(true);
-
+			GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
+								", instance counter = " << gc_service_mu_->getInstanceCounter();
 			while(_oldCount == gc_service_mu_->getInstanceCounter())
 				gc_service_mu_->waitConditional();
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
@@ -804,7 +805,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = "
 				<< mP->gc_service_mu_->getFileDescr();
 
-		int resultLock = mP->gc_service_mu_->trylock();
+		int resultLock = mP->gc_service_mu_->lock();
 		if(resultLock == 0) {
 			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
 			LOG(ERROR) << "GCService: current instance Counter = " <<
