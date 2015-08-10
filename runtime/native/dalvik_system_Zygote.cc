@@ -431,8 +431,8 @@ pid_t Runtime::GCPForkGCService(void) {
 		{  // NOLINT(whitespace/braces)
 			rc = selinux_android_setcontext(_uid, 0, "platform", "GCService");
 			if (rc == -1) {
-				PLOG(FATAL) << "selinux_android_setcontext(" << uid << ", "
-						<< (is_system_server ? "true" : "false") << ", "
+				PLOG(FATAL) << "selinux_android_setcontext(" << _uid << ", "
+						<< (0 ? "true" : "false") << ", "
 						<< "\"" << "platform" << "\", \"" << "GCService" << "\") failed";
 			}
 		}
