@@ -763,12 +763,22 @@ void VMProfiler::runGCServiceDaemon(void) {
 	if(true) {
 		int resultLock = 0;
 		int _oldCount = gc_service_mu_->getInstanceCounter();
+		bool _flag = true;
 		while((resultLock = gc_service_mu_->lock()) == 0) {
+			_flag = true;
 			gc_service_mu_->setGCServiceProcess(true);
 			GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
 								", instance counter = " << gc_service_mu_->getInstanceCounter();
-			while(_oldCount == gc_service_mu_->getInstanceCounter())
+			while(_flag) {
 				gc_service_mu_->waitConditional();
+				int _newCount = gc_service_mu_->getInstanceCounter();
+				GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
+									", instance counter = " <<
+									gc_service_mu_->getInstanceCounter() <<", oldCounter = " << _oldCount;
+				if(_oldCount != _newCount) {
+					_flag = false;
+				}
+			}
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
 					", instance counter = " << gc_service_mu_->getInstanceCounter();
 			if (!_isNameSet) {
