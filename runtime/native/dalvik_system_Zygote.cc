@@ -422,7 +422,7 @@ pid_t Runtime::GCPForkGCService(void) {
 
 		DropCapabilitiesBoundingSet();
 
-		if (!MountEmulatedStorage(_uid, MOUNT_EXTERNAL_NONE)) {
+		if (!MountEmulatedStorage(_uid, MOUNT_EXTERNAL_MULTIUSER_ALL/*MOUNT_EXTERNAL_NONE*/)) {
 			PLOG(WARNING) << "Failed to mount emulated storage";
 			if (errno == ENOTCONN || errno == EROFS) {
 				// When device is actively encrypting, we get ENOTCONN here
