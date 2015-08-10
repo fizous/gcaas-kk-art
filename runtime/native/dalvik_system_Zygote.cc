@@ -445,16 +445,16 @@ pid_t Runtime::GCPForkGCService(void) {
 		if (rc == -1) {
 			PLOG(FATAL) << "gcservice: setresuid(" << _uid << ") failed";
 		}
-#if defined(__linux__)
-		if (NeedsNoRandomizeWorkaround()) {
-			// Work around ARM kernel ASLR lossage (http://b/5817320).
-			int old_personality = personality(0xffffffff);
-			int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
-			if (new_personality == -1) {
-				PLOG(WARNING) << "personality(" << new_personality << ") failed";
-			}
-		}
-#endif
+//#if defined(__linux__)
+//		if (NeedsNoRandomizeWorkaround()) {
+//			// Work around ARM kernel ASLR lossage (http://b/5817320).
+//			int old_personality = personality(0xffffffff);
+//			int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
+//			if (new_personality == -1) {
+//				PLOG(WARNING) << "personality(" << new_personality << ") failed";
+//			}
+//		}
+//#endif
 		SetSchedulerPolicy();
 
 //#if defined(HAVE_ANDROID_OS)
