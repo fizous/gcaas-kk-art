@@ -761,10 +761,10 @@ void VMProfiler::runGCServiceDaemon(void) {
 	}
 	bool _isNameSet = false;
 	if(true) {
-		int resultLock = 0;
+		int resultLock = gc_service_mu_->lock();
 		int _oldCount = gc_service_mu_->getInstanceCounter();
 		bool _flag = true;
-		while((resultLock = gc_service_mu_->lock()) == 0) {
+		while(resultLock == 0) {
 			_flag = true;
 			gc_service_mu_->setGCServiceProcess(true);
 			GCMMP_VLOG(INFO) << "gcservice loop: " << self->GetTid()<<
@@ -791,7 +791,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 			}
 			_oldCount = gc_service_mu_->getInstanceCounter();
 			gc_service_mu_->broadcastCond();
-			gc_service_mu_->unlock();
+			//gc_service_mu_->unlock();
 			//set_process_name("GCService");
 		}
 
