@@ -775,7 +775,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 				_isNameSet = true;
 			}
 			_oldCount = gc_service_mu_->getInstanceCounter();
-			gc_service_mu_->signalConVariable();
+			gc_service_mu_->broadcastCond();
 			gc_service_mu_->unlock();
 			//set_process_name("GCService");
 		}
@@ -810,7 +810,7 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
 			LOG(ERROR) << "GCService: current instance Counter = " <<
 							mP->gc_service_mu_->incrementInstanceCounter();
-			mP->gc_service_mu_->signalConVariable();
+			mP->gc_service_mu_->broadcastCond();
 			resultLock = mP->gc_service_mu_->unlock();
 			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
 		} else {
