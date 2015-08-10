@@ -762,21 +762,27 @@ void VMProfiler::runGCServiceDaemon(void) {
 	bool _isNameSet = false;
 	if(true) {
 		int resultLock = 0;
-
+		int _oldCount = gc_service_mu_->getInstanceCounter();
 		while((resultLock = gc_service_mu_->lock()) == 0) {
 			gc_service_mu_->setGCServiceProcess(true);
-			int _oldCount = gc_service_mu_->getInstanceCounter();
+
 			while(_oldCount == gc_service_mu_->getInstanceCounter())
 				gc_service_mu_->waitConditional();
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
 					", instance counter = " << gc_service_mu_->getInstanceCounter();
 			if (!_isNameSet) {
-
 				_isNameSet = true;
 			}
+			_oldCount = gc_service_mu_->getInstanceCounter();
 			gc_service_mu_->signalConVariable();
 			gc_service_mu_->unlock();
-			set_process_name("GCService");
+			//set_process_name("GCService");
+		}
+
+		if(resultLock != 0) {
+			GCMMP_VLOG(INFO) << "gcservice Could not lock the mutex " << self->GetTid()<<
+						", instance counter = " << gc_service_mu_->getInstanceCounter();
+			break;
 		}
 	}
 
