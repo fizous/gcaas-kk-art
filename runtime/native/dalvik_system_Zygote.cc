@@ -416,7 +416,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		gMallocLeakZygoteChild = 1;
 
 		// Keep capabilities across UID change, unless we're staying root.
-		if (uid != 0) {
+		if (_uid != 0) {
 			EnableKeepCapabilities();
 		}
 
