@@ -449,7 +449,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		UnsetSigChldHandler();
 		runtime->is_gcservice_ = true;
 		runtime->DidForkFromZygote();
-		set_process_name("GCService");
+
 		GCPRunGCService();
 		return getpid();
   }

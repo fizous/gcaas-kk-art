@@ -759,6 +759,7 @@ void VMProfiler::runGCServiceDaemon(void) {
 		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
 		return;
 	}
+	bool _isNameSet = false;
 	if(true) {
 		int resultLock = 0;
 
@@ -769,6 +770,10 @@ void VMProfiler::runGCServiceDaemon(void) {
 				gc_service_mu_->waitConditional();
 			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
 					", instance counter = " << gc_service_mu_->getInstanceCounter();
+			if (!_isNameSet) {
+				set_process_name("GCService");
+				_isNameSet = true;
+			}
 			gc_service_mu_->signalConVariable();
 			gc_service_mu_->unlock();
 		}
