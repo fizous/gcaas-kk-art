@@ -57,7 +57,11 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
     GCMMP_VLOG(INFO) << "XXXXXXXXXX gcservice: process is waiting to stop XXXXXXXXX";
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
-      mProfiler->gc_service_mu_->waitConditional();
+      if(GCServiceDaemon::WaitTimedService(mProfiler->gc_service_mu_, 1000) != 0) {
+        LOG(ERROR) << "YYYY error on timed out for the launch service YYY";
+      } else {
+        GCMMP_VLOG(INFO) << "XXXXXXXXXX timed out";
+      }
     }
   }
   GCMMP_VLOG(INFO) << "XXXXXXXXXX gcservice: process is leaving XXXXXXXXX";
@@ -65,6 +69,12 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   mProfiler->gc_service_mu_->unlock();
 }
 
+int GCServiceDaemon::WaitTimedService(android::SharedProcessMutex* globalLock,
+    int64_t timeMS) {
+  timespec timeout_ts;
+  InitTimeSpec(true, CLOCK_REALTIME, timeMS, 0, &timeout_ts);
+  return globalLock->waitTimedConditional(&timeout_ts);
+}
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _gcServiceInst = reinterpret_cast<GCServiceDaemon*>(arg);
@@ -82,9 +92,12 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     _gcServiceInst->global_lock_->lock();
     _gcServiceInst->daemonThread_ = self;
     _gcServiceInst->daemonStatus_ = GCSERVICE_RUNNING;
+    _gcServiceInst->global_lock_->setServiceStatus((int)GCSERVICE_RUNNING);
+    _gcServiceInst->global_lock_->broadcastCond();
+    _gcServiceInst->global_lock_->unlock();
   }
 
-
+  _gcServiceInst->global_lock_->lock();
   while(_gcServiceInst->daemonStatus_ == GCSERVICE_RUNNING) {
     GCMMP_VLOG(INFO) << "gcservice loop-0: " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
@@ -94,7 +107,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     GCMMP_VLOG(INFO) << "gcservice loop-1: " << self->GetTid()<<
                         ", instance counter = " <<
                         _gcServiceInst->global_lock_->getInstanceCounter();
-    _gcServiceInst->global_lock_->signalCondVariable();
+    _gcServiceInst->global_lock_->broadcastCond();
     _gcServiceInst->global_lock_->unlock();
     GCMMP_VLOG(INFO) << "gcservice loop-2: " << self->GetTid();
     _gcServiceInst->global_lock_->lock();
@@ -115,6 +128,7 @@ void GCServiceDaemon::shutdownGCService(void) {
       << self->GetTid();
   global_lock_->lock();
   daemonStatus_ = GCSERVICE_STOPPED;
+  global_lock_->setServiceStatus((int)daemonStatus_);
   global_lock_->unlock();
   global_lock_->broadcastCond();
 

@@ -46,6 +46,7 @@ public:
   GCServiceDaemon(VMProfiler*);
   static void LaunchGCService(void* arg);
   static void* RunDaemon(void* arg);
+  static int WaitTimedService(android::SharedProcessMutex*, int64_t);
 
   static void ShutdownGCService(void);
   static bool IsGCServiceRunning(void);

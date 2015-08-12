@@ -756,15 +756,22 @@ void VMProfiler::GCPBlockOnGCService(void) {
     GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations ZZZZ "
         << self->GetTid();
     mP->gc_service_mu_->lock();
-    GCServiceDaemon::LaunchGCService(mP);
-    while(!GCServiceDaemon::IsGCServiceRunning()) {
+    GCMMP_VLOG(INFO) << "ZZZZ zygote locked the global lock ZZZZ "
+        << self->GetTid();
+    while(mP->gc_service_mu_->getServiceStatus() != GCSERVICE_RUNNING) {
       ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
       {
         GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations in side loop ZZZZ "
             << self->GetTid();
-        mP->gc_service_mu_->waitConditional();
+        if(GCServiceDaemon::WaitTimedService(mP->gc_service_mu_, 1000) != 0) {
+          LOG(ERROR) << "ZZZZ zygote had an error on timedWait";
+        }
+        GCMMP_VLOG(INFO) << "ZZZZ zygote left the wait lock ZZZZ "
+            << self->GetTid();
       }
     }
+    GCMMP_VLOG(INFO) << "ZZZZ zygote left the loop ZZZZ "
+        << self->GetTid();
     mP->gc_service_mu_->unlock();
     GCMMP_VLOG(INFO) << "ZZZZ zygote going to unlock the gcservice mutex ZZZZ "
         << self->GetTid();
