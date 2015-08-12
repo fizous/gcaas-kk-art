@@ -58,10 +58,11 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
       int _ret = GCServiceDaemon::WaitTimedService(mProfiler->gc_service_mu_, 1000);
-      if(_ret!= 0) {
+      if(_ret != 0 && _ret != ETIMEDOUT) {
         LOG(ERROR) << "YYYY error on timed out for the launch service YYY: " << _ret;
       } else {
-        GCMMP_VLOG(INFO) << "XXXXXXXXXX -2 timed out";
+        if(_ret == 0)
+          GCMMP_VLOG(INFO) << "XXXXXXXXXX -2 received signal";
       }
     }
   }
@@ -101,19 +102,24 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   GCMMP_VLOG(INFO) << "GCServiceD locks to enter the loop: " << self->GetTid();
   _gcServiceInst->global_lock_->lock();
+  int _ret = 0;
   while(_gcServiceInst->daemonStatus_ == GCSERVICE_RUNNING) {
     GCMMP_VLOG(INFO) << "GCServiceD loop-0: " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
-      int _ret = GCServiceDaemon::WaitTimedService(_gcServiceInst->global_lock_, 1000);
-      if(_ret != 0) {
-        LOG(ERROR) << "GCServiceD: ERROR in timed Wait";
+      _ret = GCServiceDaemon::WaitTimedService(_gcServiceInst->global_lock_, 2000);
+      if(_ret != 0 && _ret != ETIMEDOUT) {
+        LOG(ERROR) << "GCServiceD: ERROR in timed Wait:" << _ret;
       }
       //_gcServiceInst->global_lock_->waitConditional();
     }
-    GCMMP_VLOG(INFO) << "GCServiceD loop-1: " << self->GetTid()<<
-                        ", instance counter = " <<
-                        _gcServiceInst->global_lock_->getInstanceCounter();
+    if(_ret == 0) {
+      GCMMP_VLOG(INFO) << "GCServiceD loop-1: " << self->GetTid()<<
+                          ", instance counter = " <<
+                          _gcServiceInst->global_lock_->getInstanceCounter();
+
+    }
+
     _gcServiceInst->global_lock_->broadcastCond();
     _gcServiceInst->global_lock_->unlock();
     GCMMP_VLOG(INFO) << "GCServiceD loop-2: " << self->GetTid();
