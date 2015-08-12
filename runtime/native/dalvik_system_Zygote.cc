@@ -491,6 +491,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		return getpid();
   }
   GCMMP_VLOG(INFO) << "GCService: zygote initializing gcService pid: " << getpid();
+  GCPBlockOnGCService();
   return 0;
 }
 

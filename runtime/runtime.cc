@@ -811,6 +811,13 @@ void Runtime::GCPRunGCService(void){
 	GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
 }
 
+
+void Runtime::GCPBlockOnGCService(void){
+  GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
+  mprofiler::VMProfiler::GCPBlockOnGCService();
+  GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+}
+
 bool Runtime::Start() {
   VLOG(startup) << "Runtime::Start entering";
 

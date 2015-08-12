@@ -745,6 +745,31 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 	}
 }
 
+void VMProfiler::GCPBlockOnGCService(void) {
+  VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+  if(mP != NULL && mP->IsProfilingEnabled()) {
+    if(mP->gc_service_mu_ == NULL) {
+      LOG(ERROR) << "GCService: the mutex object was not initialized";
+      return;
+    }
+    Thread* self = Thread::Current();
+    GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations ZZZZ "
+        << self->GetTid();
+    mP->gc_service_mu_->lock();
+    GCServiceDaemon::LaunchGCService(mP);
+    while(!GCServiceDaemon::IsGCServiceRunning()) {
+      ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+      {
+        GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations in side loop ZZZZ "
+            << self->GetTid();
+        mP->gc_service_mu_->waitConditional();
+      }
+    }
+    mP->gc_service_mu_->unlock();
+    GCMMP_VLOG(INFO) << "ZZZZ zygote going to unlock the gcservice mutex ZZZZ "
+        << self->GetTid();
+  }
+}
 
 void VMProfiler::GCPRunGCService(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
