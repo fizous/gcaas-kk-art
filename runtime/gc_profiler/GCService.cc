@@ -5,14 +5,18 @@
  *      Author: hussein
  */
 
+#include "thread_state.h"
 #include "thread.h"
-#include "utils.h"
+#include "locks.h"
+#include "os.h"
 
 #include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "gc_profiler/GCService.h"
+
+
 
 namespace art {
 namespace mprofiler {
@@ -42,7 +46,8 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
   mProfiler->gc_service_mu_->lock();
   GCServiceDaemon::GCServiceD_ = new GCServiceDaemon(mProfiler);
-  CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL,
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&GCServiceDaemon::GCServiceD_->pthread_, NULL,
       &GCServiceDaemon::RunDaemon, GCServiceDaemon::GCServiceD_),
       "GCService Daemon thread");
   Thread* self = Thread::Current();
