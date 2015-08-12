@@ -119,7 +119,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   _gcServiceInst->global_lock_->unlock();
   _gcServiceInst->global_lock_->broadcastCond();
 
-  GCMMP_VLOG(INFO) << "gcservice: the gcservice unlocked the globallocks";
+  GCMMP_VLOG(INFO) << "GCServiceD: the gcservice unlocked the globallocks";
 
   return NULL;
 }

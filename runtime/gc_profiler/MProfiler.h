@@ -216,7 +216,7 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
-  volatile android::SharedProcessMutex* gc_service_mu_;
+  android::SharedProcessMutex* gc_service_mu_;
   android::SharedProcMutex* gcservice_mem_;
   void InitSharedLocks();
   static void GCPInitVMInstanceHeapMutex(void);
