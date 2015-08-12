@@ -501,6 +501,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		jlong permittedCapabilities, jlong effectiveCapabilities,
 		jint mount_external,
 		jstring java_se_info, jstring java_se_name, bool is_system_server) {
+
 	Runtime* runtime = Runtime::Current();
 	CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
 	if (!runtime->PreZygoteFork()) {
@@ -511,11 +512,12 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 	// Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
 	Thread* self = Thread::Current();
-
+	GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: " << getpid();
 	// dvmDumpLoaderStats("zygote");  // TODO: ?
 	pid_t pid = fork();
 
 	if (pid == 0) {
+	  GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: child: " << getpid();
 		// The child process.
 		gMallocLeakZygoteChild = 1;
 
