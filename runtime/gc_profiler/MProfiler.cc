@@ -24,6 +24,7 @@
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
+#include "gc_profiler/GCService.h"
 #include "locks.h"
 #include "os.h"
 #include "class_linker.h"
@@ -752,60 +753,60 @@ void VMProfiler::GCPRunGCService(void) {
 			LOG(ERROR) << "GCService: the mutex object was not initialized";
 			return;
 		}
-		mP->runGCServiceDaemon();
+		GCServiceDaemon::LaunchGCService(mP);
 	}
 }
-void VMProfiler::runGCServiceDaemon(void) {
-	Thread* self = Thread::Current();
-	if(gc_service_mu_ == NULL) {
-		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
-		return;
-	}
-	bool _isNameSet = false;
-	if(true) {
-		int resultLock = gc_service_mu_->lock();
-		int _oldCount = gc_service_mu_->getInstanceCounter();
-		bool _flag = true;
-		while(resultLock == 0) {
-			_flag = true;
-			gc_service_mu_->setGCServiceProcess(true);
-			GCMMP_VLOG(INFO) << "gcservice loop-0: " << self->GetTid()<<
-								", instance counter = " << gc_service_mu_->getInstanceCounter();
-			while(_flag) {
-				ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-				{
-					gc_service_mu_->waitConditional();
-				}
-				_flag = false;
-				int _newCount = gc_service_mu_->getInstanceCounter();
-				GCMMP_VLOG(INFO) << "gcservice loop-1: " << self->GetTid()<<
-									", instance counter = " <<
-									gc_service_mu_->getInstanceCounter() <<", oldCounter = " << _oldCount;
-				if(_oldCount != _newCount) {
-					_flag = false;
-				}
-
-			}
-			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
-					", instance counter = " << gc_service_mu_->getInstanceCounter();
-			if (!_isNameSet) {
-				_isNameSet = true;
-			}
-			_oldCount = gc_service_mu_->getInstanceCounter();
-			gc_service_mu_->broadcastCond();
-			//gc_service_mu_->unlock();
-			//set_process_name("GCService");
-		}
-
-		if(resultLock != 0) {
-			GCMMP_VLOG(INFO) << "gcservice Could not lock the mutex " << self->GetTid()<<
-						", instance counter = " << gc_service_mu_->getInstanceCounter();
-		}
-	}
-
-	GCMMP_VLOG(INFO) << "gcservice leaving: the main loop " << self->GetTid()<<
-			", instance counter = " << gc_service_mu_->getInstanceCounter();
-}
+//void VMProfiler::runGCServiceDaemon(void) {
+//	Thread* self = Thread::Current();
+//	if(gc_service_mu_ == NULL) {
+//		LOG(ERROR) << "GCService: the GCPRunGCServiceDaemonmutex object was not initialized";
+//		return;
+//	}
+//	bool _isNameSet = false;
+//	if(true) {
+//		int resultLock = gc_service_mu_->lock();
+//		int _oldCount = gc_service_mu_->getInstanceCounter();
+//		bool _flag = true;
+//		while(resultLock == 0) {
+//			_flag = true;
+//			gc_service_mu_->setGCServiceProcess(true);
+//			GCMMP_VLOG(INFO) << "gcservice loop-0: " << self->GetTid()<<
+//								", instance counter = " << gc_service_mu_->getInstanceCounter();
+//			while(_flag) {
+//				ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+//				{
+//					gc_service_mu_->waitConditional();
+//				}
+//				_flag = false;
+//				int _newCount = gc_service_mu_->getInstanceCounter();
+//				GCMMP_VLOG(INFO) << "gcservice loop-1: " << self->GetTid()<<
+//									", instance counter = " <<
+//									gc_service_mu_->getInstanceCounter() <<", oldCounter = " << _oldCount;
+//				if(_oldCount != _newCount) {
+//					_flag = false;
+//				}
+//
+//			}
+//			GCMMP_VLOG(INFO) << "received signal: " << self->GetTid()<<
+//					", instance counter = " << gc_service_mu_->getInstanceCounter();
+//			if (!_isNameSet) {
+//				_isNameSet = true;
+//			}
+//			_oldCount = gc_service_mu_->getInstanceCounter();
+//			gc_service_mu_->broadcastCond();
+//			//gc_service_mu_->unlock();
+//			//set_process_name("GCService");
+//		}
+//
+//		if(resultLock != 0) {
+//			GCMMP_VLOG(INFO) << "gcservice Could not lock the mutex " << self->GetTid()<<
+//						", instance counter = " << gc_service_mu_->getInstanceCounter();
+//		}
+//	}
+//
+//	GCMMP_VLOG(INFO) << "gcservice leaving: the main loop " << self->GetTid()<<
+//			", instance counter = " << gc_service_mu_->getInstanceCounter();
+//}
 
 void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 	VMProfiler* mP = Runtime::Current()->GetVMProfiler();

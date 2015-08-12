@@ -221,7 +221,7 @@ public:
   void InitSharedLocks();
   static void GCPInitVMInstanceHeapMutex(void);
   static void GCPRunGCService(void);
-  void runGCServiceDaemon(void);
+//  void runGCServiceDaemon(void);
 
 
 

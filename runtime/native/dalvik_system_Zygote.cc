@@ -406,10 +406,19 @@ static bool NeedsNoRandomizeWorkaround() {
 
 pid_t Runtime::GCPForkGCService(void) {
   //for the GCService
+  Runtime* runtime = Runtime::Current();
+  runtime->heap_->PreZygoteFork();
+  SetSigChldHandler();
+
+  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
+  Thread* self = Thread::Current();
+
 	uid_t _uid = getuid();
 	gid_t _gid = getgid();
-	pid_t _pid = fork();
-	GCMMP_VLOG(INFO) << "GCService: Forkingggggg " << getpid();
+  GCMMP_VLOG(INFO) << "GCService: Forking from: " << getpid();
+
+
+  pid_t _pid = fork();
   if (_pid == 0) {
     // child process of the GCService
 		// The child process.
@@ -467,8 +476,6 @@ pid_t Runtime::GCPForkGCService(void) {
 //			}
 //		}
 //#endif
-
-		Runtime* runtime = Runtime::Current();
 		// Our system thread ID, etc, has changed so reset Thread state.
 		Thread* self = Thread::Current();
 		self->InitAfterFork();

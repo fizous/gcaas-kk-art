@@ -807,8 +807,8 @@ jobject CreateSystemClassLoader() {
 
 void Runtime::GCPRunGCService(void){
 	GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
-	 mprofiler::VMProfiler::GCPRunGCService();
-	 GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+	mprofiler::VMProfiler::GCPRunGCService();
+	GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
 }
 
 bool Runtime::Start() {

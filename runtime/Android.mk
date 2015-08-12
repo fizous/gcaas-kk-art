@@ -61,6 +61,7 @@ LIBART_COMMON_SRC_FILES := \
 	gc_profiler/MProfilerTypes.cc \
 	gc_profiler/MProfiler.cc \
 	gc_profiler/MPPerfCounters.cc \
+	gc_profiler/GCService.cc \
 	hprof/hprof.cc \
 	image.cc \
 	indirect_reference_table.cc \
