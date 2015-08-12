@@ -105,7 +105,11 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     GCMMP_VLOG(INFO) << "GCServiceD loop-0: " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
-      _gcServiceInst->global_lock_->waitConditional();
+      int _ret = GCServiceDaemon::WaitTimedService(_gcServiceInst->global_lock_, 1000);
+      if(_ret != 0) {
+        LOG(ERROR) << "GCServiceD: ERROR in timed Wait";
+      }
+      //_gcServiceInst->global_lock_->waitConditional();
     }
     GCMMP_VLOG(INFO) << "GCServiceD loop-1: " << self->GetTid()<<
                         ", instance counter = " <<
