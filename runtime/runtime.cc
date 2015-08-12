@@ -813,9 +813,9 @@ void Runtime::GCPRunGCService(void){
 
 
 void Runtime::GCPBlockOnGCService(void){
-  GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
+  GCMMP_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
   mprofiler::VMProfiler::GCPBlockOnGCService();
-  GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+  GCMMP_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
 }
 
 bool Runtime::Start() {

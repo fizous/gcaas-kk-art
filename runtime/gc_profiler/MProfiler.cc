@@ -753,27 +753,28 @@ void VMProfiler::GCPBlockOnGCService(void) {
       return;
     }
     Thread* self = Thread::Current();
-    GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations ZZZZ "
+    GCMMP_VLOG(INFO) << "ZZZZ-0 zygote going to wait for initializations ZZZZ "
         << self->GetTid();
     mP->gc_service_mu_->lock();
-    GCMMP_VLOG(INFO) << "ZZZZ zygote locked the global lock ZZZZ "
+    GCMMP_VLOG(INFO) << "ZZZZ-1 zygote locked the global lock ZZZZ "
         << self->GetTid();
     while(mP->gc_service_mu_->getServiceStatus() != GCSERVICE_RUNNING) {
       ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
       {
-        GCMMP_VLOG(INFO) << "ZZZZ zygote going to wait for initializations in side loop ZZZZ "
+        GCMMP_VLOG(INFO) << "ZZZZ-2 zygote going to wait for initializations in side loop ZZZZ "
             << self->GetTid();
-        if(GCServiceDaemon::WaitTimedService(mP->gc_service_mu_, 1000) != 0) {
-          LOG(ERROR) << "ZZZZ zygote had an error on timedWait";
+        int _return = GCServiceDaemon::WaitTimedService(mP->gc_service_mu_, 1000);
+        if(_return != 0) {
+          LOG(ERROR) << "ZZZZ-3 zygote had an error on timedWait: " << _return;
         }
-        GCMMP_VLOG(INFO) << "ZZZZ zygote left the wait lock ZZZZ "
+        GCMMP_VLOG(INFO) << "ZZZZ-4 zygote left the wait lock ZZZZ "
             << self->GetTid();
       }
     }
-    GCMMP_VLOG(INFO) << "ZZZZ zygote left the loop ZZZZ "
+    GCMMP_VLOG(INFO) << "ZZZZ-5 zygote left the loop ZZZZ "
         << self->GetTid();
     mP->gc_service_mu_->unlock();
-    GCMMP_VLOG(INFO) << "ZZZZ zygote going to unlock the gcservice mutex ZZZZ "
+    GCMMP_VLOG(INFO) << "ZZZZ-6 zygote going to unlock the gcservice mutex ZZZZ "
         << self->GetTid();
   }
 }

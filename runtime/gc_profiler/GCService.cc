@@ -52,21 +52,23 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
       &GCServiceDaemon::RunDaemon, GCServiceDaemon::GCServiceD_),
       "GCService Daemon thread");
   Thread* self = Thread::Current();
-  GCMMP_VLOG(INFO) << "XXXXXXXXXX gcservice: process is entering the main loop XXXXXXXXX";
+  GCMMP_VLOG(INFO) << "XXXXXXXXXX-0 gcservice: process is entering the main loop XXXXXXXXX";
   while(!GCServiceDaemon::IsGCServiceStopped()) {
-    GCMMP_VLOG(INFO) << "XXXXXXXXXX gcservice: process is waiting to stop XXXXXXXXX";
+    GCMMP_VLOG(INFO) << "XXXXXXXXXX-1 gcservice: process is waiting to stop XXXXXXXXX";
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
-      if(GCServiceDaemon::WaitTimedService(mProfiler->gc_service_mu_, 1000) != 0) {
-        LOG(ERROR) << "YYYY error on timed out for the launch service YYY";
+      int _ret = GCServiceDaemon::WaitTimedService(mProfiler->gc_service_mu_, 1000);
+      if(_ret!= 0) {
+        LOG(ERROR) << "YYYY error on timed out for the launch service YYY: " << _ret;
       } else {
-        GCMMP_VLOG(INFO) << "XXXXXXXXXX timed out";
+        GCMMP_VLOG(INFO) << "XXXXXXXXXX -2 timed out";
       }
     }
   }
-  GCMMP_VLOG(INFO) << "XXXXXXXXXX gcservice: process is leaving XXXXXXXXX";
+  GCMMP_VLOG(INFO) << "XXXXXXXXXX-3 gcservice: process is broadcasting and unlocking XXXXXXXXX";
   mProfiler->gc_service_mu_->broadcastCond();
   mProfiler->gc_service_mu_->unlock();
+  GCMMP_VLOG(INFO) << "XXXXXXXXXX-4 gcservice: process is leaving XXXXXXXXX";
 }
 
 int GCServiceDaemon::WaitTimedService(android::SharedProcessMutex* globalLock,
@@ -77,7 +79,7 @@ int GCServiceDaemon::WaitTimedService(android::SharedProcessMutex* globalLock,
 }
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
-  GCServiceDaemon* _gcServiceInst = reinterpret_cast<GCServiceDaemon*>(arg);
+  GCServiceDaemon* _gcServiceInst = GCServiceDaemon::GCServiceD_;//reinterpret_cast<GCServiceDaemon*>(arg);
   Runtime* runtime = Runtime::Current();
   bool _createThread =  runtime->AttachCurrentThread("GCServiceD", true,
       runtime->GetSystemThreadGroup(),
@@ -97,24 +99,25 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     _gcServiceInst->global_lock_->unlock();
   }
 
+  GCMMP_VLOG(INFO) << "GCServiceD locks to enter the loop: " << self->GetTid();
   _gcServiceInst->global_lock_->lock();
   while(_gcServiceInst->daemonStatus_ == GCSERVICE_RUNNING) {
-    GCMMP_VLOG(INFO) << "gcservice loop-0: " << self->GetTid();
+    GCMMP_VLOG(INFO) << "GCServiceD loop-0: " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
     {
       _gcServiceInst->global_lock_->waitConditional();
     }
-    GCMMP_VLOG(INFO) << "gcservice loop-1: " << self->GetTid()<<
+    GCMMP_VLOG(INFO) << "GCServiceD loop-1: " << self->GetTid()<<
                         ", instance counter = " <<
                         _gcServiceInst->global_lock_->getInstanceCounter();
     _gcServiceInst->global_lock_->broadcastCond();
     _gcServiceInst->global_lock_->unlock();
-    GCMMP_VLOG(INFO) << "gcservice loop-2: " << self->GetTid();
+    GCMMP_VLOG(INFO) << "GCServiceD loop-2: " << self->GetTid();
     _gcServiceInst->global_lock_->lock();
   }
-  GCMMP_VLOG(INFO) << "gcservice: the gcservice is leaving the loop";
+  GCMMP_VLOG(INFO) << "GCServiceD 3: the gcservice is leaving the loop";
   _gcServiceInst->global_lock_->unlock();
-  _gcServiceInst->global_lock_->signalCondVariable();
+  _gcServiceInst->global_lock_->broadcastCond();
 
   GCMMP_VLOG(INFO) << "gcservice: the gcservice unlocked the globallocks";
 
