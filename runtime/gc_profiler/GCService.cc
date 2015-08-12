@@ -72,6 +72,10 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   bool _createThread =  runtime->AttachCurrentThread("GCServiceD", true,
       runtime->GetSystemThreadGroup(),
       !runtime->IsCompiler());
+  if(!_createThread) {
+    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
+    return NULL;
+  }
   Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
