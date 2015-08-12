@@ -477,7 +477,7 @@ pid_t Runtime::GCPForkGCService(void) {
 //		}
 //#endif
 		// Our system thread ID, etc, has changed so reset Thread state.
-		Thread* self = Thread::Current();
+		self = Thread::Current();
 		self->InitAfterFork();
 
 		//EnableDebugFeatures(debug_flags);
