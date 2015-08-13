@@ -285,6 +285,7 @@ class LOCKABLE InterProcessMutex : public BaseMutex {
   SharedFutexData* futexData_;
   void InitFutexData(void*, int);
   DISALLOW_COPY_AND_ASSIGN(InterProcessMutex);
+  friend class InterProcessConditionVariable;
 };//InterProcessMutex
 
 
