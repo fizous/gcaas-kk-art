@@ -1113,7 +1113,7 @@ void InterProcessConditionVariable::Signal(Thread* self) {
   DCHECK(self == NULL || self == Thread::Current());
   guard_.AssertExclusiveHeld(self);
 #if ART_USE_FUTEXES
-  if (num_waiters_ > 0) {
+  if (sharedCondVar_->num_waiters_ > 0) {
     android_atomic_inc(&sharedCondVar_->sequence_);  // Indicate a signal occurred.
     // Futex wake 1 waiter who will then come and in contend on mutex. It'd be nice to requeue them
     // to avoid this, however, requeueing can only move all waiters.
@@ -1138,7 +1138,7 @@ void InterProcessConditionVariable::WaitHoldingLocks(Thread* self) {
   guard_.AssertExclusiveHeld(self);
   unsigned int old_recursion_count = guard_.futexData_->recursion_count_;
 #if ART_USE_FUTEXES
-  num_waiters_++;
+  sharedCondVar_->num_waiters_++;
   // Ensure the Mutex is contended so that requeued threads are awoken.
   android_atomic_inc(&guard_.futexData_->num_contenders_);
   guard_.futexData_->recursion_count_ = 1;
