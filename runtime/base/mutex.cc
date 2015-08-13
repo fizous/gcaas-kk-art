@@ -1039,7 +1039,7 @@ std::ostream& operator<<(std::ostream& os, const ReaderWriterMutex& mu) {
 InterProcessConditionVariable::InterProcessConditionVariable(const char* name,
     InterProcessMutex& guard, void* sharedMem)
     : name_(name), guard_(guard) {
-  sharedCondVar_ = reinterpret_cast<SharedFutexData*> (sharedMem);
+  sharedCondVar_ = reinterpret_cast<SharedConditionVarData*> (sharedMem);
 #if ART_USE_FUTEXES
   sharedCondVar_->sequence_ = 0;
   sharedCondVar_->num_waiters_ = 0;
