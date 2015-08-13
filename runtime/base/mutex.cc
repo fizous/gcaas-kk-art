@@ -438,6 +438,18 @@ void InterProcessMutex::ExclusiveLock(Thread* self) {
 }
 
 
+bool InterProcessMutex::IsExclusiveHeld(const Thread* self) const {
+  DCHECK(self == NULL || self == Thread::Current());
+  bool result = (GetExclusiveOwnerTid() == SafeGetTid(self));
+  if (kDebugLocking) {
+    // Sanity debug check that if we think it is locked we have it in our held mutexes.
+    if (result && self != NULL && level_ != kMonitorLock && !gAborting) {
+      CHECK_EQ(self->GetHeldMutex(level_), this);
+    }
+  }
+  return result;
+}
+
 bool InterProcessMutex::ExclusiveTryLock(Thread* self) {
   DCHECK(self == NULL || self == Thread::Current());
   if (kDebugLocking && !futexData_->recursive_) {
