@@ -403,7 +403,7 @@ void InterProcessMutex::ExclusiveLock(Thread* self) {
 #if ART_USE_FUTEXES
     bool done = false;
     do {
-      int32_t cur_state = state_;
+      int32_t cur_state = futexData_->state_;
       if (cur_state == 0) {
         // Change state from 0 to 1.
         done = android_atomic_acquire_cas(0, 1, &futexData_->state_) == 0;
