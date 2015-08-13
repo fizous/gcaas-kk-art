@@ -508,7 +508,9 @@ void InterProcessMutex::ExclusiveUnlock(Thread* self) {
       }
     } else {
       // Logging acquires the logging lock, avoid infinite recursion in that case.
-      if (this != Locks::logging_lock_) {
+      bool _sameLock =
+          (static_cast<BaseMutex*>(this) == static_cast<BaseMutex*>(Locks::logging_lock_));
+      if (_sameLock) {
         LOG(FATAL) << "Unexpected state_ in unlock " << cur_state << " for " << name_;
       } else {
         LogMessageData data(__FILE__, __LINE__, INTERNAL_FATAL, -1);
