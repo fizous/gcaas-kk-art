@@ -44,6 +44,9 @@ bool GCServiceDaemon::IsGCServiceRunning(void) {
 }
 
 void GCServiceDaemon::LaunchGCService(void* arg) {
+
+  LOG(ERROR) << " ---------- ART_USE_FUTEX = " << BaseMutex::IsARTUseFutex() << " -------------------";
+
   VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(arg);
   mProfiler->gc_service_mu_->lock();
   GCServiceDaemon::GCServiceD_ = new GCServiceDaemon(mProfiler);

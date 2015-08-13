@@ -65,6 +65,8 @@ const size_t kAllMutexDataSize = kLogLockContentions ? 1 : 0;
 // Base class for all Mutex implementations
 class BaseMutex {
  public:
+  static int IsARTUseFutex();
+
   const char* GetName() const {
     return name_;
   }

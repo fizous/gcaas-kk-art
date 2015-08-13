@@ -542,6 +542,14 @@ ReaderWriterMutex::~ReaderWriterMutex() {
 #endif
 }
 
+
+int BaseMutex::IsARTUseFutex(){
+#if ART_USE_FUTEXES
+    return 1;
+#endif
+    return 0;
+}
+
 void ReaderWriterMutex::ExclusiveLock(Thread* self) {
   DCHECK(self == NULL || self == Thread::Current());
   AssertNotExclusiveHeld(self);
