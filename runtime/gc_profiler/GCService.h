@@ -16,7 +16,6 @@
 #include "os.h"
 #include "base/logging.h"
 #include "thread_state.h"
-#include "cutils/SharedProcessMutex.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
@@ -98,8 +97,6 @@ public:
   inline InterProcessConditionVariable* _Cond() {
     return service_header_->cond_;
   }
-
-
 
 private:
   GCDaemonHeader* service_header_;
