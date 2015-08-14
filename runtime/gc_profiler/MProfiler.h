@@ -77,7 +77,7 @@
 
 #if ART_GC_PROFILER_SERVICE
   #define GCP_INIT_SHARED_HEAP_MUTEX																  \
-    GCServiceDaemon::GCPRegisterGCService()
+    GCPRegisterGCService()
   #define GCP_INIT_GC_SERVICE_HEADER    											         \
 	  GCMMP_VLOG(INFO) << "GCService: initializing service header";      \
 	  GCPCreateGCService();																							   \

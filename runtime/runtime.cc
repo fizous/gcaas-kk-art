@@ -821,6 +821,14 @@ void Runtime::GCPCreateGCService(void) {
 }
 
 
+void Runtime::GCPRegisterGCService(void) {
+  GCSERV_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
+      getpid();
+  gcserviceHeader_ = mprofiler::GCServiceDaemon::GCPRegisterGCService();
+  GCSERV_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
+      getpid();
+}
+
 void Runtime::GCPBlockOnGCService(void){
   GCMMP_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
   mprofiler::GCServiceDaemon::GCPBlockForServiceReady(gcserviceHeader_);
