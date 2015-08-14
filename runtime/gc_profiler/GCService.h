@@ -106,7 +106,7 @@ private:
   Thread*   daemonThread_;
   pthread_t pthread_;
 
-  Mutex* shutdown_mu DEFAULT_MUTEX_ACQUIRED_AFTER;
+  Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu);
 
 

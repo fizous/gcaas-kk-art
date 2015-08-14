@@ -252,9 +252,9 @@ GCDaemonHeader* GCServiceDaemon::CreateServiceHeader(void) {
 
 /******************** private methods *************************/
 void GCServiceDaemon::initShutDownSignals(void) {
-  shutdown_mu = new Mutex("gcService Shutdown");
+  shutdown_mu_ = new Mutex("gcService Shutdown");
   shutdown_cond_.reset(new ConditionVariable("gcService Shutdown condition variable",
-      *shutdown_mu));
+      *shutdown_mu_));
 }
 
 
