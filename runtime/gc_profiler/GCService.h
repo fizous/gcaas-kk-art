@@ -23,35 +23,107 @@
 #include "utils.h"
 #include "offsets.h"
 
+/* log information. used to monitor the flow of the profiler.*/
+#define GCSERV_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "==GC_SERVICE== "
+
+
 namespace art {
 namespace mprofiler {
 
+
 typedef enum {
-  GCSERVICE_STARTING = 0,
-  GCSERVICE_RUNNING = 1,
-  GCSERVICE_STOPPED = 2
-}GCMMP_GCSERVICE_STATUS;
+  GCSERVICE_STATUS_NONE = 0,
+  GCSERVICE_STATUS_STARTING = 1,
+  GCSERVICE_STATUS_RUNNING  = 2,
+  GCSERVICE_STATUS_SHUTTING_DOWN  = 4,
+  GCSERVICE_STATUS_STOPPED  = 8
+} GC_SERVICE_STATUS;
+
+
+typedef struct SharedProcMutex_S {
+  volatile int status_;
+  volatile int file_descr_;
+  volatile int instanceCounter_;
+  pthread_cond_t condition_;
+  pthread_mutex_t mutex_;
+  pthread_mutexattr_t mutexAttr_;
+  pthread_condattr_t condAttr_;
+
+} SharedProcMutex;
+
+
+typedef struct GCDaemonMetaData_S {
+  SynchronizedLockHead lock_header_;
+  volatile int counter_;
+  volatile int status_;
+} GCDaemonMetaData;
+
+
+typedef struct GCDaemonHeader_S {
+  GCDaemonMetaData* meta_data_;
+  InterProcessMutex* mu_;
+  InterProcessConditionVariable* cond_;
+} GCDaemonHeader;
 
 class GCServiceDaemon {
-private:
-  GCMMP_GCSERVICE_STATUS daemonStatus_;
-  pthread_t pthread_;
-  Thread* daemonThread_;
 public:
-  static GCServiceDaemon* GCServiceD_;
-  android::SharedProcessMutex* global_lock_;
-  void shutdownGCService(void);
+  static GCServiceDaemon* GCServiceD;
 
+//  InterProcessMutex* service_mu_;
+//  InterProcessConditionVariable* service_cond_;
 
-  GCServiceDaemon(VMProfiler*);
+  GCServiceDaemon(GCDaemonHeader* service_header);
+
+  bool isRunning(void);
+  bool isStopped(void);
+  bool isShuttingDown(void);
+  bool gcserviceMain(Thread*);
+  void shutdown(void);
+
+  static GCDaemonHeader* CreateServiceHeader(void);
   static void LaunchGCService(void* arg);
   static void* RunDaemon(void* arg);
-  static int WaitTimedService(android::SharedProcessMutex*, int64_t);
-
   static void ShutdownGCService(void);
   static bool IsGCServiceRunning(void);
   static bool IsGCServiceStopped(void);
+  static void GCPBlockForServiceReady(GCDaemonHeader* dHeader);
+  static void GCPRegisterGCService(void);
+
+  /******************** setters and getters ************************/
+  inline void _Status(GC_SERVICE_STATUS new_status) {
+    service_header_->meta_data_->status_ = new_status;
+  }
+
+  inline int _Counter() {
+    return service_header_->meta_data_->counter_;
+  }
+
+  inline int _Status() {
+    return service_header_->meta_data_->status_;
+  }
+
+  inline InterProcessMutex* _Mu() {
+    return service_header_->mu_;
+  }
+
+  inline InterProcessConditionVariable* _Cond() {
+    return service_header_->cond_;
+  }
+
+
+
+private:
+  GCDaemonHeader* service_header_;
+  Thread*   daemonThread_;
+  pthread_t pthread_;
+
+  Mutex* shutdown_mu DEFAULT_MUTEX_ACQUIRED_AFTER;
+  UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu);
+
+
+  void initShutDownSignals(void);
 };//GCServiceDaemon
+
 }//namespace mprofiler
 }//namespace art
 

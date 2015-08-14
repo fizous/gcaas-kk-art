@@ -219,15 +219,36 @@ typedef struct SharedFutexData_S {
 
   int recursive_;  // Can the lock be recursively held?
   unsigned int recursion_count_;
-}SharedFutexData;
+} SharedFutexData;
 
+
+typedef struct SharedConditionVarData_S {
+#if ART_USE_FUTEXES
+  // A counter that is modified by signals and broadcasts. This ensures that when a waiter gives up
+  // their Mutex and another thread takes it and signals, the waiting thread observes that sequence_
+  // changed and doesn't enter the wait. Modified while holding guard_, but is read by futex wait
+  // without guard_ held.
+  volatile int32_t sequence_;
+  // Number of threads that have come into to wait, not the length of the waiters on the futex as
+  // waiters may have been requeued onto guard_. Guarded by guard_.
+  volatile int32_t num_waiters_;
+#else
+  pthread_cond_t cond_;
+  pthread_condattr_t attr_;
+#endif
+} SharedConditionVarData;
+
+typedef struct SynchronizedLockHead_S {
+  SharedFutexData futex_head_;
+  SharedConditionVarData cond_var_;
+} SynchronizedLockHead;
 
 
 
 std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
 class LOCKABLE InterProcessMutex : public BaseMutex {
  public:
-  explicit InterProcessMutex(const char* name,  void* futexMem,
+  explicit InterProcessMutex(const char* name,  SharedFutexData* futexMem,
       LockLevel level = kDefaultMutexLevel, int recursive = 0);
 
   ~InterProcessMutex();
@@ -283,7 +304,7 @@ class LOCKABLE InterProcessMutex : public BaseMutex {
   void CheckSafeToWait(Thread* self);
  private:
   SharedFutexData* futexData_;
-  void InitFutexData(void*, int);
+  void InitFutexData(SharedFutexData*, int);
   DISALLOW_COPY_AND_ASSIGN(InterProcessMutex);
   friend class InterProcessConditionVariable;
 };//InterProcessMutex
@@ -438,30 +459,12 @@ class ConditionVariable {
 };
 
 
-
-typedef struct SharedConditionVarData_S {
-#if ART_USE_FUTEXES
-  // A counter that is modified by signals and broadcasts. This ensures that when a waiter gives up
-  // their Mutex and another thread takes it and signals, the waiting thread observes that sequence_
-  // changed and doesn't enter the wait. Modified while holding guard_, but is read by futex wait
-  // without guard_ held.
-  volatile int32_t sequence_;
-  // Number of threads that have come into to wait, not the length of the waiters on the futex as
-  // waiters may have been requeued onto guard_. Guarded by guard_.
-  volatile int32_t num_waiters_;
-#else
-  pthread_cond_t cond_;
-  pthread_condattr_t attr_;
-#endif
-}SharedConditionVarData;
-
-
 // ConditionVariables allow threads to queue and sleep. Threads may then be resumed individually
 // (Signal) or all at once (Broadcast).
 class InterProcessConditionVariable {
  public:
   explicit InterProcessConditionVariable(const char* name,
-      InterProcessMutex& mutex, void* sharedMem);
+      InterProcessMutex& mutex, SharedConditionVarData* sharedMem);
   ~InterProcessConditionVariable();
 
   void Broadcast(Thread* self);
@@ -482,6 +485,25 @@ class InterProcessConditionVariable {
   InterProcessMutex& guard_;
   SharedConditionVarData* sharedCondVar_;
   DISALLOW_COPY_AND_ASSIGN(InterProcessConditionVariable);
+};
+
+
+// Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it
+// upon destruction.
+class SCOPED_LOCKABLE IterProcMutexLock {
+ public:
+  explicit IterProcMutexLock(Thread* self, InterProcessMutex& mu) EXCLUSIVE_LOCK_FUNCTION(mu) : self_(self), mu_(mu) {
+    mu_.ExclusiveLock(self_);
+  }
+
+  ~IterProcMutexLock() UNLOCK_FUNCTION() {
+    mu_.ExclusiveUnlock(self_);
+  }
+
+ private:
+  Thread* const self_;
+  InterProcessMutex& mu_;
+  DISALLOW_COPY_AND_ASSIGN(IterProcMutexLock);
 };
 
 // Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it

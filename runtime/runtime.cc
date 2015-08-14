@@ -38,6 +38,7 @@
 #include "gc/heap.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
+#include "gc_profiler/GCService.h"
 #include "gc/space/space.h"
 #include "image.h"
 #include "instrumentation.h"
@@ -101,8 +102,7 @@ Runtime::Runtime()
       use_compile_time_class_path_(false),
       main_thread_group_(NULL),
       system_thread_group_(NULL),
-      system_class_loader_(NULL),
-			is_gcservice_(false) {
+      system_class_loader_(NULL) {
   for (int i = 0; i < Runtime::kLastCalleeSaveType; i++) {
     callee_save_methods_[i] = NULL;
   }
@@ -805,16 +805,25 @@ jobject CreateSystemClassLoader() {
 }
 
 
-void Runtime::GCPRunGCService(void){
+void Runtime::GCPRunGCService(void) {
 	GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
-	mprofiler::VMProfiler::GCPRunGCService();
+	mprofiler::GCServiceDaemon::LaunchGCService(gcserviceHeader_);
 	GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+}
+
+
+void Runtime::GCPCreateGCService(void) {
+  GCSERV_VLOG(INFO) << " GCPCreateGCService: before creating service header " <<
+      getpid();
+  gcserviceHeader_ = mprofiler::GCServiceDaemon::CreateServiceHeader();
+  GCSERV_VLOG(INFO) << " GCPCreateGCService: after creating service header " <<
+      getpid();
 }
 
 
 void Runtime::GCPBlockOnGCService(void){
   GCMMP_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
-  mprofiler::VMProfiler::GCPBlockOnGCService();
+  mprofiler::GCServiceDaemon::GCPBlockForServiceReady(gcserviceHeader_);
   GCMMP_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
 }
 

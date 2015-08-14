@@ -711,7 +711,6 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 			}
 		}
 		if(_found) {
-			GCP_INIT_VMPROFILER_SHARED_DATA;
 			createAppList(argOptions);
 			GCHistogramDataManager::kGCMMPCohortLog = argOptions->cohort_log_;
 			GCHistogramDataManager::GCPUpdateCohortSize();
@@ -745,50 +744,50 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 	}
 }
 
-void VMProfiler::GCPBlockOnGCService(void) {
-  VMProfiler* mP = Runtime::Current()->GetVMProfiler();
-  if(mP != NULL && mP->IsProfilingEnabled()) {
-    if(mP->gc_service_mu_ == NULL) {
-      LOG(ERROR) << "GCService: the mutex object was not initialized";
-      return;
-    }
-    Thread* self = Thread::Current();
-    GCMMP_VLOG(INFO) << "ZZZZ-0 zygote going to wait for initializations ZZZZ "
-        << self->GetTid();
-    mP->gc_service_mu_->lock();
-    GCMMP_VLOG(INFO) << "ZZZZ-1 zygote locked the global lock ZZZZ "
-        << self->GetTid();
-    while(mP->gc_service_mu_->getServiceStatus() != GCSERVICE_RUNNING) {
-      ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
-      {
-        GCMMP_VLOG(INFO) << "ZZZZ-2 zygote going to wait for initializations in side loop ZZZZ "
-            << self->GetTid();
-        int _return = GCServiceDaemon::WaitTimedService(mP->gc_service_mu_, 1000);
-        if(_return != 0) {
-          LOG(ERROR) << "ZZZZ-3 zygote had an error on timedWait: " << _return;
-        }
-        GCMMP_VLOG(INFO) << "ZZZZ-4 zygote left the wait lock ZZZZ "
-            << self->GetTid();
-      }
-    }
-    GCMMP_VLOG(INFO) << "ZZZZ-5 zygote left the loop ZZZZ "
-        << self->GetTid();
-    mP->gc_service_mu_->unlock();
-    GCMMP_VLOG(INFO) << "ZZZZ-6 zygote going to unlock the gcservice mutex ZZZZ "
-        << self->GetTid();
-  }
-}
+//void VMProfiler::GCPBlockOnGCService(void) {
+//  VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+//  if(mP != NULL && mP->IsProfilingEnabled()) {
+//    if(mP->gc_service_mu_ == NULL) {
+//      LOG(ERROR) << "GCService: the mutex object was not initialized";
+//      return;
+//    }
+//    Thread* self = Thread::Current();
+//    GCMMP_VLOG(INFO) << "ZZZZ-0 zygote going to wait for initializations ZZZZ "
+//        << self->GetTid();
+//    mP->gc_service_mu_->lock();
+//    GCMMP_VLOG(INFO) << "ZZZZ-1 zygote locked the global lock ZZZZ "
+//        << self->GetTid();
+//    while(mP->gc_service_mu_->getServiceStatus() != GCSERVICE_RUNNING) {
+//      ScopedThreadStateChange tsc(self, kWaitingInMainGCMMPCatcherLoop);
+//      {
+//        GCMMP_VLOG(INFO) << "ZZZZ-2 zygote going to wait for initializations in side loop ZZZZ "
+//            << self->GetTid();
+//        int _return = GCServiceDaemon::WaitTimedService(mP->gc_service_mu_, 1000);
+//        if(_return != 0) {
+//          LOG(ERROR) << "ZZZZ-3 zygote had an error on timedWait: " << _return;
+//        }
+//        GCMMP_VLOG(INFO) << "ZZZZ-4 zygote left the wait lock ZZZZ "
+//            << self->GetTid();
+//      }
+//    }
+//    GCMMP_VLOG(INFO) << "ZZZZ-5 zygote left the loop ZZZZ "
+//        << self->GetTid();
+//    mP->gc_service_mu_->unlock();
+//    GCMMP_VLOG(INFO) << "ZZZZ-6 zygote going to unlock the gcservice mutex ZZZZ "
+//        << self->GetTid();
+//  }
+//}
 
-void VMProfiler::GCPRunGCService(void) {
-	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
-	if(mP != NULL && mP->IsProfilingEnabled()) {
-		if(mP->gc_service_mu_ == NULL) {
-			LOG(ERROR) << "GCService: the mutex object was not initialized";
-			return;
-		}
-		GCServiceDaemon::LaunchGCService(mP);
-	}
-}
+//void VMProfiler::GCPRunGCService(void) {
+//	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+//	if(mP != NULL && mP->IsProfilingEnabled()) {
+//		if(mP->gc_service_mu_ == NULL) {
+//			LOG(ERROR) << "GCService: the mutex object was not initialized";
+//			return;
+//		}
+//		GCServiceDaemon::LaunchGCService(mP);
+//	}
+//}
 //void VMProfiler::runGCServiceDaemon(void) {
 //	Thread* self = Thread::Current();
 //	if(gc_service_mu_ == NULL) {
@@ -900,50 +899,50 @@ void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
 
 }
 
-void VMProfiler::InitSharedLocks() {
-
-	if(!Runtime::Current()->IsZygote()){
-		LOG(ERROR) << "GCService: Not zygote we will not initialize the shared pages";
-		return;
-	}
-	LOG(ERROR) << "GCService: <<<<< Zygote Initialization >>>>>>";
-
-	int fileDescript = 0;
-
-  MemMap* mu_mem_map =
-  		MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
-                                                 PROT_READ | PROT_WRITE,
-																								 &fileDescript);
-
-  if (mu_mem_map == NULL) {
-    LOG(ERROR) << "Failed to allocate pages for alloc space (" << "SharedLockingRegion" << ") of size "
-        << PrettySize(1024);
-    return;
-  }
-
-  gcservice_mem_ =
-  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
-
-
-  gc_service_mu_ =
-  		new android::SharedProcessMutex(gcservice_mem_, fileDescript,
-  				"SharedGCProfileMutex");
-
-
-
-
-  LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< "
-  		<< gc_service_mu_->getFileDescr();
-//	int fd = ashmem_create_region("SharedLockingRegion", 1024);
-//	if(fd == 0) {
-//		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
-//	  if(gc_service_mu_ != MAP_FAILED) {
-//	  	GCMMP_VLOG(INFO) << "GCService: succeeded to create hared memory";
-//	  } else {
-//	  	GCMMP_VLOG(INFO) << "GCService: Failed to create hared memory";
-//	  }
+//void VMProfiler::InitSharedLocks() {
+//
+//	if(!Runtime::Current()->IsZygote()){
+//		LOG(ERROR) << "GCService: Not zygote we will not initialize the shared pages";
+//		return;
 //	}
-}
+//	LOG(ERROR) << "GCService: <<<<< Zygote Initialization >>>>>>";
+//
+//	int fileDescript = 0;
+//
+//  MemMap* mu_mem_map =
+//  		MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
+//                                                 PROT_READ | PROT_WRITE,
+//																								 &fileDescript);
+//
+//  if (mu_mem_map == NULL) {
+//    LOG(ERROR) << "Failed to allocate pages for alloc space (" << "SharedLockingRegion" << ") of size "
+//        << PrettySize(1024);
+//    return;
+//  }
+//
+//  gcservice_mem_ =
+//  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
+//
+//
+//  gc_service_mu_ =
+//  		new android::SharedProcessMutex(gcservice_mem_, fileDescript,
+//  				"SharedGCProfileMutex");
+//
+//
+//
+//
+//  LOG(ERROR) << "GCService: file descriptor >>>>>>> Zygote Initialization <<<<<< "
+//  		<< gc_service_mu_->getFileDescr();
+////	int fd = ashmem_create_region("SharedLockingRegion", 1024);
+////	if(fd == 0) {
+////		gc_service_mu_ = reinterpret_cast<Mutex*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+////	  if(gc_service_mu_ != MAP_FAILED) {
+////	  	GCMMP_VLOG(INFO) << "GCService: succeeded to create hared memory";
+////	  } else {
+////	  	GCMMP_VLOG(INFO) << "GCService: Failed to create hared memory";
+////	  }
+////	}
+//}
 
 void VMProfiler::InitCommonData() {
 

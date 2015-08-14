@@ -76,18 +76,18 @@
 
 
 #if ART_GC_PROFILER_SERVICE
-  #define GCP_INIT_SHARED_HEAP_MUTEX																\
-    art::mprofiler::VMProfiler::GCPInitVMInstanceHeapMutex()
-  #define GCP_INIT_VMPROFILER_SHARED_DATA											      \
-	  GCMMP_VLOG(INFO) << "GCService: initializing shared lock";      \
-	  InitSharedLocks();																							\
-	  GCMMP_VLOG(INFO) << "GCService: Done initializing shared lock";
-  #define GCP_FORK_GCSERVICE												    		  			\
+  #define GCP_INIT_SHARED_HEAP_MUTEX																  \
+    GCServiceDaemon::GCPRegisterGCService()
+  #define GCP_INIT_GC_SERVICE_HEADER    											         \
+	  GCMMP_VLOG(INFO) << "GCService: initializing service header";      \
+	  GCPCreateGCService();																							   \
+	  GCMMP_VLOG(INFO) << "GCService: Done initiaqlizing service header"
+  #define GCP_FORK_GCSERVICE												    		  			    \
 	  GCPForkGCService();
 #else
   #define GCP_FORK_GCSERVICE												    				((void) 0)
   #define GCP_INIT_SHARED_HEAP_MUTEX												    ((void) 0)
-  #define GCP_INIT_VMPROFILER_SHARED_DATA												((void) 0)
+  #define GCP_INIT_GC_SERVICE_HEADER								    				((void) 0)
 #endif//ART_GC_PROFILER_SERVICE
 
 
@@ -218,10 +218,16 @@ protected:
 public:
   android::SharedProcessMutex* gc_service_mu_;
   android::SharedProcMutex* gcservice_mem_;
-  void InitSharedLocks();
-  static void GCPInitVMInstanceHeapMutex(void);
-  static void GCPRunGCService(void);
-  static void GCPBlockOnGCService(void);
+
+  InterProcessMutex* gcservice_mu_;
+  InterProcessConditionVariable* gcservice_cond_;
+
+  GCDaemonMetaData* gcservice_data_;
+
+//  void InitSharedLocks();
+//  static void GCPInitVMInstanceHeapMutex(void);
+//  static void GCPRunGCService(void);
+//  static void GCPBlockOnGCService(void);
 //  void runGCServiceDaemon(void);
 
 

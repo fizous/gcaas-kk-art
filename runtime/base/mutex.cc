@@ -298,8 +298,8 @@ void InterProcessMutex::CheckSafeToWait(Thread* self) {
   }
 }
 
-void InterProcessMutex::InitFutexData(void* futexMem, int recursive) {
-  futexData_ = reinterpret_cast<SharedFutexData*> (futexMem);
+void InterProcessMutex::InitFutexData(SharedFutexData* futexMem, int recursive) {
+  futexData_ = futexMem;
   futexData_->recursive_ = recursive;
   futexData_->recursion_count_ = 0;
 #if ART_USE_FUTEXES
@@ -320,7 +320,7 @@ void InterProcessMutex::InitFutexData(void* futexMem, int recursive) {
 #endif
 }
 
-InterProcessMutex::InterProcessMutex(const char* name, void* futexMem,
+InterProcessMutex::InterProcessMutex(const char* name, SharedFutexData* futexMem,
     LockLevel level, int recursive) : BaseMutex(name, level) {
   InitFutexData(futexMem, recursive);
 }
@@ -1049,9 +1049,9 @@ std::ostream& operator<<(std::ostream& os, const ReaderWriterMutex& mu) {
 }
 
 InterProcessConditionVariable::InterProcessConditionVariable(const char* name,
-    InterProcessMutex& guard, void* sharedMem)
+    InterProcessMutex& guard, SharedConditionVarData* sharedMem)
     : name_(name), guard_(guard) {
-  sharedCondVar_ = reinterpret_cast<SharedConditionVarData*> (sharedMem);
+  sharedCondVar_ = sharedMem;
 #if ART_USE_FUTEXES
   sharedCondVar_->sequence_ = 0;
   sharedCondVar_->num_waiters_ = 0;

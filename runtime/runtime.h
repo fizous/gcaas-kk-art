@@ -404,6 +404,8 @@ class Runtime {
   pid_t GCPForkGCService(void);
   void GCPRunGCService(void);
   void GCPBlockOnGCService(void);
+  void GCPCreateGCService(void);
+
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;
   }
@@ -532,7 +534,7 @@ class Runtime {
   jobject system_class_loader_;
 public:
   mprofiler::VMProfiler* vmprofiler_;
-  bool is_gcservice_;
+  mprofiler::GCDaemonHeader* gcserviceHeader_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };

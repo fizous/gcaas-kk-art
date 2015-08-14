@@ -408,6 +408,9 @@ pid_t Runtime::GCPForkGCService(void) {
   //for the GCService
   Runtime* runtime = Runtime::Current();
   runtime->heap_->PreZygoteFork();
+
+  GCP_INIT_GC_SERVICE_HEADER;
+
   SetSigChldHandler();
 
   // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
@@ -484,7 +487,6 @@ pid_t Runtime::GCPForkGCService(void) {
 		GCMMP_VLOG(INFO) << "GCService: gcservice is being forked: " << getpid();
 //		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
-		runtime->is_gcservice_ = true;
 		runtime->DidForkFromZygote();
 
 		GCPRunGCService();
