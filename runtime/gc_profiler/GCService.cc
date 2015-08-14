@@ -63,6 +63,7 @@ void GCServiceDaemon::GCPRegisterGCService(void) {
   GCDaemonHeader* _header = Runtime::Current()->gcserviceHeader_;
   if(_header == NULL) {
     LOG(ERROR) << " ############### Service Header was NULL While Registering #############" << self->GetTid();
+    return;
   }
   GCSERV_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
