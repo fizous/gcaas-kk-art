@@ -86,7 +86,7 @@
 	  GCPForkGCService();
 #else
   #define GCP_FORK_GCSERVICE												    				((void) 0)
-  #define GCP_REGISTER_PROC_FOR_GCSERVICE									  ((void) 0)
+  #define GCP_REGISTER_PROC_FOR_GCSERVICE									      ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER								    				((void) 0)
 #endif//ART_GC_PROFILER_SERVICE
 
