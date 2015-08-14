@@ -107,7 +107,7 @@ private:
   pthread_t pthread_;
 
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
-  UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu);
+  UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
 
 
   void initShutDownSignals(void);
