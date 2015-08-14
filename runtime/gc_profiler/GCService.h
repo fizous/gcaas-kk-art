@@ -40,17 +40,6 @@ typedef enum {
 } GC_SERVICE_STATUS;
 
 
-typedef struct SharedProcMutex_S {
-  volatile int status_;
-  volatile int file_descr_;
-  volatile int instanceCounter_;
-  pthread_cond_t condition_;
-  pthread_mutex_t mutex_;
-  pthread_mutexattr_t mutexAttr_;
-  pthread_condattr_t condAttr_;
-
-} SharedProcMutex;
-
 
 typedef struct GCDaemonMetaData_S {
   SynchronizedLockHead lock_header_;
