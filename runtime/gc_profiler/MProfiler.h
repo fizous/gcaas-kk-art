@@ -76,7 +76,7 @@
 
 
 #if ART_GC_PROFILER_SERVICE
-  #define GCP_REGISTER_PROCESS_FOR_GCSERVICE																  \
+  #define GCP_REGISTER_PROC_FOR_GCSERVICE																  \
     GCPRegisterGCService()
   #define GCP_INIT_GC_SERVICE_HEADER    											         \
 	  GCMMP_VLOG(INFO) << "GCService: initializing service header";      \
@@ -86,7 +86,7 @@
 	  GCPForkGCService();
 #else
   #define GCP_FORK_GCSERVICE												    				((void) 0)
-  #define GCP_REGISTER_PROCESS_FOR_GCSERVICE									  ((void) 0)
+  #define GCP_REGISTER_PROC_FOR_GCSERVICE									  ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER								    				((void) 0)
 #endif//ART_GC_PROFILER_SERVICE
 
