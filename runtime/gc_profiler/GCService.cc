@@ -140,7 +140,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
-    IterProcMutexLock interProcMu(self, *_Mu());
+    IterProcMutexLock interProcMu(self, *_gcServiceInst->_Mu());
     _gcServiceInst->daemonThread_ = self;
     _gcServiceInst->_Status(GCSERVICE_STATUS_RUNNING);
     _gcServiceInst->_Cond()->Broadcast(self);
@@ -225,17 +225,17 @@ GCDaemonHeader* GCServiceDaemon::CreateServiceHeader(void) {
 
   GCDaemonHeader* _header_address =
       reinterpret_cast<GCDaemonHeader*>(mu_mem_map->Begin());
-  memset((void*) _header_address, 0, sizeof(GCDaemonMetaData));
+  memset((void*) _header_address, 0, sizeof(GCDaemonHeader));
 
   GCDaemonMetaData* _meta_data =
-      reinterpret_cast<GCDaemonHeader*>(mu_mem_map->Begin() + sizeof(GCDaemonHeader));
+      reinterpret_cast<GCDaemonMetaData*>(mu_mem_map->Begin() + sizeof(GCDaemonHeader));
 
   memset((void*) _meta_data, 0, sizeof(GCDaemonMetaData));
 
   _header_address->meta_data_ = _meta_data;
   SharedFutexData* _futexAddress =
       &_header_address->meta_data_->lock_header_.futex_head_;
-  SharedFutexData* _condAddress =
+  SharedConditionVarData* _condAddress =
       &_header_address->meta_data_->lock_header_.cond_var_;
 
   _header_address->mu_ =
