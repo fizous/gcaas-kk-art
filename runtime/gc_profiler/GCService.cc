@@ -94,7 +94,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   }
 
   GCSERV_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
-  MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu);
+  MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
     GCSERV_VLOG(INFO) << "XXXXXXXXXX-1 process is waiting to stop XXXXXXXXX";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
@@ -157,7 +157,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   GCSERV_VLOG(INFO) << "GCServiceD left the main loop: " << self->GetTid();
   if(_gcServiceInst->isShuttingDown()) {
     GCSERV_VLOG(INFO) << "GCServiceD: shuttingDown is true: " << self->GetTid();
-    MutexLock mu(self, *_gcServiceInst->shutdown_mu);
+    MutexLock mu(self, *_gcServiceInst->shutdown_mu_);
     _gcServiceInst->_Status(GCSERVICE_STATUS_STOPPED);
     _gcServiceInst->shutdown_cond_->Broadcast(self);
     GCSERV_VLOG(INFO) << "GCServiceD: updated status to stopped: " << self->GetTid();
