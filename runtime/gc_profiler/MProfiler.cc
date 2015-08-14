@@ -680,8 +680,6 @@ void VMProfiler::createAppList(GCMMP_Options* argOptions) {
 
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 						index_(argOptions->mprofile_type_),
-						gc_service_mu_(NULL),
-						gcservice_mem_(NULL),
 						enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != VMProfiler::kGCMMPDisableMProfile)),
 						gcDaemonAffinity_(argOptions->mprofile_gc_affinity_),
 						prof_thread_(NULL),
@@ -840,64 +838,64 @@ void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 //			", instance counter = " << gc_service_mu_->getInstanceCounter();
 //}
 
-void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
-	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
-	if(mP != NULL && mP->IsProfilingEnabled()) {
-		if(mP->gc_service_mu_ == NULL) {
-			LOG(ERROR) << "GCService: the mutex object was not initialized";
-			return;
-		}
-		if(mP->gc_service_mu_->isGCServiceProcess()) {
-			GCMMP_VLOG(INFO) << " GCService: Skipps its own initialization";
-			return;
-		}
-		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
-		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = "
-				<< mP->gc_service_mu_->getFileDescr();
-
-		int resultLock = mP->gc_service_mu_->lock();
-		if(resultLock == 0) {
-			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
-			LOG(ERROR) << "GCService: current instance Counter = " <<
-							mP->gc_service_mu_->incrementInstanceCounter();
-			mP->gc_service_mu_->broadcastCond();
-			resultLock = mP->gc_service_mu_->unlock();
-			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
-		} else {
-			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
-		}
-
-//		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
-//				MAP_SHARED, mP->gc_service_mu_->getFileDescr());
-//
-//		if(mu_mem_map == NULL) {
-//			LOG(ERROR) << "GCService: Error  opening file descriptor" ;
+//void VMProfiler::GCPInitVMInstanceHeapMutex(void) {
+//	VMProfiler* mP = Runtime::Current()->GetVMProfiler();
+//	if(mP != NULL && mP->IsProfilingEnabled()) {
+//		if(mP->gc_service_mu_ == NULL) {
+//			LOG(ERROR) << "GCService: the mutex object was not initialized";
 //			return;
 //		}
-//		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
-//		mP->gcservice_mem_ =
-//	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
-//		LOG(ERROR) << "GCService: current instance Counter = " <<
-//				++mP->gcservice_mem_->instanceCounter_;
-
-//	  mP->gcservice_mem_
-//		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
-
-		//int resultLock = mP->gc_service_mu_->trylock();
+//		if(mP->gc_service_mu_->isGCServiceProcess()) {
+//			GCMMP_VLOG(INFO) << " GCService: Skipps its own initialization";
+//			return;
+//		}
+//		LOG(ERROR) << "GCService: HAVE_PTHREADS: " << mP->gc_service_mu_->HasPTHREADS();
+//		LOG(ERROR) << "GCService: the mutex object was initialized; file descriptor = "
+//				<< mP->gc_service_mu_->getFileDescr();
+//
+//		int resultLock = mP->gc_service_mu_->lock();
 //		if(resultLock == 0) {
 //			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
 //			LOG(ERROR) << "GCService: current instance Counter = " <<
-//					mP->gc_service_mu_->incrementInstanceCounter();
+//							mP->gc_service_mu_->incrementInstanceCounter();
+//			mP->gc_service_mu_->broadcastCond();
 //			resultLock = mP->gc_service_mu_->unlock();
 //			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
 //		} else {
 //			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
 //		}
-	} else {
-		LOG(ERROR) << "GCService: MProfiler is NULL";
-	}
-
-}
+//
+////		MemMap* mu_mem_map = MemMap::MapSharedProcessFile(NULL, PROT_READ | PROT_WRITE,
+////				MAP_SHARED, mP->gc_service_mu_->getFileDescr());
+////
+////		if(mu_mem_map == NULL) {
+////			LOG(ERROR) << "GCService: Error  opening file descriptor" ;
+////			return;
+////		}
+////		LOG(ERROR) << "GCService: succeeded openning file descriptor" ;
+////		mP->gcservice_mem_ =
+////	  		reinterpret_cast<android::SharedProcMutex*>(mu_mem_map->Begin());
+////		LOG(ERROR) << "GCService: current instance Counter = " <<
+////				++mP->gcservice_mem_->instanceCounter_;
+//
+////	  mP->gcservice_mem_
+////		mP->gc_service_mu_->setSharedMemory(_mutexStructAddress);
+//
+//		//int resultLock = mP->gc_service_mu_->trylock();
+////		if(resultLock == 0) {
+////			LOG(ERROR) << "GCService: we locked the global heap mutex: " << resultLock;
+////			LOG(ERROR) << "GCService: current instance Counter = " <<
+////					mP->gc_service_mu_->incrementInstanceCounter();
+////			resultLock = mP->gc_service_mu_->unlock();
+////			LOG(ERROR) << "GCService: we unlocked the global heap mutex: " << resultLock;
+////		} else {
+////			LOG(ERROR) << "GCService: we could not lock the global heap mutex:" << resultLock;
+////		}
+//	} else {
+//		LOG(ERROR) << "GCService: MProfiler is NULL";
+//	}
+//
+//}
 
 //void VMProfiler::InitSharedLocks() {
 //
