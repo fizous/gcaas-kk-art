@@ -610,7 +610,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		EnableDebugFeatures(debug_flags);
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
-		GCP_INIT_SHARED_HEAP_MUTEX;
+		GCP_REGISTER_PROC_FOR_GCSERVICE;
 	} else if (pid > 0) {
 		// the parent process
 	}
