@@ -6,6 +6,7 @@
  */
 #include "os.h"
 #include "globals.h"
+#include "base/mutex.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"

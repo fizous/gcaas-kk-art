@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 
-
+#include "base/mutex.h"
 #include "gc/accounting/space_bitmap.h"
 
 namespace art {
