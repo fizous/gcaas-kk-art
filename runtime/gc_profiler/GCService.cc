@@ -25,8 +25,8 @@ namespace mprofiler {
 
 GCServiceDaemon* GCServiceDaemon::GCServiceD = NULL;
 
-GCServiceDaemon::GCServiceDaemon(GCDaemonHeader* service_header) :
-    service_header_(service_header),
+GCServiceDaemon::GCServiceDaemon(GCDaemonMetaData* service_meta_data) :
+    service_meta_data_(service_meta_data),
     daemonThread_(NULL) {
   initShutDownSignals();
 }
@@ -58,34 +58,59 @@ bool GCServiceDaemon::IsGCServiceRunning(void) {
   return _service->isRunning();
 }
 
-void GCServiceDaemon::GCPRegisterGCService(void) {
+
+
+void GCServiceDaemon::GCPRegisterWithGCService(void) {
   Thread* self = Thread::Current();
-  GCDaemonHeader* _header = Runtime::Current()->gcserviceHeader_;
-  if(_header == NULL) {
+  GCDaemonMetaData* _meta_data = Runtime::Current()->gcserviceAllocator_->GetGCServiceMeta();
+  if(_meta_data == NULL) {
     LOG(ERROR) << " ############### Service Header was NULL While Registering #############" << self->GetTid();
     return;
   }
   GCSERV_VLOG(INFO) << self->GetTid() <<
-      "-----0 register to GCService -------";
-  IterProcMutexLock interProcMu(self, *_header->mu_);
-  _header->meta_data_->counter_++;
-  GCSERV_VLOG(INFO) << self->GetTid() <<
-      "-----1 service counter ------- " << _header->meta_data_->counter_;
-  _header->cond_->Broadcast(self);
+      "-----0 locking gcservice to register -------";
+  IterProcMutexLock interProcMu(self, *_meta_data->mu_);
+
+  GCServiceDaemon::GCServiceD->registerProcesss();
+
+  _meta_data->cond_->Broadcast(self);
   GCSERV_VLOG(INFO) << self->GetTid() <<
       "-----3 leaving registration -------";
+}
+
+
+void GCServiceDaemon::registerProcesss(void) {
+  Thread* self = Thread::Current();
+  GCSERV_VLOG(INFO) << self->GetTid() <<
+      "-----0 register to GCService -------";
+  service_meta_data_->counter_++;
+  initSharedHeapHeader(*heapHeaderHolder);
+  GCSERV_VLOG(INFO) << self->GetTid() <<
+      "-----1 service counter ------- " << service_meta_data_->counter_;
+}
+
+
+void GCServiceDaemon::initSharedHeapHeader(void) {
+  Thread* self = Thread::Current();
+
+  Runtime::Current()->shared_heap_ =
+      gc::SharedHeap::CreateSharedHeap(Runtime::Current()->gcserviceAllocator_);
+
+  GCSERV_VLOG(INFO) << self->GetTid() <<
+      "-----Done with initSharedHeapHeader ------- " <<
+      service_meta_data_->counter_;
 }
 
 void GCServiceDaemon::LaunchGCService(void* arg) {
   GCSERV_VLOG(ERROR) << " ---------- ART_USE_FUTEX = " <<
       BaseMutex::IsARTUseFutex() << " -------------------";
 
-  GCDaemonHeader* _serviceHeader = reinterpret_cast<GCDaemonHeader*>(arg);
+  GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
   Thread* self = Thread::Current();
   {
-    IterProcMutexLock interProcMu(self, *_serviceHeader->mu_);
+    IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
 
-    GCServiceDaemon::GCServiceD = new GCServiceDaemon(_serviceHeader);
+    GCServiceDaemon::GCServiceD = new GCServiceDaemon(_serviceMeta);
 
     CHECK_PTHREAD_CALL(pthread_create,
         (&GCServiceDaemon::GCServiceD->pthread_, NULL,
@@ -191,65 +216,78 @@ void GCServiceDaemon::ShutdownGCService(void) {
 }
 
 
-void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonHeader* dHeader) {
+void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
   Thread* self = Thread::Current();
   GCSERV_VLOG(INFO) << self->GetTid() << " :locking to wait for service to start";
-  IterProcMutexLock interProcMu(self, *dHeader->mu_);
-  while(dHeader->meta_data_->status_ != GCSERVICE_STATUS_RUNNING) {
+  IterProcMutexLock interProcMu(self, *dmeta->mu_);
+  while(dmeta->status_ != GCSERVICE_STATUS_RUNNING) {
     GCSERV_VLOG(INFO) << self->GetTid() << " : going to wait for service to start";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
-      dHeader->cond_->Wait(self);
+      dmeta->cond_->Wait(self);
     }
   }
-  dHeader->cond_->Broadcast(self);
+  dmeta->cond_->Broadcast(self);
 
   GCSERV_VLOG(INFO) << self->GetTid() << " : done with blocking until service completion";
 }
 
+//
+//GCDaemonHeader* GCServiceDaemon::CreateServiceHeader(void) {
+//  int fileDescript = 0;
+//
+//  MemMap* mu_mem_map =
+//      MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
+//                                                 PROT_READ | PROT_WRITE,
+//                                                 &fileDescript);
+//  if (mu_mem_map == NULL) {
+//    LOG(ERROR) << "Failed to allocate pages for alloc space (" <<
+//        "SharedLockingRegion" << ") of size "
+//        << PrettySize(1024);
+//    return NULL;
+//  }
+//
+//  Thread* self = Thread::Current();
+//
+//  GCDaemonHeader* _header_address =
+//      reinterpret_cast<GCDaemonHeader*>(mu_mem_map->Begin());
+//  memset((void*) _header_address, 0, sizeof(GCDaemonHeader));
+//
+//  GCDaemonMetaData* _meta_data =
+//      reinterpret_cast<GCDaemonMetaData*>(mu_mem_map->Begin() + sizeof(GCDaemonHeader));
+//
+//  memset((void*) _meta_data, 0, sizeof(GCDaemonMetaData));
+//
+//  _header_address->meta_data_ = _meta_data;
+//  SharedFutexData* _futexAddress =
+//      &_header_address->meta_data_->lock_header_.futex_head_;
+//  SharedConditionVarData* _condAddress =
+//      &_header_address->meta_data_->lock_header_.cond_var_;
+//
+//  _header_address->mu_ =
+//      new InterProcessMutex("GCServiceD Mutex", _futexAddress);
+//  _header_address->cond_ =
+//      new InterProcessConditionVariable("GCServiceD CondVar",
+//          *_header_address->mu_, _condAddress);
+//  GCSERV_VLOG(INFO) << self->GetTid() <<
+//      " :created the GCDaemonHeader, file descriptor = " << fileDescript;
+//  return _header_address;
+//}
 
-GCDaemonHeader* GCServiceDaemon::CreateServiceHeader(void) {
-  int fileDescript = 0;
-
-  MemMap* mu_mem_map =
-      MemMap::MapSharedMemoryAnonymous("SharedLockRegion", NULL, 1024,
-                                                 PROT_READ | PROT_WRITE,
-                                                 &fileDescript);
-  if (mu_mem_map == NULL) {
-    LOG(ERROR) << "Failed to allocate pages for alloc space (" <<
-        "SharedLockingRegion" << ") of size "
-        << PrettySize(1024);
-    return NULL;
-  }
-
+void GCServiceDaemon::InitServiceMetaData(GCDaemonMetaData* metaData) {
   Thread* self = Thread::Current();
-
-  GCDaemonHeader* _header_address =
-      reinterpret_cast<GCDaemonHeader*>(mu_mem_map->Begin());
-  memset((void*) _header_address, 0, sizeof(GCDaemonHeader));
-
-  GCDaemonMetaData* _meta_data =
-      reinterpret_cast<GCDaemonMetaData*>(mu_mem_map->Begin() + sizeof(GCDaemonHeader));
-
-  memset((void*) _meta_data, 0, sizeof(GCDaemonMetaData));
-
-  _header_address->meta_data_ = _meta_data;
-  SharedFutexData* _futexAddress =
-      &_header_address->meta_data_->lock_header_.futex_head_;
-  SharedConditionVarData* _condAddress =
-      &_header_address->meta_data_->lock_header_.cond_var_;
-
-  _header_address->mu_ =
-      new InterProcessMutex("GCServiceD Mutex", _futexAddress);
-  _header_address->cond_ =
-      new InterProcessConditionVariable("GCServiceD CondVar",
-          *_header_address->mu_, _condAddress);
   GCSERV_VLOG(INFO) << self->GetTid() <<
-      " :created the GCDaemonHeader, file descriptor = " << fileDescript;
-  return _header_address;
+      " Start Initializing GCDaemonMetaData ";
+  metaData->status_ = GCSERVICE_STATUS_NONE;
+  metaData->counter_ = 0;
+  SharedFutexData* _futexAddress = &metaData->lock_header_.futex_head_;
+  SharedConditionVarData* _condAddress = &metaData->lock_header_.cond_var_;
+  metaData->mu_ = new InterProcessMutex("GCServiceD Mutex", _futexAddress);
+  metaData->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
+      *metaData->mu_, _condAddress);
+  GCSERV_VLOG(INFO) << self->GetTid() <<
+      " Done Initializing GCDaemonMetaData ";
 }
-
-
 
 /******************** private methods *************************/
 void GCServiceDaemon::initShutDownSignals(void) {

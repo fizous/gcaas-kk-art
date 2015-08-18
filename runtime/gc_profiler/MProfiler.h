@@ -77,7 +77,7 @@
 
 #if ART_GC_PROFILER_SERVICE
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)											\
-    runtime->GCPRegisterGCService()
+    runtime->GCPRegisterWithGCService()
   #define GCP_INIT_GC_SERVICE_HEADER    											         \
 	  GCMMP_VLOG(INFO) << "GCService: initializing service header";      \
 	  GCPCreateGCService();																							   \

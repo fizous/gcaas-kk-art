@@ -49,6 +49,9 @@ LIBART_COMMON_SRC_FILES := \
 	gc/accounting/heap_bitmap.cc \
 	gc/accounting/mod_union_table.cc \
 	gc/accounting/space_bitmap.cc \
+	gc/gcservice_allocator/service_allocator.cc \
+	gc/gcservice_allocator/shared_heap.cc \
+	gc/gcservice_allocator/shared_space_bitmap.cc \
 	gc/collector/garbage_collector.cc \
 	gc/collector/mark_sweep.cc \
 	gc/collector/partial_mark_sweep.cc \

@@ -807,16 +807,16 @@ jobject CreateSystemClassLoader() {
 
 void Runtime::GCPRunGCService(void) {
 	GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
-	mprofiler::GCServiceDaemon::LaunchGCService(gcserviceHeader_);
+	mprofiler::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
 	GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
 }
 
 
 void Runtime::GCPCreateGCService(void) {
-  GCSERV_VLOG(INFO) << " GCPCreateGCService: before creating service header " <<
+  GCSERV_VLOG(INFO) << " CreateServiceAllocator: before creating service header " <<
       getpid();
-  gcserviceHeader_ = mprofiler::GCServiceDaemon::CreateServiceHeader();
-  GCSERV_VLOG(INFO) << " GCPCreateGCService: after creating service header " <<
+  gcserviceAllocator_ = gc::ServiceAllocator::CreateServiceAllocator();
+  GCSERV_VLOG(INFO) << " CreateServiceAllocator: after creating service header " <<
       getpid();
 }
 
@@ -824,7 +824,7 @@ void Runtime::GCPCreateGCService(void) {
 void Runtime::GCPRegisterGCService(void) {
   GCSERV_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
       getpid();
-  mprofiler::GCServiceDaemon::GCPRegisterGCService();
+  mprofiler::GCServiceDaemon::GCPRegisterWithGCService();
   GCSERV_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
       getpid();
 }

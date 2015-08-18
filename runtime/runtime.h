@@ -536,7 +536,8 @@ class Runtime {
   jobject system_class_loader_;
 public:
   mprofiler::VMProfiler* vmprofiler_;
-  mprofiler::GCDaemonHeader* gcserviceHeader_;
+  gc::ServiceAllocator* gcserviceAllocator_;
+  gc::SharedHeap* shared_heap_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };

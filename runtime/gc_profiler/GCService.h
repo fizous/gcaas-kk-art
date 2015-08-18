@@ -44,14 +44,16 @@ typedef struct GCDaemonMetaData_S {
   SynchronizedLockHead lock_header_;
   volatile int counter_;
   volatile int status_;
+  InterProcessMutex* mu_;
+  InterProcessConditionVariable* cond_;
 } GCDaemonMetaData;
 
 
-typedef struct GCDaemonHeader_S {
-  GCDaemonMetaData* meta_data_;
-  InterProcessMutex* mu_;
-  InterProcessConditionVariable* cond_;
-} GCDaemonHeader;
+//typedef struct GCDaemonHeader_S {
+//  GCDaemonMetaData* meta_data_;
+//  InterProcessMutex* mu_;
+//  InterProcessConditionVariable* cond_;
+//} GCDaemonHeader;
 
 class GCServiceDaemon {
 public:
@@ -60,7 +62,7 @@ public:
 //  InterProcessMutex* service_mu_;
 //  InterProcessConditionVariable* service_cond_;
 
-  GCServiceDaemon(GCDaemonHeader* service_header);
+  GCServiceDaemon(GCDaemonMetaData* service_header);
 
   bool isRunning(void);
   bool isStopped(void);
@@ -68,38 +70,44 @@ public:
   bool gcserviceMain(Thread*);
   void shutdown(void);
 
-  static GCDaemonHeader* CreateServiceHeader(void);
+//  static GCDaemonHeader* CreateServiceHeader(void);
+  static void InitServiceMetaData(GCDaemonMetaData*);
   static void LaunchGCService(void* arg);
   static void* RunDaemon(void* arg);
   static void ShutdownGCService(void);
   static bool IsGCServiceRunning(void);
   static bool IsGCServiceStopped(void);
-  static void GCPBlockForServiceReady(GCDaemonHeader* dHeader);
-  static void GCPRegisterGCService(void);
-
+  static void GCPBlockForServiceReady(GCDaemonMetaData* dMeta);
+  static void GCPRegisterWithGCService(void);
   /******************** setters and getters ************************/
   inline void _Status(GC_SERVICE_STATUS new_status) {
-    service_header_->meta_data_->status_ = new_status;
+    service_meta_data_->status_ = new_status;
   }
 
   inline int _Counter() {
-    return service_header_->meta_data_->counter_;
+    return service_meta_data_->counter_;
   }
 
   inline int _Status() {
-    return service_header_->meta_data_->status_;
+    return service_meta_data_->status_;
   }
 
   inline InterProcessMutex* _Mu() {
-    return service_header_->mu_;
+    return service_meta_data_->mu_;
   }
 
   inline InterProcessConditionVariable* _Cond() {
-    return service_header_->cond_;
+    return service_meta_data_->cond_;
   }
 
+
+  /* it assumes that the lock on the service is acquired */
+  void registerProcesss(void);
+  void initSharedHeapHeader(void);
+
+
 private:
-  GCDaemonHeader* service_header_;
+  GCDaemonMetaData* service_meta_data_;
   Thread*   daemonThread_;
   pthread_t pthread_;
 
