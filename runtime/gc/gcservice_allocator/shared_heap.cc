@@ -30,7 +30,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
 }
 
 
-SharedHeap* CreateSharedHeap(ServiceAllocator* service_alloc) {
+SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
   SharedHeapMetada *_heapHeaderHolder =
       service_alloc->AllocateHeapMeta();
   memset((void*)_heapHeaderHolder, 0, sizeof(gc::SharedHeapMetada));

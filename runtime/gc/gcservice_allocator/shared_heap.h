@@ -26,7 +26,6 @@ public:
 
 private:
   SharedHeapMetada* shared_metadata_;
-
   SharedHeap(int _pid, SharedHeapMetada* metadata);
 
 };//SharedHeap
