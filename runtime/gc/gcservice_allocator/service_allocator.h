@@ -8,7 +8,8 @@
 #ifndef ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SERVICE_ALLOCATOR_H_
 #define ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SERVICE_ALLOCATOR_H_
 
-
+#include "os.h"
+#include "globals.h"
 #include "gc/gcservice_allocator/service_allocator.h"
 #include "gc/gcservice_allocator/shared_space_bitmap.h"
 

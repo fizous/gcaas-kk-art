@@ -11,6 +11,10 @@
 #include "globals.h"
 #include <stdint.h>
 
+
+
+#include "gc/accounting/space_bitmap.h"
+
 namespace art {
 
 namespace gc {
