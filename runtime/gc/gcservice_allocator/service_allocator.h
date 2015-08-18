@@ -12,6 +12,7 @@
 #include "globals.h"
 #include "base/mutex.h"
 #include "gc_profiler/MProfiler.h"
+#include "gc_profiler/GCService.h"
 #include "gc/gcservice_allocator/service_allocator.h"
 #include "gc/gcservice_allocator/shared_space_bitmap.h"
 
@@ -24,7 +25,7 @@ typedef struct SharedRegionMeta_S {
   byte* begin_;
   size_t size_;
   byte* end_;
-  size_t current_addr_;
+  byte* current_addr_;
   int fd_;
 } SharedRegionMeta;
 
