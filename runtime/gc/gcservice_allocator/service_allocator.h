@@ -11,6 +11,7 @@
 #include "os.h"
 #include "globals.h"
 #include "base/mutex.h"
+#include "gc_profiler/MProfiler.h"
 #include "gc/gcservice_allocator/service_allocator.h"
 #include "gc/gcservice_allocator/shared_space_bitmap.h"
 
