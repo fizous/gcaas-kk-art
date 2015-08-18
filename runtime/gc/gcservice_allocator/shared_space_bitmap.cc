@@ -5,8 +5,12 @@
  *      Author: hussein
  */
 
-#include "gc/gcservice_allocator/shared_space_bitmap.h"
 #include "utils.h"
+
+
+
+#include "gc/accounting/space_bitmap.h"
+#include "gc/gcservice_allocator/shared_space_bitmap.h"
 
 namespace art {
 
@@ -14,10 +18,13 @@ namespace gc {
 namespace accounting {
 
 
-SharedSpaceBitmap* SharedSpaceBitmap::CreateFromLocalSpaceBitmap(SpaceBitmap* localBitmap) {
-  SharedSpaceBitmapMeta* _meta =
-      (SharedSpaceBitmapMeta*) calloc(1, sizeof(SharedSpaceBitmapMeta));
 
+
+SharedSpaceBitmap* SharedSpaceBitmap::CreateFromLocalSpaceBitmap(SpaceBitmap* localBitmap) {
+
+
+  Runtime* runtime = Runtime::Current();
+  SharedSpaceBitmapMeta* _meta = runtime->shared_heap_->getSharedSpaceBitmap();
 
   SharedSpaceBitmap* _sharedBitmMap =
       new SharedSpaceBitmap(_meta, localBitmap->Begin(),

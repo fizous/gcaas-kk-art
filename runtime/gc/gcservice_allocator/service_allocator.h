@@ -20,10 +20,10 @@ typedef struct SharedRegionMeta_S {
   // This bitmap itself, word sized for efficiency in scanning.
   byte* begin_;
   size_t size_;
-  size_t end_;
+  byte* end_;
   size_t current_addr_;
   int fd_;
-}SharedRegionMeta;
+} SharedRegionMeta;
 
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;

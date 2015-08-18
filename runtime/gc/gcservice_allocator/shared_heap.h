@@ -19,9 +19,12 @@ public:
 
   static SharedHeap* CreateSharedHeap(ServiceAllocator* service_alloc);
 
+  accounting::SharedSpaceBitmapMeta* getSharedSpaceBitmap(void);
+
 private:
   SharedHeapMetada* shared_metadata_;
-  SharedHeap(int _pid, ServiceAllocator* service_alloc);
+
+  SharedHeap(int _pid, SharedHeapMetada* metadata);
 
 };//SharedHeap
 
