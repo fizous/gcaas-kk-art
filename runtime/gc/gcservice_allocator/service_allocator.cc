@@ -27,7 +27,7 @@ ServiceAllocator::ServiceAllocator(int pages) :
   size_t memory_size = pages * kPageSize;
   MemMap* mu_mem_map =
         MemMap::MapSharedMemoryAnonymous("ServiceAllocator", NULL,
-            memory_size_  , PROT_READ | PROT_WRITE, &fileDescript);
+            memory_size  , PROT_READ | PROT_WRITE, &fileDescript);
 
 
   if (mu_mem_map == NULL) {
