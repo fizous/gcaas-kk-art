@@ -5,8 +5,7 @@
  *      Author: hussein
  */
 
-#include "shared_space_bitmap.h"
-#include "shared_bitmap.h"
+#include "gc/gcservice_allocator/shared_space_bitmap.h"
 #include "utils.h"
 
 namespace art {

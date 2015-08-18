@@ -10,7 +10,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "locks.h"
-#include "gcservice_allocator/service_allocator.h"
+#include "gc/gcservice_allocator/service_allocator.h"
 #include "gc_profiler/GCService.h"
 #include "gc_profiler/MProfiler.h"
 

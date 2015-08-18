@@ -8,7 +8,7 @@
 
 
 
-#include "gcservice_allocator/shared_heap.h"
+#include "gc/gcservice_allocator/shared_heap.h"
 
 
 
