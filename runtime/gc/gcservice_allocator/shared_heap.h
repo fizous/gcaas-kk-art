@@ -8,7 +8,7 @@
 #ifndef ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SHARED_HEAP_H_
 #define ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SHARED_HEAP_H_
 
-#include "gcservice_allocator/service_allocator.h"
+#include "gc/gcservice_allocator/service_allocator.h"
 
 
 namespace art {
