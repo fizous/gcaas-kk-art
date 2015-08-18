@@ -9,8 +9,8 @@
 #define ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SERVICE_ALLOCATOR_H_
 
 
-#include "gcservice_allocator/service_allocator.h"
-#include "gcservice_allocator/shared_space_bitmap.h"
+#include "gc/gcservice_allocator/service_allocator.h"
+#include "gc/gcservice_allocator/shared_space_bitmap.h"
 
 namespace art {
 namespace gc {
