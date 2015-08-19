@@ -40,7 +40,7 @@ SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
 }
 
 
-accounting::SharedSpaceBitmapMeta* SharedHeap::getSharedSpaceBitmap(void) {
+SharedSpaceBitmapMeta* SharedHeap::getSharedSpaceBitmap(void) {
   return &shared_metadata_->bitmap_meta_;
 }
 
