@@ -35,14 +35,14 @@ SharedSpaceBitmap* SharedSpaceBitmap::CreateFromLocalSpaceBitmap(SpaceBitmap* lo
   return _sharedBitmMap;
 }
 
-SharedSpaceBitmap::SharedSpaceBitmap(SharedSpaceBitmapMeta* meta,
+SharedSpaceBitmap::SharedSpaceBitmap(SharedRegionMeta* meta,
                     word* bitmap_begin,
                     byte* heap_begin,
                     size_t bitmap_size) {
   bitmap_meta_ = meta;
-  bitmap_meta_->bitmap_begin_ = bitmap_begin;
+  bitmap_meta_->meta_.begin_ = reinterpret_cast<byte*>(bitmap_begin);
   bitmap_meta_->heap_begin_ = heap_begin;
-  bitmap_meta_->bitmap_size_ = bitmap_size;
+  bitmap_meta_->meta_.size_ = bitmap_size;
 
 }
 

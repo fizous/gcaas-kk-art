@@ -21,12 +21,7 @@ namespace gc {
 namespace accounting {
 
 typedef struct SharedSpaceBitmapMeta_S {
-  // This bitmap itself, word sized for efficiency in scanning.
-  word* const bitmap_begin_;
-
-  // Size of this bitmap.
-  size_t bitmap_size_;
-
+  SharedRegionMeta meta_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   const uintptr_t heap_begin_;
@@ -48,18 +43,18 @@ public:
 
   // Starting address of our internal storage.
   word* Begin() {
-    return bitmap_meta_->bitmap_begin_;
+    return bitmap_meta_->meta_.begin_;
   }
 
   // Size of our internal storage
   size_t Size() const {
-    return bitmap_meta_->bitmap_size_;
+    return bitmap_meta_->meta_.size_;
   }
 
   // Size of our internal storage
   size_t Size(size_t newSize) const {
-    bitmap_meta_->bitmap_size_ = newSize;
-    return bitmap_meta_->bitmap_size_;
+    bitmap_meta_->meta_ = newSize;
+    return bitmap_meta_->meta_.size_;
   }
 
 
@@ -69,7 +64,7 @@ public:
   }
 
   uintptr_t HeapBegin() const {
-    return bitmap_meta_->heap_begin_;
+    return bitmap_meta_->meta_.begin_;
   }
 
   // The maximum address which the bitmap can span. (HeapBegin() <= object < HeapLimit()).
@@ -82,12 +77,13 @@ public:
 
 
 private:
-  SharedSpaceBitmap(SharedSpaceBitmapMeta* meta,
+  SharedSpaceBitmap(SharedRegionMeta* meta,
                     word* bitmap_begin,
                     byte* heap_begin,
                     size_t heap_capacity);
 
   SharedSpaceBitmapMeta* bitmap_meta_;
+
 }; //SharedSpaceBitmap
 
 }//namespace accounting
