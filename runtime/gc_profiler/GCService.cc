@@ -145,7 +145,7 @@ bool GCServiceDaemon::gcserviceMain(Thread* thread) {
     return false;
   }
   if(_oldCounter != _Counter()) {
-      GCSERV_VLOG(INFO) << thread->GetTid() <<
+    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
           ":GCServiceD: counterReceived = " <<
           _Counter();
   }
@@ -172,24 +172,24 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     _gcServiceInst->_Cond()->Broadcast(self);
   }
 
-  GCSERV_VLOG(INFO) << "GCServiceD is entering the main loop: " << self->GetTid();
+  GCSERV_DAEM_VLOG(INFO) << "GCServiceD is entering the main loop: " << self->GetTid();
 
   while(_gcServiceInst->isRunning()) {
     if(!_gcServiceInst->gcserviceMain(self))
       break;
   }
 
-  GCSERV_VLOG(INFO) << "GCServiceD left the main loop: " << self->GetTid();
+  GCSERV_DAEM_VLOG(INFO) << "GCServiceD left the main loop: " << self->GetTid();
   if(_gcServiceInst->isShuttingDown()) {
-    GCSERV_VLOG(INFO) << "GCServiceD: shuttingDown is true: " << self->GetTid();
+    GCSERV_DAEM_VLOG(INFO) << "GCServiceD: shuttingDown is true: " << self->GetTid();
     MutexLock mu(self, *_gcServiceInst->shutdown_mu_);
     _gcServiceInst->_Status(GCSERVICE_STATUS_STOPPED);
     _gcServiceInst->shutdown_cond_->Broadcast(self);
-    GCSERV_VLOG(INFO) << "GCServiceD: updated status to stopped: " << self->GetTid();
+    GCSERV_DAEM_VLOG(INFO) << "GCServiceD: updated status to stopped: " << self->GetTid();
   }
 
 
-  GCSERV_VLOG(INFO) << self->GetTid() << "-GCServiceD: leaving the daemon code" ;
+  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << "-GCServiceD: leaving the daemon code" ;
 
   return NULL;
 }
@@ -197,16 +197,16 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 void GCServiceDaemon::shutdown(void) {
   Thread* self = Thread::Current();
-  GCSERV_VLOG(INFO) << self->GetTid() << " :start signaling Shutting down the GCservice "
+  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :start signaling Shutting down the GCservice "
       << self->GetTid();
   {
     IterProcMutexLock interProcMu(self, *_Mu());
     _Status(GCSERVICE_STATUS_SHUTTING_DOWN);
     _Cond()->Broadcast(self);
-    GCSERV_VLOG(INFO) << self->GetTid() << " :change status to shutting down";
+    GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :change status to shutting down";
   }
   CHECK_PTHREAD_CALL(pthread_join, (pthread_, NULL), "GC service shutdown");
-  GCSERV_VLOG(INFO) << self->GetTid() << " :joined on pthread";
+  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :joined on pthread";
 }
 
 void GCServiceDaemon::ShutdownGCService(void) {
