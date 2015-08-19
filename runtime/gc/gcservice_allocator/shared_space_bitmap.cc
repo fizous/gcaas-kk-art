@@ -12,6 +12,7 @@
 #include "locks.h"
 #include "os.h"
 #include "gc/accounting/space_bitmap.h"
+#include "gc/gcservice_allocator/service_allocator.h"
 #include "gc/gcservice_allocator/shared_space_bitmap.h"
 
 namespace art {

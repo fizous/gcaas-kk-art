@@ -22,8 +22,6 @@ namespace gc {
 namespace accounting {
 
 
-
-
 class SharedSpaceBitmap {
 public:
 
@@ -73,7 +71,7 @@ public:
 
 
 private:
-  SharedSpaceBitmap(gc::SharedRegionMeta* meta,
+  SharedSpaceBitmap(SharedRegionMeta* meta,
                     word* bitmap_begin,
                     byte* heap_begin,
                     size_t heap_capacity);
