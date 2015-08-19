@@ -46,10 +46,11 @@ ServiceAllocator::ServiceAllocator(int pages) :
   memset((void*) memory_meta_, 0, shift);
 
   memory_meta_->begin_ = mu_mem_map->Begin();
-  memory_meta_->current_addr_ = memory_meta_->begin_;
+
 
   memory_meta_->fd_ = fileDescript;
   memory_meta_->size_ = memory_size;
+  memory_meta_->current_addr_ = memory_meta_->begin_+shift;
 
 
   service_meta_ =
