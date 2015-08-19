@@ -22,7 +22,7 @@ namespace gc {
 namespace accounting {
 
 typedef struct SharedSpaceBitmapMeta_S {
-  SharedRegionMeta meta_;
+  gc::SharedRegionMeta meta_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   const uintptr_t heap_begin_;
@@ -78,7 +78,7 @@ public:
 
 
 private:
-  SharedSpaceBitmap(SharedRegionMeta* meta,
+  SharedSpaceBitmap(gc::SharedRegionMeta* meta,
                     word* bitmap_begin,
                     byte* heap_begin,
                     size_t heap_capacity);
