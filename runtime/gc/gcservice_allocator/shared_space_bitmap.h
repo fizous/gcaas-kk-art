@@ -36,7 +36,7 @@ public:
   void Clear();
 
   // Starting address of our internal storage.
-  word* Begin() {
+  byte* Begin() {
     return bitmap_meta_->meta_.begin_;
   }
 
@@ -47,7 +47,7 @@ public:
 
   // Size of our internal storage
   size_t Size(size_t newSize) const {
-    bitmap_meta_->meta_ = newSize;
+    bitmap_meta_->meta_.size_ = newSize;
     return bitmap_meta_->meta_.size_;
   }
 
