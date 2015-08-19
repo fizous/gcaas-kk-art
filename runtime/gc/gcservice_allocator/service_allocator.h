@@ -33,7 +33,7 @@ typedef struct SharedSpaceBitmapMeta_S {
   SharedRegionMeta meta_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
-  const uintptr_t heap_begin_;
+  uintptr_t heap_begin_;
 } SharedSpaceBitmapMeta;
 
 

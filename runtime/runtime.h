@@ -411,7 +411,7 @@ class Runtime {
   void GCPRunGCService(void);
   void GCPBlockOnGCService(void);
   void GCPCreateGCService(void);
-  void GCPRegisterGCService(void);
+  void GCPRegisterWithGCService(void);
 
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;

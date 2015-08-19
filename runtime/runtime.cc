@@ -821,7 +821,7 @@ void Runtime::GCPCreateGCService(void) {
 }
 
 
-void Runtime::GCPRegisterGCService(void) {
+void Runtime::GCPRegisterWithGCService(void) {
   GCSERV_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
       getpid();
   mprofiler::GCServiceDaemon::GCPRegisterWithGCService();

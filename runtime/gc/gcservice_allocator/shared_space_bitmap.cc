@@ -71,8 +71,6 @@ void SharedSpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   // should be marked.
 }
 
-// Clean up any resources associated with the bitmap.
-SharedSpaceBitmap::~SharedSpaceBitmap() {}
 
 }//namespace accounting
 }//namespace gc
