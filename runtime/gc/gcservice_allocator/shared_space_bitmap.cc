@@ -63,7 +63,7 @@ void SharedSpaceBitmap::Clear() {
 
 void SharedSpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   DCHECK(IsAligned<kBitsPerWord * SpaceBitmap::kAlignment>(new_end));
-  size_t new_size = SpaceBitmap::OffsetToIndex(new_end - Begin()) * kWordSize;
+  size_t new_size = SpaceBitmap::OffsetToIndex(new_end - HeapBegin()) * kWordSize;
   if (new_size < Size()) {
     Size(new_size);
   }
