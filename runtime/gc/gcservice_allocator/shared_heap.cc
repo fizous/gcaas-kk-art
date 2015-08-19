@@ -43,10 +43,14 @@ SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
         "-----CreateSharedHeap:0 -------";
   SharedHeapMetada *_heapHeaderHolder =
       service_alloc->AllocateHeapMeta();
-  memset((void*)_heapHeaderHolder, 0, sizeof(gc::SharedHeapMetada));
-  SharedHeap* _shared_heap = new SharedHeap(getpid(), _heapHeaderHolder);
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
         "-----CreateSharedHeap:1 -------";
+  memset((void*)_heapHeaderHolder, 0, sizeof(SharedHeapMetada));
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----CreateSharedHeap:2 -------";
+  SharedHeap* _shared_heap = new SharedHeap(getpid(), _heapHeaderHolder);
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----CreateSharedHeap:3 -------";
   return _shared_heap;
 }
 
