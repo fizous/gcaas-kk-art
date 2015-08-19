@@ -6,8 +6,10 @@
  */
 
 
-
-
+#include "thread_state.h"
+#include "thread.h"
+#include "locks.h"
+#include "os.h"
 #include "gc/gcservice_allocator/shared_heap.h"
 
 
