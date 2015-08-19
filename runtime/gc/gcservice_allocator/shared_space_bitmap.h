@@ -58,7 +58,7 @@ public:
   }
 
   uintptr_t HeapBegin() const {
-    return bitmap_meta_->meta_.begin_;
+    return bitmap_meta_->heap_begin_;
   }
 
   // The maximum address which the bitmap can span. (HeapBegin() <= object < HeapLimit()).
@@ -73,7 +73,7 @@ public:
 private:
   SharedSpaceBitmap(SharedRegionMeta* meta,
                     word* bitmap_begin,
-                    byte* heap_begin,
+                    uintptr_t heap_begin,
                     size_t heap_capacity);
 
   SharedSpaceBitmapMeta* bitmap_meta_;
