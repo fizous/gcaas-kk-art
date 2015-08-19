@@ -110,7 +110,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   {
     IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
 
-    GCServiceDaemon::GCServiceD = new GCServiceDaemon(_serviceMeta);
+    //GCServiceDaemon::GCServiceD = new GCServiceDaemon(_serviceMeta);
 
     CHECK_PTHREAD_CALL(pthread_create,
         (&GCServiceDaemon::GCServiceD->pthread_, NULL,
@@ -285,8 +285,12 @@ void GCServiceDaemon::InitServiceMetaData(GCDaemonMetaData* metaData) {
   metaData->mu_ = new InterProcessMutex("GCServiceD Mutex", _futexAddress);
   metaData->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *metaData->mu_, _condAddress);
+
+  GCServiceDaemon::GCServiceD = new GCServiceDaemon(metaData);
+
   GCSERV_VLOG(INFO) << self->GetTid() <<
       " Done Initializing GCDaemonMetaData ";
+
 }
 
 /******************** private methods *************************/
