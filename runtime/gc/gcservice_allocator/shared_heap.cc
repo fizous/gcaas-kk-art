@@ -17,6 +17,9 @@ namespace gc {
 
 SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
     shared_metadata_(metadata) {
+  Thread* self = Thread::Current();
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----new shared heap:0 -------";
   SharedFutexData* _futexAddress =
       &shared_metadata_->lock_header_.futex_head_;
   SharedConditionVarData* _condAddress =
@@ -27,15 +30,21 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
       new InterProcessConditionVariable("sharedHeap CondVar",
           *shared_metadata_->ipc_global_mu_, _condAddress);
   shared_metadata_->pid_ = _pid;
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----new shared heap:1 -------";
 }
 
 
 SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
+  Thread* self = Thread::Current();
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----CreateSharedHeap:0 -------";
   SharedHeapMetada *_heapHeaderHolder =
       service_alloc->AllocateHeapMeta();
   memset((void*)_heapHeaderHolder, 0, sizeof(gc::SharedHeapMetada));
   SharedHeap* _shared_heap = new SharedHeap(getpid(), _heapHeaderHolder);
-
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "-----CreateSharedHeap:1 -------";
   return _shared_heap;
 }
 

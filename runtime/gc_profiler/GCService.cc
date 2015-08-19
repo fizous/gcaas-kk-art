@@ -67,25 +67,25 @@ void GCServiceDaemon::GCPRegisterWithGCService(void) {
     LOG(ERROR) << " ############### Service Header was NULL While Registering #############" << self->GetTid();
     return;
   }
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 locking gcservice to register -------";
   IterProcMutexLock interProcMu(self, *_meta_data->mu_);
 
   GCServiceDaemon::GCServiceD->registerProcesss();
 
   _meta_data->cond_->Broadcast(self);
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----3 leaving registration -------";
 }
 
 
 void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
   service_meta_data_->counter_++;
   initSharedHeapHeader();
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----1 service counter ------- " << service_meta_data_->counter_;
 }
 
@@ -96,13 +96,13 @@ void GCServiceDaemon::initSharedHeapHeader(void) {
   Runtime::Current()->shared_heap_ =
       gc::SharedHeap::CreateSharedHeap(Runtime::Current()->gcserviceAllocator_);
 
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----Done with initSharedHeapHeader ------- " <<
       service_meta_data_->counter_;
 }
 
 void GCServiceDaemon::LaunchGCService(void* arg) {
-  GCSERV_VLOG(ERROR) << " ---------- ART_USE_FUTEX = " <<
+  GCSERV_DAEM_VLOG(ERROR) << " ---------- ART_USE_FUTEX = " <<
       BaseMutex::IsARTUseFutex() << " -------------------";
 
   GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
@@ -118,16 +118,16 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         "GCService Daemon thread");
   }
 
-  GCSERV_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
+  GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
-    GCSERV_VLOG(INFO) << "XXXXXXXXXX-1 process is waiting to stop XXXXXXXXX";
+    GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-1 process is waiting to stop XXXXXXXXX";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
       GCServiceDaemon::GCServiceD->shutdown_cond_->Wait(self);
     }
   }
-  GCSERV_VLOG(INFO) << "XXXXXXXXXX-2 process left waiting loop XXXXXXXXX";
+  GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-2 process left waiting loop XXXXXXXXX";
 }
 
 

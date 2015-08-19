@@ -23,7 +23,9 @@
 #include "offsets.h"
 
 /* log information. used to monitor the flow of the profiler.*/
-#define GCSERV_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "==GC_SERVICE== "
+#define GCSERV_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "==GC_ZYGOTE== "
+#define GCSERV_ZYGOTE_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "==SERVICE== "
+#define GCSERV_CLIENT_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "== CLIENT== "
 
 
 namespace art {

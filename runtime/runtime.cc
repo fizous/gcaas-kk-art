@@ -806,9 +806,9 @@ jobject CreateSystemClassLoader() {
 
 
 void Runtime::GCPRunGCService(void) {
-	GCMMP_VLOG(INFO) << " gcservice: We are inside GCService code now " << getpid();
+  GCSERV_DAEM_VLOG(INFO) << " We are inside GCService code now " << getpid();
 	mprofiler::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
-	GCMMP_VLOG(INFO) << " gcservice: We are leaving GCService code now " << getpid();
+	GCSERV_DAEM_VLOG(INFO) << " We are leaving GCService code now " << getpid();
 }
 
 
@@ -822,17 +822,17 @@ void Runtime::GCPCreateGCService(void) {
 
 
 void Runtime::GCPRegisterWithGCService(void) {
-  GCSERV_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
+  GCSERV_CLIENT_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
       getpid();
   mprofiler::GCServiceDaemon::GCPRegisterWithGCService();
-  GCSERV_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
+  GCSERV_CLIENT_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
       getpid();
 }
 
 void Runtime::GCPBlockOnGCService(void){
-  GCMMP_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
+  GCSERV_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
   mprofiler::GCServiceDaemon::GCPBlockForServiceReady(gcserviceAllocator_->GetGCServiceMeta());
-  GCMMP_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
+  GCSERV_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
 }
 
 bool Runtime::Start() {
