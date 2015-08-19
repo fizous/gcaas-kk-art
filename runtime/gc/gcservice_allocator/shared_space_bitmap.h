@@ -14,6 +14,7 @@
 
 #include "base/mutex.h"
 #include "gc/accounting/space_bitmap.h"
+#include "gc/gcservice_allocator/service_allocator.h"
 
 namespace art {
 
