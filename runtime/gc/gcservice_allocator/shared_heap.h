@@ -21,8 +21,7 @@ class SharedHeap {
 public:
 
   static SharedHeap* CreateSharedHeap(ServiceAllocator* service_alloc);
-
-  accounting::SharedSpaceBitmapMeta* getSharedSpaceBitmap(void);
+  SharedSpaceBitmapMeta* getSharedSpaceBitmap(void);
 
 private:
   SharedHeapMetada* shared_metadata_;
