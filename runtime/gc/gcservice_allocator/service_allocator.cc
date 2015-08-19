@@ -38,9 +38,10 @@ ServiceAllocator::ServiceAllocator(int pages) :
   }
 
 
-  Thread* self = Thread::Current();
+//  Thread* self = Thread::Current();
 
-  memory_meta_ = mu_mem_map->Begin();
+  memory_meta_ =
+      reinterpret_cast<SharedRegionMeta*>(mu_mem_map->Begin());
   size_t shift = RoundUp(sizeof(SharedRegionMeta), kAlignment);
   memset((void*) memory_meta_, 0, shift);
 
@@ -76,7 +77,7 @@ SharedHeapMetada* ServiceAllocator::GetHeapMetaArr(void) {
 }
 
 SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {
-  return reinterpret_cast<mprofiler::GCDaemonMetaData*>(allocate(sizeof(SharedHeapMetada)));
+  return reinterpret_cast<SharedHeapMetada*>(allocate(sizeof(SharedHeapMetada)));
 }
 
 
