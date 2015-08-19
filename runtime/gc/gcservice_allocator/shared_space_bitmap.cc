@@ -41,7 +41,7 @@ SharedSpaceBitmap::~SharedSpaceBitmap() {
 
 }
 SharedSpaceBitmap::SharedSpaceBitmap(SharedSpaceBitmapMeta* meta,
-                    word* bitmap_begin,
+                    byte* bitmap_begin,
                     const uintptr_t heap_begin,
                     size_t bitmap_size) : bitmap_meta_(meta) {
   bitmap_meta_->meta_.begin_ = reinterpret_cast<byte*>(bitmap_begin);
