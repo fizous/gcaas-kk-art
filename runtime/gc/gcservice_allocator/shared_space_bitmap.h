@@ -71,7 +71,7 @@ public:
 
 
 private:
-  SharedSpaceBitmap(SharedRegionMeta* meta,
+  SharedSpaceBitmap(SharedSpaceBitmapMeta* meta,
                     word* bitmap_begin,
                     const uintptr_t heap_begin,
                     size_t heap_capacity);
