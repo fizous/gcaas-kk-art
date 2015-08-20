@@ -8,9 +8,12 @@
 #ifndef ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SERVICE_ALLOCATOR_H_
 #define ART_RUNTIME_GC_GCSERVICE_ALLOCATOR_SERVICE_ALLOCATOR_H_
 
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <cutils/ashmem.h>
+#include "base/mutex.h"
 #include "os.h"
 #include "globals.h"
-#include "base/mutex.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/GCService.h"
 #include "gc/gcservice_allocator/service_allocator.h"
@@ -48,7 +51,7 @@ typedef struct SharedRegionMeta_S {
 } SharedRegionMeta;
 
 typedef struct SharedSpaceBitmapMeta_S {
-  SharedRegionMeta meta_;
+  SharedMemMapMeta meta_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   uintptr_t heap_begin_;

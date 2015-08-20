@@ -37,7 +37,7 @@ public:
 
   // Starting address of our internal storage.
   byte* Begin() {
-    return bitmap_meta_->meta_.begin_;
+    return bitmap_meta_->meta_.owner_begin_;
   }
 
   // Size of our internal storage
