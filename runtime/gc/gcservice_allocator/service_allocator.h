@@ -16,17 +16,38 @@
 #include "gc/gcservice_allocator/service_allocator.h"
 
 
+#define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), ServiceAllocator::kAlignment))
+
 namespace art {
 namespace gc {
 
 
+typedef struct SharedMemMapMeta_S {
+  byte* owner_begin_;
+  byte* owner_base_begin_;
+  size_t size_;
+  int fd_;
+  int prot_;
+} SharedMemMapMeta;
+
+
+class SharedMemMap {
+public:
+  static SharedMemMapMeta* CreateSharedMemory(const char *name,
+      size_t byte_count, int prot = PROT_READ | PROT_WRITE);
+  static size_t GetSIZE() {
+    return SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta);
+  }
+private:
+  SharedMemMapMeta* mem_;
+};//SharedMemMap
+
+
+
 typedef struct SharedRegionMeta_S {
   // This bitmap itself, word sized for efficiency in scanning.
-  byte* begin_;
-  size_t size_;
-  byte* end_;
+  SharedMemMapMeta meta_;
   byte* current_addr_;
-  int fd_;
 } SharedRegionMeta;
 
 typedef struct SharedSpaceBitmapMeta_S {
@@ -36,14 +57,43 @@ typedef struct SharedSpaceBitmapMeta_S {
   uintptr_t heap_begin_;
 } SharedSpaceBitmapMeta;
 
+typedef struct SharedCardTableMeta_S {
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+}SharedCardTableMeta;
+
+typedef struct SharedAtomicStackMeta_S {
+
+  // Back index (index after the last element pushed).
+  volatile int32_t back_index_;
+
+  // Front index, used for implementing PopFront.
+  volatile int32_t front_index_;
+  // Maximum number of elements.
+  size_t capacity_;
+  // Memory mapping of the atomic stack.
+  SharedRegionMeta mem_meta_;
+}SharedAtomicStackMeta;
+
+
+typedef struct SharedContinuousSpaceMeta_S {
+  byte* begin_;
+  byte* end_;
+  SharedSpaceBitmapMeta bitmap_meta_;
+}SharedContinuousSpaceMeta;
+
 
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
-  SharedSpaceBitmapMeta bitmap_meta_;
+  SharedCardTableMeta card_table_meta;
   int pid_;
   InterProcessMutex* ipc_global_mu_;
   InterProcessConditionVariable* ipc_global_cond_;
 } SharedHeapMetada;
+
+
+
 
 class ServiceAllocator {
 public:
@@ -53,6 +103,8 @@ public:
   static const size_t PageCapacity = 64;
 
   static ServiceAllocator* CreateServiceAllocator(void);
+  static SharedMemMapMeta* AllocShMemMapMeta(void);
+
 
   byte* Begin() {
     return memory_meta_->begin_;
@@ -81,6 +133,7 @@ public:
   ~ServiceAllocator();
 
   void free();
+
 
 
 private:

@@ -12,7 +12,7 @@
 #include "globals.h"
 #include "base/mutex.h"
 #include "gc/gcservice_allocator/service_allocator.h"
-
+#include "gc/gcservice_allocator/shared_card_table.h"
 
 namespace art {
 namespace gc {
@@ -25,6 +25,14 @@ public:
 
 private:
   SharedHeapMetada* shared_metadata_;
+
+  /* class members */
+  accounting::SharedCardTable* card_table_;
+  SharedAtomicStack* live_stack_;
+  SharedAtomicStack* mark_stack_;
+  SharedAtomicStack* allocation_stack;
+
+
   SharedHeap(int _pid, SharedHeapMetada* metadata);
 
 };//SharedHeap

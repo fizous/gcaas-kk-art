@@ -4,6 +4,8 @@
  *  Created on: Aug 18, 2015
  *      Author: hussein
  */
+
+#include <cutils/ashmem.h>
 #include "os.h"
 #include "globals.h"
 #include "base/mutex.h"
@@ -19,45 +21,79 @@ namespace art {
 namespace gc {
 
 
+SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
+    size_t byte_count, int prot = PROT_READ | PROT_WRITE) {
+  int flags = MAP_SHARED;
+  SharedMemMapMeta* _meta_record = ServiceAllocator::AllocShMemMapMeta();
+  _meta_record->size_ = RoundUp(byte_count, kPageSize);
+  _meta_record->fd_   = ashmem_create_region(name, _meta_record->size_);
+  _meta_record->prot_ = prot;
+  if (_meta_record->fd_  == -1) {
+    LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    return NULL;
+  }
+  _meta_record->owner_begin_ =
+      reinterpret_cast<byte*>(mmap(NULL, _meta_record->size_, prot, flags,
+          _meta_record->fd_, 0));
+  if (_meta_record->owner_begin_ == MAP_FAILED) {
+    LOG(ERROR) << "mmap(" <<name<< ")" << ", " <<
+        _meta_record->size_ << ", " << prot << ", " << flags << ", " <<
+        _meta_record->fd_ << ", 0) failed for " << name << "\n";
+    return NULL;
+  }
+  return _meta_record;
+}
+
+
+
 ServiceAllocator::ServiceAllocator(int pages) :
     service_meta_(NULL),
     heap_meta_arr_(NULL) {
 
+  int prot = PROT_READ | PROT_WRITE;
   int fileDescript = 0;
   size_t memory_size = pages * kPageSize;
-  MemMap* mu_mem_map =
-        MemMap::MapSharedMemoryAnonymous("ServiceAllocator", NULL,
-            memory_size  , PROT_READ | PROT_WRITE, &fileDescript);
+  int flags = MAP_SHARED;
+  fileDescript = ashmem_create_region("ServiceAllocator", memory_size);
+  byte* begin =
+      reinterpret_cast<byte*>(mmap(NULL, memory_size, prot, flags,
+           fileDescript, 0));
 
-
-  if (mu_mem_map == NULL) {
+  if (begin == NULL) {
     LOG(ERROR) << "Failed to allocate pages for service allocator (" <<
           "ServiceAllocator" << ") of size "
-          << PrettySize(1024);
+          << PrettySize(memory_size);
     return;
   }
-
-
+  memory_meta_ =
+      reinterpret_cast<SharedRegionMeta*>(begin);
+  size_t used_bytes = SERVICE_ALLOC_ALIGN_BYTE(SharedRegionMeta);
+  memset((void*) memory_meta_, 0, used_bytes);
 //  Thread* self = Thread::Current();
 
   memory_meta_ =
-      reinterpret_cast<SharedRegionMeta*>(mu_mem_map->Begin());
+      reinterpret_cast<SharedRegionMeta*>(begin);
   size_t shift = RoundUp(sizeof(SharedRegionMeta), kAlignment);
   memset((void*) memory_meta_, 0, shift);
 
-  memory_meta_->begin_ = mu_mem_map->Begin();
-
-
-  memory_meta_->fd_ = fileDescript;
-  memory_meta_->size_ = memory_size;
-  memory_meta_->current_addr_ = memory_meta_->begin_+shift;
+  memory_meta_->meta_.owner_begin_ = begin;
+  memory_meta_->meta_.fd_ = fileDescript;
+  memory_meta_->meta_.prot_ = prot;
+  memory_meta_->meta_.size_ = memory_size;
+  memory_meta_->current_addr_ = memory_meta_->meta_.owner_begin_+ used_bytes;
 
 
   service_meta_ =
-        reinterpret_cast<mprofiler::GCDaemonMetaData*>(allocate(sizeof(mprofiler::GCDaemonMetaData)));
+        reinterpret_cast<mprofiler::GCDaemonMetaData*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(mprofiler::GCDaemonMetaData)));
 
-  heap_meta_arr_ = reinterpret_cast<SharedHeapMetada*>(memory_meta_->current_addr_);
+  heap_meta_arr_ =
+      reinterpret_cast<SharedHeapMetada*>(memory_meta_->current_addr_);
 
+
+  GCSERV_ALLOC_VLOG(INFO) << "done allocating shared header: " <<
+      "\nbegin: " << memory_meta_->meta_.owner_begin_ << ", " <<
+      "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
+      "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
 
   mprofiler::GCServiceDaemon::InitServiceMetaData(service_meta_);
 }
@@ -81,8 +117,9 @@ SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {
   return reinterpret_cast<SharedHeapMetada*>(allocate(sizeof(SharedHeapMetada)));
 }
 
-
-
+SharedMemMapMeta* ServiceAllocator::AllocShMemMapMeta(void) {
+  return reinterpret_cast<SharedHeapMetada*>(allocate(SharedMemMap::GetSIZE()));
+}
 
 ServiceAllocator::~ServiceAllocator() {
 
