@@ -55,11 +55,11 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   size_t capacity = heap_capacity / kCardSize;
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   int _fd = 0;
+  LOG(ERROR) << "--- creating card table ---";
 #if 0//ART_GC_PROFILER_SERVICE
 
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE, &_fd));
-  LOG(ERROR) << "--- creating card table ---";
 #else
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
@@ -90,6 +90,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
 
 CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset)
     : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset) {
+  LOG(ERROR) << "--- constructor card table ---";
   byte* __attribute__((unused)) begin = mem_map_->Begin() + offset_;
   byte* __attribute__((unused)) end = mem_map_->End();
 }
