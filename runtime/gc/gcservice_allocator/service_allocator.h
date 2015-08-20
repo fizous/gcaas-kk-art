@@ -107,7 +107,7 @@ public:
 
 
   byte* Begin() {
-    return memory_meta_->begin_;
+    return memory_meta_->meta_.owner_begin_;
   }
 
 

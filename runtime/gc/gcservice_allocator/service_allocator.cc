@@ -114,11 +114,11 @@ SharedHeapMetada* ServiceAllocator::GetHeapMetaArr(void) {
 }
 
 SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {
-  return reinterpret_cast<SharedHeapMetada*>(allocate(sizeof(SharedHeapMetada)));
+  return reinterpret_cast<SharedHeapMetada*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedHeapMetada)));
 }
 
 SharedMemMapMeta* ServiceAllocator::AllocShMemMapMeta(void) {
-  return reinterpret_cast<SharedHeapMetada*>(allocate(SharedMemMap::GetSIZE()));
+  return reinterpret_cast<SharedHeapMetada*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedMemMap)));
 }
 
 ServiceAllocator::~ServiceAllocator() {
