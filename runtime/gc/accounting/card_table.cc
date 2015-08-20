@@ -58,6 +58,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   int _fd;
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE, &_fd));
+  LOG(ERROR) << "--- creating card table ---";
   mem_map->fd_ = _fd;
 #else
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
