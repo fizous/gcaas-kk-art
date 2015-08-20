@@ -44,13 +44,16 @@ SharedCardTable* SharedCardTable::CreateSharedCardTable(SharedCardTableMeta* met
 
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: biased_begin_: " << meta_p->biased_begin_;
+      " ----- SharedCardTable: biased_begin_: " <<
+      reinterpret_cast<void*>(meta_p->biased_begin_);
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       " ----- SharedCardTable: offset_: " << meta_p->offset_;
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: owner_begin_: " << shMemMeta->owner_begin_;
+      " ----- SharedCardTable: owner_begin_: " <<
+      reinterpret_cast<void*>(shMemMeta->owner_begin_);
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: owner_base_begin_: " << shMemMeta->owner_base_begin_;
+      " ----- SharedCardTable: owner_base_begin_: " <<
+      reinterpret_cast<void*>(shMemMeta->owner_base_begin_);
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       " ----- SharedCardTable: base_size_: " << shMemMeta->base_size_;
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
