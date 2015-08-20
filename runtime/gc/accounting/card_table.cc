@@ -129,6 +129,11 @@ void CardTable::VerifyCardTable() {
   UNIMPLEMENTED(WARNING) << "Card table verification";
 }
 
+
+bool CardTable::updateProtection(int newProtection) {
+  return mem_map_->Protect(newProtection);
+}
+
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art

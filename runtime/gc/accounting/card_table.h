@@ -152,6 +152,8 @@ class CardTable {
   int getProt() {
     return mem_map_->getProt();
   }
+
+  bool updateProtection(int newProtection);
  private:
   CardTable(MemMap* begin, byte* biased_begin, size_t offset);
 
