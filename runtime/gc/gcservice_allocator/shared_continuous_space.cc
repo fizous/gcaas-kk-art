@@ -25,7 +25,7 @@ namespace art {
 namespace gc {
 
 SharedContinuousSpace* SharedContinuousSpace::CreateSharedContinuousSpace() {
-
+  return NULL;
 }
 
 SharedContinuousSpace::SharedContinuousSpace(void) {

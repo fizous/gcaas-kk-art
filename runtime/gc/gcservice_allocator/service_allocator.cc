@@ -93,9 +93,9 @@ ServiceAllocator::ServiceAllocator(int pages) :
 
 
   GCSERV_ALLOC_VLOG(INFO) << "done allocating shared header: " <<
-      "\nbegin: " << memory_meta_->meta_.owner_begin_ << ", " <<
+      "\nbegin: " << reinterpret_cast<void*>(memory_meta_->meta_.owner_begin_) << ", " <<
       "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
-      "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
+      "\nsize: " << memory_meta_->meta_.size_ <<
 
   mprofiler::GCServiceDaemon::InitServiceMetaData(service_meta_);
 }
