@@ -141,7 +141,7 @@ class CardTable {
     return mem_map_->Size();
   }
 
-  size_t getBaseBegin() {
+  byte* getBaseBegin() {
     return mem_map_->BaseBegin();
   }
 
