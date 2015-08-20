@@ -21,7 +21,8 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
     shared_metadata_(metadata) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-        "-----new shared heap:0 -------";
+        " : ----- new shared heap:0 -------  pid: " << getpid() << ", meta is stored at addr: " <<
+        reinterpret_cast<void*>(metadata);
   SharedFutexData* _futexAddress =
       &shared_metadata_->lock_header_.futex_head_;
   SharedConditionVarData* _condAddress =
@@ -33,7 +34,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
           *shared_metadata_->ipc_global_mu_, _condAddress);
   shared_metadata_->pid_ = _pid;
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-        "-----new shared heap:1 -------";
+        "-----new shared heap: done -------";
 }
 
 

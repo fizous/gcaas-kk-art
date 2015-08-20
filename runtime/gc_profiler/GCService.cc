@@ -83,8 +83,8 @@ void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
-  service_meta_data_->counter_++;
   initSharedHeapHeader();
+  service_meta_data_->counter_++;
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----1 service counter ------- " << service_meta_data_->counter_;
 }
