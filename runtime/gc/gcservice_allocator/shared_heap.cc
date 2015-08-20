@@ -21,7 +21,8 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
     shared_metadata_(metadata) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-        " : ----- new shared heap:0 -------  pid: " << getpid() << ", meta is stored at addr: " <<
+        " : ----- new shared heap:0 -------  pid: " << getpid() <<
+        ", meta is stored at addr: " <<
         reinterpret_cast<void*>(metadata);
   SharedFutexData* _futexAddress =
       &shared_metadata_->lock_header_.futex_head_;
@@ -33,6 +34,14 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
       new InterProcessConditionVariable("sharedHeap CondVar",
           *shared_metadata_->ipc_global_mu_, _condAddress);
   shared_metadata_->pid_ = _pid;
+
+  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+        "----- +++ initializing cardtable +++ -------";
+
+  card_table_ =
+      accounting::SharedCardTable::CreateSharedCardTable(&shared_metadata_->card_table_meta_,
+      Runtime::Current()->GetHeap()->GetCardTable());
+
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
         "-----new shared heap: done -------";
 }

@@ -73,8 +73,17 @@ class MemMap {
     return begin_;
   }
 
+  byte* BaseBegin() const {
+    return base_begin_;
+  }
+
   size_t Size() const {
     return size_;
+  }
+
+
+  size_t BaseSize() const {
+    return base_size_;
   }
 
   byte* End() const {
@@ -88,6 +97,11 @@ class MemMap {
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
 
+  int fd_; //file descriptor
+
+  int getProt() {
+    return prot_;
+  }
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
@@ -99,6 +113,7 @@ class MemMap {
   void* const base_begin_;  // Page-aligned base address.
   const size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
+
 };
 
 }  // namespace art

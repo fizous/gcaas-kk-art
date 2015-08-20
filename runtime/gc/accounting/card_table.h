@@ -124,6 +124,34 @@ class CardTable {
 
   bool AddrIsInCardTable(const void* addr) const;
 
+
+  size_t getOffset() {
+    return offset_;
+  }
+
+  byte* getBegin() {
+    return mem_map_->Begin();
+  }
+
+  size_t getBaseSize() {
+    return mem_map_->BaseSize();
+  }
+
+  size_t getSize() {
+    return mem_map_->Size();
+  }
+
+  size_t getBaseBegin() {
+    return mem_map_->BaseBegin();
+  }
+
+  int getFD() {
+    return mem_map_->fd_;
+  }
+
+  int getProt() {
+    return mem_map_->getProt();
+  }
  private:
   CardTable(MemMap* begin, byte* biased_begin, size_t offset);
 

@@ -29,6 +29,7 @@ typedef struct SharedMemMapMeta_S {
   byte* owner_begin_;
   byte* owner_base_begin_;
   size_t size_;
+  size_t base_size_;
   int fd_;
   int prot_;
 } SharedMemMapMeta;
@@ -58,6 +59,7 @@ typedef struct SharedSpaceBitmapMeta_S {
 } SharedSpaceBitmapMeta;
 
 typedef struct SharedCardTableMeta_S {
+  SharedMemMapMeta mem_meta_;
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
@@ -86,10 +88,11 @@ typedef struct SharedContinuousSpaceMeta_S {
 
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
-  SharedCardTableMeta card_table_meta;
   int pid_;
   InterProcessMutex* ipc_global_mu_;
   InterProcessConditionVariable* ipc_global_cond_;
+  /* data related to continuous space */
+  SharedCardTableMeta card_table_meta_;
 } SharedHeapMetada;
 
 
@@ -119,7 +122,9 @@ public:
 
   byte* allocate(size_t num_bytes) {
     byte* _addr = memory_meta_->current_addr_;
-    memory_meta_->current_addr_ +=  RoundUp(num_bytes, kAlignment);
+    size_t allocated_bytes = RoundUp(num_bytes, kAlignment);
+    memory_meta_->current_addr_ +=  allocated_bytes;
+    memory_meta_->meta_.size_ += allocated_bytes;
     return _addr;
   }
 

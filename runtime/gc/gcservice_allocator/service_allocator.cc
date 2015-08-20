@@ -30,19 +30,20 @@ SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
     size_t byte_count, int prot) {
   int flags = MAP_SHARED;
   SharedMemMapMeta* _meta_record = ServiceAllocator::AllocShMemMapMeta();
-  _meta_record->size_ = RoundUp(byte_count, kPageSize);
-  _meta_record->fd_   = ashmem_create_region(name, _meta_record->size_);
+  _meta_record->base_size_ = RoundUp(byte_count, kPageSize);
+  _meta_record->size_ = 0;
+  _meta_record->fd_   = ashmem_create_region(name, _meta_record->base_size_);
   _meta_record->prot_ = prot;
   if (_meta_record->fd_  == -1) {
     LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
   }
   _meta_record->owner_begin_ =
-      reinterpret_cast<byte*>(mmap(NULL, _meta_record->size_, prot, flags,
+      reinterpret_cast<byte*>(mmap(NULL, _meta_record->base_size_, prot, flags,
           _meta_record->fd_, 0));
   if (_meta_record->owner_begin_ == MAP_FAILED) {
     LOG(ERROR) << "mmap(" <<name<< ")" << ", " <<
-        _meta_record->size_ << ", " << prot << ", " << flags << ", " <<
+        _meta_record->base_size_ << ", " << prot << ", " << flags << ", " <<
         _meta_record->fd_ << ", 0) failed for " << name << "\n";
     return NULL;
   }
@@ -84,9 +85,9 @@ ServiceAllocator::ServiceAllocator(int pages) :
   memory_meta_->meta_.owner_begin_ = begin;
   memory_meta_->meta_.fd_ = fileDescript;
   memory_meta_->meta_.prot_ = prot;
-  memory_meta_->meta_.size_ = memory_size;
+  memory_meta_->meta_.base_size_ = memory_size;
   memory_meta_->current_addr_ = memory_meta_->meta_.owner_begin_+ used_bytes;
-
+  memory_meta_->meta_.size_ = used_bytes;
 
   service_meta_ =
         reinterpret_cast<mprofiler::GCDaemonMetaData*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(mprofiler::GCDaemonMetaData)));
@@ -128,7 +129,10 @@ SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {
 }
 
 SharedMemMapMeta* ServiceAllocator::AllocShMemMapMeta(void) {
-  return reinterpret_cast<SharedMemMapMeta*>(ServiceAllocator::service_allocator->allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta)));
+  size_t memMetaSize = SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta);
+  SharedMemMapMeta* memMeta =
+      reinterpret_cast<SharedMemMapMeta*>(ServiceAllocator::service_allocator->allocate(memMetaSize));
+  return memMetaSize;
 }
 
 ServiceAllocator::~ServiceAllocator() {

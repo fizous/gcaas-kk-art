@@ -24,7 +24,8 @@ namespace accounting {
 
 class SharedCardTable {
 public:
-  static SharedCardTable* CreateSharedCardTable(void);
+  static SharedCardTable* CreateSharedCardTable(SharedCardTableMeta* meta_p,
+      accounting::CardTable* cardTable);
 private:
   SharedCardTable(SharedCardTableMeta*);
   SharedCardTableMeta* meta_;
