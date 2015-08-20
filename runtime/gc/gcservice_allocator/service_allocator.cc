@@ -24,7 +24,7 @@ namespace gc {
 
 
 SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
-    size_t byte_count, int prot = PROT_READ | PROT_WRITE) {
+    size_t byte_count, int prot) {
   int flags = MAP_SHARED;
   SharedMemMapMeta* _meta_record = ServiceAllocator::AllocShMemMapMeta();
   _meta_record->size_ = RoundUp(byte_count, kPageSize);
