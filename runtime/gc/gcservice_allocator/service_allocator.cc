@@ -132,7 +132,7 @@ SharedMemMapMeta* ServiceAllocator::AllocShMemMapMeta(void) {
   size_t memMetaSize = SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta);
   SharedMemMapMeta* memMeta =
       reinterpret_cast<SharedMemMapMeta*>(ServiceAllocator::service_allocator->allocate(memMetaSize));
-  return memMetaSize;
+  return memMeta;
 }
 
 ServiceAllocator::~ServiceAllocator() {
