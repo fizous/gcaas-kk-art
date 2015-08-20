@@ -5,6 +5,8 @@
  *      Author: hussein
  */
 
+#include <sys/mman.h>
+#include <sys/types.h>
 #include <cutils/ashmem.h>
 #include "os.h"
 #include "globals.h"

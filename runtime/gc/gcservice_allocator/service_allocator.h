@@ -35,9 +35,6 @@ class SharedMemMap {
 public:
   static SharedMemMapMeta* CreateSharedMemory(const char *name,
       size_t byte_count, int prot = PROT_READ | PROT_WRITE);
-  static size_t GetSIZE() {
-    return SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta);
-  }
 private:
   SharedMemMapMeta* mem_;
 };//SharedMemMap

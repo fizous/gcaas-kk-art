@@ -13,6 +13,7 @@
 #include "base/mutex.h"
 #include "gc/gcservice_allocator/service_allocator.h"
 #include "gc/gcservice_allocator/shared_card_table.h"
+#include "gc/gcservice_allocator/shared_atomic_stack.h"
 
 namespace art {
 namespace gc {
