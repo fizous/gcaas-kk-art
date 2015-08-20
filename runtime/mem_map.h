@@ -74,7 +74,7 @@ class MemMap {
   }
 
   byte* BaseBegin() const {
-    return base_begin_;
+    return (byte*) base_begin_;
   }
 
   size_t Size() const {
