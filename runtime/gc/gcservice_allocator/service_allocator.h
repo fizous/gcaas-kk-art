@@ -102,6 +102,8 @@ public:
   // Alignment of objects within spaces.
   static const size_t PageCapacity = 64;
 
+  static ServiceAllocator* service_allocator;
+
   static ServiceAllocator* CreateServiceAllocator(void);
   static SharedMemMapMeta* AllocShMemMapMeta(void);
 

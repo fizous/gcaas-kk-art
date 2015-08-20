@@ -23,6 +23,9 @@ namespace art {
 namespace gc {
 
 
+ServiceAllocator* ServiceAllocator::service_allocator = NULL;
+
+
 SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
     size_t byte_count, int prot) {
   int flags = MAP_SHARED;
@@ -97,6 +100,8 @@ ServiceAllocator::ServiceAllocator(int pages) :
       "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
       "\nsize: " << memory_meta_->meta_.size_;
 
+  ServiceAllocator::service_allocator = this;
+
   mprofiler::GCServiceDaemon::InitServiceMetaData(service_meta_);
 }
 
@@ -116,11 +121,11 @@ SharedHeapMetada* ServiceAllocator::GetHeapMetaArr(void) {
 }
 
 SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {
-  return reinterpret_cast<SharedHeapMetada*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedHeapMetada)));
+  return reinterpret_cast<SharedHeapMetada*>(ServiceAllocator::service_allocator->allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedHeapMetada)));
 }
 
 SharedMemMapMeta* ServiceAllocator::AllocShMemMapMeta(void) {
-  return reinterpret_cast<SharedHeapMetada*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta)));
+  return reinterpret_cast<SharedMemMapMeta*>(ServiceAllocator::service_allocator->allocate(SERVICE_ALLOC_ALIGN_BYTE(SharedMemMapMeta)));
 }
 
 ServiceAllocator::~ServiceAllocator() {
