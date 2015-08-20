@@ -54,16 +54,17 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   /* Set up the card table */
   size_t capacity = heap_capacity / kCardSize;
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
-#if ART_GC_PROFILER_SERVICE
-  int _fd;
+  int _fd = 0;
+#if 0//ART_GC_PROFILER_SERVICE
+
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE, &_fd));
   LOG(ERROR) << "--- creating card table ---";
-  mem_map->fd_ = _fd;
 #else
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
 #endif
+  mem_map->fd_ = _fd;
   CHECK(mem_map.get() != NULL) << "couldn't allocate card table";
   // All zeros is the correct initial value; all clean. Anonymous mmaps are initialized to zero, we
   // don't clear the card table to avoid unnecessary pages being allocated
