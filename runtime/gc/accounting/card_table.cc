@@ -173,7 +173,7 @@ bool CardTable::updateProtection(int newProtection) {
 
 /* reset the card table to enable sharing with gc service */
 void CardTable::ResetCardTable(CardTable* orig_card_table) {
-  orig_card_table->DumpCardTable(GCMMP_VLOG(INFO));
+  orig_card_table->DumpCardTable(LOG(ERROR));
   GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
   ;
   //orig_card_table->mem_map_.reset();
@@ -203,7 +203,7 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ biased begin: " <<
       reinterpret_cast<void*>(biased_begin);
 
-  orig_card_table->DumpCardTable(GCMMP_VLOG(INFO));
+  orig_card_table->DumpCardTable(LOG(ERROR));
 }
 
 }  // namespace accounting
