@@ -157,8 +157,9 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   mem_map->fd_ = _fd;
   orig_card_table->mem_map_.reset(mem_map.release());
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ put new pointer ~~~~~";
-  byte* cardtable_begin = mem_map->Begin();
-
+  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
+  GCSERV_CLIENT_VLOG(INFO) << "~~~~~ put new pointer: " <<
+      reinterpret_cast<void*>(cardtable_begin);
   // We allocated up to a bytes worth of extra space to allow biased_begin's byte value to equal
   // GC_CARD_DIRTY, compute a offset value to make this the case
   size_t offset = 0;
@@ -169,6 +170,9 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
     offset = delta + (delta < 0 ? 0x100 : 0);
     biased_begin += offset;
   }
+
+  GCSERV_CLIENT_VLOG(INFO) << "~~~~~ biased begin: " <<
+      reinterpret_cast<void*>(biased_begin);
 }
 
 }  // namespace accounting
