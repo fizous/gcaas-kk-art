@@ -77,7 +77,7 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 #ifdef USE_ASHMEM
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
   // prefixed "dalvik-".
-  std::string debug_friendly_name("dalvik-");
+  std::string debug_friendly_name("shared-");
   debug_friendly_name += name;
   *fileDescriptor = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
 
