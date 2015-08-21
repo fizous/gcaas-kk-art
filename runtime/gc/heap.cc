@@ -1178,6 +1178,7 @@ void Heap::() {
 
   // Try to see if we have any Zygote spaces.
   if (have_zygote_space_) {
+    GCSERV_CLIENT_VLOG(INFO) << "**** Skipping PreZygoteSpace ****";
     return;
   }
   GCSERV_CLIENT_VLOG(INFO) << "**** Continuing with PreZygoteSpace ****";
