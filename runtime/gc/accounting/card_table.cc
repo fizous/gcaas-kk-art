@@ -144,13 +144,13 @@ void CardTable::DumpCardTable(std::ostream& os) {
   Thread* self = Thread::Current();
   os << self->GetTid() <<
       " ----- SharedCardTable: biased_begin_: " <<
-      GetBiasedBegin();
+      reinterpret_cast<void*>(GetBiasedBegin());
 
   os << self->GetTid() <<
       " ----- SharedCardTable: offset_: " << getOffset();
   os << self->GetTid() <<
       " ----- SharedCardTable: owner_begin_: " <<
-      getBegin();
+      reinterpret_cast<void*>(getBegin());
   os << self->GetTid() <<
       " ----- SharedCardTable: owner_base_begin_: " <<
       getBaseBegin();
@@ -164,7 +164,7 @@ void CardTable::DumpCardTable(std::ostream& os) {
       " ----- SharedCardTable: prot_: " << getProt();
 
   os << self->GetTid() <<
-      " ===========================";
+      "\n ===========================";
 }
 
 
