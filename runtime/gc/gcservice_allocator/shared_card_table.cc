@@ -32,6 +32,7 @@ SharedCardTable::SharedCardTable(SharedCardTableMeta* metaData) :
 
 SharedCardTable* SharedCardTable::CreateSharedCardTable(SharedCardTableMeta* meta_p,
     accounting::CardTable* cardTable) {
+
   SharedMemMapMeta* shMemMeta = &meta_p->mem_meta_;
   meta_p->biased_begin_   = cardTable->GetBiasedBegin();
   meta_p->offset_         = cardTable->getOffset();
