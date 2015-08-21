@@ -11,6 +11,7 @@
 #include "locks.h"
 #include "os.h"
 
+#include "gc/accounting/card_table.h"
 #include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
@@ -83,6 +84,14 @@ void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
+  GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space  ****";
+  if(GCServiceD->IsGCServiceRunning()) {
+      GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is running..reset CARD TABLE  ****";
+      gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
+   } else {
+     GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is not Running.. do not reset CARD TABLE  ****";
+   }
+
   initSharedHeapHeader();
   service_meta_data_->counter_++;
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<

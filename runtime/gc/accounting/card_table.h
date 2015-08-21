@@ -52,6 +52,8 @@ class CardTable {
 
   static CardTable* Create(const byte* heap_begin, size_t heap_capacity);
 
+  /* reset the card table to enable sharing with gc service */
+  static void ResetCardTable(CardTable*);
   // Set the card associated with the given address to GC_CARD_DIRTY.
   void MarkCard(const void *addr) {
     byte* card_addr = CardFromAddr(addr);
@@ -155,7 +157,7 @@ class CardTable {
 
   bool updateProtection(int newProtection);
  private:
-  CardTable(MemMap* begin, byte* biased_begin, size_t offset);
+  CardTable(MemMap* begin, byte* biased_begin, size_t offset, const byte* heap_begin);
 
   // Returns true iff the card table address is within the bounds of the card table.
   bool IsValidCard(const byte* card_addr) const {
@@ -176,6 +178,8 @@ class CardTable {
   // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
   // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
   const size_t offset_;
+
+  byte* heap_begin_;
 };
 
 }  // namespace accounting

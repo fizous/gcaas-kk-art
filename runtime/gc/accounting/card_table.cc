@@ -92,11 +92,13 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   }
   CHECK_EQ(reinterpret_cast<int>(biased_begin) & 0xff, kCardDirty);
 
-  return new CardTable(mem_map.release(), biased_begin, offset);
+  return new CardTable(mem_map.release(), biased_begin, offset, heap_begin);
 }
 
-CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset)
-    : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset) {
+CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
+    const byte* heap_begin)
+    : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
+      heap_begin_(heap_begin) {
   LOG(ERROR) << "--- constructor card table ---";
   byte* __attribute__((unused)) begin = mem_map_->Begin() + offset_;
   byte* __attribute__((unused)) end = mem_map_->End();
@@ -139,6 +141,31 @@ void CardTable::VerifyCardTable() {
 
 bool CardTable::updateProtection(int newProtection) {
   return mem_map_->Protect(newProtection);
+}
+
+/* reset the card table to enable sharing with gc service */
+void CardTable::ResetCardTable(CardTable* orig_card_table) {
+  GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
+  UniquePtr<MemMap> mem_map;
+  orig_card_table->mem_map_.reset();
+  int _fd = 0;
+  mem_map.reset(MemMap::MapSharedMemoryAnonymous("card table",
+      orig_card_table->getBegin(), orig_card_table->getBaseSize(),
+      PROT_READ | PROT_WRITE, &_fd));
+  mem_map->fd_ = _fd;
+  orig_card_table->mem_map_.reset(mem_map.release());
+  byte* cardtable_begin = mem_map->Begin();
+
+  // We allocated up to a bytes worth of extra space to allow biased_begin's byte value to equal
+  // GC_CARD_DIRTY, compute a offset value to make this the case
+  size_t offset = 0;
+  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
+      (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
+  if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
+    int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
+    offset = delta + (delta < 0 ? 0x100 : 0);
+    biased_begin += offset;
+  }
 }
 
 }  // namespace accounting
