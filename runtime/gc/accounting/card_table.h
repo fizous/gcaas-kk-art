@@ -52,6 +52,8 @@ class CardTable {
 
   static CardTable* Create(const byte* heap_begin, size_t heap_capacity);
 
+  /* reset the card table to enable sharing with gc service */
+  static CardTable* ResetCardTable(CardTable*);
   // Set the card associated with the given address to GC_CARD_DIRTY.
   void MarkCard(const void *addr) {
     byte* card_addr = CardFromAddr(addr);
