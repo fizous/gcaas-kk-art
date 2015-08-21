@@ -57,12 +57,12 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   int _fd = 0;
   LOG(ERROR) << "--- creating card table ---";
 #if ART_GC_PROFILER_SERVICE
-
+  UniquePtr<MemMap> mem_map;
   if(!Runtime::Current()->IsZygote())
-    UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table", NULL,
+    mem_map.reset(MemMap::MapSharedMemoryAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE, &_fd));
   else
-    UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
+    mem_map.reset(MemMap::MapAnonymous("card table", NULL,
                                                    capacity + 256, PROT_READ | PROT_WRITE));
 #else
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
