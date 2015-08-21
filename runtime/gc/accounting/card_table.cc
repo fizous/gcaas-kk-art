@@ -176,12 +176,13 @@ bool CardTable::updateProtection(int newProtection) {
 void CardTable::ResetCardTable(CardTable* orig_card_table) {
   orig_card_table->DumpCardTable(LOG(ERROR));
   GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
-  ;
-  //orig_card_table->mem_map_.reset();
+  byte* original_begin = orig_card_table->getBegin();
+  size_t origi_size = orig_card_table->getBaseSize();
+  orig_card_table->mem_map_.reset();
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Done Reset ~~~~~";
   int _fd = 0;
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table",
-      orig_card_table->getBegin(), orig_card_table->getBaseSize(),
+      original_begin, origi_size,
       PROT_READ | PROT_WRITE, &_fd));
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~";
   mem_map->fd_ = _fd;
@@ -204,6 +205,8 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ biased begin: " <<
       reinterpret_cast<void*>(biased_begin);
 
+
+//  UniquePtr<MemMap> _newCard(CardTable(mem_map.release(), biased_begin, offset, heap_begin));
   orig_card_table->DumpCardTable(LOG(ERROR));
 }
 
