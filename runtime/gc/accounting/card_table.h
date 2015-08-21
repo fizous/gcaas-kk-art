@@ -179,7 +179,7 @@ class CardTable {
   // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
   const size_t offset_;
 
-  byte* heap_begin_;
+  const byte* heap_begin_;
 };
 
 }  // namespace accounting
