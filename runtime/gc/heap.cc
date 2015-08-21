@@ -1169,7 +1169,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
 
-void Heap::() {
+void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
   CollectGarbage(false);
@@ -1178,10 +1178,10 @@ void Heap::() {
 
   // Try to see if we have any Zygote spaces.
   if (have_zygote_space_) {
-    GCSERV_CLIENT_VLOG(INFO) << "**** Skipping PreZygoteSpace ****";
+    GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space and skipping ****";
     return;
   }
-  GCSERV_CLIENT_VLOG(INFO) << "**** Continuing with PreZygoteSpace ****";
+  GCSERV_CLIENT_VLOG(INFO) << "**** Continuing with PreZygote Forking ****";
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
 
   {
