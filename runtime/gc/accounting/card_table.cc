@@ -139,12 +139,41 @@ void CardTable::VerifyCardTable() {
 }
 
 
+void CardTable::DumpCardTable(std::ostream& os) {
+  Thread* self = Thread::Current();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: biased_begin_: " <<
+      GetBiasedBegin();
+
+  os << self->GetTid() <<
+      " ----- SharedCardTable: offset_: " << getOffset();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: owner_begin_: " <<
+      getBegin();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: owner_base_begin_: " <<
+      getBaseBegin();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: base_size_: " << getBaseSize();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: size_: " << getSize();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: fd_: " << getFD();
+  os << self->GetTid() <<
+      " ----- SharedCardTable: prot_: " << getProt();
+
+  os << self->GetTid() <<
+      " ===========================";
+}
+
+
 bool CardTable::updateProtection(int newProtection) {
   return mem_map_->Protect(newProtection);
 }
 
 /* reset the card table to enable sharing with gc service */
 void CardTable::ResetCardTable(CardTable* orig_card_table) {
+  orig_card_table->DumpCardTable(GCMMP_VLOG(INFO));
   GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
   ;
   //orig_card_table->mem_map_.reset();
@@ -173,6 +202,8 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
 
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ biased begin: " <<
       reinterpret_cast<void*>(biased_begin);
+
+  orig_card_table->DumpCardTable(GCMMP_VLOG(INFO));
 }
 
 }  // namespace accounting

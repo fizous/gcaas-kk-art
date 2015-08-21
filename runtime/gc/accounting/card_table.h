@@ -156,6 +156,8 @@ class CardTable {
   }
 
   bool updateProtection(int newProtection);
+
+  void DumpCardTable(std::ostream&);
  private:
   CardTable(MemMap* begin, byte* biased_begin, size_t offset, const byte* heap_begin);
 
