@@ -153,7 +153,7 @@ void CardTable::DumpCardTable(std::ostream& os) {
       reinterpret_cast<void*>(getBegin());
   os << self->GetTid() <<
       " ----- SharedCardTable: owner_base_begin_: " <<
-      getBaseBegin();
+      reinterpret_cast<void*>(getBaseBegin());
   os << self->GetTid() <<
       " ----- SharedCardTable: base_size_: " << getBaseSize();
   os << self->GetTid() <<
