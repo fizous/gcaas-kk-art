@@ -23,6 +23,7 @@
 #include "heap_bitmap.h"
 #include "runtime.h"
 #include "utils.h"
+#include "thread.h"
 
 namespace art {
 namespace gc {
