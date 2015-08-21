@@ -146,11 +146,11 @@ bool CardTable::updateProtection(int newProtection) {
 /* reset the card table to enable sharing with gc service */
 void CardTable::ResetCardTable(CardTable* orig_card_table) {
   GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
-  UniquePtr<MemMap> mem_map;
-  orig_card_table->mem_map_.reset();
+  ;
+  //orig_card_table->mem_map_.reset();
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Done Reset ~~~~~";
   int _fd = 0;
-  mem_map.reset(MemMap::MapSharedMemoryAnonymous("card table",
+  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous("card table",
       orig_card_table->getBegin(), orig_card_table->getBaseSize(),
       PROT_READ | PROT_WRITE, &_fd));
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~";
