@@ -146,24 +146,24 @@ void CardTable::DumpCardTable(std::ostream& os) {
       " ----- SharedCardTable: biased_begin_: " <<
       reinterpret_cast<void*>(GetBiasedBegin());
 
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: offset_: " << getOffset();
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: owner_begin_: " <<
       reinterpret_cast<void*>(getBegin());
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: owner_base_begin_: " <<
       reinterpret_cast<void*>(getBaseBegin());
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: base_size_: " << getBaseSize();
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: size_: " << getSize();
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: fd_: " << getFD();
-  os << self->GetTid() <<
+  os <<
       " ----- SharedCardTable: prot_: " << getProt();
 
-  os << self->GetTid() <<
+  os <<
       "\n ===========================";
 }
 
