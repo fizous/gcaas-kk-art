@@ -69,6 +69,25 @@ SharedHeap::SharedHeap(SharedHeapMetada* metadata) :
         ", meta is stored at addr: " <<
         reinterpret_cast<void*>(shared_metadata_);
 
+  SharedFutexData* _futexAddress =
+      &shared_metadata_->lock_header_.futex_head_;
+  SharedConditionVarData* _condAddress =
+      &shared_metadata_->lock_header_.cond_var_;
+  ipc_global_mu_ =
+      new InterProcessMutex(_futexAddress, "sharedHeap Mutex");
+  ipc_global_cond_ =
+      new InterProcessConditionVariable(*ipc_global_mu_,
+          "sharedHeap CondVar", _condAddress);
+
+  SharedFutexData* _futexConcReqAdd =
+      &shared_metadata_->gc_conc_requests.futex_head_;
+  SharedConditionVarData* _condConcReqAdd =
+      &shared_metadata_->gc_conc_requests.cond_var_;
+
+  conc_req_mu_= new InterProcessMutex(_futexConcReqAdd, "conc_req Mutex");
+  conc_req_cond_ =
+        new InterProcessConditionVariable(*conc_req_mu_, "conc_req CondVar",
+             _condConcReqAdd);
 
   GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
         "-----new server heap: done -------";

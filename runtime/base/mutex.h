@@ -251,6 +251,9 @@ class LOCKABLE InterProcessMutex : public BaseMutex {
   explicit InterProcessMutex(const char* name,  SharedFutexData* futexMem,
       LockLevel level = kDefaultMutexLevel, int recursive = 0);
 
+  /* does not initialize the memory  of the mutex */
+  explicit InterProcessMutex::InterProcessMutex(SharedFutexData* futexMem, const char* name,
+    LockLevel level = kDefaultMutexLevel, int recursive = 0);
   ~InterProcessMutex();
 
   void ExclusiveLock(Thread* self) EXCLUSIVE_LOCK_FUNCTION();
@@ -465,6 +468,9 @@ class InterProcessConditionVariable {
  public:
   explicit InterProcessConditionVariable(const char* name,
       InterProcessMutex& mutex, SharedConditionVarData* sharedMem);
+  /* does not initialize the shared memory */
+  explicit InterProcessConditionVariable(InterProcessMutex& mutex,
+      const char* name, SharedConditionVarData* sharedMem);
   ~InterProcessConditionVariable();
 
   void Broadcast(Thread* self);

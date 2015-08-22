@@ -325,6 +325,12 @@ InterProcessMutex::InterProcessMutex(const char* name, SharedFutexData* futexMem
   InitFutexData(futexMem, recursive);
 }
 
+InterProcessMutex::InterProcessMutex(SharedFutexData* futexMem, const char* name,
+    LockLevel level, int recursive) : BaseMutex(name, level) {
+        futexData_ = futexMem;
+}
+
+
 InterProcessMutex::~InterProcessMutex(){
 #if ART_USE_FUTEXES
   if(futexData_->state_ != 0) {
@@ -1046,6 +1052,13 @@ void ReaderWriterMutex::Dump(std::ostream& os) const {
 std::ostream& operator<<(std::ostream& os, const ReaderWriterMutex& mu) {
   mu.Dump(os);
   return os;
+}
+
+
+InterProcessConditionVariable::InterProcessConditionVariable(InterProcessMutex& mutex,
+    const char* name, SharedConditionVarData* sharedMem) :
+        name_(name), guard_(mutex), sharedCondVar_(sharedMem) {
+
 }
 
 InterProcessConditionVariable::InterProcessConditionVariable(const char* name,
