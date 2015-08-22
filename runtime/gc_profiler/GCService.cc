@@ -21,7 +21,7 @@
 
 
 namespace art {
-namespace mprofiler {
+namespace gc {
 
 
 GCServiceDaemon* GCServiceDaemon::GCServiceD = NULL;
@@ -157,7 +157,16 @@ bool GCServiceDaemon::gcserviceMain(Thread* thread) {
   while(processed_index_ != _Counter()) {
     GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
           ":GCServiceD: processing processed index = " <<
-          processed_index_++;
+          processed_index_;
+    SharedHeap* _serverHeap = SharedHeap::ConstructHeapServer(processed_index_);
+    if(_serverHeap == NULL) {
+      LOG(ERROR) << "Error Constructing rhe hsared heap";
+      return false;
+    }
+    processed_index_++;
+    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
+          ":GCServiceD: done processing index = " <<
+          processed_index_;
   }
 //  if(_oldCounter != _Counter()) {
 //    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
@@ -318,7 +327,7 @@ void GCServiceDaemon::initShutDownSignals(void) {
 }
 
 
-}//namespace mprofiler
+}//namespace gc
 }//namespace art
 
 

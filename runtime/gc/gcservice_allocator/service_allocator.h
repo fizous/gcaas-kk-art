@@ -88,11 +88,14 @@ typedef struct SharedContinuousSpaceMeta_S {
 
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
-  int pid_;
-  InterProcessMutex* ipc_global_mu_;
-  InterProcessConditionVariable* ipc_global_cond_;
+  pid_t pid_;
   /* data related to continuous space */
   SharedCardTableMeta card_table_meta_;
+
+  GC_SERVICE_STATUS vm_status_;
+
+  /* used to synchronize on conc requests*/
+  SynchronizedLockHead gc_conc_requests;
 } SharedHeapMetada;
 
 
@@ -128,11 +131,11 @@ public:
     return _addr;
   }
 
-  mprofiler::GCDaemonMetaData* GetGCServiceMeta(void);
+  GCDaemonMetaData* GetGCServiceMeta(void);
 
   SharedHeapMetada* AllocateHeapMeta(void);
 
-  SharedHeapMetada* GetHeapMetaArr(void);
+  SharedHeapMetada* GetHeapMetaArr(int);
 
   // constructor
   ServiceAllocator(int pages);
@@ -146,7 +149,7 @@ public:
 private:
   // Size of this bitmap.
   SharedRegionMeta* memory_meta_;
-  mprofiler::GCDaemonMetaData* service_meta_;
+  GCDaemonMetaData* service_meta_;
   SharedHeapMetada* heap_meta_arr_;
 }; //ServiceAllocator
 

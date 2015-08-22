@@ -113,12 +113,12 @@ ServiceAllocator* ServiceAllocator::CreateServiceAllocator() {
   return serviceAllocator;
 }
 
-mprofiler::GCDaemonMetaData* ServiceAllocator::GetGCServiceMeta(void) {
+GCDaemonMetaData* ServiceAllocator::GetGCServiceMeta(void) {
   return service_meta_;
 }
 
-SharedHeapMetada* ServiceAllocator::GetHeapMetaArr(void) {
-  return heap_meta_arr_;
+SharedHeapMetada* ServiceAllocator::GetHeapMetaArr(int _index) {
+  return &heap_meta_arr_[_index];
 }
 
 SharedHeapMetada* ServiceAllocator::AllocateHeapMeta(void) {

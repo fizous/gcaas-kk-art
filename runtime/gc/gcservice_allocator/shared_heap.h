@@ -23,9 +23,17 @@ public:
 
   static SharedHeap* CreateSharedHeap(ServiceAllocator* service_alloc);
   SharedSpaceBitmapMeta* getSharedSpaceBitmap(void);
-
+  static SharedHeap* ConstructHeapServer(int vm_index);
 private:
   SharedHeapMetada* shared_metadata_;
+
+  /* synchronization on the global locks */
+  InterProcessMutex* ipc_global_mu_;
+  InterProcessConditionVariable* ipc_global_cond_;
+
+  /* synchronization on the conc requests */
+  InterProcessMutex* conc_req_mu_;
+  InterProcessConditionVariable* conc_req_cond_;
 
   /* class members */
   accounting::SharedCardTable* card_table_;
@@ -35,6 +43,7 @@ private:
 
 
   SharedHeap(int _pid, SharedHeapMetada* metadata);
+  SharedHeap(SharedHeapMetada* metadata);
 
 };//SharedHeap
 

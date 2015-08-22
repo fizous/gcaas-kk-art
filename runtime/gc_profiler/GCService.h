@@ -30,7 +30,7 @@
 
 
 namespace art {
-namespace mprofiler {
+namespace gc {
 
 
 typedef enum {
@@ -122,7 +122,7 @@ private:
   void initShutDownSignals(void);
 };//GCServiceDaemon
 
-}//namespace mprofiler
+}//namespace gc
 }//namespace art
 
 
