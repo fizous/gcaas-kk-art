@@ -164,7 +164,7 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   orig_card_table->DumpCardTable(LOG(ERROR));
   GCSERV_CLIENT_VLOG(INFO) << "**** Resetting CardTable Mapping ****";
   byte* original_begin = orig_card_table->getBegin();
-  size_t origi_size = orig_card_table->getBaseSize();
+  size_t origi_size = orig_card_table->getSize();
   orig_card_table->mem_map_.reset();
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Done Reset ~~~~~";
   int _fd = 0;
