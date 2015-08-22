@@ -807,7 +807,7 @@ jobject CreateSystemClassLoader() {
 
 void Runtime::GCPRunGCService(void) {
   GCSERV_DAEM_VLOG(INFO) << " We are inside GCService code now " << getpid();
-	mprofiler::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
+	gc::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
 	GCSERV_DAEM_VLOG(INFO) << " We are leaving GCService code now " << getpid();
 }
 
@@ -824,14 +824,14 @@ void Runtime::GCPCreateGCService(void) {
 void Runtime::GCPRegisterWithGCService(void) {
   GCSERV_CLIENT_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
       getpid();
-  mprofiler::GCServiceDaemon::GCPRegisterWithGCService();
+  gc::GCServiceDaemon::GCPRegisterWithGCService();
   GCSERV_CLIENT_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
       getpid();
 }
 
 void Runtime::GCPBlockOnGCService(void){
   GCSERV_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
-  mprofiler::GCServiceDaemon::GCPBlockForServiceReady(gcserviceAllocator_->GetGCServiceMeta());
+  gc::GCServiceDaemon::GCPBlockForServiceReady(gcserviceAllocator_->GetGCServiceMeta());
   GCSERV_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
 }
 
