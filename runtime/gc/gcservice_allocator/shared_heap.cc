@@ -51,7 +51,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
   conc_req_mu_= new InterProcessMutex("conc_req Mutex", _futexConcReqAdd);
   conc_req_cond_ =
         new InterProcessConditionVariable("conc_req CondVar",
-            *conc_req_mu_, _condAddress);
+            *conc_req_mu_, _condConcReqAdd);
 
 
   shared_metadata_->vm_status_ = GCSERVICE_STATUS_RUNNING;
@@ -97,6 +97,7 @@ SharedHeap* SharedHeap::ConstructHeapServer(int vm_index) {
   SharedHeapMetada* _shared_heap_meta =
       ServiceAllocator::service_allocator->GetHeapMetaArr(vm_index);
   SharedHeap* shared_heap = new shared_heap(_shared_heap_meta);
+  return shared_heap;
 }
 
 
