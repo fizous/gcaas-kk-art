@@ -96,8 +96,8 @@ SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
 SharedHeap* SharedHeap::ConstructHeapServer(int vm_index) {
   SharedHeapMetada* _shared_heap_meta =
       ServiceAllocator::service_allocator->GetHeapMetaArr(vm_index);
-  SharedHeap* shared_heap = new shared_heap(_shared_heap_meta);
-  return shared_heap;
+  SharedHeap* _shared_heap = new SharedHeap(_shared_heap_meta);
+  return _shared_heap;
 }
 
 
