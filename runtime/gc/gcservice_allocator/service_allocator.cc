@@ -90,7 +90,7 @@ ServiceAllocator::ServiceAllocator(int pages) :
   memory_meta_->meta_.size_ = used_bytes;
 
   service_meta_ =
-        reinterpret_cast<mprofiler::GCDaemonMetaData*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(mprofiler::GCDaemonMetaData)));
+        reinterpret_cast<GCDaemonMetaData*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(GCDaemonMetaData)));
 
   heap_meta_arr_ =
       reinterpret_cast<SharedHeapMetada*>(memory_meta_->current_addr_);
@@ -103,7 +103,7 @@ ServiceAllocator::ServiceAllocator(int pages) :
 
   ServiceAllocator::service_allocator = this;
 
-  mprofiler::GCServiceDaemon::InitServiceMetaData(service_meta_);
+  GCServiceDaemon::InitServiceMetaData(service_meta_);
 }
 
 
