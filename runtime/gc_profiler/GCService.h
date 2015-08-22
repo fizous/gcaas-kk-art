@@ -117,6 +117,8 @@ private:
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
 
+
+  volatile int processed_index_;
   void initShutDownSignals(void);
 };//GCServiceDaemon
 

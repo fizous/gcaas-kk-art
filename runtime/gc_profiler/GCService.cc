@@ -28,7 +28,8 @@ GCServiceDaemon* GCServiceDaemon::GCServiceD = NULL;
 
 GCServiceDaemon::GCServiceDaemon(GCDaemonMetaData* service_meta_data) :
     service_meta_data_(service_meta_data),
-    daemonThread_(NULL) {
+    daemonThread_(NULL),
+    processed_index_(0) {
   initShutDownSignals();
 }
 
@@ -141,9 +142,9 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 
 
 bool GCServiceDaemon::gcserviceMain(Thread* thread) {
-  int _oldCounter = 0;
+ // int _oldCounter = 0;
   IterProcMutexLock interProcMu(thread, *_Mu());
-  _oldCounter = _Counter();
+ // _oldCounter = _Counter();
   ScopedThreadStateChange tsc(thread, kWaitingForGCService);
   {
     _Cond()->Wait(thread);
@@ -153,11 +154,16 @@ bool GCServiceDaemon::gcserviceMain(Thread* thread) {
     _Cond()->Broadcast(thread);
     return false;
   }
-  if(_oldCounter != _Counter()) {
+  while(processed_index_ != _Counter()) {
     GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
-          ":GCServiceD: counterReceived = " <<
-          _Counter();
+          ":GCServiceD: processing processed index = " <<
+          processed_index_++;
   }
+//  if(_oldCounter != _Counter()) {
+//    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
+//          ":GCServiceD: counterReceived = " <<
+//          _Counter();
+//  }
   _Cond()->Broadcast(thread);
   return true;
 }
