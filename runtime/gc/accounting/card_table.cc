@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdio>
-#include <cstdlib>
+#include <string>
+#include <sstream>
 #include "card_table.h"
 
 #include "base/logging.h"
@@ -169,8 +169,9 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   orig_card_table->mem_map_.reset();
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Done Reset ~~~~~";
   int _fd = 0;
-  std::string debug_friendly_name("shared card-");
-  debug_friendly_name += std::to_string(getpid());
+  std::ostringstream oss;
+  oss << "shared card-" << getpid();
+  std::string debug_friendly_name(oss.str());
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
       original_begin, origi_size,
       PROT_READ | PROT_WRITE, &_fd));
