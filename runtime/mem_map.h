@@ -104,7 +104,7 @@ class MemMap {
     return prot_;
   }
 
-  char* getName() const {
+  const char* getName() {
     return name_.c_str();
   }
 
