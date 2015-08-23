@@ -175,8 +175,10 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
       original_begin, origi_size,
       PROT_READ | PROT_WRITE, &_fd));
-  GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~";
-  mem_map->fd_ = _fd;
+  GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
+  int new_fd = dup(_fd);
+  GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~ new _fd = "  << new_fd;
+  mem_map->fd_ = new_fd;
   orig_card_table->mem_map_.reset(mem_map.release());
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ put new pointer ~~~~~";
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();
