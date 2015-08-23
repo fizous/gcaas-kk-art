@@ -18,6 +18,7 @@
 #include "gc/gcservice_allocator/shared_space_bitmap.h"
 #include "gc/gcservice_allocator/shared_card_table.h"
 #include "gc_profiler/MProfiler.h"
+#include "gc_profiler/GCService.h"
 
 namespace art {
 
