@@ -90,6 +90,14 @@ SharedHeap::SharedHeap(SharedHeapMetada* metadata) :
              _condConcReqAdd);
 
   GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+        "----- start construction of shared card tables -------";
+
+  card_table_ =
+      accounting::SharedCardTable::ConstructSharedCardTable(&metadata->card_table_meta_);
+
+  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+        "----- Done construction of shared card tables -------";
+  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
         "-----new server heap: done -------";
 }
 

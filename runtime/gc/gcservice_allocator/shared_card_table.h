@@ -26,6 +26,8 @@ class SharedCardTable {
 public:
   static SharedCardTable* CreateSharedCardTable(SharedCardTableMeta* meta_p,
       accounting::CardTable* cardTable);
+  static SharedCardTable* ConstructSharedCardTable(SharedCardTableMeta*);
+  void DumpSharedCardTable(std::ostream&);
 private:
   SharedCardTable(SharedCardTableMeta*);
   SharedCardTableMeta* meta_;

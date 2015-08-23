@@ -24,9 +24,47 @@ namespace art {
 namespace gc {
 namespace accounting {
 
+
+
+void SharedCardTable::DumpSharedCardTable(std::ostream& os) {
+  Thread* self = Thread::Current();
+  SharedMemMapMeta* shMemMeta = &meta_->mem_meta_;
+
+  os << self->GetTid() <<
+      " ----- SharedCardTable: biased_begin_: " <<
+      reinterpret_cast<void*>(meta_->biased_begin_);
+
+  os <<
+      " ----- SharedCardTable: offset_: " << meta_->offset_;
+  os <<
+      " ----- SharedCardTable: owner_begin_: " <<
+      reinterpret_cast<void*>(shMemMeta->owner_begin_);
+  os <<
+      " ----- SharedCardTable: owner_base_begin_: " <<
+      reinterpret_cast<void*>(shMemMeta->owner_base_begin_);
+  os <<
+      " ----- SharedCardTable: base_size_: " << shMemMeta->base_size_;
+  os <<
+      " ----- SharedCardTable: size_: " << shMemMeta->size_;
+  os <<
+      " ----- SharedCardTable: fd_: " << shMemMeta->fd_;
+  os <<
+      " ----- SharedCardTable: prot_: " << shMemMeta->prot_;
+
+
+  os <<
+      "\n ------------------------------";
+}
+
 SharedCardTable::SharedCardTable(SharedCardTableMeta* metaData) :
     meta_(metaData) {
 
+}
+
+SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* shared_meta) {
+  SharedCardTable* card_table = new SharedCardTable(shared_meta);
+  card_table->DumpSharedCardTable(LOG(ERROR));
+  return card_table;
 }
 
 
@@ -43,28 +81,11 @@ SharedCardTable* SharedCardTable::CreateSharedCardTable(SharedCardTableMeta* met
   shMemMeta->fd_        = cardTable->getFD();
   shMemMeta->prot_      = cardTable->getProt();
 
-  Thread* self = Thread::Current();
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: biased_begin_: " <<
-      reinterpret_cast<void*>(meta_p->biased_begin_);
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: offset_: " << meta_p->offset_;
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: owner_begin_: " <<
-      reinterpret_cast<void*>(shMemMeta->owner_begin_);
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: owner_base_begin_: " <<
-      reinterpret_cast<void*>(shMemMeta->owner_base_begin_);
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: base_size_: " << shMemMeta->base_size_;
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: size_: " << shMemMeta->size_;
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: fd_: " << shMemMeta->fd_;
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
-      " ----- SharedCardTable: prot_: " << shMemMeta->prot_;
 
   SharedCardTable* sharedCardTable = new SharedCardTable(meta_p);
+
+  sharedCardTable->DumpSharedCardTable(LOG(ERROR));
+
   return sharedCardTable;
 }
 
