@@ -159,7 +159,7 @@ MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
   byte* actual = reinterpret_cast<byte*>(mmap(page_aligned_addr,
                                               page_aligned_byte_count,
                                               prot,
-                                              MAP_SHARED,
+                                              MAP_SHARED | MAP_FILE,
                                               fd,
                                               page_aligned_offset));
 
