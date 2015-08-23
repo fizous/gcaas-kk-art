@@ -170,9 +170,10 @@ MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
                 << ", " << page_aligned_byte_count
                 << ", " << prot << ", " << MAP_SHARED << ", " << fd << ", " << page_aligned_offset
                 << ") failed\n" << maps;
+    close(fd);
     return NULL;
   }
-  return new MemMap("file", actual, 1024, actual, page_aligned_byte_count,
+  return new MemMap("file", actual, byte_count, actual, page_aligned_byte_count,
                     prot);
 
 }
