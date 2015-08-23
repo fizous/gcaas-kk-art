@@ -26,7 +26,6 @@ public:
   static SharedHeap* ConstructHeapServer(int vm_index);
 private:
   SharedHeapMetada* shared_metadata_;
-  accounting::SharedCardTable* card_table_;
 
   /* synchronization on the global locks */
   InterProcessMutex* ipc_global_mu_;
