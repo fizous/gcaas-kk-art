@@ -30,8 +30,8 @@ typedef struct SharedMemMapMeta_S {
   byte* owner_base_begin_;
   size_t size_;
   size_t base_size_;
-  int fd_;
-  int prot_;
+  volatile int fd_;
+  volatile int prot_;
 } SharedMemMapMeta;
 
 
