@@ -170,7 +170,7 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Done Reset ~~~~~";
   int _fd = 0;
   std::string debug_friendly_name("shared card-");
-  debug_friendly_name += itoa(getpid);
+  debug_friendly_name += std::to_string(getpid());
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
       original_begin, origi_size,
       PROT_READ | PROT_WRITE, &_fd));
