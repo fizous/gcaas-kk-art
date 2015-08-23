@@ -58,7 +58,8 @@ class MemMap {
   static MemMap* MapFileAtAddress(
       byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
 
-  static MemMap* MapSharedProcessFile(byte* addr, int prot, int flags, int fd);
+  static MemMap* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+      int fd);
 
   // Releases the memory mapping
   ~MemMap();

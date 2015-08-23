@@ -145,20 +145,21 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
 }
 
 
-MemMap* MemMap::MapSharedProcessFile(byte* addr, int prot, int flags, int fd) {
+MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+    int fd) {
   // Adjust 'offset' to be page-aligned as required by mmap.
   int page_offset = 0;
   off_t page_aligned_offset = 0;
   // Adjust 'byte_count' to be page-aligned as we will map this anyway.
-  size_t page_aligned_byte_count = RoundUp(1024, kPageSize);
+  size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   // The 'addr' is modified (if specified, ie non-null) to be page aligned to the file but not
   // necessarily to virtual memory. mmap will page align 'addr' for us.
   byte* page_aligned_addr = (addr == NULL) ? NULL : (addr - page_offset);
 
-  byte* actual = reinterpret_cast<byte*>(mmap(NULL,
+  byte* actual = reinterpret_cast<byte*>(mmap(page_aligned_addr,
                                               page_aligned_byte_count,
                                               prot,
-                                              flags,
+                                              MAP_SHARED,
                                               fd,
                                               page_aligned_offset));
 
@@ -167,7 +168,7 @@ MemMap* MemMap::MapSharedProcessFile(byte* addr, int prot, int flags, int fd) {
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(page_aligned_addr)
                 << ", " << page_aligned_byte_count
-                << ", " << prot << ", " << flags << ", " << fd << ", " << page_aligned_offset
+                << ", " << prot << ", " << MAP_SHARED << ", " << fd << ", " << page_aligned_offset
                 << ") failed\n" << maps;
     return NULL;
   }

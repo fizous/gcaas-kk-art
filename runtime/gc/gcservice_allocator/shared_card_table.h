@@ -31,6 +31,7 @@ public:
 private:
   SharedCardTable(SharedCardTableMeta*);
   SharedCardTableMeta* meta_;
+  MemMap* mmap_;
 };//SharedCardTable
 
 

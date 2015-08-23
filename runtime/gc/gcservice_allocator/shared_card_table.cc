@@ -64,6 +64,21 @@ SharedCardTable::SharedCardTable(SharedCardTableMeta* metaData) :
 SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* shared_meta) {
   SharedCardTable* card_table = new SharedCardTable(shared_meta);
   card_table->DumpSharedCardTable(LOG(ERROR));
+
+  card_table->mmap_ = MemMap::MapSharedProcessFile(NULL,
+      shared_meta->mem_meta_.size_, shared_meta->mem_meta_.prot_,
+      shared_meta->mem_meta_.fd_);
+  if(card_table->mmap_ == NULL) {
+    LOG(ERROR) << "SharedCardTable: server Side------- Could not map FD: " <<
+        shared_meta->mem_meta_.fd_;
+    return NULL;
+  }
+
+  GCSERV_DAEM_VLOG <<
+      "SharedCardTable: server Side-------  succeeded to map the fd: " <<
+      shared_meta->mem_meta_.fd_;
+  card_table->mmap_->fd_ = shared_meta->mem_meta_.fd_;
+
   return card_table;
 }
 
