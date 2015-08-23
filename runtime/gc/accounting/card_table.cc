@@ -176,7 +176,7 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
       original_begin, origi_size,
       PROT_READ | PROT_WRITE, &_fd));
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
-  int new_fd = dup(_fd);
+  int new_fd = _fd;
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~ new _fd = "  << new_fd;
   mem_map->fd_ = new_fd;
   orig_card_table->mem_map_.reset(mem_map.release());

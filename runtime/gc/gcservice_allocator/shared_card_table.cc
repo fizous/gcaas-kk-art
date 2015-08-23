@@ -66,6 +66,11 @@ SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* 
   SharedCardTable* card_table = new SharedCardTable(shared_meta);
   card_table->DumpSharedCardTable(LOG(ERROR));
 
+
+  int mappedFD = dup(shared_meta->mem_meta_.fd_);
+
+  GCSERV_DAEM_VLOG(INFO) <<
+      "SharedCardTable: server Side-------  the mapped file descriptor is: " <<  mappedFD;
   if(false) {
   card_table->mmap_ = MemMap::MapSharedProcessFile(NULL,
       shared_meta->mem_meta_.size_, shared_meta->mem_meta_.prot_,
