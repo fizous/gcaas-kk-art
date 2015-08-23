@@ -71,11 +71,12 @@ SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* 
 
   GCSERV_DAEM_VLOG(INFO) <<
       "SharedCardTable: server Side-------  the mapped file descriptor is: " <<  mappedFD;
-  if(false) {
+
+ // if(false) {
   card_table->mmap_ = MemMap::MapSharedProcessFile(NULL,
       shared_meta->mem_meta_.size_, shared_meta->mem_meta_.prot_,
-      shared_meta->mem_meta_.fd_);
-  }
+      mappedFD);
+ // }
   if(card_table->mmap_ == NULL) {
     LOG(ERROR) << "SharedCardTable: server Side------- Could not map FD: " <<
         shared_meta->mem_meta_.fd_;
