@@ -75,7 +75,7 @@ SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* 
     return NULL;
   }
 
-  GCSERV_DAEM_VLOG <<
+  GCSERV_DAEM_VLOG(INFO) <<
       "SharedCardTable: server Side-------  succeeded to map the fd: " <<
       shared_meta->mem_meta_.fd_;
   card_table->mmap_->fd_ = shared_meta->mem_meta_.fd_;
