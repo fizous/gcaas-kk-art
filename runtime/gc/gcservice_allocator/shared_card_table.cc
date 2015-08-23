@@ -58,7 +58,7 @@ void SharedCardTable::DumpSharedCardTable(std::ostream& os) {
 }
 
 SharedCardTable::SharedCardTable(SharedCardTableMeta* metaData) :
-    meta_(metaData) {
+    meta_(metaData), mmap_(NULL) {
 
 }
 
@@ -66,9 +66,11 @@ SharedCardTable* SharedCardTable::ConstructSharedCardTable(SharedCardTableMeta* 
   SharedCardTable* card_table = new SharedCardTable(shared_meta);
   card_table->DumpSharedCardTable(LOG(ERROR));
 
+  if(false) {
   card_table->mmap_ = MemMap::MapSharedProcessFile(NULL,
       shared_meta->mem_meta_.size_, shared_meta->mem_meta_.prot_,
       shared_meta->mem_meta_.fd_);
+  }
   if(card_table->mmap_ == NULL) {
     LOG(ERROR) << "SharedCardTable: server Side------- Could not map FD: " <<
         shared_meta->mem_meta_.fd_;

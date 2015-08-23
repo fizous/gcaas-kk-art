@@ -103,6 +103,11 @@ class MemMap {
   int getProt() {
     return prot_;
   }
+
+  char* getName() const {
+    return name_.c_str();
+  }
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);

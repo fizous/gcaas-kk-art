@@ -130,7 +130,7 @@ void CardTable::VerifyCardTable() {
 
 void CardTable::DumpCardTable(std::ostream& os) {
   Thread* self = Thread::Current();
-  os << self->GetTid() <<
+  os << self->GetTid() << " --- " << mem_map_->getName() <<
       " ----- SharedCardTable: biased_begin_: " <<
       reinterpret_cast<void*>(GetBiasedBegin());
 
