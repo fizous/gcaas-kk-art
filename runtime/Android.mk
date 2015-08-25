@@ -55,6 +55,7 @@ LIBART_COMMON_SRC_FILES := \
 	gc/gcservice_allocator/shared_continuous_space.cc \
 	gc/gcservice_allocator/shared_heap.cc \
 	gc/gcservice_allocator/shared_space_bitmap.cc \
+	gc/gcservice_allocator/service_ipcfs.cc \
 	gc/collector/garbage_collector.cc \
 	gc/collector/mark_sweep.cc \
 	gc/collector/partial_mark_sweep.cc \
@@ -340,7 +341,7 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
   LOCAL_SHARED_LIBRARIES += libpfm4 liblog libnativehelper
   LOCAL_SHARED_LIBRARIES += libcorkscrew # native stack trace support
   ifeq ($$(art_target_or_host),target)
-    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux libipcfs
+    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux libbinder
   else # host
     LOCAL_STATIC_LIBRARIES += libcutils
     LOCAL_SHARED_LIBRARIES += libz-host
