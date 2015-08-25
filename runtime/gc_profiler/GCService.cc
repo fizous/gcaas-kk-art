@@ -18,7 +18,7 @@
 #include "gc_profiler/MProfilerHeap.h"
 #include "gc_profiler/GCService.h"
 
-#include <gc/gcservice_allocator/service_ipcfs.h>
+#include "ipcfs/ipcfs.h"
 
 namespace art {
 namespace gc {
@@ -128,7 +128,12 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         "GCService Daemon thread");
   }
 
-  android::SHM::registerService();
+  android::FileMapperService* testValue =
+      android::FileMapperService::CreateFileMapperSvc();
+  if(testValue == NULL)
+    LOG(ERROR) << "Error Creating sevice";
+  else
+    LOG(ERROR) << "NO ERROR INITIALIZING the service";
 
   GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
