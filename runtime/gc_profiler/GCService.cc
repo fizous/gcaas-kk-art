@@ -128,6 +128,8 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         "GCService Daemon thread");
   }
 
+  android::SHM::registerService();
+
   GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
