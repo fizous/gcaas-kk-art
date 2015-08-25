@@ -338,10 +338,10 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
     endif
   endif
   LOCAL_C_INCLUDES += $(ART_C_INCLUDES)
-  LOCAL_SHARED_LIBRARIES += libpfm4 liblog libnativehelper libipcfs
+  LOCAL_SHARED_LIBRARIES += libpfm4 liblog libnativehelper
   LOCAL_SHARED_LIBRARIES += libcorkscrew # native stack trace support
   ifeq ($$(art_target_or_host),target)
-    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux
+    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux libipcfs
   else # host
     LOCAL_STATIC_LIBRARIES += libcutils
     LOCAL_SHARED_LIBRARIES += libz-host
