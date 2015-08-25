@@ -127,6 +127,9 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         &GCServiceDaemon::RunDaemon, GCServiceDaemon::GCServiceD),
         "GCService Daemon thread");
   }
+#ifdef HAVE_ANDROID_OS
+  // log to logcat for debugging frameworks processes
+  LOG(INFO) << str;
 
   android::FileMapperService* testValue =
       android::FileMapperService::CreateFileMapperSvc();
@@ -134,7 +137,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
     LOG(ERROR) << "Error Creating sevice";
   else
     LOG(ERROR) << "NO ERROR INITIALIZING the service";
-
+#endif
   GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
