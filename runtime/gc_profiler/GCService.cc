@@ -18,7 +18,7 @@
 #include "gc_profiler/MProfilerHeap.h"
 #include "gc_profiler/GCService.h"
 
-#include "ipcfs/ipcfs.h"
+#include <gc/gcservice_allocator/service_ipcfs.h>
 
 namespace art {
 namespace gc {
