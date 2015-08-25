@@ -812,6 +812,14 @@ void Runtime::GCPRunGCService(void) {
 }
 
 
+
+void Runtime::GCPSignalGCServerReady(void) {
+  GCSERV_DAEM_VLOG(INFO) << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+  gc::GCServiceDaemon::GCPSignalToLaunchServer();
+  GCSERV_DAEM_VLOG(INFO) << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+}
+
+
 void Runtime::GCPCreateGCService(void) {
   GCSERV_VLOG(INFO) << " CreateServiceAllocator: before creating service header " <<
       getpid();

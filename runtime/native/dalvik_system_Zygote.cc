@@ -648,6 +648,9 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 		if (waitpid(pid, &status, WNOHANG) == pid) {
 			LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
 		}
+		Runtime* runtime = Runtime::Current();
+		GCP_SIGNAL_SERVER_READY(runtime);
+		GCMMP_VLOG(INFO) << " Zygote Waited for system Server to Initialize";
 	} else {
 		GCMMP_VLOG(INFO) << "GCService: Zygote_nativeForkSystemServer C-pid: " << pid;
 	}

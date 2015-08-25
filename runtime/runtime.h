@@ -409,6 +409,7 @@ class Runtime {
   void DidForkFromZygote();
   pid_t GCPForkGCService(void);
   void GCPRunGCService(void);
+  void GCPSignalGCServerReady(void);
   void GCPBlockOnGCService(void);
   void GCPCreateGCService(void);
   void GCPRegisterWithGCService(void);

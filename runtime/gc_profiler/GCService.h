@@ -36,9 +36,11 @@ namespace gc {
 typedef enum {
   GCSERVICE_STATUS_NONE = 0,
   GCSERVICE_STATUS_STARTING = 1,
-  GCSERVICE_STATUS_RUNNING  = 2,
-  GCSERVICE_STATUS_SHUTTING_DOWN  = 4,
-  GCSERVICE_STATUS_STOPPED  = 8
+  GCSERVICE_STATUS_WAITINGSERVER = 2,
+  GCSERVICE_STATUS_SERVER_INITIALIZED = 4,
+  GCSERVICE_STATUS_RUNNING  = 8,
+  GCSERVICE_STATUS_SHUTTING_DOWN  = 16,
+  GCSERVICE_STATUS_STOPPED  = 32
 } GC_SERVICE_STATUS;
 
 
@@ -68,9 +70,11 @@ public:
   GCServiceDaemon(GCDaemonMetaData* service_header);
 
   bool isRunning(void);
+  bool isNotRunning(void);
   bool isStopped(void);
   bool isShuttingDown(void);
   bool gcserviceMain(Thread*);
+  bool createService(Thread*);
   void shutdown(void);
 
 //  static GCDaemonHeader* CreateServiceHeader(void);
@@ -81,7 +85,10 @@ public:
   static bool IsGCServiceRunning(void);
   static bool IsGCServiceStopped(void);
   static void GCPBlockForServiceReady(GCDaemonMetaData* dMeta);
+  static void GCPSignalToLaunchServer(void);
   static void GCPRegisterWithGCService(void);
+
+
   /******************** setters and getters ************************/
   inline void _Status(GC_SERVICE_STATUS new_status) {
     service_meta_data_->status_ = new_status;

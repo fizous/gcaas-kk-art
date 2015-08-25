@@ -53,6 +53,10 @@ bool GCServiceDaemon::isRunning(void) {
 }
 
 
+bool GCServiceDaemon::isNotRunning(void) {
+  return (_Status() < GCSERVICE_STATUS_RUNNING);
+}
+
 bool GCServiceDaemon::IsGCServiceRunning(void) {
   GCServiceDaemon* _service = GCServiceDaemon::GCServiceD;
   if(_service == NULL)
@@ -127,16 +131,11 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         &GCServiceDaemon::RunDaemon, GCServiceDaemon::GCServiceD),
         "GCService Daemon thread");
   }
-#ifdef HAVE_ANDROID_OS
-  // log to logcat for debugging frameworks processes
-  LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
-  android::FileMapperService* testValue =
-      android::FileMapperService::CreateFileMapperSvc();
-  if(testValue == NULL)
-    LOG(ERROR) << "Error Creating sevice";
-  else
-    LOG(ERROR) << "NO ERROR INITIALIZING the service";
-#endif
+
+
+
+
+
   GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
@@ -149,6 +148,33 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-2 process left waiting loop XXXXXXXXX";
 }
 
+
+bool GCServiceDaemon::createService(Thread* thread) {
+  IterProcMutexLock interProcMu(thread, *_Mu());
+ // _oldCounter = _Counter();
+  ScopedThreadStateChange tsc(thread, kWaitingForGCService);
+  {
+    _Cond()->Wait(thread);
+  }
+  if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
+#ifdef HAVE_ANDROID_OS
+  // log to logcat for debugging frameworks processes
+  LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+  android::FileMapperService* testValue =
+      android::FileMapperService::CreateFileMapperSvc();
+  if(testValue == NULL)
+    LOG(ERROR) << "Error Creating sevice";
+  else
+    LOG(ERROR) << "NO ERROR INITIALIZING the service";
+#endif
+    _Status(GCSERVICE_STATUS_RUNNING);
+    _Cond()->Broadcast(thread);
+    return true;
+  }
+
+  _Cond()->Broadcast(thread);
+  return false;
+}
 
 bool GCServiceDaemon::gcserviceMain(Thread* thread) {
  // int _oldCounter = 0;
@@ -201,8 +227,14 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IterProcMutexLock interProcMu(self, *_gcServiceInst->_Mu());
     _gcServiceInst->daemonThread_ = self;
-    _gcServiceInst->_Status(GCSERVICE_STATUS_RUNNING);
+    _gcServiceInst->_Status(GCSERVICE_STATUS_WAITINGSERVER);
     _gcServiceInst->_Cond()->Broadcast(self);
+  }
+
+  LOG(ERROR) << "-------- Waiting for the Server initialization ---------";
+  while(_gcServiceInst->isNotRunning()) {
+    if(_gcServiceInst->createService(self))
+      break;
   }
 
   GCSERV_DAEM_VLOG(INFO) << "GCServiceD is entering the main loop: " << self->GetTid();
@@ -249,11 +281,20 @@ void GCServiceDaemon::ShutdownGCService(void) {
 }
 
 
+void GCServiceDaemon::GCPSignalToLaunchServer(void) {
+  if(GCServiceDaemon::GCServiceD != NULL) {
+    Thread* self = Thread::Current();
+    IterProcMutexLock interProcMu(self, *GCServiceDaemon::GCServiceD->_Mu());
+    GCServiceDaemon::GCServiceD->_Status(GCSERVICE_STATUS_SERVER_INITIALIZED);
+    GCServiceDaemon::GCServiceD->_Cond()->Broadcast(self);
+  }
+}
+
 void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
   Thread* self = Thread::Current();
   GCSERV_VLOG(INFO) << self->GetTid() << " :locking to wait for service to start";
   IterProcMutexLock interProcMu(self, *dmeta->mu_);
-  while(dmeta->status_ != GCSERVICE_STATUS_RUNNING) {
+  while(dmeta->status_ != GCSERVICE_STATUS_WAITINGSERVER) {
     GCSERV_VLOG(INFO) << self->GetTid() << " : going to wait for service to start";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
