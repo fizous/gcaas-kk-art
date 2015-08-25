@@ -129,7 +129,6 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   }
 #ifdef HAVE_ANDROID_OS
   // log to logcat for debugging frameworks processes
-  LOG(INFO) << str;
 
   android::FileMapperService* testValue =
       android::FileMapperService::CreateFileMapperSvc();
