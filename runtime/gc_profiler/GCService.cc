@@ -167,19 +167,29 @@ bool GCServiceDaemon::createService(Thread* thread) {
     _Cond()->Wait(thread);
   }
   if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
+    bool returnRes = false;
 #ifdef HAVE_ANDROID_OS
-  // log to logcat for debugging frameworks processes
-  LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
-  fileMapperSvc_ =
-      android::FileMapperService::CreateFileMapperSvc();
-  if(fileMapperSvc_ == NULL)
-    LOG(ERROR) << "Error Creating sevice";
-  else
-    LOG(ERROR) << "NO ERROR INITIALIZING the service";
-#endif
+
+    // log to logcat for debugging frameworks processes
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+    if(fileMapperSvc_ == NULL) {
+      fileMapperSvc_ =
+          android::FileMapperService::CreateFileMapperSvc();
+    }
+
+    if(fileMapperSvc_->registerService()) {
+      LOG(ERROR) << "NO ERROR INITIALIZING the service";
+      _Status(GCSERVICE_STATUS_RUNNING);
+      returnRes = true;
+    } else {
+      LOG(ERROR) << "Error Creating sevice";
+    }
+#else
+    returnRes = true;
     _Status(GCSERVICE_STATUS_RUNNING);
+#endif
     _Cond()->Broadcast(thread);
-    return true;
+    return returnRes;
   }
   return false;
 }
