@@ -91,6 +91,8 @@ bool GCServiceDaemon::GCPMapFileDescriptor(int fd) {
   return GCServiceDaemon::GCServiceD->fileMapperSvc_->RegisterFD(fd);
 #else
   return false;
+#endif
+
 }
 
 void GCServiceDaemon::registerProcesss(void) {
