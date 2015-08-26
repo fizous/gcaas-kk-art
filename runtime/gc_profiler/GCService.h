@@ -19,6 +19,7 @@
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
+#include "ipcfs/ipcfs.h"
 #include "utils.h"
 #include "offsets.h"
 
