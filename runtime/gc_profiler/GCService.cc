@@ -88,7 +88,7 @@ void GCServiceDaemon::GCPRegisterWithGCService(void) {
 
 bool GCServiceDaemon::GCPMapFileDescriptor(int fd) {
 #ifdef HAVE_ANDROID_OS
-  return FileMapperService::RegisterFD(fd);
+  return android::FileMapperService::RegisterFD(fd);
 #else
   return false;
 #endif
