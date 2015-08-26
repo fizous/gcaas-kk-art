@@ -179,6 +179,9 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
   int new_fd = _fd;
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ Memory mapped ~~~~~ new _fd = "  << new_fd;
   mem_map->fd_ = new_fd;
+
+  GCServiceDaemon::GCPMapFileDescriptor(mem_map->fd_);
+
   orig_card_table->mem_map_.reset(mem_map.release());
   GCSERV_CLIENT_VLOG(INFO) << "~~~~~ put new pointer ~~~~~";
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();

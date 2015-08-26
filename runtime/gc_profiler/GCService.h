@@ -88,7 +88,7 @@ public:
   static void GCPBlockForServiceReady(GCDaemonMetaData* dMeta);
   static void GCPSignalToLaunchServer(void);
   static void GCPRegisterWithGCService(void);
-
+  static bool GCPMapFileDescriptor(int);
 
   /******************** setters and getters ************************/
   inline void _Status(GC_SERVICE_STATUS new_status) {

@@ -85,17 +85,25 @@ void GCServiceDaemon::GCPRegisterWithGCService(void) {
 }
 
 
+
+bool GCServiceDaemon::GCPMapFileDescriptor(int fd) {
+#ifdef HAVE_ANDROID_OS
+  return GCServiceDaemon::GCServiceD->fileMapperSvc_->RegisterFD(fd);
+#else
+  return false;
+}
+
 void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
   GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space  ****";
   if(GCServiceD->IsGCServiceRunning()) {
-      GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is running..reset CARD TABLE  ****";
-      gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
-   } else {
-     GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is not Running.. do not reset CARD TABLE  ****";
-   }
+    GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is running..reset CARD TABLE  ****";
+    gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
+  } else {
+    GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is not Running.. do not reset CARD TABLE  ****";
+  }
 
   initSharedHeapHeader();
   service_meta_data_->counter_++;
