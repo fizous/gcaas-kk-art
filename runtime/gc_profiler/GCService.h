@@ -126,6 +126,12 @@ private:
 
 
   volatile int processed_index_;
+
+#ifdef HAVE_ANDROID_OS
+  android::FileMapperService* fileMapperSvc_;
+#endif
+
+
   void initShutDownSignals(void);
 };//GCServiceDaemon
 
