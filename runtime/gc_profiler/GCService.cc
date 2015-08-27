@@ -100,7 +100,7 @@ void GCServiceDaemon::registerProcesss(void) {
   GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
       "-----0 register to GCService -------";
   GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space  ****";
-  if(false && GCServiceD->IsGCServiceRunning()) {
+  if(true && GCServiceD->IsGCServiceRunning()) {
     GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is running..reset CARD TABLE  ****";
     gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
   } else {
