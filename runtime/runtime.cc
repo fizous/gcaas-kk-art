@@ -815,7 +815,9 @@ void Runtime::GCPRunGCService(void) {
 
 void Runtime::GCPSignalGCServerReady(void) {
   GCSERV_DAEM_VLOG(INFO) << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
-  gc::GCServiceDaemon::GCPSignalToLaunchServer();
+  android::FileMapperService::CreateFileMapperSvc();
+  android::FileMapperService::svr_inst_->registerService();
+  //gc::GCServiceDaemon::GCPSignalToLaunchServer();
   GCSERV_DAEM_VLOG(INFO) << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
 }
 
