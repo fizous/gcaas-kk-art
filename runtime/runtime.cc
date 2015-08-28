@@ -868,8 +868,10 @@ bool Runtime::Start() {
 
   if (is_zygote_) {
   	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
+#ifdef HAVE_ANDROID_OS
   	android::FileMapperService::FileMapperService* mapperService = android::FileMapperService::CreateFileMapperSvc();
   	mapperService->registerService();
+#endif
     if (!InitZygote()) {
       return false;
     }
