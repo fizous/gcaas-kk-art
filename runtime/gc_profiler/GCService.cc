@@ -131,10 +131,14 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 
   GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
   Thread* self = Thread::Current();
+
+  GCServiceDaemon::createService(self);
   {
     IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
 
     //GCServiceDaemon::GCServiceD = new GCServiceDaemon(_serviceMeta);
+
+
 
     CHECK_PTHREAD_CALL(pthread_create,
         (&GCServiceDaemon::GCServiceD->pthread_, NULL,
@@ -166,7 +170,7 @@ bool GCServiceDaemon::createService(Thread* thread) {
   {
     _Cond()->Wait(thread);
   }
-  if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
+  //if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
     bool returnRes = false;
 #ifdef HAVE_ANDROID_OS
 
@@ -190,8 +194,8 @@ bool GCServiceDaemon::createService(Thread* thread) {
 #endif
     _Cond()->Broadcast(thread);
     return returnRes;
-  }
-  return false;
+  //}
+  //return false;
 }
 
 bool GCServiceDaemon::gcserviceMain(Thread* thread) {
