@@ -131,7 +131,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 
   GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
   Thread* self = Thread::Current();
-  GCServiceDaemon::GCServiceD->createServiceNoBlock(self);
+  //GCServiceDaemon::GCServiceD->createServiceNoBlock(self);
 
   {
     IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
