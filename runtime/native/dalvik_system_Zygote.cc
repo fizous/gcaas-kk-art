@@ -423,6 +423,8 @@ pid_t Runtime::GCPForkGCService(void) {
 
   pid_t _pid = fork();
   if (_pid == 0) {
+    GCPRunGCService();
+
     // child process of the GCService
 		// The child process.
 //		gMallocLeakZygoteChild = 1;
@@ -489,7 +491,6 @@ pid_t Runtime::GCPForkGCService(void) {
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
 
-		GCPRunGCService();
 		return getpid();
   }
   GCMMP_VLOG(INFO) << "GCService: zygote initializing gcService pid: " << getpid();
