@@ -256,7 +256,9 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   }
 
   GCSERV_DAEM_VLOG(INFO) << "GCServiceD is entering the main loop: " << self->GetTid();
-
+#ifdef HAVE_ANDROID_OS
+  _gcServiceInst->fileMapperSvc_->JoinOnThreadPool();
+#endif
   while(_gcServiceInst->isRunning()) {
     if(!_gcServiceInst->gcserviceMain(self))
       break;
