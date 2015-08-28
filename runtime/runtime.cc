@@ -866,6 +866,7 @@ bool Runtime::Start() {
 
   if (is_zygote_) {
   	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
+  	GCPRunGCService();
     if (!InitZygote()) {
       return false;
     }
