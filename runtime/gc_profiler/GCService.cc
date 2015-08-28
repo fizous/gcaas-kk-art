@@ -137,6 +137,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   {
     IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
     _gcServiceInst->_Status(GCSERVICE_STATUS_WAITINGSERVER);
+    _gcServiceInst->_Cond()->Broadcast(self);
   }
 
   GCSERV_DAEM_VLOG(ERROR) << " ---------- Going to wait for System Server " <<
@@ -162,6 +163,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
         (&GCServiceDaemon::GCServiceD->pthread_, NULL,
         &GCServiceDaemon::RunDaemon, GCServiceDaemon::GCServiceD),
         "GCService Daemon thread");
+    _gcServiceInst->_Cond()->Broadcast(self);
   }
 
 
@@ -341,7 +343,7 @@ void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
   Thread* self = Thread::Current();
   GCSERV_VLOG(INFO) << self->GetTid() << " :locking to wait for service to start";
   IterProcMutexLock interProcMu(self, *dmeta->mu_);
-  while(dmeta->status_ != GCSERVICE_STATUS_WAITINGSERVER) {
+  while(dmeta->status_ < GCSERVICE_STATUS_WAITINGSERVER) {
     GCSERV_VLOG(INFO) << self->GetTid() << " : going to wait for service to start";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
