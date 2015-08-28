@@ -131,8 +131,8 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 
   GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
   Thread* self = Thread::Current();
+  GCServiceDaemon::GCServiceD->createServiceNoBlock(self);
 
-  GCServiceDaemon::GCServiceD->createService(self);
   {
     IterProcMutexLock interProcMu(self, *_serviceMeta->mu_);
 
@@ -163,39 +163,47 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 }
 
 
+bool GCServiceDaemon::createServiceNoBlock(Thread* thread) {
+  bool returnRes = false;
+#ifdef HAVE_ANDROID_OS
+
+  // log to logcat for debugging frameworks processes
+  LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+  if(fileMapperSvc_ == NULL) {
+    fileMapperSvc_ =
+        android::FileMapperService::CreateFileMapperSvc();
+  }
+
+  if(fileMapperSvc_->registerService()) {
+    LOG(ERROR) << "NO ERROR INITIALIZING the service";
+    _Status(GCSERVICE_STATUS_RUNNING);
+    returnRes = true;
+  } else {
+    LOG(ERROR) << "Error Creating sevice";
+  }
+#else
+  returnRes = true;
+  _Status(GCSERVICE_STATUS_RUNNING);
+#endif
+  return returnRes;
+}
+
+
 bool GCServiceDaemon::createService(Thread* thread) {
   IterProcMutexLock interProcMu(thread, *_Mu());
  // _oldCounter = _Counter();
+  bool returnRes = false;
   ScopedThreadStateChange tsc(thread, kWaitingForGCService);
   {
     _Cond()->Wait(thread);
   }
-  //if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
-    bool returnRes = false;
-#ifdef HAVE_ANDROID_OS
+  if(_Status() == GCSERVICE_STATUS_SERVER_INITIALIZED) {
 
-    // log to logcat for debugging frameworks processes
-    LOG(ERROR) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
-    if(fileMapperSvc_ == NULL) {
-      fileMapperSvc_ =
-          android::FileMapperService::CreateFileMapperSvc();
-    }
+    returnRes = createServiceNoBlock(thread);
 
-    if(fileMapperSvc_->registerService()) {
-      LOG(ERROR) << "NO ERROR INITIALIZING the service";
-      _Status(GCSERVICE_STATUS_RUNNING);
-      returnRes = true;
-    } else {
-      LOG(ERROR) << "Error Creating sevice";
-    }
-#else
-    returnRes = true;
-    _Status(GCSERVICE_STATUS_RUNNING);
-#endif
-    _Cond()->Broadcast(thread);
-    return returnRes;
-  //}
-  //return false;
+  }
+  _Cond()->Broadcast(thread);
+  return returnRes;
 }
 
 bool GCServiceDaemon::gcserviceMain(Thread* thread) {

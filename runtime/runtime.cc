@@ -807,7 +807,8 @@ jobject CreateSystemClassLoader() {
 
 void Runtime::GCPRunGCService(void) {
   GCSERV_DAEM_VLOG(INFO) << " We are inside GCService code now " << getpid();
-	gc::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
+  //gc::GCServiceDaemon::GCServiceDaemon::createService(Thread::Current());
+  gc::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
 	GCSERV_DAEM_VLOG(INFO) << " We are leaving GCService code now " << getpid();
 }
 
