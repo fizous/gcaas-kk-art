@@ -488,7 +488,7 @@ pid_t Runtime::GCPForkGCService(void) {
 //		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
-//		GCPRunGCService();
+		GCPRunGCService();
 
 		return getpid();
   }

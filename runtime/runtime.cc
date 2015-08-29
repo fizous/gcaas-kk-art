@@ -67,8 +67,6 @@
 
 #include "JniConstants.h"  // Last to avoid LOG redefinition in ics-mr1-plus-art.
 
-#include "ipcfs/ipcfs.h"
-
 namespace art {
 
 Runtime* Runtime::instance_ = NULL;
@@ -868,11 +866,6 @@ bool Runtime::Start() {
 
   if (is_zygote_) {
   	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
-#ifdef HAVE_ANDROID_OS
-  	android::FileMapperService* mapperService =
-  	    android::FileMapperService::CreateFileMapperSvc();
-  	mapperService->registerService();
-#endif
     if (!InitZygote()) {
       return false;
     }
