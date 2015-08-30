@@ -10,13 +10,11 @@
 
 #include "thread.h"
 #include "gc/gcservice/common.h"
-#include "gc/gcservice/gcservice.h"
 
 namespace art {
 
 namespace gcservice {
 
-class GCService;
 class GCServiceProcess;
 
 class GCServiceDaemon {
@@ -39,15 +37,15 @@ public:
 
 class GCServiceProcess {
 public:
-  static void InitGCServiceProcess(GCService*);
-  GCService* service_;
+  static void InitGCServiceProcess(GCServiceMetaData*);
+  GCServiceMetaData* service_meta_;
   GCServiceDaemon* daemon_;
 private:
 
 
   bool initSvcFD(void);
-  GCServiceProcess(GCService*);
-  static GCServiceProcess* process_;
+  GCServiceProcess(GCServiceMetaData*);
+//  static GCServiceProcess* process_;
 
   android::FileMapperService* fileMapperSvc_;
 

@@ -33,16 +33,16 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   DCHECK_NE(self->GetState(), kRunnable);
   {
-    IterProcMutexLock interProcMu(self, *process_->service_->_Mu());
+    IterProcMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
-    process_->service_->_Status(GCSERVICE_STATUS_RUNNING);
-    process_->service_->_Cond()->Broadcast(self);
+    _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
+    _processObj->service_meta_->cond_->Broadcast(self);
   }
 
   GCSERV_DAEM_ILOG << "GCServiceDaemon is entering the main loop: " <<
       _daemonObj->thread_->GetTid();
 
-  while(process_->service_->isRunning()) {
+  while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
     if(!_daemonObj->mainLoop())
       break;
   }
@@ -69,7 +69,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
     process_(process), thread_(NULL) {
   Thread* self = Thread::Current();
   {
-    IterProcMutexLock interProcMu(self, *process_->service_->_Mu());
+    IterProcMutexLock interProcMu(self, *process_->service_meta_->mu_);
 
     initShutDownSignals();
 
@@ -77,7 +77,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
         (&pthread_, NULL,
         &GCServiceDaemon::RunDaemon, this),
         "GCService Daemon thread");
-    process_->service_->_Cond()->Broadcast(self);
+    process_->service_meta_->cond_->Broadcast(self);
   }
 }
 
@@ -90,18 +90,18 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 //----------------------------- GCServiceProcess ------------------------------
 
 
-void GCServiceProcess::InitGCServiceProcess(GCService* service) {
+void GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta) {
   if(process_ != NULL) {
-    process_ = new GCServiceProcess(service);
+    process_ = new GCServiceProcess(meta);
   }
 }
 
 bool GCServiceProcess::initSvcFD(void) {
   bool returnRes = false;
-  IterProcMutexLock interProcMu(thread_, *service_->_Mu());
+  IterProcMutexLock interProcMu(thread_, *service_meta_->mu_);
   ScopedThreadStateChange tsc(thread_, kWaitingForGCService);
   {
-    service_->_Cond()->Wait(thread_);
+    service_meta_->cond_->Wait(thread_);
   }
   if(fileMapperSvc_ == NULL) {
     GCSERV_PROC_ILOG << " creating fileMapperSvc_ for first time ";
@@ -112,12 +112,12 @@ bool GCServiceProcess::initSvcFD(void) {
     GCSERV_PROC_ILOG << " reconnecting ";
     returnRes = android::FileMapperService::Reconnect();
   }
-  service_->_Cond()->Broadcast(thread_);
+  service_meta_->cond_->Broadcast(thread_);
   return returnRes;
 }
 
-GCServiceProcess::GCServiceProcess(GCService* service) :
-    service_(service), fileMapperSvc_(NULL), srvcReady_(false) {
+GCServiceProcess::GCServiceProcess(GCServiceMetaData* meta) :
+    service_meta_(meta), fileMapperSvc_(NULL), srvcReady_(false) {
   thread_ = Thread::Current();
   srvcReady_ = initSvcFD();
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
