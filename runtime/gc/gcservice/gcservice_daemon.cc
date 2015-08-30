@@ -120,7 +120,7 @@ bool GCServiceProcess::initSvcFD(void) {
 }
 
 GCServiceProcess::GCServiceProcess(GCServiceMetaData* meta) :
-    service_meta_(meta), fileMapperSvc_(NULL), srvcReady_(false) {
+    service_meta_(meta), fileMapperSvc_(NULL), thread_(NULL), srvcReady_(false) {
   thread_ = Thread::Current();
   srvcReady_ = initSvcFD();
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
