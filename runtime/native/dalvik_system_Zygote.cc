@@ -635,12 +635,12 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 			debug_flags, rlimits,
 			permittedCapabilities, effectiveCapabilities,
 			MOUNT_EXTERNAL_NONE, NULL, NULL, true);
-	GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer A-pid: " << getpid();
+	GCSERV_ZYGOTE_ILOG << "GCService: Zygote_nativeForkSystemServer A-pid: " << getpid();
 
 	if (pid > 0) {
 		// The zygote process checks whether the child process has died or not.
 		LOG(INFO) << "System server process " << pid << " has been created";
-		GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer B-pid: " << pid;
+		GCSERV_ZYGOTE_ILOG << "GCService: Zygote_nativeForkSystemServer B-pid: " << pid;
 		gSystemServerPid = pid;
 		// There is a slight window that the system server process has crashed
 		// but it went unnoticed because we haven't published its pid yet. So
@@ -651,9 +651,9 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 		}
 		//Runtime* runtime = Runtime::Current();
 		//GCP_SIGNAL_SERVER_READY(runtime);
-		GCSERV_ILOG << " Zygote Waited for system Server to Initialize";
+		GCSERV_ZYGOTE_ILOG << " Zygote Waited for system Server to Initialize";
 	} else {
-	  GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer C-pid: " << pid;
+	  GCSERV_ZYGOTE_ILOG << "GCService: Zygote_nativeForkSystemServer C-pid: " << pid;
 	}
 	return pid;
 }

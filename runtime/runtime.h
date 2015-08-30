@@ -40,9 +40,6 @@
 #include "runtime_stats.h"
 #include "safe_map.h"
 
-#include "gc/gcservice/service_allocator.h"
-#include "gc/gcservice/shared_heap.h"
-
 namespace art {
 
 namespace mprofiler {
@@ -542,8 +539,6 @@ class Runtime {
   jobject system_class_loader_;
 public:
   mprofiler::VMProfiler* vmprofiler_;
-  gc::ServiceAllocator* gcserviceAllocator_;
-  gc::SharedHeap* shared_heap_;
 private:
   DISALLOW_COPY_AND_ASSIGN(Runtime);
 };
