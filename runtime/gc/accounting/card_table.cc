@@ -198,7 +198,7 @@ void CardTable::ResetCardTable(CardTable* orig_card_table) {
     biased_begin += offset;
   }
 
-  GCSERV_CLIENT_ILOG(INFO) << "~~~~~ biased begin: " <<
+  GCSERV_CLIENT_ILOG << "~~~~~ biased begin: " <<
       reinterpret_cast<void*>(biased_begin);
 
 
