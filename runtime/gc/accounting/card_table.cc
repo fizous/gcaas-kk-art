@@ -159,52 +159,52 @@ void CardTable::DumpCardTable(std::ostream& os) {
 bool CardTable::updateProtection(int newProtection) {
   return mem_map_->Protect(newProtection);
 }
-
-/* reset the card table to enable sharing with gc service */
-void CardTable::ResetCardTable(CardTable* orig_card_table) {
-  orig_card_table->DumpCardTable(LOG(ERROR));
-  GCSERV_PROC_ILOG << "**** Resetting CardTable Mapping ****";
-  byte* original_begin = orig_card_table->getBegin();
-  size_t origi_size = orig_card_table->getSize();
-  orig_card_table->mem_map_.reset();
-  GCSERV_PROC_ILOG << "~~~~~ Done Reset ~~~~~";
-  int _fd = 0;
-  std::ostringstream oss;
-  oss << "shared card-" << getpid();
-  std::string debug_friendly_name(oss.str());
-  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
-      original_begin, origi_size,
-      PROT_READ | PROT_WRITE, &_fd));
-  GCSERV_PROC_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
-  int new_fd = _fd;
-  GCSERV_PROC_ILOG << "~~~~~ Memory mapped ~~~~~ new _fd = "  << new_fd;
-  mem_map->fd_ = new_fd;
-
-  GCServiceDaemon::GCPMapFileDescriptor(mem_map->fd_);
-
-  orig_card_table->mem_map_.reset(mem_map.release());
-  GCSERV_PROC_ILOG << "~~~~~ put new pointer ~~~~~";
-  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
-  GCSERV_PROC_ILOG << "~~~~~ put new pointer: " <<
-      reinterpret_cast<void*>(cardtable_begin);
-  // We allocated up to a bytes worth of extra space to allow biased_begin's byte value to equal
-  // GC_CARD_DIRTY, compute a offset value to make this the case
-  size_t offset = 0;
-  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
-      (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
-  if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
-    int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
-    offset = delta + (delta < 0 ? 0x100 : 0);
-    biased_begin += offset;
-  }
-
-  GCSERV_CLIENT_ILOG << "~~~~~ biased begin: " <<
-      reinterpret_cast<void*>(biased_begin);
-
-
-//  UniquePtr<MemMap> _newCard(CardTable(mem_map.release(), biased_begin, offset, heap_begin));
-  orig_card_table->DumpCardTable(LOG(ERROR));
-}
+//
+///* reset the card table to enable sharing with gc service */
+//void CardTable::ResetCardTable(CardTable* orig_card_table) {
+//  orig_card_table->DumpCardTable(LOG(ERROR));
+//  GCSERV_PROC_ILOG << "**** Resetting CardTable Mapping ****";
+//  byte* original_begin = orig_card_table->getBegin();
+//  size_t origi_size = orig_card_table->getSize();
+//  orig_card_table->mem_map_.reset();
+//  GCSERV_PROC_ILOG << "~~~~~ Done Reset ~~~~~";
+//  int _fd = 0;
+//  std::ostringstream oss;
+//  oss << "shared card-" << getpid();
+//  std::string debug_friendly_name(oss.str());
+//  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
+//      original_begin, origi_size,
+//      PROT_READ | PROT_WRITE, &_fd));
+//  GCSERV_PROC_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
+//  int new_fd = _fd;
+//  GCSERV_PROC_ILOG << "~~~~~ Memory mapped ~~~~~ new _fd = "  << new_fd;
+//  mem_map->fd_ = new_fd;
+//
+//  GCServiceDaemon::GCPMapFileDescriptor(mem_map->fd_);
+//
+//  orig_card_table->mem_map_.reset(mem_map.release());
+//  GCSERV_PROC_ILOG << "~~~~~ put new pointer ~~~~~";
+//  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
+//  GCSERV_PROC_ILOG << "~~~~~ put new pointer: " <<
+//      reinterpret_cast<void*>(cardtable_begin);
+//  // We allocated up to a bytes worth of extra space to allow biased_begin's byte value to equal
+//  // GC_CARD_DIRTY, compute a offset value to make this the case
+//  size_t offset = 0;
+//  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
+//      (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
+//  if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
+//    int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
+//    offset = delta + (delta < 0 ? 0x100 : 0);
+//    biased_begin += offset;
+//  }
+//
+//  GCSERV_CLIENT_ILOG << "~~~~~ biased begin: " <<
+//      reinterpret_cast<void*>(biased_begin);
+//
+//
+////  UniquePtr<MemMap> _newCard(CardTable(mem_map.release(), biased_begin, offset, heap_begin));
+//  orig_card_table->DumpCardTable(LOG(ERROR));
+//}
 
 }  // namespace accounting
 }  // namespace gc
