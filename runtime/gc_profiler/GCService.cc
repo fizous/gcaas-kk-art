@@ -143,7 +143,7 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
   GCSERV_DAEM_VLOG(ERROR) << " ---------- Going to wait for System Server " <<
           " -------------------";
   while(_gcServiceInst->_Status() < GCSERVICE_STATUS_STARTING) {
-    if(_gcServiceInst->createService(self))
+    if(_gcServiceInst->initMemoryService(self))
       break;
   }
 
@@ -207,6 +207,32 @@ bool GCServiceDaemon::createServiceNoBlock(Thread* thread) {
   returnRes = true;
   _Status(GCSERVICE_STATUS_STARTING);
 #endif
+  return returnRes;
+}
+
+bool GCServiceDaemon::initMemoryService(Thread* thread) {
+  bool returnRes = false;
+  IterProcMutexLock interProcMu(thread, *_Mu());
+#ifdef HAVE_ANDROID_OS
+
+  // log to logcat for debugging frameworks processes
+  GCSERV_DAEM_VLOG(INFO) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+  if(fileMapperSvc_ == NULL) {
+    fileMapperSvc_ =
+        android::FileMapperService::CreateFileMapperSvc();
+  }
+  returnRes = android::FileMapperService::IsServiceReady();
+  if(returnRes) {
+    GCSERV_DAEM_VLOG(INFO) << "The service was ready";
+    _Status(GCSERVICE_STATUS_STARTING);
+  } else {
+    GCSERV_DAEM_VLOG(INFO) << "The service was not ready";
+  }
+#else
+  returnRes = true;
+  _Status(GCSERVICE_STATUS_STARTING);
+#endif
+  _Cond()->Broadcast(thread);
   return returnRes;
 }
 

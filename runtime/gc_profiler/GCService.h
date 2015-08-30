@@ -76,6 +76,7 @@ public:
   bool isShuttingDown(void);
   bool gcserviceMain(Thread*);
   bool createService(Thread*);
+  bool initMemoryService(Thread*);
   bool createServiceNoBlock(Thread*);
   void shutdown(void);
 
