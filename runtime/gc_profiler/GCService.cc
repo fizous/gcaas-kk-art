@@ -231,7 +231,7 @@ bool GCServiceDaemon::initMemoryService(Thread* thread) {
     returnRes = android::FileMapperService::IsServiceReady();
   } else {
     GCSERV_PROC_ILOG << "reconnecting";
-    returnRes = android::FileMapperService::Reconnect(void);
+    returnRes = android::FileMapperService::Reconnect();
   }
   if(returnRes) {
     GCSERV_PROC_ILOG << "The service was ready";
