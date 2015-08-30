@@ -339,8 +339,8 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
   ifeq ($$(art_target_or_host),target)
     LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux libipcfs
   else # host
-    LOCAL_STATIC_LIBRARIES += libcutils lib64ipcfs_default
-    LOCAL_SHARED_LIBRARIES += libz-host libipcfs_default
+    LOCAL_STATIC_LIBRARIES += libcutils libipcfs
+    LOCAL_SHARED_LIBRARIES += libz-host libipcfs
     LOCAL_LDLIBS += -ldl -lpthread
     ifeq ($(HOST_OS),linux)
       LOCAL_LDLIBS += -lrt
