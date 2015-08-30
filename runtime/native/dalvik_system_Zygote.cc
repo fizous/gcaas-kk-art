@@ -418,7 +418,7 @@ pid_t Runtime::GCPForkGCService(void) {
 
 	uid_t _uid = getuid();
 	gid_t _gid = getgid();
-  GCMMP_VLOG(INFO) << "GCService: Forking from: " << getpid();
+	GCSERV_ILOG << "GCService: Forking from: " << getpid();
 
 
   pid_t _pid = fork();
@@ -484,7 +484,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		self->InitAfterFork();
 
 		//EnableDebugFeatures(debug_flags);
-		GCMMP_VLOG(INFO) << "GCService: gcservice is being forked: " << getpid();
+		GCSERV_ILOG << "GCService: gcservice is being forked: " << getpid();
 //		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
@@ -492,7 +492,7 @@ pid_t Runtime::GCPForkGCService(void) {
 
 		return getpid();
   }
-  GCMMP_VLOG(INFO) << "GCService: zygote initializing gcService pid: " << getpid();
+  GCSERV_ILOG << "GCService: zygote initializing gcService pid: " << getpid();
   GCPBlockOnGCService();
   return 0;
 }
@@ -634,12 +634,12 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 			debug_flags, rlimits,
 			permittedCapabilities, effectiveCapabilities,
 			MOUNT_EXTERNAL_NONE, NULL, NULL, true);
-	GCMMP_VLOG(INFO) << "GCService: Zygote_nativeForkSystemServer A-pid: " << getpid();
+	GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer A-pid: " << getpid();
 
 	if (pid > 0) {
 		// The zygote process checks whether the child process has died or not.
 		LOG(INFO) << "System server process " << pid << " has been created";
-		GCMMP_VLOG(INFO) << "GCService: Zygote_nativeForkSystemServer B-pid: " << pid;
+		GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer B-pid: " << pid;
 		gSystemServerPid = pid;
 		// There is a slight window that the system server process has crashed
 		// but it went unnoticed because we haven't published its pid yet. So
@@ -649,10 +649,10 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 			LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
 		}
 		Runtime* runtime = Runtime::Current();
-		GCP_SIGNAL_SERVER_READY(runtime);
-		GCMMP_VLOG(INFO) << " Zygote Waited for system Server to Initialize";
+		//GCP_SIGNAL_SERVER_READY(runtime);
+		GCSERV_ILOG << " Zygote Waited for system Server to Initialize";
 	} else {
-		GCMMP_VLOG(INFO) << "GCService: Zygote_nativeForkSystemServer C-pid: " << pid;
+	  GCSERV_ILOG << "GCService: Zygote_nativeForkSystemServer C-pid: " << pid;
 	}
 	return pid;
 }
