@@ -56,7 +56,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
 
   shared_metadata_->vm_status_ = GCSERVICE_STATUS_RUNNING;
 
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----new shared heap: done -------";
 }
 

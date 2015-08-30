@@ -143,7 +143,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Heap() entering";
   }
-  GCSERV_CLIENT_VLOG(INFO) << "++++++++++++++++++++++Creating Heap+++++++++++++++++++++";
+  GCSERV_CLIENT_ILOG << "++++++++++++++++++++++Creating Heap+++++++++++++++++++++";
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));
 
