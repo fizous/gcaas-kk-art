@@ -5,7 +5,11 @@
  *      Author: hussein
  */
 
-
+#include "scoped_thread_state_change.h"
+#include "thread_state.h"
+#include "thread.h"
+#include "locks.h"
+#include "os.h"
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice_daemon.h"
 #include "gc/gcservice/service_allocator.h"
