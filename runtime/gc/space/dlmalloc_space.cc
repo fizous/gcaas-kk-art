@@ -332,7 +332,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   VLOG(heap) << "zygote space creation done";
-  GCSERV_CLIENT_VLOG(INFO) << "**** creating new space after zygote ****";
+  GCSERV_ILOG << "**** creating new space after zygote ****";
   return alloc_space;
 }
 

@@ -20,7 +20,7 @@ namespace gc {
 SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
     shared_metadata_(metadata) {
   Thread* self = Thread::Current();
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         " : ----- new shared heap:0 -------  pid: " << getpid() <<
         ", meta is stored at addr: " <<
         reinterpret_cast<void*>(metadata);
@@ -35,7 +35,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
           *ipc_global_mu_, _condAddress);
   shared_metadata_->pid_ = _pid;
 
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         "----- +++ initializing cardtable +++ -------";
 
   card_table_ =
@@ -64,7 +64,7 @@ SharedHeap::SharedHeap(int _pid, SharedHeapMetada* metadata) :
 SharedHeap::SharedHeap(SharedHeapMetada* metadata) :
     shared_metadata_(metadata) {
   Thread* self = Thread::Current();
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         " : ----- new server heap:0 -------  pid: " << shared_metadata_->pid_ <<
         ", meta is stored at addr: " <<
         reinterpret_cast<void*>(shared_metadata_);
@@ -89,32 +89,32 @@ SharedHeap::SharedHeap(SharedHeapMetada* metadata) :
         new InterProcessConditionVariable(*conc_req_mu_, "conc_req CondVar",
              _condConcReqAdd);
 
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         "----- start construction of shared card tables -------";
 
   card_table_ =
       accounting::SharedCardTable::ConstructSharedCardTable(&metadata->card_table_meta_);
 
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         "----- Done construction of shared card tables -------";
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----new server heap: done -------";
 }
 
 
 SharedHeap* SharedHeap::CreateSharedHeap(ServiceAllocator* service_alloc) {
   Thread* self = Thread::Current();
-  if(false) GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  if(false) GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----CreateSharedHeap:0 -------";
   SharedHeapMetada *_heapHeaderHolder =
       service_alloc->AllocateHeapMeta();
-  if(false) GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  if(false) GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----CreateSharedHeap:1 -------";
   memset((void*)_heapHeaderHolder, 0, sizeof(SharedHeapMetada));
-  if(false) GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  if(false) GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----CreateSharedHeap:2 -------";
   SharedHeap* _shared_heap = new SharedHeap(getpid(), _heapHeaderHolder);
-  if(false) GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  if(false) GCSERV_CLIENT_ILOG << self->GetTid() <<
         "-----CreateSharedHeap:3 -------";
   return _shared_heap;
 }

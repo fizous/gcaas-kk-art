@@ -822,26 +822,26 @@ void Runtime::GCPSignalGCServerReady(void) {
 
 
 void Runtime::GCPCreateGCService(void) {
-  GCSERV_VLOG(INFO) << " CreateServiceAllocator: before creating service header " <<
+  GCSERV_ILOG << " CreateServiceAllocator: before creating service header " <<
       getpid();
   gcserviceAllocator_ = gc::ServiceAllocator::CreateServiceAllocator();
-  GCSERV_VLOG(INFO) << " CreateServiceAllocator: after creating service header " <<
+  GCSERV_ILOG << " CreateServiceAllocator: after creating service header " <<
       getpid();
 }
 
 
 void Runtime::GCPRegisterWithGCService(void) {
-  GCSERV_CLIENT_VLOG(INFO) << " <<<<GCPCreateGCService>>>> " <<
+  GCSERV_CLIENT_ILOG << " <<<<GCPCreateGCService>>>> " <<
       getpid();
   gc::GCServiceDaemon::GCPRegisterWithGCService();
-  GCSERV_CLIENT_VLOG(INFO) << " >>>>GCPCreateGCService<<<< " <<
+  GCSERV_CLIENT_ILOG << " >>>>GCPCreateGCService<<<< " <<
       getpid();
 }
 
 void Runtime::GCPBlockOnGCService(void){
-  GCSERV_VLOG(INFO) << " zzzz: We are the parent process going to block" << getpid();
+  GCSERV_ILOG << " zzzz: We are the parent process going to block" << getpid();
   gc::GCServiceDaemon::GCPBlockForServiceReady(gcserviceAllocator_->GetGCServiceMeta());
-  GCSERV_VLOG(INFO) << " zzzz: We are the parent process done blocking" << getpid();
+  GCSERV_ILOG << " zzzz: We are the parent process done blocking" << getpid();
 }
 
 bool Runtime::Start() {
@@ -865,12 +865,12 @@ bool Runtime::Start() {
   Thread::FinishStartup();
 
   if (is_zygote_) {
-  	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
+    GCSERV_ILOG << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
     if (!InitZygote()) {
       return false;
     }
   } else {
-  	GCMMP_VLOG(INFO) << " GCService: Runtime::Start --> DidForkFromZygote: " << getpid();
+    GCSERV_ILOG << " GCService: Runtime::Start --> DidForkFromZygote: " << getpid();
     DidForkFromZygote();
   }
 

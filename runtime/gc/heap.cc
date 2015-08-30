@@ -1178,10 +1178,10 @@ void Heap::PreZygoteFork() {
 
   // Try to see if we have any Zygote spaces.
   if (have_zygote_space_) {
-    GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space and skipping ****";
+    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
     return;
   }
-  GCSERV_CLIENT_VLOG(INFO) << "**** Continuing with PreZygote Forking ****";
+  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
 
   {
