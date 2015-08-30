@@ -60,7 +60,7 @@ LIBART_COMMON_SRC_FILES := \
 	gc/space/space.cc \
 	gc/gcservice/gcservice.cc \
 	gc/gcservice/gcservice_daemon.cc \
-	gc/gcservice/gcservice_allocator.cc \
+	gc/gcservice/service_allocator.cc \
 	gc_profiler/MProfilerTypes.cc \
 	gc_profiler/MProfiler.cc \
 	gc_profiler/MPPerfCounters.cc \
