@@ -68,19 +68,20 @@ bool GCServiceDaemon::IsGCServiceRunning(void) {
 
 void GCServiceDaemon::GCPRegisterWithGCService(void) {
   Thread* self = Thread::Current();
-  GCDaemonMetaData* _meta_data = Runtime::Current()->gcserviceAllocator_->GetGCServiceMeta();
+  GCDaemonMetaData* _meta_data =
+      Runtime::Current()->gcserviceAllocator_->GetGCServiceMeta();
   if(_meta_data == NULL) {
     LOG(ERROR) << " ############### Service Header was NULL While Registering #############" << self->GetTid();
     return;
   }
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_PROC_ILOG << self->GetTid() <<
       "-----0 locking gcservice to register -------";
   IterProcMutexLock interProcMu(self, *_meta_data->mu_);
 
   GCServiceDaemon::GCServiceD->registerProcesss();
 
   _meta_data->cond_->Broadcast(self);
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_PROC_ILOG << self->GetTid() <<
       "-----3 leaving registration -------";
 }
 
@@ -97,19 +98,18 @@ bool GCServiceDaemon::GCPMapFileDescriptor(int fd) {
 
 void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
       "-----0 register to GCService -------";
-  GCSERV_CLIENT_VLOG(INFO) << "**** Found a zygote space  ****";
-  if(false && GCServiceD->IsGCServiceRunning()) {
-    GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is running..reset CARD TABLE  ****";
+  if(GCServiceD->IsGCServiceRunning()) {
+    GCSERV_CLIENT_ILOG << "**** The GC Service is running..reset CARD TABLE  ****";
     gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
   } else {
-    GCSERV_CLIENT_VLOG(INFO) << "**** The GC Service is not Running.. do not reset CARD TABLE  ****";
+    LOG(ERROR) << "**** The GC Service is not Running.. do not reset CARD TABLE  ****";
   }
 
   initSharedHeapHeader();
   service_meta_data_->counter_++;
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
       "-----1 service counter ------- " << service_meta_data_->counter_;
 }
 
@@ -120,13 +120,13 @@ void GCServiceDaemon::initSharedHeapHeader(void) {
   Runtime::Current()->shared_heap_ =
       gc::SharedHeap::CreateSharedHeap(Runtime::Current()->gcserviceAllocator_);
 
-  GCSERV_CLIENT_VLOG(INFO) << self->GetTid() <<
+  GCSERV_CLIENT_ILOG << self->GetTid() <<
       "-----Done with initSharedHeapHeader ------- " <<
       service_meta_data_->counter_;
 }
 
 void GCServiceDaemon::LaunchGCService(void* arg) {
-  GCSERV_DAEM_VLOG(ERROR) << " ---------- ART_USE_FUTEX = " <<
+  GCSERV_PROC_ILOG << " ---------- ART_USE_FUTEX = " <<
       BaseMutex::IsARTUseFutex() << " -------------------";
 
   GCDaemonMetaData* _serviceMeta = reinterpret_cast<GCDaemonMetaData*>(arg);
@@ -140,14 +140,14 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
     _gcServiceInst->_Cond()->Broadcast(self);
   }
 
-  GCSERV_DAEM_VLOG(ERROR) << " ---------- Going to wait for System Server " <<
+  GCSERV_PROC_ILOG << " ---------- Going to wait for System Server " <<
           " -------------------";
   while(_gcServiceInst->_Status() < GCSERVICE_STATUS_STARTING) {
     if(_gcServiceInst->initMemoryService(self))
       break;
   }
 
-  GCSERV_DAEM_VLOG(ERROR) << " ---------- Tried to create the service " <<
+  GCSERV_PROC_ILOG << " ---------- Tried to create the service " <<
           " -------------------";
 
   //GCServiceDaemon::GCServiceD->createServiceNoBlock(self);
@@ -168,20 +168,20 @@ void GCServiceDaemon::LaunchGCService(void* arg) {
 
 
 
-#ifdef HAVE_ANDROID_OS
-  _gcServiceInst->fileMapperSvc_->JoinOnThreadPool();
-#endif
+//#ifdef HAVE_ANDROID_OS
+//  _gcServiceInst->fileMapperSvc_->JoinOnThreadPool();
+//#endif
 
-  GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
+  GCSERV_PROC_ILOG << "XXXXXXXXXX-0 process is locking shutdown mu XXXXXXXXX";
   MutexLock mu(self, *GCServiceDaemon::GCServiceD->shutdown_mu_);
   while(!GCServiceDaemon::IsGCServiceStopped()) {
-    GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-1 process is waiting to stop XXXXXXXXX";
+    GCSERV_PROC_ILOG << "XXXXXXXXXX-1 process is waiting to stop XXXXXXXXX";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
       GCServiceDaemon::GCServiceD->shutdown_cond_->Wait(self);
     }
   }
-  GCSERV_DAEM_VLOG(INFO) << "XXXXXXXXXX-2 process left waiting loop XXXXXXXXX";
+  GCSERV_PROC_ILOG << "XXXXXXXXXX-2 process left waiting loop XXXXXXXXX";
 }
 
 
@@ -216,17 +216,17 @@ bool GCServiceDaemon::initMemoryService(Thread* thread) {
 #ifdef HAVE_ANDROID_OS
 
   // log to logcat for debugging frameworks processes
-  GCSERV_DAEM_VLOG(INFO) << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+  GCSERV_PROC_ILOG << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
   if(fileMapperSvc_ == NULL) {
     fileMapperSvc_ =
         android::FileMapperService::CreateFileMapperSvc();
   }
   returnRes = android::FileMapperService::IsServiceReady();
   if(returnRes) {
-    GCSERV_DAEM_VLOG(INFO) << "The service was ready";
+    GCSERV_PROC_ILOG << "The service was ready";
     _Status(GCSERVICE_STATUS_STARTING);
   } else {
-    GCSERV_DAEM_VLOG(INFO) << "The service was not ready";
+    GCSERV_PROC_ILOG << "The service was not ready";
   }
 #else
   returnRes = true;
@@ -268,16 +268,16 @@ bool GCServiceDaemon::gcserviceMain(Thread* thread) {
     return false;
   }
   while(processed_index_ != _Counter()) {
-    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
+    GCSERV_DAEM_ILOG << thread->GetTid() <<
           ":GCServiceD: processing processed index = " <<
           processed_index_;
     SharedHeap* _serverHeap = SharedHeap::ConstructHeapServer(processed_index_);
     if(_serverHeap == NULL) {
-      LOG(ERROR) << "Error Constructing rhe hsared heap";
+      LOG(ERROR) << "Error Constructing the shared heap";
       return false;
     }
     processed_index_++;
-    GCSERV_DAEM_VLOG(INFO) << thread->GetTid() <<
+    GCSERV_DAEM_ILOG << thread->GetTid() <<
           ":GCServiceD: done processing index = " <<
           processed_index_;
   }
@@ -291,7 +291,7 @@ bool GCServiceDaemon::gcserviceMain(Thread* thread) {
 }
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
-  GCSERV_DAEM_VLOG(ERROR) << " ---------- starting daemon " <<
+  GCSERV_DAEM_ILOG << " ---------- starting daemon " <<
           " -------------------";
   GCServiceDaemon* _gcServiceInst = GCServiceDaemon::GCServiceD;//reinterpret_cast<GCServiceDaemon*>(arg);
   Runtime* runtime = Runtime::Current();
@@ -312,24 +312,24 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   }
 
 
-  GCSERV_DAEM_VLOG(INFO) << "GCServiceD is entering the main loop: " << self->GetTid();
+  GCSERV_DAEM_ILOG << "GCServiceD is entering the main loop: " << self->GetTid();
 
   while(_gcServiceInst->isRunning()) {
     if(!_gcServiceInst->gcserviceMain(self))
       break;
   }
 
-  GCSERV_DAEM_VLOG(INFO) << "GCServiceD left the main loop: " << self->GetTid();
+  GCSERV_DAEM_ILOG << "left the main loop: " << self->GetTid();
   if(_gcServiceInst->isShuttingDown()) {
-    GCSERV_DAEM_VLOG(INFO) << "GCServiceD: shuttingDown is true: " << self->GetTid();
+    GCSERV_DAEM_ILOG << "shuttingDown is true: " << self->GetTid();
     MutexLock mu(self, *_gcServiceInst->shutdown_mu_);
     _gcServiceInst->_Status(GCSERVICE_STATUS_STOPPED);
     _gcServiceInst->shutdown_cond_->Broadcast(self);
-    GCSERV_DAEM_VLOG(INFO) << "GCServiceD: updated status to stopped: " << self->GetTid();
+    GCSERV_DAEM_ILOG << "updated status to stopped: " << self->GetTid();
   }
 
 
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << "-GCServiceD: leaving the daemon code" ;
+  GCSERV_DAEM_ILOG << self->GetTid() << "- leaving the daemon code" ;
 
   return NULL;
 }
@@ -337,16 +337,16 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 void GCServiceDaemon::shutdown(void) {
   Thread* self = Thread::Current();
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :start signaling Shutting down the GCservice "
+  GCSERV_PROC_ILOG << self->GetTid() << " :start signaling Shutting down the GCservice "
       << self->GetTid();
   {
     IterProcMutexLock interProcMu(self, *_Mu());
     _Status(GCSERVICE_STATUS_SHUTTING_DOWN);
     _Cond()->Broadcast(self);
-    GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :change status to shutting down";
+    GCSERV_PROC_ILOG << self->GetTid() << " :change status to shutting down";
   }
   CHECK_PTHREAD_CALL(pthread_join, (pthread_, NULL), "GC service shutdown");
-  GCSERV_DAEM_VLOG(INFO) << self->GetTid() << " :joined on pthread";
+  GCSERV_PROC_ILOG << self->GetTid() << " :joined on pthread";
 }
 
 void GCServiceDaemon::ShutdownGCService(void) {
@@ -367,10 +367,10 @@ void GCServiceDaemon::GCPSignalToLaunchServer(void) {
 
 void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
   Thread* self = Thread::Current();
-  GCSERV_VLOG(INFO) << self->GetTid() << " :locking to wait for service to start";
+  GCSERV_ILOG << self->GetTid() << " :locking to wait for service to start";
   IterProcMutexLock interProcMu(self, *dmeta->mu_);
   while(dmeta->status_ < GCSERVICE_STATUS_WAITINGSERVER) {
-    GCSERV_VLOG(INFO) << self->GetTid() << " : going to wait for service to start";
+    GCSERV_ILOG << self->GetTid() << " : going to wait for service to start";
     ScopedThreadStateChange tsc(self, kWaitingForGCService);
     {
       dmeta->cond_->Wait(self);
@@ -378,7 +378,7 @@ void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
   }
   dmeta->cond_->Broadcast(self);
 
-  GCSERV_VLOG(INFO) << self->GetTid() << " : done with blocking until service completion";
+  GCSERV_ILOG << self->GetTid() << " : done with blocking until service completion";
 }
 
 //
@@ -425,7 +425,7 @@ void GCServiceDaemon::GCPBlockForServiceReady(GCDaemonMetaData* dmeta) {
 
 void GCServiceDaemon::InitServiceMetaData(GCDaemonMetaData* metaData) {
   Thread* self = Thread::Current();
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_ILOG << self->GetTid() <<
       " Start Initializing GCDaemonMetaData ";
   metaData->status_ = GCSERVICE_STATUS_NONE;
   metaData->counter_ = 0;
@@ -437,7 +437,7 @@ void GCServiceDaemon::InitServiceMetaData(GCDaemonMetaData* metaData) {
 
   GCServiceDaemon::GCServiceD = new GCServiceDaemon(metaData);
 
-  GCSERV_VLOG(INFO) << self->GetTid() <<
+  GCSERV_ILOG << self->GetTid() <<
       " Done Initializing GCDaemonMetaData ";
 
 }
