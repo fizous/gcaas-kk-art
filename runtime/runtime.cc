@@ -806,18 +806,18 @@ jobject CreateSystemClassLoader() {
 
 
 void Runtime::GCPRunGCService(void) {
-  GCSERV_DAEM_VLOG(INFO) << " We are inside GCService code now " << getpid();
+  GCSERV_DAEM_ILOG << " We are inside GCService code now " << getpid();
   //gc::GCServiceDaemon::GCServiceDaemon::createService(Thread::Current());
   gc::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
-	GCSERV_DAEM_VLOG(INFO) << " We are leaving GCService code now " << getpid();
+  GCSERV_DAEM_ILOG << " We are leaving GCService code now " << getpid();
 }
 
 
 
 void Runtime::GCPSignalGCServerReady(void) {
-  GCSERV_DAEM_VLOG(INFO) << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+  GCSERV_DAEM_ILOG << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
   gc::GCServiceDaemon::GCPSignalToLaunchServer();
-  GCSERV_DAEM_VLOG(INFO) << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+  GCSERV_DAEM_ILOG << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
 }
 
 
