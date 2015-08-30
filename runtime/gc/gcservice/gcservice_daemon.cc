@@ -43,8 +43,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
       _daemonObj->thread_->GetTid();
 
   while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
-    if(!_daemonObj->mainLoop())
-      break;
+    _daemonObj->mainLoop();
   }
 
   GCSERV_DAEM_ILOG << "GCServiceDaemon left the main loop: " <<
