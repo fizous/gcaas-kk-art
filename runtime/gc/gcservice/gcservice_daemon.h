@@ -16,6 +16,8 @@ namespace art {
 
 namespace gcservice {
 
+class GCService;
+
 class GCServiceDaemon {
   Thread*   thread_;
   pthread_t pthread_;

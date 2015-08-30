@@ -10,12 +10,11 @@
 
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/service_allocator.h"
+#include "gc/gcservice/gcservice_daemon.h"
 
 namespace art {
 
 namespace gcservice {
-
-
 
 
 
