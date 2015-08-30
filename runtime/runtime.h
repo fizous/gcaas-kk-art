@@ -30,7 +30,6 @@
 #include "gc/heap.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
-#include "gc_profiler/GCService.h"
 #include "globals.h"
 #include "instruction_set.h"
 #include "instrumentation.h"
