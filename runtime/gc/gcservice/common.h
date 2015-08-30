@@ -22,6 +22,7 @@
 #define GCSERV_ZYGOTE_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "-Zygote- "
 #define GCSERV_CLIENT_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " == CLIENT== "
 #define GCSERV_DAEM_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " ==DAEM== "
+#define GCSERV_ALLOC_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "==SERV_ALLOC== "
 
 #if ART_GC_PROFILER_SERVICE
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)                      \
