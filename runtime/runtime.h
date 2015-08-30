@@ -40,8 +40,8 @@
 #include "runtime_stats.h"
 #include "safe_map.h"
 
-#include "gc/gcservice_allocator/service_allocator.h"
-#include "gc/gcservice_allocator/shared_heap.h"
+#include "gc/gcservice/service_allocator.h"
+#include "gc/gcservice/shared_heap.h"
 
 namespace art {
 

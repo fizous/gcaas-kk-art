@@ -80,26 +80,6 @@
 #endif//ART_USE_GC_PROFILER
 
 
-#if ART_GC_PROFILER_SERVICE
-  #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)											\
-    runtime->GCPRegisterWithGCService()
-  #define GCP_INIT_GC_SERVICE_HEADER    											         \
-	  GCMMP_VLOG(INFO) << "GCService: initializing service header";      \
-	  GCPCreateGCService();																							   \
-	  GCMMP_VLOG(INFO) << "GCService: Done initiaqlizing service header"
-  #define GCP_FORK_GCSERVICE												    		  			    \
-	  GCPForkGCService();
-  #define GCP_SIGNAL_SERVER_READY(runtime)                               \
-    runtime->GCPSignalGCServerReady();
-#else
-  #define GCP_FORK_GCSERVICE												    				((void) 0)
-  #define GCP_REGISTER_PROC_FOR_GCSERVICE									      ((void) 0)
-  #define GCP_INIT_GC_SERVICE_HEADER								    				((void) 0)
-  #define GCP_SIGNAL_SERVER_READY                               ((void) 0)
-  #define GCP_SIGNAL_SERVER_READY(runtime)                      ((void) 0)
-#endif//ART_GC_PROFILER_SERVICE
-
-
 #define GCP_OFF_CONCURRENT_GC()			(GCP_DISABLE_CONC_COLLECT)
 #define GCP_OFF_EXPLICIT_GC()			  (GCP_DISABLE_EXPL_COLLECT)
 

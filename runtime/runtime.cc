@@ -38,7 +38,7 @@
 #include "gc/heap.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
-#include "gc_profiler/GCService.h"
+#include "gc/gcservice/gcservice.h"
 #include "gc/space/space.h"
 #include "image.h"
 #include "instrumentation.h"
@@ -806,10 +806,10 @@ jobject CreateSystemClassLoader() {
 
 
 void Runtime::GCPRunGCService(void) {
-  GCSERV_DAEM_ILOG << " We are inside GCService code now " << getpid();
+  GCSERV_PROC_ILOG << " We are inside GCService code now " << getpid();
   //gc::GCServiceDaemon::GCServiceDaemon::createService(Thread::Current());
-  gc::GCServiceDaemon::LaunchGCService(gcserviceAllocator_->GetGCServiceMeta());
-  GCSERV_DAEM_ILOG << " We are leaving GCService code now " << getpid();
+  gcservice::GCService::service_->launchProcess();
+  GCSERV_PROC_ILOG << " We are leaving GCService code now " << getpid();
 }
 
 
@@ -831,17 +831,17 @@ void Runtime::GCPCreateGCService(void) {
 
 
 void Runtime::GCPRegisterWithGCService(void) {
-  GCSERV_CLIENT_ILOG << " <<<<GCPCreateGCService>>>> " <<
+  GCSERV_CLIENT_ILOG << " <<<<GCPRegisterWithGCService>>>> " <<
       getpid();
-  gc::GCServiceDaemon::GCPRegisterWithGCService();
-  GCSERV_CLIENT_ILOG << " >>>>GCPCreateGCService<<<< " <<
+  gcservice::GCService::GCPRegisterWithGCService();
+  GCSERV_CLIENT_ILOG << " >>>>GCPRegisterWithGCService<<<< " <<
       getpid();
 }
 
 void Runtime::GCPBlockOnGCService(void){
-  GCSERV_ILOG << " zzzz: We are the parent process going to block" << getpid();
-  gc::GCServiceDaemon::GCPBlockForServiceReady(gcserviceAllocator_->GetGCServiceMeta());
-  GCSERV_ILOG << " zzzz: We are the parent process done blocking" << getpid();
+  GCSERV_ZYGOTE_ILOG << " zzzz: We are the parent process going to block" << getpid();
+  gcservice::GCService::GCPBlockForServiceReady();
+  GCSERV_ZYGOTE_ILOG << " zzzz: We are the parent process done blocking" << getpid();
 }
 
 bool Runtime::Start() {
@@ -865,12 +865,12 @@ bool Runtime::Start() {
   Thread::FinishStartup();
 
   if (is_zygote_) {
-    GCSERV_ILOG << " GCService: Runtime::Start --> calling InitZygote: " << getpid();
+    GCSERV_ZYGOTE_ILOG << " Runtime::Start --> calling InitZygote: " << getpid();
     if (!InitZygote()) {
       return false;
     }
   } else {
-    GCSERV_ILOG << " GCService: Runtime::Start --> DidForkFromZygote: " << getpid();
+    GCSERV_ZYGOTE_ILOG << " Runtime::Start --> DidForkFromZygote: " << getpid();
     DidForkFromZygote();
   }
 

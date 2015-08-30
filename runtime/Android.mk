@@ -196,7 +196,11 @@ LIBART_TARGET_SRC_FILES += \
 	arch/arm/jni_entrypoints_arm.S \
 	arch/arm/portable_entrypoints_arm.S \
 	arch/arm/quick_entrypoints_arm.S \
-	arch/arm/thread_arm.cc
+	arch/arm/thread_arm.cc \
+	gc/gcservice/gcservice.cc \
+	gc/gcservice/gcservice_daemon.cc \
+	gc/gcservice/gcservice_allocator.cc
+
 else # TARGET_ARCH != arm
 ifeq ($(TARGET_ARCH),x86)
 LIBART_TARGET_SRC_FILES += \

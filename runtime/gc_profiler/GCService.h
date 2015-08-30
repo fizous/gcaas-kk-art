@@ -31,26 +31,21 @@
 #endif
 
 
-#define GCSERV_ALLOC_VLOG(severity) if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream() << "==SERV_ALLOC== "
-#define GCSERV_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "==GC_ZYGOTE== "
+
+
+
+#define GCSERV_ALLOC_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "==SERV_ALLOC== "
+
 #define GCSERV_DAEM_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "==SERVICE== "
-#define GCSERV_PROC_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "-PROC- "
-#define GCSERV_CLIENT_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "== CLIENT== "
+
+
 
 
 namespace art {
 namespace gc {
 
 
-typedef enum {
-  GCSERVICE_STATUS_NONE = 0,
-  GCSERVICE_STATUS_WAITINGSERVER = 1,
-  GCSERVICE_STATUS_SERVER_INITIALIZED = 2,
-  GCSERVICE_STATUS_STARTING = 4,
-  GCSERVICE_STATUS_RUNNING  = 8,
-  GCSERVICE_STATUS_SHUTTING_DOWN  = 16,
-  GCSERVICE_STATUS_STOPPED  = 32
-} GC_SERVICE_STATUS;
+
 
 
 
@@ -143,7 +138,7 @@ private:
 #endif
 
 
-  void initShutDownSignals(void);
+  void initShutDownSisgnals(void);
 };//GCServiceDaemon
 
 }//namespace gc

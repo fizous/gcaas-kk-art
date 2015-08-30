@@ -37,6 +37,7 @@
 #include "ScopedUtfChars.h"
 #include "thread.h"
 #include "gc_profiler/MProfiler.h"
+#include "gc/gcservice/common.h"
 #include "cutils/process_name.h"
 
 #if defined(HAVE_PRCTL)
@@ -418,7 +419,7 @@ pid_t Runtime::GCPForkGCService(void) {
 
 	uid_t _uid = getuid();
 	gid_t _gid = getgid();
-	GCSERV_ILOG << "GCService: Forking from: " << getpid();
+	GCSERV_ZYGOTE_ILOG << "GCService: Forking from: " << getpid();
 
 
   pid_t _pid = fork();
@@ -484,7 +485,7 @@ pid_t Runtime::GCPForkGCService(void) {
 		self->InitAfterFork();
 
 		//EnableDebugFeatures(debug_flags);
-		GCSERV_ILOG << "GCService: gcservice is being forked: " << getpid();
+		GCSERV_PROC_ILOG << "GCService: gcservice is being forked: " << getpid();
 //		GCP_INIT_SHARED_HEAP_MUTEX;
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
@@ -492,7 +493,7 @@ pid_t Runtime::GCPForkGCService(void) {
 
 		return getpid();
   }
-  GCSERV_ILOG << "GCService: zygote initializing gcService pid: " << getpid();
+  GCSERV_ZYGOTE_ILOG << "GCService: zygote initializing gcService pid: " << getpid();
   GCPBlockOnGCService();
   return 0;
 }
@@ -520,7 +521,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 	if (pid == 0) {
 	  GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: child: " << getpid();
-	  //GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
+	  GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
 		// The child process.
 		gMallocLeakZygoteChild = 1;
 
