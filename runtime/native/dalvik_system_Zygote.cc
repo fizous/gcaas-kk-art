@@ -38,6 +38,7 @@
 #include "thread.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc/gcservice/common.h"
+#include "gc/gcservice/gcservice.h"
 #include "cutils/process_name.h"
 
 #if defined(HAVE_PRCTL)

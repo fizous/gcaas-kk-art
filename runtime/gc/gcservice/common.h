@@ -28,7 +28,7 @@
     runtime->GCPRegisterWithGCService()
   #define GCP_INIT_GC_SERVICE_HEADER                                    \
     GCMMP_VLOG(INFO) << "GCService: initializing service header";       \
-    GCService::InitService();                                               \
+    gcservice::GCService::InitService();                                               \
     GCMMP_VLOG(INFO) << "GCService: Done initiaqlizing service header"
   #define GCP_FORK_GCSERVICE                                            \
     GCPForkGCService();
