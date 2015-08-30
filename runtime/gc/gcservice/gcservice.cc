@@ -69,7 +69,7 @@ void GCService::initServiceMetaData(GCServiceMetaData* metaData) {
 
 }
 
-void GCPRegisterWithGCService(void) {
+void GCService::GCPRegisterWithGCService(void) {
   GCSERV_CLIENT_ILOG << "Registering for GCService";
 }
 
