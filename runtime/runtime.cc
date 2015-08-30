@@ -815,18 +815,18 @@ void Runtime::GCPRunGCService(void) {
 
 
 void Runtime::GCPSignalGCServerReady(void) {
-  GCSERV_DAEM_ILOG << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
-  gc::GCServiceDaemon::GCPSignalToLaunchServer();
-  GCSERV_DAEM_ILOG << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+//  GCSERV_DAEM_ILOG << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
+//  gc::GCServiceDaemon::GCPSignalToLaunchServer();
+//  GCSERV_DAEM_ILOG << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
 }
 
 
 void Runtime::GCPCreateGCService(void) {
-  GCSERV_ILOG << " CreateServiceAllocator: before creating service header " <<
-      getpid();
-  gcserviceAllocator_ = gc::ServiceAllocator::CreateServiceAllocator();
-  GCSERV_ILOG << " CreateServiceAllocator: after creating service header " <<
-      getpid();
+//  GCSERV_ILOG << " CreateServiceAllocator: before creating service header " <<
+//      getpid();
+//  gcserviceAllocator_ = gc::ServiceAllocator::CreateServiceAllocator();
+//  GCSERV_ILOG << " CreateServiceAllocator: after creating service header " <<
+//      getpid();
 }
 
 
