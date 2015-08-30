@@ -30,6 +30,9 @@ GCServiceDaemon::GCServiceDaemon(GCDaemonMetaData* service_meta_data) :
     service_meta_data_(service_meta_data),
     daemonThread_(NULL),
     processed_index_(0) {
+#ifdef HAVE_ANDROID_OS
+  fileMapperSvc_ = NULL;
+#endif
   initShutDownSignals();
 }
 
@@ -100,7 +103,7 @@ void GCServiceDaemon::registerProcesss(void) {
   Thread* self = Thread::Current();
   GCSERV_CLIENT_ILOG << self->GetTid() <<
       "-----0 register to GCService -------";
-  if(GCServiceD->IsGCServiceRunning()) {
+  if(false && GCServiceD->IsGCServiceRunning()) {
     GCSERV_CLIENT_ILOG << "**** The GC Service is running..reset CARD TABLE  ****";
     gc::accounting::CardTable::ResetCardTable(Runtime::Current()->GetHeap()->GetCardTable());
   } else {
@@ -213,15 +216,23 @@ bool GCServiceDaemon::createServiceNoBlock(Thread* thread) {
 bool GCServiceDaemon::initMemoryService(Thread* thread) {
   bool returnRes = false;
   IterProcMutexLock interProcMu(thread, *_Mu());
+  ScopedThreadStateChange tsc(thread, kWaitingForGCService);
+  {
+    _Cond()->Wait(thread);
+  }
 #ifdef HAVE_ANDROID_OS
 
   // log to logcat for debugging frameworks processes
-  GCSERV_PROC_ILOG << "@@@@@@@@@@@@@@@@Before Creating the FileMapper@@@@@@@@@@@@@@@@@";
+  GCSERV_PROC_ILOG << " Before Creating the FileMapper ";
   if(fileMapperSvc_ == NULL) {
+    GCSERV_PROC_ILOG << "fileMapperSvc_ is null";
     fileMapperSvc_ =
         android::FileMapperService::CreateFileMapperSvc();
+    returnRes = android::FileMapperService::IsServiceReady();
+  } else {
+    GCSERV_PROC_ILOG << "reconnecting";
+    returnRes = android::FileMapperService::Reconnect(void)
   }
-  returnRes = android::FileMapperService::IsServiceReady();
   if(returnRes) {
     GCSERV_PROC_ILOG << "The service was ready";
     _Status(GCSERVICE_STATUS_STARTING);
