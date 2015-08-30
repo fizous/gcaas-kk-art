@@ -6,7 +6,11 @@
  */
 
 
-
+#include "scoped_thread_state_change.h"
+#include "thread_state.h"
+#include "thread.h"
+#include "locks.h"
+#include "os.h"
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/gcservice_daemon.h"
@@ -19,7 +23,7 @@ GCService* GCService::service_ = NULL;
 
 void GCService::InitService(void) {
   if(!service_) {
-    GCService* service = new GCService();
+    service_ = new GCService();
   }
 
 }
