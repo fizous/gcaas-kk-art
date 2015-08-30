@@ -37,7 +37,7 @@ public:
 
 class GCServiceProcess {
 public:
-  static void InitGCServiceProcess(GCServiceMetaData*);
+  static GCServiceProcess* InitGCServiceProcess(GCServiceMetaData*);
   GCServiceMetaData* service_meta_;
   GCServiceDaemon* daemon_;
 private:

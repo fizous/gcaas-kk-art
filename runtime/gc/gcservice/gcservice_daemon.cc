@@ -93,10 +93,11 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 //----------------------------- GCServiceProcess ------------------------------
 
 
-void GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta) {
+GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta) {
   if(process_ != NULL) {
     process_ = new GCServiceProcess(meta);
   }
+  return process_;
 }
 
 bool GCServiceProcess::initSvcFD(void) {
