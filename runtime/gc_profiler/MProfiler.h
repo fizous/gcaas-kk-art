@@ -27,7 +27,12 @@
  * 											Macros Definitions
  **********************************************************************/
 /* log information. used to monitor the flow of the profiler.*/
-#define GCMMP_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+#if ART_GC_PROFILER_VERBOSE
+#define GCPROF_ILOG 1
+#else
+#define GCPROF_ILOG 0
+#endif
+#define GCMMP_VLOG(severity) if (GCPROF_ILOG) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
 
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))

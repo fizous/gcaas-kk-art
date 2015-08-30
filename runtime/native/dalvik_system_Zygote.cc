@@ -520,7 +520,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 	if (pid == 0) {
 	  GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: child: " << getpid();
-	  GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
+	  //GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
 		// The child process.
 		gMallocLeakZygoteChild = 1;
 
