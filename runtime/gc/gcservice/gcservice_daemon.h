@@ -45,7 +45,7 @@ private:
 
   bool initSvcFD(void);
   GCServiceProcess(GCServiceMetaData*);
-//  static GCServiceProcess* process_;
+  static GCServiceProcess* process_;
 
   android::FileMapperService* fileMapperSvc_;
 

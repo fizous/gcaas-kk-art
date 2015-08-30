@@ -74,7 +74,7 @@ void GCPRegisterWithGCService(void) {
 }
 
 void GCService::launchProcess(void) {
-  process_ = GCServiceProcess::InitGCServiceProcess();
+  process_ = GCServiceProcess::InitGCServiceProcess(service_meta_data_);
 }
 
 }//namespace gcservice
