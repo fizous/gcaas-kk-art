@@ -14,11 +14,10 @@
 #include "locks.h"
 #include "os.h"
 #include "gc/accounting/space_bitmap.h"
-#include "gc/gcservice_allocator/service_allocator.h"
-#include "gc/gcservice_allocator/shared_space_bitmap.h"
-#include "gc/gcservice_allocator/shared_card_table.h"
+#include "gc/gcservice/service_allocator.h"
+//#include "gc/gcservice_allocator/shared_space_bitmap.h"
+//#include "gc/gcservice_allocator/shared_card_table.h"
 #include "gc_profiler/MProfiler.h"
-#include "gc_profiler/GCService.h"
 
 namespace art {
 
@@ -27,35 +26,35 @@ namespace accounting {
 
 
 
-void SharedCardTable::DumpSharedCardTable(std::ostream& os) {
-  Thread* self = Thread::Current();
-  SharedMemMapMeta* shMemMeta = &meta_->mem_meta_;
-
-  os << self->GetTid() <<
-      " ----- SharedCardTable: biased_begin_: " <<
-      reinterpret_cast<void*>(meta_->biased_begin_);
-
-  os <<
-      " ----- SharedCardTable: offset_: " << meta_->offset_;
-  os <<
-      " ----- SharedCardTable: owner_begin_: " <<
-      reinterpret_cast<void*>(shMemMeta->owner_begin_);
-  os <<
-      " ----- SharedCardTable: owner_base_begin_: " <<
-      reinterpret_cast<void*>(shMemMeta->owner_base_begin_);
-  os <<
-      " ----- SharedCardTable: base_size_: " << shMemMeta->base_size_;
-  os <<
-      " ----- SharedCardTable: size_: " << shMemMeta->size_;
-  os <<
-      " ----- SharedCardTable: fd_: " << shMemMeta->fd_;
-  os <<
-      " ----- SharedCardTable: prot_: " << shMemMeta->prot_;
-
-
-  os <<
-      "\n ------------------------------";
-}
+//void SharedCardTable::DumpSharedCardTable(std::ostream& os) {
+//  Thread* self = Thread::Current();
+//  gcservice::SharedMemMapMeta* shMemMeta = &meta_->mem_meta_;
+//
+//  os << self->GetTid() <<
+//      " ----- SharedCardTable: biased_begin_: " <<
+//      reinterpret_cast<void*>(meta_->biased_begin_);
+//
+//  os <<
+//      " ----- SharedCardTable: offset_: " << meta_->offset_;
+//  os <<
+//      " ----- SharedCardTable: owner_begin_: " <<
+//      reinterpret_cast<void*>(shMemMeta->owner_begin_);
+//  os <<
+//      " ----- SharedCardTable: owner_base_begin_: " <<
+//      reinterpret_cast<void*>(shMemMeta->owner_base_begin_);
+//  os <<
+//      " ----- SharedCardTable: base_size_: " << shMemMeta->base_size_;
+//  os <<
+//      " ----- SharedCardTable: size_: " << shMemMeta->size_;
+//  os <<
+//      " ----- SharedCardTable: fd_: " << shMemMeta->fd_;
+//  os <<
+//      " ----- SharedCardTable: prot_: " << shMemMeta->prot_;
+//
+//
+//  os <<
+//      "\n ------------------------------";
+//}
 
 SharedCardTable::SharedCardTable(SharedCardTableMeta* metaData) :
     meta_(metaData), mmap_(NULL) {

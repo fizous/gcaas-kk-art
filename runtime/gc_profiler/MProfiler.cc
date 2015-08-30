@@ -24,7 +24,7 @@
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
-#include "gc_profiler/GCService.h"
+//#include "gc_profiler/GCService.h"
 #include "locks.h"
 #include "os.h"
 #include "class_linker.h"

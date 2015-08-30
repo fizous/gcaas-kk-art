@@ -15,8 +15,7 @@
 #include "os.h"
 #include "globals.h"
 #include "gc_profiler/MProfiler.h"
-#include "gc_profiler/GCService.h"
-#include "gc/gcservice/service_allocator.h"
+#include "gc/gcservice/common.h"
 
 
 #define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), ServiceAllocator::kAlignment))
