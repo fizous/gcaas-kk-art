@@ -94,9 +94,9 @@ gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcTy
 }
 
 gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
-  if(GCService::zygoteHeapInitialized) {
-    return kZygotePolicy;
-  }
+//  if(GCService::zygoteHeapInitialized) {
+//    return kZygotePolicy;
+//  }
   return policy;
 }
 
