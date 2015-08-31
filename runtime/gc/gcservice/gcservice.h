@@ -76,6 +76,8 @@ public:
 
   static void PreZygoteFork(void);
   static gc::collector::GcType FilterCollectionType(gc::collector::GcType);
+  static gc::space::GcRetentionPolicy
+      GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy);
 private:
   static bool zygoteHeapInitialized;
 

@@ -93,6 +93,13 @@ gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcTy
   return gcType;
 }
 
+gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
+  if(GCService::zygoteHeapInitialized) {
+    return kZygotePolicy;
+  }
+  return policy;
+}
+
 
 void GCService::PreZygoteFork(void) {
   Runtime* runtime = Runtime::Current();
