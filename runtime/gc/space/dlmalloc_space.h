@@ -39,7 +39,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
 
   SpaceType GetType() const {
-    if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
+    if(GetGcRetentionPolicy() == kGcRetentionPolicyNeverCollect &&
+        spaceType_ == kSpaceTypeZygoteSpace) {
+      return kSpaceTypeZygoteSpace;
+    } else if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
       return kSpaceTypeZygoteSpace;
     } else {
       return kSpaceTypeAllocSpace;
