@@ -1197,8 +1197,8 @@ void Heap::PreZygoteFork() {
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   // Change the GC retention policy of the zygote space to only collect when full.
-  //fizo:zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+ //fizo: zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
 
   if(false && zygote_space->SetMemoryProtection()) {
     GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
