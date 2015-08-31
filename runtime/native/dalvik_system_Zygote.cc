@@ -409,7 +409,7 @@ static bool NeedsNoRandomizeWorkaround() {
 pid_t Runtime::GCPForkGCService(void) {
   //for the GCService
   Runtime* runtime = Runtime::Current();
-  runtime->heap_->PreZygoteFork();
+  runtime->PreZygoteFork(false);
 
   GCP_INIT_GC_SERVICE_HEADER;
 

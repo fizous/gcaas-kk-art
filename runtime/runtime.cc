@@ -229,13 +229,14 @@ void Runtime::Abort() {
   // notreached
 }
 
-bool Runtime::PreZygoteFork() {
+bool Runtime::PreZygoteFork(bool initProfiler) {
 #if ART_GC_PROFILER_SERVICE
   gcservice::GCService::PreZygoteFork();
 #else
   heap_->PreZygoteFork();
 #endif
-  vmprofiler_->PreForkPreparation();
+  if(initProfiler)
+    vmprofiler_->PreForkPreparation();
   return true;
 }
 
