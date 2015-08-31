@@ -231,7 +231,7 @@ void Runtime::Abort() {
 
 bool Runtime::PreZygoteFork() {
 #if ART_GC_PROFILER_SERVICE
-  gc::gservice::GCService::PreZygoteFork();
+  gcservice::GCService::PreZygoteFork();
 #else
   heap_->PreZygoteFork();
 #endif
