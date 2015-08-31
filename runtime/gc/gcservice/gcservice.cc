@@ -85,18 +85,18 @@ void GCService::launchProcess(void) {
 
 
 gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcType) {
-//  if(GCService::zygoteHeapInitialized) {
-//    if(gcType == gc::collector::kGcTypeFull) {
-//      return gc::collector::kGcTypePartial;
-//    }
-//  }
+  if(GCService::zygoteHeapInitialized) {
+    if(gcType == gc::collector::kGcTypeFull) {
+      return gc::collector::kGcTypePartial;
+    }
+  }
   return gcType;
 }
 
 gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
-  if(GCService::zygoteHeapInitialized) {
-    return kZygotePolicy;
-  }
+//  if(GCService::zygoteHeapInitialized) {
+//    return kZygotePolicy;
+//  }
   return policy;
 }
 
