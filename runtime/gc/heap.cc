@@ -1197,17 +1197,18 @@ void Heap::PreZygoteFork() {
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   // Change the GC retention policy of the zygote space to only collect when full.
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
- //fizo: zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
 
-  if(false && zygote_space->SetMemoryProtection()) {
-    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
-  } else {
-    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only failed";
-  }
+//  if(false && zygote_space->SetMemoryProtection()) {
+//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
+//  } else {
+//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only failed";
+//  }
   AddContinuousSpace(alloc_space_);
   have_zygote_space_ = true;
-
+  //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+ //fizo:
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
+  GCSERV_ZYGOTE_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();
