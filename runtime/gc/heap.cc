@@ -1173,8 +1173,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
   mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
   WaitForConcurrentGcToComplete(self);
-  collector::GcType gcpType = GCP_SERVICE_EXPLICIT_FILTER(collector::kGcTypeFull);
-  CollectGarbageInternal(gcpType, kGcCauseExplicit, clear_soft_references);
+  CollectGarbageInternal(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
   mprofiler::VMProfiler::MProfMarkEndGCExplTimeEvent(self);
   mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
