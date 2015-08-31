@@ -94,7 +94,7 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 
 
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta) {
-  if(process_ != NULL) {
+  if(process_ == NULL) {
     GCSERV_PROC_ILOG << "initializing process";
     process_ = new GCServiceProcess(meta);
   }
