@@ -230,7 +230,11 @@ void Runtime::Abort() {
 }
 
 bool Runtime::PreZygoteFork() {
+#if ART_GC_PROFILER_SERVICE
+  GCService::PreZygoteFork();
+#else
   heap_->PreZygoteFork();
+#endif
   vmprofiler_->PreForkPreparation();
   return true;
 }

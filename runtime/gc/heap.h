@@ -405,7 +405,7 @@ class Heap {
   }
 
   void PreZygoteFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
-
+  void HeapPrepareZygoteSpace(Thread*);
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

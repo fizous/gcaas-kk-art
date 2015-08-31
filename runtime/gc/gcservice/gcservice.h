@@ -69,7 +69,7 @@ public:
     return (_Status() < GCSERVICE_STATUS_RUNNING);
   }
 
-  static void preZygoteFork(void);
+  static void PreZygoteFork(void);
 
 private:
   GCService(void);

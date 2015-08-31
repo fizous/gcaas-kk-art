@@ -81,52 +81,47 @@ void GCService::launchProcess(void) {
 }
 
 
-void GCService::preZygoteFork(void) {
-//  Runtime* runtime = Runtime::Current();
-//  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
-//  if(!runtime->IsZygote()) {
-//    GCSERV_ZYGOTE_ILOG <<
-//        " GCService::preZygoteFork --- The runtime is not a zygote ";
-//    return;
-//  }
-//  int collectionType = 0;
-//  gc::Heap* _heap = runtime->GetHeap();
-//  {
-//    MutexLock mu(self, zygote_creation_lock_);
-//    if(_heap->isHaveZygoteSpace) {
-//      GCSERV_ZYGOTE_ILOG <<
-//          " GCService::preZygoteFork --- heap already have zygote space ";
-//      collectionType = 1;
-//    } else {
-//      GCSERV_ZYGOTE_ILOG <<
-//          " GCService::preZygoteFork --- first time fork() ";
-//      collectionType = 2;
-//    }
-//  }
-//
-//  {
-//   if( collectionType == 1) {
-//     //collecting heap partially
-//     GCSERV_ZYGOTE_ILOG <<
-//         " GCService::preZygoteFork --- heap already have zygote space ";
-//     _heap->CollectGarbageForZygoteFork(true);
-//   }
-//  }
-//
-//
-//  if(_heap->isHaveZygoteSpace) {
-//    GCSERV_ZYGOTE_ILOG <<
-//        " GCService::preZygoteFork --- heap already have zygote space ";
-//    //collecting heap partially
-//    _heap->CollectGarbageForZygoteFork(true);
-//    return;
-//  } else {
-//    GCSERV_ZYGOTE_ILOG <<
-//        " GCService::preZygoteFork --- first time fork() ";
-//    _heap->CollectGarbage(true);
-//  }
-//
-//
+void GCService:PreZygoteFork(void) {
+  Runtime* runtime = Runtime::Current();
+  Thread* self = Thread::Current();
+  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
+  if(!runtime->IsZygote()) {
+    GCSERV_ZYGOTE_ILOG <<
+        " GCService::preZygoteFork --- The runtime is not a zygote ";
+    return;
+  }
+  int collectionType = 0;
+  gc::Heap* _heap = runtime->GetHeap();
+  {
+    MutexLock mu(self, zygote_creation_lock_);
+    if(_heap->isHaveZygoteSpace) {
+      GCSERV_ZYGOTE_ILOG <<
+          " GCService::preZygoteFork --- heap already have zygote space ";
+      collectionType = 1;
+    } else {
+      GCSERV_ZYGOTE_ILOG <<
+          " GCService::preZygoteFork --- first time fork() ";
+      collectionType = 2;
+    }
+  }
+  if(collectionType == 1) {
+     //collecting heap partially
+     GCSERV_ZYGOTE_ILOG <<
+         " GCService::preZygoteFork --- collecting partially for fork() ";
+     _heap->CollectGarbageForZygoteFork(true);
+     return;
+   } else if(collectionType == 2) {
+     GCSERV_ZYGOTE_ILOG <<
+         " GCService::preZygoteFork --- collecting the whole heap for fork() ";
+     _heap->CollectGarbage(true);
+   }
+
+
+  GCSERV_ZYGOTE_ILOG <<
+       " GCService::preZygoteFork --- first time fork() ";
+
+  MutexLock mu(self, zygote_creation_lock_);
+  _heap->HeapPrepareZygoteSpace(self);
 
 }
 

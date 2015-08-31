@@ -1177,22 +1177,9 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
 
-void Heap::PreZygoteFork() {
-  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
-  // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
-  //fizo:CollectGarbage(false);
-  CollectGarbage(true);
-  Thread* self = Thread::Current();
-  MutexLock mu(self, zygote_creation_lock_);
 
-  // Try to see if we have any Zygote spaces.
-  if (have_zygote_space_) {
-    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
-    return;
-  }
-  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
-  VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
 
+void Heap::HeapPrepareZygoteSpace(Thread* self) {
   {
     // Flush the alloc stack.
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
@@ -1222,6 +1209,24 @@ void Heap::PreZygoteFork() {
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();
   }
+}
+void Heap::PreZygoteFork() {
+  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
+  // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
+  //fizo:CollectGarbage(false);
+  CollectGarbage(true);
+  Thread* self = Thread::Current();
+  MutexLock mu(self, zygote_creation_lock_);
+
+  // Try to see if we have any Zygote spaces.
+  if (have_zygote_space_) {
+    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
+    return;
+  }
+  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
+  VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
+
+  HeapPrepareZygoteSpace(self);
 }
 
 void Heap::FlushAllocStack() {
