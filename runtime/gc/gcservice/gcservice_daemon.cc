@@ -73,7 +73,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
   Thread* self = Thread::Current();
   {
     IterProcMutexLock interProcMu(self, *process_->service_meta_->mu_);
-
+    process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
     initShutDownSignals();
 
     CHECK_PTHREAD_CALL(pthread_create,
@@ -95,6 +95,7 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta) {
   if(process_ != NULL) {
+    GCSERV_PROC_ILOG << "initializing process";
     process_ = new GCServiceProcess(meta);
   }
   return process_;
@@ -103,10 +104,10 @@ GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceMetaData* meta
 bool GCServiceProcess::initSvcFD(void) {
   bool returnRes = false;
   IterProcMutexLock interProcMu(thread_, *service_meta_->mu_);
-  ScopedThreadStateChange tsc(thread_, kWaitingForGCService);
-  {
-    service_meta_->cond_->Wait(thread_);
-  }
+//  ScopedThreadStateChange tsc(thread_, kWaitingForGCService);
+//  {
+//    service_meta_->cond_->Wait(thread_);
+//  }
   if(fileMapperSvc_ == NULL) {
     GCSERV_PROC_ILOG << " creating fileMapperSvc_ for first time ";
     fileMapperSvc_ =
@@ -116,6 +117,13 @@ bool GCServiceProcess::initSvcFD(void) {
     GCSERV_PROC_ILOG << " reconnecting ";
     returnRes = android::FileMapperService::Reconnect();
   }
+
+  if(returnRes) {
+    GCSERV_PROC_ILOG << " the proc found the service initialized ";
+    service_meta_->status_ = GCSERVICE_STATUS_SERVER_INITIALIZED;
+  } else {
+    GCSERV_PROC_ILOG << " the proc found the service not initialized ";
+  }
   service_meta_->cond_->Broadcast(thread_);
   return returnRes;
 }
@@ -123,7 +131,14 @@ bool GCServiceProcess::initSvcFD(void) {
 GCServiceProcess::GCServiceProcess(GCServiceMetaData* meta) :
     service_meta_(meta), fileMapperSvc_(NULL), thread_(NULL), srvcReady_(false) {
   thread_ = Thread::Current();
+  {
+    GCSERV_PROC_ILOG << " changing status of service to waiting for server ";
+    IterProcMutexLock interProcMu(thread_, *service_meta_->mu_);
+    service_meta_->status_ = GCSERVICE_STATUS_WAITINGSERVER;
+    service_meta_->cond_->Broadcast(thread_);
+  }
   srvcReady_ = initSvcFD();
+
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 }
 

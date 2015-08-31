@@ -33,13 +33,6 @@
 
 
 
-
-
-
-
-
-
-
 namespace art {
 namespace gc {
 
