@@ -57,6 +57,7 @@
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc/gcservice/common.h"
+#include "gc/gcservice/gcservice.h"
 
 namespace art {
 namespace gc {
