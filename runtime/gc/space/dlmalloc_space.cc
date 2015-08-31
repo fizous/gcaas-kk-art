@@ -126,6 +126,11 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 
 size_t DlMallocSpace::bitmap_index_ = 0;
 
+
+bool DlMallocSpace::SetMemoryProtection(void) {
+  return GetMemMap()->Protect(PROT_READ);
+}
+
 DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),

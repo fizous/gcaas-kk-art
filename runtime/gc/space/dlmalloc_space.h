@@ -46,6 +46,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
     }
   }
 
+  //Fizo:
+  bool SetMemoryProtection(void);
   // Create a AllocSpace with the requested sizes. The requested
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
@@ -205,6 +207,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   size_t growth_limit_;
 
   friend class collector::MarkSweep;
+
+
 
   DISALLOW_COPY_AND_ASSIGN(DlMallocSpace);
 };

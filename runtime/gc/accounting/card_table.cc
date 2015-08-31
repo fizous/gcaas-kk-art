@@ -21,6 +21,7 @@
 #include "card_table-inl.h"
 #include "gc/heap.h"
 #include "gc/space/space.h"
+#include "gc/gcservice/common.h"
 #include "heap_bitmap.h"
 #include "runtime.h"
 #include "utils.h"
@@ -57,7 +58,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   size_t capacity = heap_capacity / kCardSize;
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   int _fd = 0;
-  LOG(ERROR) << "--- creating card table ---";
+  GCSERV_ILOG << "--- creating card table ---";
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
   mem_map->fd_ = _fd;
@@ -88,7 +89,7 @@ CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
     const byte* heap_begin)
     : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
       heap_begin_(heap_begin) {
-  LOG(ERROR) << "--- constructor card table ---";
+  GCSERV_ILOG << "--- constructor card table ---";
   byte* __attribute__((unused)) begin = mem_map_->Begin() + offset_;
   byte* __attribute__((unused)) end = mem_map_->End();
 }

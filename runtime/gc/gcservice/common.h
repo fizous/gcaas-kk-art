@@ -18,6 +18,8 @@
 #define SRVC_ILOG  0
 #endif
 
+
+#define GCSERV_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " SvcI: "
 #define GCSERV_PROC_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " =SvcProc= "
 #define GCSERV_ZYGOTE_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "-Zygote- "
 #define GCSERV_CLIENT_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " == CLIENT== "
