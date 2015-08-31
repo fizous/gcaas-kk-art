@@ -1207,7 +1207,7 @@ void Heap::PreZygoteFork() {
   have_zygote_space_ = true;
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
  //fizo:
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
+  //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
   GCSERV_ZYGOTE_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
   for (const auto& collector : mark_sweep_collectors_) {
