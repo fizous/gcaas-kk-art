@@ -159,6 +159,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
     freed.first = nullptr;
     freed.second = nullptr;
   }
+  SetSpaceType(kSpaceTypeAllocSpace);
 }
 
 DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
@@ -330,8 +331,11 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   if (capacity - initial_size > 0) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
+  //Fizo: make space types
+  SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
+  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
