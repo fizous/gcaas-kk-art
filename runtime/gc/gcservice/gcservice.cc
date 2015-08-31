@@ -81,7 +81,7 @@ void GCService::launchProcess(void) {
 }
 
 
-void GCService:PreZygoteFork(void) {
+void GCService::PreZygoteFork(void) {
   Runtime* runtime = Runtime::Current();
   Thread* self = Thread::Current();
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
@@ -94,7 +94,7 @@ void GCService:PreZygoteFork(void) {
   gc::Heap* _heap = runtime->GetHeap();
   {
     MutexLock mu(self, zygote_creation_lock_);
-    if(_heap->isHaveZygoteSpace) {
+    if(_heap->isHaveZygoteSpace()) {
       GCSERV_ZYGOTE_ILOG <<
           " GCService::preZygoteFork --- heap already have zygote space ";
       collectionType = 1;
