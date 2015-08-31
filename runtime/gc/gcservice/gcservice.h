@@ -9,6 +9,8 @@
 #define ART_RUNTIME_GC_GCSERVICE_GCSERVICE_H_
 
 #include "gc/gcservice/common.h"
+#include "gc/collector/gc_type.h"
+#include "gc/space/space.h"
 #include "gc/gcservice/service_allocator.h"
 #include "gc/gcservice/gcservice_daemon.h"
 
@@ -21,6 +23,9 @@ namespace gcservice {
 class GCService {
 public:
   static GCService* service_;
+  static const gc::space::GcRetentionPolicy kZygotePolicy =
+      gc::space::kGcRetentionPolicyNeverCollect;
+
 
   void initServiceMetaData(GCServiceMetaData*);
 
@@ -70,8 +75,10 @@ public:
   }
 
   static void PreZygoteFork(void);
-
+  static gc::collector::GcType FilterCollectionType(gc::collector::GcType);
 private:
+  static bool zygoteHeapInitialized;
+
   GCService(void);
 
   ServiceAllocator* allocator_;

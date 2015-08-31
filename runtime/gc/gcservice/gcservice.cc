@@ -17,12 +17,15 @@
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/gcservice_daemon.h"
+#include "gc/collector/gc_type.h"
 
 namespace art {
 namespace gcservice {
 
 
 GCService* GCService::service_ = NULL;
+bool GCService::zygoteHeapInitialized = false;
+
 
 void GCService::InitService(void) {
   if(!service_) {
@@ -81,6 +84,16 @@ void GCService::launchProcess(void) {
 }
 
 
+gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcType) {
+  if(GCService::zygoteHeapInitialized) {
+    if(gcType == gc::collector::kGcTypeFull) {
+      return gc::collector::kGcTypePartial;
+    }
+  }
+  return gcType;
+}
+
+
 void GCService::PreZygoteFork(void) {
   Runtime* runtime = Runtime::Current();
   Thread* self = Thread::Current();
@@ -121,6 +134,8 @@ void GCService::PreZygoteFork(void) {
        " GCService::preZygoteFork --- first time fork() ";
 
   MutexLock mu(self, zygote_creation_lock_);
+  GCService::zygoteHeapInitialized = true;
+
   _heap->HeapPrepareZygoteSpace(self);
 
 }

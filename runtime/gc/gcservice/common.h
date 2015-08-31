@@ -37,12 +37,14 @@
     GCPForkGCService();
   #define GCP_SIGNAL_SERVER_READY(runtime)                              \
     runtime->GCPSignalGCServerReady();
+  #define GCP_SERVICE_EXPLICIT_FILTER(gcpType) GCService::FilterCollectionType(gcpType)
 #else
   #define GCP_FORK_GCSERVICE                                    ((void) 0)
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)              ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER                            ((void) 0)
   #define GCP_SIGNAL_SERVER_READY                               ((void) 0)
   #define GCP_SIGNAL_SERVER_READY(runtime)                      ((void) 0)
+  #define GCP_SERVICE_EXPLICIT_FILTER(gcpType)                  (gcpType)
 #endif//ART_GC_PROFILER_SERVICE
 
 namespace art {
