@@ -94,9 +94,9 @@ gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcTy
 }
 
 gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
-//  if(GCService::zygoteHeapInitialized) {
-//    return kZygotePolicy;
-//  }
+  if(GCService::zygoteHeapInitialized) {
+    return kZygotePolicy;
+  }
   return policy;
 }
 
@@ -130,12 +130,11 @@ void GCService::PreZygoteFork(void) {
          " GCService::preZygoteFork --- collecting partially for fork() ";
      _heap->CollectGarbageForZygoteFork(true);
      return;
-   } else if(collectionType == 2) {
-     GCSERV_ZYGOTE_ILOG <<
-         " GCService::preZygoteFork --- collecting the whole heap for fork() ";
-     _heap->CollectGarbage(true);
    }
+  GCSERV_ZYGOTE_ILOG <<
+      " GCService::preZygoteFork --- collecting the whole heap for fork() ";
 
+  _heap->CollectGarbage(true);
 
   GCSERV_ZYGOTE_ILOG <<
        " GCService::preZygoteFork --- first time fork() ";
