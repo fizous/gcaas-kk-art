@@ -94,6 +94,8 @@ enum GcCause {
   kGcCauseExplicit,
   // An explicit System.gc() call for the profiler.
   kGcCauseProfile,
+  // An explicit System.gc() call for the zygote fork.
+  kGcCauseZygoteFork,
 };
 std::ostream& operator<<(std::ostream& os, const GcCause& policy);
 
@@ -170,6 +172,7 @@ class Heap {
 
   // Initiates an explicit garbage collection.
   void CollectGarbageForProfile(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
+  void CollectGarbageForZygoteFork(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
 
   // Initiates an explicit garbage collection.
   void CollectGarbage(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
@@ -475,6 +478,9 @@ class Heap {
   	return capacity_;
   }
 
+  bool isHaveZygoteSpace (){
+    return have_zygote_space_;
+  }
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

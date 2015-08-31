@@ -11,6 +11,9 @@
 #include "thread.h"
 #include "locks.h"
 #include "os.h"
+#include "runtime.h"
+#include "gc/heap.h"
+#include "gc/collector/gc_type.h"
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/gcservice_daemon.h"
@@ -75,6 +78,32 @@ void GCService::GCPRegisterWithGCService(void) {
 
 void GCService::launchProcess(void) {
   process_ = GCServiceProcess::InitGCServiceProcess(service_meta_data_);
+}
+
+
+void GCService::preZygoteFork(void) {
+  Runtime* runtime = Runtime::Current();
+  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
+  if(!runtime->IsZygote()) {
+    GCSERV_ZYGOTE_ILOG <<
+        " GCService::preZygoteFork --- The runtime is not a zygote ";
+    return;
+  }
+  gc::Heap* _heap = runtime->GetHeap();
+  if(_heap->isHaveZygoteSpace) {
+    GCSERV_ZYGOTE_ILOG <<
+        " GCService::preZygoteFork --- heap already have zygote space ";
+    //collecting heap partially
+    _heap->CollectGarbageForZygoteFork(true);
+    return;
+  } else {
+    GCSERV_ZYGOTE_ILOG <<
+        " GCService::preZygoteFork --- heap already have zygote space ";
+    _heap->CollectGarbage(true);
+  }
+
+
+
 }
 
 }//namespace gcservice

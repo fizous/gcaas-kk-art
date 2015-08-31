@@ -1155,6 +1155,14 @@ void Heap::CollectGarbageForProfile(bool clear_soft_references) {
 	  CollectGarbageInternal(collector::kGcTypeFull, kGcCauseProfile, clear_soft_references);
 }
 
+void Heap::CollectGarbageForZygoteFork(bool clear_soft_references) {
+   Thread* self = Thread::Current();
+    //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
+//    mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
+    WaitForConcurrentGcToComplete(self);
+    CollectGarbageInternal(collector::kGcTypePartial, kGcCauseZygoteFork, clear_soft_references);
+}
+
 void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.
@@ -1172,7 +1180,8 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
-  CollectGarbage(false);
+  //fizo:CollectGarbage(false);
+  CollectGarbage(true);
   Thread* self = Thread::Current();
   MutexLock mu(self, zygote_creation_lock_);
 
