@@ -625,7 +625,7 @@ static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid,
 		jint gid, jintArray gids,
 		jint debug_flags, jobjectArray rlimits, jint mount_external,
 		jstring se_info, jstring se_name) {
-  GCP_INIT_GC_SERVICE_HEADER;
+
 	return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits, 0,
 			0, mount_external, se_info, se_name, false);
 }
@@ -634,7 +634,7 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid,
 		gid_t gid, jintArray gids,
 		jint debug_flags, jobjectArray rlimits,
 		jlong permittedCapabilities, jlong effectiveCapabilities) {
-  GCP_INIT_GC_SERVICE_HEADER;
+
 	pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
 			debug_flags, rlimits,
 			permittedCapabilities, effectiveCapabilities,
