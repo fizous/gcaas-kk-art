@@ -148,9 +148,10 @@ void GCService::PreZygoteFork(void) {
        " GCService::preZygoteFork --- first time fork() ";
 
   MutexLock mu(self, zygote_creation_lock_);
-  GCService::zygoteHeapInitialized = true;
 
   _heap->HeapPrepareZygoteSpace(self);
+
+  GCService::zygoteHeapInitialized = true;
 
 }
 
