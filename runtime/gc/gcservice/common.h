@@ -32,10 +32,11 @@
   #define GCP_INIT_GC_SERVICE_HEADER                                    \
     Runtime* _runtime = Runtime::Current();                             \
     if(gcservice::GCService::InitService()) {                           \
-      return 0;                                                         \
-    }                                                                   \
-    _runtime->GCPForkGCService();                                       \
-    GCMMP_VLOG(INFO) << "GCService: initialized service header";
+                                                                 \
+    } else {                                                            \
+      _runtime->GCPForkGCService();                                       \
+      GCMMP_VLOG(INFO) << "GCService: initialized service header";        \
+    }
 
   #define GCP_SIGNAL_SERVER_READY(runtime)                              \
     runtime->GCPSignalGCServerReady();

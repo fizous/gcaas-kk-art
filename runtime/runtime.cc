@@ -886,13 +886,13 @@ bool Runtime::Start() {
   self->GetJniEnv()->locals.AssertEmpty();
 
 
-//  if (is_zygote_) {//fork gcservice
-//  	GCP_FORK_GCSERVICE;
-//  }
+
   VLOG(startup) << "Runtime::Start exiting";
 
   finished_starting_ = true;
-
+  if (is_zygote_) {//fork gcservice
+    GCP_INIT_GC_SERVICE_HEADER;
+  }
   return true;
 }
 
