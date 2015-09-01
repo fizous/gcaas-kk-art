@@ -34,7 +34,7 @@
 #include "safe_map.h"
 #include "thread_pool.h"
 #include "gc/gcservice/common.h"
-
+#include "gc/gcservice/gcservice.h"
 namespace art {
 
 class ConditionVariable;
