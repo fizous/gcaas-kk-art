@@ -33,8 +33,7 @@
 #include "offsets.h"
 #include "safe_map.h"
 #include "thread_pool.h"
-#include "gc/gcservice/common.h"
-#include "gc/gcservice/gcservice.h"
+
 namespace art {
 
 class ConditionVariable;
@@ -288,6 +287,7 @@ class Heap {
 
   void gcpIncMutationCnt(void);
 
+  void gcpLogObjectMutation(const mirror::Object*);
 
   void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
   		const mirror::Object* new_value);
@@ -321,7 +321,9 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
-    GCP_SERVICE_LOG_IMMUNED(dst);
+#if ART_GC_PROFILER_SERVICE
+    gcpLogObjectMutation(dst);
+#endif
   }
 
   // Write barrier for array operations that update many field positions
@@ -331,7 +333,9 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
-    GCP_SERVICE_LOG_IMMUNED(dst);
+#if ART_GC_PROFILER_SERVICE
+    gcpLogObjectMutation(dst);
+#endif
   }
 #endif //ART_USE_GC_PROFILER_REF_DIST
 

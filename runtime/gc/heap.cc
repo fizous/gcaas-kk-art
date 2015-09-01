@@ -1813,6 +1813,11 @@ void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
 
+
+void Heap::gcpLogObjectMutation(const mirror::Object* dst) {
+  GCP_SERVICE_LOG_IMMUNED(dst);
+}
+
 void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 		size_t length) {
 	mprofiler::VMProfiler* mP = Runtime::Current()->GetVMProfiler();
