@@ -509,10 +509,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 	CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
 
-	pid_t pidBefore = GCP_FORK_GCSERVICE(runtime);
-	if(pidBefore == 0) //child
-	  return pidBefore;
-
 	if (!runtime->PreZygoteFork()) {
 		LOG(FATAL) << "pre-fork heap failed";
 	}
