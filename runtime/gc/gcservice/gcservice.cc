@@ -26,7 +26,7 @@ namespace gcservice {
 
 GCService* GCService::service_ = NULL;
 bool GCService::zygoteHeapInitialized = false;
-static gc::space::Space* GCService::zygote_space_ = NULL;
+gc::space::Space* GCService::zygote_space_ = NULL;
 
 bool GCService::InitService(void) {
   if(!service_) {

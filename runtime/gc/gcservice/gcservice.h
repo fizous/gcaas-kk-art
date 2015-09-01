@@ -28,7 +28,6 @@ public:
   static gc::space::Space* zygote_space_;
 
 
-
   void initServiceMetaData(GCServiceMetaData*);
 
   void launchProcess(void);
