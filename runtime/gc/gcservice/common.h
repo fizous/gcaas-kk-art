@@ -31,7 +31,7 @@
     runtime->GCPRegisterWithGCService()
   #define GCP_INIT_GC_SERVICE_HEADER                                    \
     if(gcservice::GCService::InitService()) {                           \
-      return;                                                           \
+      return 0;                                                           \
     }                                                                   \
     GCMMP_VLOG(INFO) << "GCService: initialized service header";
   #define GCP_FORK_GCSERVICE(runtime)                                   \
