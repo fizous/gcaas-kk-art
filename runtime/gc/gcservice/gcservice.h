@@ -22,10 +22,11 @@ namespace gcservice {
 
 class GCService {
 public:
-  static GCService* service_;
-  static gc::space::Space* zygote_space_;
   static const gc::space::GcRetentionPolicy kZygotePolicy =
       gc::space::kGcRetentionPolicyNeverCollect;
+  static GCService* service_;
+  static gc::space::Space* zygote_space_;
+
 
 
   void initServiceMetaData(GCServiceMetaData*);
