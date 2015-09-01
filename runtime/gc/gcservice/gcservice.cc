@@ -27,11 +27,12 @@ GCService* GCService::service_ = NULL;
 bool GCService::zygoteHeapInitialized = false;
 
 
-void GCService::InitService(void) {
+bool GCService::InitService(void) {
   if(!service_) {
     service_ = new GCService();
+    return false;
   }
-
+  return true;
 }
 
 GCService::GCService(void) :

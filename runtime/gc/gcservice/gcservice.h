@@ -31,7 +31,7 @@ public:
 
   void launchProcess(void);
 
-  static void InitService(void);
+  static bool InitService(void);
   static void GCPBlockForServiceReady(void);
   static void GCPRegisterWithGCService(void);
   /******************** setters and getters ************************/

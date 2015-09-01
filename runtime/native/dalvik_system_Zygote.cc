@@ -409,9 +409,12 @@ static bool NeedsNoRandomizeWorkaround() {
 pid_t Runtime::GCPForkGCService(void) {
   //for the GCService
   Runtime* runtime = Runtime::Current();
-  runtime->PreZygoteFork(false);
 
   GCP_INIT_GC_SERVICE_HEADER;
+
+  runtime->PreZygoteFork(false);
+
+
 
   SetSigChldHandler();
 
@@ -507,6 +510,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		jstring java_se_info, jstring java_se_name, bool is_system_server) {
 
 	Runtime* runtime = Runtime::Current();
+	GCP_FORK_GCSERVICE(runtime);
 	CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
 	if (!runtime->PreZygoteFork()) {
 		LOG(FATAL) << "pre-fork heap failed";
