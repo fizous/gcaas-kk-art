@@ -57,7 +57,7 @@
   #define GCP_SERVICE_ZYGOTE_RETENTION(policy)                    policy
   #define GCP_SERVICE_SET_ZYGOTE_SPACE(space)                    ((void) 0)
   #define GCP_SERVICE_LOG_IMMUNED(addr)                           ((void)0)
-  #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                           ((void)0)
+  #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                     ((void)0)
 #endif//ART_GC_PROFILER_SERVICE
 
 namespace art {
