@@ -1219,6 +1219,7 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
   have_zygote_space_ = true;
   zygote_space->SetGcRetentionPolicy(
       GCP_SERVICE_ZYGOTE_RETENTION(space::kGcRetentionPolicyFullCollect));
+  GCP_SERVICE_SET_ZYGOTE_SPACE(zygote_space);
  //fizo:
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
   GCSERV_ZYGOTE_ILOG << "make zygote non collectable";

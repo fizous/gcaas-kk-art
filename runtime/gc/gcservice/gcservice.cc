@@ -17,6 +17,7 @@
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/gcservice_daemon.h"
+#include "gc/space/space.h"
 #include "gc/collector/gc_type.h"
 
 namespace art {
@@ -25,7 +26,7 @@ namespace gcservice {
 
 GCService* GCService::service_ = NULL;
 bool GCService::zygoteHeapInitialized = false;
-
+static gc::space::Space* GCService::zygote_space_ = NULL;
 
 bool GCService::InitService(void) {
   if(!service_) {
@@ -153,6 +154,14 @@ void GCService::PreZygoteFork(void) {
 
   GCService::zygoteHeapInitialized = true;
 
+}
+
+void GCService::LogImmunedObjectMutation(const void *addr) {
+  if(zygoteHeapInitialized && SetZygoteSpaceProtection()) {
+    if(zygote_space_->Contains(reinterpret_cast<const  mirror::Object*>(addr))) {
+      GCSERV_IMMUNE_ILOG << addr;
+    }
+  }
 }
 
 }//namespace gcservice

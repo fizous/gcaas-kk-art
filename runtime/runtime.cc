@@ -811,7 +811,7 @@ jobject CreateSystemClassLoader() {
 
 
 void Runtime::GCPRunGCService(void) {
-  GetHeap()->SetZygoteProtection();
+  //GetHeap()->SetZygoteProtection();
   GCSERV_PROC_ILOG << " We are inside GCService code now " << getpid();
   //gc::GCServiceDaemon::GCServiceDaemon::createService(Thread::Current());
   gcservice::GCService::service_->launchProcess();

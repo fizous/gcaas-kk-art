@@ -33,6 +33,7 @@
 #include "offsets.h"
 #include "safe_map.h"
 #include "thread_pool.h"
+#include "gc/gcservice/common.h"
 
 namespace art {
 
@@ -309,6 +310,9 @@ class Heap {
     card_table_->MarkCard(dst);
   }
 #else
+
+
+
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/,
@@ -317,6 +321,7 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
+    GCP_SERVICE_LOG_IMMUNED(dst);
   }
 
   // Write barrier for array operations that update many field positions
@@ -326,6 +331,7 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
+    GCP_SERVICE_LOG_IMMUNED(dst);
   }
 #endif //ART_USE_GC_PROFILER_REF_DIST
 

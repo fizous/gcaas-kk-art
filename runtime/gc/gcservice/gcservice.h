@@ -23,6 +23,7 @@ namespace gcservice {
 class GCService {
 public:
   static GCService* service_;
+  static gc::space::Space* zygote_space_;
   static const gc::space::GcRetentionPolicy kZygotePolicy =
       gc::space::kGcRetentionPolicyNeverCollect;
 
@@ -79,12 +80,14 @@ public:
   static gc::space::GcRetentionPolicy
       GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy);
   static bool SetZygoteSpaceProtection(void);
+  static void LogImmunedObjectMutation(const void *addr);
 private:
   static bool zygoteHeapInitialized;
 
   GCService(void);
 
   ServiceAllocator* allocator_;
+
   GCServiceMetaData* service_meta_data_;
 
 
