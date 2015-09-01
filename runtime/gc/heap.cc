@@ -1183,7 +1183,7 @@ void Heap::SetZygoteProtection(void) {
   if(gcservice::GCService::SetZygoteSpaceProtection()) {
     for (const auto& space : continuous_spaces_) {
       if (space->IsZygoteSpace()) {
-        GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
+        GCSERV_ZYGOTE_ILOG << "set protection of zygote space";
         space->AsDlMallocSpace()->SetMemoryProtection();
         GCSERV_ZYGOTE_ILOG << "done protection of zygote space to read only succeeded";
         break;

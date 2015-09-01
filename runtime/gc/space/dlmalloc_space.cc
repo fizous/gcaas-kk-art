@@ -128,7 +128,7 @@ size_t DlMallocSpace::bitmap_index_ = 0;
 
 
 bool DlMallocSpace::SetMemoryProtection(void) {
-  return GetMemMap()->Protect(PROT_READ);
+  return GetMemMap()->ProtectModifiedMMAP(PROT_READ);
 }
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,

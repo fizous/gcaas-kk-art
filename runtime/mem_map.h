@@ -65,6 +65,7 @@ class MemMap {
   ~MemMap();
 
   bool Protect(int prot);
+  bool ProtectModifiedMMAP(int prot);
 
   int GetProtect() const {
     return prot_;

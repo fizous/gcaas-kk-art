@@ -268,4 +268,22 @@ bool MemMap::Protect(int prot) {
   return false;
 }
 
+
+
+bool MemMap::ProtectModifiedMMAP(int prot) {
+  if (base_begin_ == NULL && base_size_ == 0) {
+    prot_ = prot;
+    return true;
+  }
+
+  if (mprotect(base_begin_, size_, prot) == 0) {
+    prot_ = prot;
+    return true;
+  }
+
+  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", " << size_ << ", "
+              << prot << ") failed";
+  return false;
+}
+
 }  // namespace art
