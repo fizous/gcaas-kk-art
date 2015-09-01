@@ -1195,11 +1195,15 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
 
   // Change the GC retention policy of the zygote space to only collect when full.
 
-//  if(false && zygote_space->SetMemoryProtection()) {
-//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
-//  } else {
-//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only failed";
-//  }
+
+  if(gcservice::GCService::SetZygoteSpaceProtection()) {
+    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
+    zygote_space->SetMemoryProtection();
+    GCSERV_ZYGOTE_ILOG << "done protection of zygote space to read only succeeded";
+  } else {
+    GCSERV_ZYGOTE_ILOG << "set protection of zygote space is not needed";
+  }
+
   AddContinuousSpace(alloc_space_);
   have_zygote_space_ = true;
   zygote_space->SetGcRetentionPolicy(

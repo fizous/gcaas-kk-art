@@ -94,6 +94,13 @@ gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcTy
   return gcType;
 }
 
+bool GCService::SetZygoteSpaceProtection(void) {
+  if(!GCService::zygoteHeapInitialized) {
+    return true;
+  }
+  return false;
+}
+
 gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
 //  if(GCService::zygoteHeapInitialized) {
 //    return kZygotePolicy;

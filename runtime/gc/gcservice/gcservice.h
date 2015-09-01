@@ -78,6 +78,7 @@ public:
   static gc::collector::GcType FilterCollectionType(gc::collector::GcType);
   static gc::space::GcRetentionPolicy
       GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy);
+  static bool SetZygoteSpaceProtection(void);
 private:
   static bool zygoteHeapInitialized;
 
