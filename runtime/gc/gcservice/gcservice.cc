@@ -95,10 +95,10 @@ gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcTy
 }
 
 bool GCService::SetZygoteSpaceProtection(void) {
-  if(!GCService::zygoteHeapInitialized) {
+//  if(tr) {
     return true;
-  }
-  return false;
+//  }
+//  return false;
 }
 
 gc::space::GcRetentionPolicy GCService::GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy policy) {
