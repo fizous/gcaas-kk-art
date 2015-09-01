@@ -597,9 +597,8 @@ mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_co
            reinterpret_cast<byte*>(obj) < continuous_spaces_.front()->Begin() ||
            reinterpret_cast<byte*>(obj) >= continuous_spaces_.back()->End());
   } else {
-    GCSERV_ILOG << "<<alloc_space_ is " << alloc_space_->IsZygoteSpace();
+    GCP_SERVICE_LOG_SPACE_IMMUNED(alloc_space_);
     obj = Allocate(self, alloc_space_, byte_count, &bytes_allocated);
-    GCSERV_ILOG << ">>alloc_space_ is " << alloc_space_->IsZygoteSpace();
     // Ensure that we did not allocate into a zygote space.
     DCHECK(obj == NULL || !have_zygote_space_ || !FindSpaceFromObject(obj, false)->IsZygoteSpace());
   }

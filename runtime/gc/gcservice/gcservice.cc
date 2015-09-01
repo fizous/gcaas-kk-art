@@ -156,6 +156,15 @@ void GCService::PreZygoteFork(void) {
 
 }
 
+void GCService::LogImmunedSpaceAllocation() {
+  if((zygoteHeapInitialized == 1) && SetZygoteSpaceProtection()) {
+    if(zygote_space_ == NULL)
+      return;
+    GCSERV_SPACE_ILOG << "Alloc in zygote";
+  }
+}
+
+
 void GCService::LogImmunedObjectMutation(const void *addr) {
   if((zygoteHeapInitialized == 1) && SetZygoteSpaceProtection()) {
     if(zygote_space_ == NULL)

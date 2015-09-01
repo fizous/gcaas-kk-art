@@ -26,7 +26,7 @@
 #define GCSERV_DAEM_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " ==DAEM== "
 #define GCSERV_ALLOC_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << "==SERV_ALLOC== "
 #define GCSERV_IMMUNE_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " #IMMUNE#: "
-
+#define GCSERV_SPACE_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " #SPACE#: "
 
 #if ART_GC_PROFILER_SERVICE
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)                      \
@@ -46,6 +46,7 @@
   #define GCP_SERVICE_ZYGOTE_RETENTION(policy)  gcservice::GCService::GetZygoteRetentionPolicy(policy)
   #define GCP_SERVICE_SET_ZYGOTE_SPACE(space)                    gcservice::GCService::zygote_space_ = space;
   #define GCP_SERVICE_LOG_IMMUNED(addr)                            gcservice::GCService::LogImmunedObjectMutation(addr)
+  #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                     if(space->IsZygoteSpace())       gcservice::GCService::LogImmunedSpaceAllocation()
 #else
 
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)              ((void) 0)
@@ -56,6 +57,7 @@
   #define GCP_SERVICE_ZYGOTE_RETENTION(policy)                    policy
   #define GCP_SERVICE_SET_ZYGOTE_SPACE(space)                    ((void) 0)
   #define GCP_SERVICE_LOG_IMMUNED(addr)                           ((void)0)
+  #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                           ((void)0)
 #endif//ART_GC_PROFILER_SERVICE
 
 namespace art {
