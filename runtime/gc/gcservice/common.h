@@ -30,19 +30,19 @@
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)                      \
     runtime->GCPRegisterWithGCService()
   #define GCP_INIT_GC_SERVICE_HEADER                                    \
+    Runtime* _runtime = Runtime::Current();                             \
     if(gcservice::GCService::InitService()) {                           \
       return 0;                                                         \
     }                                                                   \
-    runtime->GCPForkGCService();                                        \
+    _runtime->GCPForkGCService();                                       \
     GCMMP_VLOG(INFO) << "GCService: initialized service header";
-  #define GCP_FORK_GCSERVICE(runtime)                                   \
 
   #define GCP_SIGNAL_SERVER_READY(runtime)                              \
     runtime->GCPSignalGCServerReady();
   #define GCP_SERVICE_EXPLICIT_FILTER(gcpType) gcservice::GCService::FilterCollectionType(gcpType)
   #define GCP_SERVICE_ZYGOTE_RETENTION(policy)  gcservice::GCService::GetZygoteRetentionPolicy(policy)
 #else
-  #define GCP_FORK_GCSERVICE(runtime)                           (getpid())
+
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)              ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER                            ((void) 0)
   #define GCP_SIGNAL_SERVER_READY                               ((void) 0)
