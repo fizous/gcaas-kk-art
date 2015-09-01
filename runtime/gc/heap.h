@@ -310,9 +310,6 @@ class Heap {
     card_table_->MarkCard(dst);
   }
 #else
-
-
-
   // Must be called if a field of an Object in the heap changes, and before any GC safe-point.
   // The call is not needed if NULL is stored in the field.
   void WriteBarrierField(const mirror::Object* dst, MemberOffset /*offset*/,

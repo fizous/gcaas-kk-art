@@ -158,6 +158,8 @@ void GCService::PreZygoteFork(void) {
 
 void GCService::LogImmunedObjectMutation(const void *addr) {
   if(zygoteHeapInitialized && SetZygoteSpaceProtection()) {
+    if(zygote_space_ == NULL)
+      return;
     if(zygote_space_->Contains(reinterpret_cast<const  mirror::Object*>(addr))) {
       GCSERV_IMMUNE_ILOG << addr;
     }
