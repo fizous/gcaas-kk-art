@@ -25,7 +25,7 @@ namespace gcservice {
 
 
 GCService* GCService::service_ = NULL;
-bool GCService::zygoteHeapInitialized = false;
+volatile int GCService::zygoteHeapInitialized = 0;
 gc::space::Space* GCService::zygote_space_ = NULL;
 
 bool GCService::InitService(void) {
@@ -87,7 +87,7 @@ void GCService::launchProcess(void) {
 
 
 gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcType) {
-  if(GCService::zygoteHeapInitialized) {
+  if(GCService::zygoteHeapInitialized == 1) {
     if(gcType == gc::collector::kGcTypeFull) {
       return gc::collector::kGcTypePartial;
     }
@@ -152,12 +152,12 @@ void GCService::PreZygoteFork(void) {
 
   _heap->HeapPrepareZygoteSpace(self);
 
-  GCService::zygoteHeapInitialized = true;
+  GCService::zygoteHeapInitialized = 1;
 
 }
 
 void GCService::LogImmunedObjectMutation(const void *addr) {
-  if(zygoteHeapInitialized && SetZygoteSpaceProtection()) {
+  if((zygoteHeapInitialized == 1) && SetZygoteSpaceProtection()) {
     if(zygote_space_ == NULL)
       return;
     if(zygote_space_->Contains(reinterpret_cast<const  mirror::Object*>(addr))) {

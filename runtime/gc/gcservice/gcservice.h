@@ -82,7 +82,7 @@ public:
   static bool SetZygoteSpaceProtection(void);
   static void LogImmunedObjectMutation(const void *addr);
 private:
-  static bool zygoteHeapInitialized;
+  static volatile int zygoteHeapInitialized;
 
   GCService(void);
 
