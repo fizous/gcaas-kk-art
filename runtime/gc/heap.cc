@@ -1222,7 +1222,7 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
       GCP_SERVICE_ZYGOTE_RETENTION(space::kGcRetentionPolicyFullCollect));
   GCP_SERVICE_SET_ZYGOTE_SPACE(zygote_space);
       GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
-      zygote_space->SetMemoryProtection();
+  SetZygoteProtection();
  //fizo:
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
   GCSERV_ZYGOTE_ILOG << "make zygote non collectable";
