@@ -902,7 +902,7 @@ bool Runtime::Start() {
 
   finished_starting_ = true;
   if (is_zygote_) {//fork gcservice
-    //GCP_INIT_GC_SERVICE_HEADER;
+    GCP_INIT_GC_SERVICE_HEADER;
   }
   return true;
 }

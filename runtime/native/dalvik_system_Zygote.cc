@@ -424,6 +424,8 @@ pid_t Runtime::GCPForkGCService(void) {
 
   pid_t _pid = fork();
   if (_pid == 0) {
+    GCSERV_PROC_ILOG << " ~~~~~~~GCPForkGCService~~~~~~~ " << getpid();
+    runtime->PostZygoteFork();
     // child process of the GCService
 		// The child process.
 //		gMallocLeakZygoteChild = 1;
