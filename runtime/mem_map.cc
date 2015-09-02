@@ -289,20 +289,24 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 //////////////////////////////////////////////////////////////
 //////////// SharedMemMap
 
-SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot)
-      : name_(name), begin_(begin), size_(size), base_begin_(base_begin),
-        base_size_(base_size), prot_(prot) {
-  if (size_ == 0) {
-    CHECK(begin_ == NULL);
-    CHECK(base_begin_ == NULL);
-    CHECK_EQ(base_size_, 0U);
-  } else {
-    CHECK(begin_ != NULL);
-    CHECK(base_begin_ != NULL);
-    CHECK_NE(base_size_, 0U);
-  }
-}
+//SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
+//      size_t size, void* base_begin, size_t base_size, int prot)
+//      : name_(name), begin_(begin), size_(size), base_begin_(base_begin),
+//        base_size_(base_size), prot_(prot) {
+//  if (size_ == 0) {
+//    CHECK(begin_ == NULL);
+//    CHECK(base_begin_ == NULL);
+//    CHECK_EQ(base_size_, 0U);
+//  } else {
+//    CHECK(begin_ != NULL);
+//    CHECK(base_begin_ != NULL);
+//    CHECK_NE(base_size_, 0U);
+//  }
+//  metadata_->owner_base_begin_ = base_begin_;
+//  metadata_->owner_begin_
+//  metadata_->fd_ = 0;
+//
+//}
 
 
 
