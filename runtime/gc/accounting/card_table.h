@@ -152,7 +152,7 @@ class CardTable {
   }
 
   int getFD() {
-    return mem_map_->fd_;
+    return mem_map_->GetFD();
   }
 
   int getProt() {
