@@ -24,12 +24,18 @@
 #include <sys/types.h>
 
 
-#include "gc/gcservice/service_allocator.h"
-
 #include "globals.h"
 
 namespace art {
 
+typedef struct SharedMemMapMeta_S {
+  byte* owner_begin_;
+  byte* owner_base_begin_;
+  size_t size_;
+  size_t base_size_;
+  volatile int fd_;
+  volatile int prot_;
+} SharedMemMapMeta;
 
 class MemMapBase {
  public:
