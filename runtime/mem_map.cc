@@ -292,11 +292,12 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 //////////// SharedMemMap
 
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot, int fd) {
+      size_t size, void* base_begin, size_t base_size, int prot, int fd) :
+          MemMapBase(name) {
 
   metadata_ = calloc(1, sizeof(gcservice::SharedMemMapMeta));
 
-  metadata_->owner_base_begin_ = base_begin;
+  metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
   metadata_->owner_begin_ = begin;
   metadata_->size_ = size;
   metadata_->base_size_ = base_size;
