@@ -57,7 +57,20 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 }
 
 void GCServiceDaemon::mainLoop(void) {
+  IterProcMutexLock interProcMu(thread_, *process_->service_meta_->mu_);
+  ScopedThreadStateChange tsc(thread_, kWaitingForGCService);
+  {
+    process_->service_meta_->cond_->Wait(thread_);
+  }
+  if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+    while(processed_index_ < process_->service_meta_->counter_) {
+      GCSERV_DAEM_ILOG << " processing index registration: " <<
+          processed_index_;
+      processed_index_++;
+    }
+  }
 
+  process_->service_meta_->cond_->Broadcast(thread_);
 }
 
 void GCServiceDaemon::initShutDownSignals(void) {
@@ -69,7 +82,7 @@ void GCServiceDaemon::initShutDownSignals(void) {
 }
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), process_(process) {
+     thread_(NULL), process_(process), processed_index_(0) {
   Thread* self = Thread::Current();
   {
     IterProcMutexLock interProcMu(self, *process_->service_meta_->mu_);

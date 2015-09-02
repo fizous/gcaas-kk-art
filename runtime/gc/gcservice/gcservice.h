@@ -44,6 +44,10 @@ public:
     return service_meta_data_->counter_;
   }
 
+  inline int _IncCounter() {
+    return service_meta_data_->counter_++;
+  }
+
   inline int _Status() {
     return service_meta_data_->status_;
   }

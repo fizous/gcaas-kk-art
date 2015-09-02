@@ -78,7 +78,15 @@ void GCService::initServiceMetaData(GCServiceMetaData* metaData) {
 }
 
 void GCService::GCPRegisterWithGCService(void) {
-  GCSERV_CLIENT_ILOG << "Registering for GCService";
+  if(service_ == NULL)
+    return;
+  Thread* self = Thread::Current();
+  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid();
+  IterProcMutexLock interProcMu(self, *service_->_Mu());
+  int _counter = service_->_IncCounter();
+  GCSERV_CLIENT_ILOG << " the serviceIndex: " << _counter;
+  service_->_Cond()->Broadcast(self);
+  GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
 }
 
 void GCService::launchProcess(void) {

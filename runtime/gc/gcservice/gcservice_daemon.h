@@ -23,7 +23,7 @@ class GCServiceDaemon {
 
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
-
+  int processed_index_;
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);
   void mainLoop(void);
