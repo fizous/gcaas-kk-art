@@ -30,6 +30,8 @@ namespace art {
 // Used to keep track of mmap segments.
 class MemMap {
  public:
+  static const int kSharedFlag = MAP_SHARED;
+  static const int kPrivateFlag = MAP_PRIVATE;
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
   //
@@ -109,10 +111,8 @@ class MemMap {
     return name_.c_str();
   }
 
- private:
-  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
-         int prot);
 
+ protected:
   std::string name_;
   byte* const begin_;  // Start of data.
   size_t size_;  // Length of data.
@@ -121,7 +121,20 @@ class MemMap {
   const size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
 
+ private:
+  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
+         int prot);
+
 };
+
+// Used to keep track of shared mmap segments.
+class SharedMemMap : public MemMap {
+private:
+  SharedMemMap(const std::string& name, byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot);
+  int fd_;    //file descriptor
+  int prot_;  // Protection of the map.
+};//SharedMemMap
 
 }  // namespace art
 
