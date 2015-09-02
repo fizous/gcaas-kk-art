@@ -185,7 +185,7 @@ void CardTable::ShareCardTable(void) {
 
   orig_card_table->mem_map_.reset(mem_map.release());
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();
-
+  size_t offset = 0;
   byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
         (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
   if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
