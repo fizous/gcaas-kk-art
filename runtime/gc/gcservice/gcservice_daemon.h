@@ -28,6 +28,7 @@ class GCServiceDaemon {
   static void* RunDaemon(void*);
   void mainLoop(void);
   void initShutDownSignals(void);
+  bool waitShutDownSignals(void);
 public:
   GCServiceProcess* process_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);

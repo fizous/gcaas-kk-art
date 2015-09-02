@@ -81,6 +81,22 @@ void GCServiceDaemon::initShutDownSignals(void) {
       *shutdown_mu_));
 }
 
+
+bool GCServiceDaemon::waitShutDownSignals(void) {
+  Thread* self = Thread::Current();
+  MutexLock mu(self, *shutdown_mu_);
+  ScopedThreadStateChange tsc(self, kWaitingForGCService);
+  {
+    shutdown_cond_->Wait(self);
+  }
+  if(process_->service_meta_->status_ == GCSERVICE_STATUS_STOPPED) {
+    shutdown_cond_->Broadcast(self);
+    return true;
+  }
+  shutdown_cond_->Broadcast(self);
+  return false;
+}
+
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
      thread_(NULL), processed_index_(0), process_(process) {
   Thread* self = Thread::Current();
@@ -95,6 +111,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
         "GCService Daemon thread");
     process_->service_meta_->cond_->Broadcast(self);
   }
+
 }
 
 GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process) {
@@ -153,6 +170,13 @@ GCServiceProcess::GCServiceProcess(GCServiceMetaData* meta) :
   srvcReady_ = initSvcFD();
 
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
+
+  GCSERV_PROC_ILOG << "going to wait for the shutdown signals";
+  while(true) {
+    if(daemon_->waitShutDownSignals())
+      break;
+  }
+  GCSERV_PROC_ILOG << "GCService process shutdown";
 }
 
 }//namespace gcservice
