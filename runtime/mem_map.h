@@ -65,12 +65,13 @@ class MemMapBase {
   virtual bool Protect(int prot);
   virtual bool ProtectModifiedMMAP(int prot);
 
+  MemMapBase::MemMapBase(const std::string& name) : name_(name) {}
 };
 
 
 
 // Used to keep track of mmap segments.
-class MemMap : public MemMapBase{
+class MemMap : public MemMapBase {
  public:
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
@@ -82,7 +83,7 @@ class MemMap : public MemMapBase{
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
   static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
-  		size_t byte_count, int prot, int* fileDescriptor);
+  		size_t byte_count, int prot, int fileDescriptor);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -105,8 +106,6 @@ class MemMap : public MemMapBase{
 
   // Releases the memory mapping
   ~MemMap();
-
-
 
   int GetProtect() const {
     return prot_;
@@ -150,6 +149,7 @@ class MemMap : public MemMapBase{
 
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
