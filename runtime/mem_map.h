@@ -68,11 +68,11 @@ class MemMap {
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
 
-  virtual int GetProtect() const {
+  int GetProtect() const {
     return prot_;
   }
 
-  virtual byte* Begin() const {
+  byte* Begin() const {
     return begin_;
   }
 
@@ -134,13 +134,13 @@ class SharedMemMap : public MemMap {
  public:
   gcservice::SharedMemMapMeta* metadata_;
 
-  int GetProtect() const {
-    return metadata_->prot_;
-  }
-
-  byte* Begin() const {
-    return metadata_->owner_begin_;
-  }
+//  int GetProtect() const {
+//    return metadata_->prot_;
+//  }
+//
+//  byte* Begin() const {
+//    return metadata_->owner_begin_;
+//  }
 
 };//SharedMemMap
 
