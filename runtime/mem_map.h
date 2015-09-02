@@ -214,7 +214,7 @@ class SharedMemMap : public MemMapBase {
   bool HasAddress(const void* addr) const {
     return Begin() <= addr && addr < End();
   }
-
+  friend class MemMap;
   MemMap* GetLocalMemMap();
   // Releases the memory mapping
   ~SharedMemMap();
