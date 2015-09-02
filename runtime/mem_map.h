@@ -60,6 +60,11 @@ class MemMapBase {
   virtual int GetFD() {
     return -1;
   }
+
+  virtual void SetFD(int){}
+  virtual bool Protect(int prot);
+  virtual bool ProtectModifiedMMAP(int prot);
+
 };
 
 
@@ -101,8 +106,7 @@ class MemMap : public MemMapBase{
   // Releases the memory mapping
   ~MemMap();
 
-  bool Protect(int prot);
-  bool ProtectModifiedMMAP(int prot);
+
 
   int GetProtect() const {
     return prot_;
@@ -144,6 +148,8 @@ class MemMap : public MemMapBase{
     return name_.c_str();
   }
 
+  bool Protect(int prot);
+  bool ProtectModifiedMMAP(int prot);
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
@@ -197,6 +203,9 @@ class SharedMemMap : public MemMapBase {
     return metadata_->fd_;
   }
 
+  void SetFD(int fd){
+    metadata_->fd_ = fd;
+  }
 };//SharedMemMap
 
 }  // namespace art

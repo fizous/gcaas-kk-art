@@ -61,7 +61,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   GCSERV_ILOG << "--- creating card table ---";
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
-  mem_map->fd_ = _fd;
+  mem_map->SetFD(_fd);// = _fd;
   CHECK(mem_map.get() != NULL) << "couldn't allocate card table";
   // All zeros is the correct initial value; all clean. Anonymous mmaps are initialized to zero, we
   // don't clear the card table to avoid unnecessary pages being allocated
@@ -181,7 +181,7 @@ void CardTable::ShareCardTable(void) {
 
 
   GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
-  mem_map->fd_ = _fd;
+  mem_map->SetFD(_fd);
 
   orig_card_table->mem_map_.reset(mem_map.release());
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();
