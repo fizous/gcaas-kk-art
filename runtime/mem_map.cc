@@ -303,6 +303,8 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 
 }
 
+MemMapBase::MemMapBase(const std::string& name) : name_(name) {
 
+}
 
 }  // namespace art

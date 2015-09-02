@@ -37,7 +37,7 @@ typedef struct SharedMemMapMeta_S {
   volatile int fd_;
   volatile int prot_;
 } SharedMemMapMeta;
-}
+}//gcservice
 
 class MemMapBase {
  public:
@@ -65,9 +65,7 @@ class MemMapBase {
   virtual bool Protect(int prot);
   virtual bool ProtectModifiedMMAP(int prot);
 
-  MemMapBase::MemMapBase(const std::string& name) : name_(name) {
-
-  }
+  MemMapBase(const std::string& name);
 };
 
 
