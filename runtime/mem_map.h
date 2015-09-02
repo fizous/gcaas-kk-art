@@ -24,6 +24,7 @@
 #include <sys/types.h>
 
 #include "globals.h"
+#include "gc/gcservice/service_allocator.h"
 
 namespace art {
 
@@ -132,8 +133,9 @@ class SharedMemMap : public MemMap {
 private:
   SharedMemMap(const std::string& name, byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot);
-  int fd_;    //file descriptor
-  int prot_;  // Protection of the map.
+
+  gcservice::SharedMemMapMeta* mem_;
+
 };//SharedMemMap
 
 }  // namespace art
