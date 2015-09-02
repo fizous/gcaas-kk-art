@@ -23,6 +23,7 @@
 #include <sys/mman.h>  // For the PROT_* and MAP_* constants.
 #include <sys/types.h>
 
+#include "gc/gcservice/service_allocator.h"
 #include "globals.h"
 
 namespace art {
@@ -67,11 +68,11 @@ class MemMap {
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
 
-  int GetProtect() const {
+  virtual int GetProtect() const {
     return prot_;
   }
 
-  byte* Begin() const {
+  virtual byte* Begin() const {
     return begin_;
   }
 
@@ -109,11 +110,11 @@ class MemMap {
     return name_.c_str();
   }
 
+  std::string name_;
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
-
-  std::string name_;
   byte* const begin_;  // Start of data.
   size_t size_;  // Length of data.
 
@@ -122,6 +123,26 @@ class MemMap {
   int prot_;  // Protection of the map.
 
 };
+
+///////////////////////////
+/////////////////////////////Shared Memory Map
+
+// Used to keep track of mmap segments.
+class SharedMemMap : public MemMap {
+  SharedMemMap(const std::string& name, byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot, int fd);
+ public:
+  gcservice::SharedMemMapMeta* metadata_;
+
+  int GetProtect() const {
+    return metadata_->prot_;
+  }
+
+  byte* Begin() const {
+    return metadata_->owner_begin_;
+  }
+
+};//SharedMemMap
 
 }  // namespace art
 
