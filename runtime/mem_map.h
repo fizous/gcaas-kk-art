@@ -23,12 +23,35 @@
 #include <sys/mman.h>  // For the PROT_* and MAP_* constants.
 #include <sys/types.h>
 
+
+#include "gc/gcservice/service_allocator.h"
+
 #include "globals.h"
 
 namespace art {
 
+
+class MemMapBase {
+ public:
+  std::string name_;
+
+  virtual byte* Begin() const = 0;
+
+  virtual byte* BaseBegin() const = 0;
+
+  virtual size_t Size() const = 0;
+
+  virtual size_t BaseSize() const = 0;
+
+  virtual byte* End() const = 0;
+
+  virtual bool HasAddress(const void* addr) const = 0;
+};
+
+
+
 // Used to keep track of mmap segments.
-class MemMap {
+class MemMap : public MemMapBase{
  public:
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
@@ -109,13 +132,11 @@ class MemMap {
     return name_.c_str();
   }
 
-
-
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
 
-  std::string name_;
+
   byte* const begin_;  // Start of data.
   size_t size_;  // Length of data.
 
@@ -128,22 +149,47 @@ class MemMap {
 ///////////////////////////
 /////////////////////////////Shared Memory Map
 
-//// Used to keep track of mmap segments.
-//class SharedMemMap : public MemMap {
-//  SharedMemMap(const std::string& name, byte* begin, size_t size,
-//      void* base_begin, size_t base_size, int prot, int fd);
-// public:
-//  gcservice::SharedMemMapMeta* metadata_;
-//
-//  int GetProtect() const {
-//    return metadata_->prot_;
-//  }
-//
-//  byte* Begin() const {
-//    return metadata_->owner_begin_;
-//  }
-//
-//};//SharedMemMap
+// Used to keep track of mmap segments.
+class SharedMemMap : public MemMapBase {
+  SharedMemMap(const std::string& name, byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot, int fd);
+ public:
+  gcservice::SharedMemMapMeta* metadata_;
+
+  int GetProtect() const {
+    return metadata_->prot_;
+  }
+
+  byte* Begin() const {
+    return metadata_->owner_begin_;
+  }
+
+  int GetProtect() const {
+    return metadata_->prot_;
+  }
+
+  byte* Begin() const {
+    return metadata_->owner_begin_;
+  }
+
+  byte* BaseBegin() const {
+    return (byte*) metadata_->owner_base_begin_;
+  }
+
+  size_t Size() const {
+    return metadata_->size_;
+  }
+
+
+  size_t BaseSize() const {
+    return metadata_->base_size_;
+  }
+
+  byte* End() const {
+    return Begin() + Size();
+  }
+
+};//SharedMemMap
 
 }  // namespace art
 
