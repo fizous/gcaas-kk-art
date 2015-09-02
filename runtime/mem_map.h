@@ -67,7 +67,7 @@ class MemMapBase {
 
   MemMapBase(const std::string& name);
 
-  virtual ~MemMapBase();
+  virtual ~MemMapBase(){}
 
   const char* getName() {
     return name_.c_str();
