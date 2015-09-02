@@ -68,6 +68,10 @@ class MemMapBase {
   MemMapBase(const std::string& name);
 
   virtual ~MemMapBase();
+
+  const char* getName() {
+    return name_.c_str();
+  }
 };
 
 class SharedMemMap;
@@ -145,9 +149,7 @@ class MemMap : public MemMapBase {
     return prot_;
   }
 
-  const char* getName() {
-    return name_.c_str();
-  }
+
 
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
