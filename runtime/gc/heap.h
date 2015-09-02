@@ -412,6 +412,9 @@ class Heap {
   }
 
   void PreZygoteFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+  void PreZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+  void PostZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+
 
   void SetZygoteProtection(void);
   void HeapPrepareZygoteSpace(Thread*);

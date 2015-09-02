@@ -401,6 +401,7 @@ class Runtime {
   void SetStatsEnabled(bool new_state);
 
   bool PreZygoteFork(bool initProfiler = true);
+  bool PostZygoteFork();
   bool InitZygote();
   void DidForkFromZygote();
   pid_t GCPForkGCService(void);

@@ -230,8 +230,9 @@ void Runtime::Abort() {
 }
 
 bool Runtime::PreZygoteFork(bool initProfiler) {
-#if 0//ART_GC_PROFILER_SERVICE
-  gcservice::GCService::PreZygoteFork();
+#if ART_GC_PROFILER_SERVICE
+  PreZygoteForkGCService();
+  //gcservice::GCService::PreZygoteFork();
 #else
   heap_->PreZygoteFork();
 #endif
@@ -239,6 +240,15 @@ bool Runtime::PreZygoteFork(bool initProfiler) {
     vmprofiler_->PreForkPreparation();
   return true;
 }
+
+bool Runtime::PostZygoteFork() {
+#if ART_GC_PROFILER_SERVICE
+  PostZygoteForkGCService();
+  //gcservice::GCService::PreZygoteFork();
+#endif
+  return true;
+}
+
 
 void Runtime::CallExitHook(jint status) {
   if (exit_ != NULL) {
