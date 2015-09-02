@@ -104,7 +104,7 @@ MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 				*fileDescriptor << ", 0) failed for " << name << "\n" << maps;
     return NULL;
   }
-  return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
+  return reinterpret_cast<MemMap*>(new SharedMemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot, *fileDescriptor));
 }
 
 
@@ -290,8 +290,7 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 //////////// SharedMemMap
 
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot, int fd)
-      : name_(name) {
+      size_t size, void* base_begin, size_t base_size, int prot, int fd) {
 
   metadata_->owner_base_begin_ = base_begin;
   metadata_->owner_begin_ = begin;

@@ -66,6 +66,8 @@ class MemMapBase {
   virtual bool ProtectModifiedMMAP(int prot);
 
   MemMapBase(const std::string& name);
+
+  virtual ~MemMapBase();
 };
 
 
@@ -83,7 +85,7 @@ class MemMap : public MemMapBase {
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
   static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
-  		size_t byte_count, int prot, int fileDescriptor);
+  		size_t byte_count, int prot, int* fileDescriptor);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -206,6 +208,11 @@ class SharedMemMap : public MemMapBase {
   void SetFD(int fd){
     metadata_->fd_ = fd;
   }
+
+  bool HasAddress(const void* addr) const {
+    return Begin() <= addr && addr < End();
+  }
+
 };//SharedMemMap
 
 }  // namespace art

@@ -177,7 +177,7 @@ void CardTable::ShareCardTable(void) {
   std::string debug_friendly_name(oss.str());
   UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
         original_begin, origi_size,
-        PROT_READ | PROT_WRITE, &_fd));
+        PROT_READ | PROT_WRITE, fd));
 
 
   GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
