@@ -311,6 +311,7 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 SharedMemMap::~SharedMemMap() {
 //do nothing
 }
+
 MemMap* SharedMemMap::GetLocalMemMap() {
   return new MemMap(name_, Begin(), Size(),
       BaseBegin(), BaseSize(), GetProtect());

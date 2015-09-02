@@ -41,7 +41,7 @@ typedef struct SharedMemMapMeta_S {
 
 class MemMapBase {
  public:
-  std::string name_;
+  const std::string name_;
 
   virtual byte* Begin() const = 0;
 
