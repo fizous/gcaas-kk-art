@@ -294,6 +294,64 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   }
 }
 
+
+// Turn ourself into a zygote space and return a new alloc space which has
+//our unused memory. the new heap has shared access to allow the GCService to
+//collect it.
+DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name) {
+  end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
+  DCHECK(IsAligned<kPageSize>(begin_));
+  DCHECK(IsAligned<kPageSize>(end_));
+  size_t size = RoundUp(Size(), kPageSize);
+  // Trim the heap so that we minimize the size of the Zygote space.
+  Trim();
+  // Trim our mem-map to free unused pages.
+  GetMemMap()->UnMapAtEnd(end_);
+  // TODO: Not hardcode these in?
+  const size_t starting_size = kPageSize;
+  const size_t initial_size = 2 * MB;
+  // Remaining size is for the new alloc space.
+  const size_t growth_limit = growth_limit_ - size;
+  const size_t capacity = Capacity() - size;
+  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(begin_) << "\n"
+             << "End " << reinterpret_cast<const void*>(end_) << "\n"
+             << "Size " << size << "\n"
+             << "GrowthLimit " << growth_limit_ << "\n"
+             << "Capacity " << Capacity();
+  SetGrowthLimit(RoundUp(size, kPageSize));
+  SetFootprintLimit(RoundUp(size, kPageSize));
+  // FIXME: Do we need reference counted pointers here?
+  // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
+  VLOG(heap) << "Creating new AllocSpace: ";
+  VLOG(heap) << "Size " << GetMemMap()->Size();
+  VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
+  VLOG(heap) << "Capacity " << PrettySize(capacity);
+
+  int _fd = 0;
+  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE,&_fd));
+  GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " << _fd;
+  void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
+  // Protect memory beyond the initial size.
+  byte* end = mem_map->Begin() + starting_size;
+  if (capacity - initial_size > 0) {
+    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
+  }
+  //Fizo: make space types
+  SetSpaceType(kSpaceTypeZygoteSpace);
+  DlMallocSpace* alloc_space =
+      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
+  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
+  live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+  CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+  mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+  CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+  VLOG(heap) << "zygote space creation done";
+  GCSERV_CLIENT_ILOG << "**** creating new space after zygote ****";
+  return alloc_space;
+}
+
 DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
