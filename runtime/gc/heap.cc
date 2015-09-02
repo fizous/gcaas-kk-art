@@ -1181,6 +1181,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 
 void Heap::SetZygoteProtection(void) {
   if(gcservice::GCService::SetZygoteSpaceProtection()) {
+    ShareHeapForGCService();
     for (const auto& space : continuous_spaces_) {
       if (space->IsZygoteSpace()) {
         GCSERV_ZYGOTE_ILOG << "set protection of zygote space";
@@ -1192,6 +1193,11 @@ void Heap::SetZygoteProtection(void) {
   }
 }
 
+
+void Heap::ShareHeapForGCService(void) {
+  accounting::CardTable* cardTbl = GetCardTable();
+  cardTbl->ShareCardTable();
+}
 void Heap::HeapPrepareZygoteSpace(Thread* self) {
   {
     // Flush the alloc stack.

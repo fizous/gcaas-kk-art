@@ -115,6 +115,10 @@ class CardTable {
   // Resets all of the bytes in the card table to clean.
   void ClearCardTable();
 
+  // Reset the cardTable to be shared among processes
+  void ShareCardTable(void);
+
+
   // Resets all of the bytes in the card table which do not map to the image space.
   void ClearSpaceCards(space::ContinuousSpace* space);
 
