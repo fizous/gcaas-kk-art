@@ -70,7 +70,7 @@ class MemMapBase {
   virtual ~MemMapBase();
 };
 
-
+class SharedMemMap;
 
 // Used to keep track of mmap segments.
 class MemMap : public MemMapBase {
