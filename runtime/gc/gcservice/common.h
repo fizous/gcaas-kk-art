@@ -47,8 +47,8 @@
   #define GCP_SERVICE_SET_ZYGOTE_SPACE(space)                    gcservice::GCService::zygote_space_ = space;
   #define GCP_SERVICE_LOG_IMMUNED(addr)                            gcservice::GCService::LogImmunedObjectMutation(addr)
   #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                     if(space->IsZygoteSpace())       gcservice::GCService::LogImmunedSpaceAllocation()
+  #define GCP_SERVICE_CREAQTE_ALLOC_SPACE(space) space->CreateZygoteSpaceWithSharedAcc("alloc space")
 #else
-
   #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)              ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER                            ((void) 0)
   #define GCP_SIGNAL_SERVER_READY                               ((void) 0)
@@ -58,6 +58,7 @@
   #define GCP_SERVICE_SET_ZYGOTE_SPACE(space)                    ((void) 0)
   #define GCP_SERVICE_LOG_IMMUNED(addr)                           ((void)0)
   #define GCP_SERVICE_LOG_SPACE_IMMUNED(space)                     ((void)0)
+  #define GCP_SERVICE_CREAQTE_ALLOC_SPACE(space) space->CreateZygoteSpace("alloc space")
 #endif//ART_GC_PROFILER_SERVICE
 
 namespace art {
