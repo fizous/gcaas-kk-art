@@ -84,8 +84,8 @@ class MemMap : public MemMapBase {
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
-  static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
-  		size_t byte_count, int prot, int* fileDescriptor);
+  static SharedMemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
+  		size_t byte_count, int prot);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -155,7 +155,7 @@ class MemMap : public MemMapBase {
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
-
+  friend class SharedMemMap;
 
   byte* const begin_;  // Start of data.
   size_t size_;  // Length of data.
@@ -213,6 +213,9 @@ class SharedMemMap : public MemMapBase {
     return Begin() <= addr && addr < End();
   }
 
+  MemMap* GetLocalMemMap();
+  // Releases the memory mapping
+  ~SharedMemMap();
 };//SharedMemMap
 
 }  // namespace art

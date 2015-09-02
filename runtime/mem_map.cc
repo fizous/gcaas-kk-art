@@ -69,42 +69,44 @@ static void CheckMapRequest(byte*, size_t) { }
 
 
 
-MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
-		size_t byte_count, int prot, int* fileDescriptor) {
+SharedMemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
+		size_t byte_count, int prot) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
 
+  int fileDescriptor = -1;
 #ifdef USE_ASHMEM
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
   // prefixed "dalvik-".
   std::string debug_friendly_name("shared-");
   debug_friendly_name += name;
-  *fileDescriptor = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
+  fileDescriptor =
+      ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
 
   int flags = MAP_SHARED;
-  if (*fileDescriptor  == -1) {
+  if (fileDescriptor  == -1) {
     LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
   }
-  ashmem_pin_region(*fileDescriptor, 0, 0);
+  ashmem_pin_region(fileDescriptor, 0, 0);
 #else
   //ScopedFd fd(-1);
-  *fileDescriptor = -1;
+  fileDescriptor = -1;
   int flags = MAP_SHARED | MAP_ANONYMOUS;
 #endif
 
   byte* actual =
   		reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags,
-  				*fileDescriptor, 0));
+  				fileDescriptor, 0));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     LOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " <<
     		page_aligned_byte_count << ", " << prot << ", " << flags << ", " <<
-				*fileDescriptor << ", 0) failed for " << name << "\n" << maps;
+				fileDescriptor << ", 0) failed for " << name << "\n" << maps;
     return NULL;
   }
-  return reinterpret_cast<MemMap*>(new SharedMemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot, *fileDescriptor));
+  return new SharedMemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot, fileDescriptor);
 }
 
 
@@ -292,6 +294,8 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd) {
 
+  metadata_ = calloc(1, sizeof(gcservice::SharedMemMapMeta));
+
   metadata_->owner_base_begin_ = base_begin;
   metadata_->owner_begin_ = begin;
   metadata_->size_ = size;
@@ -300,6 +304,15 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
   metadata_->fd_ = fd;
   metadata_->prot_ = prot;
 
+}
+
+// Releases the memory mapping
+SharedMemMap::~SharedMemMap() {
+//do nothing
+}
+MemMap* SharedMemMap::GetLocalMemMap() {
+  return new MemMap(name_, Begin(), Size(),
+      BaseBegin(), BaseSize(), GetProtect());
 }
 
 MemMapBase::MemMapBase(const std::string& name) : name_(name) {

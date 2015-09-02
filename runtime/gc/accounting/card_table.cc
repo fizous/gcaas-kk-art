@@ -170,18 +170,19 @@ void CardTable::ShareCardTable(void) {
   size_t origi_size = orig_card_table->getSize();
 
   orig_card_table->mem_map_.reset();
-  int _fd = 0;
 
   std::ostringstream oss;
   oss << "shared card-" << getpid();
   std::string debug_friendly_name(oss.str());
-  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
-        original_begin, origi_size,
-        PROT_READ | PROT_WRITE, fd));
+  UniquePtr<SharedMemMap>
+    shared_mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
+        original_begin, origi_size, PROT_READ | PROT_WRITE));
 
 
-  GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  << _fd;
-  mem_map->SetFD(_fd);
+  GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  <<
+      shared_mem_map->GetFD();
+
+  UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
   orig_card_table->mem_map_.reset(mem_map.release());
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();

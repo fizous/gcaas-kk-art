@@ -329,9 +329,15 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
 
-  int _fd = 0;
-  UniquePtr<MemMap> mem_map(MemMap::MapSharedMemoryAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE,&_fd));
-  GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " << _fd;
+
+  UniquePtr<SharedMemMap>
+    shared_mem_map(MemMap::MapSharedMemoryAnonymous(alloc_space_name, End(),
+      capacity, PROT_READ | PROT_WRITE));
+
+  UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
+
+  GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
+      shared_mem_map->GetFD();
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;
