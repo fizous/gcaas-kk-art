@@ -46,6 +46,8 @@ class MemMapBase {
   virtual byte* End() const = 0;
 
   virtual bool HasAddress(const void* addr) const = 0;
+
+  virtual int GetProtect() const = 0;
 };
 
 
@@ -155,14 +157,6 @@ class SharedMemMap : public MemMapBase {
       void* base_begin, size_t base_size, int prot, int fd);
  public:
   gcservice::SharedMemMapMeta* metadata_;
-
-  int GetProtect() const {
-    return metadata_->prot_;
-  }
-
-  byte* Begin() const {
-    return metadata_->owner_begin_;
-  }
 
   int GetProtect() const {
     return metadata_->prot_;
