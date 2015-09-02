@@ -142,12 +142,12 @@ void GCService::PreZygoteFork(void) {
     }
   }
   if(collectionType == 1) {
-     //collecting heap partially
-     GCSERV_ZYGOTE_ILOG <<
-         " GCService::preZygoteFork --- collecting partially for fork() ";
-     _heap->CollectGarbageForZygoteFork(true);
-     return;
-   }
+    //collecting heap partially
+    GCSERV_ZYGOTE_ILOG <<
+        " GCService::preZygoteFork --- collecting partially for fork() ";
+    _heap->CollectGarbageForZygoteFork(true);
+    return;
+  }
   GCSERV_ZYGOTE_ILOG <<
       " GCService::preZygoteFork --- collecting the whole heap for fork() ";
 
@@ -177,7 +177,7 @@ void GCService::LogImmunedObjectMutation(const void *addr) {
   if((zygoteHeapInitialized == 1) && SetZygoteSpaceProtection()) {
     if(zygote_space_ == NULL)
       return;
-    if(zygote_space_->Contains(reinterpret_cast<const  mirror::Object*>(addr))) {
+    if(zygote_space_->Contains(reinterpret_cast<const mirror::Object*>(addr))) {
       GCSERV_IMMUNE_ILOG << addr;
     }
   }

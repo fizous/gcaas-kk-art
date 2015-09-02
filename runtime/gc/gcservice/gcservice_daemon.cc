@@ -82,7 +82,7 @@ void GCServiceDaemon::initShutDownSignals(void) {
 }
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), process_(process), processed_index_(0) {
+     thread_(NULL), processed_index_(0), process_(process) {
   Thread* self = Thread::Current();
   {
     IterProcMutexLock interProcMu(self, *process_->service_meta_->mu_);
