@@ -65,7 +65,9 @@ class MemMapBase {
   virtual bool Protect(int prot);
   virtual bool ProtectModifiedMMAP(int prot);
 
-  MemMapBase::MemMapBase(const std::string& name) : name_(name) {}
+  MemMapBase::MemMapBase(const std::string& name) : name_(name) {
+
+  }
 };
 
 
