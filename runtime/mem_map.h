@@ -48,6 +48,10 @@ class MemMapBase {
   virtual bool HasAddress(const void* addr) const = 0;
 
   virtual int GetProtect() const = 0;
+
+  virtual int GetFD() {
+    return -1;
+  }
 };
 
 
@@ -124,8 +128,6 @@ class MemMap : public MemMapBase{
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
 
-  int fd_; //file descriptor
-
   int getProt() {
     return prot_;
   }
@@ -181,6 +183,10 @@ class SharedMemMap : public MemMapBase {
 
   byte* End() const {
     return Begin() + Size();
+  }
+
+  int GetFD() {
+    return metadata_->fd_;
   }
 
 };//SharedMemMap
