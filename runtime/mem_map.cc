@@ -296,7 +296,7 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
           MemMapBase(name) {
 
   metadata_ =
-      reinterpret_cast<SharedMemMapMeta*>(calloc(1,
+      reinterpret_cast<gcservice::SharedMemMapMeta*>(calloc(1,
           sizeof(gcservice::SharedMemMapMeta)));
 
   metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
