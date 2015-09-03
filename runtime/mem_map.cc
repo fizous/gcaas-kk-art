@@ -260,18 +260,28 @@ MemMap* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
                     prot);
 }
 
-MemMapBase::~MemMapBase() {
+
+
+MemMap::~MemMap() {
   if (BaseBegin() == NULL && BaseSize() == 0) {
     return;
   }
   int result = munmap(BaseBegin(), BaseSize());
   if (result == -1) {
-    PLOG(FATAL) << "MemMapBase::munmap failed";
+    PLOG(FATAL) << "MemMap::munmap failed";
   }
 }
 
 
-
+SharedMemMap::~SharedMemMap() {
+  if (BaseBegin() == NULL && BaseSize() == 0) {
+    return;
+  }
+  int result = munmap(BaseBegin(), BaseSize());
+  if (result == -1) {
+    PLOG(FATAL) << "MemMap::munmap failed";
+  }
+}
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
                size_t base_size, int prot)

@@ -73,7 +73,7 @@ class MemMapBase {
   // Trim by unmapping pages at the end of the map.
   virtual void UnMapAtEnd(byte*);
 
-  virtual ~MemMapBase();
+  virtual ~MemMapBase(){}
 
   const char* getName() {
     return name_.c_str();
@@ -239,7 +239,7 @@ class SharedMemMap : public MemMapBase {
   friend class MemMap;
   MemMap* GetLocalMemMap();
   // Releases the memory mapping
-
+  ~SharedMemMap();
 };//SharedMemMap
 
 }  // namespace art
