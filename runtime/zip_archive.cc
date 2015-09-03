@@ -293,11 +293,11 @@ bool ZipEntry::ExtractToMemory(uint8_t* begin, size_t size) {
   }
 }
 
-MemMap* ZipEntry::ExtractToMemMap(const char* entry_filename) {
+MemMapBase* ZipEntry::ExtractToMemMap(const char* entry_filename) {
   std::string name(entry_filename);
   name += " extracted in memory from ";
   name += entry_filename;
-  UniquePtr<MemMap> map(MemMap::MapAnonymous(name.c_str(),
+  UniquePtr<MemMapBase> map(MemMap::MapAnonymous(name.c_str(),
                                              NULL,
                                              GetUncompressedLength(),
                                              PROT_READ | PROT_WRITE));
