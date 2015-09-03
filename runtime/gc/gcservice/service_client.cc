@@ -22,6 +22,7 @@ GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 void GCServiceClient::FinalizeInitClient() {
   if(service_client_) {
+    Thread* self = Thread::Current();
     GCSERV_CLIENT_ILOG << " +++Finalizing Initialization+++ " << self->GetTid();
     service_client_->FinalizeHeapAfterInit();
   }
