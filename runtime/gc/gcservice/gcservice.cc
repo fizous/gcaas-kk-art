@@ -17,6 +17,8 @@
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/gcservice_daemon.h"
+#include "gc/gcservice/gcservice.h"
+#include "gc/gcservice/service_client.h"
 #include "gc/space/space.h"
 #include "gc/collector/gc_type.h"
 
