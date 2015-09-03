@@ -628,7 +628,7 @@ bool ElfFile::Load(bool executable) {
     if (program_header.p_vaddr == 0) {
       std::string reservation_name("ElfFile reservation for ");
       reservation_name += file_->GetPath();
-      UniquePtr<MemMap> reserve(MemMap::MapAnonymous(reservation_name.c_str(),
+      UniquePtr<BaseMapMem> reserve(MemMap::MapAnonymous(reservation_name.c_str(),
                                                      NULL, GetLoadedSize(), PROT_NONE));
       CHECK(reserve.get() != NULL) << file_->GetPath();
       base_address_ = reserve->Begin();

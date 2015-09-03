@@ -162,41 +162,41 @@ bool CardTable::updateProtection(int newProtection) {
 }
 
 
-/// reset the card table to enable sharing with gc service
-void CardTable::ShareCardTable(void) {
-  CardTable* orig_card_table = this;
-  GCSERV_CLIENT_ILOG << "restart cardTable to enable sharing";
-  byte* original_begin = orig_card_table->getBegin();
-  size_t origi_size = orig_card_table->getSize();
-
-  orig_card_table->mem_map_.reset();
-
-  std::ostringstream oss;
-  oss << "shared card-" << getpid();
-  std::string debug_friendly_name(oss.str());
-  UniquePtr<SharedMemMap>
-    shared_mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
-        original_begin, origi_size, PROT_READ | PROT_WRITE));
-
-
-  GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  <<
-      shared_mem_map->GetFD();
-
-  UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
-
-  orig_card_table->mem_map_.reset(mem_map.release());
-  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
-  size_t offset = 0;
-  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
-        (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
-  if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
-    int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
-    offset = delta + (delta < 0 ? 0x100 : 0);
-    biased_begin += offset;
-  }
-
-  orig_card_table->DumpCardTable(LOG(ERROR));
-}
+///// reset the card table to enable sharing with gc service
+//void CardTable::ShareCardTable(void) {
+//  CardTable* orig_card_table = this;
+//  GCSERV_CLIENT_ILOG << "restart cardTable to enable sharing";
+//  byte* original_begin = orig_card_table->getBegin();
+//  size_t origi_size = orig_card_table->getSize();
+//
+//  orig_card_table->mem_map_.reset();
+//
+//  std::ostringstream oss;
+//  oss << "shared card-" << getpid();
+//  std::string debug_friendly_name(oss.str());
+//  UniquePtr<BaseMapMem>
+//    shared_mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
+//        original_begin, origi_size, PROT_READ | PROT_WRITE));
+//
+//
+//  GCSERV_CLIENT_ILOG << "~~~~~ Memory mapped ~~~~~ original _fd = "  <<
+//      shared_mem_map->GetFD();
+//
+//  //UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
+//
+//  orig_card_table->mem_map_.reset(mem_map.release());
+//  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
+//  size_t offset = 0;
+//  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
+//        (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
+//  if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
+//    int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
+//    offset = delta + (delta < 0 ? 0x100 : 0);
+//    biased_begin += offset;
+//  }
+//
+//  orig_card_table->DumpCardTable(LOG(ERROR));
+//}
 
 
 /// reset the card table to enable sharing with gc service
