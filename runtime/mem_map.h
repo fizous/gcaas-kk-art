@@ -49,7 +49,7 @@ class MemMapBase {
 
   virtual size_t Size() const = 0;
 
-  virtual void SetSize(size_t) const = 0;
+  virtual void SetSize(size_t) = 0;
 
   virtual size_t BaseSize() const = 0;
 
