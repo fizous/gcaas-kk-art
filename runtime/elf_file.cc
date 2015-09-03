@@ -663,7 +663,7 @@ bool ElfFile::Load(bool executable) {
                    << " bytes: " << file_->GetPath();
       return false;
     }
-    UniquePtr<MemMap> segment(MemMap::MapFileAtAddress(p_vaddr,
+    UniquePtr<BaseMapMem> segment(MemMap::MapFileAtAddress(p_vaddr,
                                                        program_header.p_memsz,
                                                        prot, flags, file_->Fd(),
                                                        program_header.p_offset,

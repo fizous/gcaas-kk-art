@@ -211,17 +211,17 @@ void CardTable::ShareCardTable(gcservice::SharedMemMapMeta* metaMemory) {
   std::ostringstream oss;
   oss << "shared card-" << getpid();
   std::string debug_friendly_name(oss.str());
-  UniquePtr<SharedMemMap>
-    shared_mem_map(SharedMemMap::MapSharedMemoryWithMeta(debug_friendly_name.c_str(),
+  UniquePtr<BaseMapMem>
+    shared_mem_map(MemMap::MapSharedMemoryWithMeta(debug_friendly_name.c_str(),
         original_begin, origi_size, PROT_READ | PROT_WRITE, metaMemory));
 
 
   GCSERV_CLIENT_ILOG << "xxx~~~~~ Memory mapped ~~~~~ original _fd = "  <<
       shared_mem_map->GetFD();
 
-  UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
+  //UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
-  orig_card_table->mem_map_.reset(mem_map.release());
+  orig_card_table->mem_map_.reset(shared_mem_map.release());
   byte* cardtable_begin = orig_card_table->mem_map_->Begin();
   size_t offset = 0;
   byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
