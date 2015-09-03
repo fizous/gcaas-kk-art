@@ -17,7 +17,7 @@ namespace art {
 
 namespace gcservice {
 
-GCServiceClient* service_client_ = NULL;
+GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 
 
