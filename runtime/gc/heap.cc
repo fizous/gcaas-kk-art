@@ -1234,7 +1234,7 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
   // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
   // of the remaining available heap memory.
   space::DlMallocSpace* zygote_space = alloc_space_;
-  alloc_space_ = space->CreateZygoteSpace("alloc space");//GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
+  alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");//GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   // Change the GC retention policy of the zygote space to only collect when full.
