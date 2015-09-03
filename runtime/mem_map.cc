@@ -67,7 +67,7 @@ static void CheckMapRequest(byte* addr, size_t byte_count) {
 static void CheckMapRequest(byte*, size_t) { }
 #endif
 
-SharedMemMap* SharedMemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
+BaseMapMem* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
     size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
@@ -108,7 +108,7 @@ SharedMemMap* SharedMemMap::MapSharedMemoryWithMeta(const char* name, byte* addr
       page_aligned_byte_count, prot, fileDescriptor, metadata);
 }
 
-SharedMemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
+BaseMapMem* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 		size_t byte_count, int prot) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
@@ -150,7 +150,7 @@ SharedMemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 
 
 
-MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
+BaseMapMem* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
   }
@@ -186,7 +186,7 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
 }
 
 
-MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+BaseMapMem* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
     int fd) {
   // Adjust 'offset' to be page-aligned as required by mmap.
   int page_offset = 0;
@@ -219,7 +219,7 @@ MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
 
 }
 
-MemMap* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
+BaseMapMem* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
                                  int prot, int flags, int fd, off_t start, bool reuse) {
   CHECK_NE(0, prot);
   CHECK_NE(0, flags & (MAP_SHARED | MAP_PRIVATE));
@@ -283,10 +283,20 @@ SharedMemMap::~SharedMemMap() {
   }
 }
 
+void MemMap::initMemMap(byte* begin, size_t size,
+    void* base_begin, size_t base_size, int prot) {
+  begin_      = begin;
+  size_       = size;
+  base_begin_ = base_begin;
+  base_size_  = base_size;
+  prot_       = prot;
+}
+
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
                size_t base_size, int prot)
-    : BaseMapMem(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
-      prot_(prot) {
+    : BaseMapMem(name) {
+  initMemMap(begin, size, base_begin, base_size, prot);
+
   if (size_ == 0) {
     CHECK(begin_ == NULL);
     CHECK(base_begin_ == NULL);
@@ -349,6 +359,8 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 
 }
 
+
+
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd,
       gcservice::SharedMemMapMeta* metaMem) :
@@ -361,6 +373,11 @@ void SharedMemMap::initSharedMemMap(byte* begin,
     size_t size, void* base_begin, size_t base_size, int prot, int fd,
     gcservice::SharedMemMapMeta* metaMem) {
   metadata_ = metaMem;
+  initMemMap(begin, size, base_begin, base_size, prot);
+}
+
+void SharedMemMap::initMemMap(byte* begin, size_t size,
+    void* base_begin, size_t base_size, int prot) {
   metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
   metadata_->owner_begin_ = begin;
   metadata_->size_ = size;

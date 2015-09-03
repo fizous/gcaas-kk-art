@@ -75,6 +75,10 @@ class BaseMapMem {
 
   virtual ~BaseMapMem(){}
 
+  virtual void initMemMap(byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot) = 0;
+
+
   const char* getName() {
     return name_.c_str();
   }
@@ -93,15 +97,16 @@ class MemMap : public BaseMapMem {
   // a name.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
-  static SharedMemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
+  static BaseMapMem* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+  static BaseMapMem* MapSharedMemoryAnonymous(const char* name, byte* addr,
   		size_t byte_count, int prot);
-
+  static BaseMapMem* MapSharedMemoryWithMeta(const char* name, byte* addr,
+      size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata);
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
+  static BaseMapMem* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
     return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, false);
   }
 
@@ -110,10 +115,10 @@ class MemMap : public BaseMapMem {
   // requesting a specific address for the base of the mapping.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapFileAtAddress(
+  static BaseMapMem* MapFileAtAddress(
       byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
 
-  static MemMap* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+  static BaseMapMem* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
       int fd);
 
   // Releases the memory mapping
@@ -156,6 +161,8 @@ class MemMap : public BaseMapMem {
   }
 
 
+  void initMemMap(byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot);
 
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
@@ -191,9 +198,9 @@ class SharedMemMap : public BaseMapMem {
       gcservice::SharedMemMapMeta* metaMem);
 
  public:
-  static SharedMemMap* MapSharedMemoryWithMeta(const char* name, byte* addr,
-      size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata);
 
+  void initMemMap(byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot);
   gcservice::SharedMemMapMeta* metadata_;
 
   int GetProtect() const {
