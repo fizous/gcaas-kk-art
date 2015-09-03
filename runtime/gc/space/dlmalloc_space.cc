@@ -331,7 +331,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   VLOG(heap) << "Capacity " << PrettySize(capacity);
 
 
-  UniquePtr<SharedMemMap>
+  UniquePtr<BaseMapMem>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, mem_metadata));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
