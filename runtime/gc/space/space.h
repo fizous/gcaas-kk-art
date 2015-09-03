@@ -283,7 +283,7 @@ class MemMapSpace : public ContinuousSpace {
   }
 
  protected:
-  MemMapSpace(const std::string& name, MemMap* mem_map, size_t initial_size,
+  MemMapSpace(const std::string& name, MemMapBase* mem_map, size_t initial_size,
               GcRetentionPolicy gc_retention_policy)
       : ContinuousSpace(name, gc_retention_policy,
                         mem_map->Begin(), mem_map->Begin() + initial_size),
