@@ -290,17 +290,17 @@ class MemMapSpace : public ContinuousSpace {
         mem_map_(mem_map) {
   }
 
-  MemMap* GetMemMap() {
+  MemMapBase* GetMemMap() {
     return mem_map_.get();
   }
 
-  const MemMap* GetMemMap() const {
+  const MemMapBase* GetMemMap() const {
     return mem_map_.get();
   }
 
  private:
   // Underlying storage of the space
-  UniquePtr<MemMap> mem_map_;
+  UniquePtr<MemMapBase> mem_map_;
 
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };

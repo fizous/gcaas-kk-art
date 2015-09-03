@@ -131,7 +131,7 @@ bool DlMallocSpace::SetMemoryProtection(void) {
   return GetMemMap()->ProtectModifiedMMAP(PROT_READ | PROT_WRITE);
 }
 
-DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
+DlMallocSpace::DlMallocSpace(const std::string& name, MemMapBase* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
