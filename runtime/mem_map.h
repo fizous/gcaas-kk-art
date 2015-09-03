@@ -145,7 +145,7 @@ class MemMap : public MemMapBase {
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
 
-  int getProt() {
+  int GetProtect() {
     return prot_;
   }
 

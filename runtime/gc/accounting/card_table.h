@@ -156,7 +156,7 @@ class CardTable {
   }
 
   int getProt() {
-    return mem_map_->getProt();
+    return mem_map_->GetProt();
   }
 
   bool updateProtection(int newProtection);
