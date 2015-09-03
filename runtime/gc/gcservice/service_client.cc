@@ -5,7 +5,7 @@
  *      Author: hussein
  */
 
-
+#include "ipcfs/ipcfs.h"
 #include "gc/gcservice/common.h"
 #include "gc/gcservice/gcservice.h"
 #include "gc/gcservice/service_client.h"
@@ -64,7 +64,11 @@ void GCServiceClient::FinalizeHeapAfterInit() {
   Runtime* runtime = Runtime::Current();
   gc::Heap* heap = runtime->GetHeap();
 
-  heap->SetZygoteProtection();
+  BaseMapMem* _shared_mem_space = heap->GetAllocSpace()->GetMemMap();
+  bool _svcRes =
+      android::FileMapperService::RegisterFD(_shared_mem_space->GetFD());
+  //heap->SetZygoteProtection();
+
 }
 
 GCServiceClient::GCServiceClient(int index) : index_(index) {
