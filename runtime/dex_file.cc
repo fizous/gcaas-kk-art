@@ -176,7 +176,7 @@ const DexFile* DexFile::OpenFile(int fd,
     return NULL;
   }
   size_t length = sbuf.st_size;
-  UniquePtr<MemMap> map(MemMap::MapFile(length, PROT_READ, MAP_PRIVATE, fd, 0));
+  UniquePtr<MemMapBase> map(MemMap::MapFile(length, PROT_READ, MAP_PRIVATE, fd, 0));
   if (map.get() == NULL) {
     LOG(ERROR) << "mmap \"" << location << "\" failed";
     close(fd);

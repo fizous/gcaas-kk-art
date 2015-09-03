@@ -59,7 +59,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   int _fd = 0;
   GCSERV_ILOG << "--- creating card table ---";
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
+  UniquePtr<MemMapBase> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
   mem_map->SetFD(_fd);// = _fd;
   CHECK(mem_map.get() != NULL) << "couldn't allocate card table";

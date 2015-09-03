@@ -56,7 +56,7 @@ class Arena {
   size_t bytes_allocated_;
   uint8_t* memory_;
   size_t size_;
-  MemMap* map_;
+  MemMapBase* map_;
   Arena* next_;
   friend class ArenaPool;
   friend class ArenaAllocator;

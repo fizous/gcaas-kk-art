@@ -529,7 +529,7 @@ class CommonTest : public testing::Test {
 
  private:
   std::vector<const DexFile*> opened_dex_files_;
-  UniquePtr<MemMap> image_reservation_;
+  UniquePtr<MemMapBase> image_reservation_;
 };
 
 // Sets a CheckJni abort hook to catch failures. Note that this will cause CheckJNI to carry on
