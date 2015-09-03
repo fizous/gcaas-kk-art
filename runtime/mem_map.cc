@@ -67,7 +67,46 @@ static void CheckMapRequest(byte* addr, size_t byte_count) {
 static void CheckMapRequest(byte*, size_t) { }
 #endif
 
+SharedMemMap* SharedMemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
+    size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata) {
+  size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
+  CheckMapRequest(addr, page_aligned_byte_count);
 
+  int fileDescriptor = -1;
+#ifdef USE_ASHMEM
+  // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
+  // prefixed "dalvik-".
+  std::string debug_friendly_name("shared-");
+  debug_friendly_name += name;
+  fileDescriptor =
+      ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
+
+  int flags = MAP_SHARED;
+  if (fileDescriptor  == -1) {
+    LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    return NULL;
+  }
+  ashmem_pin_region(fileDescriptor, 0, 0);
+#else
+  //ScopedFd fd(-1);
+  fileDescriptor = -1;
+  int flags = MAP_SHARED | MAP_ANONYMOUS;
+#endif
+
+  byte* actual =
+      reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags,
+          fileDescriptor, 0));
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    LOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " <<
+        page_aligned_byte_count << ", " << prot << ", " << flags << ", " <<
+        fileDescriptor << ", 0) failed for " << name << "\n" << maps;
+    return NULL;
+  }
+  return new SharedMemMap(name, actual, byte_count, actual,
+      page_aligned_byte_count, prot, fileDescriptor, metadata);
+}
 
 SharedMemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 		size_t byte_count, int prot) {
@@ -295,10 +334,27 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd) :
           MemMapBase(name) {
 
-  metadata_ =
+  gcservice::SharedMemMapMeta* _metadata =
       reinterpret_cast<gcservice::SharedMemMapMeta*>(calloc(1,
           sizeof(gcservice::SharedMemMapMeta)));
 
+  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
+      _metadata);
+
+}
+
+SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot, int fd,
+      gcservice::SharedMemMapMeta* metaMem) :
+          MemMapBase(name) {
+  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
+      metaMem);
+}
+
+void SharedMemMap::initSharedMemMap(byte* begin,
+    size_t size, void* base_begin, size_t base_size, int prot, int fd,
+    gcservice::SharedMemMapMeta* metaMem) {
+  metadata_ = metaMem;
   metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
   metadata_->owner_begin_ = begin;
   metadata_->size_ = size;
@@ -306,8 +362,8 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
   metadata_->prot_ = PROT_READ | PROT_WRITE;
   metadata_->fd_ = fd;
   metadata_->prot_ = prot;
-
 }
+
 
 // Releases the memory mapping
 SharedMemMap::~SharedMemMap() {

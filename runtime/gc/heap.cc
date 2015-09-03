@@ -1194,10 +1194,35 @@ void Heap::SetZygoteProtection(void) {
 }
 
 
-void Heap::ShareHeapForGCService(void) {
+void Heap::ShareHeapForGCService(gcservice::SharedMemMapMeta* space_shared_mem,
+    gcservice::SharedMemMapMeta* card_shared_mem) {
+  {
+    // Flush the alloc stack.
+    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
+    FlushAllocStack();
+  }
+  space::DlMallocSpace* zygote_space = alloc_space_;
+  alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
+      space_shared_mem);
+  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+
+  AddContinuousSpace(alloc_space_);
+  have_zygote_space_ = true;
+
   accounting::CardTable* cardTbl = GetCardTable();
-  cardTbl->ShareCardTable();
+  cardTbl->ShareCardTable(card_shared_mem);
+
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+  //  SetZygoteProtection();
+  GCSERV_CLIENT_ILOG << "make zygote non collectable";
+  // Reset the cumulative loggers since we now have a few additional timing phases.
+  for (const auto& collector : mark_sweep_collectors_) {
+    collector->ResetCumulativeStatistics();
+  }
 }
+
+
+
 void Heap::HeapPrepareZygoteSpace(Thread* self) {
   {
     // Flush the alloc stack.
@@ -1271,7 +1296,8 @@ void Heap::PostZygoteForkGCService() {
     return;
   }
   GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
-  VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
+  VLOG(heap) << "Starting PreZygoteFork with alloc space size " <<
+      PrettySize(alloc_space_->Size());
 
   HeapPrepareZygoteSpace(self);
 }

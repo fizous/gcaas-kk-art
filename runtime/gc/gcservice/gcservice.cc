@@ -82,10 +82,7 @@ void GCService::GCPRegisterWithGCService(void) {
     return;
   Thread* self = Thread::Current();
   GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid();
-  IterProcMutexLock interProcMu(self, *service_->_Mu());
-  int _counter = service_->_IncCounter();
-  GCSERV_CLIENT_ILOG << " the serviceIndex: " << _counter;
-  service_->_Cond()->Broadcast(self);
+  GCServiceClient::InitClient();
   GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
 }
 

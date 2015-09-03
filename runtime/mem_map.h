@@ -175,7 +175,19 @@ class MemMap : public MemMapBase {
 class SharedMemMap : public MemMapBase {
   SharedMemMap(const std::string& name, byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot, int fd);
+
+  SharedMemMap(const std::string& name, byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot, int fd,
+      gcservice::SharedMemMapMeta*);
+
+  void initSharedMemMap(byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot, int fd,
+      gcservice::SharedMemMapMeta* metaMem);
+
  public:
+  static SharedMemMap* MapSharedMemoryWithMeta(const char* name, byte* addr,
+      size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata);
+
   gcservice::SharedMemMapMeta* metadata_;
 
   int GetProtect() const {

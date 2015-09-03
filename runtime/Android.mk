@@ -59,6 +59,7 @@ LIBART_COMMON_SRC_FILES := \
 	gc/space/large_object_space.cc \
 	gc/space/space.cc \
 	gc/gcservice/gcservice.cc \
+	gc/gcservice/service_client.cc \
 	gc/gcservice/gcservice_daemon.cc \
 	gc/gcservice/service_allocator.cc \
 	gc_profiler/MProfilerTypes.cc \

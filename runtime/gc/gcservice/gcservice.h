@@ -79,6 +79,10 @@ public:
     return (_Status() < GCSERVICE_STATUS_RUNNING);
   }
 
+  ServiceAllocator* GetAllocator() {
+    return allocator_;
+  }
+
   static void PreZygoteFork(void);
   static gc::collector::GcType FilterCollectionType(gc::collector::GcType);
   static gc::space::GcRetentionPolicy

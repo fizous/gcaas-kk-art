@@ -298,7 +298,8 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 // Turn ourself into a zygote space and return a new alloc space which has
 //our unused memory. the new heap has shared access to allow the GCService to
 //collect it.
-DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name) {
+DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
+    gcservice::SharedMemMapMeta* mem_metadata) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
@@ -331,13 +332,14 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
 
 
   UniquePtr<SharedMemMap>
-    shared_mem_map(MemMap::MapSharedMemoryAnonymous(alloc_space_name, End(),
-      capacity, PROT_READ | PROT_WRITE));
+    shared_mem_map(SharedMemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
+      capacity, PROT_READ | PROT_WRITE, mem_metadata));
+  GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
+      shared_mem_map->GetFD();
 
   UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
-  GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
-      shared_mem_map->GetFD();
+
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;

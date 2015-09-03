@@ -150,7 +150,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // Turn ourself into a zygote space and return a new alloc space which has
   //our unused memory. the new heap has shared access to allow the GCService to
   //collect it.
-  DlMallocSpace* CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name);
+  DlMallocSpace* CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
+      gcservice::SharedMemMapMeta* mem_metadata);
 
   uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;

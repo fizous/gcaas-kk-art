@@ -25,8 +25,6 @@ namespace gcservice {
 
 
 
-
-
 class SharedMemMap {
 public:
   static SharedMemMapMeta* CreateSharedMemory(const char *name,
@@ -55,7 +53,15 @@ typedef struct SharedCardTableMeta_S {
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
-}SharedCardTableMeta;
+} SharedCardTableMeta;
+
+
+typedef struct SharedSpaceMeta_S {
+  SharedMemMapMeta mem_meta_;
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+} SharedSpaceMeta;
 
 typedef struct SharedAtomicStackMeta_S {
 
@@ -83,6 +89,8 @@ typedef struct SharedHeapMetada_S {
   pid_t pid_;
   /* data related to continuous space */
   SharedCardTableMeta card_table_meta_;
+
+  SharedSpaceMeta alloc_space_meta_;
 
   GC_SERVICE_STATUS vm_status_;
 
