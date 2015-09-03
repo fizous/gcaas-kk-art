@@ -135,7 +135,7 @@ size_t LargeObjectSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object*
 void LargeObjectMapSpace::Walk(DlMallocSpace::WalkCallback callback, void* arg) {
   MutexLock mu(Thread::Current(), lock_);
   for (MemMaps::iterator it = mem_maps_.begin(); it != mem_maps_.end(); ++it) {
-    MemMap* mem_map = it->second;
+    BaseMapMem* mem_map = it->second;
     callback(mem_map->Begin(), mem_map->End(), mem_map->Size(), arg);
     callback(NULL, NULL, 0, arg);
   }
@@ -159,13 +159,13 @@ bool LargeObjectMapSpace::Contains(const mirror::Object* obj) const {
 
 FreeListSpace* FreeListSpace::Create(const std::string& name, byte* requested_begin, size_t size) {
   CHECK_EQ(size % kAlignment, 0U);
-  MemMap* mem_map = MemMap::MapAnonymous(name.c_str(), requested_begin, size,
+  BaseMapMem* mem_map = MemMap::MapAnonymous(name.c_str(), requested_begin, size,
                                          PROT_READ | PROT_WRITE);
   CHECK(mem_map != NULL) << "Failed to allocate large object space mem map";
   return new FreeListSpace(name, mem_map, mem_map->Begin(), mem_map->End());
 }
 
-FreeListSpace::FreeListSpace(const std::string& name, MemMap* mem_map, byte* begin, byte* end)
+FreeListSpace::FreeListSpace(const std::string& name, BaseMapMem* mem_map, byte* begin, byte* end)
     : LargeObjectSpace(name),
       begin_(begin),
       end_(end),
