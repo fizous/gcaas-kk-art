@@ -337,19 +337,19 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
 
-  UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
+  //UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
 
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
-  byte* end = mem_map->Begin() + starting_size;
+  byte* end = shared_mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
   //Fizo: make space types
   SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
-      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
+      new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace, end_, end, growth_limit);
   alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
