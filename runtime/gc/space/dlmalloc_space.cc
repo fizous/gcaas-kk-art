@@ -111,7 +111,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
     return freed;
   }
 
-  ValgrindDlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
+  ValgrindDlMallocSpace(const std::string& name, MemMapBase* mem_map, void* mspace, byte* begin,
                         byte* end, size_t growth_limit, size_t initial_size) :
       DlMallocSpace(name, mem_map, mspace, begin, end, growth_limit) {
     VALGRIND_MAKE_MEM_UNDEFINED(mem_map->Begin() + initial_size, mem_map->Size() - initial_size);

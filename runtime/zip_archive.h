@@ -33,12 +33,13 @@ namespace art {
 
 class ZipArchive;
 class MemMap;
+class MemMapBase;
 
 class ZipEntry {
  public:
   bool ExtractToFile(File& file);
   bool ExtractToMemory(uint8_t* begin, size_t size);
-  MemMap* ExtractToMemMap(const char* entry_filename);
+  MemMapBase* ExtractToMemMap(const char* entry_filename);
 
   uint32_t GetUncompressedLength();
   uint32_t GetCrc32();
@@ -128,7 +129,7 @@ class ZipArchive {
   int fd_;
   uint16_t num_entries_;
   off64_t dir_offset_;
-  UniquePtr<MemMap> dir_map_;
+  UniquePtr<MemMapBase> dir_map_;
   typedef SafeMap<StringPiece, const byte*> DirEntries;
   DirEntries dir_entries_;
 

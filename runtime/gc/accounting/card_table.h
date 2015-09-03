@@ -163,7 +163,7 @@ class CardTable {
 
   void DumpCardTable(std::ostream&);
  private:
-  CardTable(MemMap* begin, byte* biased_begin, size_t offset, const byte* heap_begin);
+  CardTable(MemMapBase* begin, byte* biased_begin, size_t offset, const byte* heap_begin);
 
   // Returns true iff the card table address is within the bounds of the card table.
   bool IsValidCard(const byte* card_addr) const {
@@ -178,7 +178,7 @@ class CardTable {
   void VerifyCardTable();
 
   // Mmapped pages for the card table
-  UniquePtr<MemMap> mem_map_;
+  UniquePtr<MemMapBase> mem_map_;
   // Value used to compute card table addresses from object addresses, see GetBiasedBegin
   byte* const biased_begin_;
   // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset

@@ -255,7 +255,7 @@ bool ZipEntry::ExtractToFile(File& file) {
     return false;
   }
 
-  UniquePtr<MemMap> map(MemMap::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
+  UniquePtr<MemMapBase> map(MemMap::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
   if (map.get() == NULL) {
     LOG(WARNING) << "Zip: failed to mmap space for " << file.GetPath();
     return false;

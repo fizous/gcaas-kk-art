@@ -85,7 +85,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   return new CardTable(mem_map.release(), biased_begin, offset, heap_begin);
 }
 
-CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
+CardTable::CardTable(MemMapBase* mem_map, byte* biased_begin, size_t offset,
     const byte* heap_begin)
     : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
       heap_begin_(heap_begin) {
