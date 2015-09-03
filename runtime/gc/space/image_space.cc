@@ -182,7 +182,7 @@ ImageSpace* ImageSpace::Init(const std::string& image_file_name, bool validate_o
   }
 
   // Note: The image header is part of the image due to mmap page alignment required of offset.
-  UniquePtr<MemMap> map(MemMap::MapFileAtAddress(image_header.GetImageBegin(),
+  UniquePtr<BaseMapMem> map(MemMap::MapFileAtAddress(image_header.GetImageBegin(),
                                                  image_header.GetImageSize(),
                                                  PROT_READ | PROT_WRITE,
                                                  MAP_PRIVATE | MAP_FIXED,
@@ -196,7 +196,7 @@ ImageSpace* ImageSpace::Init(const std::string& image_file_name, bool validate_o
   CHECK_EQ(image_header.GetImageBegin(), map->Begin());
   DCHECK_EQ(0, memcmp(&image_header, map->Begin(), sizeof(ImageHeader)));
 
-  UniquePtr<MemMap> image_map(MemMap::MapFileAtAddress(nullptr, image_header.GetImageBitmapSize(),
+  UniquePtr<BaseMapMem> image_map(MemMap::MapFileAtAddress(nullptr, image_header.GetImageBitmapSize(),
                                                        PROT_READ, MAP_PRIVATE,
                                                        file->Fd(), image_header.GetBitmapOffset(),
                                                        false));

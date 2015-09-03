@@ -1176,7 +1176,7 @@ void VMProfiler::initMarkerManager(void) {
 		size_t capacity =
 				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-		UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL,
+		UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous("EventsTimeLine", NULL,
 				capacity, PROT_READ | PROT_WRITE));
 		markerManager->currIndex = 0;
 		if (mem_map.get() == NULL) {

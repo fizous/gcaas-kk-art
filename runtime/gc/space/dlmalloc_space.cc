@@ -200,7 +200,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
+  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
                                                  PROT_READ | PROT_WRITE));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
@@ -221,7 +221,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   }
 
   // Everything is set so record in immutable structure and leave
-  MemMap* mem_map_ptr = mem_map.release();
+  BaseMapMem* mem_map_ptr = mem_map.release();
   DlMallocSpace* space;
   if (RUNNING_ON_VALGRIND > 0) {
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
@@ -332,7 +332,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
 
 
   UniquePtr<SharedMemMap>
-    shared_mem_map(SharedMemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
+    shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, mem_metadata));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
@@ -390,7 +390,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   VLOG(heap) << "Size " << GetMemMap()->Size();
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
+  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;

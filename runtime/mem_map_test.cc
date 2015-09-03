@@ -24,7 +24,7 @@ namespace art {
 class MemMapTest : public testing::Test {};
 
 TEST_F(MemMapTest, MapAnonymousEmpty) {
-  UniquePtr<MemMap> map(MemMap::MapAnonymous("MapAnonymousEmpty",
+  UniquePtr<BaseMapMem> map(MemMap::MapAnonymous("MapAnonymousEmpty",
                                              NULL,
                                              0,
                                              PROT_READ));

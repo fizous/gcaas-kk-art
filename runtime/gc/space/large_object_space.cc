@@ -63,7 +63,7 @@ mirror::Object* LargeObjectMapSpace::Alloc(Thread* self, size_t num_bytes, size_
 	//size_t checkingSize = 0;
 	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
 
-	MemMap* mem_map = MemMap::MapAnonymous("large object space allocation", NULL, extendedSize,
+	BaseMapMem* mem_map = MemMap::MapAnonymous("large object space allocation", NULL, extendedSize,
                                          PROT_READ | PROT_WRITE);
   if (mem_map == NULL) {
     return NULL;
