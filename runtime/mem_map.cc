@@ -370,6 +370,7 @@ void SharedMemMap::initSharedMemMap(byte* begin,
     size_t size, void* base_begin, size_t base_size, int prot, int fd,
     gcservice::SharedMemMapMeta* metaMem) {
   metadata_ = metaMem;
+  metadata_->fd_ = fd;
   initMemMap(begin, size, base_begin, base_size, prot);
 }
 
@@ -380,7 +381,7 @@ void SharedMemMap::initMemMap(byte* begin, size_t size,
   metadata_->size_ = size;
   metadata_->base_size_ = base_size;
   metadata_->prot_ = PROT_READ | PROT_WRITE;
-  metadata_->fd_ = fd;
+
   metadata_->prot_ = prot;
 }
 
