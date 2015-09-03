@@ -618,7 +618,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		EnableDebugFeatures(debug_flags);
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
-		GCP_SERVICE_FINALIZE_INIT;
+		//GCP_SERVICE_FINALIZE_INIT;
 	} else if (pid > 0) {
 		// the parent process
 	}
