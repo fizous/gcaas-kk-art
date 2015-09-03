@@ -1181,7 +1181,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 
 void Heap::SetZygoteProtection(void) {
   if(gcservice::GCService::SetZygoteSpaceProtection()) {
-    ShareHeapForGCService();
+    //ShareHeapForGCService();
     for (const auto& space : continuous_spaces_) {
       if (space->IsZygoteSpace()) {
         GCSERV_ZYGOTE_ILOG << "set protection of zygote space";
@@ -1196,6 +1196,7 @@ void Heap::SetZygoteProtection(void) {
 
 void Heap::ShareHeapForGCService(gcservice::SharedMemMapMeta* space_shared_mem,
     gcservice::SharedMemMapMeta* card_shared_mem) {
+  Thread* self = Thread::Current();
   {
     // Flush the alloc stack.
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
@@ -1233,7 +1234,7 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
   // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
   // of the remaining available heap memory.
   space::DlMallocSpace* zygote_space = alloc_space_;
-  alloc_space_ = GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
+  alloc_space_ = space->CreateZygoteSpace("alloc space");//GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   // Change the GC retention policy of the zygote space to only collect when full.
@@ -1253,7 +1254,7 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
       GCP_SERVICE_ZYGOTE_RETENTION(space::kGcRetentionPolicyFullCollect));
   GCP_SERVICE_SET_ZYGOTE_SPACE(zygote_space);
       GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
-  SetZygoteProtection();
+  //SetZygoteProtection();
  //fizo:
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
   GCSERV_ZYGOTE_ILOG << "make zygote non collectable";
