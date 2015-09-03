@@ -218,7 +218,7 @@ const DexFile* DexFile::OpenZip(int fd, const std::string& location) {
 
 const DexFile* DexFile::OpenMemory(const std::string& location,
                                    uint32_t location_checksum,
-                                   MemMap* mem_map) {
+                                   MemMapBase* mem_map) {
   return OpenMemory(mem_map->Begin(),
                     mem_map->Size(),
                     location,
