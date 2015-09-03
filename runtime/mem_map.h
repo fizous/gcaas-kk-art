@@ -49,6 +49,8 @@ class MemMapBase {
 
   virtual size_t Size() const = 0;
 
+  virtual void SetSize(size_t) const = 0;
+
   virtual size_t BaseSize() const = 0;
 
   virtual byte* End() const = 0;
@@ -66,6 +68,10 @@ class MemMapBase {
   virtual bool ProtectModifiedMMAP(int) {return false;}
 
   MemMapBase(const std::string& name);
+
+
+  // Trim by unmapping pages at the end of the map.
+  virtual void UnMapAtEnd(byte*);
 
   virtual ~MemMapBase(){}
 
@@ -129,6 +135,9 @@ class MemMap : public MemMapBase {
     return size_;
   }
 
+  void SetSize(size_t new_size) {
+    size_ = new_size;
+  }
 
   size_t BaseSize() const {
     return base_size_;
@@ -141,9 +150,6 @@ class MemMap : public MemMapBase {
   bool HasAddress(const void* addr) const {
     return Begin() <= addr && addr < End();
   }
-
-  // Trim by unmapping pages at the end of the map.
-  void UnMapAtEnd(byte* new_end);
 
   int GetProtect() {
     return prot_;
@@ -206,6 +212,9 @@ class SharedMemMap : public MemMapBase {
     return metadata_->size_;
   }
 
+  void SetSize(size_t new_size) {
+    metadata_->size_ = new_size;
+  }
 
   size_t BaseSize() const {
     return metadata_->base_size_;
@@ -226,6 +235,7 @@ class SharedMemMap : public MemMapBase {
   bool HasAddress(const void* addr) const {
     return Begin() <= addr && addr < End();
   }
+
   friend class MemMap;
   MemMap* GetLocalMemMap();
   // Releases the memory mapping

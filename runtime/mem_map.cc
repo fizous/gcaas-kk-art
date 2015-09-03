@@ -285,13 +285,6 @@ MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_beg
   }
 };
 
-void MemMap::UnMapAtEnd(byte* new_end) {
-  DCHECK_GE(new_end, Begin());
-  DCHECK_LE(new_end, End());
-  size_t unmap_size = End() - new_end;
-  munmap(new_end, unmap_size);
-  size_ -= unmap_size;
-}
 
 bool MemMap::Protect(int prot) {
   if (base_begin_ == NULL && base_size_ == 0) {
@@ -377,6 +370,16 @@ MemMap* SharedMemMap::GetLocalMemMap() {
 
 MemMapBase::MemMapBase(const std::string& name) : name_(name) {
 
+}
+
+
+
+void MemMapBase::UnMapAtEnd(byte* new_end) {
+  DCHECK_GE(new_end, Begin());
+  DCHECK_LE(new_end, End());
+  size_t unmap_size = End() - new_end;
+  munmap(new_end, unmap_size);
+  SetSize(Size() - unmap_size);
 }
 
 }  // namespace art
