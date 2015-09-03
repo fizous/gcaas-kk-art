@@ -173,7 +173,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
 
  protected:
-  DlMallocSpace(const std::string& name, MemMapBase* mem_map, void* mspace, byte* begin, byte* end,
+  DlMallocSpace(const std::string& name, BaseMapMem* mem_map, void* mspace, byte* begin, byte* end,
                 size_t growth_limit);
 
  private:

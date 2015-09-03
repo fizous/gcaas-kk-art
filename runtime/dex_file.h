@@ -825,19 +825,19 @@ class DexFile {
   // Opens a .dex file at the given address backed by a MemMap
   static const DexFile* OpenMemory(const std::string& location,
                                    uint32_t location_checksum,
-                                   MemMapBase* mem_map);
+                                   BaseMapMem* mem_map);
 
   // Opens a .dex file at the given address, optionally backed by a MemMap
   static const DexFile* OpenMemory(const byte* dex_file,
                                    size_t size,
                                    const std::string& location,
                                    uint32_t location_checksum,
-                                   MemMapBase* mem_map);
+                                   BaseMapMem* mem_map);
 
   DexFile(const byte* base, size_t size,
           const std::string& location,
           uint32_t location_checksum,
-          MemMapBase* mem_map)
+          BaseMapMem* mem_map)
       : begin_(base),
         size_(size),
         location_(location),
@@ -883,7 +883,7 @@ class DexFile {
   const uint32_t location_checksum_;
 
   // Manages the underlying memory allocation.
-  UniquePtr<MemMapBase> mem_map_;
+  UniquePtr<BaseMapMem> mem_map_;
 
   // The DEX-to-DEX compiler uses this lock to ensure thread safety when
   // enabling write access to a read-only DEX file.

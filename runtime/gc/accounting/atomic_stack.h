@@ -176,7 +176,7 @@ class AtomicStack {
   std::string name_;
 
   // Memory mapping of the atomic stack.
-  UniquePtr<MemMapBase> mem_map_;
+  UniquePtr<BaseMapMem> mem_map_;
 
   // Back index (index after the last element pushed).
   AtomicInteger back_index_;

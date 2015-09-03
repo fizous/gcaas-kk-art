@@ -283,24 +283,24 @@ class MemMapSpace : public ContinuousSpace {
   }
 
  protected:
-  MemMapSpace(const std::string& name, MemMapBase* mem_map, size_t initial_size,
+  MemMapSpace(const std::string& name, BaseMapMem* mem_map, size_t initial_size,
               GcRetentionPolicy gc_retention_policy)
       : ContinuousSpace(name, gc_retention_policy,
                         mem_map->Begin(), mem_map->Begin() + initial_size),
         mem_map_(mem_map) {
   }
 
-  MemMapBase* GetMemMap() {
+  BaseMapMem* GetMemMap() {
     return mem_map_.get();
   }
 
-  const MemMapBase* GetMemMap() const {
+  const BaseMapMem* GetMemMap() const {
     return mem_map_.get();
   }
 
  private:
   // Underlying storage of the space
-  UniquePtr<MemMapBase> mem_map_;
+  UniquePtr<BaseMapMem> mem_map_;
 
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };

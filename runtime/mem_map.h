@@ -39,7 +39,7 @@ typedef struct SharedMemMapMeta_S {
 } SharedMemMapMeta;
 }//gcservice
 
-class MemMapBase {
+class BaseMapMem {
  public:
   const std::string name_;
 
@@ -67,13 +67,13 @@ class MemMapBase {
   virtual bool Protect(int){return false;}
   virtual bool ProtectModifiedMMAP(int) {return false;}
 
-  MemMapBase(const std::string& name);
+  BaseMapMem(const std::string& name);
 
 
   // Trim by unmapping pages at the end of the map.
   virtual void UnMapAtEnd(byte*);
 
-  virtual ~MemMapBase(){}
+  virtual ~BaseMapMem(){}
 
   const char* getName() {
     return name_.c_str();
@@ -83,7 +83,7 @@ class MemMapBase {
 class SharedMemMap;
 
 // Used to keep track of mmap segments.
-class MemMap : public MemMapBase {
+class MemMap : public BaseMapMem {
  public:
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
@@ -178,7 +178,7 @@ class MemMap : public MemMapBase {
 /////////////////////////////Shared Memory Map
 
 // Used to keep track of mmap segments.
-class SharedMemMap : public MemMapBase {
+class SharedMemMap : public BaseMapMem {
   SharedMemMap(const std::string& name, byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot, int fd);
 

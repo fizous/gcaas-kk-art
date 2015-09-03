@@ -285,7 +285,7 @@ SharedMemMap::~SharedMemMap() {
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
                size_t base_size, int prot)
-    : MemMapBase(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
+    : BaseMapMem(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
       prot_(prot) {
   if (size_ == 0) {
     CHECK(begin_ == NULL);
@@ -338,7 +338,7 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd) :
-          MemMapBase(name) {
+          BaseMapMem(name) {
 
   gcservice::SharedMemMapMeta* _metadata =
       reinterpret_cast<gcservice::SharedMemMapMeta*>(calloc(1,
@@ -352,7 +352,7 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd,
       gcservice::SharedMemMapMeta* metaMem) :
-          MemMapBase(name) {
+          BaseMapMem(name) {
   initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
       metaMem);
 }
@@ -376,13 +376,13 @@ MemMap* SharedMemMap::GetLocalMemMap() {
       BaseBegin(), BaseSize(), GetProtect());
 }
 
-MemMapBase::MemMapBase(const std::string& name) : name_(name) {
+BaseMapMem::BaseMapMem(const std::string& name) : name_(name) {
 
 }
 
 
 
-void MemMapBase::UnMapAtEnd(byte* new_end) {
+void BaseMapMem::UnMapAtEnd(byte* new_end) {
   DCHECK_GE(new_end, Begin());
   DCHECK_LE(new_end, End());
   size_t unmap_size = End() - new_end;

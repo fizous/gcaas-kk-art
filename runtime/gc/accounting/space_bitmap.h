@@ -55,7 +55,7 @@ class SpaceBitmap {
   // Initialize a space bitmap using the provided mem_map as the live bits. Takes ownership of the
   // mem map. The address range covered starts at heap_begin and is of size equal to heap_capacity.
   // Objects are kAlignement-aligned.
-  static SpaceBitmap* CreateFromMemMap(const std::string& name, MemMapBase* mem_map,
+  static SpaceBitmap* CreateFromMemMap(const std::string& name, BaseMapMem* mem_map,
                                        byte* heap_begin, size_t heap_capacity);
 
   ~SpaceBitmap();
@@ -182,7 +182,7 @@ class SpaceBitmap {
  private:
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
-  SpaceBitmap(const std::string& name, MemMapBase* mem_map, word* bitmap_begin, size_t bitmap_size,
+  SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
               const void* heap_begin)
       : mem_map_(mem_map), bitmap_begin_(bitmap_begin), bitmap_size_(bitmap_size),
         heap_begin_(reinterpret_cast<uintptr_t>(heap_begin)),
@@ -191,7 +191,7 @@ class SpaceBitmap {
   bool Modify(const mirror::Object* obj, bool do_set);
 
   // Backing storage for bitmap.
-  UniquePtr<MemMapBase> mem_map_;
+  UniquePtr<BaseMapMem> mem_map_;
 
   // This bitmap itself, word sized for efficiency in scanning.
   word* const bitmap_begin_;

@@ -169,7 +169,7 @@ ElfFile::~ElfFile() {
   delete dynsym_symbol_table_;
 }
 
-bool ElfFile::SetMap(MemMapBase* map) {
+bool ElfFile::SetMap(BaseMapMem* map) {
   if (map == NULL) {
     // MemMap::Open should have already logged
     return false;

@@ -255,7 +255,7 @@ bool ZipEntry::ExtractToFile(File& file) {
     return false;
   }
 
-  UniquePtr<MemMapBase> map(MemMap::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
+  UniquePtr<BaseMapMem> map(MemMap::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
   if (map.get() == NULL) {
     LOG(WARNING) << "Zip: failed to mmap space for " << file.GetPath();
     return false;
@@ -293,11 +293,11 @@ bool ZipEntry::ExtractToMemory(uint8_t* begin, size_t size) {
   }
 }
 
-MemMapBase* ZipEntry::ExtractToMemMap(const char* entry_filename) {
+BaseMapMem* ZipEntry::ExtractToMemMap(const char* entry_filename) {
   std::string name(entry_filename);
   name += " extracted in memory from ";
   name += entry_filename;
-  UniquePtr<MemMapBase> map(MemMap::MapAnonymous(name.c_str(),
+  UniquePtr<BaseMapMem> map(MemMap::MapAnonymous(name.c_str(),
                                              NULL,
                                              GetUncompressedLength(),
                                              PROT_READ | PROT_WRITE));
