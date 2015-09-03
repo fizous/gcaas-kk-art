@@ -18,6 +18,8 @@ class GCServiceClient {
  public:
   static GCServiceClient* service_client_;
   static void InitClient();
+  static void FinalizeInitClient();
+  void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);
  private:
   GCServiceClient(int);

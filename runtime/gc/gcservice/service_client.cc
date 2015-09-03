@@ -20,7 +20,12 @@ namespace gcservice {
 GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 
-
+void GCServiceClient::FinalizeInitClient() {
+  if(service_client_) {
+    GCSERV_CLIENT_ILOG << " +++Finalizing Initialization+++ " << self->GetTid();
+    service_client_->FinalizeHeapAfterInit();
+  }
+}
 void GCServiceClient::InitClient() {
   if(GCService::service_ == NULL) {
     LOG(ERROR) << "The GCService Was not initialized";
@@ -51,6 +56,14 @@ void GCServiceClient::ConstructHeap() {
       &heap_meta_->card_table_meta_.mem_meta_);
 
   heap_meta_->vm_status_ = GCSERVICE_STATUS_RUNNING;
+}
+
+
+void GCServiceClient::FinalizeHeapAfterInit() {
+  Runtime* runtime = Runtime::Current();
+  gc::Heap* heap = runtime->GetHeap();
+
+  heap->SetZygoteProtection();
 }
 
 GCServiceClient::GCServiceClient(int index) : index_(index) {

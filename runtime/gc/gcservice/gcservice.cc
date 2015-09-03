@@ -88,6 +88,16 @@ void GCService::GCPRegisterWithGCService(void) {
   GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
 }
 
+
+void GCService::GCPFinalizeHeapAfterInit(void) {
+  if(service_ == NULL)
+    return;
+  Thread* self = Thread::Current();
+  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid();
+  GCServiceClient::FinalizeInitClient();
+  GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
+}
+
 void GCService::launchProcess(void) {
   process_ = GCServiceProcess::InitGCServiceProcess(service_meta_data_);
 }

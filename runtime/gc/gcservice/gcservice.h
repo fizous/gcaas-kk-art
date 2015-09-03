@@ -88,6 +88,7 @@ public:
   static gc::space::GcRetentionPolicy
       GetZygoteRetentionPolicy(gc::space::GcRetentionPolicy);
   static bool SetZygoteSpaceProtection(void);
+  static void GCPFinalizeHeapAfterInit(void);
   static void LogImmunedObjectMutation(const void *addr);
   static void LogImmunedSpaceAllocation();
 private:
