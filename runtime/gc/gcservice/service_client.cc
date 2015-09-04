@@ -61,12 +61,15 @@ void GCServiceClient::ConstructHeap() {
 
 
 void GCServiceClient::FinalizeHeapAfterInit() {
-  Runtime* runtime = Runtime::Current();
-  gc::Heap* heap = runtime->GetHeap();
+  //Runtime* runtime = Runtime::Current();
+  //gc::Heap* heap = runtime->GetHeap();
 
-  BaseMapMem* _shared_mem_space = heap->GetAllocSpace()->GetMemMap();
+  //BaseMapMem* _shared_mem_space = heap->GetAllocSpace()->GetMemMap();
+  int _fd = heap_meta_->alloc_space_meta_.mem_meta_.fd_;
+  GCSERV_CLIENT_ILOG << " the client sent fd: " << _fd;
   bool _svcRes =
-      android::FileMapperService::RegisterFD(_shared_mem_space->GetFD());
+      android::FileMapperService::RegisterFD(_fd);
+  GCSERV_CLIENT_ILOG << " the client result is: " << (_svcRes ? "true" : "false");
   //heap->SetZygoteProtection();
 
 }
