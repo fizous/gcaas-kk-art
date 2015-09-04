@@ -24,7 +24,6 @@ namespace art {
 namespace gcservice {
 
 
-
 class SharedMemMap {
 public:
   static SharedMemMapMeta* CreateSharedMemory(const char *name,
@@ -42,7 +41,8 @@ typedef struct SharedRegionMeta_S {
 } SharedRegionMeta;
 
 typedef struct SharedSpaceBitmapMeta_S {
-  SharedMemMapMeta meta_;
+  /* memory pointer to the bitmap data*/
+  SharedMemMapMeta data_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   uintptr_t heap_begin_;
@@ -61,6 +61,8 @@ typedef struct SharedSpaceMeta_S {
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
+  /* data related to space bitmap */
+  //SharedSpaceBitmapMeta bitmap_meta_;
 } SharedSpaceMeta;
 
 typedef struct SharedAtomicStackMeta_S {

@@ -56,7 +56,7 @@ void GCServiceClient::ConstructHeap() {
   heap->ShareHeapForGCService(&heap_meta_->alloc_space_meta_.mem_meta_,
       &heap_meta_->card_table_meta_.mem_meta_);
 
-  heap_meta_->vm_status_ = GCSERVICE_STATUS_RUNNING;
+
 }
 
 
@@ -70,6 +70,7 @@ void GCServiceClient::FinalizeHeapAfterInit() {
   bool _svcRes =
       android::FileMapperService::RegisterFD(_fd);
   GCSERV_CLIENT_ILOG << " the client result is: " << (_svcRes ? "true" : "false");
+  heap_meta_->vm_status_ = GCSERVICE_STATUS_RUNNING;
   //heap->SetZygoteProtection();
 
 }
