@@ -330,7 +330,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
 
-
+  GCSERV_CLIENT_ILOG << "the alloc_space is mapped at address " <<
+      reinterpret_cast<const void*>(End());
   UniquePtr<BaseMapMem>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, mem_metadata));

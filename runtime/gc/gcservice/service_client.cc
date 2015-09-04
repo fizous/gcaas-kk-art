@@ -61,9 +61,9 @@ void GCServiceClient::ConstructHeap() {
 
 
 void GCServiceClient::FinalizeHeapAfterInit() {
-  //Runtime* runtime = Runtime::Current();
-  //gc::Heap* heap = runtime->GetHeap();
-
+//  Runtime* runtime = Runtime::Current();
+//  gc::Heap* heap = runtime->GetHeap();
+//  heap->GetAllocSpace()->Get
   //BaseMapMem* _shared_mem_space = heap->GetAllocSpace()->GetMemMap();
   int _fd = heap_meta_->alloc_space_meta_.mem_meta_.fd_;
   GCSERV_CLIENT_ILOG << " the client sent fd: " << _fd;
