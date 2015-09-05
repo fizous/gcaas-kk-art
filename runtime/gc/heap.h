@@ -33,6 +33,7 @@
 #include "offsets.h"
 #include "safe_map.h"
 #include "thread_pool.h"
+#include "gc/gcservice/common.h"
 
 namespace art {
 
