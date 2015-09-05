@@ -11,6 +11,7 @@
 #include "locks.h"
 #include "os.h"
 #include "gc/gcservice/common.h"
+#include "ipcfs/ipcfs.h"
 #include "gc/gcservice/gcservice_daemon.h"
 #include "gc/gcservice/service_allocator.h"
 
