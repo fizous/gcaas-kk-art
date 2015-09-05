@@ -151,7 +151,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   //our unused memory. the new heap has shared access to allow the GCService to
   //collect it.
   DlMallocSpace* CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
-      gcservice::SharedMemMapMeta* mem_metadata);
+      SharedHeapMetada* shared_heap_mem);
 
   uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;
@@ -173,8 +173,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
 
  protected:
-  DlMallocSpace(const std::string& name, BaseMapMem* mem_map, void* mspace, byte* begin, byte* end,
-                size_t growth_limit);
+
+  DlMallocSpace(const std::string& name, BaseMapMem* mem_map, void* mspace,
+      byte* begin, byte* end, size_t growth_limit,
+      SharedSpaceBitmapMeta* bitmap_meta_addr = NULL);
 
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);

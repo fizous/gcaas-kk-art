@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include "gc/gcservice/common.h"
+
 namespace art {
 
 namespace mirror {
@@ -37,21 +39,6 @@ namespace mirror {
 namespace gc {
 namespace accounting {
 
-
-typedef struct BitMapMemberMetaData_S {
-  // Backing storage for bitmap.
-  BaseMapMem* mem_map_;
-
-  // This bitmap itself, word sized for efficiency in scanning.
-  word* const bitmap_begin_;
-
-  // Size of this bitmap.
-  size_t bitmap_size_;
-
-  // The base address of the heap, which corresponds to the word containing the first bit in the
-  // bitmap.
-  const uintptr_t heap_begin_;
-} BitMapMemberMetaData;
 
 class SpaceBitmap {
  public:
@@ -64,15 +51,18 @@ class SpaceBitmap {
 
   typedef void SweepCallback(size_t ptr_count, mirror::Object** ptrs, void* arg);
 
+
   // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
   // heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
-  static SpaceBitmap* Create(const std::string& name, byte* heap_begin, size_t heap_capacity);
+  static SpaceBitmap* Create(const std::string& name, byte* heap_begin,
+      size_t heap_capacity, SharedSpaceBitmapMeta* meta_address = NULL);
 
   // Initialize a space bitmap using the provided mem_map as the live bits. Takes ownership of the
   // mem map. The address range covered starts at heap_begin and is of size equal to heap_capacity.
   // Objects are kAlignement-aligned.
   static SpaceBitmap* CreateFromMemMap(const std::string& name, BaseMapMem* mem_map,
-                                       byte* heap_begin, size_t heap_capacity);
+                            byte* heap_begin, size_t heap_capacity,
+                            SharedSpaceBitmapMeta* meta_address = NULL);
 
   ~SpaceBitmap();
 
@@ -208,7 +198,7 @@ class SpaceBitmap {
   // however, we document that this is expected on heap_end_
   SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
               const void* heap_begin)
-      : name_(name) {
+      : name_(name), allocated_memory_(true) {
     bitmap_meta_data_ =
         reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
             sizeof(BitMapMemberMetaData)));
@@ -216,11 +206,24 @@ class SpaceBitmap {
         mem_map, bitmap_begin, bitmap_size, heap_begin);
   }
 
+  // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
+  // however, we document that this is expected on heap_end_
+  SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
+              const void* heap_begin, BitMapMemberMetaData* meta_address)
+      : name_(name), allocated_memory_(false), bitmap_meta_data_(meta_address) {
+    SetBitmapMemberData(bitmap_meta_data_,
+        mem_map, bitmap_begin, bitmap_size, heap_begin);
+  }
+
+
   bool Modify(const mirror::Object* obj, bool do_set);
   // Name of this bitmap.
   std::string name_;
+  //was the meta_data allocated?
+  bool allocated_memory_;
   //struct that holds the metadata of the spaceBitmap
   BitMapMemberMetaData* bitmap_meta_data_;
+
 
 
 };

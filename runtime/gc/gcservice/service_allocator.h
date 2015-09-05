@@ -21,6 +21,11 @@
 #define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), ServiceAllocator::kAlignment))
 
 namespace art {
+
+
+
+
+
 namespace gcservice {
 
 
@@ -40,30 +45,6 @@ typedef struct SharedRegionMeta_S {
   byte* current_addr_;
 } SharedRegionMeta;
 
-typedef struct SharedSpaceBitmapMeta_S {
-  /* memory pointer to the bitmap data*/
-  SharedMemMapMeta data_;
-  // The base address of the heap, which corresponds to the word containing the first bit in the
-  // bitmap.
-  uintptr_t heap_begin_;
-} SharedSpaceBitmapMeta;
-
-typedef struct SharedCardTableMeta_S {
-  SharedMemMapMeta mem_meta_;
-  byte* biased_begin_;
-  byte* begin_;
-  size_t offset_;
-} SharedCardTableMeta;
-
-
-typedef struct SharedSpaceMeta_S {
-  SharedMemMapMeta mem_meta_;
-  byte* biased_begin_;
-  byte* begin_;
-  size_t offset_;
-  /* data related to space bitmap */
-  //SharedSpaceBitmapMeta bitmap_meta_;
-} SharedSpaceMeta;
 
 typedef struct SharedAtomicStackMeta_S {
 
@@ -86,19 +67,7 @@ typedef struct SharedContinuousSpaceMeta_S {
 }SharedContinuousSpaceMeta;
 
 
-typedef struct SharedHeapMetada_S {
-  SynchronizedLockHead lock_header_;
-  pid_t pid_;
-  /* data related to continuous space */
-  SharedCardTableMeta card_table_meta_;
 
-  SharedSpaceMeta alloc_space_meta_;
-
-  GC_SERVICE_STATUS vm_status_;
-
-  /* used to synchronize on conc requests*/
-  SynchronizedLockHead gc_conc_requests;
-} SharedHeapMetada;
 
 
 

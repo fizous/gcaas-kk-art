@@ -28,7 +28,7 @@
 
 namespace art {
 
-namespace gcservice {
+
 typedef struct SharedMemMapMeta_S {
   byte* owner_begin_;
   byte* owner_base_begin_;
@@ -37,7 +37,8 @@ typedef struct SharedMemMapMeta_S {
   volatile int fd_;
   volatile int prot_;
 } SharedMemMapMeta;
-}//gcservice
+
+
 
 class BaseMapMem {
  public:

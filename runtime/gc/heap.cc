@@ -1194,8 +1194,7 @@ void Heap::SetZygoteProtection(void) {
 }
 
 
-void Heap::ShareHeapForGCService(gcservice::SharedMemMapMeta* space_shared_mem,
-    gcservice::SharedMemMapMeta* card_shared_mem) {
+void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
   Thread* self = Thread::Current();
   {
     // Flush the alloc stack.
@@ -1204,7 +1203,7 @@ void Heap::ShareHeapForGCService(gcservice::SharedMemMapMeta* space_shared_mem,
   }
   space::DlMallocSpace* zygote_space = alloc_space_;
   alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
-      space_shared_mem);
+      shared_heap_mem);
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   AddContinuousSpace(alloc_space_);

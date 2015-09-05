@@ -414,8 +414,7 @@ class Heap {
   void PreZygoteFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
   void PreZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
   void PostZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
-  void ShareHeapForGCService(gcservice::SharedMemMapMeta* space_shared_mem,
-      gcservice::SharedMemMapMeta* card_shared_mem);
+  void ShareHeapForGCService(SharedHeapMetada* shared_heap_mem);
 
   void SetZygoteProtection(void);
   void HeapPrepareZygoteSpace(Thread*);
