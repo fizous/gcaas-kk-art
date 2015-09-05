@@ -10,7 +10,7 @@
 
 #include "thread.h"
 #include "gc/gcservice/common.h"
-
+#include "ipcfs/ipcfs.h"
 namespace art {
 
 namespace gcservice {
