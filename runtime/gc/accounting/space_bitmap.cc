@@ -34,7 +34,8 @@ namespace accounting {
 void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
     BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
     const void* heap_begin) {
-  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size, heap_begin};
+  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size,
+      reinterpret_cast<uintptr_t>(heap_begin)};
   memcpy(address, &data, sizeof(BitMapMemberMetaData));
 }
 
@@ -58,19 +59,24 @@ void SpaceSetMap::Walk(SpaceBitmap::Callback* callback, void* arg) {
   }
 }
 
-SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, BaseMapMem* mem_map,
-                                           byte* heap_begin, size_t heap_capacity) {
+SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name,
+                          BaseMapMem* mem_map,  byte* heap_begin,
+                          size_t heap_capacity) {
   CHECK(mem_map != nullptr);
   word* bitmap_begin = reinterpret_cast<word*>(mem_map->Begin());
-  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  size_t bitmap_size =
+      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
   return new SpaceBitmap(name, mem_map, bitmap_begin, bitmap_size, heap_begin);
 }
 
-SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin, size_t heap_capacity) {
+SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
+    size_t heap_capacity) {
   CHECK(heap_begin != NULL);
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
-  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), NULL, bitmap_size, PROT_READ | PROT_WRITE));
+  size_t bitmap_size =
+      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
+      bitmap_size, PROT_READ | PROT_WRITE));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate bitmap " << name;
     return NULL;
@@ -182,12 +188,14 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
   }
 }
 
-static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
-                              void* arg);
+static void WalkFieldsInOrder(SpaceBitmap* visited,
+                SpaceBitmap::Callback* callback, mirror::Object* obj,
+                void* arg);
 
 // Walk instance fields of the given Class. Separate function to allow recursion on the super
 // class.
-static void WalkInstanceFields(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
+static void WalkInstanceFields(SpaceBitmap* visited,
+                SpaceBitmap::Callback* callback, mirror::Object* obj,
                                mirror::Class* klass, void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   // Visit fields of parent classes first.
@@ -212,8 +220,9 @@ static void WalkInstanceFields(SpaceBitmap* visited, SpaceBitmap::Callback* call
 }
 
 // For an unvisited object, visit it then all its children found via fields.
-static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
-                              void* arg)
+static void WalkFieldsInOrder(SpaceBitmap* visited,
+                  SpaceBitmap::Callback* callback, mirror::Object* obj,
+                  void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (visited->Test(obj)) {
     return;
