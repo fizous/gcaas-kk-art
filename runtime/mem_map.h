@@ -25,6 +25,8 @@
 
 
 #include "globals.h"
+#include "gc/gcservice/common.h"
+
 
 namespace art {
 
