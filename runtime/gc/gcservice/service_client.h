@@ -8,6 +8,8 @@
 #ifndef ART_RUNTIME_GC_GCSERVICE_SERVICE_CLIENT_H_
 #define ART_RUNTIME_GC_GCSERVICE_SERVICE_CLIENT_H_
 
+#include "gc/gcservice/common.h"
+
 namespace art {
 
 namespace gcservice {

@@ -53,8 +53,7 @@ void GCServiceClient::ConstructHeap() {
   Runtime* runtime = Runtime::Current();
   gc::Heap* heap = runtime->GetHeap();
 
-  heap->ShareHeapForGCService(&heap_meta_->alloc_space_meta_.mem_meta_,
-      &heap_meta_->card_table_meta_.mem_meta_);
+  heap->ShareHeapForGCService(heap_meta_);
 
 
 }
