@@ -25,29 +25,29 @@ namespace gcservice {
 ServiceAllocator* ServiceAllocator::service_allocator_ = NULL;
 
 
-SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
-    size_t byte_count, int prot) {
-  int flags = MAP_SHARED;
-  SharedMemMapMeta* _meta_record = ServiceAllocator::AllocShMemMapMeta();
-  _meta_record->base_size_ = RoundUp(byte_count, kPageSize);
-  _meta_record->size_ = 0;
-  _meta_record->fd_   = ashmem_create_region(name, _meta_record->base_size_);
-  _meta_record->prot_ = prot;
-  if (_meta_record->fd_  == -1) {
-    LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
-    return NULL;
-  }
-  _meta_record->owner_begin_ =
-      reinterpret_cast<byte*>(mmap(NULL, _meta_record->base_size_, prot, flags,
-          _meta_record->fd_, 0));
-  if (_meta_record->owner_begin_ == MAP_FAILED) {
-    LOG(ERROR) << "mmap(" <<name<< ")" << ", " <<
-        _meta_record->base_size_ << ", " << prot << ", " << flags << ", " <<
-        _meta_record->fd_ << ", 0) failed for " << name << "\n";
-    return NULL;
-  }
-  return _meta_record;
-}
+//SharedMemMapMeta* SharedMemMap::CreateSharedMemory(const char* name,
+//    size_t byte_count, int prot) {
+//  int flags = MAP_SHARED;
+//  SharedMemMapMeta* _meta_record = ServiceAllocator::AllocShMemMapMeta();
+//  _meta_record->base_size_ = RoundUp(byte_count, kPageSize);
+//  _meta_record->size_ = 0;
+//  _meta_record->fd_   = ashmem_create_region(name, _meta_record->base_size_);
+//  _meta_record->prot_ = prot;
+//  if (_meta_record->fd_  == -1) {
+//    LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+//    return NULL;
+//  }
+//  _meta_record->owner_begin_ =
+//      reinterpret_cast<byte*>(mmap(NULL, _meta_record->base_size_, prot, flags,
+//          _meta_record->fd_, 0));
+//  if (_meta_record->owner_begin_ == MAP_FAILED) {
+//    LOG(ERROR) << "mmap(" <<name<< ")" << ", " <<
+//        _meta_record->base_size_ << ", " << prot << ", " << flags << ", " <<
+//        _meta_record->fd_ << ", 0) failed for " << name << "\n";
+//    return NULL;
+//  }
+//  return _meta_record;
+//}
 
 
 
