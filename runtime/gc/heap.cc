@@ -1210,7 +1210,7 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
   have_zygote_space_ = true;
 
   accounting::CardTable* cardTbl = GetCardTable();
-  cardTbl->ShareCardTable(card_shared_mem);
+  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
 
   zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
   //  SetZygoteProtection();
