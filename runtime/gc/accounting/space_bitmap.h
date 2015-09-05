@@ -204,6 +204,8 @@ class SpaceBitmap {
       bitmap_meta_data_ =
           reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
               sizeof(BitMapMemberMetaData)));
+    } else {
+      LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_);
     }
     SetBitmapMemberData(bitmap_meta_data_,
         mem_map, bitmap_begin, bitmap_size, heap_begin);
