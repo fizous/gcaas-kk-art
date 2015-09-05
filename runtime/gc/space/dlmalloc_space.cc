@@ -302,7 +302,7 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 //our unused memory. the new heap has shared access to allow the GCService to
 //collect it.
 DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
-    SharedHeapMetada* mem_metadata) {
+    SharedSpaceMeta* shared_space_meta_mem) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
@@ -337,7 +337,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
       reinterpret_cast<const void*>(End());
   UniquePtr<BaseMapMem>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
-      capacity, PROT_READ | PROT_WRITE, &mem_metadata->alloc_space_meta_.mem_meta_));
+      capacity, PROT_READ | PROT_WRITE, &shared_space_meta_mem->mem_meta_));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
 
@@ -354,7 +354,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
-          end_, end, growth_limit, NULL/*&mem_metadata->alloc_space_meta_.bitmap_meta_*/);
+          end_, end, growth_limit, &shared_space_meta_mem->bitmap_meta_);
 
   alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));

@@ -1203,7 +1203,7 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
   }
   space::DlMallocSpace* zygote_space = alloc_space_;
   alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
-      shared_heap_mem);
+      &shared_heap_mem->alloc_space_meta_);
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
   AddContinuousSpace(alloc_space_);
