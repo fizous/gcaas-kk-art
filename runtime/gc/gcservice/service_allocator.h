@@ -86,6 +86,22 @@ public:
 
   static ServiceAllocator* CreateServiceAllocator(void);
   static SharedMemMapMeta* AllocShMemMapMeta(void);
+
+
+  static void DumpStructSizes() {
+    LOG(ERROR) << "=======dumping sizes======\n";
+    LOG(ERROR) << "==SynchronizedLockHead: "<< sizeof(SynchronizedLockHead);
+    LOG(ERROR) << "\n==SharedCardTableMeta: "<< sizeof(SharedCardTableMeta);
+    LOG(ERROR) << "\n==SharedSpaceMeta: "<< sizeof(SharedSpaceMeta);
+    LOG(ERROR) << "\n==SharedHeapMetada: "<< sizeof(SharedHeapMetada);
+    LOG(ERROR) << "\n==offsets:\n";
+    LOG(ERROR) << "SynchronizedLockHead:" << offsetof(SharedHeapMetada, lock_header_);
+    LOG(ERROR) << "\nSharedCardTableMeta:" << offsetof(SharedHeapMetada, card_table_meta_);
+    LOG(ERROR) << "\nSharedSpaceMeta:" << offsetof(SharedHeapMetada, alloc_space_meta_);
+    LOG(ERROR) << "\nSynchronizedLockHead:" << offsetof(SharedHeapMetada, gc_conc_requests);
+    LOG(ERROR) << "\nvm_status_:" << offsetof(SharedHeapMetada, vm_status_);
+    LOG(ERROR) << "\npid_:" << offsetof(SharedHeapMetada, pid_);
+  }
 //  static SharedSpaceMeta* GetSpaceMetAddr(SharedHeapMetada*);
 
   byte* Begin() {
@@ -126,6 +142,7 @@ private:
   static ServiceAllocator* service_allocator_;
   GCServiceMetaData* service_meta_;
   SharedHeapMetada* heap_meta_arr_;
+
 }; //ServiceAllocator
 
 
