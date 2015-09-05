@@ -354,7 +354,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
-          end_, end, growth_limit, &mem_metadata->alloc_space_meta_.bitmap_meta_);
+          end_, end, growth_limit, NULL/*&mem_metadata->alloc_space_meta_.bitmap_meta_*/);
 
   alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
