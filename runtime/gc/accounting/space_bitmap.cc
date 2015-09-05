@@ -30,6 +30,14 @@ namespace art {
 namespace gc {
 namespace accounting {
 
+
+void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
+    BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
+    const void* heap_begin) {
+  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size, heap_begin};
+  memcpy(address, &data, sizeof(BitMapMemberMetaData));
+}
+
 std::string SpaceBitmap::GetName() const {
   return name_;
 }
