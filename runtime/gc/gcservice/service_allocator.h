@@ -29,13 +29,13 @@ namespace art {
 namespace gcservice {
 
 
-class SharedMemMap {
-public:
-  static SharedMemMapMeta* CreateSharedMemory(const char *name,
-      size_t byte_count, int prot = PROT_READ | PROT_WRITE);
-private:
-  SharedMemMapMeta* mem_;
-};//SharedMemMap
+//class SharedMemMap {
+//public:
+//  static SharedMemMapMeta* CreateSharedMemory(const char *name,
+//      size_t byte_count, int prot = PROT_READ | PROT_WRITE);
+//private:
+//  SharedMemMapMeta* mem_;
+//};//SharedMemMap
 
 
 
@@ -60,11 +60,11 @@ typedef struct SharedAtomicStackMeta_S {
 }SharedAtomicStackMeta;
 
 
-typedef struct SharedContinuousSpaceMeta_S {
-  byte* begin_;
-  byte* end_;
-  SharedSpaceBitmapMeta bitmap_meta_;
-}SharedContinuousSpaceMeta;
+//typedef struct SharedContinuousSpaceMeta_S {
+//  byte* begin_;
+//  byte* end_;
+//  SharedSpaceBitmapMeta bitmap_meta_;
+//}SharedContinuousSpaceMeta;
 
 
 
