@@ -99,7 +99,7 @@ class BaseMapMem {
   }
 };
 
-
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
   BaseMapMem* mem_map_;
@@ -114,7 +114,9 @@ typedef struct BitMapMemberMetaData_S {
   // bitmap.
   const uintptr_t heap_begin_;
 } BitMapMemberMetaData;
+#pragma pack(pop)
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedSpaceBitmapMeta_S {
   /* memory pointer to the bitmap data*/
   SharedMemMapMeta data_;
@@ -122,23 +124,29 @@ typedef struct SharedSpaceBitmapMeta_S {
   // bitmap.
   BitMapMemberMetaData bitmap_fields_;
 } SharedSpaceBitmapMeta;
+#pragma pack(pop)
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedSpaceMeta_S {
   SharedMemMapMeta mem_meta_;
+  /* data related to space bitmap */
+  SharedSpaceBitmapMeta bitmap_meta_[2];
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
-  /* data related to space bitmap */
-  SharedSpaceBitmapMeta bitmap_meta_[2];
 } SharedSpaceMeta;
+#pragma pack(pop)
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedCardTableMeta_S {
   SharedMemMapMeta mem_meta_;
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
 } SharedCardTableMeta;
+#pragma pack(pop)
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
   /* data related to continuous space */
@@ -152,6 +160,7 @@ typedef struct SharedHeapMetada_S {
 
   pid_t pid_;
 } SharedHeapMetada;
+#pragma pack(pop)
 
 class SharedMemMap;
 

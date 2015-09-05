@@ -204,6 +204,7 @@ class LOCKABLE Mutex : public BaseMutex {
   DISALLOW_COPY_AND_ASSIGN(Mutex);
 };
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedFutexData_S {
 #if ART_USE_FUTEXES
   // 0 is unheld, 1 is held.
@@ -220,8 +221,9 @@ typedef struct SharedFutexData_S {
   int recursive_;  // Can the lock be recursively held?
   unsigned int recursion_count_;
 } SharedFutexData;
+#pragma pack(pop)
 
-
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedConditionVarData_S {
 #if ART_USE_FUTEXES
   // A counter that is modified by signals and broadcasts. This ensures that when a waiter gives up
@@ -237,12 +239,14 @@ typedef struct SharedConditionVarData_S {
   pthread_condattr_t attr_;
 #endif
 } SharedConditionVarData;
+#pragma pack(pop)
 
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SynchronizedLockHead_S {
   SharedFutexData futex_head_;
   SharedConditionVarData cond_var_;
 } SynchronizedLockHead;
-
+#pragma pack(pop)
 
 
 std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
