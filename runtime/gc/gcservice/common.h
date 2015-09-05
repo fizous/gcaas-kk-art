@@ -8,8 +8,8 @@
 #ifndef ART_RUNTIME_GC_GCSERVICE_COMMON_H_
 #define ART_RUNTIME_GC_GCSERVICE_COMMON_H_
 
-#include "thread.h"
-#include "ipcfs/ipcfs.h"
+//#include "thread.h"
+//#include "ipcfs/ipcfs.h"
 
 /* log information. used to monitor the flow of the profiler.*/
 #if ART_GC_PROFILER_VERBOSE
