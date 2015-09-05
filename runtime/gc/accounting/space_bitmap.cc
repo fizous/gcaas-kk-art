@@ -25,6 +25,7 @@
 #include "space_bitmap-inl.h"
 #include "UniquePtr.h"
 #include "utils.h"
+#include "gc/gcservice/service_allocator.h"
 
 namespace art {
 namespace gc {
