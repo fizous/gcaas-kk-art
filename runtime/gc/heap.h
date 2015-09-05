@@ -23,6 +23,7 @@
 
 #include "atomic_integer.h"
 #include "base/timing_logger.h"
+#include "gc/gcservice/common.h"
 #include "gc/accounting/atomic_stack.h"
 #include "gc/accounting/card_table.h"
 #include "gc/collector/gc_type.h"
@@ -33,7 +34,7 @@
 #include "offsets.h"
 #include "safe_map.h"
 #include "thread_pool.h"
-#include "gc/gcservice/common.h"
+
 
 namespace art {
 
