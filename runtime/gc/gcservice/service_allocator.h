@@ -38,13 +38,11 @@ namespace gcservice {
 //};//SharedMemMap
 
 
-#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedRegionMeta_S {
   // This bitmap itself, word sized for efficiency in scanning.
   SharedMemMapMeta meta_;
   byte* current_addr_;
-} SharedRegionMeta;
-#pragma pack(pop)
+}  __attribute__((aligned(8))) SharedRegionMeta;
 
 typedef struct SharedAtomicStackMeta_S {
 
