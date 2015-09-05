@@ -32,7 +32,7 @@ namespace accounting {
 
 SpaceBitmap::SpaceBitmap(const std::string& name,
       BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
-            const void* heap_begin, BitMapMemberMetaData* fields_addr = NULL)
+            const void* heap_begin, BitMapMemberMetaData* fields_addr)
     : name_(name), bitmap_meta_data_(fields_addr),
       allocated_memory_(bitmap_meta_data_ == NULL) {
   if(allocated_memory_) {
