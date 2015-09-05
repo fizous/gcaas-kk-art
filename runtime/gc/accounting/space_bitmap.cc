@@ -106,8 +106,8 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
 
 // Clean up any resources associated with the bitmap.
 SpaceBitmap::~SpaceBitmap() {
-  if(allocated_memory_)
-    free(bitmap_meta_data_);
+ // if(allocated_memory_)
+ //   free(bitmap_meta_data_);
 }
 
 void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
