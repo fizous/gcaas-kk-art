@@ -78,17 +78,14 @@ ServiceAllocator::ServiceAllocator(int pages) :
   memset((void*) memory_meta_, 0, used_bytes);
 //  Thread* self = Thread::Current();
 
-  memory_meta_ =
-      reinterpret_cast<SharedRegionMeta*>(begin);
-  size_t shift = SERVICE_ALLOC_ALIGN_BYTE(SharedRegionMeta);
-  memset((void*) memory_meta_, 0, shift);
-
   memory_meta_->meta_.owner_begin_ = begin;
   memory_meta_->meta_.fd_ = fileDescript;
   memory_meta_->meta_.prot_ = prot;
   memory_meta_->meta_.base_size_ = memory_size;
   memory_meta_->current_addr_ = memory_meta_->meta_.owner_begin_+ used_bytes;
   memory_meta_->meta_.size_ = used_bytes;
+
+
 
   service_meta_ =
         reinterpret_cast<GCServiceMetaData*>(allocate(SERVICE_ALLOC_ALIGN_BYTE(GCServiceMetaData)));
