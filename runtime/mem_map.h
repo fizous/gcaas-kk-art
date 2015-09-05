@@ -38,7 +38,57 @@ typedef struct SharedMemMapMeta_S {
   volatile int prot_;
 } SharedMemMapMeta;
 
+typedef struct BitMapMemberMetaData_S {
+  // Backing storage for bitmap.
+  BaseMapMem* mem_map_;
 
+  // This bitmap itself, word sized for efficiency in scanning.
+  word* const bitmap_begin_;
+
+  // Size of this bitmap.
+  size_t bitmap_size_;
+
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  const uintptr_t heap_begin_;
+} BitMapMemberMetaData;
+
+typedef struct SharedSpaceBitmapMeta_S {
+  /* memory pointer to the bitmap data*/
+  SharedMemMapMeta data_;
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  BitMapMemberMetaData bitmap_fields_;
+} SharedSpaceBitmapMeta;
+
+typedef struct SharedSpaceMeta_S {
+  SharedMemMapMeta mem_meta_;
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+  /* data related to space bitmap */
+  SharedSpaceBitmapMeta bitmap_meta_;
+} SharedSpaceMeta;
+
+typedef struct SharedCardTableMeta_S {
+  SharedMemMapMeta mem_meta_;
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+} SharedCardTableMeta;
+
+typedef struct SharedHeapMetada_S {
+  SynchronizedLockHead lock_header_;
+  pid_t pid_;
+  /* data related to continuous space */
+  SharedCardTableMeta card_table_meta_;
+
+  SharedSpaceMeta alloc_space_meta_;
+
+  gcservice::GC_SERVICE_STATUS vm_status_;
+  /* used to synchronize on conc requests*/
+  SynchronizedLockHead gc_conc_requests;
+} SharedHeapMetada;
 
 class BaseMapMem {
  public:
