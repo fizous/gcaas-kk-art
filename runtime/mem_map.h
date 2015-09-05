@@ -129,7 +129,7 @@ typedef struct SharedSpaceMeta_S {
   byte* begin_;
   size_t offset_;
   /* data related to space bitmap */
-  SharedSpaceBitmapMeta bitmap_meta_;
+  SharedSpaceBitmapMeta bitmap_meta_[2];
 } SharedSpaceMeta;
 
 typedef struct SharedCardTableMeta_S {

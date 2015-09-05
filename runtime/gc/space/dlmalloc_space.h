@@ -176,7 +176,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
   DlMallocSpace(const std::string& name, BaseMapMem* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit,
-      SharedSpaceBitmapMeta* bitmap_meta_addr = NULL);
+      SharedSpaceMeta* space_meta_addr = NULL);
 
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);

@@ -134,7 +134,7 @@ bool DlMallocSpace::SetMemoryProtection(void) {
 
 DlMallocSpace::DlMallocSpace(const std::string& name, BaseMapMem* mem_map,
                 void* mspace, byte* begin, byte* end, size_t growth_limit,
-                SharedSpaceBitmapMeta* bitmap_meta_addr)
+                SharedSpaceMeta* meta_addr)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
@@ -149,12 +149,12 @@ DlMallocSpace::DlMallocSpace(const std::string& name, BaseMapMem* mem_map,
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
-      Begin(), Capacity()));
+      Begin(), Capacity(), meta_addr != NULL ? &meta_addr->bitmap_meta_[0] : NULL));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << bitmap_index;
 
   mark_bitmap_.reset(accounting::SpaceBitmap::Create(
       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
-      Begin(), Capacity(), bitmap_meta_addr));
+      Begin(), Capacity(), meta_addr != NULL ? &meta_addr->bitmap_meta_[0] : NULL));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
 
   for (auto& freed : recent_freed_objects_) {
@@ -302,7 +302,7 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 //our unused memory. the new heap has shared access to allow the GCService to
 //collect it.
 DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
-    SharedSpaceMeta* shared_space_meta_mem) {
+    SharedSpaceMeta* space_meta_addr) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
@@ -337,7 +337,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
       reinterpret_cast<const void*>(End());
   UniquePtr<BaseMapMem>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
-      capacity, PROT_READ | PROT_WRITE, &shared_space_meta_mem->mem_meta_));
+      capacity, PROT_READ | PROT_WRITE, &space_meta_addr->mem_meta_));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
 
@@ -354,7 +354,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
-          end_, end, growth_limit, &shared_space_meta_mem->bitmap_meta_);
+          end_, end, growth_limit, space_meta_addr);
 
   alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));

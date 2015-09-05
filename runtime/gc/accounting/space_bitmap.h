@@ -197,19 +197,7 @@ class SpaceBitmap {
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
   SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
-              const void* heap_begin, BitMapMemberMetaData* fields_addr = NULL)
-      : name_(name), bitmap_meta_data_(fields_addr),
-        allocated_memory_(bitmap_meta_data_ == NULL) {
-    if(allocated_memory_) {
-      bitmap_meta_data_ =
-          reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
-              sizeof(BitMapMemberMetaData)));
-    } else {
-      LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_);
-    }
-    SetBitmapMemberData(bitmap_meta_data_,
-        mem_map, bitmap_begin, bitmap_size, heap_begin);
-  }
+              const void* heap_begin, BitMapMemberMetaData* fields_addr = NULL);
 
 
   bool Modify(const mirror::Object* obj, bool do_set);
