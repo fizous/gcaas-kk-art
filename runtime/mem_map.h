@@ -25,10 +25,22 @@
 
 
 #include "globals.h"
-#include "gc/gcservice/common.h"
 
 
 namespace art {
+
+namespace gcservice {
+
+typedef enum {
+  GCSERVICE_STATUS_NONE = 0,
+  GCSERVICE_STATUS_WAITINGSERVER = 1,
+  GCSERVICE_STATUS_SERVER_INITIALIZED = 2,
+  GCSERVICE_STATUS_STARTING = 4,
+  GCSERVICE_STATUS_RUNNING  = 8,
+  GCSERVICE_STATUS_SHUTTING_DOWN  = 16,
+  GCSERVICE_STATUS_STOPPED  = 32
+} GC_SERVICE_STATUS;
+}//namespace gcservice
 
 
 typedef struct SharedMemMapMeta_S {
