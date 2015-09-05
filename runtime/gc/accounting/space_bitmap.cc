@@ -49,8 +49,8 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
 void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
     BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
     const void* heap_begin) {
-  UniquePtr<BaseMapMem> dumpPointer(NULL);
-  BitMapMemberMetaData _data = {dumpPointer, bitmap_begin, bitmap_size, reinterpret_cast<uintptr_t>(heap_begin)};
+  //UniquePtr<BaseMapMem> dumpPointer(NULL);
+  BitMapMemberMetaData _data = {(NULL), bitmap_begin, bitmap_size, reinterpret_cast<uintptr_t>(heap_begin)};
   memcpy(address, &_data, sizeof(BitMapMemberMetaData));
   //dumpPointer.release();
   address->mem_map_.reset(mem_map);
