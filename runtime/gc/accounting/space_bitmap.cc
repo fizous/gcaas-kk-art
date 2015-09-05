@@ -99,7 +99,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
     }
-    return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity,
+    return CreateFromMemMap(name, shared_mem_map.release(), heap_begin, heap_capacity,
         meta_address);
   }
 }
