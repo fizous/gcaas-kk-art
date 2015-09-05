@@ -36,7 +36,7 @@ void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
     const void* heap_begin) {
   BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size,
       reinterpret_cast<uintptr_t>(heap_begin)};
-  memcpy(address, &data, sizeof(BitMapMemberMetaData));
+  memcpy(address, &_data, sizeof(BitMapMemberMetaData));
 }
 
 std::string SpaceBitmap::GetName() const {
@@ -86,7 +86,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
 
 // Clean up any resources associated with the bitmap.
 SpaceBitmap::~SpaceBitmap() {
-  free bitmap_meta_data_;
+  free(bitmap_meta_data_);
 }
 
 void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
