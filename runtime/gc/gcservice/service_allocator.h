@@ -79,11 +79,13 @@ public:
   // Alignment of objects within spaces.
   static const size_t PageCapacity = 64;
 
+  static size_t GetSharedHeapMetaSize(void) {
 
+  }
 
   static ServiceAllocator* CreateServiceAllocator(void);
   static SharedMemMapMeta* AllocShMemMapMeta(void);
-
+  static SharedSpaceMeta* GetSpaceMetAddr(SharedHeapMetada*);
 
   byte* Begin() {
     return memory_meta_->meta_.owner_begin_;

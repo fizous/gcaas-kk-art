@@ -49,7 +49,9 @@ ServiceAllocator* ServiceAllocator::service_allocator_ = NULL;
 //  return _meta_record;
 //}
 
+SharedSpaceMeta* GetSpaceMetAddr(SharedHeapMetada*) {
 
+}
 
 ServiceAllocator::ServiceAllocator(int pages) :
     service_meta_(NULL),

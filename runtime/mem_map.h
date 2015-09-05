@@ -42,7 +42,7 @@ typedef enum {
 } GC_SERVICE_STATUS;
 }//namespace gcservice
 
-
+#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedMemMapMeta_S {
   byte* owner_begin_;
   byte* owner_base_begin_;
@@ -51,7 +51,7 @@ typedef struct SharedMemMapMeta_S {
   volatile int fd_;
   volatile int prot_;
 } SharedMemMapMeta;
-
+#pragma pack(pop)
 
 
 class BaseMapMem {
@@ -141,15 +141,16 @@ typedef struct SharedCardTableMeta_S {
 
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
-  pid_t pid_;
   /* data related to continuous space */
   SharedCardTableMeta card_table_meta_;
 
   SharedSpaceMeta alloc_space_meta_;
-
-  gcservice::GC_SERVICE_STATUS vm_status_;
   /* used to synchronize on conc requests*/
   SynchronizedLockHead gc_conc_requests;
+
+  gcservice::GC_SERVICE_STATUS vm_status_;
+
+  pid_t pid_;
 } SharedHeapMetada;
 
 class SharedMemMap;
