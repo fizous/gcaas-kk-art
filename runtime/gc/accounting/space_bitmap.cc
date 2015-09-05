@@ -39,9 +39,18 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
     bitmap_meta_data_ =
         reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
             sizeof(BitMapMemberMetaData)));
-    LOG(ERROR) << "*** non shared bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_);
+    LOG(ERROR) << "*** non shared bitmap fields is at address: "
+        << reinterpret_cast<void*>(bitmap_meta_data_)
+        << ", sizeof (BitMapMemberMetaData):"
+        << sizeof(BitMapMemberMetaData)
+        << ", sizeof(SharedSpaceBitmapMeta):"
+        << sizeof(SharedSpaceBitmapMeta);
   } else {
-    LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_);
+    LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_)
+            << ", sizeof (BitMapMemberMetaData):"
+            << sizeof(BitMapMemberMetaData)
+            << ", sizeof(SharedSpaceBitmapMeta):"
+            << sizeof(SharedSpaceBitmapMeta);
   }
   SetBitmapMemberData(bitmap_meta_data_,
       mem_map, bitmap_begin, bitmap_size, heap_begin);
@@ -51,7 +60,8 @@ void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
     BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
     const void* heap_begin) {
   //UniquePtr<BaseMapMem> dumpPointer(NULL);
-  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size, reinterpret_cast<uintptr_t>(heap_begin)};
+  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size,
+      reinterpret_cast<uintptr_t>(heap_begin)};
   memcpy(address, &_data, sizeof(BitMapMemberMetaData));
   //dumpPointer.release();
 //  address->mem_map_.reset(mem_map);
