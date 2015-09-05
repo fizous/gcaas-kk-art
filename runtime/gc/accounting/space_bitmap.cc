@@ -53,6 +53,7 @@ void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
   BitMapMemberMetaData _data = {dumpPointer, bitmap_begin,
       bitmap_size, reinterpret_cast<uintptr_t>(heap_begin)};
   memcpy(address, &_data, sizeof(BitMapMemberMetaData));
+  dumpPointer.release();
   address->mem_map_.reset(mem_map);
 }
 
