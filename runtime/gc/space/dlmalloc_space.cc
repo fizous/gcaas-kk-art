@@ -154,7 +154,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, BaseMapMem* mem_map,
 
   mark_bitmap_.reset(accounting::SpaceBitmap::Create(
       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
-      Begin(), Capacity(), &bitmap_meta_addr->bitmap_fields_));
+      Begin(), Capacity(), bitmap_meta_addr));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
 
   for (auto& freed : recent_freed_objects_) {
