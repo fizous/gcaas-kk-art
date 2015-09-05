@@ -10,7 +10,7 @@
 
 //#include "thread.h"
 //#include "ipcfs/ipcfs.h"
-
+#include "base/mutex.h"
 /* log information. used to monitor the flow of the profiler.*/
 #if ART_GC_PROFILER_VERBOSE
 #define SRVC_ILOG  1
