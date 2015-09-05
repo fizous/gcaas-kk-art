@@ -38,6 +38,54 @@ typedef struct SharedMemMapMeta_S {
   volatile int prot_;
 } SharedMemMapMeta;
 
+
+
+class BaseMapMem {
+ public:
+  const std::string name_;
+
+  virtual byte* Begin() const = 0;
+
+  virtual byte* BaseBegin() const = 0;
+
+  virtual size_t Size() const = 0;
+
+  virtual void SetSize(size_t) = 0;
+
+  virtual size_t BaseSize() const = 0;
+
+  virtual byte* End() const = 0;
+
+  virtual bool HasAddress(const void* addr) const = 0;
+
+  virtual int GetProtect() const = 0;
+
+  virtual int GetFD() {
+    return -1;
+  }
+
+  virtual void SetFD(int){}
+  virtual bool Protect(int){return false;}
+  virtual bool ProtectModifiedMMAP(int) {return false;}
+
+  BaseMapMem(const std::string& name);
+
+
+  // Trim by unmapping pages at the end of the map.
+  virtual void UnMapAtEnd(byte*);
+
+  virtual ~BaseMapMem(){}
+
+  virtual void initMemMap(byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot) = 0;
+
+
+  const char* getName() {
+    return name_.c_str();
+  }
+};
+
+
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
   BaseMapMem* mem_map_;
@@ -89,51 +137,6 @@ typedef struct SharedHeapMetada_S {
   /* used to synchronize on conc requests*/
   SynchronizedLockHead gc_conc_requests;
 } SharedHeapMetada;
-
-class BaseMapMem {
- public:
-  const std::string name_;
-
-  virtual byte* Begin() const = 0;
-
-  virtual byte* BaseBegin() const = 0;
-
-  virtual size_t Size() const = 0;
-
-  virtual void SetSize(size_t) = 0;
-
-  virtual size_t BaseSize() const = 0;
-
-  virtual byte* End() const = 0;
-
-  virtual bool HasAddress(const void* addr) const = 0;
-
-  virtual int GetProtect() const = 0;
-
-  virtual int GetFD() {
-    return -1;
-  }
-
-  virtual void SetFD(int){}
-  virtual bool Protect(int){return false;}
-  virtual bool ProtectModifiedMMAP(int) {return false;}
-
-  BaseMapMem(const std::string& name);
-
-
-  // Trim by unmapping pages at the end of the map.
-  virtual void UnMapAtEnd(byte*);
-
-  virtual ~BaseMapMem(){}
-
-  virtual void initMemMap(byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot) = 0;
-
-
-  const char* getName() {
-    return name_.c_str();
-  }
-};
 
 class SharedMemMap;
 
