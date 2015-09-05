@@ -45,13 +45,15 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
         << ", sizeof (BitMapMemberMetaData):"
         << sizeof(BitMapMemberMetaData)
         << ", sizeof(SharedSpaceBitmapMeta):"
-        << sizeof(SharedSpaceBitmapMeta);
+        << sizeof(SharedSpaceBitmapMeta)<<
+        ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
   } else {
     LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_)
             << ", sizeof (BitMapMemberMetaData):"
             << sizeof(BitMapMemberMetaData)
             << ", sizeof(SharedSpaceBitmapMeta):"
-            << sizeof(SharedSpaceBitmapMeta);
+            << sizeof(SharedSpaceBitmapMeta) <<
+            ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
   }
   SetBitmapMemberData(bitmap_meta_data_,
       mem_map, bitmap_begin, bitmap_size, heap_begin);

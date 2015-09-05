@@ -42,7 +42,7 @@ typedef enum {
 } GC_SERVICE_STATUS;
 }//namespace gcservice
 
-#pragma pack(push, 8) /* 8 bytes */
+
 typedef struct SharedMemMapMeta_S {
   byte* owner_begin_;
   byte* owner_base_begin_;
@@ -50,8 +50,7 @@ typedef struct SharedMemMapMeta_S {
   size_t base_size_;
   volatile int fd_;
   volatile int prot_;
-} SharedMemMapMeta;
-#pragma pack(pop)
+} __attribute__((aligned(8))) SharedMemMapMeta;
 
 
 class BaseMapMem {
@@ -99,7 +98,7 @@ class BaseMapMem {
   }
 };
 
-#pragma pack(push, 8) /* 8 bytes */
+
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
   BaseMapMem* mem_map_;
@@ -113,20 +112,16 @@ typedef struct BitMapMemberMetaData_S {
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   const uintptr_t heap_begin_;
-} BitMapMemberMetaData;
-#pragma pack(pop)
+} __attribute__((aligned(8)))  BitMapMemberMetaData;
 
-#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedSpaceBitmapMeta_S {
   /* memory pointer to the bitmap data*/
   SharedMemMapMeta data_;
   // The base address of the heap, which corresponds to the word containing the first bit in the
   // bitmap.
   BitMapMemberMetaData bitmap_fields_;
-} SharedSpaceBitmapMeta;
-#pragma pack(pop)
+} __attribute__((aligned(8)))  SharedSpaceBitmapMeta;
 
-#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedSpaceMeta_S {
   SharedMemMapMeta mem_meta_;
   /* data related to space bitmap */
@@ -134,19 +129,16 @@ typedef struct SharedSpaceMeta_S {
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
-} SharedSpaceMeta;
-#pragma pack(pop)
+} __attribute__((aligned(8))) SharedSpaceMeta;
 
-#pragma pack(push, 8) /* 8 bytes */
 typedef struct SharedCardTableMeta_S {
   SharedMemMapMeta mem_meta_;
   byte* biased_begin_;
   byte* begin_;
   size_t offset_;
-} SharedCardTableMeta;
-#pragma pack(pop)
+} __attribute__((aligned(8)))  SharedCardTableMeta;
 
-#pragma pack(push, 8) /* 8 bytes */
+
 typedef struct SharedHeapMetada_S {
   SynchronizedLockHead lock_header_;
   /* data related to continuous space */
@@ -159,8 +151,8 @@ typedef struct SharedHeapMetada_S {
   gcservice::GC_SERVICE_STATUS vm_status_;
 
   pid_t pid_;
-} SharedHeapMetada;
-#pragma pack(pop)
+} __attribute__((aligned(8))) SharedHeapMetada;
+
 
 class SharedMemMap;
 

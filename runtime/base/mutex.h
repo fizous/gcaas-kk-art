@@ -241,12 +241,12 @@ typedef struct SharedConditionVarData_S {
 }  __attribute__((aligned(8))) SharedConditionVarData;
 
 
-#pragma pack(push, 8) /* 8 bytes */
+
 typedef struct SynchronizedLockHead_S {
   SharedFutexData futex_head_;
   SharedConditionVarData cond_var_;
-} SynchronizedLockHead;
-#pragma pack(pop)
+} __attribute__((aligned(8)))  SynchronizedLockHead;
+
 
 
 std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
