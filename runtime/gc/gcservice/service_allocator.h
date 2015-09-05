@@ -18,7 +18,7 @@
 #include "gc/gcservice/common.h"
 
 
-#define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), gc::gcservice::ServiceAllocator::kAlignment))
+#define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), gcservice::ServiceAllocator::kAlignment))
 
 namespace art {
 
