@@ -197,20 +197,14 @@ class SpaceBitmap {
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
   SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
-              const void* heap_begin)
-      : name_(name), allocated_memory_(true) {
-    bitmap_meta_data_ =
-        reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
-            sizeof(BitMapMemberMetaData)));
-    SetBitmapMemberData(bitmap_meta_data_,
-        mem_map, bitmap_begin, bitmap_size, heap_begin);
-  }
-
-  // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
-  // however, we document that this is expected on heap_end_
-  SpaceBitmap(const std::string& name, BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
-              const void* heap_begin, BitMapMemberMetaData* meta_address)
-      : name_(name), allocated_memory_(false), bitmap_meta_data_(meta_address) {
+              const void* heap_begin, BitMapMemberMetaData* fields_addr = NULL)
+      : name_(name), bitmap_meta_data_(fields_addr),
+        allocated_memory_(bitmap_meta_data_ == NULL) {
+    if(allocated_memory_) {
+      bitmap_meta_data_ =
+          reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
+              sizeof(BitMapMemberMetaData)));
+    }
     SetBitmapMemberData(bitmap_meta_data_,
         mem_map, bitmap_begin, bitmap_size, heap_begin);
   }
@@ -219,13 +213,10 @@ class SpaceBitmap {
   bool Modify(const mirror::Object* obj, bool do_set);
   // Name of this bitmap.
   std::string name_;
-  //was the meta_data allocated?
-  bool allocated_memory_;
   //struct that holds the metadata of the spaceBitmap
   BitMapMemberMetaData* bitmap_meta_data_;
-
-
-
+  //was the meta_data allocated?
+  bool allocated_memory_;
 };
 
 // Like a bitmap except it keeps track of objects using sets.
