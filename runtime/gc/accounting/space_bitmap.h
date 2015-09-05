@@ -40,7 +40,7 @@ namespace accounting {
 
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
-  UniquePtr<BaseMapMem> mem_map_;
+  BaseMapMem* mem_map_;
 
   // This bitmap itself, word sized for efficiency in scanning.
   word* const bitmap_begin_;
