@@ -68,7 +68,7 @@ static void CheckMapRequest(byte*, size_t) { }
 #endif
 
 BaseMapMem* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
-    size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata) {
+    size_t byte_count, int prot, SharedMemMapMeta* metadata) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
 
@@ -347,9 +347,9 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd) :
           BaseMapMem(name) {
 
-  gcservice::SharedMemMapMeta* _metadata =
-      reinterpret_cast<gcservice::SharedMemMapMeta*>(calloc(1,
-          sizeof(gcservice::SharedMemMapMeta)));
+  SharedMemMapMeta* _metadata =
+      reinterpret_cast<SharedMemMapMeta*>(calloc(1,
+          sizeof(SharedMemMapMeta)));
 
   initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
       _metadata);
@@ -360,7 +360,7 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 
 SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int fd,
-      gcservice::SharedMemMapMeta* metaMem) :
+      SharedMemMapMeta* metaMem) :
           BaseMapMem(name) {
   initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
       metaMem);
@@ -368,7 +368,7 @@ SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
 
 void SharedMemMap::initSharedMemMap(byte* begin,
     size_t size, void* base_begin, size_t base_size, int prot, int fd,
-    gcservice::SharedMemMapMeta* metaMem) {
+    SharedMemMapMeta* metaMem) {
   metadata_ = metaMem;
   metadata_->fd_ = fd;
   initMemMap(begin, size, base_begin, base_size, prot);

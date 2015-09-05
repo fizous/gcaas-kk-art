@@ -200,7 +200,7 @@ bool CardTable::updateProtection(int newProtection) {
 
 
 /// reset the card table to enable sharing with gc service
-void CardTable::ShareCardTable(gcservice::SharedMemMapMeta* metaMemory) {
+void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
   CardTable* orig_card_table = this;
   GCSERV_CLIENT_ILOG << "restart cardTable to enable sharing";
   byte* original_begin = orig_card_table->getBegin();

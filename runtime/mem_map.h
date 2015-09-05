@@ -102,7 +102,7 @@ class MemMap : public BaseMapMem {
   static BaseMapMem* MapSharedMemoryAnonymous(const char* name, byte* addr,
   		size_t byte_count, int prot);
   static BaseMapMem* MapSharedMemoryWithMeta(const char* name, byte* addr,
-      size_t byte_count, int prot, gcservice::SharedMemMapMeta* metadata);
+      size_t byte_count, int prot, SharedMemMapMeta* metadata);
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //
@@ -192,17 +192,17 @@ class SharedMemMap : public BaseMapMem {
 
   SharedMemMap(const std::string& name, byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot, int fd,
-      gcservice::SharedMemMapMeta*);
+      SharedMemMapMeta*);
 
   void initSharedMemMap(byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot, int fd,
-      gcservice::SharedMemMapMeta* metaMem);
+      SharedMemMapMeta* metaMem);
 
  public:
 
   void initMemMap(byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot);
-  gcservice::SharedMemMapMeta* metadata_;
+  SharedMemMapMeta* metadata_;
 
   int GetProtect() const {
     return metadata_->prot_;
