@@ -105,6 +105,7 @@ ServiceAllocator::ServiceAllocator(int pages) :
 /* called by the zygote process */
 ServiceAllocator* ServiceAllocator::CreateServiceAllocator() {
   if(service_allocator_ == NULL) {
+    DumpStructSizes();
     ServiceAllocator::service_allocator_ = new ServiceAllocator(PageCapacity);
   }
   return service_allocator_;
