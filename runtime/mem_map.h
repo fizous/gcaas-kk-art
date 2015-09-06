@@ -192,11 +192,16 @@ class MemMap{ //: public BaseMapMem {
     return meta_data_addr_->fd_;
   }
 
+  void SetFD(int fd){
+    meta_data_addr_->fd_ = fd;
+  }
+
   const char* getName() {
     return name_.c_str();
   }
-  void initMemMap(byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot);
+
+//  void initMemMap(byte* begin, size_t size, void* base_begin, size_t base_size,
+//      int prot);
 
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
