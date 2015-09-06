@@ -44,13 +44,13 @@ static std::ostream& operator<<(std::ostream& os, map_info_t* rhs) {
 
 
 void MemMap::InitMetadata(byte* begin, size_t size,
-    void* base_begin, size_t base_size, int prot) {
-  MemMapMetaData _data = {begin, size, base_begin, base_size, prot};
+    void* base_begin, size_t base_size, int prot , int fd) {
   if(meta_data_addr_ == NULL) {
     meta_data_addr_ =
         reinterpret_cast<MemMapMetaData*>(calloc(1, sizeof(MemMapMetaData)));
   }
-  memcpy(meta_data_addr_, &_data, sizeof(MemMapMetaData));
+  art::FillMemMapMetaData(meta_data_addr_, begin, size, base_begin, base_size,
+      prot, fd);
 }
 
 static void CheckMapRequest(byte* addr, size_t byte_count) {

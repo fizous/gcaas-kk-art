@@ -55,14 +55,27 @@ typedef struct MemMapMetaData_S {
   int fd_;
 } __attribute__((aligned(8))) MemMapMetaData;
 
+
+static void FillMemMapMetaData(MemMapMetaData* addr, byte* begin, size_t size,
+    void* base_begin, size_t base_size, int prot, int fd) {
+  MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
+  memcpy(addr, &_data, sizeof(MemMapMetaData));
+}
+
 typedef struct SharedMemMapMeta_S {
-  byte* const owner_begin_;
-  byte* const owner_base_begin_;
-  size_t size_;
-  size_t base_size_;
-  volatile int fd_;
-  volatile int prot_;
+  MemMapMetaData owner_meta_;
+  /* mapped data into outer process */
+  byte* mapped_begin_;
+  byte* mapped_base_begin_;
+  int fd_;
 } __attribute__((aligned(8))) SharedMemMapMeta;
+
+
+static void FillSharedMemMapMetaData(SharedMemMapMeta* addr, byte* begin,
+    size_t size, void* base_begin, size_t base_size, int prot, int fd) {
+  MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
+  memcpy(&addr->owner_meta_, &_data, sizeof(MemMapMetaData));
+}
 
 
 //class BaseMapMem {

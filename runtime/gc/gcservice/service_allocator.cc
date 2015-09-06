@@ -78,13 +78,10 @@ ServiceAllocator::ServiceAllocator(int pages) :
   memset((void*) memory_meta_, 0, used_bytes);
 //  Thread* self = Thread::Current();
 
-  memory_meta_->meta_.owner_begin_ = begin;
-  memory_meta_->meta_.fd_ = fileDescript;
-  memory_meta_->meta_.prot_ = prot;
-  memory_meta_->meta_.base_size_ = memory_size;
-  memory_meta_->current_addr_ = memory_meta_->meta_.owner_begin_+ used_bytes;
-  memory_meta_->meta_.size_ = used_bytes;
 
+  art::FillSharedMemMapMetaData(&memory_meta_->meta_, begin, memory_size, begin,
+      memory_size, prot, fileDescript);
+  memory_meta_->current_addr_ = begin + used_bytes;
 
 
   service_meta_ =
@@ -95,9 +92,10 @@ ServiceAllocator::ServiceAllocator(int pages) :
 
 
   GCSERV_ALLOC_ILOG << "done allocating shared header: " <<
-      "\nbegin: " << reinterpret_cast<void*>(memory_meta_->meta_.owner_begin_) << ", " <<
-      "\nfd: " << memory_meta_->meta_.fd_ << ", " <<
-      "\nsize: " << memory_meta_->meta_.size_;
+      "\nbegin: " <<
+      reinterpret_cast<void*>(memory_meta_->meta_.owner_meta_.begin_)
+      << ", " << "\nfd: " << memory_meta_->meta_.fd_ << ", "
+      << "\nsize: " << memory_meta_->meta_.owner_meta_.size_;
 
 }
 
