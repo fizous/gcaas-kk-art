@@ -103,7 +103,7 @@ public:
 //  static SharedSpaceMeta* GetSpaceMetAddr(SharedHeapMetada*);
 
   byte* Begin() {
-    return memory_meta_->meta_.owner_begin_;
+    return memory_meta_->meta_.owner_meta_.begin_;
   }
 
 
@@ -115,7 +115,7 @@ public:
     byte* _addr = memory_meta_->current_addr_;
     size_t allocated_bytes = RoundUp(num_bytes, kAlignment);
     memory_meta_->current_addr_ +=  allocated_bytes;
-    memory_meta_->meta_.size_ += allocated_bytes;
+    memory_meta_->meta_.owner_meta_.size_ += allocated_bytes;
     return _addr;
   }
 
