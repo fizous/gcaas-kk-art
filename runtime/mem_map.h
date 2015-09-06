@@ -188,6 +188,9 @@ class MemMap{ //: public BaseMapMem {
     meta_data_addr_->prot_ = newProtect;
   }
 
+  int GetFD() {
+    return meta_data_addr_->fd_;
+  }
 
   const char* getName() {
     return name_.c_str();
