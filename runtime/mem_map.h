@@ -225,10 +225,10 @@ class MemMap{ //: public BaseMapMem {
   void UnMapAtEnd(byte*);
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-      size_t base_size, int prot, MemMapMetaData* addr = NULL);
+      size_t base_size, int prot, int fd = -1, MemMapMetaData* addr = NULL);
 
   void InitMetadata(byte* begin, size_t size, void* base_begin,
-      size_t base_size, int prot);
+      size_t base_size, int prot, int fd);
 
   const std::string name_;
   MemMapMetaData* meta_data_addr_;

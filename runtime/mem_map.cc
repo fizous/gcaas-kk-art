@@ -298,9 +298,9 @@ MemMap::~MemMap() {
 
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-               size_t base_size, int prot, MemMapMetaData* addr) :
+               size_t base_size, int prot, int fd, MemMapMetaData* addr) :
                    name_(name), meta_data_addr_(addr)  {
-  InitMetadata(begin, size, base_begin, base_size, prot);
+  InitMetadata(begin, size, base_begin, base_size, prot, fd);
   if (size == 0) {
     CHECK(begin == NULL);
     CHECK(base_begin == NULL);
