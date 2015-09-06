@@ -43,15 +43,7 @@ static std::ostream& operator<<(std::ostream& os, map_info_t* rhs) {
 }
 
 
-void MemMap::InitMetadata(byte* begin, size_t size, void* base_begin,
-    size_t base_size, int prot, int fd) {
-  if(meta_data_addr_ == NULL) {
-    meta_data_addr_ =
-        reinterpret_cast<MemMapMetaData*>(calloc(1, sizeof(MemMapMetaData)));
-  }
-  MemMap::FillMemMapMetaData(meta_data_addr_, begin, size, base_begin, base_size,
-      prot, fd);
-}
+
 
 static void CheckMapRequest(byte* addr, size_t byte_count) {
   if (addr == NULL) {
@@ -313,7 +305,15 @@ MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_beg
 }
 
 
-
+void MemMap::InitMetadata(byte* begin, size_t size, void* base_begin,
+    size_t base_size, int prot, int fd) {
+  if(meta_data_addr_ == NULL) {
+    meta_data_addr_ =
+        reinterpret_cast<MemMapMetaData*>(calloc(1, sizeof(MemMapMetaData)));
+  }
+  MemMap::FillMemMapMetaData(meta_data_addr_, begin, size, base_begin, base_size,
+      prot, fd);
+}
 
 
 
