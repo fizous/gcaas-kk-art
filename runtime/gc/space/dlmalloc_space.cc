@@ -141,7 +141,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
       lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
       growth_limit_(growth_limit) {
   CHECK(mspace != NULL);
-
+  meta_addr = NULL;
   size_t bitmap_index = bitmap_index_++;
 
   static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
