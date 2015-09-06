@@ -109,62 +109,10 @@ typedef struct SharedMemMapMeta_S {
 //};
 
 
-typedef struct BitMapMemberMetaData_S {
-  // Backing storage for bitmap.
-  MemMap* mem_map_;
-
-  // This bitmap itself, word sized for efficiency in scanning.
-  word* const bitmap_begin_;
-
-  // Size of this bitmap.
-  size_t bitmap_size_;
-
-  // The base address of the heap, which corresponds to the word containing the first bit in the
-  // bitmap.
-  const uintptr_t heap_begin_;
-} __attribute__((aligned(8)))  BitMapMemberMetaData;
-
-typedef struct SharedSpaceBitmapMeta_S {
-  /* memory pointer to the bitmap data*/
-  SharedMemMapMeta data_;
-  // The base address of the heap, which corresponds to the word containing the first bit in the
-  // bitmap.
-  BitMapMemberMetaData bitmap_fields_;
-} __attribute__((aligned(8)))  SharedSpaceBitmapMeta;
-
-typedef struct SharedSpaceMeta_S {
-  SharedMemMapMeta mem_meta_;
-  /* data related to space bitmap */
-  SharedSpaceBitmapMeta bitmap_meta_[2];
-  byte* biased_begin_;
-  byte* begin_;
-  size_t offset_;
-} __attribute__((aligned(8))) SharedSpaceMeta;
-
-typedef struct SharedCardTableMeta_S {
-  SharedMemMapMeta mem_meta_;
-  byte* biased_begin_;
-  byte* begin_;
-  size_t offset_;
-} __attribute__((aligned(8)))  SharedCardTableMeta;
 
 
-typedef struct SharedHeapMetada_S {
-  SynchronizedLockHead lock_header_;
-  /* data related to continuous space */
-  SharedCardTableMeta card_table_meta_;
 
-  SharedSpaceMeta alloc_space_meta_;
-  /* used to synchronize on conc requests*/
-  SynchronizedLockHead gc_conc_requests;
-
-  gcservice::GC_SERVICE_STATUS vm_status_;
-
-  pid_t pid_;
-} __attribute__((aligned(8))) SharedHeapMetada;
-
-
-class SharedMemMap;
+//class SharedMemMap;
 
 // Used to keep track of mmap segments.
 class MemMap{ //: public BaseMapMem {
@@ -269,6 +217,61 @@ class MemMap{ //: public BaseMapMem {
 //  int prot_;  // Protection of the map.
 
 };
+
+
+typedef struct BitMapMemberMetaData_S {
+  // Backing storage for bitmap.
+  MemMap* mem_map_;
+
+  // This bitmap itself, word sized for efficiency in scanning.
+  word* const bitmap_begin_;
+
+  // Size of this bitmap.
+  size_t bitmap_size_;
+
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  const uintptr_t heap_begin_;
+} __attribute__((aligned(8)))  BitMapMemberMetaData;
+
+typedef struct SharedSpaceBitmapMeta_S {
+  /* memory pointer to the bitmap data*/
+  SharedMemMapMeta data_;
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  BitMapMemberMetaData bitmap_fields_;
+} __attribute__((aligned(8)))  SharedSpaceBitmapMeta;
+
+typedef struct SharedSpaceMeta_S {
+  SharedMemMapMeta mem_meta_;
+  /* data related to space bitmap */
+  SharedSpaceBitmapMeta bitmap_meta_[2];
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+} __attribute__((aligned(8))) SharedSpaceMeta;
+
+typedef struct SharedCardTableMeta_S {
+  SharedMemMapMeta mem_meta_;
+  byte* biased_begin_;
+  byte* begin_;
+  size_t offset_;
+} __attribute__((aligned(8)))  SharedCardTableMeta;
+
+
+typedef struct SharedHeapMetada_S {
+  SynchronizedLockHead lock_header_;
+  /* data related to continuous space */
+  SharedCardTableMeta card_table_meta_;
+
+  SharedSpaceMeta alloc_space_meta_;
+  /* used to synchronize on conc requests*/
+  SynchronizedLockHead gc_conc_requests;
+
+  gcservice::GC_SERVICE_STATUS vm_status_;
+
+  pid_t pid_;
+} __attribute__((aligned(8))) SharedHeapMetada;
 
 ///////////////////////////
 /////////////////////////////Shared Memory Map
