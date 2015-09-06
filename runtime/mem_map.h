@@ -205,7 +205,7 @@ class MemMap{ //: public BaseMapMem {
 
   bool Protect(int prot);
   bool ProtectModifiedMMAP(int prot);
-
+  void UnMapAtEnd(byte*);
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
       size_t base_size, int prot, MemMapMetaData* addr = NULL);
