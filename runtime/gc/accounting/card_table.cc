@@ -59,7 +59,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   int _fd = 0;
   GCSERV_ILOG << "--- creating card table ---";
-  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous("card table", NULL,
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
                                                  capacity + 256, PROT_READ | PROT_WRITE));
   mem_map->SetFD(_fd);// = _fd;
   CHECK(mem_map.get() != NULL) << "couldn't allocate card table";
@@ -85,7 +85,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   return new CardTable(mem_map.release(), biased_begin, offset, heap_begin);
 }
 
-CardTable::CardTable(BaseMapMem* mem_map, byte* biased_begin, size_t offset,
+CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
     const byte* heap_begin)
     : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
       heap_begin_(heap_begin) {
@@ -174,7 +174,7 @@ bool CardTable::updateProtection(int newProtection) {
 //  std::ostringstream oss;
 //  oss << "shared card-" << getpid();
 //  std::string debug_friendly_name(oss.str());
-//  UniquePtr<BaseMapMem>
+//  UniquePtr<MemMap>
 //    shared_mem_map(MemMap::MapSharedMemoryAnonymous(debug_friendly_name.c_str(),
 //        original_begin, origi_size, PROT_READ | PROT_WRITE));
 //
@@ -211,7 +211,7 @@ void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
   std::ostringstream oss;
   oss << "shared card-" << getpid();
   std::string debug_friendly_name(oss.str());
-  UniquePtr<BaseMapMem>
+  UniquePtr<MemMap>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(debug_friendly_name.c_str(),
         original_begin, origi_size, PROT_READ | PROT_WRITE, metaMemory));
 

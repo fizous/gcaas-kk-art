@@ -32,7 +32,7 @@ namespace gc {
 namespace accounting {
 
 SpaceBitmap::SpaceBitmap(const std::string& name,
-      BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
+    MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
             const void* heap_begin, BitMapMemberMetaData* fields_addr)
     : name_(name), bitmap_meta_data_(fields_addr),
       allocated_memory_(bitmap_meta_data_ == NULL) {
@@ -60,7 +60,7 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
 }
 
 void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
-    BaseMapMem* mem_map, word* bitmap_begin, size_t bitmap_size,
+    MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
     const void* heap_begin) {
   //UniquePtr<BaseMapMem> dumpPointer(NULL);
   BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size,
@@ -91,7 +91,7 @@ void SpaceSetMap::Walk(SpaceBitmap::Callback* callback, void* arg) {
 }
 
 SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name,
-                          BaseMapMem* mem_map,  byte* heap_begin,
+    MemMap* mem_map,  byte* heap_begin,
                           size_t heap_capacity,
                           SharedSpaceBitmapMeta* meta_address) {
   CHECK(mem_map != nullptr);
@@ -115,7 +115,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
   size_t bitmap_size =
       OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
   if(meta_address == NULL) {
-    UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
+    UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
         bitmap_size, PROT_READ | PROT_WRITE));
     if (mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
@@ -123,16 +123,18 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
     }
     return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity);
   } else {
+    UniquePtr<MemMap> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
+        bitmap_size, PROT_READ | PROT_WRITE));
     LOG(ERROR) << "shared_mem_map --------- " << reinterpret_cast<void*>(&meta_address->data_);
-    UniquePtr<BaseMapMem>
-      shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
+    //UniquePtr<BaseMapMem>
+    //  shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
+   //       bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
     }
     return CreateFromMemMap(name, shared_mem_map.release(), heap_begin,
-        heap_capacity/*, meta_address*/);
+        heap_capacity, meta_address);
   }
 }
 

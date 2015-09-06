@@ -112,7 +112,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
     return freed;
   }
 
-  ValgrindDlMallocSpace(const std::string& name, BaseMapMem* mem_map, void* mspace, byte* begin,
+  ValgrindDlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
                         byte* end, size_t growth_limit, size_t initial_size) :
       DlMallocSpace(name, mem_map, mspace, begin, end, growth_limit) {
     VALGRIND_MAKE_MEM_UNDEFINED(mem_map->Begin() + initial_size, mem_map->Size() - initial_size);
@@ -132,7 +132,7 @@ bool DlMallocSpace::SetMemoryProtection(void) {
   return GetMemMap()->ProtectModifiedMMAP(PROT_READ/* | PROT_WRITE*/);
 }
 
-DlMallocSpace::DlMallocSpace(const std::string& name, BaseMapMem* mem_map,
+DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
                 void* mspace, byte* begin, byte* end, size_t growth_limit,
                 SharedSpaceMeta* meta_addr)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
@@ -203,7 +203,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
                                                  PROT_READ | PROT_WRITE));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
@@ -224,7 +224,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   }
 
   // Everything is set so record in immutable structure and leave
-  BaseMapMem* mem_map_ptr = mem_map.release();
+  MemMap* mem_map_ptr = mem_map.release();
   DlMallocSpace* space;
   if (RUNNING_ON_VALGRIND > 0) {
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
@@ -335,7 +335,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
 
   GCSERV_CLIENT_ILOG << "the alloc_space is mapped at address " <<
       reinterpret_cast<const void*>(End());
-  UniquePtr<BaseMapMem>
+  UniquePtr<MemMap>
     shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, &space_meta_addr->mem_meta_));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
@@ -396,7 +396,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   VLOG(heap) << "Size " << GetMemMap()->Size();
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
-  UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;

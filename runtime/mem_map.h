@@ -43,9 +43,21 @@ typedef enum {
 }//namespace gcservice
 
 
+
+
+
+typedef struct MemMapMetaData_S {
+  byte* const begin_;  // Start of data.
+  size_t size_;  // Length of data.
+  void* const base_begin_;  // Page-aligned base address.
+  const size_t base_size_;  // Length of mapping.
+  int prot_;  // Protection of the map.
+  int fd_;
+} __attribute__((aligned(8))) MemMapMetaData;
+
 typedef struct SharedMemMapMeta_S {
-  byte* owner_begin_;
-  byte* owner_base_begin_;
+  byte* const owner_begin_;
+  byte* const owner_base_begin_;
   size_t size_;
   size_t base_size_;
   volatile int fd_;
@@ -53,55 +65,53 @@ typedef struct SharedMemMapMeta_S {
 } __attribute__((aligned(8))) SharedMemMapMeta;
 
 
-class BaseMapMem {
- public:
-  const std::string name_;
-
-  virtual byte* Begin() const = 0;
-
-  virtual byte* BaseBegin() const = 0;
-
-  virtual size_t Size() const = 0;
-
-  virtual void SetSize(size_t) = 0;
-
-  virtual size_t BaseSize() const = 0;
-
-  virtual byte* End() const = 0;
-
-  virtual bool HasAddress(const void* addr) const = 0;
-
-  virtual int GetProtect() const = 0;
-
-  virtual int GetFD() {
-    return -1;
-  }
-
-  virtual void SetFD(int){}
-  virtual bool Protect(int){return false;}
-  virtual bool ProtectModifiedMMAP(int) {return false;}
-
-  BaseMapMem(const std::string& name);
-
-
-  // Trim by unmapping pages at the end of the map.
-  virtual void UnMapAtEnd(byte*);
-
-  virtual ~BaseMapMem(){}
-
-  virtual void initMemMap(byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot) = 0;
-
-
-  const char* getName() {
-    return name_.c_str();
-  }
-};
+//class BaseMapMem {
+// public:
+//  const std::string name_;
+//
+//  virtual byte* Begin() const = 0;
+//
+//  virtual byte* BaseBegin() const = 0;
+//
+//  virtual size_t Size() const = 0;
+//
+//  virtual void SetSize(size_t) = 0;
+//
+//  virtual size_t BaseSize() const = 0;
+//
+//  virtual byte* End() const = 0;
+//
+//  virtual bool HasAddress(const void* addr) const = 0;
+//
+//  virtual int GetProtect() const = 0;
+//
+//  virtual int GetFD() {
+//    return -1;
+//  }
+//
+//  virtual void SetFD(int){}
+//  virtual bool Protect(int){return false;}
+//  virtual bool ProtectModifiedMMAP(int) {return false;}
+//
+//  BaseMapMem(const std::string& name);
+//
+//
+//  // Trim by unmapping pages at the end of the map.
+//  virtual void UnMapAtEnd(byte*);
+//
+//  virtual ~BaseMapMem(){}
+//
+//  virtual void initMemMap(byte* begin, size_t size,
+//      void* base_begin, size_t base_size, int prot) = 0;
+//
+//
+//
+//};
 
 
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
-  BaseMapMem* mem_map_;
+  MemMap* mem_map_;
 
   // This bitmap itself, word sized for efficiency in scanning.
   word* const bitmap_begin_;
@@ -157,7 +167,7 @@ typedef struct SharedHeapMetada_S {
 class SharedMemMap;
 
 // Used to keep track of mmap segments.
-class MemMap : public BaseMapMem {
+class MemMap{ //: public BaseMapMem {
  public:
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
@@ -167,16 +177,16 @@ class MemMap : public BaseMapMem {
   // a name.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static BaseMapMem* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
-  static BaseMapMem* MapSharedMemoryAnonymous(const char* name, byte* addr,
+  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+  static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
   		size_t byte_count, int prot);
-  static BaseMapMem* MapSharedMemoryWithMeta(const char* name, byte* addr,
+  static MemMap* MapSharedMemoryWithMeta(const char* name, byte* addr,
       size_t byte_count, int prot, SharedMemMapMeta* metadata);
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static BaseMapMem* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
+  static MemMap* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
     return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, false);
   }
 
@@ -185,37 +195,33 @@ class MemMap : public BaseMapMem {
   // requesting a specific address for the base of the mapping.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static BaseMapMem* MapFileAtAddress(
+  static MemMap* MapFileAtAddress(
       byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
 
-  static BaseMapMem* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+  static MemMap* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
       int fd);
 
   // Releases the memory mapping
   ~MemMap();
 
-  int GetProtect() const {
-    return prot_;
-  }
-
   byte* Begin() const {
-    return begin_;
+    return meta_data_addr_->begin_;
   }
 
   byte* BaseBegin() const {
-    return (byte*) base_begin_;
+    return (byte*) meta_data_addr_->base_begin_;
   }
 
   size_t Size() const {
-    return size_;
+    return meta_data_addr_->size_;
   }
 
   void SetSize(size_t new_size) {
-    size_ = new_size;
+    meta_data_addr_->size_ = new_size;
   }
 
   size_t BaseSize() const {
-    return base_size_;
+    return meta_data_addr_->base_size_;
   }
 
   byte* End() const {
@@ -227,10 +233,17 @@ class MemMap : public BaseMapMem {
   }
 
   int GetProtect() {
-    return prot_;
+    return meta_data_addr_->prot_;
+  }
+
+  void SetProtect(int newProtect) {
+    meta_data_addr_->prot_ = newProtect;
   }
 
 
+  const char* getName() {
+    return name_.c_str();
+  }
   void initMemMap(byte* begin, size_t size,
       void* base_begin, size_t base_size, int prot);
 
@@ -238,86 +251,92 @@ class MemMap : public BaseMapMem {
   bool ProtectModifiedMMAP(int prot);
 
  private:
-  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
-         int prot);
-  friend class SharedMemMap;
+  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
+      size_t base_size, int prot, MemMapMetaData* addr = NULL);
 
-  byte* const begin_;  // Start of data.
-  size_t size_;  // Length of data.
+  void InitMetadata(byte* begin, size_t size, void* base_begin,
+      size_t base_size, int prot);
 
-  void* const base_begin_;  // Page-aligned base address.
-  const size_t base_size_;  // Length of mapping.
-  int prot_;  // Protection of the map.
+  const std::string name_;
+  MemMapMetaData* meta_data_addr_;
+//  friend class SharedMemMap;
+//
+//  byte* const begin_;  // Start of data.
+//  size_t size_;  // Length of data.
+//
+//  void* const base_begin_;  // Page-aligned base address.
+//  const size_t base_size_;  // Length of mapping.
+//  int prot_;  // Protection of the map.
 
 };
 
 ///////////////////////////
 /////////////////////////////Shared Memory Map
 
-// Used to keep track of mmap segments.
-class SharedMemMap : public BaseMapMem {
-  SharedMemMap(const std::string& name, byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot, int fd);
-
-  SharedMemMap(const std::string& name, byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot, int fd,
-      SharedMemMapMeta*);
-
-  void initSharedMemMap(byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot, int fd,
-      SharedMemMapMeta* metaMem);
-
- public:
-
-  void initMemMap(byte* begin, size_t size,
-      void* base_begin, size_t base_size, int prot);
-  SharedMemMapMeta* metadata_;
-
-  int GetProtect() const {
-    return metadata_->prot_;
-  }
-
-  byte* Begin() const {
-    return metadata_->owner_begin_;
-  }
-
-  byte* BaseBegin() const {
-    return (byte*) metadata_->owner_base_begin_;
-  }
-
-  size_t Size() const {
-    return metadata_->size_;
-  }
-
-  void SetSize(size_t new_size) {
-    metadata_->size_ = new_size;
-  }
-
-  size_t BaseSize() const {
-    return metadata_->base_size_;
-  }
-
-  byte* End() const {
-    return Begin() + Size();
-  }
-
-  int GetFD() {
-    return metadata_->fd_;
-  }
-
-  void SetFD(int fd){
-    metadata_->fd_ = fd;
-  }
-
-  bool HasAddress(const void* addr) const {
-    return Begin() <= addr && addr < End();
-  }
-
-  friend class MemMap;
-  MemMap* GetLocalMemMap();
-  // Releases the memory mapping
-  ~SharedMemMap();
-};//SharedMemMap
+//// Used to keep track of mmap segments.
+//class SharedMemMap : public BaseMapMem {
+//  SharedMemMap(const std::string& name, byte* begin, size_t size,
+//      void* base_begin, size_t base_size, int prot, int fd);
+//
+//  SharedMemMap(const std::string& name, byte* begin, size_t size,
+//      void* base_begin, size_t base_size, int prot, int fd,
+//      SharedMemMapMeta*);
+//
+//  void initSharedMemMap(byte* begin, size_t size,
+//      void* base_begin, size_t base_size, int prot, int fd,
+//      SharedMemMapMeta* metaMem);
+//
+// public:
+//
+//  void initMemMap(byte* begin, size_t size,
+//      void* base_begin, size_t base_size, int prot);
+//  SharedMemMapMeta* metadata_;
+//
+//  int GetProtect() const {
+//    return metadata_->prot_;
+//  }
+//
+//  byte* Begin() const {
+//    return metadata_->owner_begin_;
+//  }
+//
+//  byte* BaseBegin() const {
+//    return (byte*) metadata_->owner_base_begin_;
+//  }
+//
+//  size_t Size() const {
+//    return metadata_->size_;
+//  }
+//
+//  void SetSize(size_t new_size) {
+//    metadata_->size_ = new_size;
+//  }
+//
+//  size_t BaseSize() const {
+//    return metadata_->base_size_;
+//  }
+//
+//  byte* End() const {
+//    return Begin() + Size();
+//  }
+//
+//  int GetFD() {
+//    return metadata_->fd_;
+//  }
+//
+//  void SetFD(int fd){
+//    metadata_->fd_ = fd;
+//  }
+//
+//  bool HasAddress(const void* addr) const {
+//    return Begin() <= addr && addr < End();
+//  }
+//
+//  friend class MemMap;
+//  MemMap* GetLocalMemMap();
+//  // Releases the memory mapping
+//  ~SharedMemMap();
+//};//SharedMemMap
 
 }  // namespace art
 

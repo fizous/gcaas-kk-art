@@ -42,6 +42,17 @@ static std::ostream& operator<<(std::ostream& os, map_info_t* rhs) {
   return os;
 }
 
+
+void MemMap::InitMetadata(byte* begin, size_t size,
+    void* base_begin, size_t base_size, int prot) {
+  MemMapMetaData _data = {begin, size, base_begin, base_size, prot};
+  if(meta_data_addr_ == NULL) {
+    meta_data_addr_ =
+        reinterpret_cast<MemMapMetaData*>(calloc(1, sizeof(MemMapMetaData)));
+  }
+  memcpy(meta_data_addr_, &_data, sizeof(MemMapMetaData));
+}
+
 static void CheckMapRequest(byte* addr, size_t byte_count) {
   if (addr == NULL) {
     return;
@@ -67,7 +78,7 @@ static void CheckMapRequest(byte* addr, size_t byte_count) {
 static void CheckMapRequest(byte*, size_t) { }
 #endif
 
-BaseMapMem* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
+MemMap* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
     size_t byte_count, int prot, SharedMemMapMeta* metadata) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
@@ -104,11 +115,11 @@ BaseMapMem* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
         fileDescriptor << ", 0) failed for " << name << "\n" << maps;
     return NULL;
   }
-  return new SharedMemMap(name, actual, byte_count, actual,
+  return new MemMap(name, actual, byte_count, actual,
       page_aligned_byte_count, prot, fileDescriptor, metadata);
 }
 
-BaseMapMem* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
+MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 		size_t byte_count, int prot) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
@@ -145,12 +156,13 @@ BaseMapMem* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
 				fileDescriptor << ", 0) failed for " << name << "\n" << maps;
     return NULL;
   }
-  return new SharedMemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot, fileDescriptor);
+  return new MemMap(name, actual, byte_count, actual,
+      page_aligned_byte_count, prot, fileDescriptor);
 }
 
 
 
-BaseMapMem* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
+MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
   }
@@ -186,7 +198,7 @@ BaseMapMem* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count
 }
 
 
-BaseMapMem* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
+MemMap* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
     int fd) {
   // Adjust 'offset' to be page-aligned as required by mmap.
   int page_offset = 0;
@@ -219,7 +231,7 @@ BaseMapMem* MemMap::MapSharedProcessFile(byte* addr, size_t byte_count, int prot
 
 }
 
-BaseMapMem* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
+MemMap* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
                                  int prot, int flags, int fd, off_t start, bool reuse) {
   CHECK_NE(0, prot);
   CHECK_NE(0, flags & (MAP_SHARED | MAP_PRIVATE));
@@ -273,131 +285,131 @@ MemMap::~MemMap() {
 }
 
 
-SharedMemMap::~SharedMemMap() {
-  if (BaseBegin() == NULL && BaseSize() == 0) {
-    return;
-  }
-  int result = munmap(BaseBegin(), BaseSize());
-  if (result == -1) {
-    PLOG(FATAL) << "MemMap::munmap failed";
-  }
-}
+//SharedMemMap::~SharedMemMap() {
+//  if (BaseBegin() == NULL && BaseSize() == 0) {
+//    return;
+//  }
+//  int result = munmap(BaseBegin(), BaseSize());
+//  if (result == -1) {
+//    PLOG(FATAL) << "MemMap::munmap failed";
+//  }
+//}
 
-void MemMap::initMemMap(byte* begin, size_t size,
-    void* base_begin, size_t base_size, int prot) {
-  size_       = size;
-  prot_       = prot;
-}
+
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-               size_t base_size, int prot)
-    : BaseMapMem(name), begin_(begin), base_begin_(base_begin), base_size_(base_size) {
-  initMemMap(begin, size, base_begin, base_size, prot);
-
-  if (size_ == 0) {
-    CHECK(begin_ == NULL);
-    CHECK(base_begin_ == NULL);
-    CHECK_EQ(base_size_, 0U);
+               size_t base_size, int prot, MemMapMetaData* addr) :
+                   name_(name), meta_data_addr_(addr)  {
+  InitMetadata(begin, size, base_begin, base_size, prot);
+  if (size == 0) {
+    CHECK(begin == NULL);
+    CHECK(base_begin == NULL);
+    CHECK_EQ(base_size, 0U);
   } else {
-    CHECK(begin_ != NULL);
-    CHECK(base_begin_ != NULL);
-    CHECK_NE(base_size_, 0U);
+    CHECK(begin != NULL);
+    CHECK(base_begin != NULL);
+    CHECK_NE(base_size, 0U);
   }
-};
+}
+
+
+
+
+
 
 
 bool MemMap::Protect(int prot) {
-  if (base_begin_ == NULL && base_size_ == 0) {
-    prot_ = prot;
+  if (BaseBegin() == NULL && BaseSize() == 0) {
+    SetProtect(prot);
     return true;
   }
 
-  if (mprotect(base_begin_, base_size_, prot) == 0) {
-    prot_ = prot;
+  if (mprotect(BaseBegin(), Size(), prot) == 0) {
+    SetProtect(prot);
     return true;
   }
 
-  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", " << base_size_ << ", "
-              << prot << ") failed";
+  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(BaseBegin()) << ", " <<
+      BaseSize() << ", " << prot << ") failed";
   return false;
 }
 
 
 
 bool MemMap::ProtectModifiedMMAP(int prot) {
-  if (base_begin_ == NULL && base_size_ == 0) {
-    prot_ = prot;
+  if (BaseBegin() == NULL && BaseSize() == 0) {
+    SetProtect(prot);
     return true;
   }
 
-  if (mprotect(base_begin_, size_, prot) == 0) {
-    prot_ = prot;
+  if (mprotect(BaseBegin(), Size(), prot) == 0) {
+    SetProtect(prot);
     return true;
   }
 
-  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", " << size_ << ", "
-              << prot << ") failed";
+  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(BaseBegin()) << ", " <<
+      Size() << ", " << prot << ") failed";
   return false;
 }
 
 //////////////////////////////////////////////////////////////
 //////////// SharedMemMap
 
-SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot, int fd) :
-          BaseMapMem(name) {
+//SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
+//      size_t size, void* base_begin, size_t base_size, int prot, int fd) :
+//          BaseMapMem(name) {
+//
+//  SharedMemMapMeta* _metadata =
+//      reinterpret_cast<SharedMemMapMeta*>(calloc(1,
+//          sizeof(SharedMemMapMeta)));
+//
+//  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
+//      _metadata);
+//
+//}
+//
+//
+//
+//SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
+//      size_t size, void* base_begin, size_t base_size, int prot, int fd,
+//      SharedMemMapMeta* metaMem) :
+//          BaseMapMem(name) {
+//  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
+//      metaMem);
+//}
+//
+//void SharedMemMap::initSharedMemMap(byte* begin,
+//    size_t size, void* base_begin, size_t base_size, int prot, int fd,
+//    SharedMemMapMeta* metaMem) {
+//  metadata_ = metaMem;
+//  metadata_->fd_ = fd;
+//  initMemMap(begin, size, base_begin, base_size, prot);
+//}
 
-  SharedMemMapMeta* _metadata =
-      reinterpret_cast<SharedMemMapMeta*>(calloc(1,
-          sizeof(SharedMemMapMeta)));
-
-  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
-      _metadata);
-
-}
-
-
-
-SharedMemMap::SharedMemMap(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot, int fd,
-      SharedMemMapMeta* metaMem) :
-          BaseMapMem(name) {
-  initSharedMemMap(begin, size, base_begin, base_size, prot, fd,
-      metaMem);
-}
-
-void SharedMemMap::initSharedMemMap(byte* begin,
-    size_t size, void* base_begin, size_t base_size, int prot, int fd,
-    SharedMemMapMeta* metaMem) {
-  metadata_ = metaMem;
-  metadata_->fd_ = fd;
-  initMemMap(begin, size, base_begin, base_size, prot);
-}
-
-void SharedMemMap::initMemMap(byte* begin, size_t size,
-    void* base_begin, size_t base_size, int prot) {
-  metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
-  metadata_->owner_begin_ = begin;
-  metadata_->size_ = size;
-  metadata_->base_size_ = base_size;
-  metadata_->prot_ = PROT_READ | PROT_WRITE;
-
-  metadata_->prot_ = prot;
-}
-
-
-MemMap* SharedMemMap::GetLocalMemMap() {
-  return new MemMap(name_, Begin(), Size(),
-      BaseBegin(), BaseSize(), GetProtect());
-}
-
-BaseMapMem::BaseMapMem(const std::string& name) : name_(name) {
-
-}
+//void SharedMemMap::initMemMap(byte* begin, size_t size,
+//    void* base_begin, size_t base_size, int prot) {
+//  metadata_->owner_base_begin_ = reinterpret_cast<byte*>(base_begin);
+//  metadata_->owner_begin_ = begin;
+//  metadata_->size_ = size;
+//  metadata_->base_size_ = base_size;
+//  metadata_->prot_ = PROT_READ | PROT_WRITE;
+//
+//  metadata_->prot_ = prot;
+//}
 
 
+//MemMap* SharedMemMap::GetLocalMemMap() {
+//  return new MemMap(name_, Begin(), Size(),
+//      BaseBegin(), BaseSize(), GetProtect());
+//}
+//
+//BaseMapMem::BaseMapMem(const std::string& name) : name_(name) {
+//
+//}
 
-void BaseMapMem::UnMapAtEnd(byte* new_end) {
+
+
+void MemMap::UnMapAtEnd(byte* new_end) {
   DCHECK_GE(new_end, Begin());
   DCHECK_LE(new_end, End());
   size_t unmap_size = End() - new_end;

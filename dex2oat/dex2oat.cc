@@ -214,7 +214,7 @@ class Dex2Oat {
       LOG(ERROR) << "Failed to find " << image_classes_filename << " within " << zip_filename;
       return NULL;
     }
-    UniquePtr<BaseMapMem> image_classes_file(zip_entry->ExtractToMemMap(image_classes_filename));
+    UniquePtr<MemMap> image_classes_file(zip_entry->ExtractToMemMap(image_classes_filename));
     if (image_classes_file.get() == NULL) {
       LOG(ERROR) << "Failed to extract " << image_classes_filename << " from " << zip_filename;
       return NULL;

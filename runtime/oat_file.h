@@ -31,7 +31,6 @@ namespace art {
 
 class ElfFile;
 class MemMap;
-class BaseMapMem;
 class OatMethodOffsets;
 class OatHeader;
 
@@ -248,7 +247,7 @@ class OatFile {
   const byte* end_;
 
   // Backing memory map for oat file during when opened by ElfWriter during initial compilation.
-  UniquePtr<BaseMapMem> mem_map_;
+  UniquePtr<MemMap> mem_map_;
 
   // Backing memory map for oat file during cross compilation.
   UniquePtr<ElfFile> elf_file_;

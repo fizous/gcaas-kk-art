@@ -169,7 +169,7 @@ ElfFile::~ElfFile() {
   delete dynsym_symbol_table_;
 }
 
-bool ElfFile::SetMap(BaseMapMem* map) {
+bool ElfFile::SetMap(MemMap* map) {
   if (map == NULL) {
     // MemMap::Open should have already logged
     return false;
@@ -628,7 +628,7 @@ bool ElfFile::Load(bool executable) {
     if (program_header.p_vaddr == 0) {
       std::string reservation_name("ElfFile reservation for ");
       reservation_name += file_->GetPath();
-      UniquePtr<BaseMapMem> reserve(MemMap::MapAnonymous(reservation_name.c_str(),
+      UniquePtr<MemMap> reserve(MemMap::MapAnonymous(reservation_name.c_str(),
                                                      NULL, GetLoadedSize(), PROT_NONE));
       CHECK(reserve.get() != NULL) << file_->GetPath();
       base_address_ = reserve->Begin();
@@ -663,7 +663,7 @@ bool ElfFile::Load(bool executable) {
                    << " bytes: " << file_->GetPath();
       return false;
     }
-    UniquePtr<BaseMapMem> segment(MemMap::MapFileAtAddress(p_vaddr,
+    UniquePtr<MemMap> segment(MemMap::MapFileAtAddress(p_vaddr,
                                                        program_header.p_memsz,
                                                        prot, flags, file_->Fd(),
                                                        program_header.p_offset,
