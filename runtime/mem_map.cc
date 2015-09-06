@@ -71,7 +71,7 @@ static void CheckMapRequest(byte*, size_t) { }
 #endif
 
 MemMap* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
-    size_t byte_count, int prot, SharedMemMapMeta* metadata) {
+    size_t byte_count, int prot, SharedMemMapMeta* metadata, int flagsParam) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
 
@@ -84,7 +84,7 @@ MemMap* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
   fileDescriptor =
       ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
 
-  int flags = MAP_SHARED;
+  int flags = flagsParam;//MAP_SHARED;
   if (fileDescriptor  == -1) {
     LOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
