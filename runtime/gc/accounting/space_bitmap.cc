@@ -114,7 +114,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
   size_t bitmap_size =
       OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  if(true || meta_address == NULL) {
+  if(meta_address == NULL) {
     UniquePtr<BaseMapMem> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
         bitmap_size, PROT_READ | PROT_WRITE));
     if (mem_map.get() == NULL) {
@@ -123,9 +123,11 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
     }
     return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity);
   } else {
-    UniquePtr<BaseMapMem>
-      shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
+    UniquePtr<BaseMapMem> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
+        bitmap_size, PROT_READ | PROT_WRITE));
+    //UniquePtr<BaseMapMem>
+    //  shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
+   //       bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
