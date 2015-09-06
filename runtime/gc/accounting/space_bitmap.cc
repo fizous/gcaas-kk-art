@@ -36,7 +36,7 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
             const void* heap_begin, BitMapMemberMetaData* fields_addr)
     : name_(name), bitmap_meta_data_(fields_addr),
       allocated_memory_(bitmap_meta_data_ == NULL) {
-  if(true || allocated_memory_) {
+  if(allocated_memory_) {
     bitmap_meta_data_ =
         reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(BitMapMemberMetaData)));
