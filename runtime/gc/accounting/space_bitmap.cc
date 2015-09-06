@@ -125,10 +125,10 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
   } else {
 //    UniquePtr<MemMap> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
 //        bitmap_size, PROT_READ | PROT_WRITE));
-    LOG(ERROR) << "shared_mem_map --------- " << reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
+    LOG(ERROR) << "shared_mem_map owner meta --------- " << reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
     UniquePtr<MemMap>
       shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_.owner_meta_));
+          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
