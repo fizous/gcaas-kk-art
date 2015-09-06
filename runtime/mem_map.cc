@@ -116,7 +116,7 @@ MemMap* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
     return NULL;
   }
   return new MemMap(name, actual, byte_count, actual,
-      page_aligned_byte_count, prot, fileDescriptor, metadata);
+      page_aligned_byte_count, prot, fileDescriptor, &metadata->owner_meta_);
 }
 
 MemMap* MemMap::MapSharedMemoryAnonymous(const char* name, byte* addr,
