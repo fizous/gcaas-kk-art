@@ -123,18 +123,16 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
     }
     return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity);
   } else {
-    UniquePtr<BaseMapMem> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
-        bitmap_size, PROT_READ | PROT_WRITE));
     LOG(ERROR) << "shared_mem_map --------- " << reinterpret_cast<void*>(&meta_address->data_);
-    //UniquePtr<BaseMapMem>
-    //  shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-   //       bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
+    UniquePtr<BaseMapMem>
+      shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
+          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
     }
     return CreateFromMemMap(name, shared_mem_map.release(), heap_begin,
-        heap_capacity, meta_address);
+        heap_capacity/*, meta_address*/);
   }
 }
 
