@@ -126,7 +126,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
 //    UniquePtr<MemMap> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
 //        bitmap_size, PROT_READ | PROT_WRITE));
     LOG(ERROR) << "shared_mem_map --------- " << reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
-    UniquePtr<BaseMapMem>
+    UniquePtr<MemMap>
       shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
           bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_.owner_meta_));
     if (shared_mem_map.get() == NULL) {
