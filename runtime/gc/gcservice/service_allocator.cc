@@ -79,7 +79,7 @@ ServiceAllocator::ServiceAllocator(int pages) :
 //  Thread* self = Thread::Current();
 
 
-  art::FillSharedMemMapMetaData(&memory_meta_->meta_, begin, memory_size, begin,
+  MemMap::FillSharedMemMapMetaData(&memory_meta_->meta_, begin, memory_size, begin,
       memory_size, prot, fileDescript);
   memory_meta_->current_addr_ = begin + used_bytes;
 

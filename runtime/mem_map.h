@@ -56,11 +56,7 @@ typedef struct MemMapMetaData_S {
 } __attribute__((aligned(8))) MemMapMetaData;
 
 
-static void FillMemMapMetaData(MemMapMetaData* addr, byte* begin, size_t size,
-    void* base_begin, size_t base_size, int prot, int fd) {
-  MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
-  memcpy(addr, &_data, sizeof(MemMapMetaData));
-}
+
 
 typedef struct SharedMemMapMeta_S {
   MemMapMetaData owner_meta_;
@@ -71,11 +67,7 @@ typedef struct SharedMemMapMeta_S {
 } __attribute__((aligned(8))) SharedMemMapMeta;
 
 
-static void FillSharedMemMapMetaData(SharedMemMapMeta* addr, byte* begin,
-    size_t size, void* base_begin, size_t base_size, int prot, int fd) {
-  MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
-  memcpy(&addr->owner_meta_, &_data, sizeof(MemMapMetaData));
-}
+
 
 
 //class BaseMapMem {
@@ -161,6 +153,18 @@ class MemMap{ //: public BaseMapMem {
 
   static MemMap* MapSharedProcessFile(byte* addr, size_t byte_count, int prot,
       int fd);
+
+  static void FillSharedMemMapMetaData(SharedMemMapMeta* addr, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot, int fd) {
+    MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
+    memcpy(&addr->owner_meta_, &_data, sizeof(MemMapMetaData));
+  }
+
+  static void FillMemMapMetaData(MemMapMetaData* addr, byte* begin, size_t size,
+      void* base_begin, size_t base_size, int prot, int fd) {
+    MemMapMetaData _data = {begin, size, base_begin, base_size, prot, fd};
+    memcpy(addr, &_data, sizeof(MemMapMetaData));
+  }
 
   // Releases the memory mapping
   ~MemMap();

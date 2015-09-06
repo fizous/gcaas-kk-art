@@ -49,7 +49,7 @@ void MemMap::InitMetadata(byte* begin, size_t size,
     meta_data_addr_ =
         reinterpret_cast<MemMapMetaData*>(calloc(1, sizeof(MemMapMetaData)));
   }
-  art::FillMemMapMetaData(meta_data_addr_, begin, size, base_begin, base_size,
+  MemMap::FillMemMapMetaData(meta_data_addr_, begin, size, base_begin, base_size,
       prot, fd);
 }
 
