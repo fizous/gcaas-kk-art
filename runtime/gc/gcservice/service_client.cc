@@ -44,7 +44,6 @@ void GCServiceClient::InitClient(bool isSystemServer) {
     return;
   }
   GCSERV_CLIENT_ILOG << " {InitClient} ";
-  Thread* self = Thread::Current();
   GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid();
   {
     IterProcMutexLock interProcMu(self, *GCService::service_->_Mu());
