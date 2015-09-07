@@ -600,6 +600,7 @@ bool ClassLinker::GenerateOatFile(const std::string& dex_filename,
   // fork and exec dex2oat
   pid_t pid = fork();
   if (pid == 0) {
+    LOG(ERROR) << "FFFFFFFFFFork inside classlinker";
     // no allocation allowed between fork and exec
 
     // change process groups, so we don't get reaped by ProcessManager
@@ -638,6 +639,7 @@ bool ClassLinker::GenerateOatFile(const std::string& dex_filename,
     PLOG(FATAL) << "execl(" << dex2oat << ") failed";
     return false;
   } else {
+    LOG(ERROR) << "FFFFFFFFFFork inside classlinker (parent)";
     // wait for dex2oat to finish
     int status;
     pid_t got_pid = TEMP_FAILURE_RETRY(waitpid(pid, &status, 0));

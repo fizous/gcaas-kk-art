@@ -69,7 +69,7 @@ void GCServiceClient::FinalizeHeapAfterInit() {
   if(false) {
     bool _svcRes =
       android::FileMapperService::RegisterFD(_fd);
-  GCSERV_CLIENT_ILOG << " the client result is: " << (_svcRes ? "true" : "false");
+    GCSERV_CLIENT_ILOG << " the client result is: " << (_svcRes ? "true" : "false");
   }
   heap_meta_->vm_status_ = GCSERVICE_STATUS_RUNNING;
   //heap->SetZygoteProtection();
