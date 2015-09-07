@@ -615,7 +615,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		// Our system thread ID, etc, has changed so reset Thread state.
 		self->InitAfterFork();
 		if(!is_system_server)
-		  GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
+		  GCP_REGISTER_PROC_FOR_GCSERVICE(runtime, is_system_server);
 		EnableDebugFeatures(debug_flags);
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();

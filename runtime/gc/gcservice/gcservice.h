@@ -34,7 +34,7 @@ public:
 
   static bool InitService(void);
   static void GCPBlockForServiceReady(void);
-  static void GCPRegisterWithGCService(void);
+  static void GCPRegisterWithGCService(bool isSystemServer);
   /******************** setters and getters ************************/
   inline void _Status(GC_SERVICE_STATUS new_status) {
     service_meta_data_->status_ = new_status;

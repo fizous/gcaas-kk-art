@@ -27,7 +27,14 @@ void GCServiceClient::FinalizeInitClient() {
     service_client_->FinalizeHeapAfterInit();
   }
 }
-void GCServiceClient::InitClient() {
+void GCServiceClient::InitClient(bool isSystemServer) {
+  Thread* self = Thread::Current();
+  if(isSystemServer) {
+    Runtime* runtime = Runtime::Current();
+    gc::Heap* heap = runtime->GetHeap();
+    heap->PostZygoteForkGCService();
+    return;
+  }
   if(GCService::service_ == NULL) {
     LOG(ERROR) << "The GCService Was not initialized";
     return;

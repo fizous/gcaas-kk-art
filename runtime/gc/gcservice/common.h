@@ -29,8 +29,8 @@
 #define GCSERV_SPACE_ILOG if (SRVC_ILOG) ::art::LogMessage(__FILE__, __LINE__, INFO, -1).stream() << " #SPACE#: "
 
 #if ART_GC_PROFILER_SERVICE
-  #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)                      \
-    runtime->GCPRegisterWithGCService()
+  #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime, isSystemServer)                      \
+    runtime->GCPRegisterWithGCService(isSystemServer)
   #define GCP_INIT_GC_SERVICE_HEADER                                    \
     Runtime* _runtime = Runtime::Current();                             \
     if(gcservice::GCService::InitService()) {                           \
@@ -50,7 +50,7 @@
   #define GCP_SERVICE_CREAQTE_ALLOC_SPACE(space) space->CreateZygoteSpaceWithSharedAcc("alloc space")
   #define GCP_SERVICE_FINALIZE_INIT   gcservice::GCService::GCPFinalizeHeapAfterInit()
 #else
-  #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime)              ((void) 0)
+  #define GCP_REGISTER_PROC_FOR_GCSERVICE(runtime, isSystemServer)              ((void) 0)
   #define GCP_INIT_GC_SERVICE_HEADER                            ((void) 0)
   #define GCP_SIGNAL_SERVER_READY                               ((void) 0)
   #define GCP_SIGNAL_SERVER_READY(runtime)                      ((void) 0)
