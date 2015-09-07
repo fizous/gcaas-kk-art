@@ -849,10 +849,10 @@ void Runtime::GCPCreateGCService(void) {
 }
 
 
-void Runtime::GCPRegisterWithGCService(void) {
+void Runtime::GCPRegisterWithGCService(bool isSystemServer) {
   GCSERV_CLIENT_ILOG << " <<<<GCPRegisterWithGCService>>>> " <<
       getpid();
-  gcservice::GCService::GCPRegisterWithGCService();
+  gcservice::GCService::GCPRegisterWithGCService(isSystemServer);
   GCSERV_CLIENT_ILOG << " >>>>GCPRegisterWithGCService<<<< " <<
       getpid();
 }

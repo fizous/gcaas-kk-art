@@ -409,7 +409,7 @@ class Runtime {
   void GCPSignalGCServerReady(void);
   void GCPBlockOnGCService(void);
   void GCPCreateGCService(void);
-  void GCPRegisterWithGCService(void);
+  void GCPRegisterWithGCService(bool isSystemServer);
 
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;
