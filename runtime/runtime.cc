@@ -993,7 +993,7 @@ void Runtime::StartDaemonThreads() {
 
 bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
   CHECK_EQ(sysconf(_SC_PAGE_SIZE), kPageSize);
-
+  LOG(ERROR) << "CreateRuntime()";
   UniquePtr<ParsedOptions> options(ParsedOptions::Create(raw_options, ignore_unrecognized));
   if (options.get() == NULL) {
     LOG(ERROR) << "Failed to parse options";

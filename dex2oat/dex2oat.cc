@@ -339,10 +339,12 @@ class Dex2Oat {
 
   static bool CreateRuntime(Runtime::Options& options, InstructionSet instruction_set)
       SHARED_TRYLOCK_FUNCTION(true, Locks::mutator_lock_) {
+    LOG(ERROR) << "called CreateRuntime()";
     if (!Runtime::Create(options, false)) {
       LOG(ERROR) << "Failed to create runtime";
       return false;
     }
+
     Runtime* runtime = Runtime::Current();
     // if we loaded an existing image, we will reuse values from the image roots.
     if (!runtime->HasResolutionMethod()) {
