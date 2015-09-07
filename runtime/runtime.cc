@@ -231,7 +231,7 @@ void Runtime::Abort() {
 
 bool Runtime::PreZygoteFork(bool isSystemServer, bool initProfiler) {
 #if ART_GC_PROFILER_SERVICE
-  if(is_system_server)
+  if(isSystemServer)
     heap_->PreZygoteFork();
   else
     heap_->PreZygoteForkGCService();
