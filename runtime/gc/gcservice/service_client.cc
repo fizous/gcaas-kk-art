@@ -66,9 +66,11 @@ void GCServiceClient::FinalizeHeapAfterInit() {
   //BaseMapMem* _shared_mem_space = heap->GetAllocSpace()->GetMemMap();
   int _fd = heap_meta_->alloc_space_meta_.mem_meta_.owner_meta_.fd_;
   GCSERV_CLIENT_ILOG << " the client sent fd: " << _fd;
-  bool _svcRes =
+  if(false) {
+    bool _svcRes =
       android::FileMapperService::RegisterFD(_fd);
   GCSERV_CLIENT_ILOG << " the client result is: " << (_svcRes ? "true" : "false");
+  }
   heap_meta_->vm_status_ = GCSERVICE_STATUS_RUNNING;
   //heap->SetZygoteProtection();
 
