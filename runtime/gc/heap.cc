@@ -1252,14 +1252,10 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
 
   AddContinuousSpace(alloc_space_);
   have_zygote_space_ = true;
-  zygote_space->SetGcRetentionPolicy(
-      GCP_SERVICE_ZYGOTE_RETENTION(space::kGcRetentionPolicyFullCollect));
-  GCP_SERVICE_SET_ZYGOTE_SPACE(zygote_space);
-      GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
   //SetZygoteProtection();
  //fizo:
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
-  GCSERV_ZYGOTE_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();
