@@ -144,7 +144,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
 
   size_t bitmap_index = bitmap_index_++;
 
-  LOG(ERROR) << "Creating DlMallocSpace with address" << (meta_addr == NULL ? "NULL" : "sharable");
+  LOG(ERROR) << "Creating DlMallocSpace with address " << (meta_addr == NULL ? "NULL" : "sharable");
   static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
