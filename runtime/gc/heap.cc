@@ -1162,7 +1162,8 @@ void Heap::CollectGarbageForZygoteFork(bool clear_soft_references) {
     //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
 //    mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
     WaitForConcurrentGcToComplete(self);
-    CollectGarbageInternal(collector::kGcTypeFull, kGcCauseZygoteFork, clear_soft_references);
+    CollectGarbageInternal(collector::kGcTypeFull, kGcCauseZygoteFork,
+        clear_soft_references);
 }
 
 void Heap::CollectGarbage(bool clear_soft_references) {
