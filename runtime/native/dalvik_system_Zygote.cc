@@ -512,7 +512,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 	CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
 
-	if (!runtime->PreZygoteFork()) {
+	if (!runtime->PreZygoteFork(is_system_server)) {
 		LOG(FATAL) << "pre-fork heap failed";
 	}
 
@@ -614,11 +614,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 		// Our system thread ID, etc, has changed so reset Thread state.
 		self->InitAfterFork();
-		GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
+		if(!is_system_server)
+		  GCP_REGISTER_PROC_FOR_GCSERVICE(runtime);
 		EnableDebugFeatures(debug_flags);
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
-		GCP_SERVICE_FINALIZE_INIT;
+		if(!is_system_server)
+		  GCP_SERVICE_FINALIZE_INIT;
 	} else if (pid > 0) {
 		// the parent process
 	}
