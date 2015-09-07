@@ -993,7 +993,7 @@ void Runtime::StartDaemonThreads() {
 
 bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
   CHECK_EQ(sysconf(_SC_PAGE_SIZE), kPageSize);
-  LOG(ERROR) << "Runtime::Init()";
+  LOG(ERROR) << "Runtime::Init() : parentID = " << getppid();
   UniquePtr<ParsedOptions> options(ParsedOptions::Create(raw_options, ignore_unrecognized));
   if (options.get() == NULL) {
     LOG(ERROR) << "Failed to parse options";
@@ -1101,7 +1101,7 @@ bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
                           "OutOfMemoryError thrown while trying to throw OutOfMemoryError; no stack available");
   pre_allocated_OutOfMemoryError_ = self->GetException(NULL);
   self->ClearException();
-
+  LOG(ERROR) << "Runtime::LEving initialization() : parentID = " << getppid();
   VLOG(startup) << "Runtime::Init exiting";
   return true;
 }
