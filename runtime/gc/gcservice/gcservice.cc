@@ -83,7 +83,7 @@ void GCService::GCPRegisterWithGCService(bool isSystemServer) {
   if(service_ == NULL)
     return;
   Thread* self = Thread::Current();
-  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() << isSystemServer? "system is server" : "system is not server";
+  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() << (isSystemServer? "; system is server" : ";system is not server");
   GCServiceClient::InitClient(isSystemServer);
   GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
 }
