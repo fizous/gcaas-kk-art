@@ -410,7 +410,7 @@ pid_t Runtime::GCPForkGCService(void) {
   //for the GCService
   Runtime* runtime = Runtime::Current();
 
-  runtime->PreZygoteFork(false);
+  runtime->PreZygoteFork(false, false);
 
   SetSigChldHandler();
 
