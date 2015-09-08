@@ -132,7 +132,7 @@ class CardTable {
 
 
   MemMap* getMemMap() {
-    return mem_map_;////cardtable_meta_data_->mem_map_;
+    return mem_map_.get();////cardtable_meta_data_->mem_map_;
   }
 
 
