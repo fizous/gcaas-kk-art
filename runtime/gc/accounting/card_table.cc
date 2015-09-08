@@ -236,13 +236,6 @@ void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
 }
 
 
-void CardTable::SetCardTableMemberData(CardTableMemberMetaData* address,
-    MemMap* memap, byte* biased_begin, size_t offset, const byte* heap_begin) {
-  //UniquePtr<BaseMapMem> dumpPointer(NULL);
-  CardTableMemberMetaData _data = {memap, biased_begin, offset, heap_begin};
-  memcpy(address, &_data, SERVICE_ALLOC_ALIGN_BYTE(CardTableMemberMetaData));
-
-}
 
 //
 ///* reset the card table to enable sharing with gc service */
