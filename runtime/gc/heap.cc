@@ -2297,6 +2297,9 @@ void Heap::RequestHeapTrim() {
 }
 
 size_t Heap::Trim() {
+  //fizo:
+  if(true)
+    return 0;
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();
