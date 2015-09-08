@@ -133,9 +133,17 @@ class MemMap{ //: public BaseMapMem {
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
   static MemMap* MapSharedMemoryAnonymous(const char* name, byte* addr,
   		size_t byte_count, int prot);
+
   static MemMap* MapSharedMemoryWithMeta(const char* name, byte* addr,
       size_t byte_count, int prot, SharedMemMapMeta* metadata,
       int flagsParam = MAP_SHARED);
+
+  static MemMap* MapSharedMemWithMetaAtAddr(const char* name, byte* addr,
+      size_t byte_count, int prot, SharedMemMapMeta* metadata,
+      int flagsParam = MAP_SHARED) {
+    MapSharedMemoryWithMeta(name, addr, byte_count, prot, metadata,
+        flagsParam | MAP_FIXED);
+  }
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //

@@ -212,7 +212,7 @@ void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
   oss << "shared card-" << getpid();
   std::string debug_friendly_name(oss.str());
   UniquePtr<MemMap>
-    shared_mem_map(MemMap::MapSharedMemoryWithMeta(debug_friendly_name.c_str(),
+    shared_mem_map(MemMap::MapSharedMemWithMetaAtAddr(debug_friendly_name.c_str(),
         original_begin, origi_size, PROT_READ | PROT_WRITE, metaMemory));
 
 

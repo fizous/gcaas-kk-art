@@ -339,7 +339,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   GCSERV_CLIENT_ILOG << "the alloc_space is mapped at address " <<
       reinterpret_cast<const void*>(End());
   UniquePtr<MemMap>
-    shared_mem_map(MemMap::MapSharedMemoryWithMeta(alloc_space_name, End(),
+    shared_mem_map(MemMap::MapSharedMemWithMetaAtAddr(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, &space_meta_addr->mem_meta_));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
