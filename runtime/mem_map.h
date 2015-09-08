@@ -141,7 +141,7 @@ class MemMap{ //: public BaseMapMem {
   static MemMap* MapSharedMemWithMetaAtAddr(const char* name, byte* addr,
       size_t byte_count, int prot, SharedMemMapMeta* metadata,
       int flagsParam = MAP_SHARED) {
-    MapSharedMemoryWithMeta(name, addr, byte_count, prot, metadata,
+    return MapSharedMemoryWithMeta(name, addr, byte_count, prot, metadata,
         flagsParam | MAP_FIXED);
   }
   // Map part of a file, taking care of non-page aligned offsets.  The
