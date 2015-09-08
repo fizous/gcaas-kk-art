@@ -166,7 +166,7 @@ static void VMRuntime_registerNativeFree(JNIEnv* env, jobject, jint bytes) {
 
 static void VMRuntime_trimHeap(JNIEnv*, jobject) {
   uint64_t start_ns = NanoTime();
-
+  LOG(ERROR) << "Calling VMRuntime_trimHeap(); pid:" << getpid() <<"; ppid:" << getppid();
   // Trim the managed heap.
   gc::Heap* heap = Runtime::Current()->GetHeap();
   gc::space::DlMallocSpace* alloc_space = heap->GetAllocSpace();

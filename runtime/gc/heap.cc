@@ -2248,6 +2248,7 @@ void Heap::ConcurrentGC(Thread* self) {
 }
 
 void Heap::RequestHeapTrim() {
+  LOG(ERROR) << "Calling Heap::RequestHeapTrim(); pid:" << getpid() <<"; ppid:" << getppid();
   // GC completed and now we must decide whether to request a heap trim (advising pages back to the
   // kernel) or not. Issuing a request will also cause trimming of the libc heap. As a trim scans
   // a space it will hold its lock and can become a cause of jank.

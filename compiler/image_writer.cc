@@ -69,7 +69,7 @@ bool ImageWriter::Write(const std::string& image_filename,
                         const std::string& oat_filename,
                         const std::string& oat_location) {
   CHECK(!image_filename.empty());
-
+  LOG(ERROR) << "bool ImageWriter::Write--> " << image_filename;
   CHECK_NE(image_begin, 0U);
   image_begin_ = reinterpret_cast<byte*>(image_begin);
 
