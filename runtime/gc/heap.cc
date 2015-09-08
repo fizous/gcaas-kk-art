@@ -1218,7 +1218,7 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
 
   zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
   //  SetZygoteProtection();
-  GCSERV_CLIENT_ILOG << "make zygote non collectable";
+ // GCSERV_CLIENT_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();

@@ -351,8 +351,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   if (capacity - initial_size > 0) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
-  //Fizo: make space types
-  SetSpaceType(kSpaceTypeZygoteSpace);
+//  //Fizo: make space types
+//  SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
           end_, end, growth_limit, space_meta_addr);
