@@ -131,32 +131,37 @@ class CardTable {
   bool AddrIsInCardTable(const void* addr) const;
 
 
+  MemMap* getMemMap() {
+    return mem_map_;////cardtable_meta_data_->mem_map_;
+  }
+
+
   size_t getOffset() {
-    return offset_;
+    return offset_;//cardtable_meta_data_->offset_;
   }
 
   byte* getBegin() {
-    return mem_map_->Begin();
+    return getMemMap()->Begin();
   }
 
   size_t getBaseSize() {
-    return mem_map_->BaseSize();
+    return getMemMap()->BaseSize();
   }
 
   size_t getSize() {
-    return mem_map_->Size();
+    return getMemMap()->Size();
   }
 
   byte* getBaseBegin() {
-    return mem_map_->BaseBegin();
+    return getMemMap()->BaseBegin();
   }
 
   int getFD() {
-    return mem_map_->GetFD();
+    return getMemMap()->GetFD();
   }
 
   int getProt() {
-    return mem_map_->GetProtect();
+    return getMemMap()->GetProtect();
   }
 
   bool updateProtection(int newProtection);
@@ -164,11 +169,13 @@ class CardTable {
   void DumpCardTable(std::ostream&);
  private:
   CardTable(MemMap* begin, byte* biased_begin, size_t offset, const byte* heap_begin);
+  void SetCardTableMemberData(CardTableMemberMetaData* address,
+      MemMap* memap, byte* biased_begin, size_t offset, const byte* heap_begin);
 
   // Returns true iff the card table address is within the bounds of the card table.
   bool IsValidCard(const byte* card_addr) const {
-    byte* begin = mem_map_->Begin() + offset_;
-    byte* end = mem_map_->End();
+    byte* begin = getBegin() + getOffset();
+    byte* end = getMemMap()->End();
     return card_addr >= begin && card_addr < end;
   }
 
@@ -186,6 +193,13 @@ class CardTable {
   const size_t offset_;
 
   const byte* heap_begin_;
+
+
+  ///New code for the GC service
+  //struct that holds the metadata of the spaceBitmap
+//  CardTableMemberMetaData* cardtable_meta_data_;
+//  //was the meta_data allocated?
+//  bool allocated_memory_;
 };
 
 }  // namespace accounting

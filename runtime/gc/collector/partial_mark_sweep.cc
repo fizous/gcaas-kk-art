@@ -37,10 +37,10 @@ void PartialMarkSweep::BindBitmaps() {
   // For partial GCs we need to bind the bitmap of the zygote space so that all objects in the
   // zygote space are viewed as marked.
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
-    if(space->IsSpaceImmuned()) {
-      ImmuneSpace(space);
-      continue;
-    }
+//    if(space->IsSpaceImmuned()) {
+//      ImmuneSpace(space);
+//      continue;
+//    }
     if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect) {
       CHECK(space->IsZygoteSpace());
       ImmuneSpace(space);

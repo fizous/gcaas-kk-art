@@ -253,6 +253,22 @@ class MemMap{ //: public BaseMapMem {
 };
 
 
+typedef struct CardTableMemberMetaData_S {
+  // Backing storage for bitmap.
+  MemMap* mem_map_;
+
+  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
+  byte* const biased_begin_;
+
+  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
+  // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
+  const size_t offset_;
+
+  const byte* heap_begin_;
+} __attribute__((aligned(8)))  CardTableMemberMetaData;
+
+
+
 typedef struct BitMapMemberMetaData_S {
   // Backing storage for bitmap.
   MemMap* mem_map_;
