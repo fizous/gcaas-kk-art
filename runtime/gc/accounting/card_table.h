@@ -179,6 +179,10 @@ class CardTable {
     return cardtable_meta_data_->mem_map_->Begin();
   }
 
+  byte* GetEnd() const {
+    return cardtable_meta_data_->mem_map_->End();
+  }
+
   size_t GetBaseSize() {
     return GetMemMap()->BaseSize();
   }
@@ -211,8 +215,8 @@ class CardTable {
 
   // Returns true iff the card table address is within the bounds of the card table.
   bool IsValidCard(const byte* card_addr) const {
-    byte* begin = GetMemMap()->Begin() + GetOffset();
-    byte* end = GetMemMap()->End();
+    byte* begin = GetBegin() + GetOffset();
+    byte* end = GetEnd();
     return card_addr >= begin && card_addr < end;
   }
 
