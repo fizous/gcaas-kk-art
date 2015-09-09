@@ -198,12 +198,9 @@ CardTable* CardTable::ShareCardTable(CardTable* orig_card_table,
   GCSERV_CLIENT_ILOG << "restart cardTable to enable sharing";
   byte* original_begin = orig_card_table->GetBegin();
   size_t origi_size = orig_card_table->GetSize();
-
-
-
   const byte* heap_begin = orig_card_table->GetHeapBegin();
 
-
+  orig_card_table->GetMemMap()->UnMapAtEnd(orig_card_table->GetBegin());
 
   //free(orig_card_table);//->mem_map_.reset();
 

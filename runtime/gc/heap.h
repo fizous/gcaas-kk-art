@@ -343,6 +343,10 @@ class Heap {
     return card_table_.get();
   }
 
+  void ResetCardTable(accounting::CardTable* newCardTable) {
+    card_table_.reset(newCardTable);
+  }
+
   void AddFinalizerReference(Thread* self, mirror::Object* object);
 
   // Returns the number of bytes currently allocated.

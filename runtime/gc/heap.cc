@@ -1203,8 +1203,10 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
     FlushAllocStack();
   }
 
-  accounting::CardTable* cardTbl = GetCardTable();
-  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
+  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
+      &shared_heap_mem->card_table_meta_));
+//  accounting::CardTable* cardTbl = GetCardTable();
+//  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
 
   space::DlMallocSpace* zygote_space = alloc_space_;
   alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
