@@ -2250,8 +2250,6 @@ void Heap::ConcurrentGC(Thread* self) {
 }
 
 void Heap::RequestHeapTrim() {
-  if(true)
-    return;
   LOG(ERROR) << "Calling Heap::RequestHeapTrim(); pid:" << getpid() <<"; ppid:" << getppid();
   // GC completed and now we must decide whether to request a heap trim (advising pages back to the
   // kernel) or not. Issuing a request will also cause trimming of the libc heap. As a trim scans
@@ -2301,9 +2299,6 @@ void Heap::RequestHeapTrim() {
 }
 
 size_t Heap::Trim() {
-  //fizo:
-  if(true)
-    return 0;
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();

@@ -165,9 +165,6 @@ static void VMRuntime_registerNativeFree(JNIEnv* env, jobject, jint bytes) {
 }
 
 static void VMRuntime_trimHeap(JNIEnv*, jobject) {
-  //fizo:
-  if(true)
-    return;
   uint64_t start_ns = NanoTime();
   LOG(ERROR) << "Calling VMRuntime_trimHeap(); pid:" << getpid() <<"; ppid:" << getppid();
   // Trim the managed heap.
