@@ -410,8 +410,8 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 
 
 void MemMap::UnMapAtEnd(byte* new_end) {
-  if(Size() > 0)
-    return;
+//  if(Size() > 0)
+//    return;
   DCHECK_GE(new_end, Begin());
   DCHECK_LE(new_end, End());
   size_t unmap_size = End() - new_end;
