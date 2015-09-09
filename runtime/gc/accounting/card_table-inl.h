@@ -187,14 +187,14 @@ inline void CardTable::ModifyCardsAtomic(byte* scan_begin, byte* scan_end, const
 inline void* CardTable::AddrFromCard(const byte *card_addr) const {
   DCHECK(IsValidCard(card_addr))
     << " card_addr: " << reinterpret_cast<const void*>(card_addr)
-    << " begin: " << reinterpret_cast<void*>(mem_map_->Begin() + offset_)
-    << " end: " << reinterpret_cast<void*>(mem_map_->End());
-  uintptr_t offset = card_addr - biased_begin_;
+    << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
+    << " end: " << reinterpret_cast<void*>(GetEnd());
+  uintptr_t offset = card_addr - GetBiasedBegin();
   return reinterpret_cast<void*>(offset << kCardShift);
 }
 
 inline byte* CardTable::CardFromAddr(const void *addr) const {
-  byte *card_addr = biased_begin_ + (reinterpret_cast<uintptr_t>(addr) >> kCardShift);
+  byte *card_addr = GetBiasedBegin() + (reinterpret_cast<uintptr_t>(addr) >> kCardShift);
   // Sanity check the caller was asking for address covered by the card table
   DCHECK(IsValidCard(card_addr)) << "addr: " << addr
       << " card_addr: " << reinterpret_cast<void*>(card_addr);
@@ -204,8 +204,8 @@ inline byte* CardTable::CardFromAddr(const void *addr) const {
 inline void CardTable::CheckCardValid(byte* card) const {
   DCHECK(IsValidCard(card))
       << " card_addr: " << reinterpret_cast<const void*>(card)
-      << " begin: " << reinterpret_cast<void*>(mem_map_->Begin() + offset_)
-      << " end: " << reinterpret_cast<void*>(mem_map_->End());
+      << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
+      << " end: " << reinterpret_cast<void*>(GetEnd());
 }
 
 }  // namespace accounting
