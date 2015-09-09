@@ -602,6 +602,26 @@ void MarkSweep::VerifyImageRootVisitor(Object* root, void* arg) {
   mark_sweep->CheckObject(root);
 }
 
+
+//void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
+//  CHECK(space->IsDlMallocSpace());
+//  space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
+//  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
+//  accounting::SpaceBitmap* mark_bitmap = alloc_space->GetMarkBitmap();
+//  alloc_space->temp_bitmap_members_ =
+//      accounting::SpaceBitmap::BindBitmaps(mark_bitmap, live_bitmap);
+//  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+////  alloc_space->temp_bitmap_.reset(mark_bitmap);
+////  alloc_space->mark_bitmap_.reset(live_bitmap);
+////
+////
+////  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
+////  accounting::SpaceBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
+////
+////
+////
+//}
+
 void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
   CHECK(space->IsDlMallocSpace());
   space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
@@ -1617,6 +1637,9 @@ void MarkSweep::UnBindBitmaps() {
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
       space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
+//      if (alloc_space->temp_bitmap_members_ != NULL) {
+//
+//      }
       if (alloc_space->temp_bitmap_.get() != NULL) {
         // At this point, the temp_bitmap holds our old mark bitmap.
         accounting::SpaceBitmap* new_bitmap = alloc_space->temp_bitmap_.release();

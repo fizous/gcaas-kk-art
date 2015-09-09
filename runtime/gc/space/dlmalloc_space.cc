@@ -139,7 +139,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
       lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
-      growth_limit_(growth_limit) {
+      growth_limit_(growth_limit), temp_bitmap_members_(NULL) {
   CHECK(mspace != NULL);
 
   size_t bitmap_index = bitmap_index_++;
@@ -257,8 +257,9 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
 }
 
 void DlMallocSpace::SwapBitmaps() {
+//  accounting::SpaceBitmap::SwitchBitmaps(live_bitmap_.get(), mark_bitmap_.get());
   live_bitmap_.swap(mark_bitmap_);
-  // Swap names to get more descriptive diagnostics.
+//  // Swap names to get more descriptive diagnostics.
   std::string temp_name(live_bitmap_->GetName());
   live_bitmap_->SetName(mark_bitmap_->GetName());
   mark_bitmap_->SetName(temp_name);

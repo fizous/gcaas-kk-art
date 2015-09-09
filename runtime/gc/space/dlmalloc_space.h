@@ -190,6 +190,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   UniquePtr<accounting::SpaceBitmap> mark_bitmap_;
   UniquePtr<accounting::SpaceBitmap> temp_bitmap_;
 
+
   // Recent allocation buffer.
   static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
   static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
@@ -221,7 +222,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // however, capacity normally can't vary. In the case of the growth_limit_ it can be cleared
   // one time by a call to ClearGrowthLimit.
   size_t growth_limit_;
-
+  BitMapMemberMetaData* temp_bitmap_members_;
   friend class collector::MarkSweep;
 
 

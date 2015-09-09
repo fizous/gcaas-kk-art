@@ -193,6 +193,11 @@ class SpaceBitmap {
     return &Begin()[index];
   }
 
+
+  static void SwitchBitmaps(SpaceBitmap* bitmapA, SpaceBitmap* bitmapB);
+  static BitMapMemberMetaData* BindBitmaps(SpaceBitmap* bitmapSource,
+      SpaceBitmap* bitmapDestination);
+
  private:
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_

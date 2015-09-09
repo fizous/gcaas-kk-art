@@ -192,6 +192,33 @@ void SpaceBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
   }
 }
 
+
+BitMapMemberMetaData* SpaceBitmap::BindBitmaps(SpaceBitmap* bitmapSource,
+    SpaceBitmap* bitmapDestination) {
+  BitMapMemberMetaData* _membersSource = bitmapSource->bitmap_meta_data_;
+  bitmapSource->bitmap_meta_data_ = bitmapDestination->bitmap_meta_data_;
+
+
+  return _membersSource;
+//  BitMapMemberMetaData* _membersA = bitmapA->bitmap_meta_data_;
+//  bitmapA->bitmap_meta_data_ = bitmapB->bitmap_meta_data_;
+//  bitmapB->bitmap_meta_data_ = _membersA;
+//  // Swap names to get more descriptive diagnostics.
+//  std::string temp_name(bitmapA->GetName());
+//  bitmapA->SetName(bitmapB->GetName());
+//  bitmapB->SetName(temp_name);
+}
+
+void SpaceBitmap::SwitchBitmaps(SpaceBitmap* bitmapA, SpaceBitmap* bitmapB) {
+  BitMapMemberMetaData* _membersA = bitmapA->bitmap_meta_data_;
+  bitmapA->bitmap_meta_data_ = bitmapB->bitmap_meta_data_;
+  bitmapB->bitmap_meta_data_ = _membersA;
+  // Swap names to get more descriptive diagnostics.
+  std::string temp_name(bitmapA->GetName());
+  bitmapA->SetName(bitmapB->GetName());
+  bitmapB->SetName(temp_name);
+}
+
 // Walk through the bitmaps in increasing address order, and find the
 // object pointers that correspond to garbage objects.  Call
 // <callback> zero or more times with lists of these object pointers.
