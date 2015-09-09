@@ -22,6 +22,7 @@
 #include "gc/heap.h"
 #include "gc/space/space.h"
 #include "gc/gcservice/common.h"
+#include "gc/gcservice/service_allocator.h"
 #include "heap_bitmap.h"
 #include "runtime.h"
 #include "utils.h"
@@ -106,7 +107,7 @@ bool CardTable::AddrIsInCardTable(const void* addr) const {
 void CardTable::CheckAddrIsInCardTable(const byte* addr) const {
   byte* card_addr = GetBiasedBegin() + ((uintptr_t)addr >> kCardShift);
   byte* begin = GetBegin() + GetOffset();
-  byte* end = GetMemMap()->End();
+  byte* end = GetEnd();
   CHECK(AddrIsInCardTable(addr))
       << "Card table " << this
       << " begin: " << reinterpret_cast<void*>(begin)
