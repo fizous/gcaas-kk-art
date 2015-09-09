@@ -120,7 +120,7 @@ typedef struct SharedMemMapMeta_S {
 //class SharedMemMap;
 
 // Used to keep track of mmap segments.
-class MemMap{ //: public BaseMapMem {
+class MemMap { //: public BaseMapMem {
  public:
   // Request an anonymous region of length 'byte_count' and a requested base address.
   // Use NULL as the requested base address if you don't care.
@@ -303,9 +303,7 @@ typedef struct SharedSpaceMeta_S {
 
 typedef struct SharedCardTableMeta_S {
   SharedMemMapMeta mem_meta_;
-  byte* biased_begin_;
-  byte* begin_;
-  size_t offset_;
+  CardTableMemberMetaData card_table_fields_;
 } __attribute__((aligned(8)))  SharedCardTableMeta;
 
 

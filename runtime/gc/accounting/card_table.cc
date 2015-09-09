@@ -85,14 +85,7 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   return new CardTable(mem_map.release(), biased_begin, offset, heap_begin);
 }
 
-CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
-    const byte* heap_begin)
-    : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
-      heap_begin_(heap_begin) {
-  GCSERV_ILOG << "--- constructor card table ---";
-  byte* __attribute__((unused)) begin = mem_map_->Begin() + offset_;
-  byte* __attribute__((unused)) end = mem_map_->End();
-}
+
 
 void CardTable::ClearSpaceCards(space::ContinuousSpace* space) {
   // TODO: clear just the range of the table that has been modified
@@ -103,17 +96,17 @@ void CardTable::ClearSpaceCards(space::ContinuousSpace* space) {
 
 void CardTable::ClearCardTable() {
   // TODO: clear just the range of the table that has been modified
-  memset(mem_map_->Begin(), kCardClean, mem_map_->Size());
+  memset(GetBegin(), kCardClean, GetSize());
 }
 
 bool CardTable::AddrIsInCardTable(const void* addr) const {
-  return IsValidCard(biased_begin_ + ((uintptr_t)addr >> kCardShift));
+  return IsValidCard(GetBiasedBegin() + ((uintptr_t)addr >> kCardShift));
 }
 
 void CardTable::CheckAddrIsInCardTable(const byte* addr) const {
-  byte* card_addr = biased_begin_ + ((uintptr_t)addr >> kCardShift);
-  byte* begin = mem_map_->Begin() + offset_;
-  byte* end = mem_map_->End();
+  byte* card_addr = GetBiasedBegin() + ((uintptr_t)addr >> kCardShift);
+  byte* begin = GetBegin() + GetOffset();
+  byte* end = GetMemMap()->End();
   CHECK(AddrIsInCardTable(addr))
       << "Card table " << this
       << " begin: " << reinterpret_cast<void*>(begin)
@@ -131,26 +124,26 @@ void CardTable::VerifyCardTable() {
 
 void CardTable::DumpCardTable(std::ostream& os) {
   Thread* self = Thread::Current();
-  os << self->GetTid() << " --- " << mem_map_->getName() <<
+  os << self->GetTid() << " --- " << GetMemMap()->getName() <<
       " ----- SharedCardTable: biased_begin_: " <<
       reinterpret_cast<void*>(GetBiasedBegin());
 
   os <<
-      " ----- SharedCardTable: offset_: " << getOffset();
+      " ----- SharedCardTable: offset_: " << GetOffset();
   os <<
       " ----- SharedCardTable: owner_begin_: " <<
-      reinterpret_cast<void*>(getBegin());
+      reinterpret_cast<void*>(GetBegin());
   os <<
       " ----- SharedCardTable: owner_base_begin_: " <<
-      reinterpret_cast<void*>(getBaseBegin());
+      reinterpret_cast<void*>(GetBaseBegin());
   os <<
-      " ----- SharedCardTable: base_size_: " << getBaseSize();
+      " ----- SharedCardTable: base_size_: " << GetBaseSize();
   os <<
-      " ----- SharedCardTable: size_: " << getSize();
+      " ----- SharedCardTable: size_: " << GetSize();
   os <<
-      " ----- SharedCardTable: fd_: " << getFD();
+      " ----- SharedCardTable: fd_: " << GetFD();
   os <<
-      " ----- SharedCardTable: prot_: " << getProt();
+      " ----- SharedCardTable: prot_: " << GetProt();
 
   os <<
       "\n ===========================";
@@ -158,7 +151,7 @@ void CardTable::DumpCardTable(std::ostream& os) {
 
 
 bool CardTable::updateProtection(int newProtection) {
-  return mem_map_->Protect(newProtection);
+  return SetProtection(newProtection);
 }
 
 
@@ -200,32 +193,40 @@ bool CardTable::updateProtection(int newProtection) {
 
 
 /// reset the card table to enable sharing with gc service
-void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
-  CardTable* orig_card_table = this;
+CardTable* CardTable::ShareCardTable(CardTable* orig_card_table,
+    SharedCardTableMeta* card_meta_memory) {
   GCSERV_CLIENT_ILOG << "restart cardTable to enable sharing";
-  byte* original_begin = orig_card_table->getBegin();
-  size_t origi_size = orig_card_table->getSize();
+  byte* original_begin = orig_card_table->GetBegin();
+  size_t origi_size = orig_card_table->GetSize();
 
-  orig_card_table->mem_map_.reset();
+
+
+  const byte* heap_begin = orig_card_table->GetHeapBegin();
+
+
+
+  //free(orig_card_table);//->mem_map_.reset();
 
   std::ostringstream oss;
   oss << "shared card-" << getpid();
   std::string debug_friendly_name(oss.str());
+
   UniquePtr<MemMap>
     shared_mem_map(MemMap::MapSharedMemWithMetaAtAddr(debug_friendly_name.c_str(),
-        original_begin, origi_size, PROT_READ | PROT_WRITE, metaMemory));
+        original_begin, origi_size, PROT_READ | PROT_WRITE,
+        &card_meta_memory->mem_meta_));
 
 
-  GCSERV_CLIENT_ILOG << "xxx~~~~~ Memory mapped ~~~~~ original _fd = "  <<
-      shared_mem_map->GetFD();
+  GCSERV_CLIENT_ILOG << "xxx~~~~~ Memory mapped ~~~~~ owner _fd = "  <<
+      card_meta_memory->mem_meta_.owner_meta_.fd_;
 
   //UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
-  orig_card_table->mem_map_.reset(shared_mem_map.release());
-  byte* cardtable_begin = orig_card_table->mem_map_->Begin();
+ // orig_card_table->mem_map_.reset(shared_mem_map.release());
+
   size_t offset = 0;
-  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(cardtable_begin) -
-        (reinterpret_cast<uintptr_t>(orig_card_table->heap_begin_) >> kCardShift));
+  byte* biased_begin = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(original_begin) -
+        (reinterpret_cast<uintptr_t>(heap_begin) >> kCardShift));
   if (((uintptr_t)biased_begin & 0xff) != kCardDirty) {
     int delta = kCardDirty - (reinterpret_cast<int>(biased_begin) & 0xff);
     offset = delta + (delta < 0 ? 0x100 : 0);
@@ -233,9 +234,39 @@ void CardTable::ShareCardTable(SharedMemMapMeta* metaMemory) {
   }
 
   orig_card_table->DumpCardTable(LOG(ERROR));
+
+  return new CardTable(shared_mem_map.release(), biased_begin, offset,
+      heap_begin, &card_meta_memory->card_table_fields_);
 }
 
+//CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
+//    const byte* heap_begin, CardTableMemberMetaData* cardTblAddr)
+//    : mem_map_(mem_map), biased_begin_(biased_begin), offset_(offset),
+//      heap_begin_(heap_begin) {
+//  GCSERV_ILOG << "--- constructor card table ---";
+//  byte* __attribute__((unused)) begin = mem_map_->Begin() + offset_;
+//  byte* __attribute__((unused)) end = mem_map_->End();
+//}
 
+CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
+    const byte* heap_begin, CardTableMemberMetaData* cardTblAddr) :
+        cardtable_meta_data_(cardTblAddr),
+        allocated_memory_(cardtable_meta_data_ == NULL) {
+  GCSERV_ILOG << "--- new constructor card table ---";
+  if(allocated_memory_) {
+    cardtable_meta_data_ =
+        reinterpret_cast<CardTableMemberMetaData*>(calloc(1,
+            SERVICE_ALLOC_ALIGN_BYTE(CardTableMemberMetaData)));
+  }
+  SetCardTableMemberData(cardtable_meta_data_, mem_map, biased_begin, offset,
+      heap_begin);
+}
+
+void CardTable::SetCardTableMemberData(CardTableMemberMetaData* address,
+    MemMap* mem_map, byte* biased_begin, size_t offset, const byte* heap_begin) {
+  CardTableMemberMetaData _data = {mem_map, biased_begin, offset, heap_begin};
+  memcpy(address, &_data, SERVICE_ALLOC_ALIGN_BYTE(CardTableMemberMetaData));
+}
 
 //
 ///* reset the card table to enable sharing with gc service */
