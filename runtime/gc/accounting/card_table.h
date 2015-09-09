@@ -171,12 +171,12 @@ class CardTable {
     return cardtable_meta_data_->heap_begin_;
   }
 
-  size_t GetOffset() {
+  size_t GetOffset() const {
     return cardtable_meta_data_->offset_;
   }
 
-  byte* GetBegin() {
-    return GetMemMap()->Begin();
+  byte* GetBegin() const {
+    return cardtable_meta_data_->mem_map_->Begin();
   }
 
   size_t GetBaseSize() {
