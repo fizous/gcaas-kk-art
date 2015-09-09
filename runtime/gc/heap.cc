@@ -1298,7 +1298,7 @@ void Heap::PostZygoteForkGCService() {
     GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
     return;
   }
-  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
+  //GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " <<
       PrettySize(alloc_space_->Size());
 
