@@ -152,7 +152,8 @@ void CardTable::DumpCardTable(std::ostream& os) {
 
 
 bool CardTable::updateProtection(int newProtection) {
-  return SetProtection(newProtection);
+  SetProtection(newProtection);
+  return true;
 }
 
 
