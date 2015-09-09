@@ -167,7 +167,7 @@ class CardTable {
     return cardtable_meta_data_->mem_map_;
   }
 
-  byte* GetHeapBegin() const {
+  const byte* GetHeapBegin() {
     return cardtable_meta_data_->heap_begin_;
   }
 
