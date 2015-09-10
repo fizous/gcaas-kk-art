@@ -314,7 +314,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   // Trim the heap so that we minimize the size of the Zygote space.
   //Fizo we should not trim here..Instead the trim should happen only before we
   //fork the new process
-  Trim();
+  //Trim();
   // Trim our mem-map to free unused pages.
   GetMemMap()->UnMapAtEnd(end_);
   // TODO: Not hardcode these in?
@@ -330,6 +330,9 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
              << "Capacity " << Capacity();
   SetGrowthLimit(RoundUp(size, kPageSize));
   SetFootprintLimit(RoundUp(size, kPageSize));
+
+  Dump(LOG(ERROR));
+
   // FIXME: Do we need reference counted pointers here?
   // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
   VLOG(heap) << "Creating new AllocSpace: ";
@@ -368,6 +371,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   VLOG(heap) << "zygote space creation done";
   GCSERV_CLIENT_ILOG << "**** creating new space after zygote ****";
+  alloc_space->Dump(LOG(ERROR));
+
   return alloc_space;
 }
 
