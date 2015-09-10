@@ -314,7 +314,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   // Trim the heap so that we minimize the size of the Zygote space.
   //Fizo we should not trim here..Instead the trim should happen only before we
   //fork the new process
-  //Trim();
+  Trim();
   // Trim our mem-map to free unused pages.
   GetMemMap()->UnMapAtEnd(end_);
   // TODO: Not hardcode these in?
