@@ -144,19 +144,25 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
 
   size_t bitmap_index = bitmap_index_++;
 
-  LOG(ERROR) << "Creating DlMallocSpace with address " << (meta_addr == NULL ? "NULL" : "sharable");
-  static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
+  LOG(ERROR) << "Creating DlMallocSpace with address " <<
+      (meta_addr == NULL ? "NULL" : "sharable");
+  static const uintptr_t kGcCardSize =
+      static_cast<uintptr_t>(accounting::CardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
-      StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
-      Begin(), Capacity(), meta_addr != NULL ? &meta_addr->bitmap_meta_[0] : NULL));
-  DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << bitmap_index;
+      StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
+          static_cast<int>(bitmap_index)), Begin(), Capacity(),
+          meta_addr != NULL ? &meta_addr->bitmap_meta_[0] : NULL));
+  DCHECK(live_bitmap_.get() != NULL) <<
+      "could not create allocspace live bitmap #" << bitmap_index;
 
   mark_bitmap_.reset(accounting::SpaceBitmap::Create(
-      StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
-      Begin(), Capacity(), meta_addr != NULL ? &meta_addr->bitmap_meta_[1] : NULL));
-  DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
+      StringPrintf("allocspace %s mark-bitmap %d", name.c_str(),
+          static_cast<int>(bitmap_index)), Begin(), Capacity(),
+          meta_addr != NULL ? &meta_addr->bitmap_meta_[1] : NULL));
+  DCHECK(live_bitmap_.get() != NULL) <<
+      "could not create allocspace mark bitmap #" << bitmap_index;
 
   for (auto& freed : recent_freed_objects_) {
     freed.first = nullptr;

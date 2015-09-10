@@ -82,7 +82,8 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
     uintptr_t ptr_base = IndexToOffset(word_start) + HeapBegin();
     do {
       const size_t shift = CLZ(edge_word);
-      mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+      mirror::Object* obj =
+          reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
       visitor(obj);
       edge_word ^= static_cast<size_t>(kWordHighBitMask) >> shift;
     } while (edge_word != 0);
@@ -95,7 +96,8 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
       uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       do {
         const size_t shift = CLZ(w);
-        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj =
+            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         visitor(obj);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       } while (w != 0);

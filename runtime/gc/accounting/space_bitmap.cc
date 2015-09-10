@@ -184,7 +184,8 @@ void SpaceBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
       uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       do {
         const size_t shift = CLZ(w);
-        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj =
+            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         (*callback)(obj, arg);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       } while (w != 0);

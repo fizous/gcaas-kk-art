@@ -201,8 +201,9 @@ class SpaceBitmap {
  private:
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
-  SpaceBitmap(const std::string& name, MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
-              const void* heap_begin, BitMapMemberMetaData* fields_addr = NULL);
+  SpaceBitmap(const std::string& name, MemMap* mem_map, word* bitmap_begin,
+              size_t bitmap_size, const void* heap_begin,
+              BitMapMemberMetaData* fields_addr = NULL);
 
 
   bool Modify(const mirror::Object* obj, bool do_set);
