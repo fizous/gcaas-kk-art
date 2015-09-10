@@ -201,7 +201,7 @@ CardTable* CardTable::ShareCardTable(CardTable* orig_card_table,
   byte* original_begin = orig_card_table->GetBegin();
   size_t origi_size = orig_card_table->GetSize();
   const byte* heap_begin = orig_card_table->GetHeapBegin();
-
+  orig_card_table->DumpCardTable(LOG(ERROR));
   orig_card_table->GetMemMap()->UnMapAtEnd(orig_card_table->GetBegin());
 
   //free(orig_card_table);//->mem_map_.reset();
@@ -232,10 +232,12 @@ CardTable* CardTable::ShareCardTable(CardTable* orig_card_table,
     biased_begin += offset;
   }
 
-  orig_card_table->DumpCardTable(LOG(ERROR));
 
-  return new CardTable(shared_mem_map.release(), biased_begin, offset,
+
+  CardTable* newCardTable = new CardTable(shared_mem_map.release(), biased_begin, offset,
       heap_begin, &card_meta_memory->card_table_fields_);
+  newCardTable->DumpCardTable(LOG(ERROR));
+  return newCardTable;
 }
 
 //CardTable::CardTable(MemMap* mem_map, byte* biased_begin, size_t offset,
