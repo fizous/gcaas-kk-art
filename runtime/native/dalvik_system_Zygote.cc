@@ -604,7 +604,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
             (strcmp(se_name_c_str, "com.android.launcher") == 0);
 
         _shouldBlankGCService =
-            (strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") != 0)
+            (strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") != 0);
 			}
 
 			rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
