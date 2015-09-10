@@ -79,12 +79,12 @@ void GCService::initServiceMetaData(GCServiceMetaData* metaData) {
 
 }
 
-void GCService::GCPRegisterWithGCService(bool isSystemServer) {
+void GCService::GCPRegisterWithGCService(bool blockGCService) {
   if(service_ == NULL)
     return;
   Thread* self = Thread::Current();
-  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() << (isSystemServer? "; system is server" : ";system is not server");
-  GCServiceClient::InitClient(isSystemServer);
+  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() << (blockGCService? "; GCService blocked" : ";GCService is not server");
+  GCServiceClient::InitClient(blockGCService);
   GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
 }
 

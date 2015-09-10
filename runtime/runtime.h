@@ -400,7 +400,7 @@ class Runtime {
 
   void SetStatsEnabled(bool new_state);
 
-  bool PreZygoteFork(bool isSystemServer, bool initProfiler = true);
+  bool PreZygoteFork(bool skipGCService, bool initProfiler = true);
   bool PostZygoteFork();
   bool InitZygote();
   void DidForkFromZygote();

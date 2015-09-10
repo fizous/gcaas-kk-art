@@ -423,7 +423,7 @@ class Heap {
   void ShareHeapForGCService(SharedHeapMetada* shared_heap_mem);
 
   void SetZygoteProtection(void);
-  void HeapPrepareZygoteSpace(Thread*);
+  void HeapPrepareZygoteSpace(Thread*, bool flushAllocStk);
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

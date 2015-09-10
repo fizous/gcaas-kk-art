@@ -1196,16 +1196,17 @@ void Heap::SetZygoteProtection(void) {
 
 
 void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
-  Thread* self = Thread::Current();
-  {
-    // Flush the alloc stack.
-    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-    FlushAllocStack();
-  }
+//  Thread* self = Thread::Current();
+//  {
+//    // Flush the alloc stack.
+//    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
+//    FlushAllocStack();
+//  }
 
 //  accounting::CardTable* cardTbl = GetCardTable();
 //  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
-
+  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
+      &shared_heap_mem->card_table_meta_));
   space::DlMallocSpace* zygote_space = alloc_space_;
   alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
       &shared_heap_mem->alloc_space_meta_);
@@ -1218,8 +1219,7 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
 
   zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
 
-  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
-      &shared_heap_mem->card_table_meta_));
+
   //  SetZygoteProtection();
  // GCSERV_CLIENT_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
@@ -1230,8 +1230,8 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
 
 
 
-void Heap::HeapPrepareZygoteSpace(Thread* self) {
-  {
+void Heap::HeapPrepareZygoteSpace(Thread* self, bool flushAllocStk) {
+  if(flushAllocStk) {
     // Flush the alloc stack.
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
     FlushAllocStack();
@@ -1243,20 +1243,10 @@ void Heap::HeapPrepareZygoteSpace(Thread* self) {
   alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");//GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
-  // Change the GC retention policy of the zygote space to only collect when full.
-
-
-//  if(gcservice::GCService::SetZygoteSpaceProtection()) {
-//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space to read only succeeded";
-//    zygote_space->SetMemoryProtection();
-//    GCSERV_ZYGOTE_ILOG << "done protection of zygote space to read only succeeded";
-//  } else {
-//    GCSERV_ZYGOTE_ILOG << "set protection of zygote space is not needed";
-//  }
-
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
   AddContinuousSpace(alloc_space_);
   have_zygote_space_ = true;
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+
   //SetZygoteProtection();
  //fizo:
   //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
@@ -1270,7 +1260,7 @@ void Heap::PreZygoteForkGCService() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
   //fizo:CollectGarbage(false);
-  CollectGarbageForZygoteFork(true);
+  CollectGarbageForZygoteFork(false);
   Trim();
   Thread* self = Thread::Current();
   MutexLock mu(self, zygote_creation_lock_);
@@ -1303,14 +1293,13 @@ void Heap::PostZygoteForkGCService() {
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " <<
       PrettySize(alloc_space_->Size());
 
-  HeapPrepareZygoteSpace(self);
+  HeapPrepareZygoteSpace(self, false);
 }
 
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
-  //fizo:CollectGarbage(false);
-  CollectGarbage(true);
+  CollectGarbage(false);
   Thread* self = Thread::Current();
   MutexLock mu(self, zygote_creation_lock_);
 
@@ -1319,10 +1308,10 @@ void Heap::PreZygoteFork() {
     GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
     return;
   }
-  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
+  GCSERV_CLIENT_ILOG << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
 
-  HeapPrepareZygoteSpace(self);
+  HeapPrepareZygoteSpace(self, true);
 }
 
 void Heap::FlushAllocStack() {
@@ -1331,7 +1320,8 @@ void Heap::FlushAllocStack() {
   allocation_stack_->Reset();
 }
 
-void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
+void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap,
+                          accounting::SpaceSetMap* large_objects,
                           accounting::ObjectStack* stack) {
   mirror::Object** limit = stack->End();
   for (mirror::Object** it = stack->Begin(); it != limit; ++it) {

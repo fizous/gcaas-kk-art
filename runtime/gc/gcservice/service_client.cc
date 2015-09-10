@@ -27,9 +27,9 @@ void GCServiceClient::FinalizeInitClient() {
     service_client_->FinalizeHeapAfterInit();
   }
 }
-void GCServiceClient::InitClient(bool isSystemServer) {
+void GCServiceClient::InitClient(bool blockGCService) {
   Thread* self = Thread::Current();
-  if(isSystemServer) {
+  if(blockGCService) {
     Runtime* runtime = Runtime::Current();
     gc::Heap* heap = runtime->GetHeap();
     heap->PostZygoteForkGCService();
