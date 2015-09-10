@@ -410,8 +410,10 @@ bool MemMap::ProtectModifiedMMAP(int prot) {
 
 
 void MemMap::UnMapAtEnd(byte* new_end) {
-  if(Size() == 0)
-    return;
+//Fizo:
+ //Remove the check of size zero when unmapping
+//  if(Size() == 0)
+//    return;
   DCHECK_GE(new_end, Begin());
   DCHECK_LE(new_end, End());
   size_t unmap_size = End() - new_end;
