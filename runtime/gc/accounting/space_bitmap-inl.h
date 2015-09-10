@@ -58,6 +58,7 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
                                    const Visitor& visitor) const {
   //Fizo
   //D
+  if(gcservice::GCService::IsProcessRegistered())
   CHECK_LT(visit_begin, visit_end);
   const size_t bit_index_start = (visit_begin - HeapBegin()) / kAlignment;
   const size_t bit_index_end = (visit_end - HeapBegin() - 1) / kAlignment;
@@ -66,8 +67,9 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
   size_t word_end = bit_index_end / kBitsPerWord;
   //fizo
   //D
-  CHECK_LT(word_end * kWordSize, Size());
-
+  if(gcservice::GCService::IsProcessRegistered())
+    CHECK_LT(word_end * kWordSize, Size());
+  DCHECK_LT(word_end * kWordSize, Size());
   // Trim off left_bits of left bits.
   size_t edge_word = Begin()[word_start];
 

@@ -167,6 +167,8 @@ void SpaceBitmap::Clear() {
 }
 
 void SpaceBitmap::CopyFrom(SpaceBitmap* source_bitmap) {
+  if(gcservice::GCService::IsProcessRegistered())
+    CHECK_EQ(Size(), source_bitmap->Size());
   DCHECK_EQ(Size(), source_bitmap->Size());
   std::copy(source_bitmap->Begin(), source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
 }
@@ -230,6 +232,7 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
                            const SpaceBitmap& mark_bitmap,
                            uintptr_t sweep_begin, uintptr_t sweep_end,
                            SpaceBitmap::SweepCallback* callback, void* arg) {
+
   CHECK(live_bitmap.Begin() != NULL);
   CHECK(mark_bitmap.Begin() != NULL);
   CHECK_EQ(live_bitmap.HeapBegin(), mark_bitmap.HeapBegin());

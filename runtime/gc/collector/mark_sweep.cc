@@ -788,8 +788,16 @@ class CardScanTask : public MarkStackTask<false> {
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
     accounting::CardTable* card_table = mark_sweep_->GetHeap()->GetCardTable();
+    if(gcservice::GCService::IsProcessRegistered()) {
+      GCSERV_CLIENT_ILOG << "Parallel start scanning cards " << reinterpret_cast<void*>(begin_) << " - "
+          << reinterpret_cast<void*>(end_);
+    }
     size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
     mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
+    if(gcservice::GCService::IsProcessRegistered()) {
+      GCSERV_CLIENT_ILOG << "Parallel done scanning cards " << reinterpret_cast<void*>(begin_) << " - "
+          << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
+    }
     VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
         << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
     // Finish by emptying our local mark stack.
