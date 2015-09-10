@@ -76,10 +76,10 @@ class ImageSpace : public MemMapSpace {
 
   void Dump(std::ostream& os) const;
 
-  //Fizo
-  bool IsSpaceImmuned(void) {
-    return true;
-  }
+//  //Fizo
+//  bool IsSpaceImmuned(void) {
+//    return true;
+//  }
 
  private:
   // Tries to initialize an ImageSpace from the given image path,

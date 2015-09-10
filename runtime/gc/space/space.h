@@ -98,7 +98,7 @@ class Space {
   // The kind of space this: image, alloc, zygote, large object.
   virtual SpaceType GetType() const = 0;
 
-  virtual bool IsSpaceImmuned(void) {return false;}
+//  virtual bool IsSpaceImmuned(void) {return false;}
   // Is this an image space, ie one backed by a memory mapped image file.
   bool IsImageSpace() const {
     return GetType() == kSpaceTypeImageSpace;
@@ -134,13 +134,13 @@ class Space {
   void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
     gc_retention_policy_ = gc_retention_policy;
   }
-  void SetSpaceType(SpaceType newType) {
-    spaceType_ = newType;
-  }
-
-  SpaceType GetSpaceType() {
-    return spaceType_;
-  }
+//  void SetSpaceType(SpaceType newType) {
+//    spaceType_ = newType;
+//  }
+//
+//  SpaceType GetSpaceType() {
+//    return spaceType_;
+//  }
   // Name of the space that may vary due to the Zygote fork.
   std::string name_;
 
@@ -149,8 +149,8 @@ class Space {
   // of Zygote forking.
   GcRetentionPolicy gc_retention_policy_;
 
-  //Fizo: add type for sygote space...
-  SpaceType spaceType_;
+//  //Fizo: add type for sygote space...
+//  SpaceType spaceType_;
 
   friend class art::gc::Heap;
 

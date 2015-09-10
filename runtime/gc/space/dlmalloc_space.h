@@ -46,13 +46,13 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
       return kSpaceTypeAllocSpace;
     }
   }
-//Fizo
-  bool IsSpaceImmuned(void) {
-    if(GetSpaceType() == kSpaceTypeZygoteSpace) {
-      return GetGcRetentionPolicy() == kGcRetentionPolicyNeverCollect;
-    }
-    return false;
-  }
+////Fizo
+//  bool IsSpaceImmuned(void) {
+//    if(GetSpaceType() == kSpaceTypeZygoteSpace) {
+//      return GetGcRetentionPolicy() == kGcRetentionPolicyNeverCollect;
+//    }
+//    return false;
+//  }
 
   //Fizo:
   bool SetMemoryProtection(void);

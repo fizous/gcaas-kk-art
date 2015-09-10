@@ -352,7 +352,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
   // Protect memory beyond the initial size.
   byte* end = shared_mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
-    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
+    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+        alloc_space_name);
   }
 //  //Fizo: make space types
 //  SetSpaceType(kSpaceTypeZygoteSpace);
