@@ -263,12 +263,12 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
 }
 
 void DlMallocSpace::SwapBitmaps() {
-//  accounting::SpaceBitmap::SwitchBitmaps(live_bitmap_.get(), mark_bitmap_.get());
-  live_bitmap_.swap(mark_bitmap_);
-//  // Swap names to get more descriptive diagnostics.
-  std::string temp_name(live_bitmap_->GetName());
-  live_bitmap_->SetName(mark_bitmap_->GetName());
-  mark_bitmap_->SetName(temp_name);
+  accounting::SpaceBitmap::SwitchBitmaps(live_bitmap_.get(), mark_bitmap_.get());
+//  live_bitmap_.swap(mark_bitmap_);
+////  // Swap names to get more descriptive diagnostics.
+//  std::string temp_name(live_bitmap_->GetName());
+//  live_bitmap_->SetName(mark_bitmap_->GetName());
+//  mark_bitmap_->SetName(temp_name);
 }
 
 mirror::Object* DlMallocSpace::Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated) {

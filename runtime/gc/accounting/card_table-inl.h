@@ -44,6 +44,10 @@ static inline bool byte_cas(byte old_value, byte new_value, byte* address) {
 template <typename Visitor>
 inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_end,
                               const Visitor& visitor, const byte minimum_age) const {
+#if ART_GC_PROFILER_SERVICE
+  CHECK(bitmap->HasAddress(scan_begin));
+  CHECK(bitmap->HasAddress(scan_end - 1));  // scan_end is the byte after the last byte we scan.
+#endif
   DCHECK(bitmap->HasAddress(scan_begin));
   DCHECK(bitmap->HasAddress(scan_end - 1));  // scan_end is the byte after the last byte we scan.
   byte* card_cur = CardFromAddr(scan_begin);
@@ -202,6 +206,13 @@ inline byte* CardTable::CardFromAddr(const void *addr) const {
 }
 
 inline void CardTable::CheckCardValid(byte* card) const {
+
+#if ART_GC_PROFILER_SERVICE
+  CHECK(IsValidCard(card))
+      << " card_addr: " << reinterpret_cast<const void*>(card)
+      << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
+      << " end: " << reinterpret_cast<void*>(GetEnd());
+#endif
   DCHECK(IsValidCard(card))
       << " card_addr: " << reinterpret_cast<const void*>(card)
       << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
