@@ -533,7 +533,8 @@ void* DlMallocSpace::MoreCore(intptr_t increment) {
   lock_.AssertHeld(Thread::Current());
   byte* original_end = end_;
   if (increment != 0) {
-    GCSERV_ZYGOTE_ILOG << "DlMallocSpace::MoreCore " << PrettySize(increment);
+    if(gcservice::GCService::IsProcessRegistered())
+      GCSERV_ZYGOTE_ILOG << "DlMallocSpace::MoreCore " << PrettySize(increment);
     VLOG(heap) << "DlMallocSpace::MoreCore " << PrettySize(increment);
     byte* new_end = original_end + increment;
     if (increment > 0) {

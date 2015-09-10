@@ -92,6 +92,10 @@ void GCService::GCPRegisterWithGCService(bool blockGCService) {
 }
 
 
+
+bool GCService::IsProcessRegistered() {
+  return GCServiceClient::service_client_ != NULL;
+}
 void GCService::GCPFinalizeHeapAfterInit(void) {
   if(service_ == NULL)
     return;
