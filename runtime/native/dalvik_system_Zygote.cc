@@ -525,7 +525,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 	pid_t pid = fork();
 
 	if (pid == 0) {
-	  bool _shouldBlankGCService = is_system_server;
+	  bool _shouldBlankGCService = true;//is_system_server;
 	  GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: child: " << getpid();
 	  //runtime->PostZygoteFork();
 
@@ -602,6 +602,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 				GCMMP_VLOG(INFO) << "---GCService: se_name  is " << se_name_c_str;
         _shouldBlankGCService = _shouldBlankGCService ||
             (strcmp(se_name_c_str, "com.android.launcher") == 0);
+
+        _shouldBlankGCService =
+            (strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") != 0)
 			}
 
 			rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
