@@ -167,7 +167,7 @@ void GCService::PreZygoteFork(void) {
 
   MutexLock mu(self, zygote_creation_lock_);
 
-  _heap->HeapPrepareZygoteSpace(self);
+  _heap->HeapPrepareZygoteSpace(self, false);
 
   GCService::zygoteHeapInitialized = 1;
 
