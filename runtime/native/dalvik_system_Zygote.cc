@@ -588,7 +588,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 				se_info.reset(new ScopedUtfChars(env, java_se_info));
 				se_info_c_str = se_info->c_str();
 				CHECK(se_info_c_str != NULL);
-				//GCMMP_VLOG(INFO) << "---GCService: se_info is " << se_info_c_str;
+				GCMMP_VLOG(INFO) << "---GCService: se_info is " << se_info_c_str;
 			}
 			const char* se_name_c_str = NULL;
 			UniquePtr<ScopedUtfChars> se_name;
@@ -596,7 +596,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 				se_name.reset(new ScopedUtfChars(env, java_se_name));
 				se_name_c_str = se_name->c_str();
 				CHECK(se_name_c_str != NULL);
-				//GCMMP_VLOG(INFO) << "---GCService: se_name  is " << se_name_c_str;
+				GCMMP_VLOG(INFO) << "---GCService: se_name  is " << se_name_c_str;
 			}
 
 			rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);

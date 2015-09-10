@@ -849,7 +849,8 @@ void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
         mark_stack_->PopBackCount(static_cast<int32_t>(mark_stack_increment));
         DCHECK_EQ(mark_stack_end, mark_stack_->End());
         // Add the new task to the thread pool.
-        auto* task = new CardScanTask(thread_pool, this, space->GetMarkBitmap(), card_begin,
+        auto* task = new CardScanTask(thread_pool, this, space->GetMarkBitmap(),
+                                      card_begin,
                                       card_begin + card_increment, minimum_age,
                                       mark_stack_increment, mark_stack_end);
         thread_pool->AddTask(self, task);

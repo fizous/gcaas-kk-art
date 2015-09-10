@@ -129,7 +129,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
         reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
     UniquePtr<MemMap>
       shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_/*, MAP_PRIVATE*/));
+          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_, MAP_PRIVATE));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
