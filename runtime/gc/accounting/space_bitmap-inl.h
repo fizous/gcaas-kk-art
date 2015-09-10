@@ -60,8 +60,16 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
                                    const Visitor& visitor) const {
   //Fizo
   //D
-  if(gcservice::GCService::IsProcessRegistered())
-  CHECK_LT(visit_begin, visit_end);
+  if(gcservice::GCService::IsProcessRegistered()) {
+    CHECK_LT(visit_begin, visit_end);
+    GCSERV_CLIENT_ILOG << "SpaceBitmap::VisitMarkedRange --> " <<
+
+        StringPrintf("%s: %p-%p", name_.c_str(),
+                              reinterpret_cast<void*>(visit_begin),
+                              reinterpret_cast<void*>(visit_end));
+
+
+  }
   const size_t bit_index_start = (visit_begin - HeapBegin()) / kAlignment;
   const size_t bit_index_end = (visit_end - HeapBegin() - 1) / kAlignment;
 

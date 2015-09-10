@@ -919,6 +919,15 @@ void MarkSweep::VerifyImageRoots() {
       uintptr_t end = reinterpret_cast<uintptr_t>(image_space->End());
       accounting::SpaceBitmap* live_bitmap = image_space->GetLiveBitmap();
       DCHECK(live_bitmap != NULL);
+      if(gcservice::GCService::IsProcessRegistered()) {
+        GCSERV_CLIENT_ILOG << "MarkSweep::VerifyImageRoots --> " <<
+
+            StringPrintf("%s: %p-%p", live_bitmap->GetName(),
+                                  reinterpret_cast<void*>(begin),
+                                  reinterpret_cast<void*>(end));
+
+
+      }
       live_bitmap->VisitMarkedRange(begin, end, [this](const Object* obj) {
         if (kCheckLocks) {
           Locks::heap_bitmap_lock_->AssertSharedHeld(Thread::Current());
@@ -953,6 +962,15 @@ class RecursiveMarkTask : public MarkStackTask<false> {
   // Scans all of the objects
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
+    if(gcservice::GCService::IsProcessRegistered()) {
+      GCSERV_CLIENT_ILOG << "RecursiveMarkTask::Run --> " <<
+
+          StringPrintf("%s: %p-%p", "inside internal class",
+                                reinterpret_cast<void*>(begin_),
+                                reinterpret_cast<void*>(end_));
+
+
+    }
     bitmap_->VisitMarkedRange(begin_, end_, visitor);
     // Finish by emptying our local mark stack.
     MarkStackTask::Run(self);
@@ -1021,6 +1039,15 @@ void MarkSweep::RecursiveMark() {
           // This function does not handle heap end increasing, so we must use the space end.
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
+          if(gcservice::GCService::IsProcessRegistered()) {
+            GCSERV_CLIENT_ILOG << "SpaceBitmap::VisitMarkedRange --> " <<
+
+                StringPrintf("%s: %p-%p", current_mark_bitmap_->GetName(),
+                                      reinterpret_cast<void*>(begin),
+                                      reinterpret_cast<void*>(end));
+
+
+          }
           current_mark_bitmap_->VisitMarkedRange(begin, end, scan_visitor);
         }
       }
