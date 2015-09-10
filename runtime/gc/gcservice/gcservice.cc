@@ -104,6 +104,11 @@ void GCService::launchProcess(void) {
 
 
 gc::collector::GcType GCService::FilterCollectionType(gc::collector::GcType gcType) {
+  if(GCServiceClient::service_client_) {
+    if(gcType == gc::collector::kGcTypeFull) {
+      return gc::collector::kGcTypePartial;
+    }
+  }
 //  if(GCService::zygoteHeapInitialized == 1) {
 //    if(gcType == gc::collector::kGcTypeFull) {
 //      return gc::collector::kGcTypePartial;
