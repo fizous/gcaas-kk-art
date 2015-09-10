@@ -20,6 +20,8 @@
 #include "base/logging.h"
 #include "cutils/atomic-inline.h"
 #include "utils.h"
+#include "gc/gcservice/gcservice.h"
+
 
 namespace art {
 namespace gc {
