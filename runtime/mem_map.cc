@@ -70,11 +70,32 @@ static void CheckMapRequest(byte* addr, size_t byte_count) {
 static void CheckMapRequest(byte*, size_t) { }
 #endif
 
+static void CheckGCServiceMapRequest(byte* addr, size_t byte_count) {
+  if (addr == NULL) {
+    return;
+  }
+
+  uint32_t base = reinterpret_cast<size_t>(addr);
+  uint32_t limit = base + byte_count;
+
+  map_info_t* map_info_list = load_map_info_list(getpid());
+  for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
+    CHECK(!(base >= m->start && base < m->end)     // start of new within old
+        && !(limit > m->start && limit < m->end)   // end of new within old
+        && !(base <= m->start && limit > m->end))  // start/end of new includes all of old
+        << StringPrintf("Requested region 0x%08x-0x%08x overlaps with existing map 0x%08x-0x%08x (%s)\n",
+                        base, limit,
+                        static_cast<uint32_t>(m->start), static_cast<uint32_t>(m->end), m->name)
+        << map_info_list;
+  }
+  free_map_info_list(map_info_list);
+}
+
 MemMap* MemMap::MapSharedMemoryWithMeta(const char* name, byte* addr,
     size_t byte_count, int prot, SharedMemMapMeta* metadata, int flagsParam) {
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
-
+  CheckGCServiceMapRequest(addr, page_aligned_byte_count);
   int fileDescriptor = -1;
 #ifdef USE_ASHMEM
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
