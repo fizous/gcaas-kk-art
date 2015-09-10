@@ -141,7 +141,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
 
 // Clean up any resources associated with the bitmap.
 SpaceBitmap::~SpaceBitmap() {
-  LOG(ERROR) << "Destroying Bitmap: " << name;
+  LOG(ERROR) << "Destroying Bitmap: " << name_;
  // if(allocated_memory_)
  //   free(bitmap_meta_data_);
 }
