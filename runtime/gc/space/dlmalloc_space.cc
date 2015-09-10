@@ -162,7 +162,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
     freed.first = nullptr;
     freed.second = nullptr;
   }
-  SetSpaceType(kSpaceTypeAllocSpace);
+//  SetSpaceType(kSpaceTypeAllocSpace);
 }
 
 
@@ -361,7 +361,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
           end_, end, growth_limit, space_meta_addr);
 
-  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
+//  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
@@ -412,7 +412,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
-  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
+//  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
