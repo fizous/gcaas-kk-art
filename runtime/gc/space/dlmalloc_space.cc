@@ -409,7 +409,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
   //Fizo: make space types
-  SetSpaceType(kSpaceTypeZygoteSpace);
+//  SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
 //  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);

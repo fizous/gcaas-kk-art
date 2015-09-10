@@ -1203,8 +1203,6 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
     FlushAllocStack();
   }
 
-  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
-      &shared_heap_mem->card_table_meta_));
 //  accounting::CardTable* cardTbl = GetCardTable();
 //  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
 
@@ -1219,6 +1217,9 @@ void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
 
 
   zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+
+  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
+      &shared_heap_mem->card_table_meta_));
   //  SetZygoteProtection();
  // GCSERV_CLIENT_ILOG << "make zygote non collectable";
   // Reset the cumulative loggers since we now have a few additional timing phases.
