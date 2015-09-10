@@ -1352,6 +1352,9 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
   Locks::mutator_lock_->AssertNotHeld(self);
 
+  LOG(WARNING) << "Performing GC by tid: " << self->GetTid() <<
+      " With specs: "<< gc_cause_and_type_strings[gc_cause][gc_type];
+
   if (self->IsHandlingStackOverflow()) {
     LOG(WARNING) << "Performing GC on a thread that is handling a stack overflow.";
   }
