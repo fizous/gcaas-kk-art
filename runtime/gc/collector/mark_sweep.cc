@@ -922,7 +922,7 @@ void MarkSweep::VerifyImageRoots() {
       if(gcservice::GCService::IsProcessRegistered()) {
         GCSERV_CLIENT_ILOG << "MarkSweep::VerifyImageRoots --> " <<
 
-            StringPrintf("%s: %p-%p", live_bitmap->GetName(),
+            StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
                                   reinterpret_cast<void*>(begin),
                                   reinterpret_cast<void*>(end));
 
@@ -1042,7 +1042,7 @@ void MarkSweep::RecursiveMark() {
           if(gcservice::GCService::IsProcessRegistered()) {
             GCSERV_CLIENT_ILOG << "SpaceBitmap::VisitMarkedRange --> " <<
 
-                StringPrintf("%s: %p-%p", current_mark_bitmap_->GetName(),
+                StringPrintf("%s: %p-%p", current_mark_bitmap_->GetName().c_str(),
                                       reinterpret_cast<void*>(begin),
                                       reinterpret_cast<void*>(end));
 
