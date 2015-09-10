@@ -210,7 +210,7 @@ void ModUnionTableReferenceCache::Verify() {
       if(gcservice::GCService::IsProcessRegistered()) {
         GCSERV_CLIENT_ILOG << "ModUnionTableReferenceCache::Verify --> " <<
 
-            StringPrintf("%s: %p-%p", live_bitmap->GetName(),
+            StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
                                   reinterpret_cast<void*>(start),
                                   reinterpret_cast<void*>(end));
 
@@ -261,7 +261,7 @@ void ModUnionTableReferenceCache::Update() {
     if(gcservice::GCService::IsProcessRegistered()) {
       GCSERV_CLIENT_ILOG << "ModUnionTableReferenceCache::Update --> " <<
 
-          StringPrintf("%s: %p-%p", live_bitmap->GetName(),
+          StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
                                 reinterpret_cast<void*>(start),
                                 reinterpret_cast<void*>(end));
 
@@ -325,7 +325,7 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
     if(gcservice::GCService::IsProcessRegistered()) {
       GCSERV_CLIENT_ILOG << "ModUnionTableCardCache::MarkReferences --> " <<
 
-          StringPrintf("%s: %p-%p", bitmap->GetName(),
+          StringPrintf("%s: %p-%p", bitmap->GetName().c_str(),
                                 reinterpret_cast<void*>(start),
                                 reinterpret_cast<void*>(end));
 
