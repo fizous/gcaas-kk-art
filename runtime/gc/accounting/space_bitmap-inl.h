@@ -56,13 +56,17 @@ inline bool SpaceBitmap::Test(const mirror::Object* obj) const {
 template <typename Visitor>
 void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
                                    const Visitor& visitor) const {
-  DCHECK_LT(visit_begin, visit_end);
+  //Fizo
+  //D
+  CHECK_LT(visit_begin, visit_end);
   const size_t bit_index_start = (visit_begin - HeapBegin()) / kAlignment;
   const size_t bit_index_end = (visit_end - HeapBegin() - 1) / kAlignment;
 
   size_t word_start = bit_index_start / kBitsPerWord;
   size_t word_end = bit_index_end / kBitsPerWord;
-  DCHECK_LT(word_end * kWordSize, Size());
+  //fizo
+  //D
+  CHECK_LT(word_end * kWordSize, Size());
 
   // Trim off left_bits of left bits.
   size_t edge_word = Begin()[word_start];
