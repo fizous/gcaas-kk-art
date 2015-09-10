@@ -525,6 +525,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 	pid_t pid = fork();
 
 	if (pid == 0) {
+	  bool _shouldBlankGCService = is_system_server;
 	  GCMMP_VLOG(INFO) << "GCMMP: ForkAndSpecializeCommon: child: " << getpid();
 	  //runtime->PostZygoteFork();
 
@@ -589,6 +590,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 				se_info_c_str = se_info->c_str();
 				CHECK(se_info_c_str != NULL);
 				GCMMP_VLOG(INFO) << "---GCService: se_info is " << se_info_c_str;
+				_shouldBlankGCService = _shouldBlankGCService ||
+				    (strcmp(se_info_c_str, "platform") == 0);
 			}
 			const char* se_name_c_str = NULL;
 			UniquePtr<ScopedUtfChars> se_name;
@@ -611,15 +614,17 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 		UNUSED(java_se_info);
 		UNUSED(java_se_name);
 #endif
-
+		if(_shouldBlankGCService) {
+		  GCMMP_VLOG(INFO) << "GCMMP: skip registration GCService  <child>: " << getpid();
+		}
 		// Our system thread ID, etc, has changed so reset Thread state.
 		self->InitAfterFork();
 		//if(!is_system_server)
-		GCP_REGISTER_PROC_FOR_GCSERVICE(runtime, is_system_server);
+		GCP_REGISTER_PROC_FOR_GCSERVICE(runtime, _shouldBlankGCService);
 		EnableDebugFeatures(debug_flags);
 		UnsetSigChldHandler();
 		runtime->DidForkFromZygote();
-		if(!is_system_server)
+		if(!_shouldBlankGCService)
 		  GCP_SERVICE_FINALIZE_INIT;
 	} else if (pid > 0) {
 		// the parent process
