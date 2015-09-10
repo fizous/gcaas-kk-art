@@ -58,7 +58,8 @@ void GCService::GCPBlockForServiceReady(void) {
   }
   service_->_Cond()->Broadcast(self);
 
-  GCSERV_ZYGOTE_ILOG << self->GetTid() << " : done with blocking until service completion";
+  GCSERV_ZYGOTE_ILOG << self->GetTid() <<
+      " : done with blocking until service completion";
 }
 
 void GCService::initServiceMetaData(GCServiceMetaData* metaData) {
@@ -83,9 +84,11 @@ void GCService::GCPRegisterWithGCService(bool blockGCService) {
   if(service_ == NULL)
     return;
   Thread* self = Thread::Current();
-  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() << (blockGCService? "; GCService blocked" : ";GCService is not server");
+  GCSERV_CLIENT_ILOG << " +++Registering for GCService+++ " << self->GetTid() <<
+      (blockGCService? "; GCService blocked" : ";GCService is not server");
   GCServiceClient::InitClient(blockGCService);
-  GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " << self->GetTid();
+  GCSERV_CLIENT_ILOG << " +++Done registering for GCService+++ " <<
+      self->GetTid();
 }
 
 

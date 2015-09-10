@@ -445,9 +445,9 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->is_zygote_ = false;
   parsed->interpreter_only_ = false;
   parsed->is_concurrent_gc_enabled_ = true;
-#if ART_GC_PROFILER_SERVICE
-  parsed->is_concurrent_gc_enabled_ = false;
-#endif
+//#if ART_GC_PROFILER_SERVICE
+//  parsed->is_concurrent_gc_enabled_ = false;
+//#endif
   parsed->is_explicit_gc_disabled_ = false;
 
   parsed->long_pause_log_threshold_ = gc::Heap::kDefaultLongPauseLogThreshold;

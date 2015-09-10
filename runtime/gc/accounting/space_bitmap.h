@@ -128,14 +128,16 @@ class SpaceBitmap {
   };
 
   template <typename Visitor>
-  void VisitRange(uintptr_t visit_begin, uintptr_t visit_end, const Visitor& visitor) const {
+  void VisitRange(uintptr_t visit_begin, uintptr_t visit_end,
+      const Visitor& visitor) const {
     for (; visit_begin < visit_end; visit_begin += kAlignment) {
       visitor(reinterpret_cast<mirror::Object*>(visit_begin));
     }
   }
 
   template <typename Visitor>
-  void VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end, const Visitor& visitor) const
+  void VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
+      const Visitor& visitor) const
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
@@ -145,8 +147,9 @@ class SpaceBitmap {
   void InOrderWalk(Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
-  static void SweepWalk(const SpaceBitmap& live, const SpaceBitmap& mark, uintptr_t base,
-                        uintptr_t max, SweepCallback* thunk, void* arg);
+  static void SweepWalk(const SpaceBitmap& live, const SpaceBitmap& mark,
+                        uintptr_t base, uintptr_t max, SweepCallback* thunk,
+                        void* arg);
 
   void CopyFrom(SpaceBitmap* source_bitmap);
 
