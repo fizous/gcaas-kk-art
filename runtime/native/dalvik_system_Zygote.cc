@@ -600,6 +600,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 				se_name_c_str = se_name->c_str();
 				CHECK(se_name_c_str != NULL);
 				GCMMP_VLOG(INFO) << "---GCService: se_name  is " << se_name_c_str;
+        _shouldBlankGCService = _shouldBlankGCService ||
+            (strcmp(se_name_c_str, "com.android.launcher") == 0);
 			}
 
 			rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
