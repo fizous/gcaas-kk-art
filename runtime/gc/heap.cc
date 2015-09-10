@@ -1261,7 +1261,8 @@ void Heap::PreZygoteForkGCService() {
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
   //fizo:CollectGarbage(false);
   CollectGarbageForZygoteFork(false);
-  Trim();
+  //fizo: do not trim the heap here
+  //Trim();
   Thread* self = Thread::Current();
   MutexLock mu(self, zygote_creation_lock_);
 
