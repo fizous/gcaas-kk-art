@@ -37,7 +37,7 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
     : name_(name), bitmap_meta_data_(fields_addr),
       allocated_memory_(bitmap_meta_data_ == NULL) {
   if(allocated_memory_) {
-    bitmap_meta_data_ =
+    bitmap_meta_data_ = reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(BitMapMemberMetaData)));
     LOG(ERROR) << "*** non shared bitmap fields is at address: "
         << reinterpret_cast<void*>(bitmap_meta_data_)
