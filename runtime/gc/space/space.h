@@ -124,16 +124,16 @@ class Space {
   LargeObjectSpace* AsLargeObjectSpace();
 
   virtual ~Space() {}
-
+  virtual void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+    gc_retention_policy_ = gc_retention_policy;
+  }
 
   // Return the storage space required by obj.
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
  protected:
   Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
 
-  virtual void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
-    gc_retention_policy_ = gc_retention_policy;
-  }
+
 //  void SetSpaceType(SpaceType newType) {
 //    spaceType_ = newType;
 //  }
@@ -256,14 +256,15 @@ class ContinuousSpace : public Space {
     return (GcRetentionPolicy)space_meta_data_->gc_retention_policy_;
   }
 
+  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+    space_meta_data_->gc_retention_policy_ = (int) gc_retention_policy;
+  }
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                   byte* begin, byte* end,
                   ContinuousSpaceMemberMetaData* meta_addr = NULL);
 
-  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
-    space_meta_data_->gc_retention_policy_ = gc_retention_policy;
-  }
+
 
 
 //  // The beginning of the storage for fast access.
