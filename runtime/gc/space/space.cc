@@ -37,7 +37,7 @@ ContinuousSpace::ContinuousSpace(const std::string& name,
 
 void ContinuousSpace::SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
     GcRetentionPolicy gc_retention_policy, byte* begin, byte* end) {
-  ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, {0}};
+  ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, {}};
   memcpy(space_meta_data_, &_data,
       SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
 }
