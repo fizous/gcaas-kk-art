@@ -1040,9 +1040,10 @@ void MarkSweep::RecursiveMark() {
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
           if(gcservice::GCService::IsProcessRegistered()) {
-            GCSERV_CLIENT_ILOG << "SpaceBitmap::VisitMarkedRange --> " <<
+            GCSERV_CLIENT_ILOG << "MarkSweep::RecursiveMark --> " <<
 
-                StringPrintf("%s: %p-%p", current_mark_bitmap_->GetName().c_str(),
+                StringPrintf("%s; %s: %p-%p", space->GetName(),
+                     current_mark_bitmap_->GetName().c_str(),
                                       reinterpret_cast<void*>(begin),
                                       reinterpret_cast<void*>(end));
 
