@@ -135,7 +135,8 @@ bool DlMallocSpace::SetMemoryProtection(void) {
 DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
                 void* mspace, byte* begin, byte* end, size_t growth_limit,
                 SharedSpaceMeta* meta_addr)
-    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect, meta_addr),
+    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect,
+        meta_addr != NULL ? &meta_addr->space_data_meta_ : NULL),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
       lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
