@@ -250,6 +250,12 @@ class ContinuousSpace : public Space {
 
   static void SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
       GcRetentionPolicy gc_retention_policy, byte* begin, byte* end);
+
+  // The policy of when objects are collected associated with this space.
+  GcRetentionPolicy GetGcRetentionPolicy() const {
+    return (GcRetentionPolicy)space_meta_data_->gc_retention_policy_;
+  }
+
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                   byte* begin, byte* end,
@@ -259,10 +265,7 @@ class ContinuousSpace : public Space {
     space_meta_data_->gc_retention_policy_ = gc_retention_policy;
   }
 
-  // The policy of when objects are collected associated with this space.
-  GcRetentionPolicy GetGcRetentionPolicy() const {
-    return (GcRetentionPolicy)space_meta_data_->gc_retention_policy_;
-  }
+
 //  // The beginning of the storage for fast access.
 //  byte* const begin_;
 //
