@@ -28,23 +28,25 @@ ContinuousSpace::ContinuousSpace(const std::string& name,
                 ContinuousSpaceMemberMetaData* meta_addr) :
     Space(name, gc_retention_policy), space_meta_data_(meta_addr),
     allocated_memory_(space_meta_data_ == NULL) {
-  if(space_meta_data_ == NULL) {
+  bool allocated_memory = (space_meta_data_ == NULL);
+  if(allocated_memory) {
     space_meta_data_ =
         reinterpret_cast<ContinuousSpaceMemberMetaData*>(calloc(1,
         SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData)));
   }
-  SetContSpaceMemberData(space_meta_data_, gc_retention_policy, begin, end);
+  SetContSpaceMemberData(space_meta_data_, gc_retention_policy, begin, end, allocated_memory);
 }
 
 void ContinuousSpace::SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
-    GcRetentionPolicy gc_retention_policy, byte* begin, byte* end) {
-  if(allocated_memory_) {
+    GcRetentionPolicy gc_retention_policy, byte* begin, byte* end,
+    bool allocated_memory) {
+  if(allocated_memory) {
     ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, {{0,0,0,0,0,0},0,0,0}};
-    memcpy(space_meta_data_, &_data,
+    memcpy(address, &_data,
         SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
   } else {
     ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, address->mem_meta_};
-    memcpy(space_meta_data_, &_data,
+    memcpy(address, &_data,
         SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
   }
 }

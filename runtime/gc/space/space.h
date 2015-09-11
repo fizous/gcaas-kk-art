@@ -274,7 +274,7 @@ class ContinuousSpace : public Space {
 //  byte* end_;
 
   ContinuousSpaceMemberMetaData* space_meta_data_;
-  bool allocated_memory_;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
 };
