@@ -436,6 +436,10 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->heap_growth_limit_ = 0;  // 0 means no growth limit.
   // Default to number of processors minus one since the main GC thread also does work.
   parsed->parallel_gc_threads_ = sysconf(_SC_NPROCESSORS_CONF) - 1;
+#if ART_GC_PROFILER_SERVICE
+  parsed->parallel_gc_threads_ = 0;
+  LOG(ERROR) << "parallel_gc_threads_ = 0";
+#endif
   // Only the main GC thread, no workers.
   parsed->conc_gc_threads_ = 0;
   parsed->stack_size_ = 0;  // 0 means default.
