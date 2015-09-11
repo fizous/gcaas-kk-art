@@ -26,8 +26,7 @@ ContinuousSpace::ContinuousSpace(const std::string& name,
                 GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 ContinuousSpaceMemberMetaData* meta_addr) :
-    Space(name, gc_retention_policy), space_meta_data_(meta_addr),
-    allocated_memory_(space_meta_data_ == NULL) {
+    Space(name, gc_retention_policy), space_meta_data_(meta_addr) {
   bool allocated_memory = (space_meta_data_ == NULL);
   if(allocated_memory) {
     space_meta_data_ =
