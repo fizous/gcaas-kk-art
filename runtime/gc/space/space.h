@@ -249,7 +249,8 @@ class ContinuousSpace : public Space {
   virtual ~ContinuousSpace() {}
 
   static void SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
-      GcRetentionPolicy gc_retention_policy, byte* begin, byte* end);
+      GcRetentionPolicy gc_retention_policy, byte* begin, byte* end,
+      bool isAllocatedMemory);
 
   // The policy of when objects are collected associated with this space.
   GcRetentionPolicy GetGcRetentionPolicy() const {
