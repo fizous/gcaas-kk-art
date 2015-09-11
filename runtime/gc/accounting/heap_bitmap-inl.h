@@ -26,6 +26,16 @@ namespace accounting {
 template <typename Visitor>
 inline void HeapBitmap::Visit(const Visitor& visitor) {
   for (const auto& bitmap : continuous_space_bitmaps_) {
+    if(gcservice::GCService::IsProcessRegistered()) {
+      GCSERV_CLIENT_ILOG << "HeapBitmap::Visit --> " <<
+
+          StringPrintf("%s: %p-%p",
+              bitmap->GetName().c_str(),
+                                reinterpret_cast<void*>(bitmap->HeapBegin()),
+                                reinterpret_cast<void*>(bitmap->HeapLimit()));
+
+
+    }
     bitmap->VisitMarkedRange(bitmap->HeapBegin(), bitmap->HeapLimit(), visitor);
   }
   DCHECK(!discontinuous_space_sets_.empty());

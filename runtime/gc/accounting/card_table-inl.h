@@ -60,6 +60,16 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
   while (!IsAligned<sizeof(word)>(card_cur) && card_cur < card_end) {
     if (*card_cur >= minimum_age) {
       uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(card_cur));
+      if(gcservice::GCService::IsProcessRegistered()) {
+        GCSERV_CLIENT_ILOG << "CardTable::Scan0 --> " <<
+
+            StringPrintf("%s: %p-%p",
+                bitmap->GetName().c_str(),
+                                  reinterpret_cast<void*>(start),
+                                  reinterpret_cast<void*>(start + kCardSize));
+
+
+      }
       bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
       ++cards_scanned;
     }
@@ -89,6 +99,15 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
         auto* card = reinterpret_cast<byte*>(word_cur) + i;
         DCHECK(*card == static_cast<byte>(start_word) || *card == kCardDirty)
             << "card " << static_cast<size_t>(*card) << " word " << (start_word & 0xFF);
+        if(gcservice::GCService::IsProcessRegistered()) {
+          GCSERV_CLIENT_ILOG << "CardTable::Scan1 --> " <<
+
+              StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
+                                    reinterpret_cast<void*>(start),
+                                    reinterpret_cast<void*>(start + kCardSize));
+
+
+        }
         bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
         ++cards_scanned;
       }
@@ -103,6 +122,16 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
   while (card_cur < card_end) {
     if (*card_cur >= minimum_age) {
       uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(card_cur));
+      if(gcservice::GCService::IsProcessRegistered()) {
+        GCSERV_CLIENT_ILOG << "CardTable::Scan2 --> " <<
+
+            StringPrintf("%s: %p-%p",
+                bitmap->GetName().c_str(),
+                                  reinterpret_cast<void*>(start),
+                                  reinterpret_cast<void*>(start + kCardSize));
+
+
+      }
       bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
       ++cards_scanned;
     }
