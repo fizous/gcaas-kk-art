@@ -106,7 +106,11 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
               StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
                                     reinterpret_cast<void*>(start),
                                     reinterpret_cast<void*>(start + kCardSize));
+          GCSERV_CLIENT_ILOG << "bitmap range --> " <<
 
+              StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
+                                    reinterpret_cast<void*>(bitmap->Begin()),
+                                    reinterpret_cast<void*>(bitmap->HeapLimit()));
 
         }
         bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
