@@ -139,7 +139,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
       lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
-      growth_limit_(growth_limit), temp_bitmap_members_(NULL) {
+      growth_limit_(growth_limit) {
   CHECK(mspace != NULL);
 
   size_t bitmap_index = bitmap_index_++;

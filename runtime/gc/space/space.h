@@ -261,7 +261,7 @@ class ContinuousSpace : public Space {
 
   // The policy of when objects are collected associated with this space.
   GcRetentionPolicy GetGcRetentionPolicy() const {
-    return space_meta_data_->gc_retention_policy_;
+    return (GcRetentionPolicy)space_meta_data_->gc_retention_policy_;
   }
 //  // The beginning of the storage for fast access.
 //  byte* const begin_;
