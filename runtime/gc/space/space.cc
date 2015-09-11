@@ -15,7 +15,7 @@
  */
 
 #include "space.h"
-
+#include "gc/gcservice/common.h"
 #include "base/logging.h"
 
 namespace art {
