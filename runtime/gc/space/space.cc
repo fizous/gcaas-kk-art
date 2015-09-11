@@ -26,7 +26,8 @@ ContinuousSpace::ContinuousSpace(const std::string& name,
                 GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 ContinuousSpaceMemberMetaData* meta_addr) :
-    Space(name, gc_retention_policy), space_meta_data_(meta_addr) {
+    Space(name, gc_retention_policy), space_meta_data_(meta_addr),
+    allocated_memory_(space_meta_data_ == NULL) {
   if(space_meta_data_ == NULL) {
     space_meta_data_ =
         reinterpret_cast<ContinuousSpaceMemberMetaData*>(calloc(1,
@@ -37,9 +38,15 @@ ContinuousSpace::ContinuousSpace(const std::string& name,
 
 void ContinuousSpace::SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
     GcRetentionPolicy gc_retention_policy, byte* begin, byte* end) {
-  ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, {}};
-  memcpy(space_meta_data_, &_data,
-      SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
+  if(allocated_memory_) {
+    ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, {{0,0,0,0,0,0},0,0,0}};
+    memcpy(space_meta_data_, &_data,
+        SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
+  } else {
+    ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy, address->mem_meta_};
+    memcpy(space_meta_data_, &_data,
+        SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
+  }
 }
 
 
