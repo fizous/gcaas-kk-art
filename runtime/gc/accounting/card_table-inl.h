@@ -110,7 +110,7 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
           GCSERV_CLIENT_ILOG << "bitmap range --> " <<
 
               StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
-                                    reinterpret_cast<void*>(bitmap->Begin()),
+                                    reinterpret_cast<void*>(bitmap->HeapBegin()),
                                     reinterpret_cast<void*>(bitmap->HeapLimit()));
 
         }
