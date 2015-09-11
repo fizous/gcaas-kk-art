@@ -425,11 +425,12 @@ inline void MarkSweep::MarkObjectNonNull(const Object* obj) {
     return;
   }
 
-  // Try to take advantage of locality of references within a space, failing this find the space
-  // the hard way.
+  // Try to take advantage of locality of references within a space, failing
+  // this find the space the hard way.
   accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SpaceBitmap* new_bitmap =
+        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (LIKELY(new_bitmap != NULL)) {
       object_bitmap = new_bitmap;
     } else {
@@ -491,7 +492,8 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
   // the hard way.
   accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SpaceBitmap* new_bitmap =
+        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (new_bitmap != NULL) {
       object_bitmap = new_bitmap;
     } else {
@@ -653,8 +655,8 @@ class ScanObjectVisitor {
 template <bool kUseFinger = false>
 class MarkStackTask : public Task {
  public:
-  MarkStackTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, size_t mark_stack_size,
-                const Object** mark_stack)
+  MarkStackTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
+                size_t mark_stack_size, const Object** mark_stack)
       : mark_sweep_(mark_sweep),
         thread_pool_(thread_pool),
         mark_stack_pos_(mark_stack_size) {
@@ -1014,7 +1016,8 @@ void MarkSweep::RecursiveMark() {
         if (parallel) {
           // We will use the mark stack the future.
           // CHECK(mark_stack_->IsEmpty());
-          // This function does not handle heap end increasing, so we must use the space end.
+          // This function does not handle heap end increasing, so we must use
+          // the space end.
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
           atomic_finger_ = static_cast<int32_t>(0xFFFFFFFF);
@@ -1027,8 +1030,9 @@ void MarkSweep::RecursiveMark() {
             delta = RoundUp(delta, KB);
             if (delta < 16 * KB) delta = end - begin;
             begin += delta;
-            auto* task = new RecursiveMarkTask(thread_pool, this, current_mark_bitmap_, start,
-                                               begin);
+            auto* task =
+                new RecursiveMarkTask(thread_pool, this, current_mark_bitmap_,
+                    start, begin);
             thread_pool->AddTask(self, task);
           }
           thread_pool->SetMaxActiveWorkers(thread_count - 1);
@@ -1036,7 +1040,8 @@ void MarkSweep::RecursiveMark() {
           thread_pool->Wait(self, true, true);
           thread_pool->StopWorkers(self);
         } else {
-          // This function does not handle heap end increasing, so we must use the space end.
+          // This function does not handle heap end increasing, so we must use
+          // the space end.
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
           if(gcservice::GCService::IsProcessRegistered()) {

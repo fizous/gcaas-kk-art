@@ -92,7 +92,8 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
 
     // Find the first dirty card.
     uintptr_t start_word = *word_cur;
-    uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(reinterpret_cast<byte*>(word_cur)));
+    uintptr_t start =
+        reinterpret_cast<uintptr_t>(AddrFromCard(reinterpret_cast<byte*>(word_cur)));
     // TODO: Investigate if processing continuous runs of dirty cards with a single bitmap visit is
     // more efficient.
     for (size_t i = 0; i < sizeof(uintptr_t); ++i) {

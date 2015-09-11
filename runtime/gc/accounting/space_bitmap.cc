@@ -38,7 +38,6 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
       allocated_memory_(bitmap_meta_data_ == NULL) {
   if(allocated_memory_) {
     bitmap_meta_data_ =
-        reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(BitMapMemberMetaData)));
     LOG(ERROR) << "*** non shared bitmap fields is at address: "
         << reinterpret_cast<void*>(bitmap_meta_data_)
@@ -48,15 +47,19 @@ SpaceBitmap::SpaceBitmap(const std::string& name,
         << sizeof(SharedSpaceBitmapMeta)<<
         ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
   } else {
-    LOG(ERROR) << "*** bitmap fields is at address: " << reinterpret_cast<void*>(bitmap_meta_data_)
+    LOG(ERROR) << "*** bitmap fields is at address: " <<
+        reinterpret_cast<void*>(bitmap_meta_data_)
             << ", sizeof (BitMapMemberMetaData):"
             << sizeof(BitMapMemberMetaData)
             << ", sizeof(SharedSpaceBitmapMeta):"
             << sizeof(SharedSpaceBitmapMeta) <<
             ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
+
+
   }
   SetBitmapMemberData(bitmap_meta_data_,
       mem_map, bitmap_begin, bitmap_size, heap_begin);
+  LOG(ERROR) << "Dumping Bitmap: " << Dump();
 }
 
 void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
@@ -129,7 +132,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
         reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
     UniquePtr<MemMap>
       shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_/*, MAP_PRIVATE*/));
+          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_, MAP_PRIVATE));
     if (shared_mem_map.get() == NULL) {
       LOG(ERROR) << "Failed to allocate bitmap " << name;
       return NULL;
@@ -383,7 +386,6 @@ void SpaceSetMap::SetName(const std::string& name) {
 void SpaceSetMap::CopyFrom(const SpaceSetMap& space_set) {
   contained_ = space_set.contained_;
 }
-
 std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap) {
   return stream
     << bitmap.GetName() << "["

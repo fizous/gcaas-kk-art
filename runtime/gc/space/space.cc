@@ -22,6 +22,27 @@ namespace art {
 namespace gc {
 namespace space {
 
+ContinuousSpace::ContinuousSpace(const std::string& name,
+                GcRetentionPolicy gc_retention_policy,
+                byte* begin, byte* end,
+                ContinuousSpaceMemberMetaData* meta_addr) :
+    Space(name, gc_retention_policy), space_meta_data_(meta_addr) {
+  if(space_meta_data_ == NULL) {
+    space_meta_data_ =
+        reinterpret_cast<ContinuousSpaceMemberMetaData*>(calloc(1,
+        SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData)));
+  }
+  SetContSpaceMemberData(space_meta_data_, gc_retention_policy, begin, end);
+}
+
+void ContinuousSpace::SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
+    GcRetentionPolicy gc_retention_policy, byte* begin, byte* end) {
+  ContinuousSpaceMemberMetaData _data = {begin, end, gc_retention_policy};
+  memcpy(space_meta_data_, &_data,
+      SERVICE_ALLOC_ALIGN_BYTE(ContinuousSpaceMemberMetaData));
+}
+
+
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy)
     : name_(name), gc_retention_policy_(gc_retention_policy) { }
 

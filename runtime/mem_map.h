@@ -284,6 +284,20 @@ typedef struct BitMapMemberMetaData_S {
   const uintptr_t heap_begin_;
 } __attribute__((aligned(8)))  BitMapMemberMetaData;
 
+
+typedef struct ContinuousSpaceMemberMetaData_S {
+  // The beginning of the storage for fast access.
+  byte* const begin_;
+
+  // Current end of the space.
+  byte* end_;
+
+  int gc_retention_policy_;
+
+  SharedMemMapMeta mem_meta_;
+} __attribute__((aligned(8)))  ContinuousSpaceMemberMetaData;
+
+
 typedef struct SharedSpaceBitmapMeta_S {
   /* memory pointer to the bitmap data*/
   SharedMemMapMeta data_;
@@ -293,7 +307,7 @@ typedef struct SharedSpaceBitmapMeta_S {
 } __attribute__((aligned(8)))  SharedSpaceBitmapMeta;
 
 typedef struct SharedSpaceMeta_S {
-  SharedMemMapMeta mem_meta_;
+  ContinuousSpaceMemberMetaData space_data_meta_;
   /* data related to space bitmap */
   SharedSpaceBitmapMeta bitmap_meta_[2];
   byte* biased_begin_;

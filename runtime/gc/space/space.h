@@ -80,7 +80,7 @@ class Space {
   }
 
   // The policy of when objects are collected associated with this space.
-  GcRetentionPolicy GetGcRetentionPolicy() const {
+  virtual GcRetentionPolicy GetGcRetentionPolicy() const {
     return gc_retention_policy_;
   }
 
@@ -131,7 +131,7 @@ class Space {
  protected:
   Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
 
-  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+  virtual void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
     gc_retention_policy_ = gc_retention_policy;
   }
 //  void SetSpaceType(SpaceType newType) {
@@ -196,16 +196,37 @@ class AllocSpace {
 // continuous spaces can be marked in the card table.
 class ContinuousSpace : public Space {
  public:
+//  // Address at which the space begins
+//  byte* Begin() const {
+//    return begin_;
+//  }
+//
+//  // Address at which the space ends, which may vary as the space is filled.
+//  byte* End() const {
+//    return end_;
+//  }
+//
+//  // Current size of space
+//  size_t Size() const {
+//    return End() - Begin();
+//  }
+
+
   // Address at which the space begins
   byte* Begin() const {
-    return begin_;
+    return space_meta_data_->begin_;
   }
 
   // Address at which the space ends, which may vary as the space is filled.
   byte* End() const {
-    return end_;
+    return space_meta_data_->end_;
   }
 
+
+  // Address at which the space ends, which may vary as the space is filled.
+  void SetEnd(byte* newEnd) {
+    space_meta_data_->end_ = newEnd;
+  }
   // Current size of space
   size_t Size() const {
     return End() - Begin();
@@ -227,19 +248,28 @@ class ContinuousSpace : public Space {
 
   virtual ~ContinuousSpace() {}
 
+  static void SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
+      GcRetentionPolicy gc_retention_policy, byte* begin, byte* end);
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
-                  byte* begin, byte* end) :
-      Space(name, gc_retention_policy), begin_(begin), end_(end) {
+                  byte* begin, byte* end,
+                  ContinuousSpaceMemberMetaData* meta_addr = NULL);
+
+  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+    space_meta_data_->gc_retention_policy_ = gc_retention_policy;
   }
 
+  // The policy of when objects are collected associated with this space.
+  GcRetentionPolicy GetGcRetentionPolicy() const {
+    return space_meta_data_->gc_retention_policy_;
+  }
+//  // The beginning of the storage for fast access.
+//  byte* const begin_;
+//
+//  // Current end of the space.
+//  byte* end_;
 
-  // The beginning of the storage for fast access.
-  byte* const begin_;
-
-  // Current end of the space.
-  byte* end_;
-
+  ContinuousSpaceMemberMetaData* space_meta_data_;
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
 };
@@ -284,9 +314,10 @@ class MemMapSpace : public ContinuousSpace {
 
  protected:
   MemMapSpace(const std::string& name, MemMap* mem_map, size_t initial_size,
-              GcRetentionPolicy gc_retention_policy)
+              GcRetentionPolicy gc_retention_policy,
+              ContinuousSpaceMemberMetaData* meta_addr = NULL)
       : ContinuousSpace(name, gc_retention_policy,
-                        mem_map->Begin(), mem_map->Begin() + initial_size),
+                        mem_map->Begin(), mem_map->Begin() + initial_size, meta_addr),
         mem_map_(mem_map) {
   }
 

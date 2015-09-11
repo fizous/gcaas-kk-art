@@ -135,7 +135,7 @@ bool DlMallocSpace::SetMemoryProtection(void) {
 DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map,
                 void* mspace, byte* begin, byte* end, size_t growth_limit,
                 SharedSpaceMeta* meta_addr)
-    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
+    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect, meta_addr),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
       lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
@@ -301,7 +301,7 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   growth_limit = RoundUp(growth_limit, kPageSize);
   growth_limit_ = growth_limit;
   if (Size() > growth_limit_) {
-    end_ = begin_ + growth_limit;
+    SetEnd(Begin() + growth_limit);
   }
 }
 
@@ -311,26 +311,26 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 //collect it.
 DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
     SharedSpaceMeta* space_meta_addr) {
-  end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
-  DCHECK(IsAligned<kPageSize>(begin_));
-  DCHECK(IsAligned<kPageSize>(end_));
+  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(Begin()));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(End()));
+  DCHECK(IsAligned<kPageSize>(Begin()));
+  DCHECK(IsAligned<kPageSize>(End()));
   size_t size = RoundUp(Size(), kPageSize);
   // Trim the heap so that we minimize the size of the Zygote space.
   //Fizo we should not trim here..Instead the trim should happen only before we
   //fork the new process
   Trim();
   // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(end_);
+  GetMemMap()->UnMapAtEnd(End());
   // TODO: Not hardcode these in?
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
   const size_t capacity = Capacity() - size;
-  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(begin_) << "\n"
-             << "End " << reinterpret_cast<const void*>(end_) << "\n"
+  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+             << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << growth_limit_ << "\n"
              << "Capacity " << Capacity();
@@ -350,14 +350,14 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
       reinterpret_cast<const void*>(End());
   UniquePtr<MemMap>
     shared_mem_map(MemMap::MapSharedMemWithMetaAtAddr(alloc_space_name, End(),
-      capacity, PROT_READ | PROT_WRITE, &space_meta_addr->mem_meta_));
+      capacity, PROT_READ | PROT_WRITE, &space_meta_addr->space_data_meta_.mem_meta_));
   GCSERV_CLIENT_ILOG << "created the shared allocation space with fd: " <<
       shared_mem_map->GetFD();
 
   //UniquePtr<MemMap> mem_map(shared_mem_map->GetLocalMemMap());
 
 
-  void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
+  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = shared_mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
@@ -368,7 +368,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
 //  SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
       new DlMallocSpace(alloc_space_name, shared_mem_map.release(), mspace,
-          end_, end, growth_limit, space_meta_addr);
+          End(), end, growth_limit, space_meta_addr);
 
 //  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
@@ -383,24 +383,24 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedAcc(const char* alloc_s
 }
 
 DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
-  end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
-  DCHECK(IsAligned<kPageSize>(begin_));
-  DCHECK(IsAligned<kPageSize>(end_));
+  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(Begin()));
+  DCHECK(IsAligned<accounting::CardTable::kCardSize>(End()));
+  DCHECK(IsAligned<kPageSize>(Begin()));
+  DCHECK(IsAligned<kPageSize>(End()));
   size_t size = RoundUp(Size(), kPageSize);
   // Trim the heap so that we minimize the size of the Zygote space.
   Trim();
   // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(end_);
+  GetMemMap()->UnMapAtEnd(End());
   // TODO: Not hardcode these in?
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
   const size_t capacity = Capacity() - size;
-  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(begin_) << "\n"
-             << "End " << reinterpret_cast<const void*>(end_) << "\n"
+  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+             << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << growth_limit_ << "\n"
              << "Capacity " << Capacity();
@@ -413,7 +413,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
-  void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
+  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
@@ -422,7 +422,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   //Fizo: make space types
 //  SetSpaceType(kSpaceTypeZygoteSpace);
   DlMallocSpace* alloc_space =
-      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
+      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end, growth_limit);
 //  alloc_space->SetSpaceType(kSpaceTypeAllocSpace);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
@@ -531,7 +531,7 @@ extern "C" void* art_heap_morecore(void* mspace, intptr_t increment) {
 
 void* DlMallocSpace::MoreCore(intptr_t increment) {
   lock_.AssertHeld(Thread::Current());
-  byte* original_end = end_;
+  byte* original_end = End();
   if (increment != 0) {
     if(false && gcservice::GCService::IsProcessRegistered())
       GCSERV_ZYGOTE_ILOG << "DlMallocSpace::MoreCore " << PrettySize(increment);
@@ -556,7 +556,7 @@ void* DlMallocSpace::MoreCore(intptr_t increment) {
       CHECK_MEMORY_CALL(mprotect, (new_end, size, PROT_NONE), GetName());
     }
     // Update end_
-    end_ = new_end;
+    SetEnd(new_end);
   }
   return original_end;
 }

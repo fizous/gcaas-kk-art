@@ -89,7 +89,8 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
     edge_word &= (1 << (kBitsPerWord - left_bits)) - 1;
   }
 
-  // If word_start == word_end then handle this case at the same place we handle the right edge.
+  // If word_start == word_end then handle this case at the same place we
+  // handle the right edge.
   if (edge_word != 0 && word_start < word_end) {
     uintptr_t ptr_base = IndexToOffset(word_start) + HeapBegin();
     do {
@@ -116,10 +117,12 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
     }
   }
 
-  // Handle the right edge, and also the left edge if both edges are on the same word.
+  // Handle the right edge, and also the left edge if both edges are on the
+  //same word.
   size_t right_bits = bit_index_end & (kBitsPerWord - 1);
 
-  // If word_start == word_end then we need to use the word which we removed the left bits.
+  // If word_start == word_end then we need to use the word which we removed
+  // the left bits.
   if (word_start <= word_end) {
     edge_word = Begin()[word_end];
   }
@@ -129,7 +132,8 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
   uintptr_t ptr_base = IndexToOffset(word_end) + HeapBegin();
   while (edge_word != 0) {
     const size_t shift = CLZ(edge_word);
-    mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+    mirror::Object* obj =
+        reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
     visitor(obj);
     edge_word ^= static_cast<size_t>(kWordHighBitMask) >> shift;
   }
