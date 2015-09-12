@@ -78,6 +78,8 @@ class BaseMutex {
 
  protected:
   friend class ConditionVariable;
+  friend class ConditionVariable;
+  friend class InterProcessConditionVariable;
 
   BaseMutex(const char* name, LockLevel level);
   virtual ~BaseMutex();
@@ -169,7 +171,7 @@ typedef struct SynchronizedLockHead_S {
 
 class InterProcessConditionVariable;
 
-std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
+
 class LOCKABLE InterProcessMutex : public BaseMutex {
  public:
   explicit InterProcessMutex(const char* name,  SharedFutexData* futexMem,
@@ -235,7 +237,7 @@ class LOCKABLE InterProcessMutex : public BaseMutex {
   DISALLOW_COPY_AND_ASSIGN(InterProcessMutex);
   friend class InterProcessConditionVariable;
 };//InterProcessMutex
-
+std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
 
 // ConditionVariables allow threads to queue and sleep. Threads may then be resumed individually
 // (Signal) or all at once (Broadcast).
