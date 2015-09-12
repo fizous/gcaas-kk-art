@@ -138,6 +138,11 @@ LIBART_COMMON_SRC_FILES := \
 	well_known_classes.cc \
 	zip_archive.cc
 
+ifeq ($(ART_GC_SERVICE),true)
+LIBART_COMMON_SRC_FILES += \
+	gc/service/service_space.cc
+endif
+
 LIBART_COMMON_SRC_FILES += \
 	arch/context.cc \
 	arch/arm/registers_arm.cc \

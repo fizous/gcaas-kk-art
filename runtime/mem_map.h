@@ -27,6 +27,20 @@
 
 namespace art {
 
+typedef struct AShmemMap_S {
+  char name_[64];
+  byte* const begin_;  // Start of data.
+  size_t size_;  // Length of data.
+  void* const base_begin_;  // Page-aligned base address.
+  const size_t base_size_;  // Length of mapping.
+  int prot_;  // Protection of the map.
+  AShmemMap_S(const std::string& name, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot) :
+        name_(name.c_str()), begin_(begin), size_(size),
+        base_begin_(base_begin), base_size_(base_size), prot_(prot){}
+}  __attribute__((aligned(8))) AShmemMap;
+
+
 // Used to keep track of mmap segments.
 class MemMap {
  public:
@@ -38,7 +52,11 @@ class MemMap {
   // a name.
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr,
+      size_t byte_count, int prot);
+
+  static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -84,6 +102,52 @@ class MemMap {
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
 
+
+
+  static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot) {
+    AShmemMap _data = {name.c_str(), begin, size, base_begin, base_size, prot};
+    memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+  }
+
+
+  static byte* Begin(AShmemMap* addr) const {
+    return addr->begin_;
+  }
+
+  static size_t Size(AShmemMap* addr) const {
+    return addr->size_;
+  }
+
+  static byte* End(AShmemMap* addr) const {
+    return Begin(addr) + Size(addr);
+  }
+
+  // Trim by unmapping pages at the end of the map.
+  static void UnMapAtEnd(AShmemMap* addr, byte* new_end) {
+    size_t unmap_size = End(addr) - new_end;
+    munmap(new_end, unmap_size);
+    addr->size_ -= unmap_size;
+  }
+
+
+  static bool Protect(AShmemMap* addr, int prot) {
+    if (addr->base_begin_ == NULL && addr->base_size_ == 0) {
+      addr->prot_ = prot;
+      return true;
+    }
+
+    if (mprotect(addr->base_begin_, addr->base_size_, prot) == 0) {
+      addr->prot_ = prot;
+      return true;
+    }
+
+    PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(addr->base_begin_) <<
+        ", " << addr->base_size_ << ", "
+                << prot << ") failed";
+    return false;
+  }
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
          int prot);
@@ -96,6 +160,12 @@ class MemMap {
   const size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
 };
+
+
+
+
+
+
 
 }  // namespace art
 

@@ -73,6 +73,8 @@ const bool kIsTargetBuild = true;
 const bool kIsTargetBuild = false;
 #endif
 
+#define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), kObjectAlignment))
+
 }  // namespace art
 
 #endif  // ART_RUNTIME_GLOBALS_H_
