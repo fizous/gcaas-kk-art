@@ -24,6 +24,7 @@
 #include <sys/types.h>
 
 #include "globals.h"
+#include "utils.h"
 
 namespace art {
 

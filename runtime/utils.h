@@ -130,6 +130,9 @@ static inline T RoundUp(T x, int n) {
   return RoundDown(x + n - 1, n);
 }
 
+
+#define SERVICE_ALLOC_ALIGN_BYTE(T) (RoundUp(sizeof(T), kObjectAlignment))
+
 // Implementation is from "Hacker's Delight" by Henry S. Warren, Jr.,
 // figure 3-3, page 48, where the function is called clp2.
 static inline uint32_t RoundUpToPowerOfTwo(uint32_t x) {
