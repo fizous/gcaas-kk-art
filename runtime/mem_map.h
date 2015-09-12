@@ -29,15 +29,15 @@ namespace art {
 
 typedef struct AShmemMap_S {
   char name_[64];
-  byte* const begin_;  // Start of data.
+  byte* /*const*/ begin_;  // Start of data.
   size_t size_;  // Length of data.
-  void* const base_begin_;  // Page-aligned base address.
-  const size_t base_size_;  // Length of mapping.
+  void* /*const*/ base_begin_;  // Page-aligned base address.
+  /*const*/ size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
   AShmemMap_S(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot) :
-        name_(name.c_str()), begin_(begin), size_(size),
-        base_begin_(base_begin), base_size_(base_size), prot_(prot){}
+        begin_(begin), size_(size),
+        base_begin_(base_begin), base_size_(base_size), prot_(prot){ strcpy(name_, name.c_str())}
 }  __attribute__((aligned(8))) AShmemMap;
 
 
