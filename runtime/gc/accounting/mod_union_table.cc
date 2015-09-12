@@ -207,15 +207,6 @@ void ModUnionTableReferenceCache::Verify() {
       auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
       DCHECK(space != nullptr);
       SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-      if(gcservice::GCService::IsProcessRegistered()) {
-        GCSERV_CLIENT_ILOG << "ModUnionTableReferenceCache::Verify --> " <<
-
-            StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
-                                  reinterpret_cast<void*>(start),
-                                  reinterpret_cast<void*>(end));
-
-
-      }
       live_bitmap->VisitMarkedRange(start, end, visitor);
     }
   }
@@ -257,17 +248,6 @@ void ModUnionTableReferenceCache::Update() {
     auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
     DCHECK(space != nullptr);
     SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-
-    if(gcservice::GCService::IsProcessRegistered()) {
-      GCSERV_CLIENT_ILOG << "ModUnionTableReferenceCache::Update --> " <<
-
-          StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
-                                reinterpret_cast<void*>(start),
-                                reinterpret_cast<void*>(end));
-
-
-    }
-
     live_bitmap->VisitMarkedRange(start, end, visitor);
 
     // Update the corresponding references for the card.
@@ -321,15 +301,6 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
       DCHECK(space != nullptr);
       bitmap = space->GetLiveBitmap();
       DCHECK(bitmap != nullptr);
-    }
-    if(gcservice::GCService::IsProcessRegistered()) {
-      GCSERV_CLIENT_ILOG << "ModUnionTableCardCache::MarkReferences --> " <<
-
-          StringPrintf("%s: %p-%p", bitmap->GetName().c_str(),
-                                reinterpret_cast<void*>(start),
-                                reinterpret_cast<void*>(end));
-
-
     }
     bitmap->VisitMarkedRange(start, end, visitor);
   }

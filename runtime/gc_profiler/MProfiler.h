@@ -16,23 +16,16 @@
 #include "os.h"
 #include "base/logging.h"
 #include "thread_state.h"
-#include "cutils/SharedProcessMutex.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
-
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
 /* log information. used to monitor the flow of the profiler.*/
-#if ART_GC_PROFILER_VERBOSE
-#define GCPROF_ILOG 1
-#else
-#define GCPROF_ILOG 0
-#endif
-#define GCMMP_VLOG(severity) if (GCPROF_ILOG) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+#define GCMMP_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
 
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
@@ -79,7 +72,6 @@
   #endif//ART_USE_GC_DEFAULT_PROFILER
 #endif//ART_USE_GC_PROFILER
 
-
 #define GCP_OFF_CONCURRENT_GC()			(GCP_DISABLE_CONC_COLLECT)
 #define GCP_OFF_EXPLICIT_GC()			  (GCP_DISABLE_EXPL_COLLECT)
 
@@ -92,10 +84,6 @@
  */
 void dvmGCMMProfPerfCounters(const char*);
 
-
-namespace android {
-class SharedProcessMutex;
-}//namesspace android
 
 namespace art {
 class ConditionVariable;
@@ -205,15 +193,6 @@ protected:
   pthread_t pthread_ GUARDED_BY(prof_thread_mutex_);
 
 public:
-
-//  void InitSharedLocks();
-//  static void GCPInitVMInstanceHeapMutex(void);
-//  static void GCPRunGCService(void);
-//  static void GCPBlockOnGCService(void);
-//  void runGCServiceDaemon(void);
-
-
-
   static constexpr int kGCMMPDumpSignal 			= SIGUSR2;
   static constexpr int kGCMMPDefaultCohortLog = GCP_DEFAULT_COHORT_LOG;
   static const int kGCMMPDefaultAffinity 			= -1;
@@ -523,9 +502,6 @@ public:
 	virtual void resetHeapAllocStatus() {
 		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
 	}
-
-
-
 };
 
 

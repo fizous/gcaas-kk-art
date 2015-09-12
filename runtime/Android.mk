@@ -58,10 +58,6 @@ LIBART_COMMON_SRC_FILES := \
 	gc/space/image_space.cc \
 	gc/space/large_object_space.cc \
 	gc/space/space.cc \
-	gc/gcservice/gcservice.cc \
-	gc/gcservice/service_client.cc \
-	gc/gcservice/gcservice_daemon.cc \
-	gc/gcservice/service_allocator.cc \
 	gc_profiler/MProfilerTypes.cc \
 	gc_profiler/MProfiler.cc \
 	gc_profiler/MPPerfCounters.cc \
@@ -193,7 +189,6 @@ LIBART_TARGET_SRC_FILES += \
 	arch/arm/portable_entrypoints_arm.S \
 	arch/arm/quick_entrypoints_arm.S \
 	arch/arm/thread_arm.cc
-
 else # TARGET_ARCH != arm
 ifeq ($(TARGET_ARCH),x86)
 LIBART_TARGET_SRC_FILES += \
@@ -338,10 +333,10 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
   LOCAL_SHARED_LIBRARIES += libpfm4 liblog libnativehelper
   LOCAL_SHARED_LIBRARIES += libcorkscrew # native stack trace support
   ifeq ($$(art_target_or_host),target)
-    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux libipcfs
+    LOCAL_SHARED_LIBRARIES += libcutils libz libdl libselinux
   else # host
     LOCAL_STATIC_LIBRARIES += libcutils
-    LOCAL_SHARED_LIBRARIES += libz-host libipcfs
+    LOCAL_SHARED_LIBRARIES += libz-host
     LOCAL_LDLIBS += -ldl -lpthread
     ifeq ($(HOST_OS),linux)
       LOCAL_LDLIBS += -lrt

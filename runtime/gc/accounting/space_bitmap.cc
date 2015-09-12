@@ -25,53 +25,10 @@
 #include "space_bitmap-inl.h"
 #include "UniquePtr.h"
 #include "utils.h"
-#include "gc/gcservice/service_allocator.h"
 
 namespace art {
 namespace gc {
 namespace accounting {
-
-SpaceBitmap::SpaceBitmap(const std::string& name,
-    MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
-            const void* heap_begin, BitMapMemberMetaData* fields_addr)
-    : name_(name), bitmap_meta_data_(fields_addr),
-      allocated_memory_(bitmap_meta_data_ == NULL) {
-  if(allocated_memory_) {
-    bitmap_meta_data_ = reinterpret_cast<BitMapMemberMetaData*>(calloc(1,
-            SERVICE_ALLOC_ALIGN_BYTE(BitMapMemberMetaData)));
-    LOG(ERROR) << "*** non shared bitmap fields is at address: "
-        << reinterpret_cast<void*>(bitmap_meta_data_)
-        << ", sizeof (BitMapMemberMetaData):"
-        << sizeof(BitMapMemberMetaData)
-        << ", sizeof(SharedSpaceBitmapMeta):"
-        << sizeof(SharedSpaceBitmapMeta)<<
-        ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
-  } else {
-    LOG(ERROR) << "*** bitmap fields is at address: " <<
-        reinterpret_cast<void*>(bitmap_meta_data_)
-            << ", sizeof (BitMapMemberMetaData):"
-            << sizeof(BitMapMemberMetaData)
-            << ", sizeof(SharedSpaceBitmapMeta):"
-            << sizeof(SharedSpaceBitmapMeta) <<
-            ", SharedMemMapMeta: " << sizeof(SharedMemMapMeta);
-
-
-  }
-  SetBitmapMemberData(bitmap_meta_data_,
-      mem_map, bitmap_begin, bitmap_size, heap_begin);
-  LOG(ERROR) << "Dumping Bitmap: " << Dump();
-}
-
-void SpaceBitmap::SetBitmapMemberData(BitMapMemberMetaData* address,
-    MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
-    const void* heap_begin) {
-  //UniquePtr<BaseMapMem> dumpPointer(NULL);
-  BitMapMemberMetaData _data = {mem_map, bitmap_begin, bitmap_size,
-      reinterpret_cast<uintptr_t>(heap_begin)};
-  memcpy(address, &_data, SERVICE_ALLOC_ALIGN_BYTE(BitMapMemberMetaData));
-  //dumpPointer.release();
-//  address->mem_map_.reset(mem_map);
-}
 
 std::string SpaceBitmap::GetName() const {
   return name_;
@@ -93,76 +50,43 @@ void SpaceSetMap::Walk(SpaceBitmap::Callback* callback, void* arg) {
   }
 }
 
-SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name,
-    MemMap* mem_map,  byte* heap_begin,
-                          size_t heap_capacity,
-                          SharedSpaceBitmapMeta* meta_address) {
+SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, MemMap* mem_map,
+                                           byte* heap_begin, size_t heap_capacity) {
   CHECK(mem_map != nullptr);
   word* bitmap_begin = reinterpret_cast<word*>(mem_map->Begin());
-  size_t bitmap_size =
-      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  if(meta_address == NULL) {
-    return new SpaceBitmap(name, mem_map, bitmap_begin, bitmap_size,
-        heap_begin);
-  }
-  return new SpaceBitmap(name, mem_map, bitmap_begin, bitmap_size,
-      heap_begin, &meta_address->bitmap_fields_);
+  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  return new SpaceBitmap(name, mem_map, bitmap_begin, bitmap_size, heap_begin);
 }
 
-
-// Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
-// heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
-SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
-    size_t heap_capacity, SharedSpaceBitmapMeta* meta_address) {
+SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin, size_t heap_capacity) {
+  CHECK(heap_begin != NULL);
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
-  size_t bitmap_size =
-      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  if(meta_address == NULL) {
-    UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
-        bitmap_size, PROT_READ | PROT_WRITE));
-    if (mem_map.get() == NULL) {
-      LOG(ERROR) << "Failed to allocate bitmap " << name;
-      return NULL;
-    }
-    return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity);
-  } else {
-//    UniquePtr<MemMap> shared_mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
-//        bitmap_size, PROT_READ | PROT_WRITE));
-    LOG(ERROR) << "shared_mem_map owner meta --------- " <<
-        reinterpret_cast<void*>(&meta_address->data_.owner_meta_);
-    UniquePtr<MemMap>
-      shared_mem_map(MemMap::MapSharedMemoryWithMeta(name.c_str(), NULL,
-          bitmap_size, PROT_READ | PROT_WRITE, &meta_address->data_/*, MAP_PRIVATE*/));
-    if (shared_mem_map.get() == NULL) {
-      LOG(ERROR) << "Failed to allocate bitmap " << name;
-      return NULL;
-    }
-    return CreateFromMemMap(name, shared_mem_map.release(), heap_begin,
-        heap_capacity, meta_address);
+  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), NULL, bitmap_size, PROT_READ | PROT_WRITE));
+  if (mem_map.get() == NULL) {
+    LOG(ERROR) << "Failed to allocate bitmap " << name;
+    return NULL;
   }
+  return CreateFromMemMap(name, mem_map.release(), heap_begin, heap_capacity);
 }
 
 // Clean up any resources associated with the bitmap.
-SpaceBitmap::~SpaceBitmap() {
-  LOG(ERROR) << "Destroying Bitmap: " << name_;
- // if(allocated_memory_)
- //   free(bitmap_meta_data_);
-}
+SpaceBitmap::~SpaceBitmap() {}
 
 void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   DCHECK(IsAligned<kBitsPerWord * kAlignment>(new_end));
-  size_t new_size = OffsetToIndex(new_end - HeapBegin()) * kWordSize;
-  if (new_size < Size()) {
-    SetSize(new_size);
+  size_t new_size = OffsetToIndex(new_end - heap_begin_) * kWordSize;
+  if (new_size < bitmap_size_) {
+    bitmap_size_ = new_size;
   }
   // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
   // should be marked.
 }
 
 void SpaceBitmap::Clear() {
-  if (Begin() != NULL) {
+  if (bitmap_begin_ != NULL) {
     // This returns the memory to the system.  Successive page faults will return zeroed memory.
-    int result = madvise(Begin(), Size(), MADV_DONTNEED);
+    int result = madvise(bitmap_begin_, bitmap_size_, MADV_DONTNEED);
     if (result == -1) {
       PLOG(FATAL) << "madvise failed";
     }
@@ -170,8 +94,6 @@ void SpaceBitmap::Clear() {
 }
 
 void SpaceBitmap::CopyFrom(SpaceBitmap* source_bitmap) {
-  if(gcservice::GCService::IsProcessRegistered())
-    CHECK_EQ(Size(), source_bitmap->Size());
   DCHECK_EQ(Size(), source_bitmap->Size());
   std::copy(source_bitmap->Begin(), source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
 }
@@ -179,51 +101,23 @@ void SpaceBitmap::CopyFrom(SpaceBitmap* source_bitmap) {
 // Visits set bits in address order.  The callback is not permitted to
 // change the bitmap bits or max during the traversal.
 void SpaceBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
-  CHECK(Begin() != NULL);
+  CHECK(bitmap_begin_ != NULL);
   CHECK(callback != NULL);
 
-  uintptr_t end = OffsetToIndex(HeapLimit() - HeapBegin() - 1);
-  word* bitmap_begin = Begin();
+  uintptr_t end = OffsetToIndex(HeapLimit() - heap_begin_ - 1);
+  word* bitmap_begin = bitmap_begin_;
   for (uintptr_t i = 0; i <= end; ++i) {
     word w = bitmap_begin[i];
     if (w != 0) {
-      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
+      uintptr_t ptr_base = IndexToOffset(i) + heap_begin_;
       do {
         const size_t shift = CLZ(w);
-        mirror::Object* obj =
-            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         (*callback)(obj, arg);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       } while (w != 0);
     }
   }
-}
-
-
-BitMapMemberMetaData* SpaceBitmap::BindBitmaps(SpaceBitmap* bitmapSource,
-    SpaceBitmap* bitmapDestination) {
-  BitMapMemberMetaData* _membersSource = bitmapSource->bitmap_meta_data_;
-  bitmapSource->bitmap_meta_data_ = bitmapDestination->bitmap_meta_data_;
-
-
-  return _membersSource;
-//  BitMapMemberMetaData* _membersA = bitmapA->bitmap_meta_data_;
-//  bitmapA->bitmap_meta_data_ = bitmapB->bitmap_meta_data_;
-//  bitmapB->bitmap_meta_data_ = _membersA;
-//  // Swap names to get more descriptive diagnostics.
-//  std::string temp_name(bitmapA->GetName());
-//  bitmapA->SetName(bitmapB->GetName());
-//  bitmapB->SetName(temp_name);
-}
-
-void SpaceBitmap::SwitchBitmaps(SpaceBitmap* bitmapA, SpaceBitmap* bitmapB) {
-  BitMapMemberMetaData* _membersA = bitmapA->bitmap_meta_data_;
-  bitmapA->bitmap_meta_data_ = bitmapB->bitmap_meta_data_;
-  bitmapB->bitmap_meta_data_ = _membersA;
-  // Swap names to get more descriptive diagnostics.
-  std::string temp_name(bitmapA->GetName());
-  bitmapA->SetName(bitmapB->GetName());
-  bitmapB->SetName(temp_name);
 }
 
 // Walk through the bitmaps in increasing address order, and find the
@@ -235,14 +129,13 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
                            const SpaceBitmap& mark_bitmap,
                            uintptr_t sweep_begin, uintptr_t sweep_end,
                            SpaceBitmap::SweepCallback* callback, void* arg) {
-
-  CHECK(live_bitmap.Begin() != NULL);
-  CHECK(mark_bitmap.Begin() != NULL);
-  CHECK_EQ(live_bitmap.HeapBegin(), mark_bitmap.HeapBegin());
-  CHECK_EQ(live_bitmap.Size(), mark_bitmap.Size());
+  CHECK(live_bitmap.bitmap_begin_ != NULL);
+  CHECK(mark_bitmap.bitmap_begin_ != NULL);
+  CHECK_EQ(live_bitmap.heap_begin_, mark_bitmap.heap_begin_);
+  CHECK_EQ(live_bitmap.bitmap_size_, mark_bitmap.bitmap_size_);
   CHECK(callback != NULL);
   CHECK_LE(sweep_begin, sweep_end);
-  CHECK_GE(sweep_begin, live_bitmap.HeapBegin());
+  CHECK_GE(sweep_begin, live_bitmap.heap_begin_);
 
   if (sweep_end <= sweep_begin) {
     return;
@@ -252,15 +145,15 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
   const size_t buffer_size = kWordSize * kBitsPerWord;
   mirror::Object* pointer_buf[buffer_size];
   mirror::Object** pb = &pointer_buf[0];
-  size_t start = OffsetToIndex(sweep_begin - live_bitmap.HeapBegin());
-  size_t end = OffsetToIndex(sweep_end - live_bitmap.HeapBegin() - 1);
+  size_t start = OffsetToIndex(sweep_begin - live_bitmap.heap_begin_);
+  size_t end = OffsetToIndex(sweep_end - live_bitmap.heap_begin_ - 1);
   CHECK_LT(end, live_bitmap.Size() / kWordSize);
-  word* live = live_bitmap.Begin();
-  word* mark = mark_bitmap.Begin();
+  word* live = live_bitmap.bitmap_begin_;
+  word* mark = mark_bitmap.bitmap_begin_;
   for (size_t i = start; i <= end; i++) {
     word garbage = live[i] & ~mark[i];
     if (UNLIKELY(garbage != 0)) {
-      uintptr_t ptr_base = IndexToOffset(i) + live_bitmap.HeapBegin();
+      uintptr_t ptr_base = IndexToOffset(i) + live_bitmap.heap_begin_;
       do {
         const size_t shift = CLZ(garbage);
         garbage ^= static_cast<size_t>(kWordHighBitMask) >> shift;
@@ -279,14 +172,12 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
   }
 }
 
-static void WalkFieldsInOrder(SpaceBitmap* visited,
-                SpaceBitmap::Callback* callback, mirror::Object* obj,
-                void* arg);
+static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
+                              void* arg);
 
 // Walk instance fields of the given Class. Separate function to allow recursion on the super
 // class.
-static void WalkInstanceFields(SpaceBitmap* visited,
-                SpaceBitmap::Callback* callback, mirror::Object* obj,
+static void WalkInstanceFields(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
                                mirror::Class* klass, void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   // Visit fields of parent classes first.
@@ -311,9 +202,8 @@ static void WalkInstanceFields(SpaceBitmap* visited,
 }
 
 // For an unvisited object, visit it then all its children found via fields.
-static void WalkFieldsInOrder(SpaceBitmap* visited,
-                  SpaceBitmap::Callback* callback, mirror::Object* obj,
-                  void* arg)
+static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
+                              void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (visited->Test(obj)) {
     return;
@@ -356,15 +246,15 @@ static void WalkFieldsInOrder(SpaceBitmap* visited,
 // bits or max during the traversal.
 void SpaceBitmap::InOrderWalk(SpaceBitmap::Callback* callback, void* arg) {
   UniquePtr<SpaceBitmap> visited(Create("bitmap for in-order walk",
-                                       reinterpret_cast<byte*>(HeapBegin()),
-                                       IndexToOffset(Size() / kWordSize)));
-  CHECK(Begin() != NULL);
+                                       reinterpret_cast<byte*>(heap_begin_),
+                                       IndexToOffset(bitmap_size_ / kWordSize)));
+  CHECK(bitmap_begin_ != NULL);
   CHECK(callback != NULL);
   uintptr_t end = Size() / kWordSize;
   for (uintptr_t i = 0; i < end; ++i) {
-    word w = Begin()[i];
+    word w = bitmap_begin_[i];
     if (UNLIKELY(w != 0)) {
-      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
+      uintptr_t ptr_base = IndexToOffset(i) + heap_begin_;
       while (w != 0) {
         const size_t shift = CLZ(w);
         mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
@@ -386,6 +276,7 @@ void SpaceSetMap::SetName(const std::string& name) {
 void SpaceSetMap::CopyFrom(const SpaceSetMap& space_set) {
   contained_ = space_set.contained_;
 }
+
 std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap) {
   return stream
     << bitmap.GetName() << "["

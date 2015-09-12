@@ -101,7 +101,6 @@ static bool GenerateImage(const std::string& image_file_name) {
   // fork and exec dex2oat
   pid_t pid = fork();
   if (pid == 0) {
-    LOG(ERROR) << "FFFFFFork Image Space ";
     // no allocation allowed between fork and exec
 
     // change process groups, so we don't get reaped by ProcessManager
@@ -112,7 +111,6 @@ static bool GenerateImage(const std::string& image_file_name) {
     PLOG(FATAL) << "execv(" << dex2oat << ") failed";
     return false;
   } else {
-    LOG(ERROR) << "FFFFFFork Image Space (parent)";
     if (pid == -1) {
       PLOG(ERROR) << "fork failed";
     }

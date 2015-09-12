@@ -20,8 +20,6 @@
 #include "base/logging.h"
 #include "cutils/atomic-inline.h"
 #include "utils.h"
-#include "gc/gcservice/gcservice.h"
-
 
 namespace art {
 namespace gc {
@@ -29,12 +27,12 @@ namespace accounting {
 
 inline bool SpaceBitmap::AtomicTestAndSet(const mirror::Object* obj) {
   uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
-  DCHECK_GE(addr, HeapBegin());
-  const uintptr_t offset = addr - HeapBegin();
+  DCHECK_GE(addr, heap_begin_);
+  const uintptr_t offset = addr - heap_begin_;
   const size_t index = OffsetToIndex(offset);
   const word mask = OffsetToMask(offset);
-  word* const address = &Begin()[index];
-  DCHECK_LT(index, Size() / kWordSize) << " bitmap_size_ = " << Size();
+  word* const address = &bitmap_begin_[index];
+  DCHECK_LT(index, bitmap_size_ / kWordSize) << " bitmap_size_ = " << bitmap_size_;
   word old_word;
   do {
     old_word = *address;
@@ -49,39 +47,25 @@ inline bool SpaceBitmap::AtomicTestAndSet(const mirror::Object* obj) {
 inline bool SpaceBitmap::Test(const mirror::Object* obj) const {
   uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
   DCHECK(HasAddress(obj)) << obj;
-  DCHECK(Begin() != NULL);
-  DCHECK_GE(addr, HeapBegin());
-  const uintptr_t offset = addr - HeapBegin();
-  return (Begin()[OffsetToIndex(offset)] & OffsetToMask(offset)) != 0;
+  DCHECK(bitmap_begin_ != NULL);
+  DCHECK_GE(addr, heap_begin_);
+  const uintptr_t offset = addr - heap_begin_;
+  return (bitmap_begin_[OffsetToIndex(offset)] & OffsetToMask(offset)) != 0;
 }
 
 template <typename Visitor>
 void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
                                    const Visitor& visitor) const {
-  //Fizo
-  //D
-  if(gcservice::GCService::IsProcessRegistered()) {
-    CHECK_LT(visit_begin, visit_end);
-    GCSERV_CLIENT_ILOG << "SpaceBitmap::VisitMarkedRange --> " <<
-
-        StringPrintf("%s: %p-%p", name_.c_str(),
-                              reinterpret_cast<void*>(visit_begin),
-                              reinterpret_cast<void*>(visit_end));
-
-
-  }
-  const size_t bit_index_start = (visit_begin - HeapBegin()) / kAlignment;
-  const size_t bit_index_end = (visit_end - HeapBegin() - 1) / kAlignment;
+  DCHECK_LT(visit_begin, visit_end);
+  const size_t bit_index_start = (visit_begin - heap_begin_) / kAlignment;
+  const size_t bit_index_end = (visit_end - heap_begin_ - 1) / kAlignment;
 
   size_t word_start = bit_index_start / kBitsPerWord;
   size_t word_end = bit_index_end / kBitsPerWord;
-  //fizo
-  //D
-  if(gcservice::GCService::IsProcessRegistered())
-    CHECK_LT(word_end * kWordSize, Size());
   DCHECK_LT(word_end * kWordSize, Size());
+
   // Trim off left_bits of left bits.
-  size_t edge_word = Begin()[word_start];
+  size_t edge_word = bitmap_begin_[word_start];
 
   // Handle bits on the left first as a special case
   size_t left_bits = bit_index_start & (kBitsPerWord - 1);
@@ -89,14 +73,12 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
     edge_word &= (1 << (kBitsPerWord - left_bits)) - 1;
   }
 
-  // If word_start == word_end then handle this case at the same place we
-  // handle the right edge.
+  // If word_start == word_end then handle this case at the same place we handle the right edge.
   if (edge_word != 0 && word_start < word_end) {
-    uintptr_t ptr_base = IndexToOffset(word_start) + HeapBegin();
+    uintptr_t ptr_base = IndexToOffset(word_start) + heap_begin_;
     do {
       const size_t shift = CLZ(edge_word);
-      mirror::Object* obj =
-          reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+      mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
       visitor(obj);
       edge_word ^= static_cast<size_t>(kWordHighBitMask) >> shift;
     } while (edge_word != 0);
@@ -104,36 +86,32 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
   word_start++;
 
   for (size_t i = word_start; i < word_end; i++) {
-    size_t w = Begin()[i];
+    size_t w = bitmap_begin_[i];
     if (w != 0) {
-      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
+      uintptr_t ptr_base = IndexToOffset(i) + heap_begin_;
       do {
         const size_t shift = CLZ(w);
-        mirror::Object* obj =
-            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         visitor(obj);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       } while (w != 0);
     }
   }
 
-  // Handle the right edge, and also the left edge if both edges are on the
-  //same word.
+  // Handle the right edge, and also the left edge if both edges are on the same word.
   size_t right_bits = bit_index_end & (kBitsPerWord - 1);
 
-  // If word_start == word_end then we need to use the word which we removed
-  // the left bits.
+  // If word_start == word_end then we need to use the word which we removed the left bits.
   if (word_start <= word_end) {
-    edge_word = Begin()[word_end];
+    edge_word = bitmap_begin_[word_end];
   }
 
   // Bits that we trim off the right.
   edge_word &= ~((static_cast<size_t>(kWordHighBitMask) >> right_bits) - 1);
-  uintptr_t ptr_base = IndexToOffset(word_end) + HeapBegin();
+  uintptr_t ptr_base = IndexToOffset(word_end) + heap_begin_;
   while (edge_word != 0) {
     const size_t shift = CLZ(edge_word);
-    mirror::Object* obj =
-        reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+    mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
     visitor(obj);
     edge_word ^= static_cast<size_t>(kWordHighBitMask) >> shift;
   }
@@ -141,12 +119,12 @@ void SpaceBitmap::VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
 
 inline bool SpaceBitmap::Modify(const mirror::Object* obj, bool do_set) {
   uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
-  DCHECK_GE(addr, HeapBegin());
-  const uintptr_t offset = addr - HeapBegin();
+  DCHECK_GE(addr, heap_begin_);
+  const uintptr_t offset = addr - heap_begin_;
   const size_t index = OffsetToIndex(offset);
   const word mask = OffsetToMask(offset);
-  DCHECK_LT(index, Size() / kWordSize) << " bitmap_size_ = " << Size();
-  word* address = &Begin()[index];
+  DCHECK_LT(index, bitmap_size_ / kWordSize) << " bitmap_size_ = " << bitmap_size_;
+  word* address = &bitmap_begin_[index];
   word old_word = *address;
   if (do_set) {
     *address = old_word | mask;

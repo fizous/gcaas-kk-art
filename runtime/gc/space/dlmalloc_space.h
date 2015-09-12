@@ -39,23 +39,13 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
 
   SpaceType GetType() const {
-
     if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
       return kSpaceTypeZygoteSpace;
     } else {
       return kSpaceTypeAllocSpace;
     }
   }
-////Fizo
-//  bool IsSpaceImmuned(void) {
-//    if(GetSpaceType() == kSpaceTypeZygoteSpace) {
-//      return GetGcRetentionPolicy() == kGcRetentionPolicyNeverCollect;
-//    }
-//    return false;
-//  }
 
-  //Fizo:
-  bool SetMemoryProtection(void);
   // Create a AllocSpace with the requested sizes. The requested
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
@@ -147,12 +137,6 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
   DlMallocSpace* CreateZygoteSpace(const char* alloc_space_name);
 
-  // Turn ourself into a zygote space and return a new alloc space which has
-  //our unused memory. the new heap has shared access to allow the GCService to
-  //collect it.
-  DlMallocSpace* CreateZygoteSpaceWithSharedAcc(const char* alloc_space_name,
-      SharedSpaceMeta* shared_space_meta_mem);
-
   uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;
   }
@@ -173,10 +157,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
 
  protected:
-
-  DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace,
-      byte* begin, byte* end, size_t growth_limit,
-      SharedSpaceMeta* space_meta_addr = NULL);
+  DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
+                size_t growth_limit);
 
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
@@ -189,7 +171,6 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   UniquePtr<accounting::SpaceBitmap> live_bitmap_;
   UniquePtr<accounting::SpaceBitmap> mark_bitmap_;
   UniquePtr<accounting::SpaceBitmap> temp_bitmap_;
-
 
   // Recent allocation buffer.
   static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
@@ -224,8 +205,6 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   size_t growth_limit_;
 
   friend class collector::MarkSweep;
-
-
 
   DISALLOW_COPY_AND_ASSIGN(DlMallocSpace);
 };

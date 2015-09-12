@@ -38,7 +38,6 @@
 #include "gc/heap.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
-#include "gc/gcservice/gcservice.h"
 #include "gc/space/space.h"
 #include "image.h"
 #include "instrumentation.h"
@@ -229,29 +228,11 @@ void Runtime::Abort() {
   // notreached
 }
 
-bool Runtime::PreZygoteFork(bool skipGCService, bool initProfiler) {
-#if ART_GC_PROFILER_SERVICE
-//  if(isSystemServer)
-//    heap_->PreZygoteFork();
-//  else
-    heap_->PreZygoteForkGCService();
-  //gcservice::GCService::PreZygoteFork();
-#else
+bool Runtime::PreZygoteFork() {
   heap_->PreZygoteFork();
-#endif
-  if(initProfiler)
-    vmprofiler_->PreForkPreparation();
+  vmprofiler_->PreForkPreparation();
   return true;
 }
-
-bool Runtime::PostZygoteFork() {
-#if ART_GC_PROFILER_SERVICE
-  heap_->PostZygoteForkGCService();
-  //gcservice::GCService::PreZygoteFork();
-#endif
-  return true;
-}
-
 
 void Runtime::CallExitHook(jint status) {
   if (exit_ != NULL) {
@@ -436,10 +417,6 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->heap_growth_limit_ = 0;  // 0 means no growth limit.
   // Default to number of processors minus one since the main GC thread also does work.
   parsed->parallel_gc_threads_ = sysconf(_SC_NPROCESSORS_CONF) - 1;
-#if ART_GC_PROFILER_SERVICE
-  parsed->parallel_gc_threads_ = 0;
-  LOG(ERROR) << "parallel_gc_threads_ = 0";
-#endif
   // Only the main GC thread, no workers.
   parsed->conc_gc_threads_ = 0;
   parsed->stack_size_ = 0;  // 0 means default.
@@ -449,9 +426,6 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   parsed->is_zygote_ = false;
   parsed->interpreter_only_ = false;
   parsed->is_concurrent_gc_enabled_ = true;
-//#if ART_GC_PROFILER_SERVICE
-//  parsed->is_concurrent_gc_enabled_ = false;
-//#endif
   parsed->is_explicit_gc_disabled_ = false;
 
   parsed->long_pause_log_threshold_ = gc::Heap::kDefaultLongPauseLogThreshold;
@@ -829,47 +803,6 @@ jobject CreateSystemClassLoader() {
   return env->NewGlobalRef(system_class_loader.get());
 }
 
-
-void Runtime::GCPRunGCService(void) {
-  //GetHeap()->SetZygoteProtection();
-  GCSERV_PROC_ILOG << " We are inside GCService code now " << getpid();
-  //gc::GCServiceDaemon::GCServiceDaemon::createService(Thread::Current());
-  gcservice::GCService::service_->launchProcess();
-  GCSERV_PROC_ILOG << " We are leaving GCService code now " << getpid();
-}
-
-
-
-void Runtime::GCPSignalGCServerReady(void) {
-//  GCSERV_DAEM_ILOG << " Before Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
-//  gc::GCServiceDaemon::GCPSignalToLaunchServer();
-//  GCSERV_DAEM_ILOG << " After Calling Runtime::GCPSignalGCServerReady(void)  " << getpid();
-}
-
-
-void Runtime::GCPCreateGCService(void) {
-//  GCSERV_ILOG << " CreateServiceAllocator: before creating service header " <<
-//      getpid();
-//  gcserviceAllocator_ = gc::ServiceAllocator::CreateServiceAllocator();
-//  GCSERV_ILOG << " CreateServiceAllocator: after creating service header " <<
-//      getpid();
-}
-
-
-void Runtime::GCPRegisterWithGCService(bool isSystemServer) {
-  GCSERV_CLIENT_ILOG << " <<<<GCPRegisterWithGCService>>>> " <<
-      getpid();
-  gcservice::GCService::GCPRegisterWithGCService(isSystemServer);
-  GCSERV_CLIENT_ILOG << " >>>>GCPRegisterWithGCService<<<< " <<
-      getpid();
-}
-
-void Runtime::GCPBlockOnGCService(void){
-  GCSERV_ZYGOTE_ILOG << " zzzz: We are the parent process going to block" << getpid();
-  gcservice::GCService::GCPBlockForServiceReady();
-  GCSERV_ZYGOTE_ILOG << " zzzz: We are the parent process done blocking" << getpid();
-}
-
 bool Runtime::Start() {
   VLOG(startup) << "Runtime::Start entering";
 
@@ -891,12 +824,10 @@ bool Runtime::Start() {
   Thread::FinishStartup();
 
   if (is_zygote_) {
-    GCSERV_ZYGOTE_ILOG << " Runtime::Start --> calling InitZygote: " << getpid();
     if (!InitZygote()) {
       return false;
     }
   } else {
-    GCSERV_ZYGOTE_ILOG << " Runtime::Start --> DidForkFromZygote: " << getpid();
     DidForkFromZygote();
   }
 
@@ -906,14 +837,10 @@ bool Runtime::Start() {
 
   self->GetJniEnv()->locals.AssertEmpty();
 
-
-
   VLOG(startup) << "Runtime::Start exiting";
 
   finished_starting_ = true;
-  if (is_zygote_) {//fork gcservice
-    GCP_INIT_GC_SERVICE_HEADER;
-  }
+
   return true;
 }
 
@@ -1000,7 +927,7 @@ void Runtime::StartDaemonThreads() {
 
 bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
   CHECK_EQ(sysconf(_SC_PAGE_SIZE), kPageSize);
-  LOG(ERROR) << "Runtime::Init() : parentID = " << getppid();
+
   UniquePtr<ParsedOptions> options(ParsedOptions::Create(raw_options, ignore_unrecognized));
   if (options.get() == NULL) {
     LOG(ERROR) << "Failed to parse options";
@@ -1108,7 +1035,7 @@ bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
                           "OutOfMemoryError thrown while trying to throw OutOfMemoryError; no stack available");
   pre_allocated_OutOfMemoryError_ = self->GetException(NULL);
   self->ClearException();
-  LOG(ERROR) << "Runtime::LEving initialization() : parentID = " << getppid();
+
   VLOG(startup) << "Runtime::Init exiting";
   return true;
 }

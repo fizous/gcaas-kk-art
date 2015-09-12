@@ -48,8 +48,6 @@ namespace mprofiler {
 
 namespace gc {
   class Heap;
-  class ServiceAllocator;
-  class SharedHeap;
 }
 namespace mirror {
   class ArtMethod;
@@ -400,16 +398,9 @@ class Runtime {
 
   void SetStatsEnabled(bool new_state);
 
-  bool PreZygoteFork(bool skipGCService, bool initProfiler = true);
-  bool PostZygoteFork();
+  bool PreZygoteFork();
   bool InitZygote();
   void DidForkFromZygote();
-  pid_t GCPForkGCService(void);
-  void GCPRunGCService(void);
-  void GCPSignalGCServerReady(void);
-  void GCPBlockOnGCService(void);
-  void GCPCreateGCService(void);
-  void GCPRegisterWithGCService(bool isSystemServer);
 
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;

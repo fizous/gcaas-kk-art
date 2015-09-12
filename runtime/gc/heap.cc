@@ -56,8 +56,7 @@
 #include "well_known_classes.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerTypes.h"
-#include "gc/gcservice/common.h"
-#include "gc/gcservice/gcservice.h"
+
 
 namespace art {
 namespace gc {
@@ -144,7 +143,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Heap() entering";
   }
-  GCSERV_CLIENT_ILOG << "++++++++++++++++++++++Creating Heap+++++++++++++++++++++";
+
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));
 
@@ -597,7 +596,6 @@ mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_co
            reinterpret_cast<byte*>(obj) < continuous_spaces_.front()->Begin() ||
            reinterpret_cast<byte*>(obj) >= continuous_spaces_.back()->End());
   } else {
-    GCP_SERVICE_LOG_SPACE_IMMUNED(alloc_space_);
     obj = Allocate(self, alloc_space_, byte_count, &bytes_allocated);
     // Ensure that we did not allocate into a zygote space.
     DCHECK(obj == NULL || !have_zygote_space_ || !FindSpaceFromObject(obj, false)->IsZygoteSpace());
@@ -1157,15 +1155,6 @@ void Heap::CollectGarbageForProfile(bool clear_soft_references) {
 	  CollectGarbageInternal(collector::kGcTypeFull, kGcCauseProfile, clear_soft_references);
 }
 
-void Heap::CollectGarbageForZygoteFork(bool clear_soft_references) {
-   Thread* self = Thread::Current();
-    //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
-//    mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
-    WaitForConcurrentGcToComplete(self);
-    CollectGarbageInternal(collector::kGcTypeFull, kGcCauseZygoteFork,
-        clear_soft_references);
-}
-
 void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.
@@ -1180,123 +1169,6 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
 
-void Heap::SetZygoteProtection(void) {
-  if(gcservice::GCService::SetZygoteSpaceProtection()) {
-    //ShareHeapForGCService();
-    for (const auto& space : continuous_spaces_) {
-      if (space->IsZygoteSpace()) {
-        GCSERV_ZYGOTE_ILOG << "set protection of zygote space";
-        space->AsDlMallocSpace()->SetMemoryProtection();
-        GCSERV_ZYGOTE_ILOG << "done protection of zygote space to read only succeeded";
-        break;
-      }
-    }
-  }
-}
-
-
-void Heap::ShareHeapForGCService(SharedHeapMetada* shared_heap_mem) {
-//  Thread* self = Thread::Current();
-//  {
-//    // Flush the alloc stack.
-//    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-//    FlushAllocStack();
-//  }
-
-//  accounting::CardTable* cardTbl = GetCardTable();
-//  cardTbl->ShareCardTable(&shared_heap_mem->card_table_meta_.mem_meta_);
-  ResetCardTable(accounting::CardTable::ShareCardTable(GetCardTable(),
-      &shared_heap_mem->card_table_meta_));
-  space::DlMallocSpace* zygote_space = alloc_space_;
-  alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedAcc("alloc space",
-      &shared_heap_mem->alloc_space_meta_);
-  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
-
-  AddContinuousSpace(alloc_space_);
-  have_zygote_space_ = true;
-
-
-
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
-
-
-  //  SetZygoteProtection();
- // GCSERV_CLIENT_ILOG << "make zygote non collectable";
-  // Reset the cumulative loggers since we now have a few additional timing phases.
-  for (const auto& collector : mark_sweep_collectors_) {
-    collector->ResetCumulativeStatistics();
-  }
-}
-
-
-
-void Heap::HeapPrepareZygoteSpace(Thread* self, bool flushAllocStk) {
-  if(flushAllocStk) {
-    // Flush the alloc stack.
-    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-    FlushAllocStack();
-  }
-
-  // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
-  // of the remaining available heap memory.
-  space::DlMallocSpace* zygote_space = alloc_space_;
-  alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");//GCP_SERVICE_CREAQTE_ALLOC_SPACE(zygote_space);//zygote_space->CreateZygoteSpace("alloc space");
-  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
-
-  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
-  AddContinuousSpace(alloc_space_);
-  have_zygote_space_ = true;
-
-  //SetZygoteProtection();
- //fizo:
-  //zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyNeverCollect);
-  // Reset the cumulative loggers since we now have a few additional timing phases.
-  for (const auto& collector : mark_sweep_collectors_) {
-    collector->ResetCumulativeStatistics();
-  }
-}
-
-void Heap::PreZygoteForkGCService() {
-  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
-  // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
-  //fizo:CollectGarbage(false);
-  CollectGarbageForZygoteFork(false);
-  //fizo: do not trim the heap here
-  //Trim();
-  Thread* self = Thread::Current();
-  MutexLock mu(self, zygote_creation_lock_);
-
-  // Try to see if we have any Zygote spaces.
-  if (have_zygote_space_) {
-    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
-    return;
-  }
-  GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
-  VLOG(heap) << "Starting PreZygoteForkGCService with alloc space size " << PrettySize(alloc_space_->Size());
-
-  //HeapPrepareZygoteSpace(self);
-}
-
-void Heap::PostZygoteForkGCService() {
-  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
-  // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
-  //fizo:CollectGarbage(false);
-//  CollectGarbage(true);
-  Thread* self = Thread::Current();
-  MutexLock mu(self, zygote_creation_lock_);
-
-  // Try to see if we have any Zygote spaces.
-  if (have_zygote_space_) {
-    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
-    return;
-  }
-  //GCSERV_CLIENT_ILOG << "**** Continuing with PreZygote Forking ****";
-  VLOG(heap) << "Starting PreZygoteFork with alloc space size " <<
-      PrettySize(alloc_space_->Size());
-
-  HeapPrepareZygoteSpace(self, false);
-}
-
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
@@ -1306,13 +1178,32 @@ void Heap::PreZygoteFork() {
 
   // Try to see if we have any Zygote spaces.
   if (have_zygote_space_) {
-    GCSERV_CLIENT_ILOG << "**** Found a zygote space and skipping ****";
     return;
   }
-  GCSERV_CLIENT_ILOG << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
+
   VLOG(heap) << "Starting PreZygoteFork with alloc space size " << PrettySize(alloc_space_->Size());
 
-  HeapPrepareZygoteSpace(self, true);
+  {
+    // Flush the alloc stack.
+    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
+    FlushAllocStack();
+  }
+
+  // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
+  // of the remaining available heap memory.
+  space::DlMallocSpace* zygote_space = alloc_space_;
+  alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");
+  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+
+  // Change the GC retention policy of the zygote space to only collect when full.
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+  AddContinuousSpace(alloc_space_);
+  have_zygote_space_ = true;
+
+  // Reset the cumulative loggers since we now have a few additional timing phases.
+  for (const auto& collector : mark_sweep_collectors_) {
+    collector->ResetCumulativeStatistics();
+  }
 }
 
 void Heap::FlushAllocStack() {
@@ -1321,8 +1212,7 @@ void Heap::FlushAllocStack() {
   allocation_stack_->Reset();
 }
 
-void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap,
-                          accounting::SpaceSetMap* large_objects,
+void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                           accounting::ObjectStack* stack) {
   mirror::Object** limit = stack->End();
   for (mirror::Object** it = stack->Begin(); it != limit; ++it) {
@@ -1345,16 +1235,10 @@ const char* gc_cause_and_type_strings[4][4] = {
 
 collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCause gc_cause,
                                                bool clear_soft_references) {
-
-
-  gc_type =  GCP_SERVICE_EXPLICIT_FILTER(gc_type);
   Thread* self = Thread::Current();
 
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
   Locks::mutator_lock_->AssertNotHeld(self);
-
-  LOG(WARNING) << "Performing GC by tid: " << self->GetTid() <<
-      " With specs: "<< gc_cause_and_type_strings[gc_cause][gc_type];
 
   if (self->IsHandlingStackOverflow()) {
     LOG(WARNING) << "Performing GC on a thread that is handling a stack overflow.";
@@ -1885,11 +1769,6 @@ void Heap::gcpIncMutationCnt(void) {
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
 }
 
-
-void Heap::gcpLogObjectMutation(const mirror::Object* dst) {
-  GCP_SERVICE_LOG_IMMUNED(dst);
-}
-
 void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 		size_t length) {
 	mprofiler::VMProfiler* mP = Runtime::Current()->GetVMProfiler();
@@ -2245,7 +2124,6 @@ void Heap::ConcurrentGC(Thread* self) {
 }
 
 void Heap::RequestHeapTrim() {
-  LOG(ERROR) << "Calling Heap::RequestHeapTrim(); pid:" << getpid() <<"; ppid:" << getppid();
   // GC completed and now we must decide whether to request a heap trim (advising pages back to the
   // kernel) or not. Issuing a request will also cause trimming of the libc heap. As a trim scans
   // a space it will hold its lock and can become a cause of jank.

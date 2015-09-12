@@ -22,10 +22,10 @@
 #include "UniquePtr.h"
 #include "base/macros.h"
 #include "base/mutex.h"
+#include "gc/accounting/space_bitmap.h"
 #include "globals.h"
 #include "image.h"
 #include "mem_map.h"
-#include "gc/accounting/space_bitmap.h"
 
 namespace art {
 namespace mirror {
@@ -80,7 +80,7 @@ class Space {
   }
 
   // The policy of when objects are collected associated with this space.
-  virtual GcRetentionPolicy GetGcRetentionPolicy() const {
+  GcRetentionPolicy GetGcRetentionPolicy() const {
     return gc_retention_policy_;
   }
 
@@ -98,7 +98,6 @@ class Space {
   // The kind of space this: image, alloc, zygote, large object.
   virtual SpaceType GetType() const = 0;
 
-//  virtual bool IsSpaceImmuned(void) {return false;}
   // Is this an image space, ie one backed by a memory mapped image file.
   bool IsImageSpace() const {
     return GetType() == kSpaceTypeImageSpace;
@@ -124,23 +123,17 @@ class Space {
   LargeObjectSpace* AsLargeObjectSpace();
 
   virtual ~Space() {}
-  virtual void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
-    gc_retention_policy_ = gc_retention_policy;
-  }
+
 
   // Return the storage space required by obj.
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
  protected:
   Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
 
+  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+    gc_retention_policy_ = gc_retention_policy;
+  }
 
-//  void SetSpaceType(SpaceType newType) {
-//    spaceType_ = newType;
-//  }
-//
-//  SpaceType GetSpaceType() {
-//    return spaceType_;
-//  }
   // Name of the space that may vary due to the Zygote fork.
   std::string name_;
 
@@ -148,9 +141,6 @@ class Space {
   // When should objects within this space be reclaimed? Not constant as we vary it in the case
   // of Zygote forking.
   GcRetentionPolicy gc_retention_policy_;
-
-//  //Fizo: add type for sygote space...
-//  SpaceType spaceType_;
 
   friend class art::gc::Heap;
 
@@ -196,37 +186,16 @@ class AllocSpace {
 // continuous spaces can be marked in the card table.
 class ContinuousSpace : public Space {
  public:
-//  // Address at which the space begins
-//  byte* Begin() const {
-//    return begin_;
-//  }
-//
-//  // Address at which the space ends, which may vary as the space is filled.
-//  byte* End() const {
-//    return end_;
-//  }
-//
-//  // Current size of space
-//  size_t Size() const {
-//    return End() - Begin();
-//  }
-
-
   // Address at which the space begins
   byte* Begin() const {
-    return space_meta_data_->begin_;
+    return begin_;
   }
 
   // Address at which the space ends, which may vary as the space is filled.
   byte* End() const {
-    return space_meta_data_->end_;
+    return end_;
   }
 
-
-  // Address at which the space ends, which may vary as the space is filled.
-  void SetEnd(byte* newEnd) {
-    space_meta_data_->end_ = newEnd;
-  }
   // Current size of space
   size_t Size() const {
     return End() - Begin();
@@ -248,33 +217,18 @@ class ContinuousSpace : public Space {
 
   virtual ~ContinuousSpace() {}
 
-  static void SetContSpaceMemberData(ContinuousSpaceMemberMetaData* address,
-      GcRetentionPolicy gc_retention_policy, byte* begin, byte* end,
-      bool isAllocatedMemory);
-
-  // The policy of when objects are collected associated with this space.
-  GcRetentionPolicy GetGcRetentionPolicy() const {
-    return (GcRetentionPolicy)space_meta_data_->gc_retention_policy_;
-  }
-
-  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
-    space_meta_data_->gc_retention_policy_ = (int) gc_retention_policy;
-  }
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
-                  byte* begin, byte* end,
-                  ContinuousSpaceMemberMetaData* meta_addr = NULL);
+                  byte* begin, byte* end) :
+      Space(name, gc_retention_policy), begin_(begin), end_(end) {
+  }
 
 
+  // The beginning of the storage for fast access.
+  byte* const begin_;
 
-
-//  // The beginning of the storage for fast access.
-//  byte* const begin_;
-//
-//  // Current end of the space.
-//  byte* end_;
-
-  ContinuousSpaceMemberMetaData* space_meta_data_;
+  // Current end of the space.
+  byte* end_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
@@ -320,10 +274,9 @@ class MemMapSpace : public ContinuousSpace {
 
  protected:
   MemMapSpace(const std::string& name, MemMap* mem_map, size_t initial_size,
-              GcRetentionPolicy gc_retention_policy,
-              ContinuousSpaceMemberMetaData* meta_addr = NULL)
+              GcRetentionPolicy gc_retention_policy)
       : ContinuousSpace(name, gc_retention_policy,
-                        mem_map->Begin(), mem_map->Begin() + initial_size, meta_addr),
+                        mem_map->Begin(), mem_map->Begin() + initial_size),
         mem_map_(mem_map) {
   }
 

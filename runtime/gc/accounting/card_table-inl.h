@@ -22,7 +22,6 @@
 #include "cutils/atomic-inline.h"
 #include "space_bitmap.h"
 #include "utils.h"
-#include "gc/gcservice/gcservice.h"
 
 namespace art {
 namespace gc {
@@ -45,10 +44,6 @@ static inline bool byte_cas(byte old_value, byte new_value, byte* address) {
 template <typename Visitor>
 inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_end,
                               const Visitor& visitor, const byte minimum_age) const {
-#if ART_GC_PROFILER_SERVICE
-  CHECK(bitmap->HasAddress(scan_begin));
-  CHECK(bitmap->HasAddress(scan_end - 1));  // scan_end is the byte after the last byte we scan.
-#endif
   DCHECK(bitmap->HasAddress(scan_begin));
   DCHECK(bitmap->HasAddress(scan_end - 1));  // scan_end is the byte after the last byte we scan.
   byte* card_cur = CardFromAddr(scan_begin);
@@ -61,16 +56,6 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
   while (!IsAligned<sizeof(word)>(card_cur) && card_cur < card_end) {
     if (*card_cur >= minimum_age) {
       uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(card_cur));
-      if(gcservice::GCService::IsProcessRegistered()) {
-        GCSERV_CLIENT_ILOG << "CardTable::Scan0 --> " <<
-
-            StringPrintf("%s: %p-%p",
-                bitmap->GetName().c_str(),
-                                  reinterpret_cast<void*>(start),
-                                  reinterpret_cast<void*>(start + kCardSize));
-
-
-      }
       bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
       ++cards_scanned;
     }
@@ -92,8 +77,7 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
 
     // Find the first dirty card.
     uintptr_t start_word = *word_cur;
-    uintptr_t start =
-        reinterpret_cast<uintptr_t>(AddrFromCard(reinterpret_cast<byte*>(word_cur)));
+    uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(reinterpret_cast<byte*>(word_cur)));
     // TODO: Investigate if processing continuous runs of dirty cards with a single bitmap visit is
     // more efficient.
     for (size_t i = 0; i < sizeof(uintptr_t); ++i) {
@@ -101,19 +85,6 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
         auto* card = reinterpret_cast<byte*>(word_cur) + i;
         DCHECK(*card == static_cast<byte>(start_word) || *card == kCardDirty)
             << "card " << static_cast<size_t>(*card) << " word " << (start_word & 0xFF);
-        if(gcservice::GCService::IsProcessRegistered()) {
-          GCSERV_CLIENT_ILOG << "CardTable::Scan1 --> " <<
-
-              StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
-                                    reinterpret_cast<void*>(start),
-                                    reinterpret_cast<void*>(start + kCardSize));
-          GCSERV_CLIENT_ILOG << "bitmap range --> " <<
-
-              StringPrintf("%s: %p-%p",  bitmap->GetName().c_str(),
-                                    reinterpret_cast<void*>(bitmap->HeapBegin()),
-                                    reinterpret_cast<void*>(bitmap->HeapLimit()));
-
-        }
         bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
         ++cards_scanned;
       }
@@ -128,16 +99,6 @@ inline size_t CardTable::Scan(SpaceBitmap* bitmap, byte* scan_begin, byte* scan_
   while (card_cur < card_end) {
     if (*card_cur >= minimum_age) {
       uintptr_t start = reinterpret_cast<uintptr_t>(AddrFromCard(card_cur));
-      if(gcservice::GCService::IsProcessRegistered()) {
-        GCSERV_CLIENT_ILOG << "CardTable::Scan2 --> " <<
-
-            StringPrintf("%s: %p-%p",
-                bitmap->GetName().c_str(),
-                                  reinterpret_cast<void*>(start),
-                                  reinterpret_cast<void*>(start + kCardSize));
-
-
-      }
       bitmap->VisitMarkedRange(start, start + kCardSize, visitor);
       ++cards_scanned;
     }
@@ -226,14 +187,14 @@ inline void CardTable::ModifyCardsAtomic(byte* scan_begin, byte* scan_end, const
 inline void* CardTable::AddrFromCard(const byte *card_addr) const {
   DCHECK(IsValidCard(card_addr))
     << " card_addr: " << reinterpret_cast<const void*>(card_addr)
-    << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
-    << " end: " << reinterpret_cast<void*>(GetEnd());
-  uintptr_t offset = card_addr - GetBiasedBegin();
+    << " begin: " << reinterpret_cast<void*>(mem_map_->Begin() + offset_)
+    << " end: " << reinterpret_cast<void*>(mem_map_->End());
+  uintptr_t offset = card_addr - biased_begin_;
   return reinterpret_cast<void*>(offset << kCardShift);
 }
 
 inline byte* CardTable::CardFromAddr(const void *addr) const {
-  byte *card_addr = GetBiasedBegin() + (reinterpret_cast<uintptr_t>(addr) >> kCardShift);
+  byte *card_addr = biased_begin_ + (reinterpret_cast<uintptr_t>(addr) >> kCardShift);
   // Sanity check the caller was asking for address covered by the card table
   DCHECK(IsValidCard(card_addr)) << "addr: " << addr
       << " card_addr: " << reinterpret_cast<void*>(card_addr);
@@ -241,17 +202,10 @@ inline byte* CardTable::CardFromAddr(const void *addr) const {
 }
 
 inline void CardTable::CheckCardValid(byte* card) const {
-
-#if ART_GC_PROFILER_SERVICE
-  CHECK(IsValidCard(card))
-      << " card_addr: " << reinterpret_cast<const void*>(card)
-      << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
-      << " end: " << reinterpret_cast<void*>(GetEnd());
-#endif
   DCHECK(IsValidCard(card))
       << " card_addr: " << reinterpret_cast<const void*>(card)
-      << " begin: " << reinterpret_cast<void*>(GetBegin() + GetOffset())
-      << " end: " << reinterpret_cast<void*>(GetEnd());
+      << " begin: " << reinterpret_cast<void*>(mem_map_->Begin() + offset_)
+      << " end: " << reinterpret_cast<void*>(mem_map_->End());
 }
 
 }  // namespace accounting

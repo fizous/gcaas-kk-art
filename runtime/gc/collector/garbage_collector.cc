@@ -115,9 +115,6 @@ void GarbageCollector::Run() {
 
 }
 
-
-
-
 void GarbageCollector::SwapBitmaps() {
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
   // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
@@ -137,20 +134,6 @@ void GarbageCollector::SwapBitmaps() {
       }
     }
   }
-//  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
-//    // We never allocate into zygote spaces.
-//    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
-//        (gc_type == kGcTypeFull &&
-//         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
-//      accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-//      accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
-//      if (live_bitmap != mark_bitmap) {
-//        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
-//        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-//        space->AsDlMallocSpace()->SwapBitmaps();
-//      }
-//    }
-//  }
   for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
     space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
     accounting::SpaceSetMap* live_set = space->GetLiveObjects();

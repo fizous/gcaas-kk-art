@@ -52,8 +52,6 @@ class CardTable {
 
   static CardTable* Create(const byte* heap_begin, size_t heap_capacity);
 
-  /* reset the card table to enable sharing with gc service */
-//  static void ResetCardTable(CardTable*);
   // Set the card associated with the given address to GC_CARD_DIRTY.
   void MarkCard(const void *addr) {
     byte* card_addr = CardFromAddr(addr);
@@ -83,7 +81,11 @@ class CardTable {
     }
   }
 
-
+  // Returns a value that when added to a heap address >> GC_CARD_SHIFT will address the appropriate
+  // card table byte. For convenience this value is cached in every Thread
+  byte* GetBiasedBegin() const {
+    return biased_begin_;
+  }
 
   /*
    * Visitor is expected to take in a card and return the new value. When a value is modified, the
@@ -111,11 +113,6 @@ class CardTable {
   // Resets all of the bytes in the card table to clean.
   void ClearCardTable();
 
-  // Reset the cardTable to be shared among processes
-  //void ShareCardTable(void);
-  static CardTable* ShareCardTable(CardTable* originalCardTable,
-      SharedCardTableMeta* metaMemory);
-
   // Resets all of the bytes in the card table which do not map to the image space.
   void ClearSpaceCards(space::ContinuousSpace* space);
 
@@ -127,96 +124,13 @@ class CardTable {
 
   bool AddrIsInCardTable(const void* addr) const;
 
-
-
-
-//  size_t getOffset() {
-//    return offset_;
-//  }
-//
-//  byte* getBegin() {
-//    return mem_map_->Begin();
-//  }
-//
-//  size_t getBaseSize() {
-//    return mem_map_->BaseSize();
-//  }
-//
-//  size_t getSize() {
-//    return mem_map_->Size();
-//  }
-//
-//  byte* getBaseBegin() {
-//    return mem_map_->BaseBegin();
-//  }
-//
-//  int getFD() {
-//    return mem_map_->GetFD();
-//  }
-//
-//  int getProt() {
-//    return mem_map_->GetProtect();
-//  }
-
-  // Returns a value that when added to a heap address >> GC_CARD_SHIFT will address the appropriate
-  // card table byte. For convenience this value is cached in every Thread
-  byte* GetBiasedBegin() const {
-    return cardtable_meta_data_->biased_begin_;
-  }
-  MemMap* GetMemMap() {
-    return cardtable_meta_data_->mem_map_;
-  }
-
-  const byte* GetHeapBegin() {
-    return cardtable_meta_data_->heap_begin_;
-  }
-
-  size_t GetOffset() const {
-    return cardtable_meta_data_->offset_;
-  }
-
-  byte* GetBegin() const {
-    return cardtable_meta_data_->mem_map_->Begin();
-  }
-
-  byte* GetEnd() const {
-    return cardtable_meta_data_->mem_map_->End();
-  }
-
-  size_t GetBaseSize() {
-    return GetMemMap()->BaseSize();
-  }
-
-  size_t GetSize() {
-    return GetMemMap()->Size();
-  }
-
-  byte* GetBaseBegin() {
-    return GetMemMap()->BaseBegin();
-  }
-
-  int GetFD() {
-    return GetMemMap()->GetFD();
-  }
-
-  int GetProt() {
-    return GetMemMap()->GetProtect();
-  }
-
-  void SetProtection(int val) {
-     GetMemMap()->SetProtect(val);
-  }
-  bool updateProtection(int newProtection);
-
-  void DumpCardTable(std::ostream&);
  private:
-  CardTable(MemMap* begin, byte* biased_begin, size_t offset,
-      const byte* heap_begin, CardTableMemberMetaData* cardTblAddr = NULL);
+  CardTable(MemMap* begin, byte* biased_begin, size_t offset);
 
   // Returns true iff the card table address is within the bounds of the card table.
   bool IsValidCard(const byte* card_addr) const {
-    byte* begin = GetBegin() + GetOffset();
-    byte* end = GetEnd();
+    byte* begin = mem_map_->Begin() + offset_;
+    byte* end = mem_map_->End();
     return card_addr >= begin && card_addr < end;
   }
 
@@ -225,22 +139,13 @@ class CardTable {
   // Verifies that all gray objects are on a dirty card.
   void VerifyCardTable();
 
-//  // Mmapped pages for the card table
-//  UniquePtr<MemMap> mem_map_;
-//  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
-//  byte* const biased_begin_;
-//  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
-//  // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
-//  const size_t offset_;
-//
-//  const byte* heap_begin_;
-
-
-  CardTableMemberMetaData* cardtable_meta_data_;
-  bool allocated_memory_;
-  static void SetCardTableMemberData(CardTableMemberMetaData* address,
-      MemMap* memMap, byte* biased_begin, size_t offset, const byte* heap_begin);
-
+  // Mmapped pages for the card table
+  UniquePtr<MemMap> mem_map_;
+  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
+  byte* const biased_begin_;
+  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
+  // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
+  const size_t offset_;
 };
 
 }  // namespace accounting

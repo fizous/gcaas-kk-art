@@ -73,7 +73,6 @@ class MarkSweep : public GarbageCollector {
   virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
   virtual GcType GetGcType() const {
     return kGcTypeFull;
   }

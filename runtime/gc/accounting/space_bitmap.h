@@ -28,8 +28,6 @@
 #include <stdint.h>
 #include <vector>
 
-#include "gc/gcservice/common.h"
-
 namespace art {
 
 namespace mirror {
@@ -38,7 +36,6 @@ namespace mirror {
 
 namespace gc {
 namespace accounting {
-
 
 class SpaceBitmap {
  public:
@@ -51,18 +48,15 @@ class SpaceBitmap {
 
   typedef void SweepCallback(size_t ptr_count, mirror::Object** ptrs, void* arg);
 
-
   // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
   // heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
-  static SpaceBitmap* Create(const std::string& name, byte* heap_begin,
-      size_t heap_capacity, SharedSpaceBitmapMeta* meta_address = NULL);
+  static SpaceBitmap* Create(const std::string& name, byte* heap_begin, size_t heap_capacity);
 
   // Initialize a space bitmap using the provided mem_map as the live bits. Takes ownership of the
   // mem map. The address range covered starts at heap_begin and is of size equal to heap_capacity.
   // Objects are kAlignement-aligned.
   static SpaceBitmap* CreateFromMemMap(const std::string& name, MemMap* mem_map,
-                            byte* heap_begin, size_t heap_capacity,
-                            SharedSpaceBitmapMeta* meta_address = NULL);
+                                       byte* heap_begin, size_t heap_capacity);
 
   ~SpaceBitmap();
 
@@ -81,10 +75,6 @@ class SpaceBitmap {
   static word OffsetToMask(uintptr_t offset_) {
     return static_cast<uintptr_t>(kWordHighBitMask) >> ((offset_ / kAlignment) % kBitsPerWord);
   }
-
-  static void SetBitmapMemberData(BitMapMemberMetaData* address,
-      MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
-      const void* heap_begin);
 
   inline bool Set(const mirror::Object* obj) {
     return Modify(obj, true);
@@ -107,9 +97,9 @@ class SpaceBitmap {
   bool HasAddress(const void* obj) const {
     // If obj < heap_begin_ then offset underflows to some very large value past the end of the
     // bitmap.
-    const uintptr_t offset = reinterpret_cast<uintptr_t>(obj) - HeapBegin();
+    const uintptr_t offset = reinterpret_cast<uintptr_t>(obj) - heap_begin_;
     const size_t index = OffsetToIndex(offset);
-    return index < Size() / kWordSize;
+    return index < bitmap_size_ / kWordSize;
   }
 
   void VisitRange(uintptr_t base, uintptr_t max, Callback* visitor, void* arg) const;
@@ -128,16 +118,14 @@ class SpaceBitmap {
   };
 
   template <typename Visitor>
-  void VisitRange(uintptr_t visit_begin, uintptr_t visit_end,
-      const Visitor& visitor) const {
+  void VisitRange(uintptr_t visit_begin, uintptr_t visit_end, const Visitor& visitor) const {
     for (; visit_begin < visit_end; visit_begin += kAlignment) {
       visitor(reinterpret_cast<mirror::Object*>(visit_begin));
     }
   }
 
   template <typename Visitor>
-  void VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end,
-      const Visitor& visitor) const
+  void VisitMarkedRange(uintptr_t visit_begin, uintptr_t visit_end, const Visitor& visitor) const
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
@@ -147,24 +135,19 @@ class SpaceBitmap {
   void InOrderWalk(Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
-  static void SweepWalk(const SpaceBitmap& live, const SpaceBitmap& mark,
-                        uintptr_t base, uintptr_t max, SweepCallback* thunk,
-                        void* arg);
+  static void SweepWalk(const SpaceBitmap& live, const SpaceBitmap& mark, uintptr_t base,
+                        uintptr_t max, SweepCallback* thunk, void* arg);
 
   void CopyFrom(SpaceBitmap* source_bitmap);
 
   // Starting address of our internal storage.
-  word* Begin() const {
-    return bitmap_meta_data_->bitmap_begin_;
+  word* Begin() {
+    return bitmap_begin_;
   }
 
   // Size of our internal storage
   size_t Size() const {
-    return bitmap_meta_data_->bitmap_size_;
-  }
-
-  void SetSize(size_t new_size) {
-    bitmap_meta_data_->bitmap_size_ = new_size;
+    return bitmap_size_;
   }
 
   // Size in bytes of the memory that the bitmaps spans.
@@ -173,7 +156,7 @@ class SpaceBitmap {
   }
 
   uintptr_t HeapBegin() const {
-    return bitmap_meta_data_->heap_begin_;
+    return heap_begin_;
   }
 
   // The maximum address which the bitmap can span. (HeapBegin() <= object < HeapLimit()).
@@ -191,31 +174,37 @@ class SpaceBitmap {
 
   const void* GetObjectWordAddress(const mirror::Object* obj) const {
     uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
-    const uintptr_t offset = addr - HeapBegin();
+    const uintptr_t offset = addr - heap_begin_;
     const size_t index = OffsetToIndex(offset);
-    return &Begin()[index];
+    return &bitmap_begin_[index];
   }
-
-
-  static void SwitchBitmaps(SpaceBitmap* bitmapA, SpaceBitmap* bitmapB);
-  static BitMapMemberMetaData* BindBitmaps(SpaceBitmap* bitmapSource,
-      SpaceBitmap* bitmapDestination);
 
  private:
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
-  SpaceBitmap(const std::string& name, MemMap* mem_map, word* bitmap_begin,
-              size_t bitmap_size, const void* heap_begin,
-              BitMapMemberMetaData* fields_addr = NULL);
-
+  SpaceBitmap(const std::string& name, MemMap* mem_map, word* bitmap_begin, size_t bitmap_size,
+              const void* heap_begin)
+      : mem_map_(mem_map), bitmap_begin_(bitmap_begin), bitmap_size_(bitmap_size),
+        heap_begin_(reinterpret_cast<uintptr_t>(heap_begin)),
+        name_(name) {}
 
   bool Modify(const mirror::Object* obj, bool do_set);
+
+  // Backing storage for bitmap.
+  UniquePtr<MemMap> mem_map_;
+
+  // This bitmap itself, word sized for efficiency in scanning.
+  word* const bitmap_begin_;
+
+  // Size of this bitmap.
+  size_t bitmap_size_;
+
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  const uintptr_t heap_begin_;
+
   // Name of this bitmap.
   std::string name_;
-  //struct that holds the metadata of the spaceBitmap
-  BitMapMemberMetaData* bitmap_meta_data_;
-  //was the meta_data allocated?
-  bool allocated_memory_;
 };
 
 // Like a bitmap except it keeps track of objects using sets.

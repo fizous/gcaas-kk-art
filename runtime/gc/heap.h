@@ -23,7 +23,6 @@
 
 #include "atomic_integer.h"
 #include "base/timing_logger.h"
-#include "gc/gcservice/common.h"
 #include "gc/accounting/atomic_stack.h"
 #include "gc/accounting/card_table.h"
 #include "gc/collector/gc_type.h"
@@ -34,7 +33,6 @@
 #include "offsets.h"
 #include "safe_map.h"
 #include "thread_pool.h"
-
 
 namespace art {
 
@@ -96,8 +94,6 @@ enum GcCause {
   kGcCauseExplicit,
   // An explicit System.gc() call for the profiler.
   kGcCauseProfile,
-  // An explicit System.gc() call for the zygote fork.
-  kGcCauseZygoteFork,
 };
 std::ostream& operator<<(std::ostream& os, const GcCause& policy);
 
@@ -174,7 +170,6 @@ class Heap {
 
   // Initiates an explicit garbage collection.
   void CollectGarbageForProfile(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
-  void CollectGarbageForZygoteFork(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
 
   // Initiates an explicit garbage collection.
   void CollectGarbage(bool clear_soft_references) LOCKS_EXCLUDED(Locks::mutator_lock_);
@@ -289,7 +284,6 @@ class Heap {
 
   void gcpIncMutationCnt(void);
 
-  void gcpLogObjectMutation(const mirror::Object*);
 
   void gcpIncMutationCnt(const mirror::Object* dst, MemberOffset offset,
   		const mirror::Object* new_value);
@@ -320,9 +314,6 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
-#if ART_GC_PROFILER_SERVICE
-    gcpLogObjectMutation(dst);
-#endif
   }
 
   // Write barrier for array operations that update many field positions
@@ -332,19 +323,12 @@ class Heap {
   	gcpIncMutationCnt();
 #endif
     card_table_->MarkCard(dst);
-#if ART_GC_PROFILER_SERVICE
-    gcpLogObjectMutation(dst);
-#endif
   }
 #endif //ART_USE_GC_PROFILER_REF_DIST
 
 
   accounting::CardTable* GetCardTable() const {
     return card_table_.get();
-  }
-
-  void ResetCardTable(accounting::CardTable* newCardTable) {
-    card_table_.reset(newCardTable);
   }
 
   void AddFinalizerReference(Thread* self, mirror::Object* object);
@@ -418,12 +402,7 @@ class Heap {
   }
 
   void PreZygoteFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
-  void PreZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
-  void PostZygoteForkGCService() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
-  void ShareHeapForGCService(SharedHeapMetada* shared_heap_mem);
 
-  void SetZygoteProtection(void);
-  void HeapPrepareZygoteSpace(Thread*, bool);
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -496,9 +475,6 @@ class Heap {
   	return capacity_;
   }
 
-  bool isHaveZygoteSpace (){
-    return have_zygote_space_;
-  }
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

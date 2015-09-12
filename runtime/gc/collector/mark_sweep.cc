@@ -425,12 +425,11 @@ inline void MarkSweep::MarkObjectNonNull(const Object* obj) {
     return;
   }
 
-  // Try to take advantage of locality of references within a space, failing
-  // this find the space the hard way.
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
   accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SpaceBitmap* new_bitmap =
-        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (LIKELY(new_bitmap != NULL)) {
       object_bitmap = new_bitmap;
     } else {
@@ -492,8 +491,7 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
   // the hard way.
   accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SpaceBitmap* new_bitmap =
-        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (new_bitmap != NULL) {
       object_bitmap = new_bitmap;
     } else {
@@ -604,26 +602,6 @@ void MarkSweep::VerifyImageRootVisitor(Object* root, void* arg) {
   mark_sweep->CheckObject(root);
 }
 
-
-//void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
-//  CHECK(space->IsDlMallocSpace());
-//  space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
-//  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-//  accounting::SpaceBitmap* mark_bitmap = alloc_space->GetMarkBitmap();
-//  alloc_space->temp_bitmap_members_ =
-//      accounting::SpaceBitmap::BindBitmaps(mark_bitmap, live_bitmap);
-//  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-////  alloc_space->temp_bitmap_.reset(mark_bitmap);
-////  alloc_space->mark_bitmap_.reset(live_bitmap);
-////
-////
-////  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-////  accounting::SpaceBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
-////
-////
-////
-//}
-
 void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
   CHECK(space->IsDlMallocSpace());
   space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
@@ -655,8 +633,8 @@ class ScanObjectVisitor {
 template <bool kUseFinger = false>
 class MarkStackTask : public Task {
  public:
-  MarkStackTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
-                size_t mark_stack_size, const Object** mark_stack)
+  MarkStackTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, size_t mark_stack_size,
+                const Object** mark_stack)
       : mark_sweep_(mark_sweep),
         thread_pool_(thread_pool),
         mark_stack_pos_(mark_stack_size) {
@@ -790,16 +768,8 @@ class CardScanTask : public MarkStackTask<false> {
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
     accounting::CardTable* card_table = mark_sweep_->GetHeap()->GetCardTable();
-    if(gcservice::GCService::IsProcessRegistered()) {
-      GCSERV_CLIENT_ILOG << "Parallel start scanning cards " << reinterpret_cast<void*>(begin_) << " - "
-          << reinterpret_cast<void*>(end_);
-    }
     size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
     mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
-    if(gcservice::GCService::IsProcessRegistered()) {
-      GCSERV_CLIENT_ILOG << "Parallel done scanning cards " << reinterpret_cast<void*>(begin_) << " - "
-          << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
-    }
     VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
         << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
     // Finish by emptying our local mark stack.
@@ -859,8 +829,7 @@ void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
         mark_stack_->PopBackCount(static_cast<int32_t>(mark_stack_increment));
         DCHECK_EQ(mark_stack_end, mark_stack_->End());
         // Add the new task to the thread pool.
-        auto* task = new CardScanTask(thread_pool, this, space->GetMarkBitmap(),
-                                      card_begin,
+        auto* task = new CardScanTask(thread_pool, this, space->GetMarkBitmap(), card_begin,
                                       card_begin + card_increment, minimum_age,
                                       mark_stack_increment, mark_stack_end);
         thread_pool->AddTask(self, task);
@@ -921,15 +890,6 @@ void MarkSweep::VerifyImageRoots() {
       uintptr_t end = reinterpret_cast<uintptr_t>(image_space->End());
       accounting::SpaceBitmap* live_bitmap = image_space->GetLiveBitmap();
       DCHECK(live_bitmap != NULL);
-      if(gcservice::GCService::IsProcessRegistered()) {
-        GCSERV_CLIENT_ILOG << "MarkSweep::VerifyImageRoots --> " <<
-
-            StringPrintf("%s: %p-%p", live_bitmap->GetName().c_str(),
-                                  reinterpret_cast<void*>(begin),
-                                  reinterpret_cast<void*>(end));
-
-
-      }
       live_bitmap->VisitMarkedRange(begin, end, [this](const Object* obj) {
         if (kCheckLocks) {
           Locks::heap_bitmap_lock_->AssertSharedHeld(Thread::Current());
@@ -964,15 +924,6 @@ class RecursiveMarkTask : public MarkStackTask<false> {
   // Scans all of the objects
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
-    if(gcservice::GCService::IsProcessRegistered()) {
-      GCSERV_CLIENT_ILOG << "RecursiveMarkTask::Run --> " <<
-
-          StringPrintf("%s: %p-%p", "inside internal class",
-                                reinterpret_cast<void*>(begin_),
-                                reinterpret_cast<void*>(end_));
-
-
-    }
     bitmap_->VisitMarkedRange(begin_, end_, visitor);
     // Finish by emptying our local mark stack.
     MarkStackTask::Run(self);
@@ -1016,8 +967,7 @@ void MarkSweep::RecursiveMark() {
         if (parallel) {
           // We will use the mark stack the future.
           // CHECK(mark_stack_->IsEmpty());
-          // This function does not handle heap end increasing, so we must use
-          // the space end.
+          // This function does not handle heap end increasing, so we must use the space end.
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
           atomic_finger_ = static_cast<int32_t>(0xFFFFFFFF);
@@ -1030,9 +980,8 @@ void MarkSweep::RecursiveMark() {
             delta = RoundUp(delta, KB);
             if (delta < 16 * KB) delta = end - begin;
             begin += delta;
-            auto* task =
-                new RecursiveMarkTask(thread_pool, this, current_mark_bitmap_,
-                    start, begin);
+            auto* task = new RecursiveMarkTask(thread_pool, this, current_mark_bitmap_, start,
+                                               begin);
             thread_pool->AddTask(self, task);
           }
           thread_pool->SetMaxActiveWorkers(thread_count - 1);
@@ -1040,20 +989,9 @@ void MarkSweep::RecursiveMark() {
           thread_pool->Wait(self, true, true);
           thread_pool->StopWorkers(self);
         } else {
-          // This function does not handle heap end increasing, so we must use
-          // the space end.
+          // This function does not handle heap end increasing, so we must use the space end.
           uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
           uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
-          if(gcservice::GCService::IsProcessRegistered()) {
-            GCSERV_CLIENT_ILOG << "MarkSweep::RecursiveMark --> " <<
-
-                StringPrintf("%s; %s: %p-%p", space->GetName(),
-                     current_mark_bitmap_->GetName().c_str(),
-                                      reinterpret_cast<void*>(begin),
-                                      reinterpret_cast<void*>(end));
-
-
-          }
           current_mark_bitmap_->VisitMarkedRange(begin, end, scan_visitor);
         }
       }
@@ -1679,9 +1617,6 @@ void MarkSweep::UnBindBitmaps() {
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
       space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
-//      if (alloc_space->temp_bitmap_members_ != NULL) {
-//
-//      }
       if (alloc_space->temp_bitmap_.get() != NULL) {
         // At this point, the temp_bitmap holds our old mark bitmap.
         accounting::SpaceBitmap* new_bitmap = alloc_space->temp_bitmap_.release();
