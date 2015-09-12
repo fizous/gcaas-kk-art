@@ -88,7 +88,7 @@ void SharedDlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 void SharedDlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
   alloc_space_->recent_freed_objects_[alloc_space_->recent_free_pos_].first = ptr;
   alloc_space_->recent_freed_objects_[alloc_space_->recent_free_pos_].second = ptr->GetClass();
-  alloc_space_->recent_free_pos_ = (alloc_space_->recent_free_pos_ + 1) & kRecentFreeMask;
+  alloc_space_->recent_free_pos_ = (alloc_space_->recent_free_pos_ + 1) & kRecentFreeMaskService;
 }
 
 

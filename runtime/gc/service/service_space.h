@@ -131,8 +131,9 @@ class SharedDlMallocSpace : public DlMallocSpace {
                                size_t initial_size, size_t growth_limit,
                                size_t capacity, byte* requested_begin);
 
-  SharedDlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace,
-      byte* begin, byte* end, size_t growth_limit);
+  SharedDlMallocSpace(const std::string& name,
+      size_t initial_size, size_t growth_limit, size_t capacity,
+      byte* requested_begin, size_t starting_size);
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
