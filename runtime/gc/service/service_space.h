@@ -17,6 +17,9 @@ namespace art {
 namespace gc {
 namespace space {
 
+// Recent allocation buffer.
+static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
+static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
 
 typedef struct GCSrvceSpace_S {
   char name_[64];
@@ -76,7 +79,7 @@ typedef struct GCSrvceDlMallocSpace_S {
   size_t growth_limit_;
 
   std::pair<const mirror::Object*, mirror::Class*>
-                    recent_freed_objects_[SharedDlMallocSpace::kRecentFreeCount];
+                    recent_freed_objects_[kRecentFreeCount];
   size_t recent_free_pos_;
 
   // Approximate number of bytes which have been allocated into the space.
@@ -103,9 +106,7 @@ class SharedDlMallocSpace : public DlMallocSpace {
  public:
   // Alignment of objects within spaces.
   static const size_t kAlignment = 8;
-  // Recent allocation buffer.
-  static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
-  static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
+
   // The boundary tag overhead.
   static const size_t kChunkOverhead = kWordSize;
 
@@ -135,7 +136,7 @@ class SharedDlMallocSpace : public DlMallocSpace {
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
-    return alloc_space_->continuous_space_.space_header_.name;
+    return alloc_space_->continuous_space_.space_header_.name_;
   }
 
   // The policy of when objects are collected associated with this space.
@@ -192,16 +193,18 @@ class SharedDlMallocSpace : public DlMallocSpace {
 
   void Dump(std::ostream& os) const;
 
-  // Returns the number of bytes that the space has currently obtained from the system. This is
-  // greater or equal to the amount of live data in the space.
+  // Returns the number of bytes that the space has currently obtained from the
+  // system. This is greater or equal to the amount of live data in the space.
   size_t GetFootprint();
 
-  // Returns the number of bytes that the heap is allowed to obtain from the system via MoreCore.
+  // Returns the number of bytes that the heap is allowed to obtain from the
+  // system via MoreCore.
   size_t GetFootprintLimit();
 
-  // Set the maximum number of bytes that the heap is allowed to obtain from the system via
-  // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
-  // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
+  // Set the maximum number of bytes that the heap is allowed to obtain from
+  // the system via MoreCore. Note this is used to stop the mspace growing
+  // beyond the limit to Capacity. When allocations fail we GC before
+  // increasing the footprint limit and allowing the mspace to grow.
   void SetFootprintLimit(size_t limit);
 
   // Hands unused pages back to the system.
@@ -209,7 +212,8 @@ class SharedDlMallocSpace : public DlMallocSpace {
 
   void SetGrowthLimit(size_t growth_limit);
 
-  // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
+  // Swap the live and mark bitmaps of this space. This is used by the GC for
+  // concurrent sweeping.
   void SwapBitmaps();
 
 
