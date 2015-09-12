@@ -18,8 +18,8 @@ namespace gc {
 namespace space {
 
 // Recent allocation buffer.
-static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
-static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
+static constexpr size_t kRecentFreeCountService = kDebugSpaces ? (1 << 16) : 0;
+static constexpr size_t kRecentFreeMaskService = kRecentFreeCountService - 1;
 
 typedef struct GCSrvceSpace_S {
   char name_[64];
@@ -79,7 +79,7 @@ typedef struct GCSrvceDlMallocSpace_S {
   size_t growth_limit_;
 
   std::pair<const mirror::Object*, mirror::Class*>
-                    recent_freed_objects_[kRecentFreeCount];
+                    recent_freed_objects_[kRecentFreeCountService];
   size_t recent_free_pos_;
 
   // Approximate number of bytes which have been allocated into the space.
