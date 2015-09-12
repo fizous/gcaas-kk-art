@@ -205,6 +205,7 @@ class LogMessage {
 
   friend void HandleUnexpectedSignal(int signal_number, siginfo_t* info, void* raw_context);
   friend class Mutex;
+  friend class InterProcessMutex;
   DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
