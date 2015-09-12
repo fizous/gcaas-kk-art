@@ -37,7 +37,7 @@ typedef struct AShmemMap_S {
   AShmemMap_S(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot) :
         begin_(begin), size_(size),
-        base_begin_(base_begin), base_size_(base_size), prot_(prot){ strcpy(name_, name.c_str())}
+        base_begin_(base_begin), base_size_(base_size), prot_(prot){ strcpy(name_, name.c_str());}
 }  __attribute__((aligned(8))) AShmemMap;
 
 
