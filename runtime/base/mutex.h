@@ -78,7 +78,6 @@ class BaseMutex {
 
  protected:
   friend class ConditionVariable;
-  friend class ConditionVariable;
   friend class InterProcessConditionVariable;
 
   BaseMutex(const char* name, LockLevel level);
