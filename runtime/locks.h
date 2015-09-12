@@ -24,6 +24,7 @@
 namespace art {
 
 class LOCKABLE Mutex;
+class LOCKABLE InterProcessMutex;
 class LOCKABLE ReaderWriterMutex;
 
 // LockLevel is used to impose a lock hierarchy [1] where acquisition of a Mutex at a higher or
