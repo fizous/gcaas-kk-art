@@ -106,32 +106,37 @@ class MemMap {
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot) {
-    AShmemMap _data = {name.c_str(), begin, size, base_begin, base_size, prot};
+    AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot};
+    strcpy(_data.name_, name.c_str());
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 
 
-  static byte* Begin(AShmemMap* addr) const {
-    return addr->begin_;
+  static bool AshmemHasAddress(AShmemMap* record, const void* addr)  {
+    return AshmemBegin(record) <= addr && addr < AshmemEnd(record);
   }
 
-  static size_t Size(AShmemMap* addr) const {
+  static byte* AshmemBegin(AShmemMap* addr)  {
+    return const_cast<const byte*>(addr->begin_);
+  }
+
+  static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;
   }
 
-  static byte* End(AShmemMap* addr) const {
-    return Begin(addr) + Size(addr);
+  static byte* AshmemEnd(AShmemMap* addr)  {
+    return AshmemBegin(addr) + AshmemSize(addr);
   }
 
   // Trim by unmapping pages at the end of the map.
-  static void UnMapAtEnd(AShmemMap* addr, byte* new_end) {
-    size_t unmap_size = End(addr) - new_end;
+  static void AshmemUnMapAtEnd(AShmemMap* addr, byte* new_end) {
+    size_t unmap_size = AshmemEnd(addr) - new_end;
     munmap(new_end, unmap_size);
     addr->size_ -= unmap_size;
   }
 
 
-  static bool Protect(AShmemMap* addr, int prot) {
+  static bool AshmemProtect(AShmemMap* addr, int prot) {
     if (addr->base_begin_ == NULL && addr->base_size_ == 0) {
       addr->prot_ = prot;
       return true;
