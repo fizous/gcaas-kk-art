@@ -77,11 +77,11 @@ AShmemMap* MemMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
   // prefixed "dalvik-".
   std::string debug_friendly_name("dalvik-");
-  debug_friendly_name += name;
+  debug_friendly_name += ashmem_name;
   ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
   int flags = MAP_PRIVATE;
   if (fd.get() == -1) {
-    PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    PLOG(ERROR) << "ashmem_create_region failed (" << ashmem_name << ")";
     return NULL;
   }
 #else
@@ -94,7 +94,7 @@ AShmemMap* MemMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
+                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << ashmem_name
                 << "\n" << maps;
     return NULL;
   }
