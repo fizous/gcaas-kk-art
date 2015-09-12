@@ -291,26 +291,6 @@ void BaseMutex::DumpContention(std::ostream& os) const {
 }
 
 
-Mutex::Mutex(const char* name, LockLevel level, bool recursive)
-    : BaseMutex(name, level), recursive_(recursive), recursion_count_(0) {
-#if ART_USE_FUTEXES
-  state_ = 0;
-  exclusive_owner_ = 0;
-  num_contenders_ = 0;
-#elif defined(__BIONIC__) || defined(__APPLE__)
-  // Use recursive mutexes for bionic and Apple otherwise the
-  // non-recursive mutexes don't have TIDs to check lock ownership of.
-  pthread_mutexattr_t attributes;
-  CHECK_MUTEX_CALL(pthread_mutexattr_init, (&attributes));
-  CHECK_MUTEX_CALL(pthread_mutexattr_settype, (&attributes, PTHREAD_MUTEX_RECURSIVE));
-  CHECK_MUTEX_CALL(pthread_mutex_init, (&mutex_, &attributes));
-  CHECK_MUTEX_CALL(pthread_mutexattr_destroy, (&attributes));
-#else
-  CHECK_MUTEX_CALL(pthread_mutex_init, (&mutex_, NULL));
-#endif
-}
-
-
 void InterProcessMutex::CheckSafeToWait(Thread* self) {
   if (self == NULL) {
     CheckUnattachedThread(level_);
@@ -602,200 +582,27 @@ std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu) {
   mu.Dump(os);
   return os;
 }
-//////////////
-//InterProcessConditionVariable()
 
-InterProcessConditionVariable::InterProcessConditionVariable(InterProcessMutex& mutex,
-    const char* name, SharedConditionVarData* sharedMem) :
-        name_(name), guard_(mutex), sharedCondVar_(sharedMem) {
 
-}
-
-InterProcessConditionVariable::InterProcessConditionVariable(const char* name,
-    InterProcessMutex& guard, SharedConditionVarData* sharedMem)
-    : name_(name), guard_(guard) {
-  sharedCondVar_ = sharedMem;
+Mutex::Mutex(const char* name, LockLevel level, bool recursive)
+    : BaseMutex(name, level), recursive_(recursive), recursion_count_(0) {
 #if ART_USE_FUTEXES
-  sharedCondVar_->sequence_ = 0;
-  sharedCondVar_->num_waiters_ = 0;
+  state_ = 0;
+  exclusive_owner_ = 0;
+  num_contenders_ = 0;
+#elif defined(__BIONIC__) || defined(__APPLE__)
+  // Use recursive mutexes for bionic and Apple otherwise the
+  // non-recursive mutexes don't have TIDs to check lock ownership of.
+  pthread_mutexattr_t attributes;
+  CHECK_MUTEX_CALL(pthread_mutexattr_init, (&attributes));
+  CHECK_MUTEX_CALL(pthread_mutexattr_settype, (&attributes, PTHREAD_MUTEX_RECURSIVE));
+  CHECK_MUTEX_CALL(pthread_mutex_init, (&mutex_, &attributes));
+  CHECK_MUTEX_CALL(pthread_mutexattr_destroy, (&attributes));
 #else
-  CHECK_MUTEX_CALL(pthread_condattr_init,
-      (&sharedCondVar_->attr_));
-  CHECK_MUTEX_CALL(pthread_condattr_setpshared,
-      (&sharedCondVar_->attr_, PTHREAD_PROCESS_SHARED));
-  CHECK_MUTEX_CALL(pthread_cond_init,
-      (&sharedCondVar_->cond_, &sharedCondVar_->attr_));
+  CHECK_MUTEX_CALL(pthread_mutex_init, (&mutex_, NULL));
 #endif
 }
 
-InterProcessConditionVariable::~InterProcessConditionVariable() {
-#if ART_USE_FUTEXES
-  if (sharedCondVar_->num_waiters_!= 0) {
-    MutexLock mu(Thread::Current(), *Locks::runtime_shutdown_lock_);
-    Runtime* runtime = Runtime::Current();
-    bool shutting_down = (runtime == NULL) || runtime->IsShuttingDown();
-    LOG(shutting_down ? WARNING : FATAL) <<
-        "ConditionVariable::~ConditionVariable for " << name_
-        << " called with " << sharedCondVar_->num_waiters_ << " waiters.";
-  }
-#else
-  // We can't use CHECK_MUTEX_CALL here because on shutdown a suspended daemon thread
-  // may still be using condition variables.
-  int rc = pthread_cond_destroy(&sharedCondVar_->cond_);
-  if (rc != 0) {
-    errno = rc;
-    MutexLock mu(Thread::Current(), *Locks::runtime_shutdown_lock_);
-    Runtime* runtime = Runtime::Current();
-    bool shutting_down = (runtime == NULL) || runtime->IsShuttingDown();
-    PLOG(shutting_down ? WARNING : FATAL) <<
-        "pthread_cond_destroy failed for " << name_;
-  }
-#endif
-}
-
-
-
-void InterProcessConditionVariable::Broadcast(Thread* self) {
-  DCHECK(self == NULL || self == Thread::Current());
-  // TODO: enable below, there's a race in thread creation that causes false failures currently.
-  // guard_.AssertExclusiveHeld(self);
-  DCHECK_EQ(guard_.GetExclusiveOwnerTid(), SafeGetTid(self));
-#if ART_USE_FUTEXES
-  if (sharedCondVar_->num_waiters_ > 0) {
-    android_atomic_inc(&sharedCondVar_->sequence_);  // Indicate the broadcast occurred.
-    bool done = false;
-    do {
-      int32_t cur_sequence = sharedCondVar_->sequence_;
-      // Requeue waiters onto mutex. The waiter holds the contender count on the mutex high ensuring
-      // mutex unlocks will awaken the requeued waiter thread.
-      done = futex(&sharedCondVar_->sequence_, FUTEX_CMP_REQUEUE, 0,
-                   reinterpret_cast<const timespec*>(std::numeric_limits<int32_t>::max()),
-                   &guard_.futexData_->state_, cur_sequence) != -1;
-      if (!done) {
-        if (errno != EAGAIN) {
-          PLOG(FATAL) << "futex cmp requeue failed for " << name_;
-        }
-      }
-    } while (!done);
-  }
-#else
-  CHECK_MUTEX_CALL(pthread_cond_broadcast, (&sharedCondVar_->cond_));
-#endif
-}
-
-
-void InterProcessConditionVariable::Signal(Thread* self) {
-  DCHECK(self == NULL || self == Thread::Current());
-  guard_.AssertExclusiveHeld(self);
-#if ART_USE_FUTEXES
-  if (sharedCondVar_->num_waiters_ > 0) {
-    android_atomic_inc(&sharedCondVar_->sequence_);  // Indicate a signal occurred.
-    // Futex wake 1 waiter who will then come and in contend on mutex. It'd be nice to requeue them
-    // to avoid this, however, requeueing can only move all waiters.
-    int num_woken = futex(&sharedCondVar_->sequence_, FUTEX_WAKE, 1, NULL, NULL, 0);
-    // Check something was woken or else we changed sequence_ before they had chance to wait.
-    CHECK((num_woken == 0) || (num_woken == 1));
-  }
-#else
-  CHECK_MUTEX_CALL(pthread_cond_signal, (&sharedCondVar_->cond_));
-#endif
-}
-
-
-void InterProcessConditionVariable::Wait(Thread* self) {
-  guard_.CheckSafeToWait(self);
-  WaitHoldingLocks(self);
-}
-
-
-void InterProcessConditionVariable::WaitHoldingLocks(Thread* self) {
-  DCHECK(self == NULL || self == Thread::Current());
-  guard_.AssertExclusiveHeld(self);
-  unsigned int old_recursion_count = guard_.futexData_->recursion_count_;
-#if ART_USE_FUTEXES
-  sharedCondVar_->num_waiters_++;
-  // Ensure the Mutex is contended so that requeued threads are awoken.
-  android_atomic_inc(&guard_.futexData_->num_contenders_);
-  guard_.futexData_->recursion_count_ = 1;
-  int32_t cur_sequence = sharedCondVar_->sequence_;
-  guard_.ExclusiveUnlock(self);
-  if (futex(&sharedCondVar_->sequence_, FUTEX_WAIT, cur_sequence, NULL, NULL, 0) != 0) {
-    // Futex failed, check it is an expected error.
-    // EAGAIN == EWOULDBLK, so we let the caller try again.
-    // EINTR implies a signal was sent to this thread.
-    if ((errno != EINTR) && (errno != EAGAIN)) {
-      PLOG(FATAL) << "futex wait failed for " << name_;
-    }
-  }
-  guard_.ExclusiveLock(self);
-  CHECK_GE(sharedCondVar_->num_waiters_, 0);
-  sharedCondVar_->num_waiters_--;
-  // We awoke and so no longer require awakes from the guard_'s unlock.
-  CHECK_GE(guard_.futexData_->num_contenders_, 0);
-  android_atomic_dec(&guard_.futexData_->num_contenders_);
-#else
-  guard_.futexData_->recursion_count_ = 0;
-  CHECK_MUTEX_CALL(pthread_cond_wait, (&sharedCondVar_->cond_,
-      &guard_.futexData_->mutex_));
-#endif
-  guard_.futexData_->recursion_count_ = old_recursion_count;
-}
-
-
-void InterProcessConditionVariable::TimedWait(Thread* self, int64_t ms,
-    int32_t ns) {
-  DCHECK(self == NULL || self == Thread::Current());
-  guard_.AssertExclusiveHeld(self);
-  guard_.CheckSafeToWait(self);
-  unsigned int old_recursion_count = guard_.futexData_->recursion_count_;
-#if ART_USE_FUTEXES
-  timespec rel_ts;
-  InitTimeSpec(false, CLOCK_REALTIME, ms, ns, &rel_ts);
-  sharedCondVar_->num_waiters_++;
-  // Ensure the Mutex is contended so that requeued threads are awoken.
-  android_atomic_inc(&guard_.futexData_->num_contenders_);
-  guard_.futexData_->recursion_count_ = 1;
-  int32_t cur_sequence = sharedCondVar_->sequence_;
-  guard_.ExclusiveUnlock(self);
-  if (futex(&sharedCondVar_->sequence_, FUTEX_WAIT, cur_sequence, &rel_ts, NULL, 0) != 0) {
-    if (errno == ETIMEDOUT) {
-      // Timed out we're done.
-    } else if ((errno == EAGAIN) || (errno == EINTR)) {
-      // A signal or ConditionVariable::Signal/Broadcast has come in.
-    } else {
-      PLOG(FATAL) << "timed futex wait failed for " << name_;
-    }
-  }
-  guard_.ExclusiveLock(self);
-  CHECK_GE(sharedCondVar_->num_waiters_, 0);
-  sharedCondVar_->num_waiters_--;
-  // We awoke and so no longer require awakes from the guard_'s unlock.
-  CHECK_GE(guard_.futexData_->num_contenders_, 0);
-  android_atomic_dec(&guard_.futexData_->num_contenders_);
-#else
-#ifdef HAVE_TIMEDWAIT_MONOTONIC
-#define TIMEDWAIT pthread_cond_timedwait_monotonic
-  int clock = CLOCK_MONOTONIC;
-#else
-#define TIMEDWAIT pthread_cond_timedwait
-  int clock = CLOCK_REALTIME;
-#endif
-  guard_.futexData_->recursion_count_ = 0;
-  timespec ts;
-  InitTimeSpec(true, clock, ms, ns, &ts);
-  int rc = TEMP_FAILURE_RETRY(TIMEDWAIT(&sharedCondVar_->cond_,
-      &guard_.futexData_->mutex_, &ts));
-  if (rc != 0 && rc != ETIMEDOUT) {
-    errno = rc;
-    PLOG(FATAL) << "TimedWait failed for " << name_;
-  }
-#endif
-  guard_.futexData_->recursion_count_ = old_recursion_count;
-}
-
-
-//////////////////////
-//Mutex()
 Mutex::~Mutex() {
 #if ART_USE_FUTEXES
   if (state_ != 0) {
@@ -1028,6 +835,14 @@ ReaderWriterMutex::~ReaderWriterMutex() {
 #endif
 }
 
+
+int BaseMutex::IsARTUseFutex(){
+#if ART_USE_FUTEXES
+    return 1;
+#endif
+    return 0;
+}
+
 void ReaderWriterMutex::ExclusiveLock(Thread* self) {
   DCHECK(self == NULL || self == Thread::Current());
   AssertNotExclusiveHeld(self);
@@ -1237,6 +1052,195 @@ void ReaderWriterMutex::Dump(std::ostream& os) const {
 std::ostream& operator<<(std::ostream& os, const ReaderWriterMutex& mu) {
   mu.Dump(os);
   return os;
+}
+
+
+InterProcessConditionVariable::InterProcessConditionVariable(InterProcessMutex& mutex,
+    const char* name, SharedConditionVarData* sharedMem) :
+        name_(name), guard_(mutex), sharedCondVar_(sharedMem) {
+
+}
+
+InterProcessConditionVariable::InterProcessConditionVariable(const char* name,
+    InterProcessMutex& guard, SharedConditionVarData* sharedMem)
+    : name_(name), guard_(guard) {
+  sharedCondVar_ = sharedMem;
+#if ART_USE_FUTEXES
+  sharedCondVar_->sequence_ = 0;
+  sharedCondVar_->num_waiters_ = 0;
+#else
+  CHECK_MUTEX_CALL(pthread_condattr_init,
+      (&sharedCondVar_->attr_));
+  CHECK_MUTEX_CALL(pthread_condattr_setpshared,
+      (&sharedCondVar_->attr_, PTHREAD_PROCESS_SHARED));
+  CHECK_MUTEX_CALL(pthread_cond_init,
+      (&sharedCondVar_->cond_, &sharedCondVar_->attr_));
+#endif
+}
+
+InterProcessConditionVariable::~InterProcessConditionVariable() {
+#if ART_USE_FUTEXES
+  if (sharedCondVar_->num_waiters_!= 0) {
+    MutexLock mu(Thread::Current(), *Locks::runtime_shutdown_lock_);
+    Runtime* runtime = Runtime::Current();
+    bool shutting_down = (runtime == NULL) || runtime->IsShuttingDown();
+    LOG(shutting_down ? WARNING : FATAL) <<
+        "ConditionVariable::~ConditionVariable for " << name_
+        << " called with " << sharedCondVar_->num_waiters_ << " waiters.";
+  }
+#else
+  // We can't use CHECK_MUTEX_CALL here because on shutdown a suspended daemon thread
+  // may still be using condition variables.
+  int rc = pthread_cond_destroy(&sharedCondVar_->cond_);
+  if (rc != 0) {
+    errno = rc;
+    MutexLock mu(Thread::Current(), *Locks::runtime_shutdown_lock_);
+    Runtime* runtime = Runtime::Current();
+    bool shutting_down = (runtime == NULL) || runtime->IsShuttingDown();
+    PLOG(shutting_down ? WARNING : FATAL) <<
+        "pthread_cond_destroy failed for " << name_;
+  }
+#endif
+}
+
+
+
+void InterProcessConditionVariable::Broadcast(Thread* self) {
+  DCHECK(self == NULL || self == Thread::Current());
+  // TODO: enable below, there's a race in thread creation that causes false failures currently.
+  // guard_.AssertExclusiveHeld(self);
+  DCHECK_EQ(guard_.GetExclusiveOwnerTid(), SafeGetTid(self));
+#if ART_USE_FUTEXES
+  if (sharedCondVar_->num_waiters_ > 0) {
+    android_atomic_inc(&sharedCondVar_->sequence_);  // Indicate the broadcast occurred.
+    bool done = false;
+    do {
+      int32_t cur_sequence = sharedCondVar_->sequence_;
+      // Requeue waiters onto mutex. The waiter holds the contender count on the mutex high ensuring
+      // mutex unlocks will awaken the requeued waiter thread.
+      done = futex(&sharedCondVar_->sequence_, FUTEX_CMP_REQUEUE, 0,
+                   reinterpret_cast<const timespec*>(std::numeric_limits<int32_t>::max()),
+                   &guard_.futexData_->state_, cur_sequence) != -1;
+      if (!done) {
+        if (errno != EAGAIN) {
+          PLOG(FATAL) << "futex cmp requeue failed for " << name_;
+        }
+      }
+    } while (!done);
+  }
+#else
+  CHECK_MUTEX_CALL(pthread_cond_broadcast, (&sharedCondVar_->cond_));
+#endif
+}
+
+
+void InterProcessConditionVariable::Signal(Thread* self) {
+  DCHECK(self == NULL || self == Thread::Current());
+  guard_.AssertExclusiveHeld(self);
+#if ART_USE_FUTEXES
+  if (sharedCondVar_->num_waiters_ > 0) {
+    android_atomic_inc(&sharedCondVar_->sequence_);  // Indicate a signal occurred.
+    // Futex wake 1 waiter who will then come and in contend on mutex. It'd be nice to requeue them
+    // to avoid this, however, requeueing can only move all waiters.
+    int num_woken = futex(&sharedCondVar_->sequence_, FUTEX_WAKE, 1, NULL, NULL, 0);
+    // Check something was woken or else we changed sequence_ before they had chance to wait.
+    CHECK((num_woken == 0) || (num_woken == 1));
+  }
+#else
+  CHECK_MUTEX_CALL(pthread_cond_signal, (&sharedCondVar_->cond_));
+#endif
+}
+
+
+void InterProcessConditionVariable::Wait(Thread* self) {
+  guard_.CheckSafeToWait(self);
+  WaitHoldingLocks(self);
+}
+
+
+void InterProcessConditionVariable::WaitHoldingLocks(Thread* self) {
+  DCHECK(self == NULL || self == Thread::Current());
+  guard_.AssertExclusiveHeld(self);
+  unsigned int old_recursion_count = guard_.futexData_->recursion_count_;
+#if ART_USE_FUTEXES
+  sharedCondVar_->num_waiters_++;
+  // Ensure the Mutex is contended so that requeued threads are awoken.
+  android_atomic_inc(&guard_.futexData_->num_contenders_);
+  guard_.futexData_->recursion_count_ = 1;
+  int32_t cur_sequence = sharedCondVar_->sequence_;
+  guard_.ExclusiveUnlock(self);
+  if (futex(&sharedCondVar_->sequence_, FUTEX_WAIT, cur_sequence, NULL, NULL, 0) != 0) {
+    // Futex failed, check it is an expected error.
+    // EAGAIN == EWOULDBLK, so we let the caller try again.
+    // EINTR implies a signal was sent to this thread.
+    if ((errno != EINTR) && (errno != EAGAIN)) {
+      PLOG(FATAL) << "futex wait failed for " << name_;
+    }
+  }
+  guard_.ExclusiveLock(self);
+  CHECK_GE(sharedCondVar_->num_waiters_, 0);
+  sharedCondVar_->num_waiters_--;
+  // We awoke and so no longer require awakes from the guard_'s unlock.
+  CHECK_GE(guard_.futexData_->num_contenders_, 0);
+  android_atomic_dec(&guard_.futexData_->num_contenders_);
+#else
+  guard_.futexData_->recursion_count_ = 0;
+  CHECK_MUTEX_CALL(pthread_cond_wait, (&sharedCondVar_->cond_,
+      &guard_.futexData_->mutex_));
+#endif
+  guard_.futexData_->recursion_count_ = old_recursion_count;
+}
+
+
+void InterProcessConditionVariable::TimedWait(Thread* self, int64_t ms,
+    int32_t ns) {
+  DCHECK(self == NULL || self == Thread::Current());
+  guard_.AssertExclusiveHeld(self);
+  guard_.CheckSafeToWait(self);
+  unsigned int old_recursion_count = guard_.futexData_->recursion_count_;
+#if ART_USE_FUTEXES
+  timespec rel_ts;
+  InitTimeSpec(false, CLOCK_REALTIME, ms, ns, &rel_ts);
+  sharedCondVar_->num_waiters_++;
+  // Ensure the Mutex is contended so that requeued threads are awoken.
+  android_atomic_inc(&guard_.futexData_->num_contenders_);
+  guard_.futexData_->recursion_count_ = 1;
+  int32_t cur_sequence = sharedCondVar_->sequence_;
+  guard_.ExclusiveUnlock(self);
+  if (futex(&sharedCondVar_->sequence_, FUTEX_WAIT, cur_sequence, &rel_ts, NULL, 0) != 0) {
+    if (errno == ETIMEDOUT) {
+      // Timed out we're done.
+    } else if ((errno == EAGAIN) || (errno == EINTR)) {
+      // A signal or ConditionVariable::Signal/Broadcast has come in.
+    } else {
+      PLOG(FATAL) << "timed futex wait failed for " << name_;
+    }
+  }
+  guard_.ExclusiveLock(self);
+  CHECK_GE(sharedCondVar_->num_waiters_, 0);
+  sharedCondVar_->num_waiters_--;
+  // We awoke and so no longer require awakes from the guard_'s unlock.
+  CHECK_GE(guard_.futexData_->num_contenders_, 0);
+  android_atomic_dec(&guard_.futexData_->num_contenders_);
+#else
+#ifdef HAVE_TIMEDWAIT_MONOTONIC
+#define TIMEDWAIT pthread_cond_timedwait_monotonic
+  int clock = CLOCK_MONOTONIC;
+#else
+#define TIMEDWAIT pthread_cond_timedwait
+  int clock = CLOCK_REALTIME;
+#endif
+  guard_.futexData_->recursion_count_ = 0;
+  timespec ts;
+  InitTimeSpec(true, clock, ms, ns, &ts);
+  int rc = TEMP_FAILURE_RETRY(TIMEDWAIT(&sharedCondVar_->cond_,
+      &guard_.futexData_->mutex_, &ts));
+  if (rc != 0 && rc != ETIMEDOUT) {
+    errno = rc;
+    PLOG(FATAL) << "TimedWait failed for " << name_;
+  }
+#endif
+  guard_.futexData_->recursion_count_ = old_recursion_count;
 }
 
 ConditionVariable::ConditionVariable(const char* name, Mutex& guard)

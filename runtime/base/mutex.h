@@ -65,6 +65,8 @@ const size_t kAllMutexDataSize = kLogLockContentions ? 1 : 0;
 // Base class for all Mutex implementations
 class BaseMutex {
  public:
+  static int IsARTUseFutex();
+
   const char* GetName() const {
     return name_;
   }
@@ -123,152 +125,6 @@ class BaseMutex {
     return false;
   }
 };
-
-
-typedef struct SharedFutexData_S {
-#if ART_USE_FUTEXES
-  // 0 is unheld, 1 is held.
-  volatile int32_t state_;
-  // Exclusive owner.
-  volatile uint64_t exclusive_owner_;
-  // Number of waiting contenders.
-  volatile int32_t num_contenders_;
-#else//ART_USE_FUTEXES
-  pthread_mutexattr_t attr_;
-  pthread_mutex_t mutex_;
-#endif//ART_USE_FUTEXES
-
-  int recursive_;  // Can the lock be recursively held?
-  unsigned int recursion_count_;
-} __attribute__((aligned(8))) SharedFutexData;
-
-
-
-typedef struct SharedConditionVarData_S {
-#if ART_USE_FUTEXES
-  // A counter that is modified by signals and broadcasts. This ensures that when a waiter gives up
-  // their Mutex and another thread takes it and signals, the waiting thread observes that sequence_
-  // changed and doesn't enter the wait. Modified while holding guard_, but is read by futex wait
-  // without guard_ held.
-  volatile int32_t sequence_;
-  // Number of threads that have come into to wait, not the length of the waiters on the futex as
-  // waiters may have been requeued onto guard_. Guarded by guard_.
-  volatile int32_t num_waiters_;
-#else
-  pthread_cond_t cond_;
-  pthread_condattr_t attr_;
-#endif
-}  __attribute__((aligned(8))) SharedConditionVarData;
-
-
-
-typedef struct SynchronizedLockHead_S {
-  SharedFutexData futex_head_;
-  SharedConditionVarData cond_var_;
-} __attribute__((aligned(8)))  SynchronizedLockHead;
-
-
-class InterProcessConditionVariable;
-
-
-class LOCKABLE InterProcessMutex : public BaseMutex {
- public:
-  explicit InterProcessMutex(const char* name,  SharedFutexData* futexMem,
-      LockLevel level = kDefaultMutexLevel, int recursive = 0);
-
-  /* does not initialize the memory  of the mutex */
-  explicit InterProcessMutex(SharedFutexData* futexMem,
-      const char* name, LockLevel level = kDefaultMutexLevel, int recursive = 0);
-  ~InterProcessMutex();
-
-  void ExclusiveLock(Thread* self) EXCLUSIVE_LOCK_FUNCTION();
-  void Lock(Thread* self) EXCLUSIVE_LOCK_FUNCTION() {  ExclusiveLock(self); }
-
-
-  // Returns true if acquires exclusive access, false otherwise.
-  bool ExclusiveTryLock(Thread* self) EXCLUSIVE_TRYLOCK_FUNCTION(true);
-  bool TryLock(Thread* self) EXCLUSIVE_TRYLOCK_FUNCTION(true) {
-    return ExclusiveTryLock(self);
-  }
-
-  // Release exclusive access.
-  void ExclusiveUnlock(Thread* self) UNLOCK_FUNCTION();
-  void Unlock(Thread* self) UNLOCK_FUNCTION() {  ExclusiveUnlock(self); }
-
-
-  // Returns how many times this Mutex has been locked, it is better to use AssertHeld/NotHeld.
-  unsigned int GetDepth() const {
-    return futexData_->recursion_count_;
-  }
-
-  // Is the current thread the exclusive holder of the Mutex.
-  bool IsExclusiveHeld(const Thread* self) const;
-
-  // Assert that the Mutex is exclusively held by the current thread.
-  void AssertExclusiveHeld(const Thread* self) {
-    if (kDebugLocking && (gAborting == 0)) {
-      CHECK(IsExclusiveHeld(self)) << *this;
-    }
-  }
-  void AssertHeld(const Thread* self) { AssertExclusiveHeld(self); }
-
-  // Assert that the Mutex is not held by the current thread.
-  void AssertNotHeldExclusive(const Thread* self) {
-    if (kDebugLocking && (gAborting == 0)) {
-      CHECK(!IsExclusiveHeld(self)) << *this;
-    }
-  }
-  void AssertNotHeld(const Thread* self) { AssertNotHeldExclusive(self); }
-
-  void RegisterAsInterProcessLocked(Thread*);
-
-  void RegisterAsInterProcessUnlocked(Thread*);
-
-  // Id associated with exclusive owner.
-  uint64_t GetExclusiveOwnerTid() const;
-
-  void Dump(std::ostream& os) const;
-
-  void CheckSafeToWait(Thread* self);
- private:
-  SharedFutexData* futexData_;
-  void InitFutexData(SharedFutexData*, int);
-  DISALLOW_COPY_AND_ASSIGN(InterProcessMutex);
-  friend class InterProcessConditionVariable;
-};//InterProcessMutex
-std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
-
-// ConditionVariables allow threads to queue and sleep. Threads may then be resumed individually
-// (Signal) or all at once (Broadcast).
-class InterProcessConditionVariable {
- public:
-  explicit InterProcessConditionVariable(const char* name,
-      InterProcessMutex& mutex, SharedConditionVarData* sharedMem);
-  /* does not initialize the shared memory */
-  explicit InterProcessConditionVariable(InterProcessMutex& mutex,
-      const char* name, SharedConditionVarData* sharedMem);
-  ~InterProcessConditionVariable();
-
-  void Broadcast(Thread* self);
-  void Signal(Thread* self);
-  // TODO: No thread safety analysis on Wait and TimedWait as they call mutex operations via their
-  //       pointer copy, thereby defeating annotalysis.
-  void Wait(Thread* self) NO_THREAD_SAFETY_ANALYSIS;
-  void TimedWait(Thread* self, int64_t ms, int32_t ns) NO_THREAD_SAFETY_ANALYSIS;
-  // Variant of Wait that should be used with caution. Doesn't validate that no mutexes are held
-  // when waiting.
-  // TODO: remove this.
-  void WaitHoldingLocks(Thread* self) NO_THREAD_SAFETY_ANALYSIS;
-
- private:
-  const char* const name_;
-  // The Mutex being used by waiters. It is an error to mix condition variables between different
-  // Mutexes.
-  InterProcessMutex& guard_;
-  SharedConditionVarData* sharedCondVar_;
-  DISALLOW_COPY_AND_ASSIGN(InterProcessConditionVariable);
-};
-
 
 // A Mutex is used to achieve mutual exclusion between threads. A Mutex can be used to gain
 // exclusive access to what it guards. A Mutex can be in one of two states:
@@ -347,6 +203,119 @@ class LOCKABLE Mutex : public BaseMutex {
   friend class ConditionVariable;
   DISALLOW_COPY_AND_ASSIGN(Mutex);
 };
+
+
+typedef struct SharedFutexData_S {
+#if ART_USE_FUTEXES
+  // 0 is unheld, 1 is held.
+  volatile int32_t state_;
+  // Exclusive owner.
+  volatile uint64_t exclusive_owner_;
+  // Number of waiting contenders.
+  volatile int32_t num_contenders_;
+#else//ART_USE_FUTEXES
+  pthread_mutexattr_t attr_;
+  pthread_mutex_t mutex_;
+#endif//ART_USE_FUTEXES
+
+  int recursive_;  // Can the lock be recursively held?
+  unsigned int recursion_count_;
+} __attribute__((aligned(8))) SharedFutexData;
+
+
+
+typedef struct SharedConditionVarData_S {
+#if ART_USE_FUTEXES
+  // A counter that is modified by signals and broadcasts. This ensures that when a waiter gives up
+  // their Mutex and another thread takes it and signals, the waiting thread observes that sequence_
+  // changed and doesn't enter the wait. Modified while holding guard_, but is read by futex wait
+  // without guard_ held.
+  volatile int32_t sequence_;
+  // Number of threads that have come into to wait, not the length of the waiters on the futex as
+  // waiters may have been requeued onto guard_. Guarded by guard_.
+  volatile int32_t num_waiters_;
+#else
+  pthread_cond_t cond_;
+  pthread_condattr_t attr_;
+#endif
+}  __attribute__((aligned(8))) SharedConditionVarData;
+
+
+
+typedef struct SynchronizedLockHead_S {
+  SharedFutexData futex_head_;
+  SharedConditionVarData cond_var_;
+} __attribute__((aligned(8)))  SynchronizedLockHead;
+
+
+
+std::ostream& operator<<(std::ostream& os, const InterProcessMutex& mu);
+class LOCKABLE InterProcessMutex : public BaseMutex {
+ public:
+  explicit InterProcessMutex(const char* name,  SharedFutexData* futexMem,
+      LockLevel level = kDefaultMutexLevel, int recursive = 0);
+
+  /* does not initialize the memory  of the mutex */
+  explicit InterProcessMutex(SharedFutexData* futexMem,
+      const char* name, LockLevel level = kDefaultMutexLevel, int recursive = 0);
+  ~InterProcessMutex();
+
+  void ExclusiveLock(Thread* self) EXCLUSIVE_LOCK_FUNCTION();
+  void Lock(Thread* self) EXCLUSIVE_LOCK_FUNCTION() {  ExclusiveLock(self); }
+
+
+  // Returns true if acquires exclusive access, false otherwise.
+  bool ExclusiveTryLock(Thread* self) EXCLUSIVE_TRYLOCK_FUNCTION(true);
+  bool TryLock(Thread* self) EXCLUSIVE_TRYLOCK_FUNCTION(true) {
+    return ExclusiveTryLock(self);
+  }
+
+  // Release exclusive access.
+  void ExclusiveUnlock(Thread* self) UNLOCK_FUNCTION();
+  void Unlock(Thread* self) UNLOCK_FUNCTION() {  ExclusiveUnlock(self); }
+
+
+  // Returns how many times this Mutex has been locked, it is better to use AssertHeld/NotHeld.
+  unsigned int GetDepth() const {
+    return futexData_->recursion_count_;
+  }
+
+  // Is the current thread the exclusive holder of the Mutex.
+  bool IsExclusiveHeld(const Thread* self) const;
+
+  // Assert that the Mutex is exclusively held by the current thread.
+  void AssertExclusiveHeld(const Thread* self) {
+    if (kDebugLocking && (gAborting == 0)) {
+      CHECK(IsExclusiveHeld(self)) << *this;
+    }
+  }
+  void AssertHeld(const Thread* self) { AssertExclusiveHeld(self); }
+
+  // Assert that the Mutex is not held by the current thread.
+  void AssertNotHeldExclusive(const Thread* self) {
+    if (kDebugLocking && (gAborting == 0)) {
+      CHECK(!IsExclusiveHeld(self)) << *this;
+    }
+  }
+  void AssertNotHeld(const Thread* self) { AssertNotHeldExclusive(self); }
+
+  void RegisterAsInterProcessLocked(Thread*);
+
+  void RegisterAsInterProcessUnlocked(Thread*);
+
+  // Id associated with exclusive owner.
+  uint64_t GetExclusiveOwnerTid() const;
+
+  void Dump(std::ostream& os) const;
+
+  void CheckSafeToWait(Thread* self);
+ private:
+  SharedFutexData* futexData_;
+  void InitFutexData(SharedFutexData*, int);
+  DISALLOW_COPY_AND_ASSIGN(InterProcessMutex);
+  friend class InterProcessConditionVariable;
+};//InterProcessMutex
+
 
 // A ReaderWriterMutex is used to achieve mutual exclusion between threads, similar to a Mutex.
 // Unlike a Mutex a ReaderWriterMutex can be used to gain exclusive (writer) or shared (reader)
@@ -494,6 +463,57 @@ class ConditionVariable {
   pthread_cond_t cond_;
 #endif
   DISALLOW_COPY_AND_ASSIGN(ConditionVariable);
+};
+
+
+// ConditionVariables allow threads to queue and sleep. Threads may then be resumed individually
+// (Signal) or all at once (Broadcast).
+class InterProcessConditionVariable {
+ public:
+  explicit InterProcessConditionVariable(const char* name,
+      InterProcessMutex& mutex, SharedConditionVarData* sharedMem);
+  /* does not initialize the shared memory */
+  explicit InterProcessConditionVariable(InterProcessMutex& mutex,
+      const char* name, SharedConditionVarData* sharedMem);
+  ~InterProcessConditionVariable();
+
+  void Broadcast(Thread* self);
+  void Signal(Thread* self);
+  // TODO: No thread safety analysis on Wait and TimedWait as they call mutex operations via their
+  //       pointer copy, thereby defeating annotalysis.
+  void Wait(Thread* self) NO_THREAD_SAFETY_ANALYSIS;
+  void TimedWait(Thread* self, int64_t ms, int32_t ns) NO_THREAD_SAFETY_ANALYSIS;
+  // Variant of Wait that should be used with caution. Doesn't validate that no mutexes are held
+  // when waiting.
+  // TODO: remove this.
+  void WaitHoldingLocks(Thread* self) NO_THREAD_SAFETY_ANALYSIS;
+
+ private:
+  const char* const name_;
+  // The Mutex being used by waiters. It is an error to mix condition variables between different
+  // Mutexes.
+  InterProcessMutex& guard_;
+  SharedConditionVarData* sharedCondVar_;
+  DISALLOW_COPY_AND_ASSIGN(InterProcessConditionVariable);
+};
+
+
+// Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it
+// upon destruction.
+class SCOPED_LOCKABLE IterProcMutexLock {
+ public:
+  explicit IterProcMutexLock(Thread* self, InterProcessMutex& mu) EXCLUSIVE_LOCK_FUNCTION(mu) : self_(self), mu_(mu) {
+    mu_.ExclusiveLock(self_);
+  }
+
+  ~IterProcMutexLock() UNLOCK_FUNCTION() {
+    mu_.ExclusiveUnlock(self_);
+  }
+
+ private:
+  Thread* const self_;
+  InterProcessMutex& mu_;
+  DISALLOW_COPY_AND_ASSIGN(IterProcMutexLock);
 };
 
 // Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it
