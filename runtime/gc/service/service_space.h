@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "utils.h"
 #include "gc/space/space_common.h"
+#include "gc/space/dlmalloc_space.h"
 
 namespace art {
 namespace gc {
@@ -54,7 +55,7 @@ typedef struct GCSrvceBitmap_S {
 
 
 class SharedDlMallocSpace;
-
+class DlMallocSpace;
 
 typedef struct GCSrvceDlMallocSpace_S {
   GCSrvceContinuousSpace continuous_space_;
