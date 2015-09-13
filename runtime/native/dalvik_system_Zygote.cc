@@ -401,7 +401,7 @@ static bool NeedsNoRandomizeWorkaround() {
 }
 #endif
 
-#if ART_GC_SERVICE
+#if (0 && ART_GC_SERVICE)
 // Utility routine to fork zygote and specialize the child process.
 static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,
@@ -641,7 +641,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
                                            jint debug_flags, jobjectArray rlimits, jint mount_external,
                                            jstring se_info, jstring se_name) {
-#if ART_GC_SERVICE
+#if (0 && ART_GC_SERVICE)
   return GCSrvcForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits,
       0, 0, mount_external, se_info, se_name, false);
 #else
@@ -653,7 +653,7 @@ static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint g
 static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
                                           jint debug_flags, jobjectArray rlimits,
                                           jlong permittedCapabilities, jlong effectiveCapabilities) {
-#if ART_GC_SERVICE
+#if (0 && ART_GC_SERVICE)
   pid_t pid = GCSrvcForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
