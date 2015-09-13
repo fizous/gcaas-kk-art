@@ -172,7 +172,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
   }
 
   alloc_space_->mspace_ =
-      DlMallocSpace::CreateMallocSpace(MemMap::Begin(&alloc_space_->memory_),
+      DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&alloc_space_->memory_),
           starting_size, initial_size);
 
   if (alloc_space_->mspace_ == NULL) {
@@ -182,7 +182,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
 
 
   // Protect memory beyond the initial size.
-  byte* end = MemMap::Begin(&alloc_space_->memory_) + starting_size;
+  byte* end = MemMap::AshmemBegin(&alloc_space_->memory_) + starting_size;
   if (capacity - initial_size > 0) {
     CHECK_SHARED_MEMORY_CALL(mprotect, (end, capacity - initial_size,
         PROT_NONE), name);
@@ -192,7 +192,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
   alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
       kGcRetentionPolicyAlwaysCollect;
 
-  alloc_space_->continuous_space_.begin_ = MemMap::Begin(&alloc_space_->memory_);
+  alloc_space_->continuous_space_.begin_ = MemMap::AshmemBegin(&alloc_space_->memory_);
   alloc_space_->continuous_space_.end_ = end;
   alloc_space_->growth_limit_ = growth_limit;
 
@@ -249,7 +249,7 @@ bool SharedDlMallocSpace::SpaceBitmapInit(GCSrvceBitmap *hb,
     LOG(ERROR) << "Failed to allocate bitmap " << name;
     return false;
   }
-  hb->bitmap_begin_ = reinterpret_cast<word*>(MemMap::Begin(&hb->mem_map_));
+  hb->bitmap_begin_ = reinterpret_cast<word*>(MemMap::AshmemBegin(&hb->mem_map_));
   hb->bitmap_size_  = bitmap_size;
   hb->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
   strcpy(hb->name_, name.c_str());
