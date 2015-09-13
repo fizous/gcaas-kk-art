@@ -5,8 +5,11 @@
  *      Author: hussein
  */
 #include <string>
-#include "globals.h"
-#include "utils.h"
+#include "scoped_thread_state_change.h"
+#include "thread_state.h"
+#include "thread.h"
+#include "locks.h"
+#include "os.h"
 #include "runtime.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
