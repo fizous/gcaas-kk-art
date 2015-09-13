@@ -240,6 +240,7 @@ bool Runtime::GCSrvcePreZygoteFork() {
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
   heap_->PostZygoteForkWithSpaceFork(shared_space);
   LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
+  return true;
 }
 
 
