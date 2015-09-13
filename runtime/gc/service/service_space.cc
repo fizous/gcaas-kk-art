@@ -111,8 +111,9 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   // will ask for this memory from sys_alloc which will fail as the footprint (this value plus the
   // size of the large allocation) will be greater than the footprint limit.
   size_t starting_size = kPageSize;
-  uint64_t start_time = 0;
+
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
+    uint64_t start_time = 0;
     start_time = NanoTime();
     VLOG(startup) << "Space::CreateAllocSpace entering " << name
                   << " initial_size=" << PrettySize(initial_size)
