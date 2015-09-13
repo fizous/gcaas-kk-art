@@ -12,6 +12,7 @@
 #include "gc/service/service_space.h"
 #include "gc/allocator/dlmalloc.h"
 #include "gc/space/dlmalloc_space.h"
+#include "mirror/object-inl.h"
 
 namespace art {
 namespace gc {
