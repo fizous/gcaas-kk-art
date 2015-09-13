@@ -16,13 +16,15 @@
 
 #include "mod_union_table.h"
 
-#include "gc/space/space_common.h"
+
 #include "base/stl_util.h"
 #include "card_table-inl.h"
 #include "heap_bitmap.h"
 #include "gc/collector/mark_sweep-inl.h"
 #include "gc/heap.h"
+#include "gc/space/space_common.h"
 #include "gc/space/space.h"
+
 #include "mirror/art_field-inl.h"
 #include "mirror/object-inl.h"
 #include "mirror/class-inl.h"
