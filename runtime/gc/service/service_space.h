@@ -101,7 +101,7 @@ typedef struct GCSrvceDlMallocSpace_S {
 }  __attribute__((aligned(8))) GCSrvceDlMallocSpace;
 
 
-class SharedDlMallocSpace : public AllocSpace {
+class SharedDlMallocSpace : public AshmemMemMapSpace {
 
  public:
   // Alignment of objects within spaces.

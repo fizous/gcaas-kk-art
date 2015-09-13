@@ -279,6 +279,11 @@ class MemMapSpace : public ContinuousSpace {
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };
 
+
+class AshmemMemMapSpace : public ContinuousSpace {
+
+};
+
 }  // namespace space
 }  // namespace gc
 }  // namespace art
