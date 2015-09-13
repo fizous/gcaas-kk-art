@@ -242,10 +242,9 @@ bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity) 
 bool SharedDlMallocSpace::SpaceBitmapInit(GCSrvceBitmap *hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     size_t bitmap_size) {
-
-  AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb->mem_map_,
-       StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
-           static_cast<int>(alloc_space_->bitmap_index_)),
+  std::string _str = StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
+      static_cast<int>(alloc_space_->bitmap_index_));
+  AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb->mem_map_, _str.c_str(),
       NULL, bitmap_size, PROT_READ | PROT_WRITE);
 
   if (_ashmem == NULL) {
