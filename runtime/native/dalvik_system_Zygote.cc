@@ -517,7 +517,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
   return pid;
 }
 
-#endif
+#else
 
 
 
@@ -635,6 +635,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   }
   return pid;
 }
+#endif// ART_GC_SERVICE
 
 static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
                                            jint debug_flags, jobjectArray rlimits, jint mount_external,
