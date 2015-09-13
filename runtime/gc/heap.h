@@ -37,7 +37,7 @@
 
 
 #if ART_GC_SERVICE
- #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max())
+ #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
 #endif
