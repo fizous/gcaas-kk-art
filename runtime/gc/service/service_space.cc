@@ -155,9 +155,6 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
     size_t initial_size, size_t growth_limit, size_t capacity,
     byte* requested_begin, size_t starting_size) {
 
-  static const uintptr_t kGcCardSize =
-      static_cast<uintptr_t>(accounting::CardTable::kCardSize);
-
   alloc_space_ =
       reinterpret_cast<GCSrvceDlMallocSpace*>(calloc(1,
           SERVICE_ALLOC_ALIGN_BYTE(GCSrvceDlMallocSpace)));
@@ -221,7 +218,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
 
 bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity) {
   bool _result = true;
-  size_t bitmap_index = alloc_space_->bitmap_index_++;
+  alloc_space_->bitmap_index_++;
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
   size_t bitmap_size =
       BitmapOffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
