@@ -280,7 +280,7 @@ class MemMapSpace : public ContinuousSpace {
 };
 
 
-class AshmemMemMapSpace : public ContinuousSpace {
+class SharableSpace {
 
 };
 
