@@ -22,7 +22,6 @@
 #include "gc_profiler/MProfiler.h"
 
 
-#include "gc/service/service_space.h"
 
 namespace art {
 namespace mprofiler {
@@ -36,6 +35,8 @@ namespace collector {
 }  // namespace collector
 
 namespace space {
+
+class SharedDlMallocSpace;
 
 // An alloc space is a space where objects may be allocated and garbage collected.
 class DlMallocSpace : public MemMapSpace, public AllocSpace {
