@@ -20,6 +20,10 @@
 #include "gc/allocator/dlmalloc.h"
 #include "space.h"
 #include "gc_profiler/MProfiler.h"
+
+
+#include "gc/service/service_space.h"
+
 namespace art {
 namespace mprofiler {
 	class MProfiler;
@@ -156,6 +160,13 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
   static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
+
+
+
+
+  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
+
+
  protected:
   DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
                 size_t growth_limit);
