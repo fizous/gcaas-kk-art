@@ -13,6 +13,7 @@
 #include "gc/allocator/dlmalloc.h"
 #include "gc/space/dlmalloc_space.h"
 #include "mirror/object-inl.h"
+#include "gc/service/global_allocator.h"
 
 namespace art {
 namespace gc {
@@ -159,8 +160,9 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
     byte* requested_begin, size_t starting_size) {
 
   alloc_space_ =
-      reinterpret_cast<GCSrvceDlMallocSpace*>(calloc(1,
-          SERVICE_ALLOC_ALIGN_BYTE(GCSrvceDlMallocSpace)));
+      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
+      /*reinterpret_cast<GCSrvceDlMallocSpace*>(calloc(1,
+          SERVICE_ALLOC_ALIGN_BYTE(GCSrvceDlMallocSpace)));*/
 
   AShmemMap* _ashmem_mem = MemMap::CreateAShmemMap(&alloc_space_->memory_,
         name.c_str(), requested_begin, capacity, PROT_READ | PROT_WRITE);
