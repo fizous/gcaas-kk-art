@@ -5,6 +5,7 @@
  *      Author: hussein
  */
 #include <string>
+#include <cutils/ashmem.h>
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
