@@ -168,7 +168,9 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
   if (_ashmem_mem == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
-    return NULL;
+    free(alloc_space_);
+    alloc_space_ = NULL;
+    return;
   }
 
   alloc_space_->mspace_ =
@@ -177,7 +179,9 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
 
   if (alloc_space_->mspace_ == NULL) {
     LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
-    return NULL;
+    free(alloc_space_);
+    alloc_space_ = NULL;
+    return;
   }
 
 
@@ -189,10 +193,12 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
   }
 
   strcpy(alloc_space_->continuous_space_.space_header_.name_, name.c_str());
+
   alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
       kGcRetentionPolicyAlwaysCollect;
 
-  alloc_space_->continuous_space_.begin_ = MemMap::AshmemBegin(&alloc_space_->memory_);
+  alloc_space_->continuous_space_.begin_ =
+      MemMap::AshmemBegin(&alloc_space_->memory_);
   alloc_space_->continuous_space_.end_ = end;
   alloc_space_->growth_limit_ = growth_limit;
 
