@@ -108,7 +108,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
           :  std::numeric_limits<size_t>::max()),
       total_bytes_freed_ever_(0),
       total_objects_freed_ever_(0),
-      large_object_threshold_(3 * kPageSize),
+      large_object_threshold_(GC_HEAP_LARGE_OBJECT_THRESHOLD),
       num_bytes_allocated_(0),
       native_bytes_allocated_(0),
       gc_memory_overhead_(0),

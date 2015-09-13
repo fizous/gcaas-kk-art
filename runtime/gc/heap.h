@@ -34,6 +34,14 @@
 #include "safe_map.h"
 #include "thread_pool.h"
 
+
+
+#if ART_GC_SERVICE
+ #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max())
+#else
+ #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
+#endif
+
 namespace art {
 
 class ConditionVariable;
