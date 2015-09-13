@@ -1170,6 +1170,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 }
 
 void Heap::PreZygoteForkNoSpaceFork() {
+  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
   CollectGarbage(false);
 

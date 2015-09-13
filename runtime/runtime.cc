@@ -230,6 +230,7 @@ void Runtime::Abort() {
 
 
 bool Runtime::GCSrvcePreZygoteFork() {
+  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   heap_->PreZygoteForkNoSpaceFork();
   vmprofiler_->PreForkPreparation();
   return true;
@@ -238,6 +239,7 @@ bool Runtime::GCSrvcePreZygoteFork() {
 
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
   heap_->PostZygoteForkWithSpaceFork(shared_space);
+  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
 }
 
 
