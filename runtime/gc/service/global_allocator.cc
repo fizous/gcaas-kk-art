@@ -95,6 +95,7 @@ byte* GCServiceGlobalAllocator::allocateSharedSpace(void) {
   byte* _addr = allocate(_allocation_size);
   region_header_->service_header_.cond_->Broadcast(self);
 
+  LOG(ERROR) << "printing counter in GCService: " << _counter;
   return _addr;
 }
 
