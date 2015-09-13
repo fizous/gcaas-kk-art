@@ -155,7 +155,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
-
+  static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
  protected:
   DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
                 size_t growth_limit);
@@ -166,7 +166,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
       EXCLUSIVE_LOCKS_REQUIRED(lock_);
   bool Init(size_t initial_size, size_t maximum_size, size_t growth_size, byte* requested_base);
   void RegisterRecentFree(mirror::Object* ptr);
-  static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
+
 
   UniquePtr<accounting::SpaceBitmap> live_bitmap_;
   UniquePtr<accounting::SpaceBitmap> mark_bitmap_;
