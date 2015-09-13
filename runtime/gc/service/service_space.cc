@@ -267,5 +267,9 @@ bool SharedDlMallocSpace::SpaceBitmapInit(GCSrvceBitmap *hb,
 
 
 }//namespace space
+
+
+
+
 }//namespace gc
 }//namespace art

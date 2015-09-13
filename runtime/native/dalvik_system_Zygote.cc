@@ -421,8 +421,9 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
 
   // dvmDumpLoaderStats("zygote");  // TODO: ?
   pid_t pid = fork();
-  runtime->GCSrvcePostZygoteFork(false);
+
   if (pid == 0) {
+    runtime->GCSrvcePostZygoteFork(false);
     // The child process.
     gMallocLeakZygoteChild = 1;
 

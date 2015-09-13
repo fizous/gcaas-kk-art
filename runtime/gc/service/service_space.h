@@ -229,6 +229,38 @@ class SharedDlMallocSpace : public SharableSpace {
 };//SharedDlMallocSpace
 
 }//namespace space
+
+
+//namespace gcservice {
+//
+//typedef struct GCSrvcGlobalRegionHeader_S {
+//  // This bitmap itself, word sized for efficiency in scanning.
+//  AShmemMap ashmem_meta_;
+//  byte* current_addr_;
+//}  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
+//
+//
+//class GCServiceGlobalAllocator {
+//public:
+// static GCServiceGlobalAllocator* CreateServiceAllocator(void);
+//
+//
+// byte* allocateSharedSpace(void);
+//
+// private:
+//  GCSrvcGlobalRegionHeader* region_header_;
+//  static GCServiceGlobalAllocator* allocator_instant_;
+//  byte* allocate(size_t num_bytes) {
+//    byte* _addr = region_header_->current_addr_;
+//    size_t allocated_bytes = RoundUp(num_bytes, kAlignment);
+//    region_header_->current_addr_ +=  allocated_bytes;
+//    return _addr;
+//  }
+//};//class ServiceAllocator
+//
+//
+//}//namespace gcservice
+
 }//namespace gc
 }//namespace art
 
