@@ -401,6 +401,126 @@ static bool NeedsNoRandomizeWorkaround() {
 }
 #endif
 
+#if ART_GC_SERVICE
+// Utility routine to fork zygote and specialize the child process.
+static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
+                                     jint debug_flags, jobjectArray javaRlimits,
+                                     jlong permittedCapabilities, jlong effectiveCapabilities,
+                                     jint mount_external,
+                                     jstring java_se_info, jstring java_se_name, bool is_system_server) {
+  Runtime* runtime = Runtime::Current();
+  CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
+  if (!runtime->GCSrvcePreZygoteFork()) {
+    LOG(FATAL) << "pre-fork heap failed";
+  }
+
+  SetSigChldHandler();
+
+  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
+  Thread* self = Thread::Current();
+
+  // dvmDumpLoaderStats("zygote");  // TODO: ?
+  pid_t pid = fork();
+  runtime->GCSrvcePostZygoteFork(false);
+  if (pid == 0) {
+    // The child process.
+    gMallocLeakZygoteChild = 1;
+
+    // Keep capabilities across UID change, unless we're staying root.
+    if (uid != 0) {
+      EnableKeepCapabilities();
+    }
+
+    DropCapabilitiesBoundingSet();
+
+    if (!MountEmulatedStorage(uid, mount_external)) {
+      PLOG(WARNING) << "Failed to mount emulated storage";
+      if (errno == ENOTCONN || errno == EROFS) {
+        // When device is actively encrypting, we get ENOTCONN here
+        // since FUSE was mounted before the framework restarted.
+        // When encrypted device is booting, we get EROFS since
+        // FUSE hasn't been created yet by init.
+        // In either case, continue without external storage.
+      } else {
+        LOG(FATAL) << "Cannot continue without emulated storage";
+      }
+    }
+
+    SetGids(env, javaGids);
+
+    SetRLimits(env, javaRlimits);
+
+    int rc = setresgid(gid, gid, gid);
+    if (rc == -1) {
+      PLOG(FATAL) << "setresgid(" << gid << ") failed";
+    }
+
+    rc = setresuid(uid, uid, uid);
+    if (rc == -1) {
+      PLOG(FATAL) << "setresuid(" << uid << ") failed";
+    }
+
+#if defined(__linux__)
+    if (NeedsNoRandomizeWorkaround()) {
+        // Work around ARM kernel ASLR lossage (http://b/5817320).
+        int old_personality = personality(0xffffffff);
+        int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
+        if (new_personality == -1) {
+            PLOG(WARNING) << "personality(" << new_personality << ") failed";
+        }
+    }
+#endif
+
+    SetCapabilities(permittedCapabilities, effectiveCapabilities);
+
+    SetSchedulerPolicy();
+
+#if defined(HAVE_ANDROID_OS)
+    {  // NOLINT(whitespace/braces)
+      const char* se_info_c_str = NULL;
+      UniquePtr<ScopedUtfChars> se_info;
+      if (java_se_info != NULL) {
+          se_info.reset(new ScopedUtfChars(env, java_se_info));
+          se_info_c_str = se_info->c_str();
+          CHECK(se_info_c_str != NULL);
+      }
+      const char* se_name_c_str = NULL;
+      UniquePtr<ScopedUtfChars> se_name;
+      if (java_se_name != NULL) {
+          se_name.reset(new ScopedUtfChars(env, java_se_name));
+          se_name_c_str = se_name->c_str();
+          CHECK(se_name_c_str != NULL);
+      }
+      rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
+      if (rc == -1) {
+        PLOG(FATAL) << "selinux_android_setcontext(" << uid << ", "
+                    << (is_system_server ? "true" : "false") << ", "
+                    << "\"" << se_info_c_str << "\", \"" << se_name_c_str << "\") failed";
+      }
+    }
+#else
+    UNUSED(is_system_server);
+    UNUSED(java_se_info);
+    UNUSED(java_se_name);
+#endif
+
+    // Our system thread ID, etc, has changed so reset Thread state.
+    self->InitAfterFork();
+
+    EnableDebugFeatures(debug_flags);
+
+    UnsetSigChldHandler();
+    runtime->DidForkFromZygote();
+  } else if (pid > 0) {
+    // the parent process
+  }
+  return pid;
+}
+
+#endif
+
+
+
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,
@@ -519,16 +639,29 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
                                            jint debug_flags, jobjectArray rlimits, jint mount_external,
                                            jstring se_info, jstring se_name) {
-  return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits, 0, 0, mount_external, se_info, se_name, false);
+#if ART_GC_SERVICE
+  return GCSrvcForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits,
+      0, 0, mount_external, se_info, se_name, false);
+#else
+  return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits, 0,
+      0, mount_external, se_info, se_name, false);
+#endif
 }
 
 static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
                                           jint debug_flags, jobjectArray rlimits,
                                           jlong permittedCapabilities, jlong effectiveCapabilities) {
+#if ART_GC_SERVICE
+  pid_t pid = GCSrvcForkAndSpecializeCommon(env, uid, gid, gids,
+                                      debug_flags, rlimits,
+                                      permittedCapabilities, effectiveCapabilities,
+                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true);
+#else
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_NONE, NULL, NULL, true);
+#endif
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       LOG(INFO) << "System server process " << pid << " has been created";

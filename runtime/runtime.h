@@ -398,6 +398,10 @@ class Runtime {
 
   void SetStatsEnabled(bool new_state);
 
+  bool GCSrvcePreZygoteFork();
+  bool GCSrvcePostZygoteFork(bool);
+
+
   bool PreZygoteFork();
   bool InitZygote();
   void DidForkFromZygote();

@@ -228,6 +228,19 @@ void Runtime::Abort() {
   // notreached
 }
 
+
+bool Runtime::GCSrvcePreZygoteFork() {
+  heap_->PreZygoteForkNoSpaceFork();
+  vmprofiler_->PreForkPreparation();
+  return true;
+}
+
+
+bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
+  heap_->PostZygoteForkWithSpaceFork(shared_space);
+}
+
+
 bool Runtime::PreZygoteFork() {
   heap_->PreZygoteFork();
   vmprofiler_->PreForkPreparation();

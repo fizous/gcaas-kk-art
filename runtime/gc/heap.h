@@ -401,7 +401,11 @@ class Heap {
     return live_stack_.get();
   }
 
+  void PreZygoteForkNoSpaceFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
   void PreZygoteFork() LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+
+
+  void PostZygoteForkWithSpaceFork(bool);
 
   // Mark and empty stack.
   void FlushAllocStack()

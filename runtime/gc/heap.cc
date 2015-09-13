@@ -1169,6 +1169,54 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent();
 }
 
+void Heap::PreZygoteForkNoSpaceFork() {
+  // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
+  CollectGarbage(false);
+
+  Thread* self = Thread::Current();
+  MutexLock mu(self, zygote_creation_lock_);
+
+  {
+    // Flush the alloc stack.
+    WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
+    FlushAllocStack();
+  }
+
+}
+
+void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
+  static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
+  Thread* self = Thread::Current();
+  MutexLock mu(self, zygote_creation_lock_);
+
+  // Try to see if we have any Zygote spaces.
+  if (have_zygote_space_) {
+    return;
+  }
+
+  if(!shared_space) {
+    // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
+    // of the remaining available heap memory.
+    space::DlMallocSpace* zygote_space = alloc_space_;
+    alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");
+    alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+
+    // Change the GC retention policy of the zygote space to only collect when full.
+    zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+    AddContinuousSpace(alloc_space_);
+    have_zygote_space_ = true;
+
+    // Reset the cumulative loggers since we now have a few additional timing phases.
+    for (const auto& collector : mark_sweep_collectors_) {
+      collector->ResetCumulativeStatistics();
+    }
+    return ;
+  }
+  //create shared space here
+}
+
+
+
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
