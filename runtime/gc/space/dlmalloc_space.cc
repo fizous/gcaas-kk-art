@@ -541,7 +541,7 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
   // Trim our mem-map to free unused pages.
   GetMemMap()->UnMapAtEnd(end_);
   // TODO: Not hardcode these in?
-  const size_t starting_size = kPageSize;
+ // const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
