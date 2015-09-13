@@ -401,7 +401,7 @@ static bool NeedsNoRandomizeWorkaround() {
 }
 #endif
 
-#if (0 && ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 // Utility routine to fork zygote and specialize the child process.
 static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,

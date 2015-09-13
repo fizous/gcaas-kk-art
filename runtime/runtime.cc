@@ -66,6 +66,8 @@
 
 #include "JniConstants.h"  // Last to avoid LOG redefinition in ics-mr1-plus-art.
 
+#include "gc/service/global_allocator.h"
+
 namespace art {
 
 Runtime* Runtime::instance_ = NULL;
@@ -231,6 +233,7 @@ void Runtime::Abort() {
 
 bool Runtime::GCSrvcePreZygoteFork() {
   LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
+  gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
   heap_->PreZygoteForkNoSpaceFork();
   vmprofiler_->PreForkPreparation();
   return true;
