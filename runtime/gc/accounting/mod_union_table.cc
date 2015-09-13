@@ -16,6 +16,7 @@
 
 #include "mod_union_table.h"
 
+#include "gc/space/space_common.h"
 #include "base/stl_util.h"
 #include "card_table-inl.h"
 #include "heap_bitmap.h"
