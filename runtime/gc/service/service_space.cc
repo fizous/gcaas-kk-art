@@ -377,7 +377,8 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
     kGcRetentionPolicyAlwaysCollect,
     GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
     size_t capacity, byte* requested_begin, size_t starting_size) :
-        ContinuousSpace(name, retentionPolicy, begin, begin + growth_limit) {
+        ContinuousSpace(name, retentionPolicy, requested_begin,
+            requested_begin + growth_limit) {
 
   alloc_space_ =
       reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
