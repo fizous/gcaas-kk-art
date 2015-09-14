@@ -203,8 +203,8 @@ static void WalkInstanceFields(SpaceBitmap* visited, SpaceBitmap::Callback* call
 }
 
 // For an unvisited object, visit it then all its children found via fields.
-static void WalkFieldsInOrder(SharedSpaceBitmap* visited,
-    SharedSpaceBitmap::Callback* callback, mirror::Object* obj,
+static void WalkFieldsInOrder(SpaceBitmap* visited,
+    SpaceBitmap::Callback* callback, mirror::Object* obj,
                       void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (visited->Test(obj)) {

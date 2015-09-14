@@ -141,7 +141,7 @@ class SpaceBitmap {
   void CopyFrom(SpaceBitmap* source_bitmap);
 
   // Starting address of our internal storage.
-  word* Begin() {
+  word* Begin() const {
     return bitmap_begin_;
   }
 
