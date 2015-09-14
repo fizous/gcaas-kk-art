@@ -366,6 +366,7 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   capacity = RoundUp(capacity, kPageSize);
 
   SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
+      kGcRetentionPolicyAlwaysCollect,
       initial_size, growth_limit, capacity,
       requested_begin, starting_size);
 
@@ -374,7 +375,6 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
 }
 
 SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
-    kGcRetentionPolicyAlwaysCollect,
     GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
     size_t capacity, byte* requested_begin, size_t starting_size) :
         ContinuousSpace(name, retentionPolicy, requested_begin,
