@@ -142,7 +142,7 @@ class SpaceBitmap {
 
   // Starting address of our internal storage.
   word* Begin() {
-    return bitmap_begin_;
+    return const_cast<word*>(bitmap_begin_);
   }
 
   // Size of our internal storage
