@@ -159,6 +159,9 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
 
   size_t InternalAllocationSize(const mirror::Object* obj);
 
+  // Return the storage space required by obj.
+  size_t AllocationSize(const mirror::Object* obj);
+
   size_t Free(Thread* self, mirror::Object* ptr);
   size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
 

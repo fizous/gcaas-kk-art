@@ -190,6 +190,10 @@ void SharedDlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
   alloc_space_->recent_free_pos_ = (alloc_space_->recent_free_pos_ + 1) & kRecentFreeMaskService;
 }
 
+// Return the storage space required by obj.
+size_t SharedDlMallocSpace::AllocationSize(const mirror::Object* obj) {
+  return InternalAllocationSize(obj);
+}
 
 // Virtual functions can't get inlined.
 size_t SharedDlMallocSpace::InternalAllocationSize(const mirror::Object* obj) {
