@@ -374,8 +374,9 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
 }
 
 SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
-    GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit, size_t capacity,
-    byte* requested_begin, size_t starting_size) :
+    kGcRetentionPolicyAlwaysCollect,
+    GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
+    size_t capacity, byte* requested_begin, size_t starting_size) :
         ContinuousSpace(name, retentionPolicy, begin, begin + growth_limit) {
 
   alloc_space_ =
@@ -427,6 +428,8 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
   alloc_space_->continuous_space_.begin_ =
       MemMap::AshmemBegin(&alloc_space_->memory_);
   alloc_space_->continuous_space_.end_ = end;
+  alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
+      retentionPolicy;
   alloc_space_->growth_limit_ = growth_limit;
 
   alloc_space_->total_objects_allocated_ = 0;
