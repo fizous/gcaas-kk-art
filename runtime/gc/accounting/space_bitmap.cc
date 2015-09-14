@@ -75,8 +75,8 @@ SpaceBitmap::~SpaceBitmap() {}
 
 void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   DCHECK(IsAligned<kBitsPerWord * kAlignment>(new_end));
-  size_t new_size = OffsetToIndex(new_end - heap_begin_) * kWordSize;
-  if (new_size < bitmap_size_) {
+  size_t new_size = OffsetToIndex(new_end - HeapBegin()) * kWordSize;
+  if (new_size < Size()) {
     bitmap_size_ = new_size;
   }
   // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
@@ -84,9 +84,9 @@ void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
 }
 
 void SpaceBitmap::Clear() {
-  if (bitmap_begin_ != NULL) {
+  if (Begin() != NULL) {
     // This returns the memory to the system.  Successive page faults will return zeroed memory.
-    int result = madvise(bitmap_begin_, bitmap_size_, MADV_DONTNEED);
+    int result = madvise(Begin(), Size(), MADV_DONTNEED);
     if (result == -1) {
       PLOG(FATAL) << "madvise failed";
     }
@@ -95,21 +95,22 @@ void SpaceBitmap::Clear() {
 
 void SpaceBitmap::CopyFrom(SpaceBitmap* source_bitmap) {
   DCHECK_EQ(Size(), source_bitmap->Size());
-  std::copy(source_bitmap->Begin(), source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
+  std::copy(source_bitmap->Begin(),
+      source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
 }
 
 // Visits set bits in address order.  The callback is not permitted to
 // change the bitmap bits or max during the traversal.
 void SpaceBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
-  CHECK(bitmap_begin_ != NULL);
+  CHECK(Begin() != NULL);
   CHECK(callback != NULL);
 
-  uintptr_t end = OffsetToIndex(HeapLimit() - heap_begin_ - 1);
-  word* bitmap_begin = bitmap_begin_;
+  uintptr_t end = OffsetToIndex(HeapLimit() - HeapBegin() - 1);
+  word* bitmap_begin = Begin();
   for (uintptr_t i = 0; i <= end; ++i) {
     word w = bitmap_begin[i];
     if (w != 0) {
-      uintptr_t ptr_base = IndexToOffset(i) + heap_begin_;
+      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       do {
         const size_t shift = CLZ(w);
         mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
@@ -129,13 +130,13 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
                            const SpaceBitmap& mark_bitmap,
                            uintptr_t sweep_begin, uintptr_t sweep_end,
                            SpaceBitmap::SweepCallback* callback, void* arg) {
-  CHECK(live_bitmap.bitmap_begin_ != NULL);
-  CHECK(mark_bitmap.bitmap_begin_ != NULL);
-  CHECK_EQ(live_bitmap.heap_begin_, mark_bitmap.heap_begin_);
-  CHECK_EQ(live_bitmap.bitmap_size_, mark_bitmap.bitmap_size_);
+  CHECK(live_bitmap.Begin() != NULL);
+  CHECK(mark_bitmap.Begin() != NULL);
+  CHECK_EQ(live_bitmap.HeapBegin(), mark_bitmap.HeapBegin());
+  CHECK_EQ(live_bitmap.Size(), mark_bitmap.Size());
   CHECK(callback != NULL);
   CHECK_LE(sweep_begin, sweep_end);
-  CHECK_GE(sweep_begin, live_bitmap.heap_begin_);
+  CHECK_GE(sweep_begin, live_bitmap.HeapBegin());
 
   if (sweep_end <= sweep_begin) {
     return;
@@ -145,15 +146,15 @@ void SpaceBitmap::SweepWalk(const SpaceBitmap& live_bitmap,
   const size_t buffer_size = kWordSize * kBitsPerWord;
   mirror::Object* pointer_buf[buffer_size];
   mirror::Object** pb = &pointer_buf[0];
-  size_t start = OffsetToIndex(sweep_begin - live_bitmap.heap_begin_);
-  size_t end = OffsetToIndex(sweep_end - live_bitmap.heap_begin_ - 1);
+  size_t start = OffsetToIndex(sweep_begin - live_bitmap.HeapBegin());
+  size_t end = OffsetToIndex(sweep_end - live_bitmap.HeapBegin() - 1);
   CHECK_LT(end, live_bitmap.Size() / kWordSize);
-  word* live = live_bitmap.bitmap_begin_;
-  word* mark = mark_bitmap.bitmap_begin_;
+  word* live = live_bitmap.Begin();
+  word* mark = mark_bitmap.Begin();
   for (size_t i = start; i <= end; i++) {
     word garbage = live[i] & ~mark[i];
     if (UNLIKELY(garbage != 0)) {
-      uintptr_t ptr_base = IndexToOffset(i) + live_bitmap.heap_begin_;
+      uintptr_t ptr_base = IndexToOffset(i) + live_bitmap.HeapBegin();
       do {
         const size_t shift = CLZ(garbage);
         garbage ^= static_cast<size_t>(kWordHighBitMask) >> shift;
@@ -202,8 +203,9 @@ static void WalkInstanceFields(SpaceBitmap* visited, SpaceBitmap::Callback* call
 }
 
 // For an unvisited object, visit it then all its children found via fields.
-static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callback, mirror::Object* obj,
-                              void* arg)
+static void WalkFieldsInOrder(SharedSpaceBitmap* visited,
+    SharedSpaceBitmap::Callback* callback, mirror::Object* obj,
+                      void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (visited->Test(obj)) {
     return;
@@ -246,15 +248,15 @@ static void WalkFieldsInOrder(SpaceBitmap* visited, SpaceBitmap::Callback* callb
 // bits or max during the traversal.
 void SpaceBitmap::InOrderWalk(SpaceBitmap::Callback* callback, void* arg) {
   UniquePtr<SpaceBitmap> visited(Create("bitmap for in-order walk",
-                                       reinterpret_cast<byte*>(heap_begin_),
-                                       IndexToOffset(bitmap_size_ / kWordSize)));
-  CHECK(bitmap_begin_ != NULL);
+                                       reinterpret_cast<byte*>(HeapBegin()),
+                                       IndexToOffset(Size() / kWordSize)));
+  CHECK(Begin() != NULL);
   CHECK(callback != NULL);
   uintptr_t end = Size() / kWordSize;
   for (uintptr_t i = 0; i < end; ++i) {
-    word w = bitmap_begin_[i];
+    word w = Begin()[i];
     if (UNLIKELY(w != 0)) {
-      uintptr_t ptr_base = IndexToOffset(i) + heap_begin_;
+      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       while (w != 0) {
         const size_t shift = CLZ(w);
         mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
