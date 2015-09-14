@@ -253,7 +253,8 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
   // concurrent sweeping.
   void SwapBitmaps();
 
-
+  accounting::SpaceBitmap* GetLiveBitmap(){return NULL;}
+  accounting::SpaceBitmap* GetMarkBitmap(){return NULL;}
 
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
