@@ -197,7 +197,6 @@ size_t SharedDlMallocSpace::InternalAllocationSize(const mirror::Object* obj) {
 }
 
 size_t SharedDlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
-  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   if (kDebugSpaces) {
     CHECK(ptr != NULL);
@@ -216,7 +215,6 @@ size_t SharedDlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 }
 
 size_t SharedDlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs) {
-  Thread* self = Thread::Current();
   DCHECK(ptrs != NULL);
 
   // Don't need the lock to calculate the size of the freed pointers.
@@ -283,7 +281,7 @@ void* SharedDlMallocSpace::MoreCore(intptr_t increment) {
       // Should never be asked to increase the allocation beyond the capacity of the space. Enforced
       // by mspace_set_footprint_limit.
       CHECK_LE(new_end, Begin() + Capacity());
-      CHECK_MEMORY_CALL(mprotect, (original_end, increment, PROT_READ | PROT_WRITE), GetName());
+      CHECK_SHARED_MEMORY_CALL(mprotect, (original_end, increment, PROT_READ | PROT_WRITE), GetName());
     } else {
       // Should never be asked for negative footprint (ie before begin)
       CHECK_GT(original_end + increment, Begin());
@@ -294,8 +292,8 @@ void* SharedDlMallocSpace::MoreCore(intptr_t increment) {
       // removing ignoring the memory protection change here and in Space::CreateAllocSpace. It's
       // likely just a useful debug feature.
       size_t size = -increment;
-      CHECK_MEMORY_CALL(madvise, (new_end, size, MADV_DONTNEED), GetName());
-      CHECK_MEMORY_CALL(mprotect, (new_end, size, PROT_NONE), GetName());
+      CHECK_SHARED_MEMORY_CALL(madvise, (new_end, size, MADV_DONTNEED), GetName());
+      CHECK_SHARED_MEMORY_CALL(mprotect, (new_end, size, PROT_NONE), GetName());
     }
     // Update end_
     alloc_space_->continuous_space_.end_ = new_end;
