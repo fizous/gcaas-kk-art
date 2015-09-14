@@ -111,6 +111,8 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
   // The boundary tag overhead.
   static const size_t kChunkOverhead = kWordSize;
 
+  typedef void(*SharedDlSpaceWalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
+
   SpaceType GetType() const {
     if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
       return kSpaceTypeZygoteSpace;
@@ -164,7 +166,7 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
 
   // Perform a mspace_inspect_all which calls back for each allocation chunk. The chunk may not be
   // in use, indicated by num_bytes equaling zero.
-  void Walk(WalkCallback callback, void* arg) LOCKS_EXCLUDED(*mu_);
+  void Walk(SharedDlSpaceWalkCallback callback, void* arg) LOCKS_EXCLUDED(*mu_);
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
