@@ -120,12 +120,14 @@ mirror::Object* SharedDlMallocSpace::AllocWithGrowth(Thread* self,
 // Returns the number of bytes that the space has currently obtained from the system. This is
 // greater or equal to the amount of live data in the space.
 size_t SharedDlMallocSpace::GetFootprint() {
+  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   return mspace_footprint(alloc_space_->mspace_);
 }
 
 // Returns the number of bytes that the heap is allowed to obtain from the system via MoreCore.
 size_t SharedDlMallocSpace::GetFootprintLimit() {
+  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   return mspace_footprint_limit(alloc_space_->mspace_);
 }
@@ -134,6 +136,7 @@ size_t SharedDlMallocSpace::GetFootprintLimit() {
 // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
 // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
 void SharedDlMallocSpace::SetFootprintLimit(size_t new_size) {
+  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   VLOG(heap) << "SharedDlMallocSpace::SetFootprintLimit " << PrettySize(new_size);
   // Compare against the actual footprint, rather than the Size(), because the heap may not have
@@ -147,6 +150,7 @@ void SharedDlMallocSpace::SetFootprintLimit(size_t new_size) {
 }
 
 size_t SharedDlMallocSpace::Trim() {
+  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   // Trim to release memory at the end of the space.
   mspace_trim(alloc_space_->mspace_, 0);
@@ -193,6 +197,7 @@ size_t SharedDlMallocSpace::InternalAllocationSize(const mirror::Object* obj) {
 }
 
 size_t SharedDlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
+  Thread* self = Thread::Current();
   IterProcMutexLock interProcMu(self, *mu_);
   if (kDebugSpaces) {
     CHECK(ptr != NULL);
@@ -211,6 +216,7 @@ size_t SharedDlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 }
 
 size_t SharedDlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs) {
+  Thread* self = Thread::Current();
   DCHECK(ptrs != NULL);
 
   // Don't need the lock to calculate the size of the freed pointers.
