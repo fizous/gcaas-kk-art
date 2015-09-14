@@ -146,6 +146,11 @@ class SpaceBitmap {
   }
 
 
+  // Starting address of our internal storage.
+  const word* ConstBegin() {
+    return bitmap_begin_;
+  }
+
   // Size of our internal storage
   size_t Size() const {
     return bitmap_size_;
@@ -177,7 +182,8 @@ class SpaceBitmap {
     uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
     const uintptr_t offset = addr - HeapBegin();
     const size_t index = OffsetToIndex(offset);
-    return bitmap_begin_[index];
+    const word* _arr = ConstBegin();
+    return &_arr[index];
   }
 
  private:
