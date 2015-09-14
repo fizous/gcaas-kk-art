@@ -101,7 +101,7 @@ typedef struct GCSrvceDlMallocSpace_S {
 }  __attribute__((aligned(8))) GCSrvceDlMallocSpace;
 
 
-class SharedDlMallocSpace : public SharableSpace {
+class SharedDlMallocSpace : public SharableSpace , public DlMallocSpace {
 
  public:
   // Alignment of objects within spaces.
@@ -134,6 +134,36 @@ class SharedDlMallocSpace : public SharableSpace {
   SharedDlMallocSpace(const std::string& name,
       size_t initial_size, size_t growth_limit, size_t capacity,
       byte* requested_begin, size_t starting_size);
+
+  // Allocate num_bytes allowing the underlying mspace to grow.
+  mirror::Object* Alloc(Thread* self, size_t num_bytes,
+      size_t* bytes_allocated);
+
+  mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes,
+      size_t* bytes_allocated);
+
+  mirror::Object* AllocWithGrowth(Thread* self,
+      size_t num_bytes, size_t* bytes_allocated);
+
+  size_t AllocationSizeNonvirtual(const mirror::Object* obj) {
+    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj))) +
+        kChunkOverhead;
+  }
+
+  size_t AllocationNoOverhead(const mirror::Object* obj) {
+    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+  }
+
+  size_t InternalAllocationSize(const mirror::Object* obj);
+
+  size_t Free(Thread* self, mirror::Object* ptr);
+  size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
+
+  void* MoreCore(intptr_t increment);
+
+  // Perform a mspace_inspect_all which calls back for each allocation chunk. The chunk may not be
+  // in use, indicated by num_bytes equaling zero.
+  void Walk(WalkCallback callback, void* arg) LOCKS_EXCLUDED(*mu_);
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
@@ -218,6 +248,10 @@ class SharedDlMallocSpace : public SharableSpace {
   void SwapBitmaps();
 
 
+
+  // Returns the class of a recently freed object.
+  mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
+
   bool CreateBitmaps(byte* heap_begin, size_t heap_capacity);
   bool SpaceBitmapInit(GCSrvceBitmap *hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
@@ -225,6 +259,8 @@ class SharedDlMallocSpace : public SharableSpace {
 
  private:
   GCSrvceDlMallocSpace* alloc_space_;
+  InterProcessMutex*    mu_;
+  InterProcessConditionVariable* cond_;
   void RegisterRecentFree(mirror::Object* ptr);
 };//SharedDlMallocSpace
 

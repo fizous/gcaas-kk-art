@@ -82,6 +82,8 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
       begin + SERVICE_ALLOC_ALIGN_BYTE(GCSrvcGlobalRegionHeader);
 
   initServiceHeader();
+
+  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator>>>>>>";
 }
 
 
