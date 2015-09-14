@@ -131,11 +131,11 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
   // the caller should call Begin on the returned space to confirm
   // the request was granted.
   static SharedDlMallocSpace* Create(const std::string& name,
-                               GcRetentionPolicy retentionPolicy,
                                size_t initial_size, size_t growth_limit,
                                size_t capacity, byte* requested_begin);
 
   SharedDlMallocSpace(const std::string& name,
+      GcRetentionPolicy retentionPolicy,
       size_t initial_size, size_t growth_limit, size_t capacity,
       byte* requested_begin, size_t starting_size);
 
