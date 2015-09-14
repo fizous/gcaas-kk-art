@@ -176,7 +176,7 @@ class SpaceBitmap {
     uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
     const uintptr_t offset = addr - HeapBegin();
     const size_t index = OffsetToIndex(offset);
-    return &Begin()[index];
+    return reinterpret_cast<const void*>(&Begin()[index]);
   }
 
  private:
