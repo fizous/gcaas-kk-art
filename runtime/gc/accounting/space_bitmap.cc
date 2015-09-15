@@ -82,6 +82,15 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin, size
 SpaceBitmap::~SpaceBitmap() {}
 
 
+void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
+  DCHECK(IsAligned<kBitsPerWord * kAlignment>(new_end));
+  size_t new_size = OffsetToIndex(new_end - HeapBegin()) * kWordSize;
+  if (new_size < Size()) {
+    bitmap_size_ = new_size;
+  }
+  // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
+  // should be marked.
+}
 
 #if ART_GC_SERVICE
 
