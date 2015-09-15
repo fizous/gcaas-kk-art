@@ -31,6 +31,16 @@ namespace accounting {
 
 #if ART_GC_SERVICE
 
+
+typedef struct GCSrvceSharedHeapBitmap_S {
+  BaseBitmap* bitmaps_[8];
+  // The index of the bitmap array
+  volatile int index_;
+  // pointer to the heap
+  const Heap* const heap_;
+}  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
+
+
 template <typename Visitor>
 
 class BaseHeapBitmap {
@@ -107,13 +117,7 @@ class BaseHeapBitmap {
 };//class BaseHeapBitmap
 
 
-typedef struct GCSrvceSharedHeapBitmap_S {
-  BaseBitmap* bitmaps_[8];
-  // The index of the bitmap array
-  volatile int index_;
-  // pointer to the heap
-  const Heap* const heap_;
-}  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
+
 
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
