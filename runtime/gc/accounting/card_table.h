@@ -37,9 +37,11 @@ namespace space {
 class Heap;
 
 namespace accounting {
-
+#if ART_GC_SERVICE
+class BaseBitmap;
+#else
 class SpaceBitmap;
-
+#endif
 // Maintain a card table from the the write barrier. All writes of
 // non-NULL values to heap addresses should go through an entry in
 // WriteBarrier, and from there to here.
@@ -99,6 +101,7 @@ class CardTable {
   void ModifyCardsAtomic(byte* scan_begin, byte* scan_end, const Visitor& visitor,
                          const ModifiedVisitor& modified);
 
+#if ART_GC_SERVICE
   // For every dirty at least minumum age between begin and end invoke the visitor with the
   // specified argument. Returns how many cards the visitor was run on.
   template <typename Visitor>
@@ -106,7 +109,15 @@ class CardTable {
               const byte minimum_age = kCardDirty) const
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
+#else
+  // For every dirty at least minumum age between begin and end invoke the visitor with the
+  // specified argument. Returns how many cards the visitor was run on.
+  template <typename Visitor>
+  size_t Scan(BaseBitmap* bitmap, byte* scan_begin, byte* scan_end, const Visitor& visitor,
+              const byte minimum_age = kCardDirty) const
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+#endif
   // Assertion used to check the given address is covered by the card table
   void CheckAddrIsInCardTable(const byte* addr) const;
 

@@ -1517,8 +1517,11 @@ class VerifyReferenceVisitor {
             accounting::CardTable::kCardSize);
         LOG(ERROR) << "Card " << reinterpret_cast<void*>(card_addr) << " covers " << cover_begin
             << "-" << cover_end;
+#if ART_GC_SERVICE
+        accounting::BaseBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);
+#else
         accounting::SpaceBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);
-
+#endif
         // Print out how the object is live.
         if (bitmap != NULL && bitmap->Test(obj)) {
           LOG(ERROR) << "Object " << obj << " found in live bitmap";
