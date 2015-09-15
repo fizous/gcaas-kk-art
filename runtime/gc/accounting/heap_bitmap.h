@@ -112,7 +112,6 @@ class BaseHeapBitmap {
 
   virtual void AddContinuousSpaceBitmap(BaseBitmap* bitmap) = 0;
   virtual void AddDiscontinuousObjectSet(SpaceSetMap*){}
- private:
 };//class BaseHeapBitmap
 
 
