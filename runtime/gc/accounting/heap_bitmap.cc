@@ -32,9 +32,9 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
         reinterpret_cast<GCSrvceSharedHeapBitmap*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap)));
   }
-  header_ = header_addr;
-  header_->heap_ = heap;
-  header_->index_ = 0;
+  GCSrvceSharedHeapBitmap _data_values = {heap, 0, {0}};
+  memcpy(header_, &_data_values,
+      SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
   memset(header_->bitmaps_, 0, (8 * sizeof(BaseBitmap*)));
 
 }

@@ -33,11 +33,12 @@ namespace accounting {
 
 
 typedef struct GCSrvceSharedHeapBitmap_S {
-  BaseBitmap* bitmaps_[8];
   // The index of the bitmap array
   volatile int index_;
   // pointer to the heap
   const Heap* const heap_;
+  //bitmaps array
+  BaseBitmap* bitmaps_[8];
 }  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 
