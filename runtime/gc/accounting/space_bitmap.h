@@ -152,6 +152,9 @@ public:
     }
   }
 
+  void Walk(Callback* callback, void* arg)
+      SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
   void InOrderWalk(Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
