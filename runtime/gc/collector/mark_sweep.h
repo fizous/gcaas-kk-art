@@ -47,7 +47,11 @@ namespace accounting {
   class ModUnionTableBitmap;
   class MarkStackChunk;
   typedef AtomicStack<mirror::Object*> ObjectStack;
+#if ART_GC_SERVICE
+  class BaseBitmap;
+#else
   class SpaceBitmap;
+#endif
 }  // namespace accounting
 
 namespace space {
