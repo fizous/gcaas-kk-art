@@ -115,7 +115,7 @@ class BaseHeapBitmap {
 };//class BaseHeapBitmap
 
 
-template <typename Visitor>
+//template <typename Visitor>
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
   SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
@@ -151,7 +151,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
 
 
 ////////////////////////////////////////////////////////////////
-template <typename Visitor>
+//template <typename Visitor>
 class HeapBitmap : public BaseHeapBitmap {
  public:
   typedef std::vector<SpaceBitmap*, GCAllocator<SpaceBitmap*> > SpaceBitmapVector;
