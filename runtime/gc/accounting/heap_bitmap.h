@@ -132,11 +132,11 @@ class SharedHeapBitmap : public BaseHeapBitmap {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
-    BaseBitmap* _temp = NULL;
+    BaseBitmap* _bitmap = NULL;
     for(int i = 0; i < header_->index_; i ++) {
-      _temp = header_->bitmaps_[i];
-      if (_temp->HasAddress(obj)) {
-        return bitmap;
+      _bitmap = header_->bitmaps_[i];
+      if (_bitmap->HasAddress(obj)) {
+        return _bitmap;
       }
     }
     return NULL;
