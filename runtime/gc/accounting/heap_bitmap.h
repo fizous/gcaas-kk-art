@@ -151,14 +151,13 @@ class SharedHeapBitmap : public BaseHeapBitmap {
 
 
 ////////////////////////////////////////////////////////////////
-template <typename Visitor>
 class HeapBitmap : public BaseHeapBitmap {
  public:
   typedef std::vector<SpaceBitmap*, GCAllocator<SpaceBitmap*> > SpaceBitmapVector;
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
 
   bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       return bitmap->Test(obj);
     } else {
@@ -167,7 +166,7 @@ class HeapBitmap : public BaseHeapBitmap {
   }
 
   void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       bitmap->Clear(obj);
     } else {
@@ -178,7 +177,7 @@ class HeapBitmap : public BaseHeapBitmap {
   }
 
   void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       bitmap->Set(obj);
     } else {
@@ -209,13 +208,13 @@ class HeapBitmap : public BaseHeapBitmap {
   void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  //template <typename Visitor>
+  template <typename Visitor>
   void VisitContinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
 
-  //template <typename Visitor>
+  template <typename Visitor>
   void VisitDisConstinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
