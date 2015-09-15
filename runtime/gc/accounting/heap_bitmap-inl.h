@@ -25,38 +25,19 @@ namespace accounting {
 
 #if ART_GC_SERVICE
 template <typename Visitor>
-inline void SharedHeapBitmap::VisitContinuous(const Visitor& visitor) {
+inline void BaseHeapBitmap::Visit(const Visitor& visitor) {
   BaseBitmap* _bitmap = NULL;
-  for(int i = 0; i < header_->index_; i ++) {
-    _bitmap = header_->bitmaps_[i];
+  for(int i = 0; i < GetContinuousSize(); i++) {
+    _bitmap = GetContBitmapFromIndex(i);
     _bitmap->VisitMarkedRange(_bitmap->HeapBegin(), _bitmap->HeapLimit(), visitor);
   }
-}
-
-
-template <typename Visitor>
-inline void HeapBitmap::VisitContinuous(const Visitor& visitor) {
-  for (const auto& bitmap : continuous_space_bitmaps_) {
-    bitmap->VisitMarkedRange(bitmap->HeapBegin(), bitmap->HeapLimit(), visitor);
+  SpaceSetMap* _set_map = NULL;
+  for(int i = 0; i < GetDiscContinuousSize(); i++) {
+    _set_map = GetDiscContBitmapFromIndex(i);
+    _set_map->Visit(visitor);
   }
+
 }
-
-
-template <typename Visitor>
-inline void HeapBitmap::VisitDisConstinuous(const Visitor& visitor) {
-  DCHECK(!discontinuous_space_sets_.empty());
-  for (const auto& space_set : discontinuous_space_sets_) {
-    space_set->Visit(visitor);
-  }
-}
-
-template <typename Visitor>
-inline void BaseHeapBitmap::Visit(const Visitor& visitor) {
-  VisitContinuous(visitor);
-  VisitDisConstinuous(visitor);
-}
-
-
 
 #else
 

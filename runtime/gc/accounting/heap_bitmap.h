@@ -41,7 +41,7 @@ typedef struct GCSrvceSharedHeapBitmap_S {
 }  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 
-template <typename Visitor>
+
 class BaseHeapBitmap {
  public:
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
@@ -82,18 +82,8 @@ class BaseHeapBitmap {
   virtual void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) = 0;
 
-  //template <typename Visitor>
-  virtual void VisitContinuous(const Visitor& visitor)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) = 0;
 
-
- // template <typename Visitor>
-  virtual void VisitDisConstinuous(const Visitor&)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_){}
-
- // template <typename Visitor>
+  template <typename Visitor>
   void Visit(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -110,10 +100,19 @@ class BaseHeapBitmap {
   explicit BaseHeapBitmap(Heap*) {}
   virtual ~BaseHeapBitmap(){}
 
-  virtual void AddContinuousSpaceBitmap(BaseBitmap* bitmap) = 0;
+  virtual void AddContinuousSpaceBitmap(BaseBitmap*) = 0;
   virtual void AddDiscontinuousObjectSet(SpaceSetMap*){}
-};//class BaseHeapBitmap
 
+
+  virtual int GetContinuousSize() = 0;
+  virtual BaseBitmap* GetContBitmapFromIndex(int index) = 0;
+  virtual int GetDiscContinuousSize() {
+    return 0;
+  }
+  virtual SpaceSetMap* GetDiscContBitmapFromIndex(int index){
+    return NULL;
+  }
+};//class BaseHeapBitmap
 
 
 class SharedHeapBitmap : public BaseHeapBitmap {
@@ -126,11 +125,6 @@ class SharedHeapBitmap : public BaseHeapBitmap {
   void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  template <typename Visitor>
-  void VisitContinuous(const Visitor& visitor)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
   BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
     BaseBitmap* _bitmap = NULL;
     for(int i = 0; i < header_->index_; i ++) {
@@ -140,6 +134,14 @@ class SharedHeapBitmap : public BaseHeapBitmap {
       }
     }
     return NULL;
+  }
+
+  int GetContinuousSize() {
+    return header_->index_;
+  }
+
+  BaseBitmap* GetContBitmapFromIndex(int index) {
+    return header_->bitmaps_[index];
   }
 
  private:
@@ -155,6 +157,7 @@ class HeapBitmap : public BaseHeapBitmap {
  public:
   typedef std::vector<SpaceBitmap*, GCAllocator<SpaceBitmap*> > SpaceBitmapVector;
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
+
 
   bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
@@ -208,17 +211,6 @@ class HeapBitmap : public BaseHeapBitmap {
   void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  template <typename Visitor>
-  void VisitContinuous(const Visitor& visitor)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
-
-  template <typename Visitor>
-  void VisitDisConstinuous(const Visitor& visitor)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
   // Find and replace a bitmap pointer, this is used by for the bitmap swapping in the GC.
   void ReplaceBitmap(BaseBitmap* old_bitmap, SpaceBitmap* new_bitmap)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -231,6 +223,25 @@ class HeapBitmap : public BaseHeapBitmap {
 
   void AddContinuousSpaceBitmap(BaseBitmap* bitmap);
   void AddDiscontinuousObjectSet(SpaceSetMap* set);
+
+
+  int GetContinuousSize() {
+    return continuous_space_bitmaps_.size();
+  }
+
+
+  BaseBitmap* GetContBitmapFromIndex(int index) {
+    return continuous_space_bitmaps_[index];
+  }
+
+
+  int GetDiscContinuousSize() {
+    return discontinuous_space_sets_.size();
+  }
+
+  SpaceSetMap* GetDiscContBitmapFromIndex(int index) {
+    return discontinuous_space_sets_[index];
+  }
  private:
   const Heap* const heap_;
 
