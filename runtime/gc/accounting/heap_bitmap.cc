@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "space_bitmap-inl.h"
+
 #include "heap_bitmap.h"
 
 #include "gc/space/space.h"
-
+#include "space_bitmap-inl.h"
 namespace art {
 namespace gc {
 namespace accounting {
