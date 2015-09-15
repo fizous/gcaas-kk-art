@@ -129,11 +129,6 @@ void HeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
 
 #else
 
-
-
-
-
-
 void HeapBitmap::ReplaceBitmap(SpaceBitmap* old_bitmap, SpaceBitmap* new_bitmap) {
   for (auto& bitmap : continuous_space_bitmaps_) {
     if (bitmap == old_bitmap) {
@@ -182,7 +177,7 @@ void HeapBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
     space_set->Walk(callback, arg);
   }
 }
-
+#endif
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art
