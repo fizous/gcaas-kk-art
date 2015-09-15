@@ -141,7 +141,8 @@ LIBART_COMMON_SRC_FILES := \
 ifeq ($(ART_GC_SERVICE),true)
 LIBART_COMMON_SRC_FILES += \
 	gc/service/service_space.cc \
-	gc/service/global_allocator.cc
+	gc/service/global_allocator.cc \
+	gc/service/base_bitmap.cc
 endif
 
 LIBART_COMMON_SRC_FILES += \
