@@ -36,7 +36,7 @@ template <typename Visitor>
 class BaseHeapBitmap {
  public:
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       return bitmap->Test(obj);
     } else {
