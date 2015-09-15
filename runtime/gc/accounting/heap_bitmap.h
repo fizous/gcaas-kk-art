@@ -45,37 +45,13 @@ typedef struct GCSrvceSharedHeapBitmap_S {
 
 class BaseHeapBitmap {
  public:
-  virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      return bitmap->Test(obj);
-    } else {
-      LOG(FATAL) << "Test: object does not belong to any bitmap";
-    }
-    return false;
-  }
+  virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
-  virtual void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      bitmap->Clear(obj);
-    } else {
-      LOG(FATAL) << "The object could not be cleared as it does not belong to "
-          "any bitmap";
-    }
-  }
+  virtual void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
-  virtual void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      bitmap->Set(obj);
-    } else {
-      LOG(FATAL) << "The object could not be set the object as it does not belong to "
-          "any bitmap";
-    }
-  }
+  virtual void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
   virtual BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) = 0;
@@ -160,36 +136,11 @@ class HeapBitmap : public BaseHeapBitmap {
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
 
 
-  bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      return bitmap->Test(obj);
-    } else {
-      return GetDiscontinuousSpaceObjectSet(obj) != NULL;
-    }
-  }
+  bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      bitmap->Clear(obj);
-    } else {
-      SpaceSetMap* set = GetDiscontinuousSpaceObjectSet(obj);
-      DCHECK(set != NULL);
-      set->Clear(obj);
-    }
-  }
+  void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
-    if (LIKELY(bitmap != NULL)) {
-      bitmap->Set(obj);
-    } else {
-      SpaceSetMap* set = GetDiscontinuousSpaceObjectSet(obj);
-      DCHECK(set != NULL);
-      set->Set(obj);
-    }
-  }
+  void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
     for (const auto& bitmap : continuous_space_bitmaps_) {

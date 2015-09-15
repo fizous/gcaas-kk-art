@@ -25,6 +25,40 @@ namespace accounting {
 
 #if ART_GC_SERVICE
 
+bool BaseHeapBitmap::Test(const mirror::Object* obj) {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    return bitmap->Test(obj);
+  } else {
+    LOG(FATAL) << "Test: object does not belong to any bitmap";
+  }
+  return false;
+}
+
+
+void BaseHeapBitmap::Clear(const mirror::Object* obj)  {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    bitmap->Clear(obj);
+  } else {
+    LOG(FATAL) << "The object could not be cleared as it does not belong to "
+        "any bitmap";
+  }
+}
+
+
+void BaseHeapBitmap::Set(const mirror::Object* obj)  {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    bitmap->Set(obj);
+  } else {
+    LOG(FATAL) << "The object could not be set the object as it does not belong to "
+        "any bitmap";
+  }
+}
+
+
+
 SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
     GCSrvceSharedHeapBitmap* header_addr) : BaseHeapBitmap(heap) {
   if(header_addr == NULL) {
@@ -126,7 +160,36 @@ void HeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
   }
 }
 
+bool HeapBitmap::Test(const mirror::Object* obj) {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    return bitmap->Test(obj);
+  } else {
+    return GetDiscontinuousSpaceObjectSet(obj) != NULL;
+  }
+}
 
+void HeapBitmap::Clear(const mirror::Object* obj)  {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    bitmap->Clear(obj);
+  } else {
+    SpaceSetMap* set = GetDiscontinuousSpaceObjectSet(obj);
+    DCHECK(set != NULL);
+    set->Clear(obj);
+  }
+}
+
+void HeapBitmap::Set(const mirror::Object* obj) {
+  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    bitmap->Set(obj);
+  } else {
+    SpaceSetMap* set = GetDiscontinuousSpaceObjectSet(obj);
+    DCHECK(set != NULL);
+    set->Set(obj);
+  }
+}
 #else
 
 void HeapBitmap::ReplaceBitmap(SpaceBitmap* old_bitmap, SpaceBitmap* new_bitmap) {
