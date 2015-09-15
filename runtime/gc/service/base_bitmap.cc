@@ -94,7 +94,76 @@ void BaseBitmap::SweepWalk(const BaseBitmap& live_bitmap,
   }
 }
 
+static void WalkFieldsInOrder(BaseBitmap* visited, BaseBitmap::Callback* callback, mirror::Object* obj,
+                              void* arg);
 
+// Walk instance fields of the given Class. Separate function to allow recursion on the super
+// class.
+static void WalkInstanceFields(BaseBitmap* visited, BaseBitmap::Callback* callback, mirror::Object* obj,
+                               mirror::Class* klass, void* arg)
+    SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+  // Visit fields of parent classes first.
+  mirror::Class* super = klass->GetSuperClass();
+  if (super != NULL) {
+    WalkInstanceFields(visited, callback, obj, super, arg);
+  }
+  // Walk instance fields
+  mirror::ObjectArray<mirror::ArtField>* fields = klass->GetIFields();
+  if (fields != NULL) {
+    for (int32_t i = 0; i < fields->GetLength(); i++) {
+      mirror::ArtField* field = fields->Get(i);
+      FieldHelper fh(field);
+      if (!fh.IsPrimitiveType()) {
+        mirror::Object* value = field->GetObj(obj);
+        if (value != NULL) {
+          WalkFieldsInOrder(visited, callback, value,  arg);
+        }
+      }
+    }
+  }
+}
+
+// For an unvisited object, visit it then all its children found via fields.
+static void WalkFieldsInOrder(BaseBitmap* visited,
+    BaseBitmap::Callback* callback, mirror::Object* obj,
+                      void* arg)
+    SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+  if (visited->Test(obj)) {
+    return;
+  }
+  // visit the object itself
+  (*callback)(obj, arg);
+  visited->Set(obj);
+  // Walk instance fields of all objects
+  mirror::Class* klass = obj->GetClass();
+  WalkInstanceFields(visited, callback, obj, klass, arg);
+  // Walk static fields of a Class
+  if (obj->IsClass()) {
+    mirror::ObjectArray<mirror::ArtField>* fields = klass->GetSFields();
+    if (fields != NULL) {
+      for (int32_t i = 0; i < fields->GetLength(); i++) {
+        mirror::ArtField* field = fields->Get(i);
+        FieldHelper fh(field);
+        if (!fh.IsPrimitiveType()) {
+          mirror::Object* value = field->GetObj(NULL);
+          if (value != NULL) {
+            WalkFieldsInOrder(visited, callback, value, arg);
+          }
+        }
+      }
+    }
+  } else if (obj->IsObjectArray()) {
+    // Walk elements of an object array
+    mirror::ObjectArray<mirror::Object>* obj_array = obj->AsObjectArray<mirror::Object>();
+    int32_t length = obj_array->GetLength();
+    for (int32_t i = 0; i < length; i++) {
+      mirror::Object* value = obj_array->Get(i);
+      if (value != NULL) {
+        WalkFieldsInOrder(visited, callback, value, arg);
+      }
+    }
+  }
+}
 
 // Visits set bits with an in order traversal.  The callback is not permitted to change the bitmap
 // bits or max during the traversal.
@@ -115,6 +184,29 @@ void BaseBitmap::InOrderWalk(BaseBitmap::Callback* callback, void* arg) {
         WalkFieldsInOrder(visited.get(), callback, obj, arg);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       }
+    }
+  }
+}
+
+
+// Visits set bits in address order.  The callback is not permitted to
+// change the bitmap bits or max during the traversal.
+void SpaceBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
+  CHECK(Begin() != NULL);
+  CHECK(callback != NULL);
+
+  uintptr_t end = OffsetToIndex(HeapLimit() - HeapBegin() - 1);
+  word* bitmap_begin = Begin();
+  for (uintptr_t i = 0; i <= end; ++i) {
+    word w = bitmap_begin[i];
+    if (w != 0) {
+      uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
+      do {
+        const size_t shift = CLZ(w);
+        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        (*callback)(obj, arg);
+        w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
+      } while (w != 0);
     }
   }
 }

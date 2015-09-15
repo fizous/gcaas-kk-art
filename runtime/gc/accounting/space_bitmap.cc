@@ -30,6 +30,9 @@ namespace art {
 namespace gc {
 namespace accounting {
 
+
+
+
 std::string SpaceBitmap::GetName() const {
   return name_;
 }
@@ -44,11 +47,15 @@ std::string SpaceBitmap::Dump() const {
                       reinterpret_cast<void*>(HeapLimit()));
 }
 
-void SpaceSetMap::Walk(SpaceBitmap::Callback* callback, void* arg) {
-  for (const mirror::Object* obj : contained_) {
-    callback(const_cast<mirror::Object*>(obj), arg);
-  }
+
+std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap) {
+  return stream
+    << bitmap.GetName() << "["
+    << "begin=" << reinterpret_cast<const void*>(bitmap.HeapBegin())
+    << ",end=" << reinterpret_cast<const void*>(bitmap.HeapLimit())
+    << "]";
 }
+
 
 SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, MemMap* mem_map,
                                            byte* heap_begin, size_t heap_capacity) {
@@ -57,6 +64,7 @@ SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, MemMap* mem_
   size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
   return new SpaceBitmap(name, mem_map, bitmap_begin, bitmap_size, heap_begin);
 }
+
 
 SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin, size_t heap_capacity) {
   CHECK(heap_begin != NULL);
@@ -73,15 +81,13 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin, size
 // Clean up any resources associated with the bitmap.
 SpaceBitmap::~SpaceBitmap() {}
 
-void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
-  DCHECK(IsAligned<kBitsPerWord * kAlignment>(new_end));
-  size_t new_size = OffsetToIndex(new_end - HeapBegin()) * kWordSize;
-  if (new_size < Size()) {
-    bitmap_size_ = new_size;
-  }
-  // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
-  // should be marked.
-}
+
+
+#if ART_GC_SERVICE
+
+#else
+
+
 
 void SpaceBitmap::Clear() {
   if (Begin() != NULL) {
@@ -98,6 +104,7 @@ void SpaceBitmap::CopyFrom(SpaceBitmap* source_bitmap) {
   std::copy(source_bitmap->Begin(),
       source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
 }
+
 
 // Visits set bits in address order.  The callback is not permitted to
 // change the bitmap bits or max during the traversal.
@@ -267,6 +274,16 @@ void SpaceBitmap::InOrderWalk(SpaceBitmap::Callback* callback, void* arg) {
   }
 }
 
+#endif
+
+
+
+void SpaceSetMap::Walk(SpaceBitmap::Callback* callback, void* arg) {
+  for (const mirror::Object* obj : contained_) {
+    callback(const_cast<mirror::Object*>(obj), arg);
+  }
+}
+
 std::string SpaceSetMap::GetName() const {
   return name_;
 }
@@ -278,15 +295,6 @@ void SpaceSetMap::SetName(const std::string& name) {
 void SpaceSetMap::CopyFrom(const SpaceSetMap& space_set) {
   contained_ = space_set.contained_;
 }
-
-std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap) {
-  return stream
-    << bitmap.GetName() << "["
-    << "begin=" << reinterpret_cast<const void*>(bitmap.HeapBegin())
-    << ",end=" << reinterpret_cast<const void*>(bitmap.HeapLimit())
-    << "]";
-}
-
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art

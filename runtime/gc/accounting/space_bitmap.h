@@ -412,9 +412,9 @@ class SpaceBitmap {
   std::string name_;
 };
 
-std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap);
-
 #endif
+
+std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap);
 
 // Like a bitmap except it keeps track of objects using sets.
 class SpaceSetMap {
