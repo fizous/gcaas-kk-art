@@ -94,13 +94,14 @@ void BaseBitmap::SweepWalk(const BaseBitmap& live_bitmap,
   }
 }
 
-static void WalkFieldsInOrder(BaseBitmap* visited, BaseBitmap::Callback* callback, mirror::Object* obj,
-                              void* arg);
+static void WalkFieldsInOrder(BaseBitmap* visited,
+            BaseBitmap::Callback* callback, mirror::Object* obj, void* arg);
 
 // Walk instance fields of the given Class. Separate function to allow recursion on the super
 // class.
-static void WalkInstanceFields(BaseBitmap* visited, BaseBitmap::Callback* callback, mirror::Object* obj,
-                               mirror::Class* klass, void* arg)
+static void WalkInstanceFields(BaseBitmap* visited,
+              BaseBitmap::Callback* callback, mirror::Object* obj,
+              mirror::Class* klass, void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   // Visit fields of parent classes first.
   mirror::Class* super = klass->GetSuperClass();
@@ -191,7 +192,7 @@ void BaseBitmap::InOrderWalk(BaseBitmap::Callback* callback, void* arg) {
 
 // Visits set bits in address order.  The callback is not permitted to
 // change the bitmap bits or max during the traversal.
-void SpaceBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
+void BaseBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
   CHECK(Begin() != NULL);
   CHECK(callback != NULL);
 
