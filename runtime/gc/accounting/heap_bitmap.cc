@@ -77,7 +77,7 @@ void SharedHeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap,
 }
 
 
-void HeapBitmap::ReplaceBitmap(SpaceBitmap* old_bitmap, SpaceBitmap* new_bitmap) {
+void HeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap) {
   for (auto& bitmap : continuous_space_bitmaps_) {
     if (bitmap == old_bitmap) {
       bitmap = new_bitmap;
@@ -97,7 +97,7 @@ void HeapBitmap::ReplaceObjectSet(SpaceSetMap* old_set, SpaceSetMap* new_set) {
   LOG(FATAL) << "object set " << static_cast<const void*>(old_set) << " not found";
 }
 
-void HeapBitmap::AddContinuousSpaceBitmap(accounting::SpaceBitmap* bitmap) {
+void HeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) {
   DCHECK(bitmap != NULL);
 
   // Check for interval overlap.
@@ -115,7 +115,7 @@ void HeapBitmap::AddDiscontinuousObjectSet(SpaceSetMap* set) {
   discontinuous_space_sets_.push_back(set);
 }
 
-void HeapBitmap::Walk(SpaceBitmap::Callback* callback, void* arg) {
+void HeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
   for (const auto& bitmap : continuous_space_bitmaps_) {
     bitmap->Walk(callback, arg);
   }

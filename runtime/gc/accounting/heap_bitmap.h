@@ -34,7 +34,7 @@ namespace accounting {
 class BaseHeapBitmap {
  public:
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    SpaceBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       return bitmap->Test(obj);
     } else {
@@ -115,7 +115,7 @@ typedef struct GCSrvceSharedHeapBitmap_S {
 
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
-  SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr);
+  SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
   ~SharedHeapBitmap(){}
   void AddContinuousSpaceBitmap(BaseBitmap* bitmap);
   void Walk(BaseBitmap::Callback* callback, void* arg)
@@ -155,7 +155,7 @@ class HeapBitmap : public BaseHeapBitmap {
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
 
   bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    SpaceBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       return bitmap->Test(obj);
     } else {
@@ -164,7 +164,7 @@ class HeapBitmap : public BaseHeapBitmap {
   }
 
   void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    SpaceBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       bitmap->Clear(obj);
     } else {
@@ -175,7 +175,7 @@ class HeapBitmap : public BaseHeapBitmap {
   }
 
   void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-    SpaceBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+    Bitmap* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       bitmap->Set(obj);
     } else {
@@ -185,7 +185,7 @@ class HeapBitmap : public BaseHeapBitmap {
     }
   }
 
-  SpaceBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
+  Bitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
     for (const auto& bitmap : continuous_space_bitmaps_) {
       if (bitmap->HasAddress(obj)) {
         return bitmap;
@@ -203,7 +203,7 @@ class HeapBitmap : public BaseHeapBitmap {
     return NULL;
   }
 
-  void Walk(SpaceBitmap::Callback* callback, void* arg)
+  void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   template <typename Visitor>
@@ -218,7 +218,7 @@ class HeapBitmap : public BaseHeapBitmap {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   // Find and replace a bitmap pointer, this is used by for the bitmap swapping in the GC.
-  void ReplaceBitmap(SpaceBitmap* old_bitmap, SpaceBitmap* new_bitmap)
+  void ReplaceBitmap(BaseBitmap* old_bitmap, SpaceBitmap* new_bitmap)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   // Find and replace a object set pointer, this is used by for the bitmap swapping in the GC.
@@ -227,7 +227,7 @@ class HeapBitmap : public BaseHeapBitmap {
 
   explicit HeapBitmap(Heap* heap) : BaseHeapBitmap(heap), heap_(heap) {}
 
-  void AddContinuousSpaceBitmap(SpaceBitmap* bitmap);
+  void AddContinuousSpaceBitmap(BaseBitmap* bitmap);
   void AddDiscontinuousObjectSet(SpaceSetMap* set);
  private:
   const Heap* const heap_;
