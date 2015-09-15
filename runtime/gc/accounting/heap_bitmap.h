@@ -115,7 +115,7 @@ class BaseHeapBitmap {
 };//class BaseHeapBitmap
 
 
-template <typename Visitor>
+
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
   SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
@@ -126,7 +126,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
   void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  //template <typename Visitor>
+  template <typename Visitor>
   void VisitContinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
