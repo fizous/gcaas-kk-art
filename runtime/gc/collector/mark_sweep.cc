@@ -1002,6 +1002,38 @@ void MarkSweep::VerifyImageRoots() {
   timings_.EndSplit();
 }
 
+
+#if ART_GC_SERVICE
+class RecursiveMarkTask : public MarkStackTask<false> {
+ public:
+  RecursiveMarkTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
+                    accounting::BaseBitmap* bitmap, uintptr_t begin, uintptr_t end)
+      : MarkStackTask<false>(thread_pool, mark_sweep, 0, NULL),
+        bitmap_(bitmap),
+        begin_(begin),
+        end_(end) {
+  }
+
+ protected:
+  accounting::BaseBitmap* const bitmap_;
+  const uintptr_t begin_;
+  const uintptr_t end_;
+
+  virtual void Finalize() {
+    delete this;
+  }
+
+  // Scans all of the objects
+  virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
+    ScanObjectParallelVisitor visitor(this);
+    bitmap_->VisitMarkedRange(begin_, end_, visitor);
+    // Finish by emptying our local mark stack.
+    MarkStackTask::Run(self);
+  }
+};
+
+#else
+
 class RecursiveMarkTask : public MarkStackTask<false> {
  public:
   RecursiveMarkTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
@@ -1029,7 +1061,7 @@ class RecursiveMarkTask : public MarkStackTask<false> {
     MarkStackTask::Run(self);
   }
 };
-
+#endif
 // Populates the mark stack based on the set of marked objects and
 // recursively marks until the mark stack is emptied.
 void MarkSweep::RecursiveMark() {
