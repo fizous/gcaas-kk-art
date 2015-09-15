@@ -39,10 +39,6 @@ inline void HeapBitmap::VisitContinuous(const Visitor& visitor) {
   for (const auto& bitmap : continuous_space_bitmaps_) {
     bitmap->VisitMarkedRange(bitmap->HeapBegin(), bitmap->HeapLimit(), visitor);
   }
-  DCHECK(!discontinuous_space_sets_.empty());
-  for (const auto& space_set : discontinuous_space_sets_) {
-    space_set->Visit(visitor);
-  }
 }
 
 
