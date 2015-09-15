@@ -26,7 +26,7 @@ namespace accounting {
 #if ART_GC_SERVICE
 
 SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
-    GCSrvceSharedHeapBitmap* header_addr) {
+    GCSrvceSharedHeapBitmap* header_addr) : BaseHeapBitmap(heap) {
   if(header_addr == NULL) {
     header_addr =
         reinterpret_cast<GCSrvceSharedHeapBitmap*>(calloc(1,
