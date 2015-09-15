@@ -23,6 +23,49 @@ namespace art {
 namespace gc {
 namespace accounting {
 
+#if ART_GC_SERVICE
+template <typename Visitor>
+inline void SharedHeapBitmap::VisitContinuous(const Visitor& visitor) {
+  BaseBitmap* _bitmap = NULL;
+  for(int i = 0; i < header_->index_; i ++) {
+    _bitmap = header_->bitmaps_[i];
+    _bitmap->VisitMarkedRange(_bitmap->HeapBegin(), _bitmap->HeapLimit(), visitor);
+  }
+}
+
+
+template <typename Visitor>
+inline void HeapBitmap::VisitContinuous(const Visitor& visitor) {
+  for (const auto& bitmap : continuous_space_bitmaps_) {
+    bitmap->VisitMarkedRange(bitmap->HeapBegin(), bitmap->HeapLimit(), visitor);
+  }
+  DCHECK(!discontinuous_space_sets_.empty());
+  for (const auto& space_set : discontinuous_space_sets_) {
+    space_set->Visit(visitor);
+  }
+}
+
+
+template <typename Visitor>
+inline void HeapBitmap::VisitDisConstinuous(const Visitor& visitor) {
+  DCHECK(!discontinuous_space_sets_.empty());
+  for (const auto& space_set : discontinuous_space_sets_) {
+    space_set->Visit(visitor);
+  }
+}
+
+template <typename Visitor>
+inline void BaseHeapBitmap::Visit(const Visitor& visitor) {
+  VisitContinuous(visitor);
+  VisitDisConstinuous(visitor);
+}
+
+
+
+#else
+
+
+
 template <typename Visitor>
 inline void HeapBitmap::Visit(const Visitor& visitor) {
   for (const auto& bitmap : continuous_space_bitmaps_) {
@@ -33,6 +76,8 @@ inline void HeapBitmap::Visit(const Visitor& visitor) {
     space_set->Visit(visitor);
   }
 }
+
+#endif
 
 }  // namespace accounting
 }  // namespace gc
