@@ -159,7 +159,7 @@ public:
   void CopyFrom(BaseBitmap* source_bitmap);
 
   BaseBitmap(){}
-  ~BaseBitmap(){}
+  virtual ~BaseBitmap(){}
 };
 
 
