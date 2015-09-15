@@ -87,8 +87,6 @@ SpaceBitmap::~SpaceBitmap() {}
 
 #else
 
-
-
 void SpaceBitmap::Clear() {
   if (Begin() != NULL) {
     // This returns the memory to the system.  Successive page faults will return zeroed memory.

@@ -208,7 +208,7 @@ class SpaceBitmap : public BaseBitmap {
   void SetHeapLimit(uintptr_t new_end);
 
   std::string GetName() const;
-
+  void SetName(const std::string& name);
   std::string Dump() const;
 
  private:
