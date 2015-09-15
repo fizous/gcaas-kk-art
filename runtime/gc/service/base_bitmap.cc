@@ -10,7 +10,7 @@
 
 #include "base/logging.h"
 #include "dex_file-inl.h"
-#include "heap_bitmap.h"
+#include "gc/accounting/heap_bitmap.h"
 #include "mirror/art_field-inl.h"
 #include "mirror/class-inl.h"
 #include "mirror/object-inl.h"
