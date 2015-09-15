@@ -1261,8 +1261,14 @@ void Heap::FlushAllocStack() {
   allocation_stack_->Reset();
 }
 
+
+#if ART_GC_SERVICE
+void Heap::MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
+                          accounting::ObjectStack* stack) {
+#else
 void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                           accounting::ObjectStack* stack) {
+#endif
   mirror::Object** limit = stack->End();
   for (mirror::Object** it = stack->Begin(); it != limit; ++it) {
     const mirror::Object* obj = *it;

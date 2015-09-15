@@ -418,12 +418,17 @@ class Heap {
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
+#if ART_GC_SERVICE
+  // Mark all the objects in the allocation stack in the specified bitmap.
+  void MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
+                      accounting::ObjectStack* stack)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+#else
   // Mark all the objects in the allocation stack in the specified bitmap.
   void MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                       accounting::ObjectStack* stack)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
+#endif
   // Update and mark mod union table based on gc type.
   void UpdateAndMarkModUnion(collector::MarkSweep* mark_sweep, base::TimingLogger& timings,
                              collector::GcType gc_type)
