@@ -89,7 +89,7 @@ public:
   // Set the max address which can covered by the bitmap.
   virtual void SetHeapLimit(uintptr_t new_end) = 0;
 
-  std::string Dump() const = 0;
+  virtual std::string Dump() const = 0;
 
   bool Modify(const mirror::Object* obj, bool do_set);
   // Returns true if the object was previously marked.
