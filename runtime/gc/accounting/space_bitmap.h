@@ -18,8 +18,6 @@
 #define ART_RUNTIME_GC_ACCOUNTING_SPACE_BITMAP_H_
 
 
-
-#if ART_GC_SERVICE
 #include "locks.h"
 #include "gc_allocator.h"
 #include "globals.h"
@@ -39,6 +37,10 @@ namespace mirror {
 
 namespace gc {
 namespace accounting {
+
+
+#if ART_GC_SERVICE
+
 
 class BaseBitmap {
 public:
@@ -232,30 +234,8 @@ class SpaceBitmap : public BaseBitmap {
   std::string name_;
 };
 
-}  // namespace accounting
-}  // namespace gc
-}  // namespace art
 
 #else
-#include "locks.h"
-#include "gc_allocator.h"
-#include "globals.h"
-#include "mem_map.h"
-#include "UniquePtr.h"
-
-#include <limits.h>
-#include <set>
-#include <stdint.h>
-#include <vector>
-
-namespace art {
-
-namespace mirror {
-  class Object;
-}  // namespace mirror
-
-namespace gc {
-namespace accounting {
 
 class SpaceBitmap {
  public:
@@ -429,19 +409,9 @@ class SpaceBitmap {
   std::string name_;
 };
 
-
-
 std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap);
 
-
-
-}  // namespace accounting
-}  // namespace gc
-}  // namespace art
-
 #endif
-
-
 
 // Like a bitmap except it keeps track of objects using sets.
 class SpaceSetMap {
@@ -499,4 +469,9 @@ class SpaceSetMap {
   std::string name_;
   Objects contained_;
 };
+
+}  // namespace accounting
+}  // namespace gc
+}  // namespace art
+
 #endif  // ART_RUNTIME_GC_ACCOUNTING_SPACE_BITMAP_H_
