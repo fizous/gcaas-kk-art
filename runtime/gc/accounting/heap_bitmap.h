@@ -156,7 +156,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
 ////////////////////////////////////////////////////////////////
 class HeapBitmap : public BaseHeapBitmap {
  public:
-  typedef std::vector<SpaceBitmap*, GCAllocator<SpaceBitmap*> > SpaceBitmapVector;
+  typedef std::vector<BaseBitmap*, GCAllocator<BaseBitmap*> > SpaceBitmapVector;
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
 
 
