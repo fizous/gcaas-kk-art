@@ -31,6 +31,8 @@ namespace accounting {
 
 #if ART_GC_SERVICE
 
+template <typename Visitor>
+
 class BaseHeapBitmap {
  public:
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
@@ -71,18 +73,18 @@ class BaseHeapBitmap {
   virtual void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) = 0;
 
-  template <typename Visitor>
+  //template <typename Visitor>
   virtual void VisitContinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) = 0;
 
 
-  template <typename Visitor>
+ // template <typename Visitor>
   virtual void VisitDisConstinuous(const Visitor&)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_){}
 
-  template <typename Visitor>
+ // template <typename Visitor>
   void Visit(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -123,7 +125,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
   void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  template <typename Visitor>
+  //template <typename Visitor>
   void VisitContinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -206,13 +208,13 @@ class HeapBitmap : public BaseHeapBitmap {
   void Walk(BaseBitmap::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  template <typename Visitor>
+  //template <typename Visitor>
   void VisitContinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
 
-  template <typename Visitor>
+  //template <typename Visitor>
   void VisitDisConstinuous(const Visitor& visitor)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
