@@ -398,6 +398,98 @@ inline void MarkSweep::MarkObjectNonNullParallel(const Object* obj) {
   }
 }
 
+#if ART_GC_SERVICE
+inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
+  DCHECK(!IsImmune(obj));
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    accounting::BaseBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    if (LIKELY(new_bitmap != NULL)) {
+      object_bitmap = new_bitmap;
+    } else {
+      MarkLargeObject(obj, false);
+      return;
+    }
+  }
+
+  DCHECK(object_bitmap->HasAddress(obj));
+  object_bitmap->Clear(obj);
+}
+
+inline void MarkSweep::MarkObjectNonNull(const Object* obj) {
+  DCHECK(obj != NULL);
+
+  if (IsImmune(obj)) {
+    DCHECK(IsMarked(obj));
+    return;
+  }
+
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    accounting::BaseBitmap* new_bitmap =
+        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    if (LIKELY(new_bitmap != NULL)) {
+      object_bitmap = new_bitmap;
+    } else {
+      MarkLargeObject(obj, true);
+      return;
+    }
+  }
+
+  // This object was not previously marked.
+  if (!object_bitmap->Test(obj)) {
+    object_bitmap->Set(obj);
+    if (UNLIKELY(mark_stack_->Size() >= mark_stack_->Capacity())) {
+      // Lock is not needed but is here anyways to please annotalysis.
+      MutexLock mu(Thread::Current(), mark_stack_lock_);
+      ExpandMarkStack();
+    }
+    // The object must be pushed on to the mark stack.
+    mark_stack_->PushBack(const_cast<Object*>(obj));
+  }
+}
+
+inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
+  DCHECK(obj != NULL);
+
+  if (IsImmune(obj)) {
+    DCHECK(IsMarked(obj));
+    return false;
+  }
+
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    accounting::BaseBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    if (new_bitmap != NULL) {
+      object_bitmap = new_bitmap;
+    } else {
+      // TODO: Remove the Thread::Current here?
+      // TODO: Convert this to some kind of atomic marking?
+      MutexLock mu(Thread::Current(), large_object_lock_);
+      return MarkLargeObject(obj, true);
+    }
+  }
+
+  // Return true if the object was not previously marked.
+  return !object_bitmap->AtomicTestAndSet(obj);
+}
+
+void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
+  CHECK(space->IsDlMallocSpace());
+  space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
+  accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
+  accounting::BaseBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
+  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+  alloc_space->temp_bitmap_.reset(mark_bitmap);
+  alloc_space->mark_bitmap_.reset(live_bitmap);
+}
+#else
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   DCHECK(!IsImmune(obj));
   // Try to take advantage of locality of references within a space, failing this find the space
@@ -451,6 +543,47 @@ inline void MarkSweep::MarkObjectNonNull(const Object* obj) {
   }
 }
 
+inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
+  DCHECK(obj != NULL);
+
+  if (IsImmune(obj)) {
+    DCHECK(IsMarked(obj));
+    return false;
+  }
+
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    if (new_bitmap != NULL) {
+      object_bitmap = new_bitmap;
+    } else {
+      // TODO: Remove the Thread::Current here?
+      // TODO: Convert this to some kind of atomic marking?
+      MutexLock mu(Thread::Current(), large_object_lock_);
+      return MarkLargeObject(obj, true);
+    }
+  }
+
+  // Return true if the object was not previously marked.
+  return !object_bitmap->AtomicTestAndSet(obj);
+}
+
+void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
+  CHECK(space->IsDlMallocSpace());
+  space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
+  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
+  accounting::SpaceBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
+  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+  alloc_space->temp_bitmap_.reset(mark_bitmap);
+  alloc_space->mark_bitmap_.reset(live_bitmap);
+}
+#endif
+
+
+
+
 // Rare case, probably not worth inlining since it will increase instruction cache miss rate.
 bool MarkSweep::MarkLargeObject(const Object* obj, bool set) {
   // TODO: support >1 discontinuous space.
@@ -479,32 +612,7 @@ bool MarkSweep::MarkLargeObject(const Object* obj, bool set) {
   return false;
 }
 
-inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
-  DCHECK(obj != NULL);
 
-  if (IsImmune(obj)) {
-    DCHECK(IsMarked(obj));
-    return false;
-  }
-
-  // Try to take advantage of locality of references within a space, failing this find the space
-  // the hard way.
-  accounting::SpaceBitmap* object_bitmap = current_mark_bitmap_;
-  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SpaceBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
-    if (new_bitmap != NULL) {
-      object_bitmap = new_bitmap;
-    } else {
-      // TODO: Remove the Thread::Current here?
-      // TODO: Convert this to some kind of atomic marking?
-      MutexLock mu(Thread::Current(), large_object_lock_);
-      return MarkLargeObject(obj, true);
-    }
-  }
-
-  // Return true if the object was not previously marked.
-  return !object_bitmap->AtomicTestAndSet(obj);
-}
 
 // Used to mark objects when recursing.  Recursion is done by moving
 // the finger across the bitmaps in address order and marking child
@@ -602,15 +710,7 @@ void MarkSweep::VerifyImageRootVisitor(Object* root, void* arg) {
   mark_sweep->CheckObject(root);
 }
 
-void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
-  CHECK(space->IsDlMallocSpace());
-  space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
-  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-  accounting::SpaceBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
-  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-  alloc_space->temp_bitmap_.reset(mark_bitmap);
-  alloc_space->mark_bitmap_.reset(live_bitmap);
-}
+
 
 class ScanObjectVisitor {
  public:
