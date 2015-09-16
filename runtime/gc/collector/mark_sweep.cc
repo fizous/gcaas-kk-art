@@ -843,6 +843,41 @@ class MarkStackTask : public Task {
   }
 };
 
+#if (true || ART_GC_SERVICE)
+class CardScanTask : public MarkStackTask<false> {
+ public:
+  CardScanTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, accounting::BaseBitmap* bitmap,
+               byte* begin, byte* end, byte minimum_age, size_t mark_stack_size,
+               const Object** mark_stack_obj)
+      : MarkStackTask<false>(thread_pool, mark_sweep, mark_stack_size, mark_stack_obj),
+        bitmap_(bitmap),
+        begin_(begin),
+        end_(end),
+        minimum_age_(minimum_age) {
+  }
+
+ protected:
+  accounting::BaseBitmap* const bitmap_;
+  byte* const begin_;
+  byte* const end_;
+  const byte minimum_age_;
+
+  virtual void Finalize() {
+    delete this;
+  }
+
+  virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
+    ScanObjectParallelVisitor visitor(this);
+    accounting::CardTable* card_table = mark_sweep_->GetHeap()->GetCardTable();
+    size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
+    mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
+    VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
+        << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
+    // Finish by emptying our local mark stack.
+    MarkStackTask::Run(self);
+  }
+};
+#else
 class CardScanTask : public MarkStackTask<false> {
  public:
   CardScanTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, accounting::SpaceBitmap* bitmap,
@@ -876,7 +911,7 @@ class CardScanTask : public MarkStackTask<false> {
     MarkStackTask::Run(self);
   }
 };
-
+#endif
 size_t MarkSweep::GetThreadCount(bool paused) const {
   if (heap_->GetThreadPool() == nullptr || !heap_->CareAboutPauseTimes()) {
     return 0;

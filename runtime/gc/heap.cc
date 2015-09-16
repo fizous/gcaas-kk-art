@@ -732,8 +732,13 @@ void Heap::VerifyObjectImpl(const mirror::Object* obj) {
 
 void Heap::DumpSpaces() {
   for (const auto& space : continuous_spaces_) {
+#if (true || ART_GC_SERVICE)
+    accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
+    accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
+#else
     accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
     accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
+#endif
     LOG(INFO) << space << " " << *space << "\n"
               << live_bitmap << " " << *live_bitmap << "\n"
               << mark_bitmap << " " << *mark_bitmap;
