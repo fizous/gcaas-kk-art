@@ -293,7 +293,7 @@ BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
     size_t bitmap_size) {
   InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size);
 
-  return SharedSpaceBitmap(*hb);
+  return new SharedSpaceBitmap(*hb);
 }
 
 SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
