@@ -278,7 +278,7 @@ class MemMapSpace : public ContinuousSpace {
   virtual size_t NonGrowthLimitCapacity() const {
     return Capacity();
   }
-
+  MemMapSpace(){}
  protected:
   MemMapSpace(const std::string& name, MemMap* mem_map, size_t initial_size,
               GcRetentionPolicy gc_retention_policy)
