@@ -1476,6 +1476,8 @@ void MarkSweep::SweepLargeObjects(bool swap_bitmaps) {
   base::TimingLogger::ScopedSplit("SweepLargeObjects", &timings_);
   // Sweep large objects
   space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
+  if(large_object_space == NULL)
+    return;
   accounting::SpaceSetMap* large_live_objects = large_object_space->GetLiveObjects();
   accounting::SpaceSetMap* large_mark_objects = large_object_space->GetMarkObjects();
   if (swap_bitmaps) {
