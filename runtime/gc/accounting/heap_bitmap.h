@@ -22,6 +22,11 @@
 #include "locks.h"
 #include "space_bitmap.h"
 
+
+
+#define GC_SERVICE_SHARABLE_HEAP_BITMAP    true
+
+
 namespace art {
 namespace gc {
 
