@@ -303,6 +303,10 @@ class MemMapSpace : public ContinuousSpace {
 };
 
 
+class AbstractDLmallocSpace: public AllocSpace {
+
+};
+
 class SharableSpace {
 
 };
