@@ -24,6 +24,7 @@
 #include "runtime.h"
 #include "utils.h"
 
+
 namespace art {
 namespace gc {
 namespace accounting {

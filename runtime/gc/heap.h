@@ -59,7 +59,11 @@ namespace mirror {
 
 namespace gc {
 namespace accounting {
-  class HeapBitmap;
+#if true || ART_GC_SERVICE
+class BaseHeapBitmap;
+#else
+class HeapBitmap;
+#endif
   class ModUnionTable;
   class SpaceSetMap;
 }  // namespace accounting
@@ -397,6 +401,14 @@ class Heap {
 
   size_t Trim();
 
+#if (true || ART_GC_SERVICE)
+  accounting::BaseHeapBitmap* GetLiveBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
+    return live_bitmap_.get();
+  }
+
+  accounting::BaseHeapBitmap* GetMarkBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
+    return mark_bitmap_.get();
+#else
   accounting::HeapBitmap* GetLiveBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return live_bitmap_.get();
   }
@@ -404,7 +416,7 @@ class Heap {
   accounting::HeapBitmap* GetMarkBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return mark_bitmap_.get();
   }
-
+#endif
   accounting::ObjectStack* GetLiveStack() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return live_stack_.get();
   }
@@ -726,9 +738,13 @@ class Heap {
   uint64_t allocation_rate_;
 
   // For a GC cycle, a bitmap that is set corresponding to the
+#if true || ART_GC_SERVICE
+  UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+  UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+#else
   UniquePtr<accounting::HeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
-
+#endif
   // Mark stack that we reuse to avoid re-allocating the mark stack.
   UniquePtr<accounting::ObjectStack> mark_stack_;
 

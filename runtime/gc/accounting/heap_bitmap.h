@@ -29,7 +29,7 @@ class Heap;
 
 namespace accounting {
 
-#if ART_GC_SERVICE
+#if true || ART_GC_SERVICE
 
 
 typedef struct GCSrvceSharedHeapBitmap_S {
@@ -45,6 +45,9 @@ typedef struct GCSrvceSharedHeapBitmap_S {
 
 class BaseHeapBitmap {
  public:
+
+  static BaseHeapBitmap* CreateHeapBitmap(Heap* heap, bool sharable = false);
+
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 

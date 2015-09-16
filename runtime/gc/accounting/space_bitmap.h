@@ -39,7 +39,7 @@ namespace gc {
 namespace accounting {
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 
 
 class BaseBitmap {

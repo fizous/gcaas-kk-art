@@ -23,7 +23,14 @@ namespace gc {
 namespace accounting {
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
+
+BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(Heap* heap, bool sharable) {
+  if(!sharable) {
+    return new HeapBitmap(heap);
+  }
+  return new SharedHeapBitmap(heap);
+}
 
 bool BaseHeapBitmap::Test(const mirror::Object* obj) {
   BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);

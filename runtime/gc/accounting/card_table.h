@@ -37,6 +37,8 @@ namespace space {
 class Heap;
 
 namespace accounting {
+
+
 #if ART_GC_SERVICE
 class BaseBitmap;
 #else

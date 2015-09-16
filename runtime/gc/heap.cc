@@ -143,10 +143,13 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Heap() entering";
   }
-
+#if (true || ART_GC_SERVICE)
+  live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this));
+  mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this));
+#else
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));
-
+#endif
   // Requested begin for the alloc space, to follow the mapped image and oat files
   byte* requested_alloc_space_begin = NULL;
   std::string image_file_name(original_image_file_name);
