@@ -19,6 +19,7 @@
 
 #include "gc/allocator/dlmalloc.h"
 #include "space.h"
+#include "gc/accounting/space_bitmap.h"
 #include "gc_profiler/MProfiler.h"
 
 
