@@ -71,12 +71,12 @@ public:
   }
 
 
-  static BaseBitmap* CreateSharedSpaceBitmap(space::GCSrvceBitmap **hb,
+  static BaseBitmap* CreateSharedSpaceBitmap(GCSrvceBitmap **hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
       size_t bitmap_size);
 
 
-  static void InitSrvcBitmap(space::GCSrvceBitmap **hb,
+  static void InitSrvcBitmap(GCSrvceBitmap **hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
       size_t bitmap_size);
 
@@ -250,12 +250,12 @@ class SharedSpaceBitmap : public BaseBitmap {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
 
-  SharedSpaceBitmap(space::GCSrvceBitmap*);
+  SharedSpaceBitmap(GCSrvceBitmap*);
 
   ~SharedSpaceBitmap();
 
  private:
-  space::GCSrvceBitmap* bitmap_data_;
+  GCSrvceBitmap* bitmap_data_;
 };
 
 std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap);
