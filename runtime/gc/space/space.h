@@ -223,7 +223,7 @@ class ContinuousSpace : public Space {
   }
 
   virtual ~ContinuousSpace() {}
-
+  ContinuousSpace(){}
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                   byte* begin, byte* end) :
