@@ -125,6 +125,7 @@ class Space {
   }
   LargeObjectSpace* AsLargeObjectSpace();
 
+  Space(){}
   virtual ~Space() {}
 
 
