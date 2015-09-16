@@ -42,8 +42,9 @@ void StickyMarkSweep::BindBitmaps() {
       BindLiveToMarkBitmap(space);
     }
   }
-
-  GetHeap()->GetLargeObjectsSpace()->CopyLiveToMarked();
+  space::LargeObjectSpace* _LOS = GetHeap()->GetLargeObjectsSpace();
+  if (_LOS != NULL)
+    GetHeap()->GetLargeObjectsSpace()->CopyLiveToMarked();
 }
 
 void StickyMarkSweep::MarkReachableObjects() {

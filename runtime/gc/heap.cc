@@ -144,8 +144,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     LOG(INFO) << "Heap() entering";
   }
 #if (true || ART_GC_SERVICE)
-  live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this, GC_SERVICE_SHARABLE_HEAP_BITMAP));
-  mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this, GC_SERVICE_SHARABLE_HEAP_BITMAP));
+  live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+  mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
 #else
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));
@@ -180,14 +182,18 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   AddContinuousSpace(alloc_space_);
 
   // Allocate the large object space.
-  const bool kUseFreeListSpaceForLOS = false;
-  if (kUseFreeListSpaceForLOS) {
-    large_object_space_ = space::FreeListSpace::Create("large object space", NULL, capacity);
+  if(!GC_HEAP_SRVCE_NO_LOS) {
+    const bool kUseFreeListSpaceForLOS = false;
+    if (kUseFreeListSpaceForLOS) {
+      large_object_space_ = space::FreeListSpace::Create("large object space", NULL, capacity);
+    } else {
+      large_object_space_ = space::LargeObjectMapSpace::Create("large object space");
+    }
+    CHECK(large_object_space_ != NULL) << "Failed to create large object space";
+    AddDiscontinuousSpace(large_object_space_);
   } else {
-    large_object_space_ = space::LargeObjectMapSpace::Create("large object space");
+    large_object_space_ = NULL;
   }
-  CHECK(large_object_space_ != NULL) << "Failed to create large object space";
-  AddDiscontinuousSpace(large_object_space_);
 
   // Compute heap capacity. Continuous spaces are sorted in order of Begin().
   byte* heap_begin = continuous_spaces_.front()->Begin();
@@ -1264,7 +1270,7 @@ void Heap::PreZygoteFork() {
 }
 
 void Heap::FlushAllocStack() {
-  MarkAllocStack(alloc_space_->GetLiveBitmap(), large_object_space_->GetLiveObjects(),
+  MarkAllocStack(alloc_space_->GetLiveBitmap(), GC_HEAP_SRVCE_NO_LOS ? NULL : large_object_space_->GetLiveObjects(),
                  allocation_stack_.get());
   allocation_stack_->Reset();
 }
@@ -1284,7 +1290,11 @@ void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetM
     if (LIKELY(bitmap->HasAddress(obj))) {
       bitmap->Set(obj);
     } else {
-      large_objects->Set(obj);
+      if(GC_HEAP_SRVCE_NO_LOS){
+        LOG(FATAL) << "ERROR Heap::MarkAllocStack";
+      } else {
+        large_objects->Set(obj);
+      }
     }
   }
 }

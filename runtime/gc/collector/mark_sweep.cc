@@ -588,6 +588,8 @@ void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
 bool MarkSweep::MarkLargeObject(const Object* obj, bool set) {
   // TODO: support >1 discontinuous space.
   space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
+  if(large_object_space == NULL)
+    return false;
   accounting::SpaceSetMap* large_objects = large_object_space->GetMarkObjects();
   if (kProfileLargeObjects) {
     ++large_object_test_;
@@ -660,7 +662,7 @@ void MarkSweep::VerifyRoot(const Object* root, size_t vreg, const StackVisitor* 
   // See if the root is on any space bitmap.
   if (GetHeap()->GetLiveBitmap()->GetContinuousSpaceBitmap(root) == NULL) {
     space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
-    if (!large_object_space->Contains(root)) {
+    if (large_object_space != NULL && !large_object_space->Contains(root)) {
       LOG(ERROR) << "Found invalid root: " << root;
       if (visitor != NULL) {
         LOG(ERROR) << visitor->DescribeLocation() << " in VReg: " << vreg;
@@ -1223,7 +1225,7 @@ void MarkSweep::VerifyIsLive(const Object* obj) {
   Heap* heap = GetHeap();
   if (!heap->GetLiveBitmap()->Test(obj)) {
     space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
-    if (!large_object_space->GetLiveObjects()->Test(obj)) {
+    if (large_object_space != NULL && !large_object_space->GetLiveObjects()->Test(obj)) {
       if (std::find(heap->allocation_stack_->Begin(), heap->allocation_stack_->End(), obj) ==
           heap->allocation_stack_->End()) {
         // Object not found!
@@ -1333,11 +1335,19 @@ void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitma
   accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
 #endif
   space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
-  accounting::SpaceSetMap* large_live_objects = large_object_space->GetLiveObjects();
-  accounting::SpaceSetMap* large_mark_objects = large_object_space->GetMarkObjects();
+  accounting::SpaceSetMap* large_live_objects = NULL;
+  accounting::SpaceSetMap* large_mark_objects = NULL;
+  bool _ignoreLOS = true;
+  if(large_object_space != NULL) {
+    _ignoreLOS = false;
+    large_live_objects = large_object_space->GetLiveObjects();
+    large_mark_objects = large_object_space->GetMarkObjects();
+  }
+
   if (swap_bitmaps) {
     std::swap(live_bitmap, mark_bitmap);
-    std::swap(large_live_objects, large_mark_objects);
+    if(!_ignoreLOS)
+      std::swap(large_live_objects, large_mark_objects);
   }
 
   size_t freed_bytes = 0;
@@ -1370,7 +1380,7 @@ void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitma
           timings_.EndSplit();
         }
       }
-    } else if (!large_mark_objects->Test(obj)) {
+    } else if ((!_ignoreLOS) && (!large_mark_objects->Test(obj))) {
       ++freed_large_objects;
       freed_large_object_bytes += large_object_space->Free(self, obj);
     }

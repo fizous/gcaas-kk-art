@@ -3445,7 +3445,9 @@ void Dbg::DdmSendHeapSegments(bool native) {
       }
     }
     // Walk the large objects, these are not in the AllocSpace.
-    heap->GetLargeObjectsSpace()->Walk(HeapChunkContext::HeapChunkCallback, &context);
+    gc::space::LargeObjectSpace* _LOS =  heap->GetLargeObjectsSpace();
+    if(_LOS != NULL)
+      _LOS->Walk(HeapChunkContext::HeapChunkCallback, &context);
   }
 
   // Finally, send a heap end chunk.

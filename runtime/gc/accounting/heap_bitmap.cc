@@ -78,6 +78,7 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
   memcpy(header_, &_data_values,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
   memset(header_->bitmaps_, 0, (8 * sizeof(BaseBitmap*)));
+  LOG(ERROR) << "done creating heap bitmap";
 
 }
 
