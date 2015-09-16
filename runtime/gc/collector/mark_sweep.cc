@@ -1807,7 +1807,11 @@ void MarkSweep::UnBindBitmaps() {
       space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
       if (alloc_space->temp_bitmap_.get() != NULL) {
         // At this point, the temp_bitmap holds our old mark bitmap.
+#if (true || ART_GC_SERVICE)
+        accounting::BaseBitmap* new_bitmap = alloc_space->temp_bitmap_.release();
+#else
         accounting::SpaceBitmap* new_bitmap = alloc_space->temp_bitmap_.release();
+#endif
         GetHeap()->GetMarkBitmap()->ReplaceBitmap(alloc_space->mark_bitmap_.get(), new_bitmap);
         CHECK_EQ(alloc_space->mark_bitmap_.release(), alloc_space->live_bitmap_.get());
         alloc_space->mark_bitmap_.reset(new_bitmap);

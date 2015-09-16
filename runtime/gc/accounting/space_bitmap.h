@@ -168,7 +168,7 @@ public:
   virtual ~BaseBitmap(){}
 };
 
-
+std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap);
 
 class SpaceBitmap : public BaseBitmap {
  public:
