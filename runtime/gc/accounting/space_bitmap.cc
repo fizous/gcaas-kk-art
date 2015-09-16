@@ -92,7 +92,7 @@ void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   // should be marked.
 }
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 
 #else
 

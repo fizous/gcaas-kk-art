@@ -36,7 +36,7 @@
 
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
@@ -59,7 +59,7 @@ namespace mirror {
 
 namespace gc {
 namespace accounting {
-#if true || ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 class BaseHeapBitmap;
 #else
 class HeapBitmap;
@@ -430,7 +430,7 @@ class Heap {
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
   // Mark all the objects in the allocation stack in the specified bitmap.
   void MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                       accounting::ObjectStack* stack)

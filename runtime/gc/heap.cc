@@ -1265,7 +1265,7 @@ void Heap::FlushAllocStack() {
 }
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 void Heap::MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                           accounting::ObjectStack* stack) {
 #else
@@ -1526,7 +1526,7 @@ class VerifyReferenceVisitor {
             accounting::CardTable::kCardSize);
         LOG(ERROR) << "Card " << reinterpret_cast<void*>(card_addr) << " covers " << cover_begin
             << "-" << cover_end;
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
         accounting::BaseBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);
 #else
         accounting::SpaceBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);

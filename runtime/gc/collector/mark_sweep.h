@@ -47,7 +47,7 @@ namespace accounting {
   class ModUnionTableBitmap;
   class MarkStackChunk;
   typedef AtomicStack<mirror::Object*> ObjectStack;
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
   class BaseBitmap;
 #else
   class SpaceBitmap;
@@ -400,7 +400,7 @@ class MarkSweep : public GarbageCollector {
   // Whether or not we count how many of each type of object were scanned.
   static const bool kCountScannedTypes = false;
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
   // Current space, we check this space first to avoid searching for the appropriate space for an
   // object.
   accounting::BaseBitmap* current_mark_bitmap_;

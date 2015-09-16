@@ -398,7 +398,7 @@ inline void MarkSweep::MarkObjectNonNullParallel(const Object* obj) {
   }
 }
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   DCHECK(!IsImmune(obj));
   // Try to take advantage of locality of references within a space, failing this find the space
@@ -1003,7 +1003,7 @@ void MarkSweep::VerifyImageRoots() {
 }
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 class RecursiveMarkTask : public MarkStackTask<false> {
  public:
   RecursiveMarkTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,

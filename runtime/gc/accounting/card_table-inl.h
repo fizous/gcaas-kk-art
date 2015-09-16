@@ -41,7 +41,7 @@ static inline bool byte_cas(byte old_value, byte new_value, byte* address) {
   return success;
 }
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 template <typename Visitor>
 inline size_t CardTable::Scan(BaseBitmap* bitmap, byte* scan_begin, byte* scan_end,
                               const Visitor& visitor, const byte minimum_age) const {

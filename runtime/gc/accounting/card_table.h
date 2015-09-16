@@ -39,7 +39,7 @@ class Heap;
 namespace accounting {
 
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
 class BaseBitmap;
 #else
 class SpaceBitmap;
@@ -103,7 +103,7 @@ class CardTable {
   void ModifyCardsAtomic(byte* scan_begin, byte* scan_end, const Visitor& visitor,
                          const ModifiedVisitor& modified);
 
-#if ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
   // For every dirty at least minumum age between begin and end invoke the visitor with the
   // specified argument. Returns how many cards the visitor was run on.
   template <typename Visitor>
