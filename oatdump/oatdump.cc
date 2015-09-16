@@ -768,7 +768,11 @@ class ImageDumper {
         }
       }
       // Dump the large objects separately.
-      heap->GetLargeObjectsSpace()->GetLiveObjects()->Walk(ImageDumper::Callback, this);
+      gc::space::LargeObjectSpace* _large_object_space = heap->GetLargeObjectsSpace();
+      if(_large_object_space != NULL) {
+        heap->GetLargeObjectsSpace()->GetLiveObjects()->Walk(ImageDumper::Callback, this);
+      }
+
       indent_os << "\n";
       os_ = saved_os;
     }

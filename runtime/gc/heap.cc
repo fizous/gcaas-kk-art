@@ -146,9 +146,9 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 #if (true || ART_GC_SERVICE)
   LOG(ERROR) << "the runtime is a compiler ? " << Runtime::Current()->IsCompiler();
   live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
-      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+      false && (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
   mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
-      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+      false && (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
 #else
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));

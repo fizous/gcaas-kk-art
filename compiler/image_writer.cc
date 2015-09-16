@@ -425,6 +425,7 @@ void ImageWriter::CalculateNewObjectOffsets(size_t oat_loaded_size, size_t oat_d
     // TODO: Image spaces only?
     // TODO: Add InOrderWalk to heap bitmap.
     const char* old = self->StartAssertNoThreadSuspension("ImageWriter");
+    space::LargeObjectSpace* large_objects = heap->GetLargeObjectsSpace();
     DCHECK(heap->GetLargeObjectsSpace()->GetLiveObjects()->IsEmpty());
     for (const auto& space : spaces) {
       space->GetLiveBitmap()->InOrderWalk(CalculateNewObjectOffsetsCallback, this);

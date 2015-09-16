@@ -1901,7 +1901,8 @@ void MarkSweep::FinishPhase() {
 
   // Reset the marked large objects.
   space::LargeObjectSpace* large_objects = GetHeap()->GetLargeObjectsSpace();
-  large_objects->GetMarkObjects()->Clear();
+  if (large_objects != NULL)
+    large_objects->GetMarkObjects()->Clear();
 }
 
 }  // namespace collector
