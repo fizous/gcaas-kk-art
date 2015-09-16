@@ -86,7 +86,7 @@ typedef struct GCSrvceDlMallocSpace_S {
 }  __attribute__((aligned(8))) GCSrvceDlMallocSpace;
 
 
-class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
+class SharedDlMallocSpace : public SharableSpace ,
                             public DlMallocSpace {
 
  public:
