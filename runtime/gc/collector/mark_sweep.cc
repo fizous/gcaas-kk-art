@@ -1325,8 +1325,13 @@ void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitma
   timings_.StartSplit("SweepArray");
   // Newly allocated objects MUST be in the alloc space and those are the only objects which we are
   // going to free.
+#if (true || ART_GC_SERVICE)
+  accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
+  accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
+#else
   accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
   accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
+#endif
   space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
   accounting::SpaceSetMap* large_live_objects = large_object_space->GetLiveObjects();
   accounting::SpaceSetMap* large_mark_objects = large_object_space->GetMarkObjects();
@@ -1417,22 +1422,38 @@ void MarkSweep::Sweep(bool swap_bitmaps) {
       uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
       uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
       scc.space = space->AsDlMallocSpace();
+#if (true || ART_GC_SERVICE)
+      accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
+      accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
+#else
       accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
       accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
+#endif
       if (swap_bitmaps) {
         std::swap(live_bitmap, mark_bitmap);
       }
       if (!space->IsZygoteSpace()) {
         base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
         // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
+#if (true || ART_GC_SERVICE)
+        accounting::BaseBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                             &SweepCallback, reinterpret_cast<void*>(&scc));
+#else
         accounting::SpaceBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
                                            &SweepCallback, reinterpret_cast<void*>(&scc));
+#endif
       } else {
         base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
         // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
         // memory.
+#if (true || ART_GC_SERVICE)
+        accounting::BaseBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                            &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
+#else
         accounting::SpaceBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
                                            &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
+#endif
+
       }
     }
   }
