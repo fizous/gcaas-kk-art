@@ -87,7 +87,7 @@ typedef struct GCSrvceDlMallocSpace_S {
 
 
 class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
-                            public AllocSpace, public DlMallocSpace {
+                            public DlMallocSpace {
 
  public:
   // Alignment of objects within spaces.
