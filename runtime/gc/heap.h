@@ -595,12 +595,10 @@ class Heap {
   // All-known discontinuous spaces, where objects may be placed throughout virtual memory.
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;
 
-#if (true || ART_GC_SERVICE)
-  space::ContinuousSpace* alloc_space_;
-#else
+
   // The allocation space we are currently allocating into.
   space::DlMallocSpace* alloc_space_;
-#endif
+
   // The large object space we are currently allocating into.
   space::LargeObjectSpace* large_object_space_;
 
