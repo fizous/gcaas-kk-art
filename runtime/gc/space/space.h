@@ -22,7 +22,6 @@
 #include "UniquePtr.h"
 #include "base/macros.h"
 #include "base/mutex.h"
-#include "gc/space/space_common.h"
 #include "gc/accounting/space_bitmap.h"
 
 #include "globals.h"
@@ -39,6 +38,7 @@ namespace gc {
 namespace accounting {
   class BaseBitmap;
   class SpaceBitmap;
+  class SpaceSetMap;
 }  // namespace accounting
 
 class Heap;
