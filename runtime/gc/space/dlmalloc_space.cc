@@ -559,7 +559,7 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
   const size_t capacity = Capacity() - size;
-  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(begin_) << "\n"
+  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin " << reinterpret_cast<const void*>(begin_) << "\n"
              << "End " << reinterpret_cast<const void*>(end_) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << growth_limit_ << "\n"

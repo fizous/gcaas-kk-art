@@ -1235,9 +1235,12 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     for (const auto& collector : mark_sweep_collectors_) {
       collector->ResetCumulativeStatistics();
     }
-    return ;
+    return;
   }
-  //create shared space here
+//  LOG(ERROR) << "Heap::PostZygoteForkWithSpaceFork..with shared space";
+//  // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
+//  // of the remaining available heap memory.
+//  space::DlMallocSpace* zygote_space = alloc_space_;
 }
 
 
