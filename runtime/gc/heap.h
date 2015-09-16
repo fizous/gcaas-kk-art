@@ -596,6 +596,8 @@ class Heap {
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;
 
 #if (true || ART_GC_SERVICE)
+  // The allocation space we are currently allocating into.
+  space::AbstractDLmallocSpace* alloc_space_;
 #else
   // The allocation space we are currently allocating into.
   space::DlMallocSpace* alloc_space_;
