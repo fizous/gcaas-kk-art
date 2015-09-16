@@ -38,7 +38,7 @@ namespace gc {
 namespace accounting {
   class BaseBitmap;
   class SpaceBitmap;
-  class SpaceSetMap;
+  class SpaceBitmap;
 }  // namespace accounting
 
 class Heap;
@@ -125,7 +125,6 @@ class Space {
   }
   LargeObjectSpace* AsLargeObjectSpace();
 
-  Space(){}
   virtual ~Space() {}
 
 
@@ -224,7 +223,7 @@ class ContinuousSpace : public Space {
   }
 
   virtual ~ContinuousSpace() {}
-  ContinuousSpace(){}
+
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                   byte* begin, byte* end) :
@@ -279,7 +278,7 @@ class MemMapSpace : public ContinuousSpace {
   virtual size_t NonGrowthLimitCapacity() const {
     return Capacity();
   }
-  MemMapSpace(){}
+
  protected:
   MemMapSpace(const std::string& name, MemMap* mem_map, size_t initial_size,
               GcRetentionPolicy gc_retention_policy)
