@@ -209,7 +209,11 @@ void ModUnionTableReferenceCache::Verify() {
       uintptr_t end = start + CardTable::kCardSize;
       auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
       DCHECK(space != nullptr);
+#if (true || ART_GC_SERVICE)
+      BaseBitmap* live_bitmap = space->GetLiveBitmap();
+#else
       SpaceBitmap* live_bitmap = space->GetLiveBitmap();
+#endif
       live_bitmap->VisitMarkedRange(start, end, visitor);
     }
   }
@@ -250,7 +254,11 @@ void ModUnionTableReferenceCache::Update() {
     uintptr_t end = start + CardTable::kCardSize;
     auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
     DCHECK(space != nullptr);
+#if (true || ART_GC_SERVICE)
+    BaseBitmap* live_bitmap = space->GetLiveBitmap();
+#else
     SpaceBitmap* live_bitmap = space->GetLiveBitmap();
+#endif
     live_bitmap->VisitMarkedRange(start, end, visitor);
 
     // Update the corresponding references for the card.
@@ -294,7 +302,11 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
   CardTable* card_table = heap_->GetCardTable();
   ModUnionScanImageRootVisitor visitor(mark_sweep);
   space::ContinuousSpace* space = nullptr;
+#if (true || ART_GC_SERVICE)
+  BaseBitmap* bitmap = nullptr;
+#else
   SpaceBitmap* bitmap = nullptr;
+#endif
   for (const byte* card_addr : cleared_cards_) {
     auto start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
     auto end = start + CardTable::kCardSize;
