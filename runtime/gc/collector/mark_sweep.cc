@@ -486,8 +486,8 @@ void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
   accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
   accounting::BaseBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
   GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-  alloc_space->temp_bitmap_.reset(reinterpret_cast<accounting::SpaceBitmap*>(mark_bitmap));
-  alloc_space->mark_bitmap_.reset(reinterpret_cast<accounting::SpaceBitmap*>(live_bitmap));
+  alloc_space->temp_bitmap_.reset(mark_bitmap);
+  alloc_space->mark_bitmap_.reset(live_bitmap);
 }
 #else
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
