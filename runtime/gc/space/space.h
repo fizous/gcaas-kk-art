@@ -203,9 +203,13 @@ class ContinuousSpace : public Space {
     return End() - Begin();
   }
 
+#if true || ART_GC_SERVICE
+  virtual accounting::BaseBitmap* GetLiveBitmap() const = 0;
+  virtual accounting::BaseBitmap* GetMarkBitmap() const = 0;
+#else
   virtual accounting::SpaceBitmap* GetLiveBitmap() const = 0;
   virtual accounting::SpaceBitmap* GetMarkBitmap() const = 0;
-
+#endif
   // Is object within this space? We check to see if the pointer is beyond the end first as
   // continuous spaces are iterated over from low to high.
   bool HasAddress(const mirror::Object* obj) const {

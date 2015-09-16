@@ -140,6 +140,19 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
   static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
+
+#if true || ART_GC_SERVICE
+  live_bitmap_.reset(reinterpret_cast<accounting::BaseBitmap*>(accounting::SpaceBitmap::Create(
+       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
+       Begin(), Capacity())));
+   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << bitmap_index;
+
+   mark_bitmap_.reset(reinterpret_cast<accounting::BaseBitmap*>(accounting::SpaceBitmap::Create(
+       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
+       Begin(), Capacity())));
+   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
+
+#else
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
       Begin(), Capacity()));
@@ -149,7 +162,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
       Begin(), Capacity()));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
-
+#endif
   for (auto& freed : recent_freed_objects_) {
     freed.first = nullptr;
     freed.second = nullptr;

@@ -125,8 +125,13 @@ void GarbageCollector::SwapBitmaps() {
     if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
         (gc_type == kGcTypeFull &&
          space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
+#if (true || ART_GC_SERVICE)
+      accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
+      accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
+#else
       accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
       accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
+#endif
       if (live_bitmap != mark_bitmap) {
         heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
         heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
