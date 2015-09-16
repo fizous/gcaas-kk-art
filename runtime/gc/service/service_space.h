@@ -74,8 +74,8 @@ typedef struct GCSrvceDlMallocSpace_S {
   size_t total_objects_allocated_;
 
 
-  GCSrvceBitmap live_bitmap_;
-  GCSrvceBitmap mark_bitmap_;
+  accounting::GCSrvceBitmap live_bitmap_;
+  accounting::GCSrvceBitmap mark_bitmap_;
 
 
 
@@ -246,7 +246,7 @@ class SharedDlMallocSpace : public SharableSpace , public ContinuousSpace,
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
 
   bool CreateBitmaps(byte* heap_begin, size_t heap_capacity);
-  bool SpaceBitmapInit(GCSrvceBitmap *hb,
+  bool SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
       size_t bitmap_size);
 
