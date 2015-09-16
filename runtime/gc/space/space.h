@@ -37,6 +37,7 @@ namespace mirror {
 namespace gc {
 
 namespace accounting {
+  class BaseBitmap;
   class SpaceBitmap;
 }  // namespace accounting
 
