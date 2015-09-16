@@ -212,7 +212,20 @@ void BaseBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
   }
 }
 
+std::string BaseBitmap::Dump() const {
+  return StringPrintf("%s: %p-%p", GetName().c_str(),
+                      reinterpret_cast<void*>(HeapBegin()),
+                      reinterpret_cast<void*>(HeapLimit()));
+}
 
+
+std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap) {
+  return stream
+    << bitmap.GetName() << "["
+    << "begin=" << reinterpret_cast<const void*>(bitmap.HeapBegin())
+    << ",end=" << reinterpret_cast<const void*>(bitmap.HeapLimit())
+    << "]";
+}
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art

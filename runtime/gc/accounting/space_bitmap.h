@@ -92,7 +92,7 @@ public:
   virtual void SetHeapLimit(uintptr_t new_end) = 0;
   virtual std::string GetName() const = 0;
   virtual void SetName(const std::string& name) = 0;
-  virtual std::string Dump() const = 0;
+  virtual std::string Dump() const;
 
   bool Modify(const mirror::Object* obj, bool do_set);
   // Returns true if the object was previously marked.
