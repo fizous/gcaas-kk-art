@@ -314,7 +314,7 @@ void SharedDlMallocSpace::Walk(void(*callback)(void *start, void *end,
 }
 
 void SharedDlMallocSpace::SwapBitmaps() {
-  GCSrvceBitmap tmp = alloc_space_->live_bitmap_;
+  accounting::GCSrvceBitmap tmp = alloc_space_->live_bitmap_;
   alloc_space_->live_bitmap_ = alloc_space_->mark_bitmap_;
   alloc_space_->mark_bitmap_ = tmp;
 }
@@ -473,7 +473,7 @@ bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity) 
  * enough to cover a heap at <base> of <maxSize> bytes, where
  * objects are guaranteed to be HB_OBJECT_ALIGNMENT-aligned.
  */
-bool SharedDlMallocSpace::SpaceBitmapInit(GCSrvceBitmap *hb,
+bool SharedDlMallocSpace::SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     size_t bitmap_size) {
   std::string _str = StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
