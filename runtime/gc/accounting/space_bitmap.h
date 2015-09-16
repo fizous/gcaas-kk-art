@@ -29,9 +29,6 @@
 #include <stdint.h>
 #include <vector>
 
-#if (true || ART_GC_SERVICE)
-#include  "gc/service/service_space.h"
-#endif
 
 namespace art {
 
@@ -184,7 +181,22 @@ public:
 
 std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap);
 
+typedef struct GCSrvceBitmap_S {
+  // Backing storage for bitmap.
+  AShmemMap mem_map_;
 
+  // This bitmap itself, word sized for efficiency in scanning.
+  word* /*const*/ bitmap_begin_;
+
+  // Size of this bitmap.
+  size_t bitmap_size_;
+
+  // The base address of the heap, which corresponds to the word containing the first bit in the
+  // bitmap.
+  /*const*/ uintptr_t heap_begin_;
+
+  char name_[64];
+} __attribute__((aligned(8)))  GCSrvceBitmap;
 
 class SharedSpaceBitmap : public BaseBitmap {
  public:
