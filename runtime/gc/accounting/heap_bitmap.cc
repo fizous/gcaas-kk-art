@@ -103,8 +103,9 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) 
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
         << _temp->Dump();
   }
-  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop " << header_->index_;
+
   header_->bitmaps_[header_->index_++] = bitmap;
+  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop " << header_->index_;
 }
 
 void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
