@@ -281,8 +281,9 @@ void MarkSweep::MarkReachableObjects() {
   // knowing that new allocations won't be marked as live.
   timings_.StartSplit("MarkStackAsLive");
   accounting::ObjectStack* live_stack = heap_->GetLiveStack();
+  space::LargeObjectSpace* _LOS = heap_->large_object_space_;
   heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
-                        heap_->large_object_space_->GetLiveObjects(), live_stack);
+      _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
   // Recursively mark all the non-image bits set in the mark bitmap.
