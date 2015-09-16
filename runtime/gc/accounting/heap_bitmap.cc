@@ -83,11 +83,19 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
 
 }
 
+
+
 void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) {
   DCHECK(bitmap != NULL);
   // Check for interval overlap.
   BaseBitmap* _temp = NULL;
-  for(int i = 0; i < header_->index_; i ++) {
+  LOG(ERROR) << "header is allocated? " << (header_ != NULL);
+  if(header_ != NULL) {
+    LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " << header_->index_;
+  } else {
+    LOG(FATAL) << "SharedHeapBitmap::AddContinuousSpaceBitmap..._header is not allocated";
+  }
+  for(int i = 0; i < header_->index_; i++) {
     _temp = header_->bitmaps_[i];
     CHECK(!(
         bitmap->HeapBegin() < _temp->HeapLimit() &&
@@ -95,7 +103,8 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) 
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
         << _temp->Dump();
   }
-  header_->bitmaps_[header_->index_++] = _temp;
+  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop " << header_->index_;
+  header_->bitmaps_[header_->index_++] = bitmap;
 }
 
 void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
