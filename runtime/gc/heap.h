@@ -408,6 +408,7 @@ class Heap {
 
   accounting::BaseHeapBitmap* GetMarkBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return mark_bitmap_.get();
+  }
 #else
   accounting::HeapBitmap* GetLiveBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return live_bitmap_.get();
@@ -738,7 +739,7 @@ class Heap {
   uint64_t allocation_rate_;
 
   // For a GC cycle, a bitmap that is set corresponding to the
-#if true || ART_GC_SERVICE
+#if (true || ART_GC_SERVICE)
   UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
 #else
