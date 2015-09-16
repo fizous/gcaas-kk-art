@@ -262,13 +262,13 @@ std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap
 }
 
 
-void BaseBitmap::InitSrvcBitmap(space::GCSrvceBitmap **hb,
+void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     size_t bitmap_size) {
-  space::GCSrvceBitmap* hb_p = *hb;
+  accounting::GCSrvceBitmap* hb_p = *hb;
   if(hb_p == NULL) {
-    *hb = reinterpret_cast<space::GCSrvceBitmap*>(
-        calloc(1, SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvceBitmap)));
+    *hb = reinterpret_cast<accounting::GCSrvceBitmap*>(
+        calloc(1, SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap)));
     hb_p = *hb;
   }
 
@@ -288,7 +288,7 @@ void BaseBitmap::InitSrvcBitmap(space::GCSrvceBitmap **hb,
 }
 
 
-BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(space::GCSrvceBitmap **hb,
+BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     size_t bitmap_size) {
   InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size);
@@ -296,7 +296,7 @@ BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(space::GCSrvceBitmap **hb,
   return SharedSpaceBitmap(*hb);
 }
 
-SharedSpaceBitmap::SharedSpaceBitmap(space::GCSrvceBitmap* data_p) :
+SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
     bitmap_data_(data_p) {
   if(data_p == NULL) {
     LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
