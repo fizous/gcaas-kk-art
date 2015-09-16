@@ -177,7 +177,6 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
-  DlMallocSpace(){}
  protected:
   DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
                 size_t growth_limit);
