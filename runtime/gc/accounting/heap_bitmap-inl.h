@@ -23,7 +23,7 @@ namespace art {
 namespace gc {
 namespace accounting {
 
-#if rue || ART_GC_SERVICE
+#if true || ART_GC_SERVICE
 template <typename Visitor>
 inline void BaseHeapBitmap::Visit(const Visitor& visitor) {
   BaseBitmap* _bitmap = NULL;

@@ -226,6 +226,92 @@ std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap) {
     << ",end=" << reinterpret_cast<const void*>(bitmap.HeapLimit())
     << "]";
 }
+
+
+
+/// SharedSpaceBitmap
+
+
+void SharedSpaceBitmap::SetHeapLimit(uintptr_t new_end) {
+  DCHECK(IsAligned<kBitsPerWord * kAlignment>(new_end));
+  size_t new_size = OffsetToIndex(new_end - HeapBegin()) * kWordSize;
+  if (new_size < Size()) {
+    bitmap_data_->bitmap_size_ = new_size;
+  }
+  // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
+  // should be marked.
+}
+
+std::string SharedSpaceBitmap::GetName() const {
+  std::string str(bitmap_data_->name_);
+  return str;
+}
+
+std::string SharedSpaceBitmap::Dump() const {
+  return StringPrintf("%s: %p-%p", GetName().c_str(),
+                      reinterpret_cast<void*>(HeapBegin()),
+                      reinterpret_cast<void*>(HeapLimit()));
+}
+
+std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap) {
+  return stream
+    << bitmap.GetName() << "["
+    << "begin=" << reinterpret_cast<const void*>(bitmap.HeapBegin())
+    << ",end=" << reinterpret_cast<const void*>(bitmap.HeapLimit())
+    << "]";
+}
+
+
+void BaseBitmap::InitSrvcBitmap(space::GCSrvceBitmap **hb,
+    const std::string& name, byte* heap_begin, size_t heap_capacity,
+    size_t bitmap_size) {
+  space::GCSrvceBitmap* hb_p = *hb;
+  if(hb_p == NULL) {
+    *hb = reinterpret_cast<space::GCSrvceBitmap*>(
+        calloc(1, SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvceBitmap)));
+    hb_p = *hb;
+  }
+
+  std::string _str = StringPrintf("allocspace %s mmap", name.c_str());
+
+  AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb_p->mem_map_, _str.c_str(),
+      NULL, bitmap_size, PROT_READ | PROT_WRITE);
+
+  if (_ashmem == NULL) {
+    LOG(FATAL) << "Failed to allocate bitmap BaseBitmap::InitSrvcBitmap" << name;
+    return;
+  }
+  hb_p->bitmap_begin_ = reinterpret_cast<word*>(MemMap::AshmemBegin(&hb_p->mem_map_));
+  hb_p->bitmap_size_  = bitmap_size;
+  hb_p->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
+  strcpy(hb_p->name_, name.c_str());
+}
+
+
+BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(space::GCSrvceBitmap **hb,
+    const std::string& name, byte* heap_begin, size_t heap_capacity,
+    size_t bitmap_size) {
+  InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size);
+
+  return SharedSpaceBitmap(*hb);
+}
+
+SharedSpaceBitmap::SharedSpaceBitmap(space::GCSrvceBitmap* data_p) :
+    bitmap_data_(data_p) {
+  if(data_p == NULL) {
+    LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
+    return;
+  }
+}
+
+// Clean up any resources associated with the bitmap.
+SharedSpaceBitmap::~SharedSpaceBitmap() {}
+
+void SharedSpaceBitmap::SetName(const std::string& name) {
+  strcpy(bitmap_data_->name_, name.c_str());
+}
+
+
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art

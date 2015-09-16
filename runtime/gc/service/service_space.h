@@ -10,7 +10,6 @@
 
 #include "globals.h"
 #include "utils.h"
-#include "gc/space/space_common.h"
 #include "gc/space/dlmalloc_space.h"
 
 namespace art {

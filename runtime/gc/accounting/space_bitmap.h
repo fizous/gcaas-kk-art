@@ -29,6 +29,10 @@
 #include <stdint.h>
 #include <vector>
 
+#if (true || ART_GC_SERVICE)
+#include  "gc/service/service_space.h"
+#endif
+
 namespace art {
 
 namespace mirror {
@@ -68,6 +72,16 @@ public:
   static word OffsetToMask(uintptr_t offset_) {
     return static_cast<uintptr_t>(kWordHighBitMask) >> ((offset_ / kAlignment) % kBitsPerWord);
   }
+
+
+  static BaseBitmap* CreateSharedSpaceBitmap(space::GCSrvceBitmap **hb,
+      const std::string& name, byte* heap_begin, size_t heap_capacity,
+      size_t bitmap_size);
+
+
+  static void InitSrvcBitmap(space::GCSrvceBitmap **hb,
+      const std::string& name, byte* heap_begin, size_t heap_capacity,
+      size_t bitmap_size);
 
   static void SweepWalk(const BaseBitmap& live, const BaseBitmap& mark, uintptr_t base,
                         uintptr_t max, SweepCallback* thunk, void* arg);
@@ -169,6 +183,71 @@ public:
 };
 
 std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap);
+
+
+
+class SharedSpaceBitmap : public BaseBitmap {
+ public:
+  typedef void Callback(mirror::Object* obj, void* arg);
+
+  typedef void ScanCallback(mirror::Object* obj, void* finger, void* arg);
+
+  typedef void SweepCallback(size_t ptr_count, mirror::Object** ptrs, void* arg);
+
+
+  static void WalkFieldsInOrder(SharedSpaceBitmap* visited,
+              SharedSpaceBitmap::Callback* callback, mirror::Object* obj,
+                                void* arg);
+
+  static void SweepWalk(const SharedSpaceBitmap& live, const SharedSpaceBitmap& mark, uintptr_t base,
+                        uintptr_t max, SweepCallback* thunk, void* arg);
+
+
+  void Walk(Callback* callback, void* arg)
+      SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
+
+  // Starting address of our internal storage.
+  word* Begin() const {
+    return bitmap_data_->bitmap_begin_;
+  }
+
+  // Size of our internal storage
+  size_t Size() const {
+    return bitmap_data_->bitmap_size_;
+  }
+
+  // Size in bytes of the memory that the bitmaps spans.
+  size_t HeapSize() const {
+    return IndexToOffset(Size() / kWordSize);
+  }
+
+  uintptr_t HeapBegin() const {
+    return bitmap_data_->heap_begin_;
+  }
+
+  // Set the max address which can covered by the bitmap.
+  void SetHeapLimit(uintptr_t new_end);
+
+  std::string GetName() const;
+  void SetName(const std::string& name);
+  std::string Dump() const;
+
+
+  void InOrderWalk(Callback* callback, void* arg)
+      SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
+
+
+  SharedSpaceBitmap(space::GCSrvceBitmap*);
+
+  ~SharedSpaceBitmap();
+
+ private:
+  space::GCSrvceBitmap* bitmap_data_;
+};
+
+std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap);
+
 
 class SpaceBitmap : public BaseBitmap {
  public:
