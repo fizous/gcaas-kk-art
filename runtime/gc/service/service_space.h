@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "utils.h"
 #include "gc/space/dlmalloc_space.h"
+#include "gc/accounting/space_bitmap.h"
 
 namespace art {
 namespace gc {
