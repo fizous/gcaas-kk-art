@@ -244,7 +244,8 @@ StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem
 }
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem) :
-    MemMap((std::string(ashmem->name_), MemMap::AshmemBegin(ashmem),
+    MemMap((std::string(ashmem->name_),
+            MemMap::AshmemBegin(ashmem),
             MemMap::AshmemSize(ashmem),
             ashmem->base_begin_,
             ashmem->base_size_,
