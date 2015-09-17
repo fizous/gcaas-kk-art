@@ -76,7 +76,7 @@ class MemMap {
       byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
 
   // Releases the memory mapping
-  ~MemMap();
+  virtual ~MemMap();
 
   virtual bool Protect(int prot);
 
@@ -153,7 +153,7 @@ class MemMap {
                 << prot << ") failed";
     return false;
   }
-  virtual ~MemMap(){}
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
       size_t base_size, int prot);
