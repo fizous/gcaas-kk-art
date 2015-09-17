@@ -103,7 +103,7 @@ class MemMap {
     return base_size_;
   }
 
-  byte* End() const {
+  virtual byte* End() const {
     return Begin() + Size();
   }
 
@@ -211,6 +211,10 @@ class StructuredMemMap: public MemMap {
 
   size_t BaseSize() const {
     return ashmem_->base_size_;
+  }
+
+  byte* End() const {
+    return Begin() + Size();
   }
 
   void UnMapAtEnd(byte* new_end) {
