@@ -456,11 +456,15 @@ class Heap {
   // DEPRECATED: Should remove in "near" future when support for multiple image spaces is added.
   // Assumes there is only one image space.
   space::ImageSpace* GetImageSpace() const;
-
+#if (true || ART_GC_SERVICE)
+  space::AbstractDLmallocSpace* GetAllocSpace() const {
+    return alloc_space_;
+  }
+#else
   space::DlMallocSpace* GetAllocSpace() const {
     return alloc_space_;
   }
-
+#endif
   space::LargeObjectSpace* GetLargeObjectsSpace() const {
     return large_object_space_;
   }
