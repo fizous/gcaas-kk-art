@@ -54,7 +54,7 @@ class MemMap {
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapAnonymous(const char* ashmem_name, byte* addr,
-      size_t byte_count, int prot);
+      size_t byte_count, int prot, bool shareMem = false);
 
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot);

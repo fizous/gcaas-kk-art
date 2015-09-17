@@ -57,7 +57,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // the caller should call Begin on the returned space to confirm
   // the request was granted.
   static DlMallocSpace* Create(const std::string& name, size_t initial_size, size_t growth_limit,
-                               size_t capacity, byte* requested_begin);
+                               size_t capacity, byte* requested_begin, bool shareMem = false);
 
   // Allocate num_bytes without allowing the underlying mspace to grow.
   virtual mirror::Object* AllocWithGrowth(Thread* self, size_t num_bytes,
@@ -146,11 +146,12 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
   void SetGrowthLimit(size_t growth_limit);
 
+  //fizo, we need to override this
   // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
   void SwapBitmaps();
 
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
-  DlMallocSpace* CreateZygoteSpace(const char* alloc_space_name);
+  DlMallocSpace* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
 
   uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;
@@ -180,7 +181,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
  protected:
   DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace,
-      byte* begin, byte* end, size_t growth_limit);
+      byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
 
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);

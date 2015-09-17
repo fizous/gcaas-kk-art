@@ -1219,11 +1219,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     return;
   }
 
-  if(!shared_space) {
+  //if(!shared_space) {
     // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
     // of the remaining available heap memory.
     space::DlMallocSpace* zygote_space = alloc_space_;
-    alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");
+    alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
     alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
     // Change the GC retention policy of the zygote space to only collect when full.
@@ -1236,10 +1236,23 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
       collector->ResetCumulativeStatistics();
     }
     return;
-  } else {
-
-
-  }
+ // } else {
+    // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
+    // of the remaining available heap memory.
+//    space::DlMallocSpace* zygote_space = alloc_space_;
+//    alloc_space_ = zygote_space->CreateZygoteSpaceWithSharedSpace("alloc space");
+//    alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+//
+//    // Change the GC retention policy of the zygote space to only collect when full.
+//    zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+//    AddContinuousSpace(alloc_space_);
+//    have_zygote_space_ = true;
+//
+//    // Reset the cumulative loggers since we now have a few additional timing phases.
+//    for (const auto& collector : mark_sweep_collectors_) {
+//      collector->ResetCumulativeStatistics();
+//    }
+ // }
   //create shared space here
 }
 

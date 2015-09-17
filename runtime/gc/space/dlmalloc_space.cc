@@ -127,7 +127,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 size_t DlMallocSpace::bitmap_index_ = 0;
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
-                       byte* end, size_t growth_limit)
+                       byte* end, size_t growth_limit, bool shareMem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
       total_bytes_allocated_(0), total_objects_allocated_(0),
@@ -170,7 +170,8 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
 }
 
 DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
-                                     growth_limit, size_t capacity, byte* requested_begin) {
+                                     growth_limit, size_t capacity,
+                                     byte* requested_begin, bool shareMem) {
   // Memory we promise to dlmalloc before it asks for morecore.
   // Note: making this value large means that large allocations are unlikely to succeed as dlmalloc
   // will ask for this memory from sys_alloc which will fail as the footprint (this value plus the
@@ -208,7 +209,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   capacity = RoundUp(capacity, kPageSize);
 
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
-                                                 PROT_READ | PROT_WRITE));
+                                                 PROT_READ | PROT_WRITE, shareMem));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
@@ -234,7 +235,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
                                       growth_limit, initial_size);
   } else {
-    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit);
+    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
@@ -301,7 +302,7 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   }
 }
 
-DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
+DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bool shareMem) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
   DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
@@ -331,7 +332,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
   VLOG(heap) << "Size " << GetMemMap()->Size();
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
+  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(),
+      capacity, PROT_READ | PROT_WRITE, shareMem));
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;
@@ -339,7 +341,8 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
   DlMallocSpace* alloc_space =
-      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end, growth_limit);
+      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end,
+          growth_limit, shareMem);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));

@@ -106,7 +106,7 @@ AShmemMap* MemMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
   return ashmem_mem_map;
 }
 
-MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot) {
+MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot, bool shareMem) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
   }
@@ -120,6 +120,8 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
   debug_friendly_name += name;
   ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
   int flags = MAP_PRIVATE;
+  if(shareMem)
+    flags = MAP_SHARED;
   if (fd.get() == -1) {
     PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
     return NULL;
