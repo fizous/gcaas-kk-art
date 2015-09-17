@@ -79,6 +79,7 @@ namespace space {
   class AllocSpace;
   class DiscontinuousSpace;
   class DlMallocSpace;
+  class AbstractDLmallocSpace;
   class ImageSpace;
   class LargeObjectSpace;
   class Space;
