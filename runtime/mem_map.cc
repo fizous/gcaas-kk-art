@@ -235,10 +235,15 @@ bool MemMap::Protect(int prot) {
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot) :
-          MemMap("", NULL, 0, NULL, 0, 0), ashmem_(ashmem) {
+          MemMap(name, begin, size, base_begin, base_size, prot), ashmem_(ashmem) {
   MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
 };
 
+
+StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
+    const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
+
+}
 
 
 }  // namespace art

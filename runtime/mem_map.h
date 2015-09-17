@@ -59,6 +59,8 @@ class MemMap {
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
+
+
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //
@@ -88,8 +90,17 @@ class MemMap {
     return begin_;
   }
 
+
+  virtual void* BaseBegin() const {
+    return base_begin_;
+  }
+
   virtual size_t Size() const {
     return size_;
+  }
+
+  virtual size_t BaseSize() const {
+    return base_size_;
   }
 
   byte* End() const {
@@ -172,6 +183,10 @@ class StructuredMemMap: public MemMap {
  public:
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
+
+
+  static StructuredMemMap* CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
   bool Protect(int prot) {
     return MemMap::AshmemProtect(ashmem_, prot);
