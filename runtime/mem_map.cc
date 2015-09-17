@@ -183,10 +183,10 @@ MemMap* MemMap::MapFileAtAddress(byte* addr, size_t byte_count,
 }
 
 MemMap::~MemMap() {
-  if (base_begin_ == NULL && base_size_ == 0) {
+  if (BaseBegin() == NULL && BaseSize() == 0) {
     return;
   }
-  int result = munmap(base_begin_, base_size_);
+  int result = munmap(BaseBegin(), BaseSize());
   if (result == -1) {
     PLOG(FATAL) << "munmap failed";
   }
@@ -241,8 +241,10 @@ StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name, b
 
 
 StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-    const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
-
+    const char* ashmem_name, byte* begin, size_t size, void* base_begin,
+    size_t base_size, int prot) {
+  return new StructuredMemMap(ashmem_mem_map, ashmem_name, begin,
+      size, base_begin, base_size, prot);
 }
 
 

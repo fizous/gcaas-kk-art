@@ -186,7 +186,8 @@ class StructuredMemMap: public MemMap {
 
 
   static StructuredMemMap* CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+      const char* ashmem_name, byte* begin, size_t size, void* base_begin,
+      size_t base_size, int prot);
 
   bool Protect(int prot) {
     return MemMap::AshmemProtect(ashmem_, prot);
