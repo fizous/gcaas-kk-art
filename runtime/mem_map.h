@@ -78,30 +78,30 @@ class MemMap {
   // Releases the memory mapping
   ~MemMap();
 
-  bool Protect(int prot);
+  virtual bool Protect(int prot);
 
-  int GetProtect() const {
+  virtual int GetProtect() const {
     return prot_;
   }
 
-  byte* Begin() const {
+  virtual byte* Begin() const {
     return begin_;
   }
 
-  size_t Size() const {
+  virtual size_t Size() const {
     return size_;
   }
 
-  byte* End() const {
+  virtual byte* End() const {
     return Begin() + Size();
   }
 
-  bool HasAddress(const void* addr) const {
+  virtual bool HasAddress(const void* addr) const {
     return Begin() <= addr && addr < End();
   }
 
   // Trim by unmapping pages at the end of the map.
-  void UnMapAtEnd(byte* new_end);
+  virtual void UnMapAtEnd(byte* new_end);
 
 
 
@@ -157,6 +157,7 @@ class MemMap {
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
       size_t base_size, int prot);
+  virtual ~MemMap();
 
   std::string name_;
   byte* const begin_;  // Start of data.
