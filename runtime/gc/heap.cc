@@ -188,7 +188,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
                                               growth_limit, capacity,
                                               requested_alloc_space_begin);
   CHECK(alloc_space_ != NULL) << "Failed to create alloc space";
-  alloc_space_->SetFootprintLimit(alloc_space_->GetCapacity());
+  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
   AddContinuousSpace(alloc_space_);
 
   // Allocate the large object space.
@@ -1236,11 +1236,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
       collector->ResetCumulativeStatistics();
     }
     return;
+  } else {
+
+
   }
-//  LOG(ERROR) << "Heap::PostZygoteForkWithSpaceFork..with shared space";
-//  // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
-//  // of the remaining available heap memory.
-//  space::DlMallocSpace* zygote_space = alloc_space_;
+  //create shared space here
 }
 
 

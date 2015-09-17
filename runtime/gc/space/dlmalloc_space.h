@@ -40,7 +40,7 @@ namespace space {
 class SharedDlMallocSpace;
 
 // An alloc space is a space where objects may be allocated and garbage collected.
-class DlMallocSpace : public MemMapSpace,/* public AllocSpace,*/ public AbstractDLmallocSpace {
+class DlMallocSpace : public MemMapSpace, public AllocSpace {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
 
@@ -176,6 +176,7 @@ class DlMallocSpace : public MemMapSpace,/* public AllocSpace,*/ public Abstract
 
 
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
+
 
  protected:
   DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
