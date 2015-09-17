@@ -188,7 +188,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
                                               growth_limit, capacity,
                                               requested_alloc_space_begin);
   CHECK(alloc_space_ != NULL) << "Failed to create alloc space";
-  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+  alloc_space_->SetFootprintLimit(alloc_space_->GetCapacity());
   AddContinuousSpace(alloc_space_);
 
   // Allocate the large object space.
