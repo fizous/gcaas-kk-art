@@ -374,10 +374,10 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
       name.c_str(), initial_size, capacity, requested_begin, starting_size);
 
 
-  SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
-      kGcRetentionPolicyAlwaysCollect,
-      initial_size, growth_limit, capacity,
-      requested_begin, starting_size);
+//  SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
+//      kGcRetentionPolicyAlwaysCollect,
+//      initial_size, growth_limit, capacity,
+//      requested_begin, starting_size);
 
   return _new_space;
 
@@ -424,7 +424,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
     const std::string& name, size_t growth_limit, size_t initial_size,
     size_t capacity, size_t starting_size) :
     DlMallocSpace(name, structured_mem_map, mem_space_struct->mspace_,
-        structured_mem_map->Begin(), structured_mem_map->Size()) {
+        structured_mem_map->Begin(), structured_mem_map->Size(), growth_limit) {
   alloc_space_ = mem_space_struct;
   mu_   = new InterProcessMutex("shared-space mutex", &alloc_space_->lock_.futex_head_);
   cond_ = new InterProcessConditionVariable("shared-space CondVar", *mu_,

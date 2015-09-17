@@ -179,8 +179,8 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
 
  protected:
-  DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
-                size_t growth_limit);
+  DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace,
+      byte* begin, byte* end, size_t growth_limit);
 
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
