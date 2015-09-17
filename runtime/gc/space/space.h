@@ -309,6 +309,8 @@ public:
   // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
   // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
   virtual void SetFootprintLimit(size_t limit);
+
+  virtual void* GetMspace() const = 0;
 protected:
   virtual ~AbstractDLmallocSpace() {}
   AbstractDLmallocSpace(){}
