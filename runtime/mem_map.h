@@ -165,7 +165,7 @@ class MemMap {
     return false;
   }
 
- protected:
+ //protected:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
       size_t base_size, int prot);
  private:
