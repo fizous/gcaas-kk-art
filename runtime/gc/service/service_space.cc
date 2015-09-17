@@ -366,10 +366,6 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   capacity = RoundUp(capacity, kPageSize);
 
 
-  GCSrvceDlMallocSpace* _alloc_space =
-      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
-
-
   SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
       kGcRetentionPolicyAlwaysCollect,
       initial_size, growth_limit, capacity,
