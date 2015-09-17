@@ -92,7 +92,7 @@ class MemMap {
     return size_;
   }
 
-  virtual byte* End() const {
+  byte* End() const {
     return Begin() + Size();
   }
 
@@ -172,6 +172,26 @@ class StructuredMemMap: public MemMap {
  public:
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
+
+  bool Protect(int prot) {
+    return MemMap::AshmemProtect(ashmem_, prot);
+  }
+
+  int GetProtect() const {
+    return ashmem_->prot_;
+  }
+
+  byte* Begin() const {
+    return ashmem_->begin_;
+  }
+
+  size_t Size() const {
+    return ashmem_->size_;
+  }
+
+  void UnMapAtEnd(byte* new_end) {
+    MemMap::AshmemUnMapAtEnd(ashmem_, new_end);
+  }
   AShmemMap* ashmem_;
 };
 
