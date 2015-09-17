@@ -365,6 +365,11 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
+
+  GCSrvceDlMallocSpace* _alloc_space =
+      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
+
+
   SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
       kGcRetentionPolicyAlwaysCollect,
       initial_size, growth_limit, capacity,
@@ -374,11 +379,39 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
 
 }
 
+//void SharedDlMallocSpace::InitAlloSpace(GCSrvceDlMallocSpace* srvc_space,
+//    const char * name, size_t initial_size, size_t capacity,
+//    byte* requested_begin, size_t starting_size) {
+//  AShmemMap* _ashmem_mem = MemMap::CreateAShmemMap(&srvc_space->memory_,
+//        name, requested_begin, capacity, PROT_READ | PROT_WRITE);
+//
+//  if (_ashmem_mem == NULL) {
+//    free(srvc_space);
+//    LOG(FATAL) << "Failed to allocate pages for alloc space (" << name << ") of size "
+//        << PrettySize(capacity);
+//    return;
+//  }
+//
+//  srvc_space->mspace_ =
+//      DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&srvc_space->memory_),
+//          starting_size, initial_size);
+//
+//
+//  if (srvc_space->mspace_ == NULL) {
+//    LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
+//    free(alloc_space_);
+//    alloc_space_ = NULL;
+//    return;
+//  }
+//}
+
 SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
     GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
     size_t capacity, byte* requested_begin, size_t starting_size) :
         ContinuousSpace(name, retentionPolicy, requested_begin,
             requested_begin + growth_limit) {
+//      DlMallocSpace(name, NULL, void* mspace, byte* begin, byte* end,
+//                    size_t growth_limit) {
 
   alloc_space_ =
       reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());

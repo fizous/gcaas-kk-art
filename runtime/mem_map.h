@@ -155,8 +155,8 @@ class MemMap {
   }
 
  private:
-  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin, size_t base_size,
-         int prot);
+  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
+      size_t base_size, int prot);
 
   std::string name_;
   byte* const begin_;  // Start of data.
@@ -168,7 +168,12 @@ class MemMap {
 };
 
 
-
+class StructuredMemMap: public MemMap {
+ public:
+  StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot);
+  AShmemMap* ashmem_;
+};
 
 
 
