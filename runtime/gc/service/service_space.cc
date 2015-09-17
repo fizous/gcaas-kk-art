@@ -416,16 +416,13 @@ StructuredMemMap* SharedDlMallocSpace::InitAllocSpace(
 }
 
 
-//DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
-//              size_t growth_limit);
-
 SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
     StructuredMemMap* structured_mem_map, GcRetentionPolicy retentionPolicy,
     const std::string& name, size_t growth_limit, size_t initial_size,
     size_t capacity, size_t starting_size) :
-    DlMallocSpace(name, reinterpret_cast<MemMap*>(structured_mem_map), mem_space_struct->mspace_,
-        structured_mem_map->Begin(), structured_mem_map->End(),
-        structured_mem_map->Size(), growth_limit) {
+    DlMallocSpace(name, reinterpret_cast<MemMap*>(structured_mem_map),
+        mem_space_struct->mspace_, structured_mem_map->ashmem_->begin_,
+        structured_mem_map->End(), growth_limit) {
   alloc_space_ = mem_space_struct;
   mu_   = new InterProcessMutex("shared-space mutex", &alloc_space_->lock_.futex_head_);
   cond_ = new InterProcessConditionVariable("shared-space CondVar", *mu_,
