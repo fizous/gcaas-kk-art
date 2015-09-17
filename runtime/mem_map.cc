@@ -226,12 +226,29 @@ bool MemMap::Protect(int prot) {
     return true;
   }
 
-  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", " << base_size_ << ", "
-              << prot << ") failed";
+  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", "
+      << base_size_ << ", " << prot << ") failed";
   return false;
 }
 
+StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
+  AShmemMap* _addr = MemMap::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr,
+      byte_count, prot);
+  if(_addr != ashmem_mem_map) {
+    LOG(FATAL) << "could not create StructuredMemMap::CreateStructuredMemMap";
+    return NULL;
+  }
+  return new StructuredMemMap(ashmem_mem_map);
 
+}
+
+StructuredMemMap::StructuredMemMap(AShmemMap* ashmem) :
+    MemMap((std::string(ashmem->name_), MemMap::AshmemBegin(ashmem),
+            MemMap::AshmemSize(ashmem), ashmem->base_begin_, ashmem->base_size_,
+            ashmem->prot_)), ashmem_(ashmem) {
+
+}
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
     byte* begin, size_t size, void* base_begin, size_t base_size, int prot) :
@@ -240,12 +257,12 @@ StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
 };
 
 
-StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-    const char* ashmem_name, byte* begin, size_t size, void* base_begin,
-    size_t base_size, int prot) {
-  return new StructuredMemMap(ashmem_mem_map, ashmem_name, begin,
-      size, base_begin, base_size, prot);
-}
+//StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
+//    const char* ashmem_name, byte* begin, size_t size, void* base_begin,
+//    size_t base_size, int prot) {
+//  return new StructuredMemMap(ashmem_mem_map, ashmem_name, begin,
+//      size, base_begin, base_size, prot);
+//}
 
 
 }  // namespace art

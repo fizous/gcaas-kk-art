@@ -112,6 +112,11 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
   static size_t BitmapOffsetToIndex(size_t offset) {
     return offset / kAlignment / kBitsPerWord;
   }
+
+  static StructuredMemMap* InitAllocSpace(GCSrvceDlMallocSpace* srvc_space,
+      const char * name, size_t initial_size, size_t capacity,
+      byte* requested_begin, size_t starting_size);
+
   // Create a AllocSpace with the requested sizes. The requested
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
@@ -119,6 +124,13 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
   static SharedDlMallocSpace* Create(const std::string& name,
                                size_t initial_size, size_t growth_limit,
                                size_t capacity, byte* requested_begin);
+
+  SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space,
+      StructuredMemMap* structured_mem_map,
+      GcRetentionPolicy retentionPolicy, const std::string& name,
+      size_t growth_limit, size_t initial_size, size_t capacity,
+      size_t starting_size);
+
 
   SharedDlMallocSpace(const std::string& name,
       GcRetentionPolicy retentionPolicy,

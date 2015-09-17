@@ -184,10 +184,10 @@ class StructuredMemMap: public MemMap {
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
 
+  StructuredMemMap(AShmemMap* ashmem);
 
   static StructuredMemMap* CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* begin, size_t size, void* base_begin,
-      size_t base_size, int prot);
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
   bool Protect(int prot) {
     return MemMap::AshmemProtect(ashmem_, prot);
@@ -203,6 +203,14 @@ class StructuredMemMap: public MemMap {
 
   size_t Size() const {
     return ashmem_->size_;
+  }
+
+  void* BaseBegin() const {
+    return ashmem_->base_begin_;
+  }
+
+  size_t BaseSize() const {
+    return ashmem_->base_size_;
   }
 
   void UnMapAtEnd(byte* new_end) {

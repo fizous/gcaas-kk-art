@@ -366,6 +366,14 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   capacity = RoundUp(capacity, kPageSize);
 
 
+
+  GCSrvceDlMallocSpace* _alloc_space =
+      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
+
+  StructuredMemMap* _structuredMemMap = InitAllocSpace(_alloc_space,
+      name.c_str(), initial_size, capacity, requested_begin, starting_size);
+
+
   SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
       kGcRetentionPolicyAlwaysCollect,
       initial_size, growth_limit, capacity,
@@ -375,74 +383,52 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
 
 }
 
-//void SharedDlMallocSpace::InitAlloSpace(GCSrvceDlMallocSpace* srvc_space,
-//    const char * name, size_t initial_size, size_t capacity,
-//    byte* requested_begin, size_t starting_size) {
-//  AShmemMap* _ashmem_mem = MemMap::CreateAShmemMap(&srvc_space->memory_,
-//        name, requested_begin, capacity, PROT_READ | PROT_WRITE);
-//
-//  if (_ashmem_mem == NULL) {
+StructuredMemMap* SharedDlMallocSpace::InitAllocSpace(
+    GCSrvceDlMallocSpace* srvc_space,
+    const char * name, size_t initial_size, size_t capacity,
+    byte* requested_begin, size_t starting_size) {
+
+
+  StructuredMemMap* _structuredMemMap =
+      StructuredMemMap::CreateStructuredMemMap(&srvc_space->memory_,
+      name, requested_begin, capacity, PROT_READ | PROT_WRITE);
+
+
+  if(_structuredMemMap == NULL) {
+    LOG(FATAL) << "SharedDlMallocSpace::InitAllocSpace: could not create "
+        << "StructuredMemMap.." <<  PrettySize(capacity);
+    return NULL;
+  }
+
+  srvc_space->mspace_ =
+        DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&srvc_space->memory_),
+            starting_size, initial_size);
+
+
+  if (srvc_space->mspace_ == NULL) {
+    LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
 //    free(srvc_space);
-//    LOG(FATAL) << "Failed to allocate pages for alloc space (" << name << ") of size "
-//        << PrettySize(capacity);
-//    return;
-//  }
-//
-//  srvc_space->mspace_ =
-//      DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&srvc_space->memory_),
-//          starting_size, initial_size);
-//
-//
-//  if (srvc_space->mspace_ == NULL) {
-//    LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
-//    free(alloc_space_);
-//    alloc_space_ = NULL;
-//    return;
-//  }
-//}
+    return NULL;
+  }
 
-SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
-    GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
-    size_t capacity, byte* requested_begin, size_t starting_size) :
-        ContinuousSpace(name, retentionPolicy, requested_begin,
-            requested_begin + growth_limit) {
-//      DlMallocSpace(name, NULL, void* mspace, byte* begin, byte* end,
-//                    size_t growth_limit) {
+  return _structuredMemMap;
 
-  alloc_space_ =
-      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
-      /*reinterpret_cast<GCSrvceDlMallocSpace*>(calloc(1,
-          SERVICE_ALLOC_ALIGN_BYTE(GCSrvceDlMallocSpace)));*/
+}
 
 
+//DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin, byte* end,
+//              size_t growth_limit);
+
+SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
+    StructuredMemMap* structured_mem_map, GcRetentionPolicy retentionPolicy,
+    const std::string& name, size_t growth_limit, size_t initial_size,
+    size_t capacity, size_t starting_size) :
+    DlMallocSpace(name, structured_mem_map, mem_space_struct->mspace_,
+        structured_mem_map->Begin(), structured_mem_map->Size()) {
+  alloc_space_ = mem_space_struct;
   mu_   = new InterProcessMutex("shared-space mutex", &alloc_space_->lock_.futex_head_);
   cond_ = new InterProcessConditionVariable("shared-space CondVar", *mu_,
       &alloc_space_->lock_.cond_var_);
-
-
-  AShmemMap* _ashmem_mem = MemMap::CreateAShmemMap(&alloc_space_->memory_,
-        name.c_str(), requested_begin, capacity, PROT_READ | PROT_WRITE);
-
-  if (_ashmem_mem == NULL) {
-    LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
-        << PrettySize(capacity);
-    free(alloc_space_);
-    alloc_space_ = NULL;
-    return;
-  }
-
-  alloc_space_->mspace_ =
-      DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&alloc_space_->memory_),
-          starting_size, initial_size);
-
-  if (alloc_space_->mspace_ == NULL) {
-    LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
-    free(alloc_space_);
-    alloc_space_ = NULL;
-    return;
-  }
-
-
   // Protect memory beyond the initial size.
   byte* end = MemMap::AshmemBegin(&alloc_space_->memory_) + starting_size;
   if (capacity - initial_size > 0) {
@@ -477,6 +463,84 @@ SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
     freed.second = nullptr;
   }
 }
+
+//SharedDlMallocSpace::SharedDlMallocSpace(const std::string& name,
+//    GcRetentionPolicy retentionPolicy, size_t initial_size, size_t growth_limit,
+//    size_t capacity, byte* requested_begin, size_t starting_size) :
+////    DlMallocSpace(name, NULL, void* mspace, byte* begin, byte* end,
+////                        size_t growth_limit) {
+////        ContinuousSpace(name, retentionPolicy, requested_begin,
+////            requested_begin + growth_limit) {
+//
+//
+//  alloc_space_ =
+//      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
+//      /*reinterpret_cast<GCSrvceDlMallocSpace*>(calloc(1,
+//          SERVICE_ALLOC_ALIGN_BYTE(GCSrvceDlMallocSpace)));*/
+//
+//
+//  mu_   = new InterProcessMutex("shared-space mutex", &alloc_space_->lock_.futex_head_);
+//  cond_ = new InterProcessConditionVariable("shared-space CondVar", *mu_,
+//      &alloc_space_->lock_.cond_var_);
+//
+//
+//  AShmemMap* _ashmem_mem = MemMap::CreateAShmemMap(&alloc_space_->memory_,
+//        name.c_str(), requested_begin, capacity, PROT_READ | PROT_WRITE);
+//
+//  if (_ashmem_mem == NULL) {
+//    LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
+//        << PrettySize(capacity);
+//    free(alloc_space_);
+//    alloc_space_ = NULL;
+//    return;
+//  }
+//
+//  alloc_space_->mspace_ =
+//      DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&alloc_space_->memory_),
+//          starting_size, initial_size);
+//
+//  if (alloc_space_->mspace_ == NULL) {
+//    LOG(ERROR) << "Failed to initialize mspace for alloc space (" << name << ")";
+//    free(alloc_space_);
+//    alloc_space_ = NULL;
+//    return;
+//  }
+//
+//
+//  // Protect memory beyond the initial size.
+//  byte* end = MemMap::AshmemBegin(&alloc_space_->memory_) + starting_size;
+//  if (capacity - initial_size > 0) {
+//    CHECK_SHARED_MEMORY_CALL(mprotect, (end, capacity - initial_size,
+//        PROT_NONE), name);
+//  }
+//
+//  strcpy(alloc_space_->continuous_space_.space_header_.name_, name.c_str());
+//
+//  alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
+//      kGcRetentionPolicyAlwaysCollect;
+//
+//  alloc_space_->continuous_space_.begin_ =
+//      MemMap::AshmemBegin(&alloc_space_->memory_);
+//  alloc_space_->continuous_space_.end_ = end;
+//  alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
+//      retentionPolicy;
+//  alloc_space_->growth_limit_ = growth_limit;
+//
+//  alloc_space_->total_objects_allocated_ = 0;
+//  alloc_space_->num_bytes_allocated_ = 0;
+//  alloc_space_->num_objects_allocated_ = 0;
+//  alloc_space_->total_objects_allocated_ = 0;
+//
+//  CreateBitmaps(alloc_space_->continuous_space_.begin_,
+//      alloc_space_->growth_limit_);
+//
+//  alloc_space_->recent_free_pos_ = 0;
+//
+//  for (auto& freed : alloc_space_->recent_freed_objects_) {
+//    freed.first = nullptr;
+//    freed.second = nullptr;
+//  }
+//}
 
 
 bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity) {
