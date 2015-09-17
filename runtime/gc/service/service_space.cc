@@ -374,10 +374,10 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
       name.c_str(), initial_size, capacity, requested_begin, starting_size);
 
 
-//  SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
-//      kGcRetentionPolicyAlwaysCollect,
-//      initial_size, growth_limit, capacity,
-//      requested_begin, starting_size);
+  SharedDlMallocSpace* _new_space = new SharedDlMallocSpace(name,
+      kGcRetentionPolicyAlwaysCollect,
+      initial_size, growth_limit, capacity,
+      requested_begin, starting_size);
 
   return _new_space;
 
