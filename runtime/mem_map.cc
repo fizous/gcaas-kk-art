@@ -258,7 +258,7 @@ StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
     byte* begin, size_t size, void* base_begin, size_t base_size, int prot) :
           MemMap(name, begin, size, base_begin, base_size, prot), ashmem_(ashmem) {
   MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
-};
+}
 
 
 //StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
