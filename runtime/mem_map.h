@@ -184,7 +184,7 @@ class StructuredMemMap: public MemMap {
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
 
-  StructuredMemMap(AShmemMap* ashmem);
+//  StructuredMemMap(AShmemMap* ashmem);
 
   static StructuredMemMap* CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot);

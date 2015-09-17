@@ -239,25 +239,27 @@ StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem
     LOG(FATAL) << "could not create StructuredMemMap::CreateStructuredMemMap";
     return NULL;
   }
-  return new StructuredMemMap(ashmem_mem_map);
+  return new StructuredMemMap(ashmem_mem_map, std::string(ashmem_name), addr,
+      MemMap::AshmemSize(ashmem_mem_map), ashmem_mem_map->base_begin_,
+      ashmem_mem_map->base_size_, prot);
 
 }
 
-StructuredMemMap::StructuredMemMap(AShmemMap* ashmem) :
-    MemMap((std::string(ashmem->name_),
-            MemMap::AshmemBegin(ashmem),
-            MemMap::AshmemSize(ashmem),
-            ashmem->base_begin_,
-            ashmem->base_size_,
-            ashmem->prot_))
-    , ashmem_(ashmem) {
-
-}
+//StructuredMemMap::StructuredMemMap(AShmemMap* ashmem) :
+//    MemMap((std::string(ashmem->name_),
+//            MemMap::AshmemBegin(ashmem),
+//            MemMap::AshmemSize(ashmem),
+//            ashmem->base_begin_,
+//            ashmem->base_size_,
+//            ashmem->prot_))
+//    , ashmem_(ashmem) {
+//
+//}
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
     byte* begin, size_t size, void* base_begin, size_t base_size, int prot) :
           MemMap(name, begin, size, base_begin, base_size, prot), ashmem_(ashmem) {
-  MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
+  //MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
 }
 
 
