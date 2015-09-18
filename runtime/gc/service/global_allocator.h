@@ -49,6 +49,7 @@ class GCServiceGlobalAllocator {
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static byte* GCSrvcAllocateSharedSpace(void);
 
+  static int GCPAllowSharedMemMaps;
  private:
   static const int   kGCServicePageCapacity = 32;
   GCSrvcGlobalRegionHeader* region_header_;

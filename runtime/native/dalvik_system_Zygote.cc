@@ -49,6 +49,8 @@
 #include <sys/capability.h>
 #endif
 
+#include "gc/service/global_allocator.h"
+
 namespace art {
 
 static pid_t gSystemServerPid = 0;
@@ -675,6 +677,7 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
       if (waitpid(pid, &status, WNOHANG) == pid) {
           LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
       }
+      gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 1;
   }
   return pid;
 }

@@ -33,6 +33,8 @@ size_t GCSrvceDlMallocSpace::bitmap_index_ = 0;
 static const bool kPrefetchDuringSharedDlMallocSpaceFreeList = true;
 
 
+int gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
+
 void SharedDlMallocSpace::Dump(std::ostream& os) const {
   os << GetType()
       << " begin=" << reinterpret_cast<void*>(Begin())
