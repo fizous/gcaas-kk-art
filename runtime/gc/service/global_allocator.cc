@@ -21,7 +21,7 @@ namespace gc {
 namespace gcservice{
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
-
+int GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void) {
   if(allocator_instant_ != NULL) {
