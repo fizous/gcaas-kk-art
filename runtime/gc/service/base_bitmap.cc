@@ -27,7 +27,8 @@ namespace accounting {
 void BaseBitmap::Clear() {
   if (Begin() != NULL) {
     // This returns the memory to the system.  Successive page faults will return zeroed memory.
-    int result = madvise(Begin(), Size(), MADV_DONTNEED);
+    //int result = madvise(Begin(), Size(), MADV_DONTNEED);
+    int result = memset(Begin(), 0, Size());
     if (result == -1) {
       PLOG(FATAL) << "madvise failed";
     }
