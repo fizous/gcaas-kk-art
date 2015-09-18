@@ -266,7 +266,8 @@ class SpaceBitmap : public BaseBitmap {
  public:
   // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
   // heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
-  static SpaceBitmap* Create(const std::string& name, byte* heap_begin, size_t heap_capacity);
+  static SpaceBitmap* Create(const std::string& name, byte* heap_begin,
+      size_t heap_capacity, bool shareMem = false);
 
   // Initialize a space bitmap using the provided mem_map as the live bits. Takes ownership of the
   // mem map. The address range covered starts at heap_begin and is of size equal to heap_capacity.
