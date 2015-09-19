@@ -142,6 +142,9 @@ MemMap* MemMap::MapAnonymous(const char* name, byte* addr, size_t byte_count, in
   }
   if(shareMem) {
     int result = madvise((void*)actual, page_aligned_byte_count, MADV_DONTFORK);
+    if (result == -1) {
+      PLOG(WARNING) << "madvise failed";
+    }
   }
   return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
 }
