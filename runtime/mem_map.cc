@@ -76,14 +76,17 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
   int flags = MAP_SHARED | MAP_FIXED;
   int _fd = ashmem_create_region(source_ashmem_mem_map->name_,
       source_ashmem_mem_map->base_size_);
-
+  if (_fd == -1) {
+    PLOG(ERROR) << "ashmem_create_region failed (" << source_ashmem_mem_map->name_ << ")";
+    return NULL;
+  }
   byte* actual = reinterpret_cast<byte*>(mremap(source_ashmem_mem_map->begin_,
       source_ashmem_mem_map->base_size_, source_ashmem_mem_map->base_size_,
-      flags, _fd));
+      flags));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(source_ashmem_mem_map->begin_) << ", " << page_aligned_byte_count
+    PLOG(ERROR) << "mremap(" << reinterpret_cast<void*>(source_ashmem_mem_map->begin_) << ", " << page_aligned_byte_count
                 << ", " << source_ashmem_mem_map->prot_ << ", " << flags << ", " <<
                 _fd << ", 0) failed for " << source_ashmem_mem_map->name_
                 << "\n" << maps;
