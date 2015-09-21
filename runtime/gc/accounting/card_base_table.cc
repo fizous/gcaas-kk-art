@@ -108,8 +108,8 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
 
 CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
     CardBaseTableFields* fields_memory): fields_(fields_memory){
-  fields_->biased_begin_(biased_begin);
-  fields_->offset_(offset);
+  fields_->biased_begin_ = biased_begin;
+  fields_->offset_ = offset;
 }
 
 
