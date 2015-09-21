@@ -39,7 +39,17 @@ typedef struct AShmemMap_S {
       size_t size, void* base_begin, size_t base_size, int prot) :
         begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size), prot_(prot){ strcpy(name_, name.c_str());}
-}  __attribute__((aligned(8))) AShmemMap;
+} __attribute__((aligned(8))) AShmemMap;
+
+
+typedef struct CardBaseTableFields_S {
+  AShmemMap mem_map_;
+  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
+  byte* const biased_begin_;
+  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
+  // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
+  const size_t offset_;
+} __attribute__((aligned(8))) CardBaseTableFields;
 
 
 // Used to keep track of mmap segments.

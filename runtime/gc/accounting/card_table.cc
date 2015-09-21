@@ -28,7 +28,9 @@
 namespace art {
 namespace gc {
 namespace accounting {
+#if (true || ART_GC_SERVICE)
 
+#else
 /*
  * Maintain a card table from the write barrier. All writes of
  * non-NULL values to heap addresses should go through an entry in
@@ -56,7 +58,8 @@ CardTable* CardTable::Create(const byte* heap_begin, size_t heap_capacity) {
   size_t capacity = heap_capacity / kCardSize;
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   UniquePtr<MemMap> mem_map(MemMap::MapAnonymous("card table", NULL,
-                                                 capacity + 256, PROT_READ | PROT_WRITE));
+                                                 capacity + 256,
+                                                 PROT_READ | PROT_WRITE));
   CHECK(mem_map.get() != NULL) << "couldn't allocate card table";
   // All zeros is the correct initial value; all clean. Anonymous mmaps are initialized to zero, we
   // don't clear the card table to avoid unnecessary pages being allocated
@@ -119,6 +122,8 @@ void CardTable::CheckAddrIsInCardTable(const byte* addr) const {
 void CardTable::VerifyCardTable() {
   UNIMPLEMENTED(WARNING) << "Card table verification";
 }
+
+#endif
 
 }  // namespace accounting
 }  // namespace gc

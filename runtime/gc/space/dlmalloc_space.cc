@@ -32,6 +32,7 @@ namespace mprofiler {
 	class MProfiler;
 }
 
+
 namespace gc {
 namespace space {
 
@@ -137,7 +138,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
 
   size_t bitmap_index = bitmap_index_++;
 
-  static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
+  static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::ConstantsCardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
 
@@ -304,8 +305,8 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
 
 DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bool shareMem) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(begin_));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(end_));
   DCHECK(IsAligned<kPageSize>(begin_));
   DCHECK(IsAligned<kPageSize>(end_));
   size_t size = RoundUp(Size(), kPageSize);
@@ -547,8 +548,8 @@ void DlMallocSpace::Dump(std::ostream& os) const {
 
 SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
   end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::CardTable::kCardSize>(end_));
+  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(begin_));
+  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(end_));
   DCHECK(IsAligned<kPageSize>(begin_));
   DCHECK(IsAligned<kPageSize>(end_));
   size_t size = RoundUp(Size(), kPageSize);

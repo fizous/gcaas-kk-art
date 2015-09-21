@@ -203,7 +203,7 @@ bool MarkSweep::HandleDirtyObjectsPhase() {
     ReMarkRoots();
 
     // Scan dirty objects, this is only required if we are not doing concurrent GC.
-    RecursiveMarkDirtyObjects(true, accounting::CardTable::kCardDirty);
+    RecursiveMarkDirtyObjects(true, accounting::ConstantsCardTable::kCardDirty);
   }
 
   ProcessReferences(self);
@@ -871,7 +871,7 @@ class CardScanTask : public MarkStackTask<false> {
 
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
-    accounting::CardTable* card_table = mark_sweep_->GetHeap()->GetCardTable();
+    accounting::CARD_TABLE* card_table = mark_sweep_->GetHeap()->GetCardTable();
     size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
     mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
     VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
@@ -905,7 +905,7 @@ class CardScanTask : public MarkStackTask<false> {
 
   virtual void Run(Thread* self) NO_THREAD_SAFETY_ANALYSIS {
     ScanObjectParallelVisitor visitor(this);
-    accounting::CardTable* card_table = mark_sweep_->GetHeap()->GetCardTable();
+    accounting::CARD_TABLE* card_table = mark_sweep_->GetHeap()->GetCardTable();
     size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
     mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
     VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
@@ -927,7 +927,7 @@ size_t MarkSweep::GetThreadCount(bool paused) const {
 }
 
 void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
-  accounting::CardTable* card_table = GetHeap()->GetCardTable();
+  accounting::CARD_TABLE* card_table = GetHeap()->GetCardTable();
   ThreadPool* thread_pool = GetHeap()->GetThreadPool();
   size_t thread_count = GetThreadCount(paused);
   // The parallel version with only one thread is faster for card scanning, TODO: fix.
@@ -954,7 +954,7 @@ void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
       const size_t address_range = card_end - card_begin;
       // Calculate how much address range each task gets.
       const size_t card_delta = RoundUp(address_range / thread_count + 1,
-                                        accounting::CardTable::kCardSize);
+                                        accounting::CARD_TABLE::kCardSize);
       // Create the worker tasks for this space.
       while (card_begin != card_end) {
         // Add a range of cards.

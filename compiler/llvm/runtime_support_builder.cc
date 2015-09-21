@@ -264,9 +264,9 @@ void RuntimeSupportBuilder::EmitMarkGCCard(::llvm::Value* value, ::llvm::Value* 
                                                kTBAAConstJObject);
   Value* target_addr_int = irb_.CreatePtrToInt(target_addr, irb_.getPtrEquivIntTy());
   Value* card_no = irb_.CreateLShr(target_addr_int,
-                                   irb_.getPtrEquivInt(gc::accounting::CardTable::kCardShift));
+                                   irb_.getPtrEquivInt(gc::accounting::CARD_TABLE::kCardShift));
   Value* card_table_entry = irb_.CreateGEP(card_table, card_no);
-  irb_.CreateStore(irb_.getInt8(gc::accounting::CardTable::kCardDirty), card_table_entry,
+  irb_.CreateStore(irb_.getInt8(gc::accounting::CARD_TABLE::kCardDirty), card_table_entry,
                    kTBAARuntimeInfo);
   irb_.CreateBr(bb_cont);
 

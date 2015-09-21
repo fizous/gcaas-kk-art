@@ -213,7 +213,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   }
 
   // Allocate the card table.
-  card_table_.reset(accounting::CardTable::Create(heap_begin, heap_capacity));
+  card_table_.reset(accounting::CARD_TABLE::Create(heap_begin, heap_capacity));
   CHECK(card_table_.get() != NULL) << "Failed to create card table";
 
   image_mod_union_table_.reset(new accounting::ModUnionTableToZygoteAllocspace(this));
@@ -1521,7 +1521,7 @@ class VerifyReferenceVisitor {
       NO_THREAD_SAFETY_ANALYSIS {
     // Verify that the reference is live.
     if (UNLIKELY(ref != NULL && !IsLive(ref))) {
-      accounting::CardTable* card_table = heap_->GetCardTable();
+      accounting::CARD_TABLE* card_table = heap_->GetCardTable();
       accounting::ObjectStack* alloc_stack = heap_->allocation_stack_.get();
       accounting::ObjectStack* live_stack = heap_->live_stack_.get();
 
@@ -1564,7 +1564,7 @@ class VerifyReferenceVisitor {
         card_table->CheckAddrIsInCardTable(reinterpret_cast<const byte*>(obj));
         void* cover_begin = card_table->AddrFromCard(card_addr);
         void* cover_end = reinterpret_cast<void*>(reinterpret_cast<size_t>(cover_begin) +
-            accounting::CardTable::kCardSize);
+            accounting::ConstantsCardTable::kCardSize);
         LOG(ERROR) << "Card " << reinterpret_cast<void*>(card_addr) << " covers " << cover_begin
             << "-" << cover_end;
 #if (true || ART_GC_SERVICE)
@@ -1592,7 +1592,7 @@ class VerifyReferenceVisitor {
         ScanVisitor scan_visitor;
         byte* byte_cover_begin = reinterpret_cast<byte*>(card_table->AddrFromCard(card_addr));
         card_table->Scan(bitmap, byte_cover_begin,
-                         byte_cover_begin + accounting::CardTable::kCardSize, scan_visitor);
+                         byte_cover_begin + accounting::ConstantsCardTable::kCardSize, scan_visitor);
 
         // Search to see if any of the roots reference our object.
         void* arg = const_cast<void*>(reinterpret_cast<const void*>(obj));
@@ -1689,7 +1689,7 @@ class VerifyReferenceCardVisitor {
     // Filter out class references since changing an object's class does not mark the card as dirty.
     // Also handles large objects, since the only reference they hold is a class reference.
     if (ref != NULL && !ref->IsClass()) {
-      accounting::CardTable* card_table = heap_->GetCardTable();
+      accounting::CARD_TABLE* card_table = heap_->GetCardTable();
       // If the object is not dirty and it is referencing something in the live stack other than
       // class, then it must be on a dirty card.
       if (!card_table->AddrIsInCardTable(obj)) {

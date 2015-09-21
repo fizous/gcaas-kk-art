@@ -89,7 +89,7 @@ namespace space {
 class AgeCardVisitor {
  public:
   byte operator()(byte card) const {
-    if (card == accounting::CardTable::kCardDirty) {
+    if (card == accounting::ConstantsCardTable::kCardDirty) {
       return card - 1;
     } else {
       return 0;
@@ -341,7 +341,7 @@ class Heap {
 #endif //ART_USE_GC_PROFILER_REF_DIST
 
 
-  accounting::CardTable* GetCardTable() const {
+  accounting::CARD_TABLE* GetCardTable() const {
     return card_table_.get();
   }
 
@@ -602,7 +602,7 @@ class Heap {
   space::LargeObjectSpace* large_object_space_;
 
   // The card table, dirtied by the write barrier.
-  UniquePtr<accounting::CardTable> card_table_;
+  UniquePtr<accounting::CARD_TABLE> card_table_;
 
   // The mod-union table remembers all of the references from the image space to the alloc /
   // zygote spaces to allow the card table to be cleared.

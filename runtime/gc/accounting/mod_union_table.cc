@@ -35,6 +35,7 @@
 
 using ::art::mirror::Object;
 
+
 namespace art {
 namespace gc {
 namespace accounting {
@@ -46,7 +47,7 @@ class ModUnionClearCardSetVisitor {
   }
 
   inline void operator()(byte* card, byte expected_value, byte new_value) const {
-    if (expected_value == CardTable::kCardDirty) {
+    if (expected_value == ConstantsCardTable::kCardDirty) {
       cleared_cards_->insert(card);
     }
   }
@@ -62,7 +63,7 @@ class ModUnionClearCardVisitor {
   }
 
   void operator()(byte* card, byte expected_card, byte new_card) const {
-    if (expected_card == CardTable::kCardDirty) {
+    if (expected_card == ConstantsCardTable::kCardDirty) {
       cleared_cards_->push_back(card);
     }
   }
@@ -87,7 +88,7 @@ class ModUnionScanImageRootVisitor {
 };
 
 void ModUnionTableReferenceCache::ClearCards(space::ContinuousSpace* space) {
-  CardTable* card_table = GetHeap()->GetCardTable();
+  CARD_TABLE* card_table = GetHeap()->GetCardTable();
   ModUnionClearCardSetVisitor visitor(&cleared_cards_);
   // Clear dirty cards in the this space and update the corresponding mod-union bits.
   card_table->ModifyCardsAtomic(space->Begin(), space->End(), AgeCardVisitor(), visitor);
@@ -199,14 +200,14 @@ void ModUnionTableReferenceCache::Verify() {
   }
 
   // Check the references of each clean card which is also in the mod union table.
-  CardTable* card_table = heap->GetCardTable();
+  CARD_TABLE* card_table = heap->GetCardTable();
   for (const std::pair<const byte*, std::vector<const Object*> > & it : references_) {
     const byte* card = it.first;
-    if (*card == CardTable::kCardClean) {
+    if (*card == ConstantsCardTable::kCardClean) {
       std::set<const Object*> reference_set(it.second.begin(), it.second.end());
       ModUnionCheckReferences visitor(this, reference_set);
       uintptr_t start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card));
-      uintptr_t end = start + CardTable::kCardSize;
+      uintptr_t end = start + ConstantsCardTable::kCardSize;
       auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
       DCHECK(space != nullptr);
 #if (true || ART_GC_SERVICE)
@@ -220,18 +221,18 @@ void ModUnionTableReferenceCache::Verify() {
 }
 
 void ModUnionTableReferenceCache::Dump(std::ostream& os) {
-  CardTable* card_table = heap_->GetCardTable();
+  CARD_TABLE* card_table = heap_->GetCardTable();
   os << "ModUnionTable cleared cards: [";
   for (byte* card_addr : cleared_cards_) {
     uintptr_t start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
-    uintptr_t end = start + CardTable::kCardSize;
+    uintptr_t end = start + ConstantsCardTable::kCardSize;
     os << reinterpret_cast<void*>(start) << "-" << reinterpret_cast<void*>(end) << ",";
   }
   os << "]\nModUnionTable references: [";
   for (const std::pair<const byte*, std::vector<const Object*> >& it : references_) {
     const byte* card_addr = it.first;
     uintptr_t start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
-    uintptr_t end = start + CardTable::kCardSize;
+    uintptr_t end = start + ConstantsCardTable::kCardSize;
     os << reinterpret_cast<void*>(start) << "-" << reinterpret_cast<void*>(end) << "->{";
     for (const mirror::Object* ref : it.second) {
       os << reinterpret_cast<const void*>(ref) << ",";
@@ -242,7 +243,7 @@ void ModUnionTableReferenceCache::Dump(std::ostream& os) {
 
 void ModUnionTableReferenceCache::Update() {
   Heap* heap = GetHeap();
-  CardTable* card_table = heap->GetCardTable();
+  CARD_TABLE* card_table = heap->GetCardTable();
 
   std::vector<const Object*> cards_references;
   ModUnionReferenceVisitor visitor(this, &cards_references);
@@ -251,7 +252,7 @@ void ModUnionTableReferenceCache::Update() {
     // Clear and re-compute alloc space references associated with this card.
     cards_references.clear();
     uintptr_t start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card));
-    uintptr_t end = start + CardTable::kCardSize;
+    uintptr_t end = start + ConstantsCardTable::kCardSize;
     auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
     DCHECK(space != nullptr);
 #if (true || ART_GC_SERVICE)
@@ -291,7 +292,7 @@ void ModUnionTableReferenceCache::MarkReferences(collector::MarkSweep* mark_swee
 }
 
 void ModUnionTableCardCache::ClearCards(space::ContinuousSpace* space) {
-  CardTable* card_table = GetHeap()->GetCardTable();
+  CARD_TABLE* card_table = GetHeap()->GetCardTable();
   ModUnionClearCardSetVisitor visitor(&cleared_cards_);
   // Clear dirty cards in the this space and update the corresponding mod-union bits.
   card_table->ModifyCardsAtomic(space->Begin(), space->End(), AgeCardVisitor(), visitor);
@@ -299,7 +300,7 @@ void ModUnionTableCardCache::ClearCards(space::ContinuousSpace* space) {
 
 // Mark all references to the alloc space(s).
 void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
-  CardTable* card_table = heap_->GetCardTable();
+  CARD_TABLE* card_table = heap_->GetCardTable();
   ModUnionScanImageRootVisitor visitor(mark_sweep);
   space::ContinuousSpace* space = nullptr;
 #if (true || ART_GC_SERVICE)
@@ -309,7 +310,7 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
 #endif
   for (const byte* card_addr : cleared_cards_) {
     auto start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
-    auto end = start + CardTable::kCardSize;
+    auto end = start + ConstantsCardTable::kCardSize;
     auto obj_start = reinterpret_cast<Object*>(start);
     if (UNLIKELY(space == nullptr || !space->Contains(obj_start))) {
       space = heap_->FindContinuousSpaceFromObject(obj_start, false);
@@ -322,11 +323,11 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
 }
 
 void ModUnionTableCardCache::Dump(std::ostream& os) {
-  CardTable* card_table = heap_->GetCardTable();
+  CARD_TABLE* card_table = heap_->GetCardTable();
   os << "ModUnionTable dirty cards: [";
   for (const byte* card_addr : cleared_cards_) {
     auto start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
-    auto end = start + CardTable::kCardSize;
+    auto end = start + ConstantsCardTable::kCardSize;
     os << reinterpret_cast<void*>(start) << "-" << reinterpret_cast<void*>(end) << ",";
   }
   os << "]";
