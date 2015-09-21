@@ -70,7 +70,7 @@ static void CheckMapRequest(byte*, size_t) { }
 
 AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     AShmemMap* dest_ashmem_mem_map) {
-  if(source_ashmem_mem_map->flags_ & MAP_SHARED != 0) {
+  if((source_ashmem_mem_map->flags_ & MAP_SHARED) != 0) {
     LOG(ERROR) << "the Memory was already shared before";
     return NULL;
   }
