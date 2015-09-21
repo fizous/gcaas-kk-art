@@ -70,9 +70,24 @@ static void CheckMapRequest(byte*, size_t) { }
 
 AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     AShmemMap* dest_ashmem_mem_map) {
-  if(dest_ashmem_mem_map == NULL) {
+  if(source_ashmem_mem_map->flags_ & MAP_SHARED != 0) {
+    LOG(ERROR) << "the Memory was already shared before";
     return NULL;
   }
+  if(dest_ashmem_mem_map == NULL) {
+    LOG(ERROR) << "the destination sharedAshmemmap is not allocated";
+    return NULL;
+  }
+  //make sure we copy to the destination before unmapping the region
+  memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
+      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+  if(source_ashmem_mem_map->fd_ != -1) { //unmap the old memory mapped pages
+    close(source_ashmem_mem_map->fd_);
+    if (!(source_ashmem_mem_map->begin_ == NULL && source_ashmem_mem_map->base_size_ == 0)) {
+      AshmemUnMapAtEnd(source_ashmem_mem_map, source_ashmem_mem_map->begin_);
+    }
+  }
+
   int flags = MAP_SHARED | MAP_FIXED;
   int _fd = ashmem_create_region(source_ashmem_mem_map->name_,
       source_ashmem_mem_map->base_size_);
@@ -80,9 +95,9 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     PLOG(ERROR) << "ashmem_create_region failed (" << source_ashmem_mem_map->name_ << ")";
     return NULL;
   }
-  byte* actual = reinterpret_cast<byte*>(mremap(source_ashmem_mem_map->begin_,
-      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->base_size_,
-      flags));
+  byte* actual = reinterpret_cast<byte*>(mmap(source_ashmem_mem_map->begin_,
+      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->prot_, flags,
+      _fd, 0));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
@@ -96,44 +111,65 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
   }
   memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
       SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+  dest_ashmem_mem_map->flags_ = flags;
+  dest_ashmem_mem_map->fd_ = _fd;
   //todo: change the file descriptor here
   return dest_ashmem_mem_map;
 }
 
 
 AShmemMap* MemMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
-    const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
+    const char* ashmem_name, byte* addr, size_t byte_count, int prot,
+    bool shareFlags) {
 
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
+  int flags = 0;
+  int _fd = -1;
 #ifdef USE_ASHMEM
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
   // prefixed "dalvik-".
   std::string debug_friendly_name("dalvik-");
   debug_friendly_name += ashmem_name;
-  ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
-  int flags = MAP_PRIVATE;
-  if (fd.get() == -1) {
+  _fd = ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count);
+  flags = MAP_PRIVATE;
+  if(shareFlags) {
+    flags = MAP_SHARED;
+    if(addr != NULL) {
+      flags |= MAP_FIXED;
+    }
+  }
+  if (_fd == -1) {
     PLOG(ERROR) << "ashmem_create_region failed (" << ashmem_name << ")";
     return NULL;
   }
 #else
-  ScopedFd fd(-1);
-  int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+  flags = MAP_ANONYMOUS;
+  if(shareFlags) {
+    flags |= MAP_SHARED;
+    if(addr != NULL) {
+      flags |= MAP_FIXED;
+    }
+  } else {
+    flags |= MAP_PRIVATE;
+  }
+
 #endif
 
-  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
+  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, _fd, 0));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << ashmem_name
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", "
+                << page_aligned_byte_count
+                << ", " << prot << ", " << flags << ", " << _fd
+                << ", 0) failed for " << ashmem_name
                 << "\n" << maps;
     return NULL;
   }
 //  AShmemMap* ashmem_mem_map = reinterpret_cast<AShmemMap*>(calloc(1,
 //      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap)));
   MemMap::AShmemFillData(ashmem_mem_map, debug_friendly_name, actual,
-      byte_count, actual, page_aligned_byte_count, prot);
+      byte_count, actual, page_aligned_byte_count, prot, flags, _fd);
 
   return ashmem_mem_map;
 }

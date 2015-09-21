@@ -35,18 +35,28 @@ typedef struct AShmemMap_S {
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
+  /* int to hold the flags by which the memory was mapped */
+  int flags_;
+  /*integer to hold the file descriptor of the memory mapped region */
+  int fd_;
   AShmemMap_S(const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot) :
+      size_t size, void* base_begin, size_t base_size, int prot,
+      int flags, int fd) :
         begin_(begin), size_(size),
-        base_begin_(base_begin), base_size_(base_size), prot_(prot){ strcpy(name_, name.c_str());}
+        base_begin_(base_begin), base_size_(base_size),
+        prot_(prot), flags_(flags), fd_(fd) {
+    strcpy(name_, name.c_str());
+  }
 } __attribute__((aligned(8))) AShmemMap;
 
 
 typedef struct CardBaseTableFields_S {
   AShmemMap mem_map_;
-  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
+  // Value used to compute card table addresses from object addresses, see
+  //GetBiasedBegin
   byte* const biased_begin_;
-  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
+  // Card table doesn't begin at the beginning of the mem_map_, instead it is
+  //displaced by offset
   // to allow the byte value of biased_begin_ to equal GC_CARD_DIRTY
   const size_t offset_;
 } __attribute__((aligned(8))) CardBaseTableFields;
@@ -67,7 +77,8 @@ class MemMap {
       size_t byte_count, int prot, bool shareMem = false);
 
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot,
+      bool shareMem = false);
 
 
   static AShmemMap* ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
@@ -87,7 +98,8 @@ class MemMap {
   //
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemMap* MapFileAtAddress(
-      byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start, bool reuse);
+      byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start,
+      bool reuse);
 
   // Releases the memory mapping
   virtual ~MemMap();
@@ -129,8 +141,8 @@ class MemMap {
 
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot) {
-    AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot};
+      size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
+    AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot, flags, fd};
     strcpy(_data.name_, name.c_str());
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
