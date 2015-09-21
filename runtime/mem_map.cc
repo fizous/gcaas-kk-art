@@ -68,6 +68,33 @@ static void CheckMapRequest(byte*, size_t) { }
 #endif
 
 
+AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
+    AShmemMap* dest_ashmem_mem_map) {
+  if(dest_ashmem_mem_map == NULL) {
+    return NULL;
+  }
+  int flags = MAP_SHARED | MAP_FIXED;
+  int _fd = ashmem_create_region(source_ashmem_mem_map->name_,
+      source_ashmem_mem_map->base_size_);
+
+  byte* actual = reinterpret_cast<byte*>(mremap(source_ashmem_mem_map->begin_,
+      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->base_size_,
+      flags, _fd));
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(source_ashmem_mem_map->begin_) << ", " << page_aligned_byte_count
+                << ", " << source_ashmem_mem_map->prot_ << ", " << flags << ", " <<
+                _fd << ", 0) failed for " << source_ashmem_mem_map->name_
+                << "\n" << maps;
+    return NULL;
+  }
+  memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
+      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+  //todo: change the file descriptor here
+  return dest_ashmem_mem_map;
+}
+
 
 AShmemMap* MemMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
     const char* ashmem_name, byte* addr, size_t byte_count, int prot) {

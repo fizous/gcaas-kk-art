@@ -139,6 +139,9 @@ public:
  bool IsValidCard(const byte* card_addr) const;
 
  void CheckCardValid(byte* card) const ALWAYS_INLINE;
+
+
+ bool shareCardTable(void);
  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
  virtual byte* BiasedBegin() const {
    return fields_->biased_begin_;

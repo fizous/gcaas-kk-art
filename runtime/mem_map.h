@@ -70,6 +70,8 @@ class MemMap {
       const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
 
+  static AShmemMap* ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
+      AShmemMap* dest_ashmem_mem_map = NULL);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.

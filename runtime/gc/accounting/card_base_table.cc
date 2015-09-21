@@ -113,6 +113,10 @@ CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
 }
 
 
+bool CardBaseTable::shareCardTable(void) {
+
+}
+
 }  // namespace accounting
 }  // namespace gc
 }  // namespace art
