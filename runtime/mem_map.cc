@@ -86,9 +86,11 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mremap(" << reinterpret_cast<void*>(source_ashmem_mem_map->begin_) << ", " << page_aligned_byte_count
-                << ", " << source_ashmem_mem_map->prot_ << ", " << flags << ", " <<
-                _fd << ", 0) failed for " << source_ashmem_mem_map->name_
+    PLOG(ERROR) << "mremap(" <<
+                reinterpret_cast<void*>(source_ashmem_mem_map->begin_) <<
+                ", " << source_ashmem_mem_map->base_size_ <<
+                ", " << source_ashmem_mem_map->prot_ << ", " << flags <<
+                ", " << _fd << ", 0) failed for " << source_ashmem_mem_map->name_
                 << "\n" << maps;
     return NULL;
   }
