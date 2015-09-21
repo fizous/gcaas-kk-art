@@ -78,7 +78,7 @@ ConditionVariable* Thread::resume_cond_ = NULL;
 static const char* kThreadNameDuringStartup = "<native thread without managed peer>";
 
 void Thread::InitCardTable() {
-  card_table_ = Runtime::Current()->GetHeap()->GetCardTable()->GetBiasedBegin();
+  card_table_ = Runtime::Current()->GetHeap()->GetCardTable()->BiasedBegin();
 }
 
 #if !defined(__APPLE__)
