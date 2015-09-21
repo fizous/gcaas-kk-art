@@ -79,7 +79,7 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
           capacity + 256, PROT_READ | PROT_WRITE);
 
 
-  CHECK(_mem_map_structure == NULL) <<
+  CHECK(_mem_map_structure != NULL) <<
       "couldn't allocate card table";
   // All zeros is the correct initial value; all clean. Anonymous mmaps are initialized to zero, we
   // don't clear the card table to avoid unnecessary pages being allocated
