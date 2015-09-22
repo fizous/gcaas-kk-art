@@ -1222,6 +1222,13 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   //if(!shared_space) {
     // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
     // of the remaining available heap memory.
+  if(shared_space) {
+    if(!GetCardTable()->shareCardTable()) {
+      LOG(ERROR) << "Error in sharing the Card table";
+    } else {
+      LOG(ERROR) << "Success in sharing the Card table";
+    }
+  }
     space::DlMallocSpace* zygote_space = alloc_space_;
     alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
     alloc_space_->SetFootprintLimit(alloc_space_->Capacity());

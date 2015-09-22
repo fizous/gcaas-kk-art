@@ -110,8 +110,6 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
                 << "\n" << maps;
     return NULL;
   }
-  memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
-      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   dest_ashmem_mem_map->flags_ = flags;
   dest_ashmem_mem_map->fd_ = _fd;
   //todo: change the file descriptor here

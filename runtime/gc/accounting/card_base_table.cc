@@ -118,7 +118,9 @@ CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
 
 
 bool CardBaseTable::shareCardTable(void) {
-  return true;
+  AShmemMap* _ashmem_map = MemMap::ShareAShmemMap(&(fields_->mem_map_),
+      &(fields_->mem_map_));
+  return (_ashmem_map != NULL);
 }
 
 }  // namespace accounting
