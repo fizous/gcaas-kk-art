@@ -166,7 +166,7 @@ public:
      CardBaseTableFields* fields_memory = NULL);
  CardBaseTable(byte* biased_begin, size_t offset,
      CardBaseTableFields* fields_memory = NULL);
- virtual ~CardBaseTable(){}
+ virtual ~CardBaseTable();
 
  CardBaseTableFields* fields_;
 };//CardBaseTable

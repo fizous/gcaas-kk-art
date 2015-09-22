@@ -83,6 +83,7 @@ AShmemMap* MemMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
       SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   if(source_ashmem_mem_map->fd_ != -1) { //unmap the old memory mapped pages
     close(source_ashmem_mem_map->fd_);
+    source_ashmem_mem_map->fd_ = -1;
     if (!(source_ashmem_mem_map->begin_ == NULL && source_ashmem_mem_map->base_size_ == 0)) {
       AshmemUnMapAtEnd(source_ashmem_mem_map, source_ashmem_mem_map->begin_);
     }
@@ -305,6 +306,23 @@ bool MemMap::Protect(int prot) {
   PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(base_begin_) << ", "
       << base_size_ << ", " << prot << ") failed";
   return false;
+}
+
+
+
+
+void MemMap::AshmemDestructData(AShmemMap* addr, bool release_pointer) {
+  if (addr == NULL)
+    return;
+  if (!(addr->base_begin_ == NULL && addr->base_size_ == 0)) {
+    if(addr->fd_!=-1) {
+      close(addr->fd_);
+    }
+    AshmemUnMapAtEnd(addr, reinterpret_cast<byte*>(addr->base_begin_));
+  }
+
+  if(release_pointer)
+    free(addr);
 }
 
 StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,

@@ -156,6 +156,8 @@ class MemMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
+
+
   static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;
   }
@@ -171,6 +173,8 @@ class MemMap {
     addr->size_ -= unmap_size;
   }
 
+
+  static void AshmemDestructData(AShmemMap* addr, bool release_pointer);
 
   static bool AshmemProtect(AShmemMap* addr, int prot) {
     if (addr->base_begin_ == NULL && addr->base_size_ == 0) {
