@@ -316,9 +316,13 @@ void MemMap::AshmemDestructData(AShmemMap* addr, bool release_pointer) {
     return;
   if (!(addr->base_begin_ == NULL && addr->base_size_ == 0)) {
     if(addr->fd_!=-1) {
+      LOG(ERROR) << "before close";
       close(addr->fd_);
+      LOG(ERROR) << "After close";
     }
+    LOG(ERROR) << "before Calling UnmapAtEnd";
     AshmemUnMapAtEnd(addr, reinterpret_cast<byte*>(addr->base_begin_));
+    LOG(ERROR) << "After Calling UnmapAtEnd";
   }
 
   if(release_pointer)
