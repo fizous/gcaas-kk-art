@@ -23,7 +23,7 @@ namespace accounting {
 
 
 CardBaseTable::~CardBaseTable() {
-//  MemMap::AshmemDestructData(&fields_->mem_map_, false);
+  MemMap::AshmemDestructData(&fields_->mem_map_, false);
 //  free(fields_);
 //  fields_ = NULL;
 }
