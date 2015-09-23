@@ -137,7 +137,7 @@ class InterfaceSpace {
 
  protected:
   InterfaceSpace() {}
-  //virtual ~InterfaceSpace() {}
+  virtual ~InterfaceSpace() {}
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InterfaceSpace);
