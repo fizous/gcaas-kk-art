@@ -143,12 +143,12 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* msp
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
 
 #if true || ART_GC_SERVICE
-  live_bitmap_.reset(reinterpret_cast<accounting::BaseBitmap*>(accounting::SpaceBitmap::Create(
+  live_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SpaceBitmap::Create(
        StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
        Begin(), Capacity(), shareMem)));
    DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << bitmap_index;
 
-   mark_bitmap_.reset(reinterpret_cast<accounting::BaseBitmap*>(accounting::SpaceBitmap::Create(
+   mark_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SpaceBitmap::Create(
        StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
        Begin(), Capacity(), shareMem)));
    DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;

@@ -1026,7 +1026,7 @@ void MarkSweep::VerifyImageRoots() {
       space::ImageSpace* image_space = space->AsImageSpace();
       uintptr_t begin = reinterpret_cast<uintptr_t>(image_space->Begin());
       uintptr_t end = reinterpret_cast<uintptr_t>(image_space->End());
-      accounting::SpaceBitmap* live_bitmap = image_space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* live_bitmap = image_space->GetLiveBitmap();
       DCHECK(live_bitmap != NULL);
       live_bitmap->VisitMarkedRange(begin, end, [this](const Object* obj) {
         if (kCheckLocks) {
