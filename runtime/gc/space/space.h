@@ -107,6 +107,8 @@ class ISpace {
     return GetType() == kSpaceTypeImageSpace;
   }
 
+  virtual ImageSpace* AsImageSpace();
+
   // Is this a dlmalloc backed allocation space?
   bool IsDlMallocSpace() const {
     SpaceType type = GetType();
@@ -165,7 +167,7 @@ class Space : public ISpace {
   // The kind of space this: image, alloc, zygote, large object.
   virtual SpaceType GetType() const = 0;
 
-
+  ImageSpace* AsImageSpace();
   virtual ~Space() {}
 
  protected:
