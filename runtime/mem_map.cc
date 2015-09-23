@@ -78,7 +78,7 @@ void StructuredMemMap::SetSize(size_t new_size) {
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
     byte* begin, size_t size, void* base_begin, size_t base_size, int prot) :
-      MemBaseMap(name, begin, size, base_begin, base_size, prot), ashmem_(ashmem) {
+      ashmem_(ashmem) {
   //MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
 }
 
@@ -236,8 +236,7 @@ MemMap::~MemMap(){
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
                size_t base_size, int prot) :
-          MemBaseMap(name, begin, size, base_begin, base_size, prot)
-    , name_(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
+       name_(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
       prot_(prot) {
   if (size_ == 0) {
     CHECK(begin_ == NULL);

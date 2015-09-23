@@ -118,8 +118,7 @@ class MemBaseMap {
   // Releases the memory mapping
   virtual ~MemBaseMap();
 
-  MemBaseMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-        size_t base_size, int prot){}
+  MemBaseMap(){}
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative. This version allows
