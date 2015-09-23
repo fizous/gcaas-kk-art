@@ -355,8 +355,6 @@ public:
 
   virtual void* GetMspace() const = 0;
 
-  void SetGrowthLimit(size_t) = 0;
-
   virtual void SetGrowthLimit(size_t growth_limit) = 0;
 //  virtual size_t GetCapacity() const = 0;
 
