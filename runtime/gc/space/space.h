@@ -348,7 +348,7 @@ public:
 
   virtual void* GetMspace() const = 0;
 
-  virtual size_t GetCapacity() const = 0;
+//  virtual size_t GetCapacity() const = 0;
 
   // Current size of space
   virtual size_t GetSize() const = 0;
