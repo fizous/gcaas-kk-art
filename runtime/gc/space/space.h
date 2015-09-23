@@ -177,6 +177,13 @@ class AllocSpace {
   // Number of objects allocated since the space was created.
   virtual uint64_t GetTotalObjectsAllocated() const = 0;
 
+  virtual void UpdateBytesAllocated(int) = 0;
+
+  virtual void UpdateObjectsAllocated(int) = 0;
+
+  virtual void UpdateTotalBytesAllocated(int) = 0;
+
+  virtual void UpdateTotalObjectsAllocated(int) = 0;
   // Allocate num_bytes without allowing growth. If the allocation
   // succeeds, the output parameter bytes_allocated will be set to the
   // actually allocated bytes which is >= num_bytes.
@@ -348,6 +355,7 @@ public:
 
   virtual void* GetMspace() const = 0;
 
+  virtual void SetGrowthLimit(size_t) = 0;
 //  virtual size_t GetCapacity() const = 0;
 
   // Current size of space

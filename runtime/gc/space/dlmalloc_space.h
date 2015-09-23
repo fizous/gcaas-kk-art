@@ -161,12 +161,30 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
     return total_objects_allocated_;
   }
 
+  void UpdateBytesAllocated(int delta) {
+    num_bytes_allocated_ += delta;
+  }
+
+  void UpdateObjectsAllocated(int delta) {
+    num_objects_allocated_ += delta;
+  }
+
+  void UpdateTotalBytesAllocated(int delta) {
+    total_bytes_allocated_ += delta;
+  }
+
+  void UpdateTotalObjectsAllocated(int delta) {
+    total_objects_allocated_ += delta;
+  }
+
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
   static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
 
 
-
+  void SetGrowthLimit(size_t new_growth_limit) {
+    growth_limit_ = new_growth_limit;
+  }
 
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 

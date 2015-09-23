@@ -196,6 +196,23 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
     return alloc_space_->total_objects_allocated_;
   }
 
+
+  void UpdateBytesAllocated(int delta) {
+    alloc_space_->num_bytes_allocated_ += delta;
+  }
+
+  void UpdateObjectsAllocated(int delta) {
+    alloc_space_->num_objects_allocated_ += delta;
+  }
+
+  void UpdateTotalBytesAllocated(int delta) {
+    alloc_space_->total_bytes_allocated_ += delta;
+  }
+
+  void UpdateTotalObjectsAllocated(int delta) {
+    alloc_space_->total_objects_allocated_ += delta;
+  }
+
   // Address at which the space begins
   byte* Begin() const {
     return alloc_space_->continuous_space_.begin_;
