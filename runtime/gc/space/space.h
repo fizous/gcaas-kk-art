@@ -129,15 +129,12 @@ class ISpace {
   }
   virtual LargeObjectSpace* AsLargeObjectSpace();
 
-  virtual ~ISpace() {}
-
 
   // Return the storage space required by obj.
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
 
-
   ISpace(){}
-
+  virtual ~ISpace() {}
 };
 
 
