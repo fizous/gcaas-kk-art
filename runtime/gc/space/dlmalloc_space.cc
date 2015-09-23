@@ -318,12 +318,12 @@ DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, 
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
-  const size_t growth_limit = growth_limit_ - size;
+  const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
   VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
-             << "GrowthLimit " << growth_limit_ << "\n"
+             << "GrowthLimit " << Capacity() << "\n"
              << "Capacity " << Capacity();
   SetGrowthLimit(RoundUp(size, kPageSize));
   SetFootprintLimit(RoundUp(size, kPageSize));
@@ -381,7 +381,8 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
     CHECK(Contains(ptr)) << "Free (" << ptr << ") not in bounds of heap " << *this;
   }
   const size_t bytes_freed = InternalAllocationSize(ptr);
-  num_bytes_allocated_ -= bytes_freed;
+  //num_bytes_allocated_ -= bytes_freed;
+  UpdateBytesAllocated(-bytes_freed);
   --num_objects_allocated_;
   //GCMMP_HANDLE_FINE_GRAINED_FREE(AllocationNoOverhead(ptr), bytes_freed);
   GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr), ptr);
@@ -434,7 +435,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
 
   {
     MutexLock mu(self, lock_);
-    num_bytes_allocated_ -= bytes_freed;
+    UpdateBytesAllocated(-bytes_freed);
     num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
@@ -561,12 +562,12 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
  // const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
-  const size_t growth_limit = growth_limit_ - size;
+  const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
   LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
-             << "GrowthLimit " << growth_limit_ << "\n"
+             << "GrowthLimit " << Capacity() << "\n"
              << "Capacity " << Capacity();
   SetGrowthLimit(RoundUp(size, kPageSize));
   SetFootprintLimit(RoundUp(size, kPageSize));
