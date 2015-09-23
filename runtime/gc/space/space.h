@@ -260,9 +260,7 @@ class IContinuousSpace {
     return byte_ptr < End() && byte_ptr >= Begin();
   }
 
-  bool Contains(const mirror::Object* obj) const {
-    return HasAddress(obj);
-  }
+
 
   virtual ~IContinuousSpace() {}
   IContinuousSpace(){}
@@ -291,6 +289,10 @@ class ContinuousSpace : public IContinuousSpace, public Space {
 
   void SetEnd(byte* new_end)  {
     end_ = new_end;
+  }
+
+  bool Contains(const mirror::Object* obj) const {
+    return HasAddress(obj);
   }
 
   virtual ~ContinuousSpace() {}
