@@ -228,6 +228,8 @@ class MemMap : public MemBaseMap {
     prot_ = newProt;
   }
 
+  ~MemMap();
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
         size_t base_size, int prot);
@@ -244,6 +246,7 @@ class MemMap : public MemBaseMap {
 
 class StructuredMemMap: public MemBaseMap {
  public:
+  ~StructuredMemMap();
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
 

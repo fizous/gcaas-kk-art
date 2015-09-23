@@ -82,6 +82,17 @@ StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
   //MemMap::AShmemFillData(ashmem_, name, begin, size, base_begin, base_size, prot);
 }
 
+StructuredMemMap::~StructuredMemMap(){
+  if (BaseBegin() == NULL && BaseSize() == 0) {
+    return;
+  }
+  int result = munmap(BaseBegin(), BaseSize());
+  if (result == -1) {
+    PLOG(FATAL) << "munmap failed";
+  }
+}
+
+
 AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
     const char* ashmem_name, byte* addr, size_t byte_count, int prot,
     bool shareFlags) {
@@ -209,6 +220,10 @@ void MemBaseMap::AshmemDestructData(AShmemMap* addr, bool release_pointer) {
 }
 
 MemBaseMap::~MemBaseMap(){
+}
+
+
+MemMap::~MemMap(){
   if (BaseBegin() == NULL && BaseSize() == 0) {
     return;
   }
