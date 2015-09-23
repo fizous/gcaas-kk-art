@@ -26,6 +26,14 @@
 #include "globals.h"
 #include "utils.h"
 
+#if (true || ART_GC_SERVICE)
+#define MEM_MAP MemBaseMap
+#else
+#define MEM_MAP MemMap
+#endif
+
+
+
 namespace art {
 
 typedef struct AShmemMap_S {
@@ -62,72 +70,25 @@ typedef struct CardBaseTableFields_S {
 } __attribute__((aligned(8))) CardBaseTableFields;
 
 
+
+#if (true || ART_GC_SERVICE)
+
 // Used to keep track of mmap segments.
-class MemMap {
+class MemBaseMap {
  public:
-  // Request an anonymous region of length 'byte_count' and a requested base address.
-  // Use NULL as the requested base address if you don't care.
-  //
-  // The word "anonymous" in this context means "not backed by a file". The supplied
-  // 'ashmem_name' will be used -- on systems that support it -- to give the mapping
-  // a name.
-  //
-  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr,
-      size_t byte_count, int prot, bool shareMem = false);
+  virtual int GetProtect() const = 0;
 
-  static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* addr, size_t byte_count, int prot,
-      bool shareMem = false);
+  virtual byte* Begin() const = 0;
 
+  virtual void* BaseBegin()  const = 0;
 
-  static AShmemMap* ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
-      AShmemMap* dest_ashmem_mem_map = NULL);
+  virtual size_t Size()  const = 0;
 
-  // Map part of a file, taking care of non-page aligned offsets.  The
-  // "start" offset is absolute, not relative.
-  //
-  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
-    return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, false);
-  }
+  virtual void SetSize(size_t) = 0;
 
-  // Map part of a file, taking care of non-page aligned offsets.  The
-  // "start" offset is absolute, not relative. This version allows
-  // requesting a specific address for the base of the mapping.
-  //
-  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
-  static MemMap* MapFileAtAddress(
-      byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start,
-      bool reuse);
+  virtual size_t BaseSize()  const = 0;
 
-  // Releases the memory mapping
-  virtual ~MemMap();
-
-  virtual bool Protect(int prot);
-
-  virtual int GetProtect() const {
-    return prot_;
-  }
-
-  virtual byte* Begin() const {
-    return begin_;
-  }
-
-
-  virtual void* BaseBegin() const {
-    return base_begin_;
-  }
-
-  virtual size_t Size() const {
-    return size_;
-  }
-
-  virtual size_t BaseSize() const {
-    return base_size_;
-  }
-
-  virtual byte* End() const {
+  byte* End() const {
     return Begin() + Size();
   }
 
@@ -136,9 +97,11 @@ class MemMap {
   }
 
   // Trim by unmapping pages at the end of the map.
-  virtual void UnMapAtEnd(byte* new_end);
+  void UnMapAtEnd(byte* new_end);
 
-
+  static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot,
+      bool shareMem = false);
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
@@ -147,6 +110,39 @@ class MemMap {
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 
+  // Releases the memory mapping
+  virtual ~MemBaseMap();
+
+  MemBaseMap(const std::string& name, byte* begin, size_t size, void* base_begin,
+        size_t base_size, int prot){}
+
+  // Map part of a file, taking care of non-page aligned offsets.  The
+  // "start" offset is absolute, not relative. This version allows
+  // requesting a specific address for the base of the mapping.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemBaseMap* MapFileAtAddress(
+      byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start,
+      bool reuse);
+
+  // Request an anonymous region of length 'byte_count' and a requested base address.
+  // Use NULL as the requested base address if you don't care.
+  //
+  // The word "anonymous" in this context means "not backed by a file". The supplied
+  // 'ashmem_name' will be used -- on systems that support it -- to give the mapping
+  // a name.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemBaseMap* MapAnonymous(const char* ashmem_name, byte* addr,
+      size_t byte_count, int prot, bool shareMem = false);
+
+  // Map part of a file, taking care of non-page aligned offsets.  The
+  // "start" offset is absolute, not relative.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemBaseMap* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
+    return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, false);
+  }
 
   static bool AshmemHasAddress(AShmemMap* record, const void* addr)  {
     return AshmemBegin(record) <= addr && addr < AshmemEnd(record);
@@ -173,6 +169,8 @@ class MemMap {
     addr->size_ -= unmap_size;
   }
 
+  static AShmemMap* ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
+      AShmemMap* dest_ashmem_mem_map = NULL);
 
   static void AshmemDestructData(AShmemMap* addr, bool release_pointer);
 
@@ -192,11 +190,39 @@ class MemMap {
                 << prot << ") failed";
     return false;
   }
+};//class MemBaseMap
 
- //protected:
-  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-      size_t base_size, int prot);
+
+// Used to keep track of mmap segments.
+class MemMap : public MemBaseMap {
+ public:
+  int GetProtect() const {
+    return prot_;
+  }
+
+  byte* Begin() const {
+    return begin_;
+  }
+
+
+  void* BaseBegin() const {
+    return base_begin_;
+  }
+
+  size_t Size() const {
+    return size_;
+  }
+
+  size_t BaseSize() const {
+    return base_size_;
+  }
+
+  void SetSize(size_t new_size);
+
  private:
+  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
+        size_t base_size, int prot);
+
   std::string name_;
   byte* const begin_;  // Start of data.
   size_t size_;  // Length of data.
@@ -204,10 +230,10 @@ class MemMap {
   void* const base_begin_;  // Page-aligned base address.
   const size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
-};
+};//class MemMap
 
 
-class StructuredMemMap: public MemMap {
+class StructuredMemMap: public MemBaseMap {
  public:
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
@@ -248,8 +274,108 @@ class StructuredMemMap: public MemMap {
   void UnMapAtEnd(byte* new_end) {
     MemMap::AshmemUnMapAtEnd(ashmem_, new_end);
   }
+
+  void SetSize(size_t new_size);
   AShmemMap* ashmem_;
 };
+
+
+
+
+#else
+
+
+
+
+
+
+
+// Used to keep track of mmap segments.
+class MemMap {
+ public:
+  // Request an anonymous region of length 'byte_count' and a requested base address.
+  // Use NULL as the requested base address if you don't care.
+  //
+  // The word "anonymous" in this context means "not backed by a file". The supplied
+  // 'ashmem_name' will be used -- on systems that support it -- to give the mapping
+  // a name.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemMap* MapAnonymous(const char* ashmem_name, byte* addr,
+      size_t byte_count, int prot, bool shareMem = false);
+
+  // Map part of a file, taking care of non-page aligned offsets.  The
+  // "start" offset is absolute, not relative.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemMap* MapFile(size_t byte_count, int prot, int flags, int fd, off_t start) {
+    return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, false);
+  }
+
+  // Map part of a file, taking care of non-page aligned offsets.  The
+  // "start" offset is absolute, not relative. This version allows
+  // requesting a specific address for the base of the mapping.
+  //
+  // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+  static MemMap* MapFileAtAddress(
+      byte* addr, size_t byte_count, int prot, int flags, int fd, off_t start,
+      bool reuse);
+
+  // Releases the memory mapping
+  ~MemMap();
+
+  bool Protect(int prot);
+
+  int GetProtect() const {
+    return prot_;
+  }
+
+  byte* Begin() const {
+    return begin_;
+  }
+
+
+  void* BaseBegin() const {
+    return base_begin_;
+  }
+
+  size_t Size() const {
+    return size_;
+  }
+
+  size_t BaseSize() const {
+    return base_size_;
+  }
+
+  byte* End() const {
+    return Begin() + Size();
+  }
+
+  bool HasAddress(const void* addr) const {
+    return Begin() <= addr && addr < End();
+  }
+
+  // Trim by unmapping pages at the end of the map.
+  void UnMapAtEnd(byte* new_end);
+
+
+
+
+ //protected:
+  MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
+      size_t base_size, int prot);
+ private:
+  std::string name_;
+  byte* const begin_;  // Start of data.
+  size_t size_;  // Length of data.
+
+  void* const base_begin_;  // Page-aligned base address.
+  const size_t base_size_;  // Length of mapping.
+  int prot_;  // Protection of the map.
+};
+
+
+#endif
 
 
 
