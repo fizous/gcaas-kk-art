@@ -116,7 +116,7 @@ class ISpace {
   }
 
 
-  DL_MALLOC_SPACE* AsDlMallocSpace();
+  virtual DL_MALLOC_SPACE* AsDlMallocSpace();
 
   // Is this the space allocated into by the Zygote and no-longer in use?
   bool IsZygoteSpace() const {
@@ -127,7 +127,7 @@ class ISpace {
   bool IsLargeObjectSpace() const {
     return GetType() == kSpaceTypeLargeObjectSpace;
   }
-  LargeObjectSpace* AsLargeObjectSpace();
+  virtual LargeObjectSpace* AsLargeObjectSpace();
 
   virtual ~ISpace() {}
 
@@ -168,6 +168,9 @@ class Space : public ISpace {
   virtual SpaceType GetType() const = 0;
 
   ImageSpace* AsImageSpace();
+  DL_MALLOC_SPACE* AsDlMallocSpace();
+  LargeObjectSpace* AsLargeObjectSpace();
+
   virtual ~Space() {}
 
  protected:
