@@ -29,7 +29,7 @@ namespace space {
 
 class SpaceTest : public CommonTest {
  public:
-  void SizeFootPrintGrowthLimitAndTrimBody(DlMallocSpace* space, intptr_t object_size,
+  void SizeFootPrintGrowthLimitAndTrimBody(DL_MALLOC_SPACE* space, intptr_t object_size,
                                            int round, size_t growth_limit);
   void SizeFootPrintGrowthLimitAndTrimDriver(size_t object_size);
 
@@ -87,7 +87,7 @@ TEST_F(SpaceTest, Init) {
 // the GC works with the ZygoteSpace.
 TEST_F(SpaceTest, ZygoteSpace) {
     size_t dummy = 0;
-    DlMallocSpace* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
+    DL_MALLOC_SPACE* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
     ASSERT_TRUE(space != NULL);
 
     // Make space findable to the heap, will also delete space when runtime is cleaned up
@@ -159,7 +159,7 @@ TEST_F(SpaceTest, ZygoteSpace) {
 
 TEST_F(SpaceTest, AllocAndFree) {
   size_t dummy = 0;
-  DlMallocSpace* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
+  DL_MALLOC_SPACE* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
   ASSERT_TRUE(space != NULL);
   Thread* self = Thread::Current();
 
@@ -266,7 +266,7 @@ TEST_F(SpaceTest, LargeObjectTest) {
 }
 
 TEST_F(SpaceTest, AllocAndFreeList) {
-  DlMallocSpace* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
+  DL_MALLOC_SPACE* space(DlMallocSpace::Create("test", 4 * MB, 16 * MB, 16 * MB, NULL));
   ASSERT_TRUE(space != NULL);
 
   // Make space findable to the heap, will also delete space when runtime is cleaned up
@@ -303,7 +303,7 @@ TEST_F(SpaceTest, AllocAndFreeList) {
   }
 }
 
-void SpaceTest::SizeFootPrintGrowthLimitAndTrimBody(DlMallocSpace* space, intptr_t object_size,
+void SpaceTest::SizeFootPrintGrowthLimitAndTrimBody(DL_MALLOC_SPACE* space, intptr_t object_size,
                                                     int round, size_t growth_limit) {
   if (((object_size > 0 && object_size >= static_cast<intptr_t>(growth_limit))) ||
       ((object_size < 0 && -object_size >= static_cast<intptr_t>(growth_limit)))) {
@@ -459,7 +459,7 @@ void SpaceTest::SizeFootPrintGrowthLimitAndTrimDriver(size_t object_size) {
   size_t initial_size = 4 * MB;
   size_t growth_limit = 8 * MB;
   size_t capacity = 16 * MB;
-  DlMallocSpace* space(DlMallocSpace::Create("test", initial_size, growth_limit, capacity, NULL));
+  DL_MALLOC_SPACE* space(DlMallocSpace::Create("test", initial_size, growth_limit, capacity, NULL));
   ASSERT_TRUE(space != NULL);
 
   // Basic sanity

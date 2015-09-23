@@ -31,9 +31,9 @@ inline ImageSpace* Space::AsImageSpace() {
   return down_cast<ImageSpace*>(down_cast<MemMapSpace*>(this));
 }
 
-inline DlMallocSpace* Space::AsDlMallocSpace() {
+inline DL_MALLOC_SPACE* Space::AsDlMallocSpace() {
   DCHECK(GetType() == kSpaceTypeAllocSpace || GetType() == kSpaceTypeZygoteSpace);
-  return down_cast<DlMallocSpace*>(down_cast<MemMapSpace*>(this));
+  return down_cast<DL_MALLOC_SPACE*>(down_cast<MemMapSpace*>(this));
 }
 
 inline LargeObjectSpace* Space::AsLargeObjectSpace() {

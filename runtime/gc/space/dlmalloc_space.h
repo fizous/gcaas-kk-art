@@ -40,7 +40,8 @@ namespace space {
 class SharedDlMallocSpace;
 
 // An alloc space is a space where objects may be allocated and garbage collected.
-class DlMallocSpace : public MemMapSpace, public AllocSpace {
+class DlMallocSpace : public MemMapSpace, public AllocSpace,
+                      public AbstractDLmallocSpace {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
 
@@ -56,7 +57,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
   // the request was granted.
-  static DlMallocSpace* Create(const std::string& name, size_t initial_size, size_t growth_limit,
+  static DL_MALLOC_SPACE* Create(const std::string& name, size_t initial_size, size_t growth_limit,
                                size_t capacity, byte* requested_begin, bool shareMem = false);
 
   // Allocate num_bytes without allowing the underlying mspace to grow.
@@ -142,7 +143,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   void SwapBitmaps();
 
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
-  DlMallocSpace* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
+  DL_MALLOC_SPACE* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
 
   uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;

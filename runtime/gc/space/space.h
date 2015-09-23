@@ -28,6 +28,13 @@
 #include "image.h"
 #include "mem_map.h"
 
+
+#if (true || ART_GC_SERVICE)
+#define DL_MALLOC_SPACE  DlMallocSpace
+#else
+#define DL_MALLOC_SPACE  DlMallocSpace
+#endif
+
 namespace art {
 namespace mirror {
   class Object;
@@ -45,7 +52,7 @@ class Heap;
 
 namespace space {
 
-class DlMallocSpace;
+class DL_MALLOC_SPACE;
 class ImageSpace;
 class LargeObjectSpace;
 
@@ -82,10 +89,17 @@ class Space {
     return name_.c_str();
   }
 
+#if (true || ART_GC_SERVICE)
   // The policy of when objects are collected associated with this space.
   GcRetentionPolicy GetGcRetentionPolicy() const {
     return gc_retention_policy_;
   }
+#else
+  // The policy of when objects are collected associated with this space.
+  virtual GcRetentionPolicy GetGcRetentionPolicy() const {
+    return gc_retention_policy_;
+  }
+#endif
 
   // Does the space support allocation?
   virtual bool CanAllocateInto() const {
@@ -112,7 +126,7 @@ class Space {
     SpaceType type = GetType();
     return type == kSpaceTypeAllocSpace || type == kSpaceTypeZygoteSpace;
   }
-  DlMallocSpace* AsDlMallocSpace();
+  DL_MALLOC_SPACE* AsDlMallocSpace();
 
   // Is this the space allocated into by the Zygote and no-longer in use?
   bool IsZygoteSpace() const {
@@ -190,6 +204,27 @@ class AllocSpace {
 class ContinuousSpace : public Space {
  public:
   // Address at which the space begins
+
+#if (true || ART_GC_SERVICE)
+  virtual byte* Begin() const {
+    return begin_;
+  }
+
+  // Address at which the space ends, which may vary as the space is filled.
+  virtual byte* End() const {
+    return end_;
+  }
+
+
+  virtual void SetEnd(byte* new_end)  {
+    end_ = new_end;
+  }
+
+  // Current size of space
+  virtual size_t Size() const {
+    return End() - Begin();
+  }
+#else
   byte* Begin() const {
     return begin_;
   }
@@ -204,6 +239,10 @@ class ContinuousSpace : public Space {
     return End() - Begin();
   }
 
+  void SetEnd(byte* new_end)  {
+    end_ = new_end;
+  }
+#endif
 
   virtual accounting::SPACE_BITMAP* GetLiveBitmap() const = 0;
   virtual accounting::SPACE_BITMAP* GetMarkBitmap() const = 0;

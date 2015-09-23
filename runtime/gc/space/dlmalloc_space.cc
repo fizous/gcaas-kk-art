@@ -170,7 +170,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   }
 }
 
-DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
+DL_MALLOC_SPACE* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
                                      growth_limit, size_t capacity,
                                      byte* requested_begin, bool shareMem) {
   // Memory we promise to dlmalloc before it asks for morecore.
@@ -231,7 +231,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
 
   // Everything is set so record in immutable structure and leave
   MEM_MAP* mem_map_ptr = mem_map.release();
-  DlMallocSpace* space;
+  DL_MALLOC_SPACE* space;
   if (RUNNING_ON_VALGRIND > 0) {
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
                                       growth_limit, initial_size);
@@ -279,12 +279,12 @@ mirror::Object* DlMallocSpace::AllocWithGrowth(Thread* self, size_t num_bytes, s
     MutexLock mu(self, lock_);
     // Grow as much as possible within the mspace.
     size_t max_allowed = Capacity();
-    mspace_set_footprint_limit(mspace_, max_allowed);
+    mspace_set_footprint_limit(GetMspace(), max_allowed);
     // Try the allocation.
     result = AllocWithoutGrowthLocked(num_bytes, bytes_allocated);
     // Shrink back down as small as possible.
-    size_t footprint = mspace_footprint(mspace_);
-    mspace_set_footprint_limit(mspace_, footprint);
+    size_t footprint = mspace_footprint(GetMspace());
+    mspace_set_footprint_limit(GetMspace(), footprint);
   }
   if (result != NULL) {
     // Zero freshly allocated memory, done while not holding the space's lock.
@@ -299,29 +299,29 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   growth_limit = RoundUp(growth_limit, kPageSize);
   growth_limit_ = growth_limit;
   if (Size() > growth_limit_) {
-    end_ = begin_ + growth_limit;
+    SetEnd(Begin() + growth_limit);
   }
 }
 
-DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bool shareMem) {
-  end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(end_));
-  DCHECK(IsAligned<kPageSize>(begin_));
-  DCHECK(IsAligned<kPageSize>(end_));
+DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bool shareMem) {
+  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(Begin()));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(End()));
+  DCHECK(IsAligned<kPageSize>(Begin()));
+  DCHECK(IsAligned<kPageSize>(End()));
   size_t size = RoundUp(Size(), kPageSize);
   // Trim the heap so that we minimize the size of the Zygote space.
   Trim();
   // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(end_);
+  GetMemMap()->UnMapAtEnd(End());
   // TODO: Not hardcode these in?
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
   const size_t capacity = Capacity() - size;
-  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(begin_) << "\n"
-             << "End " << reinterpret_cast<const void*>(end_) << "\n"
+  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+             << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << growth_limit_ << "\n"
              << "Capacity " << Capacity();
@@ -335,14 +335,14 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bo
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, shareMem));
-  void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
+  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
   }
-  DlMallocSpace* alloc_space =
-      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, end_, end,
+  DL_MALLOC_SPACE* alloc_space =
+      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
           growth_limit, shareMem);
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
@@ -388,7 +388,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   if (kRecentFreeCount > 0) {
     RegisterRecentFree(ptr);
   }
-  mspace_free(mspace_, ptr);
+  mspace_free(GetMspace(), ptr);
   return bytes_freed;
 }
 
@@ -436,7 +436,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
     MutexLock mu(self, lock_);
     num_bytes_allocated_ -= bytes_freed;
     num_objects_allocated_ -= num_ptrs;
-    mspace_bulk_free(mspace_, reinterpret_cast<void**>(ptrs), num_ptrs);
+    mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
   }
 }
@@ -450,7 +450,7 @@ extern "C" void* art_heap_morecore(void* mspace, intptr_t increment) {
 
 void* DlMallocSpace::MoreCore(intptr_t increment) {
   lock_.AssertHeld(Thread::Current());
-  byte* original_end = end_;
+  byte* original_end = End();
   if (increment != 0) {
     VLOG(heap) << "DlMallocSpace::MoreCore " << PrettySize(increment);
     byte* new_end = original_end + increment;
@@ -473,7 +473,7 @@ void* DlMallocSpace::MoreCore(intptr_t increment) {
       CHECK_MEMORY_CALL(mprotect, (new_end, size, PROT_NONE), GetName());
     }
     // Update end_
-    end_ = new_end;
+    SetEnd(new_end);
   }
   return original_end;
 }
@@ -499,10 +499,10 @@ size_t DlMallocSpace::Trim() {
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   MutexLock mu(Thread::Current(), lock_);
   // Trim to release memory at the end of the space.
-  mspace_trim(mspace_, 0);
+  mspace_trim(GetMspace(), 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
   size_t reclaimed = 0;
-  mspace_inspect_all(mspace_, DlmallocMadviseCallback, &reclaimed);
+  mspace_inspect_all(GetMspace(), DlmallocMadviseCallback, &reclaimed);
   mprofiler::VMProfiler::MProfMarkEndTrimHWEvent();
   return reclaimed;
 }
@@ -510,18 +510,18 @@ size_t DlMallocSpace::Trim() {
 void DlMallocSpace::Walk(void(*callback)(void *start, void *end, size_t num_bytes, void* callback_arg),
                       void* arg) {
   MutexLock mu(Thread::Current(), lock_);
-  mspace_inspect_all(mspace_, callback, arg);
+  mspace_inspect_all(GetMspace(), callback, arg);
   callback(NULL, NULL, 0, arg);  // Indicate end of a space.
 }
 
 size_t DlMallocSpace::GetFootprint() {
   MutexLock mu(Thread::Current(), lock_);
-  return mspace_footprint(mspace_);
+  return mspace_footprint(GetMspace());
 }
 
 size_t DlMallocSpace::GetFootprintLimit() {
   MutexLock mu(Thread::Current(), lock_);
-  return mspace_footprint_limit(mspace_);
+  return mspace_footprint_limit(GetMspace());
 }
 
 void DlMallocSpace::SetFootprintLimit(size_t new_size) {
@@ -529,12 +529,12 @@ void DlMallocSpace::SetFootprintLimit(size_t new_size) {
   VLOG(heap) << "DLMallocSpace::SetFootprintLimit " << PrettySize(new_size);
   // Compare against the actual footprint, rather than the Size(), because the heap may not have
   // grown all the way to the allowed size yet.
-  size_t current_space_size = mspace_footprint(mspace_);
+  size_t current_space_size = mspace_footprint(GetMspace());
   if (new_size < current_space_size) {
     // Don't let the space grow any more.
     new_size = current_space_size;
   }
-  mspace_set_footprint_limit(mspace_, new_size);
+  mspace_set_footprint_limit(GetMspace(), new_size);
 }
 
 void DlMallocSpace::Dump(std::ostream& os) const {
@@ -547,24 +547,24 @@ void DlMallocSpace::Dump(std::ostream& os) const {
 
 
 SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
-  end_ = reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(end_), kPageSize));
-  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(begin_));
-  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(end_));
-  DCHECK(IsAligned<kPageSize>(begin_));
-  DCHECK(IsAligned<kPageSize>(end_));
+  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));
+  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(End()));
+  DCHECK(IsAligned<kPageSize>(Begin()));
+  DCHECK(IsAligned<kPageSize>(End()));
   size_t size = RoundUp(Size(), kPageSize);
   // Trim the heap so that we minimize the size of the Zygote space.
   Trim();
   // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(end_);
+  GetMemMap()->UnMapAtEnd(End());
   // TODO: Not hardcode these in?
  // const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
   const size_t growth_limit = growth_limit_ - size;
   const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin " << reinterpret_cast<const void*>(begin_) << "\n"
-             << "End " << reinterpret_cast<const void*>(end_) << "\n"
+  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+             << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << growth_limit_ << "\n"
              << "Capacity " << Capacity();
@@ -586,7 +586,7 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
 
 
   SharedDlMallocSpace* _shared_space = SharedDlMallocSpace::Create(alloc_space_name,
-      initial_size, growth_limit, capacity, end_);
+      initial_size, growth_limit, capacity, End());
 
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));

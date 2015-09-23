@@ -880,7 +880,7 @@ inline mirror::Object* Heap::TryToAllocate(Thread* self, space::AllocSpace* spac
 }
 
 // DlMallocSpace-specific version.
-inline mirror::Object* Heap::TryToAllocate(Thread* self, space::DlMallocSpace* space, size_t alloc_size,
+inline mirror::Object* Heap::TryToAllocate(Thread* self, space::DL_MALLOC_SPACE* space, size_t alloc_size,
                                            bool grow, size_t* bytes_allocated) {
   if (UNLIKELY(IsOutOfMemoryOnAllocation(alloc_size, grow))) {
     return NULL;
@@ -1229,7 +1229,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
       LOG(ERROR) << "Success in sharing the Card table";
     }
   }
-    space::DlMallocSpace* zygote_space = alloc_space_;
+    space::DL_MALLOC_SPACE* zygote_space = alloc_space_;
     alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
     alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
@@ -1287,7 +1287,7 @@ void Heap::PreZygoteFork() {
 
   // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
   // of the remaining available heap memory.
-  space::DlMallocSpace* zygote_space = alloc_space_;
+  space::DL_MALLOC_SPACE* zygote_space = alloc_space_;
   alloc_space_ = zygote_space->CreateZygoteSpace("alloc space");
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
@@ -1550,7 +1550,7 @@ class VerifyReferenceVisitor {
         // Attmept to find the class inside of the recently freed objects.
         space::ContinuousSpace* ref_space = heap_->FindContinuousSpaceFromObject(ref, true);
         if (ref_space->IsDlMallocSpace()) {
-          space::DlMallocSpace* space = ref_space->AsDlMallocSpace();
+          space::DL_MALLOC_SPACE* space = ref_space->AsDlMallocSpace();
           mirror::Class* ref_class = space->FindRecentFreedObject(ref);
           if (ref_class != nullptr) {
             LOG(ERROR) << "Reference " << ref << " found as a recently freed object with class "

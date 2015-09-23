@@ -46,7 +46,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
 	size_t calculatedSize  = 0;
 	size_t checkingSize = 0;
 	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
-  mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(mspace_, extendedSize));
+  mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), extendedSize));
   if (result != NULL) {
     if (kDebugSpaces) {
       CHECK(Contains(result)) << "Allocation (" << reinterpret_cast<void*>(result)

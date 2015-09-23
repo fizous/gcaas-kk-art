@@ -39,9 +39,11 @@
 #if (true || ART_GC_SERVICE)
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
  #define GC_HEAP_SRVCE_NO_LOS     true
+ #define DL_MALLOC_SPACE DlMallocSpace
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
  #define GC_HEAP_SRVCE_NO_LOS     false
+#define DL_MALLOC_SPACE DlMallocSpace
 #endif
 
 namespace art {
@@ -78,7 +80,7 @@ namespace collector {
 namespace space {
   class AllocSpace;
   class DiscontinuousSpace;
-  class DlMallocSpace;
+  class DL_MALLOC_SPACE;
   class ImageSpace;
   class LargeObjectSpace;
   class Space;
@@ -456,7 +458,7 @@ class Heap {
   // Assumes there is only one image space.
   space::ImageSpace* GetImageSpace() const;
 
-  space::DlMallocSpace* GetAllocSpace() const {
+  space::DL_MALLOC_SPACE* GetAllocSpace() const {
     return alloc_space_;
   }
 
@@ -528,7 +530,7 @@ class Heap {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   // Try to allocate a number of bytes, this function never does any GCs. DlMallocSpace-specialized version.
-  mirror::Object* TryToAllocate(Thread* self, space::DlMallocSpace* space, size_t alloc_size, bool grow,
+  mirror::Object* TryToAllocate(Thread* self, space::DL_MALLOC_SPACE* space, size_t alloc_size, bool grow,
                                 size_t* bytes_allocated)
       LOCKS_EXCLUDED(Locks::thread_suspend_count_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -596,7 +598,7 @@ class Heap {
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;
 
   // The allocation space we are currently allocating into.
-  space::DlMallocSpace* alloc_space_;
+  space::DL_MALLOC_SPACE* alloc_space_;
 
   // The large object space we are currently allocating into.
   space::LargeObjectSpace* large_object_space_;

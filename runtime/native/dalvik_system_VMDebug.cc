@@ -267,12 +267,12 @@ static void VMDebug_getHeapSpaceStats(JNIEnv* env, jclass, jlongArray data) {
     if (space->IsImageSpace()) {
       // Currently don't include the image space.
     } else if (space->IsZygoteSpace()) {
-      gc::space::DlMallocSpace* dlmalloc_space = space->AsDlMallocSpace();
+      gc::space::DL_MALLOC_SPACE* dlmalloc_space = space->AsDlMallocSpace();
       zygoteSize += dlmalloc_space->GetFootprint();
       zygoteUsed += dlmalloc_space->GetBytesAllocated();
     } else {
       // This is the alloc space.
-      gc::space::DlMallocSpace* dlmalloc_space = space->AsDlMallocSpace();
+      gc::space::DL_MALLOC_SPACE* dlmalloc_space = space->AsDlMallocSpace();
       allocSize += dlmalloc_space->GetFootprint();
       allocUsed += dlmalloc_space->GetBytesAllocated();
     }
