@@ -140,6 +140,9 @@ class MemBaseMap {
   static MemBaseMap* MapAnonymous(const char* ashmem_name, byte* addr,
       size_t byte_count, int prot, bool shareMem = false);
 
+  static MemBaseMap* CreateStructedMemMap(const char* ashmem_name, byte* addr,
+      size_t byte_count, int prot, bool shareMem = false);
+
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
   //
@@ -246,13 +249,15 @@ class MemMap : public MemBaseMap {
 class StructuredMemMap: public MemBaseMap {
  public:
   ~StructuredMemMap();
+  StructuredMemMap(AShmemMap* ashmem) : ashmem_(ashmem) {};
   StructuredMemMap(AShmemMap* ashmem, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot);
 
 //  StructuredMemMap(AShmemMap* ashmem);
 
   static StructuredMemMap* CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* addr, size_t byte_count, int prot);
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot,
+      bool shareMem = false);
 
   bool Protect(int prot) {
     return MEM_MAP::AshmemProtect(ashmem_, prot);

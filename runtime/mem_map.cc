@@ -76,6 +76,9 @@ void StructuredMemMap::SetSize(size_t new_size) {
   ashmem_->size_ = new_size;
 }
 
+
+
+
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,
     byte* begin, size_t size, void* base_begin, size_t base_size, int prot) :
       ashmem_(ashmem) {
@@ -91,6 +94,46 @@ StructuredMemMap::~StructuredMemMap(){
     PLOG(FATAL) << "munmap failed";
   }
 }
+
+
+MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr,
+    size_t byte_count, int prot, bool shareMem) {
+
+  AShmemMap* _memory_allocation =
+      reinterpret_cast<AShmemMap*>(calloc(1, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap)));
+
+  AShmemMap* _checkP =
+      MemBaseMap::CreateAShmemMap(_memory_allocation, ashmem_name, addr, byte_count,
+      prot, shareMem);
+
+  if(_checkP == NULL) {
+    LOG(ERROR) << "MemBaseMap::CreateStructruedMemMap -- > could not allocate shared memory map";
+    return NULL;
+  }
+
+  StructuredMemMap* _allocated_structured_map =
+      new StructuredMemMap(_memory_allocation);
+
+  return _allocated_structured_map;
+}
+
+StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
+      const char* ashmem_name, byte* addr, size_t byte_count, int prot,
+      bool shareMem) {
+  AShmemMap* _addr = MEM_MAP::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr,
+      byte_count, prot, shareMem);
+  if(_addr != ashmem_mem_map) {
+    LOG(FATAL) << "could not create StructuredMemMap::CreateStructuredMemMap";
+    return NULL;
+  }
+  return new StructuredMemMap(ashmem_mem_map, std::string(ashmem_name), addr,
+      MEM_MAP::AshmemSize(ashmem_mem_map), ashmem_mem_map->base_begin_,
+      ashmem_mem_map->base_size_, prot);
+
+}
+
+
+
 
 
 AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
@@ -368,19 +411,7 @@ MEM_MAP* MemBaseMap::MapFileAtAddress(byte* addr, size_t byte_count,
 }
 
 
-StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
-      const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
-  AShmemMap* _addr = MEM_MAP::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr,
-      byte_count, prot);
-  if(_addr != ashmem_mem_map) {
-    LOG(FATAL) << "could not create StructuredMemMap::CreateStructuredMemMap";
-    return NULL;
-  }
-  return new StructuredMemMap(ashmem_mem_map, std::string(ashmem_name), addr,
-      MEM_MAP::AshmemSize(ashmem_mem_map), ashmem_mem_map->base_begin_,
-      ashmem_mem_map->base_size_, prot);
 
-}
 
 
 

@@ -56,8 +56,10 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
 
     DCHECK(bytes_allocated != NULL);
     *bytes_allocated = allocation_size;
-    num_bytes_allocated_ += allocation_size;
-    total_bytes_allocated_ += allocation_size;
+    UpdateBytesAllocated(allocation_size);
+    UpdateTotalBytesAllocated(allocation_size);
+//    num_bytes_allocated_ += allocation_size;
+//    total_bytes_allocated_ += allocation_size;
 
     size_t tempSize = AllocationNoOverhead(result);
     GCP_REMOVE_EXTRA_BYTES(tempSize, calculatedSize);
@@ -70,8 +72,10 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
 			checkingSize - calculatedSize;
     //Fizo: should tune this
     GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result), num_bytes, result);
-    ++total_objects_allocated_;
-    ++num_objects_allocated_;
+    UpdateObjectsAllocated(1);
+    UpdateTotalObjectsAllocated(1);
+//    ++total_objects_allocated_;
+//    ++num_objects_allocated_;
   }
   return result;
 }

@@ -91,28 +91,6 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
                             public AllocSpace*/ {
 
  public:
-  // Alignment of objects within spaces.
-  static const size_t kAlignment = 8;
-
-  // The boundary tag overhead.
-  static const size_t kChunkOverhead = kWordSize;
-
-  typedef void(*SharedDlSpaceWalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
-
-  SpaceType GetType() const {
-    if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
-      return kSpaceTypeZygoteSpace;
-    } else {
-      return kSpaceTypeAllocSpace;
-    }
-  }
-  // <offset> is the difference from .base to a pointer address.
-  // <index> is the index of .bits that contains the bit representing
-  //         <offset>.
-  static size_t BitmapOffsetToIndex(size_t offset) {
-    return offset / kAlignment / kBitsPerWord;
-  }
-
   static StructuredMemMap* InitAllocSpace(GCSrvceDlMallocSpace* srvc_space,
       const char * name, size_t initial_size, size_t capacity,
       byte* requested_begin, size_t starting_size);
@@ -166,9 +144,6 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
 
   void* MoreCore(intptr_t increment);
 
-  // Perform a mspace_inspect_all which calls back for each allocation chunk. The chunk may not be
-  // in use, indicated by num_bytes equaling zero.
-  void Walk(SharedDlSpaceWalkCallback callback, void* arg) LOCKS_EXCLUDED(*mu_);
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
@@ -242,6 +217,10 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
   // maximum reserved size of the heap.
   void ClearGrowthLimit() {
     alloc_space_->growth_limit_ = NonGrowthLimitCapacity();
+  }
+
+  void SetInternalGrowthLimit(size_t new_growth_limit) {
+    alloc_space_->growth_limit_ = new_growth_limit;
   }
 
   void Dump(std::ostream& os) const;

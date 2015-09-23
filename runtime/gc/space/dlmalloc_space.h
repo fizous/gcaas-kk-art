@@ -113,7 +113,7 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
   // Removes the fork time growth limit on capacity, allowing the application to allocate up to the
   // maximum reserved size of the heap.
   void ClearGrowthLimit() {
-    growth_limit_ = NonGrowthLimitCapacity();
+    SetInternalGrowthLimit(NonGrowthLimitCapacity());
   }
 
   // Override capacity so that we only return the possibly limited capacity
@@ -145,35 +145,35 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
   DL_MALLOC_SPACE* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
 
-  uint64_t GetBytesAllocated() const {
+  virtual uint64_t GetBytesAllocated() const {
     return num_bytes_allocated_;
   }
 
-  uint64_t GetObjectsAllocated() const {
+  virtual uint64_t GetObjectsAllocated() const {
     return num_objects_allocated_;
   }
 
-  uint64_t GetTotalBytesAllocated() const {
+  virtual uint64_t GetTotalBytesAllocated() const {
     return total_bytes_allocated_;
   }
 
-  uint64_t GetTotalObjectsAllocated() const {
+  virtual uint64_t GetTotalObjectsAllocated() const {
     return total_objects_allocated_;
   }
 
-  void UpdateBytesAllocated(int delta) {
+  virtual void UpdateBytesAllocated(int delta) {
     num_bytes_allocated_ += delta;
   }
 
-  void UpdateObjectsAllocated(int delta) {
+  virtual void UpdateObjectsAllocated(int delta) {
     num_objects_allocated_ += delta;
   }
 
-  void UpdateTotalBytesAllocated(int delta) {
+  virtual void UpdateTotalBytesAllocated(int delta) {
     total_bytes_allocated_ += delta;
   }
 
-  void UpdateTotalObjectsAllocated(int delta) {
+  virtual void UpdateTotalObjectsAllocated(int delta) {
     total_objects_allocated_ += delta;
   }
 
@@ -182,7 +182,7 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
   static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
 
 
-  void SetInternalGrowthLimit(size_t new_growth_limit) {
+  virtual void SetInternalGrowthLimit(size_t new_growth_limit) {
     growth_limit_ = new_growth_limit;
   }
 

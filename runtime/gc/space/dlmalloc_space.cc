@@ -303,7 +303,8 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   }
 }
 
-DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bool shareMem) {
+DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
+    bool shareMem) {
   SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
   DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(Begin()));
   DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(End()));
@@ -333,13 +334,21 @@ DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, 
   VLOG(heap) << "Size " << GetMemMap()->Size();
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(alloc_space_name, End(),
-      capacity, PROT_READ | PROT_WRITE, shareMem));
+  MEM_MAP* _space_mem_map = NULL;
+  if(shareMem) {
+    _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
+        capacity, PROT_READ | PROT_WRITE, shareMem);
+  } else {
+    _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
+        capacity, PROT_READ | PROT_WRITE, shareMem);
+  }
+  UniquePtr<MEM_MAP> mem_map(_space_mem_map);
   void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
   // Protect memory beyond the initial size.
   byte* end = mem_map->Begin() + starting_size;
   if (capacity - initial_size > 0) {
-    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
+    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+        alloc_space_name);
   }
   DL_MALLOC_SPACE* alloc_space =
       new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
@@ -383,7 +392,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   const size_t bytes_freed = InternalAllocationSize(ptr);
   //num_bytes_allocated_ -= bytes_freed;
   UpdateBytesAllocated(-bytes_freed);
-  --num_objects_allocated_;
+  UpdateObjectsAllocated(-1);//--num_objects_allocated_;
   //GCMMP_HANDLE_FINE_GRAINED_FREE(AllocationNoOverhead(ptr), bytes_freed);
   GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr), ptr);
   if (kRecentFreeCount > 0) {
@@ -436,7 +445,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
   {
     MutexLock mu(self, lock_);
     UpdateBytesAllocated(-bytes_freed);
-    num_objects_allocated_ -= num_ptrs;
+    UpdateObjectsAllocated(-num_ptrs);//num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
   }
@@ -564,7 +573,8 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
   // Remaining size is for the new alloc space.
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin "
+             << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << Capacity() << "\n"
