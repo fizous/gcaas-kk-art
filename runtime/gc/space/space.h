@@ -159,7 +159,7 @@ class Space : public ISpace {
 
 
   // Is the given object contained within this space?
-  virtual bool Contains(const mirror::Object* obj) const = 0;
+  //virtual bool Contains(const mirror::Object* obj) const = 0;
 
 //  // get the allocated memory for that object?
 //  virtual size_t GetObjectSize(const mirror::Object* obj) const = 0;
