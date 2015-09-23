@@ -86,6 +86,8 @@ class MemBaseMap {
 
   virtual void SetSize(size_t) = 0;
 
+  virtual void SetProt(int) = 0;
+
   virtual size_t BaseSize()  const = 0;
 
   byte* End() const {
@@ -95,6 +97,9 @@ class MemBaseMap {
   virtual bool HasAddress(const void* addr) const {
     return Begin() <= addr && addr < End();
   }
+
+
+  bool Protect(int);
 
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
@@ -219,6 +224,10 @@ class MemMap : public MemBaseMap {
 
   void SetSize(size_t new_size);
 
+  void SetProt(int newProt) {
+    prot_ = newProt;
+  }
+
  private:
   MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
         size_t base_size, int prot);
@@ -273,6 +282,10 @@ class StructuredMemMap: public MemBaseMap {
 
   void UnMapAtEnd(byte* new_end) {
     MEM_MAP::AshmemUnMapAtEnd(ashmem_, new_end);
+  }
+
+  void SetProt(int newProt) {
+    ashmem_->prot_ = newProt;
   }
 
   void SetSize(size_t new_size);

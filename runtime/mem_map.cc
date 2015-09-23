@@ -279,6 +279,21 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count, 
   return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
 }
 
+bool MemBaseMap::Protect(int prot) {
+  if (BaseBegin() == NULL && BaseSize() == 0) {
+    SetProt(prot);
+    return true;
+  }
+
+  if (mprotect(BaseBegin(), BaseSize(), prot) == 0) {
+    SetProt(prot);
+    return true;
+  }
+
+  PLOG(ERROR) << "mprotect(" << reinterpret_cast<void*>(BaseBegin()) << ", "
+      << BaseSize() << ", " << prot << ") failed";
+  return false;
+}
 
 void MemBaseMap::UnMapAtEnd(byte* new_end) {
   DCHECK_GE(new_end, Begin());
