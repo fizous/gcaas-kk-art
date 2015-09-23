@@ -143,7 +143,9 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
   size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
 
   void* MoreCore(intptr_t increment);
-
+  // Perform a mspace_inspect_all which calls back for each allocation chunk. The chunk may not be
+  // in use, indicated by num_bytes equaling zero.
+  void Walk(WalkCallback callback, void* arg) LOCKS_EXCLUDED(*mu_);
 
   // Name of the space. May vary, for example before/after the Zygote fork.
   const char* GetName() const {
