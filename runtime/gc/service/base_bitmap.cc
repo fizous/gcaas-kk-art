@@ -287,6 +287,7 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
   hb_p->bitmap_size_  = bitmap_size;
   hb_p->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
   strcpy(hb_p->name_, name.c_str());
+  LOG(ERROR) << "---DOne creating Shared Space Bitmap---";
 }
 
 
