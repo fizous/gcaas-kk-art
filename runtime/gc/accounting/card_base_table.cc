@@ -24,8 +24,8 @@ namespace accounting {
 
 CardBaseTable::~CardBaseTable() {
 //  MemMap::AshmemDestructData(&fields_->mem_map_, false);
-  free(fields_);
-  fields_ = NULL;
+//  free(fields_);
+//  fields_ = NULL;
 }
 
 void CardBaseTable::ClearCardTable() {

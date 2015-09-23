@@ -266,7 +266,7 @@ std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap
 
 void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
-    size_t bitmap_size) {
+    size_t bitmap_size, bool shareMem) {
   accounting::GCSrvceBitmap* hb_p = *hb;
   if(hb_p == NULL) {
     *hb = reinterpret_cast<accounting::GCSrvceBitmap*>(
@@ -277,7 +277,7 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
   std::string _str = StringPrintf("allocspace %s mmap", name.c_str());
 
   AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb_p->mem_map_, _str.c_str(),
-      NULL, bitmap_size, PROT_READ | PROT_WRITE);
+      NULL, bitmap_size, PROT_READ | PROT_WRITE, shareMem);
 
   if (_ashmem == NULL) {
     LOG(FATAL) << "Failed to allocate bitmap BaseBitmap::InitSrvcBitmap" << name;
@@ -297,7 +297,8 @@ BaseBitmap* BaseBitmap::Create(const std::string& name, byte* heap_begin,
     size_t heap_capacity, bool shareMem) {
   accounting::GCSrvceBitmap* _gcServiceBitmapP = NULL;
   size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  InitSrvcBitmap(&_gcServiceBitmapP, name, heap_begin, heap_capacity, bitmap_size);
+  InitSrvcBitmap(&_gcServiceBitmapP, name, heap_begin, heap_capacity,
+      bitmap_size, shareMem);
   return new SharedSpaceBitmap(_gcServiceBitmapP);
 }
 

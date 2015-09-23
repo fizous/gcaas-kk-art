@@ -105,7 +105,7 @@ public:
 
   static void InitSrvcBitmap(GCSrvceBitmap **hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
-      size_t bitmap_size);
+      size_t bitmap_size, bool shareMem = false);
 
   static void SweepWalk(const BaseBitmap& live, const BaseBitmap& mark, uintptr_t base,
                         uintptr_t max, SweepCallback* thunk, void* arg);
