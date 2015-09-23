@@ -45,6 +45,9 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
 
+  // The boundary tag overhead.
+  static const size_t kChunkOverhead = kWordSize;
+
   SpaceType GetType() const {
     if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
       return kSpaceTypeZygoteSpace;
@@ -218,8 +221,7 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
 
   static size_t bitmap_index_;
 
-  // The boundary tag overhead.
-  static const size_t kChunkOverhead = kWordSize;
+
 
   // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
   Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
