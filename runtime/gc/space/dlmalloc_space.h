@@ -47,7 +47,8 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
 
   // The boundary tag overhead.
   static const size_t kChunkOverhead = kWordSize;
-
+  //Todo: Fizo: I do not know why I need this?
+  static const size_t kAlignment = 8;
   SpaceType GetType() const {
     if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
       return kSpaceTypeZygoteSpace;
@@ -56,6 +57,10 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
     }
   }
 
+
+  static size_t BitmapOffsetToIndex(size_t offset) {
+    return offset / kAlignment / kBitsPerWord;
+  }
   // Create a AllocSpace with the requested sizes. The requested
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
