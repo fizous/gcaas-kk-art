@@ -182,7 +182,7 @@ class DlMallocSpace : public MemMapSpace, /*, public AllocSpace,*/
   static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
 
 
-  void SetGrowthLimit(size_t new_growth_limit) {
+  void SetInternalGrowthLimit(size_t new_growth_limit) {
     growth_limit_ = new_growth_limit;
   }
 

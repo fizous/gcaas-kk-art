@@ -297,8 +297,8 @@ mirror::Object* DlMallocSpace::AllocWithGrowth(Thread* self, size_t num_bytes, s
 
 void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   growth_limit = RoundUp(growth_limit, kPageSize);
-  growth_limit_ = growth_limit;
-  if (Size() > growth_limit_) {
+  SetInternalGrowthLimit(growth_limit);
+  if (Size() > Capacity()) {
     SetEnd(Begin() + growth_limit);
   }
 }
