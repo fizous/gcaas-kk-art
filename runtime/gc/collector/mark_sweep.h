@@ -48,10 +48,11 @@ namespace accounting {
   class MarkStackChunk;
   typedef AtomicStack<mirror::Object*> ObjectStack;
 #if (true || ART_GC_SERVICE)
-  class BaseBitmap;
+#define SPACE_BITMAP BaseBitmap
 #else
-  class SpaceBitmap;
+#define SPACE_BITMAP SpaceBitmap
 #endif
+  class SPACE_BITMAP;
 }  // namespace accounting
 
 namespace space {
@@ -400,15 +401,10 @@ class MarkSweep : public GarbageCollector {
   // Whether or not we count how many of each type of object were scanned.
   static const bool kCountScannedTypes = false;
 
-#if (true || ART_GC_SERVICE)
   // Current space, we check this space first to avoid searching for the appropriate space for an
   // object.
-  accounting::BaseBitmap* current_mark_bitmap_;
-#else
-  // Current space, we check this space first to avoid searching for the appropriate space for an
-  // object.
-  accounting::SpaceBitmap* current_mark_bitmap_;
-#endif
+  accounting::SPACE_BITMAP* current_mark_bitmap_;
+
   // Cache java.lang.Class for optimization.
   mirror::Class* java_lang_Class_;
 

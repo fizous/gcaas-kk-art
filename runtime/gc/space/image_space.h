@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+\\ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,11 @@ class ImageSpace : public MemMapSpace {
     return GetName();
   }
 
-  accounting::SpaceBitmap* GetLiveBitmap() const {
+  accounting::SPACE_BITMAP* GetLiveBitmap() const {
     return live_bitmap_.get();
   }
 
-  accounting::SpaceBitmap* GetMarkBitmap() const {
+  accounting::SPACE_BITMAP* GetMarkBitmap() const {
     // ImageSpaces have the same bitmap for both live and marked. This helps reduce the number of
     // special cases to test against.
     return live_bitmap_.get();
@@ -97,9 +97,9 @@ class ImageSpace : public MemMapSpace {
 
   static AtomicInteger bitmap_index_;
 
-  UniquePtr<accounting::SpaceBitmap> live_bitmap_;
+  UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
 
-  ImageSpace(const std::string& name, MemMap* mem_map, accounting::SpaceBitmap* live_bitmap);
+  ImageSpace(const std::string& name, MemMap* mem_map, accounting::SPACE_BITMAP* live_bitmap);
 
   // The OatFile associated with the image during early startup to
   // reserve space contiguous to the image. It is later released to

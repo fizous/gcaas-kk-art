@@ -38,7 +38,7 @@ namespace space {
 AtomicInteger ImageSpace::bitmap_index_(0);
 
 ImageSpace::ImageSpace(const std::string& name, MemMap* mem_map,
-                       accounting::SpaceBitmap* live_bitmap)
+                       accounting::SPACE_BITMAP* live_bitmap)
     : MemMapSpace(name, mem_map, mem_map->Size(), kGcRetentionPolicyNeverCollect) {
   DCHECK(live_bitmap != NULL);
   live_bitmap_.reset(live_bitmap);
@@ -206,7 +206,7 @@ ImageSpace* ImageSpace::Init(const std::string& image_file_name, bool validate_o
   size_t bitmap_index = bitmap_index_.fetch_add(1);
   std::string bitmap_name(StringPrintf("imagespace %s live-bitmap %u", image_file_name.c_str(),
                                        bitmap_index));
-  UniquePtr<accounting::SpaceBitmap> bitmap(
+  UniquePtr<accounting::SPACE_BITMAP> bitmap(
       accounting::SpaceBitmap::CreateFromMemMap(bitmap_name, image_map.release(),
                                                 reinterpret_cast<byte*>(map->Begin()),
                                                 map->Size()));

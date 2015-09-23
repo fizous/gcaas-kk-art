@@ -26,8 +26,10 @@
 
 #if (true || ART_GC_SERVICE)
 #define CARD_TABLE  CardBaseTable
+#define SPACE_BITMAP BaseBitmap
 #else
 #define CARD_TABLE  CardTable
+#define SPACE_BITMAP SpaceBitmap
 #endif
 
 namespace art {
@@ -46,12 +48,7 @@ class Heap;
 
 namespace accounting {
 
-
-#if (true || ART_GC_SERVICE)
-class BaseBitmap;
-#else
-class SpaceBitmap;
-#endif
+class SPACE_BITMAP;
 
 
 class ConstantsCardTable {
@@ -102,7 +99,7 @@ public:
  // For every dirty at least minumum age between begin and end invoke the visitor with the
  // specified argument. Returns how many cards the visitor was run on.
  template <typename Visitor>
- size_t Scan(BaseBitmap* bitmap, byte* scan_begin, byte* scan_end, const Visitor& visitor,
+ size_t Scan(SPACE_BITMAP* bitmap, byte* scan_begin, byte* scan_end, const Visitor& visitor,
              const byte minimum_age = kCardDirty) const
      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);

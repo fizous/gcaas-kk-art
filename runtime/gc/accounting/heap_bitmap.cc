@@ -33,7 +33,7 @@ BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(Heap* heap, bool sharable) {
 }
 
 bool BaseHeapBitmap::Test(const mirror::Object* obj) {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     return bitmap->Test(obj);
   } else {
@@ -44,7 +44,7 @@ bool BaseHeapBitmap::Test(const mirror::Object* obj) {
 
 
 void BaseHeapBitmap::Clear(const mirror::Object* obj)  {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     bitmap->Clear(obj);
   } else {
@@ -55,7 +55,7 @@ void BaseHeapBitmap::Clear(const mirror::Object* obj)  {
 
 
 void BaseHeapBitmap::Set(const mirror::Object* obj)  {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     bitmap->Set(obj);
   } else {
@@ -85,10 +85,10 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
 
 
 
-void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) {
+void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap) {
   DCHECK(bitmap != NULL);
   // Check for interval overlap.
-  BaseBitmap* _temp = NULL;
+  SPACE_BITMAP* _temp = NULL;
   LOG(ERROR) << "header is allocated? " << (header_ != NULL);
   if(header_ != NULL) {
     LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " << header_->index_;
@@ -109,7 +109,7 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) 
 }
 
 void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
-  BaseBitmap* _temp = NULL;
+  SPACE_BITMAP* _temp = NULL;
   for(int i = 0; i < header_->index_; i ++) {
     _temp = header_->bitmaps_[i];
     _temp->Walk(callback, arg);
@@ -131,7 +131,7 @@ void SharedHeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap,
 }
 
 
-void HeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap) {
+void HeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap, SPACE_BITMAP* new_bitmap) {
   for (auto& bitmap : continuous_space_bitmaps_) {
     if (bitmap == old_bitmap) {
       bitmap = new_bitmap;
@@ -151,7 +151,7 @@ void HeapBitmap::ReplaceObjectSet(SpaceSetMap* old_set, SpaceSetMap* new_set) {
   LOG(FATAL) << "object set " << static_cast<const void*>(old_set) << " not found";
 }
 
-void HeapBitmap::AddContinuousSpaceBitmap(accounting::BaseBitmap* bitmap) {
+void HeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap) {
   DCHECK(bitmap != NULL);
 
   // Check for interval overlap.
@@ -181,7 +181,7 @@ void HeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
 }
 
 bool HeapBitmap::Test(const mirror::Object* obj) {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     return bitmap->Test(obj);
   } else {
@@ -190,7 +190,7 @@ bool HeapBitmap::Test(const mirror::Object* obj) {
 }
 
 void HeapBitmap::Clear(const mirror::Object* obj)  {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     bitmap->Clear(obj);
   } else {
@@ -201,7 +201,7 @@ void HeapBitmap::Clear(const mirror::Object* obj)  {
 }
 
 void HeapBitmap::Set(const mirror::Object* obj) {
-  BaseBitmap* bitmap = GetContinuousSpaceBitmap(obj);
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
     bitmap->Set(obj);
   } else {

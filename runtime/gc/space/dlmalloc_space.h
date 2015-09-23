@@ -125,23 +125,14 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
     return GetMemMap()->Size();
   }
 
-#if true || ART_GC_SERVICE
-  accounting::BaseBitmap* GetLiveBitmap() const {
+  accounting::SPACE_BITMAP* GetLiveBitmap() const {
     return live_bitmap_.get();
   }
 
-  accounting::BaseBitmap* GetMarkBitmap() const {
+  accounting::SPACE_BITMAP* GetMarkBitmap() const {
     return mark_bitmap_.get();
-  }
-#else
-  accounting::SpaceBitmap* GetLiveBitmap() const {
-    return live_bitmap_.get();
   }
 
-  accounting::SpaceBitmap* GetMarkBitmap() const {
-    return mark_bitmap_.get();
-  }
-#endif
   void Dump(std::ostream& os) const;
 
   void SetGrowthLimit(size_t growth_limit);
@@ -190,15 +181,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
   bool Init(size_t initial_size, size_t maximum_size, size_t growth_size, byte* requested_base);
   void RegisterRecentFree(mirror::Object* ptr);
 
-#if true || ART_GC_SERVICE
-  UniquePtr<accounting::BaseBitmap> live_bitmap_;
-  UniquePtr<accounting::BaseBitmap> mark_bitmap_;
-  UniquePtr<accounting::BaseBitmap> temp_bitmap_;
-#else
-  UniquePtr<accounting::SpaceBitmap> live_bitmap_;
-  UniquePtr<accounting::SpaceBitmap> mark_bitmap_;
-  UniquePtr<accounting::SpaceBitmap> temp_bitmap_;
-#endif
+
+  UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
+  UniquePtr<accounting::SPACE_BITMAP> mark_bitmap_;
+  UniquePtr<accounting::SPACE_BITMAP> temp_bitmap_;
   // Recent allocation buffer.
   static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
   static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;

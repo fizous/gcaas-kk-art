@@ -43,7 +43,7 @@ typedef struct GCSrvceSharedHeapBitmap_S {
   // The index of the bitmap array
   volatile int index_;
   //bitmaps array
-  BaseBitmap* bitmaps_[8];
+  SPACE_BITMAP* bitmaps_[8];
 }  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 
@@ -62,9 +62,9 @@ class BaseHeapBitmap {
   virtual void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
-  virtual BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) = 0;
+  virtual SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) = 0;
 
-  virtual void Walk(BaseBitmap::Callback* callback, void* arg)
+  virtual void Walk(SPACE_BITMAP::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) = 0;
 
 
@@ -75,7 +75,7 @@ class BaseHeapBitmap {
 
 
   // Find and replace a bitmap pointer, this is used by for the bitmap swapping in the GC.
-  virtual void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
+  virtual void ReplaceBitmap(SPACE_BITMAP* old_bitmap, SPACE_BITMAP* new_bitmap)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) = 0;
 
   // Find and replace a object set pointer, this is used by for the bitmap swapping in the GC.
@@ -85,12 +85,12 @@ class BaseHeapBitmap {
   explicit BaseHeapBitmap(Heap*) {}
   virtual ~BaseHeapBitmap(){}
 
-  virtual void AddContinuousSpaceBitmap(BaseBitmap*) = 0;
+  virtual void AddContinuousSpaceBitmap(SPACE_BITMAP*) = 0;
   virtual void AddDiscontinuousObjectSet(SpaceSetMap*){}
 
 
   virtual int GetContinuousSize() = 0;
-  virtual BaseBitmap* GetContBitmapFromIndex(int index) = 0;
+  virtual SPACE_BITMAP* GetContBitmapFromIndex(int index) = 0;
   virtual int GetDiscContinuousSize() {
     return 0;
   }
@@ -104,14 +104,14 @@ class SharedHeapBitmap : public BaseHeapBitmap {
  public:
   SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
   ~SharedHeapBitmap(){}
-  void AddContinuousSpaceBitmap(BaseBitmap* bitmap);
-  void Walk(BaseBitmap::Callback* callback, void* arg)
+  void AddContinuousSpaceBitmap(SPACE_BITMAP* bitmap);
+  void Walk(SPACE_BITMAP::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
+  void ReplaceBitmap(SPACE_BITMAP* old_bitmap, SPACE_BITMAP* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
-    BaseBitmap* _bitmap = NULL;
+  SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) {
+    SPACE_BITMAP* _bitmap = NULL;
     for(int i = 0; i < header_->index_; i ++) {
       _bitmap = header_->bitmaps_[i];
       if (_bitmap->HasAddress(obj)) {
@@ -125,7 +125,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
     return header_->index_;
   }
 
-  BaseBitmap* GetContBitmapFromIndex(int index) {
+  SPACE_BITMAP* GetContBitmapFromIndex(int index) {
     return header_->bitmaps_[index];
   }
 
@@ -140,7 +140,7 @@ class SharedHeapBitmap : public BaseHeapBitmap {
 ////////////////////////////////////////////////////////////////
 class HeapBitmap : public BaseHeapBitmap {
  public:
-  typedef std::vector<BaseBitmap*, GCAllocator<BaseBitmap*> > SpaceBitmapVector;
+  typedef std::vector<SPACE_BITMAP*, GCAllocator<SPACE_BITMAP*> > SpaceBitmapVector;
   typedef std::vector<SpaceSetMap*, GCAllocator<SpaceSetMap*> > SpaceSetMapVector;
 
 
@@ -150,7 +150,7 @@ class HeapBitmap : public BaseHeapBitmap {
 
   void Set(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  BaseBitmap* GetContinuousSpaceBitmap(const mirror::Object* obj) {
+  SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) {
     for (const auto& bitmap : continuous_space_bitmaps_) {
       if (bitmap->HasAddress(obj)) {
         return bitmap;
@@ -168,11 +168,11 @@ class HeapBitmap : public BaseHeapBitmap {
     return NULL;
   }
 
-  void Walk(BaseBitmap::Callback* callback, void* arg)
+  void Walk(SPACE_BITMAP::Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   // Find and replace a bitmap pointer, this is used by for the bitmap swapping in the GC.
-  void ReplaceBitmap(BaseBitmap* old_bitmap, BaseBitmap* new_bitmap)
+  void ReplaceBitmap(SPACE_BITMAP* old_bitmap, SPACE_BITMAP* new_bitmap)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   // Find and replace a object set pointer, this is used by for the bitmap swapping in the GC.
@@ -181,7 +181,7 @@ class HeapBitmap : public BaseHeapBitmap {
 
   explicit HeapBitmap(Heap* heap) : BaseHeapBitmap(heap), heap_(heap) {}
 
-  void AddContinuousSpaceBitmap(BaseBitmap* bitmap);
+  void AddContinuousSpaceBitmap(SPACE_BITMAP* bitmap);
   void AddDiscontinuousObjectSet(SpaceSetMap* set);
 
 
@@ -190,7 +190,7 @@ class HeapBitmap : public BaseHeapBitmap {
   }
 
 
-  BaseBitmap* GetContBitmapFromIndex(int index) {
+  SPACE_BITMAP* GetContBitmapFromIndex(int index) {
     return continuous_space_bitmaps_[index];
   }
 

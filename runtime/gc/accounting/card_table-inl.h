@@ -52,8 +52,9 @@ inline void CardBaseTable::CheckCardValid(byte* card) const {
 
 
 template <typename Visitor>
-inline size_t CardBaseTable::Scan(BaseBitmap* bitmap, byte* scan_begin, byte* scan_end,
-                              const Visitor& visitor, const byte minimum_age) const {
+inline size_t CardBaseTable::Scan(BaseBitmap* bitmap, byte* scan_begin,
+                              byte* scan_end, const Visitor& visitor,
+                              const byte minimum_age) const {
   DCHECK(bitmap->HasAddress(scan_begin));
   DCHECK(bitmap->HasAddress(scan_end - 1));  // scan_end is the byte after the last byte we scan.
   byte* card_cur = CardFromAddr(scan_begin);

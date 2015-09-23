@@ -30,6 +30,12 @@
 #include <vector>
 
 
+#if (true || ART_GC_SERVICE)
+#define SPACE_BITMAP  BaseBitmap
+#else
+#define SPACE_BITMAP  SpaceBitmap
+#endif
+
 namespace art {
 
 namespace mirror {

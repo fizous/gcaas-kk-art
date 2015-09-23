@@ -404,9 +404,9 @@ inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   DCHECK(!IsImmune(obj));
   // Try to take advantage of locality of references within a space, failing this find the space
   // the hard way.
-  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::BaseBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SPACE_BITMAP* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (LIKELY(new_bitmap != NULL)) {
       object_bitmap = new_bitmap;
     } else {
@@ -464,9 +464,9 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
 
   // Try to take advantage of locality of references within a space, failing this find the space
   // the hard way.
-  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::BaseBitmap* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SPACE_BITMAP* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (new_bitmap != NULL) {
       object_bitmap = new_bitmap;
     } else {
@@ -484,8 +484,8 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
 void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
   CHECK(space->IsDlMallocSpace());
   space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
-  accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
-  accounting::BaseBitmap* mark_bitmap = alloc_space->mark_bitmap_.release();
+  accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+  accounting::SPACE_BITMAP* mark_bitmap = alloc_space->mark_bitmap_.release();
   GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
   alloc_space->temp_bitmap_.reset(mark_bitmap);
   alloc_space->mark_bitmap_.reset(live_bitmap);
@@ -1328,13 +1328,10 @@ void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitma
   timings_.StartSplit("SweepArray");
   // Newly allocated objects MUST be in the alloc space and those are the only objects which we are
   // going to free.
-#if (true || ART_GC_SERVICE)
-  accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
-  accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
-#else
-  accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-  accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
-#endif
+
+  accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+  accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
   space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
   accounting::SpaceSetMap* large_live_objects = NULL;
   accounting::SpaceSetMap* large_mark_objects = NULL;
@@ -1433,37 +1430,28 @@ void MarkSweep::Sweep(bool swap_bitmaps) {
       uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
       uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
       scc.space = space->AsDlMallocSpace();
-#if (true || ART_GC_SERVICE)
-      accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
-      accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
-#else
-      accounting::SpaceBitmap* live_bitmap = space->GetLiveBitmap();
-      accounting::SpaceBitmap* mark_bitmap = space->GetMarkBitmap();
-#endif
+
+      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
       if (swap_bitmaps) {
         std::swap(live_bitmap, mark_bitmap);
       }
       if (!space->IsZygoteSpace()) {
         base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
         // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
-#if (true || ART_GC_SERVICE)
-        accounting::BaseBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+
+        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
                                              &SweepCallback, reinterpret_cast<void*>(&scc));
-#else
-        accounting::SpaceBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                           &SweepCallback, reinterpret_cast<void*>(&scc));
-#endif
+
       } else {
         base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
         // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
         // memory.
-#if (true || ART_GC_SERVICE)
-        accounting::BaseBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+
+        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
                                             &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
-#else
-        accounting::SpaceBitmap::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                           &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
-#endif
+
 
       }
     }
@@ -1820,11 +1808,7 @@ void MarkSweep::UnBindBitmaps() {
       space::DlMallocSpace* alloc_space = space->AsDlMallocSpace();
       if (alloc_space->temp_bitmap_.get() != NULL) {
         // At this point, the temp_bitmap holds our old mark bitmap.
-#if (true || ART_GC_SERVICE)
-        accounting::BaseBitmap* new_bitmap = alloc_space->temp_bitmap_.release();
-#else
-        accounting::SpaceBitmap* new_bitmap = alloc_space->temp_bitmap_.release();
-#endif
+        accounting::SPACE_BITMAP* new_bitmap = alloc_space->temp_bitmap_.release();
         GetHeap()->GetMarkBitmap()->ReplaceBitmap(alloc_space->mark_bitmap_.get(), new_bitmap);
         CHECK_EQ(alloc_space->mark_bitmap_.release(), alloc_space->live_bitmap_.get());
         alloc_space->mark_bitmap_.reset(new_bitmap);
