@@ -406,7 +406,7 @@ StructuredMemMap* SharedDlMallocSpace::InitAllocSpace(
   }
 
   srvc_space->mspace_ =
-        DlMallocSpace::CreateMallocSpace(MemMap::AshmemBegin(&srvc_space->memory_),
+        DlMallocSpace::CreateMallocSpace(MEM_MAP::AshmemBegin(&srvc_space->memory_),
             starting_size, initial_size);
 
 
@@ -425,7 +425,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
     StructuredMemMap* structured_mem_map, GcRetentionPolicy retentionPolicy,
     const std::string& name, size_t growth_limit, size_t initial_size,
     size_t capacity, size_t starting_size) :
-    DlMallocSpace(name, reinterpret_cast<MemMap*>(structured_mem_map),
+    DlMallocSpace(name, structured_mem_map,
         mem_space_struct->mspace_, structured_mem_map->ashmem_->begin_,
         structured_mem_map->End(), growth_limit) {
   alloc_space_ = mem_space_struct;
@@ -433,7 +433,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
   cond_ = new InterProcessConditionVariable("shared-space CondVar", *mu_,
       &alloc_space_->lock_.cond_var_);
   // Protect memory beyond the initial size.
-  byte* end = MemMap::AshmemBegin(&alloc_space_->memory_) + starting_size;
+  byte* end = MEM_MAP::AshmemBegin(&alloc_space_->memory_) + starting_size;
   if (capacity - initial_size > 0) {
     CHECK_SHARED_MEMORY_CALL(mprotect, (end, capacity - initial_size,
         PROT_NONE), name);
@@ -445,7 +445,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
       kGcRetentionPolicyAlwaysCollect;
 
   alloc_space_->continuous_space_.begin_ =
-      MemMap::AshmemBegin(&alloc_space_->memory_);
+      MEM_MAP::AshmemBegin(&alloc_space_->memory_);
   alloc_space_->continuous_space_.end_ = end;
   alloc_space_->continuous_space_.space_header_.gc_retention_policy_ =
       retentionPolicy;
@@ -574,14 +574,14 @@ bool SharedDlMallocSpace::SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
     size_t bitmap_size) {
   std::string _str = StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
       static_cast<int>(alloc_space_->bitmap_index_));
-  AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb->mem_map_, _str.c_str(),
+  AShmemMap* _ashmem = MEM_MAP::CreateAShmemMap(&hb->mem_map_, _str.c_str(),
       NULL, bitmap_size, PROT_READ | PROT_WRITE);
 
   if (_ashmem == NULL) {
     LOG(ERROR) << "Failed to allocate bitmap " << name;
     return false;
   }
-  hb->bitmap_begin_ = reinterpret_cast<word*>(MemMap::AshmemBegin(&hb->mem_map_));
+  hb->bitmap_begin_ = reinterpret_cast<word*>(MEM_MAP::AshmemBegin(&hb->mem_map_));
   hb->bitmap_size_  = bitmap_size;
   hb->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
   strcpy(hb->name_, name.c_str());

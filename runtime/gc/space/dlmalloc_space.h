@@ -171,7 +171,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace {
 
 
  protected:
-  DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace,
+  DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
 
  private:

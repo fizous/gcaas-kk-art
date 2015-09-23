@@ -218,7 +218,7 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
 
   // The total amount of memory reserved for the alloc space.
   size_t NonGrowthLimitCapacity() const {
-    return MemMap::AshmemSize(&alloc_space_->memory_);
+    return MEM_MAP::AshmemSize(&alloc_space_->memory_);
   }
 
   // Removes the fork time growth limit on capacity, allowing the application to allocate up to the

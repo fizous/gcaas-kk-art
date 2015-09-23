@@ -112,7 +112,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
     return freed;
   }
 
-  ValgrindDlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
+  ValgrindDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                         byte* end, size_t growth_limit, size_t initial_size) :
       DlMallocSpace(name, mem_map, mspace, begin, end, growth_limit) {
     VALGRIND_MAKE_MEM_UNDEFINED(mem_map->Begin() + initial_size, mem_map->Size() - initial_size);
@@ -127,7 +127,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 
 size_t DlMallocSpace::bitmap_index_ = 0;
 
-DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
+DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
       recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
@@ -209,7 +209,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), requested_begin, capacity,
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
                                                  PROT_READ | PROT_WRITE, shareMem));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
@@ -230,7 +230,7 @@ DlMallocSpace* DlMallocSpace::Create(const std::string& name, size_t initial_siz
   }
 
   // Everything is set so record in immutable structure and leave
-  MemMap* mem_map_ptr = mem_map.release();
+  MEM_MAP* mem_map_ptr = mem_map.release();
   DlMallocSpace* space;
   if (RUNNING_ON_VALGRIND > 0) {
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
@@ -333,7 +333,7 @@ DlMallocSpace* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name, bo
   VLOG(heap) << "Size " << GetMemMap()->Size();
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(),
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(alloc_space_name, End(),
       capacity, PROT_READ | PROT_WRITE, shareMem));
   void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
   // Protect memory beyond the initial size.

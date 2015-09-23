@@ -255,7 +255,7 @@ bool ZipEntry::ExtractToFile(File& file) {
     return false;
   }
 
-  UniquePtr<MemMap> map(MemMap::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
+  UniquePtr<MEM_MAP> map(MEM_MAP::MapFile(length, PROT_READ | PROT_WRITE, MAP_SHARED, file.Fd(), 0));
   if (map.get() == NULL) {
     LOG(WARNING) << "Zip: failed to mmap space for " << file.GetPath();
     return false;
@@ -293,11 +293,11 @@ bool ZipEntry::ExtractToMemory(uint8_t* begin, size_t size) {
   }
 }
 
-MemMap* ZipEntry::ExtractToMemMap(const char* entry_filename) {
+MEM_MAP* ZipEntry::ExtractToMemMap(const char* entry_filename) {
   std::string name(entry_filename);
   name += " extracted in memory from ";
   name += entry_filename;
-  UniquePtr<MemMap> map(MemMap::MapAnonymous(name.c_str(),
+  UniquePtr<MEM_MAP> map(MEM_MAP::MapAnonymous(name.c_str(),
                                              NULL,
                                              GetUncompressedLength(),
                                              PROT_READ | PROT_WRITE));
@@ -496,7 +496,7 @@ bool ZipArchive::MapCentralDirectory() {
   }
 
   // It all looks good.  Create a mapping for the CD.
-  dir_map_.reset(MemMap::MapFile(dir_size, PROT_READ, MAP_SHARED, fd_, dir_offset));
+  dir_map_.reset(MEM_MAP::MapFile(dir_size, PROT_READ, MAP_SHARED, fd_, dir_offset));
   if (dir_map_.get() == NULL) {
     return false;
   }

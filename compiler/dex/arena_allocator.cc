@@ -47,7 +47,7 @@ Arena::Arena(size_t size)
       map_(nullptr),
       next_(nullptr) {
   if (kUseMemMap) {
-    map_ = MemMap::MapAnonymous("dalvik-arena", NULL, size, PROT_READ | PROT_WRITE);
+    map_ = MEM_MAP::MapAnonymous("dalvik-arena", NULL, size, PROT_READ | PROT_WRITE);
     memory_ = map_->Begin();
     size_ = map_->Size();
   } else {

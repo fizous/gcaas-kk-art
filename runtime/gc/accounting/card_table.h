@@ -149,13 +149,13 @@ public:
    return fields_->offset_;
  }
  virtual byte* MemMapBegin() const{
-   return MemMap::AshmemBegin(&fields_->mem_map_);
+   return MEM_MAP::AshmemBegin(&fields_->mem_map_);
  }
  virtual byte* MemMapEnd() const {
-   return MemMap::AshmemEnd(&fields_->mem_map_);
+   return MEM_MAP::AshmemEnd(&fields_->mem_map_);
  }
  virtual size_t MemMapSize() const{
-   return MemMap::AshmemSize(&fields_->mem_map_);
+   return MEM_MAP::AshmemSize(&fields_->mem_map_);
  }
 
 

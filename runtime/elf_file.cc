@@ -81,7 +81,7 @@ bool ElfFile::Setup(File* file, bool writable, bool program_header_only) {
   if (program_header_only) {
     // first just map ELF header to get program header size information
     size_t elf_header_size = sizeof(llvm::ELF::Elf32_Ehdr);
-    if (!SetMap(MemMap::MapFile(elf_header_size, prot, flags, file_->Fd(), 0))) {
+    if (!SetMap(MEM_MAP::MapFile(elf_header_size, prot, flags, file_->Fd(), 0))) {
       return false;
     }
     // then remap to cover program header
@@ -92,13 +92,13 @@ bool ElfFile::Setup(File* file, bool writable, bool program_header_only) {
                    << program_header_size << " bytes: " << file_->GetPath();
       return false;
     }
-    if (!SetMap(MemMap::MapFile(program_header_size, prot, flags, file_->Fd(), 0))) {
+    if (!SetMap(MEM_MAP::MapFile(program_header_size, prot, flags, file_->Fd(), 0))) {
       LOG(WARNING) << "Failed to map ELF program headers: " << file_->GetPath();
       return false;
     }
   } else {
     // otherwise map entire file
-    if (!SetMap(MemMap::MapFile(file_->GetLength(), prot, flags, file_->Fd(), 0))) {
+    if (!SetMap(MEM_MAP::MapFile(file_->GetLength(), prot, flags, file_->Fd(), 0))) {
       LOG(WARNING) << "Failed to map ELF file: " << file_->GetPath();
       return false;
     }
@@ -169,7 +169,7 @@ ElfFile::~ElfFile() {
   delete dynsym_symbol_table_;
 }
 
-bool ElfFile::SetMap(MemMap* map) {
+bool ElfFile::SetMap(MEM_MAP* map) {
   if (map == NULL) {
     // MemMap::Open should have already logged
     return false;
@@ -628,7 +628,7 @@ bool ElfFile::Load(bool executable) {
     if (program_header.p_vaddr == 0) {
       std::string reservation_name("ElfFile reservation for ");
       reservation_name += file_->GetPath();
-      UniquePtr<MemMap> reserve(MemMap::MapAnonymous(reservation_name.c_str(),
+      UniquePtr<MEM_MAP> reserve(MEM_MAP::MapAnonymous(reservation_name.c_str(),
                                                      NULL, GetLoadedSize(), PROT_NONE));
       CHECK(reserve.get() != NULL) << file_->GetPath();
       base_address_ = reserve->Begin();
@@ -663,7 +663,7 @@ bool ElfFile::Load(bool executable) {
                    << " bytes: " << file_->GetPath();
       return false;
     }
-    UniquePtr<MemMap> segment(MemMap::MapFileAtAddress(p_vaddr,
+    UniquePtr<MEM_MAP> segment(MEM_MAP::MapFileAtAddress(p_vaddr,
                                                        program_header.p_memsz,
                                                        prot, flags, file_->Fd(),
                                                        program_header.p_offset,

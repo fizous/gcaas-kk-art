@@ -244,7 +244,7 @@ class StructuredMemMap: public MemBaseMap {
       const char* ashmem_name, byte* addr, size_t byte_count, int prot);
 
   bool Protect(int prot) {
-    return MemMap::AshmemProtect(ashmem_, prot);
+    return MEM_MAP::AshmemProtect(ashmem_, prot);
   }
 
   int GetProtect() const {
@@ -272,7 +272,7 @@ class StructuredMemMap: public MemBaseMap {
   }
 
   void UnMapAtEnd(byte* new_end) {
-    MemMap::AshmemUnMapAtEnd(ashmem_, new_end);
+    MEM_MAP::AshmemUnMapAtEnd(ashmem_, new_end);
   }
 
   void SetSize(size_t new_size);

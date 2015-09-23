@@ -507,7 +507,7 @@ class CommonTest : public testing::Test {
   void ReserveImageSpace() {
     // Reserve where the image will be loaded up front so that other parts of test set up don't
     // accidentally end up colliding with the fixed memory address when we need to load the image.
-    image_reservation_.reset(MemMap::MapAnonymous("image reservation",
+    image_reservation_.reset(MEM_MAP::MapAnonymous("image reservation",
                                                   reinterpret_cast<byte*>(ART_BASE_ADDRESS),
                                                   (size_t)100 * 1024 * 1024,  // 100MB
                                                   PROT_NONE));
@@ -529,7 +529,7 @@ class CommonTest : public testing::Test {
 
  private:
   std::vector<const DexFile*> opened_dex_files_;
-  UniquePtr<MemMap> image_reservation_;
+  UniquePtr<MEM_MAP> image_reservation_;
 };
 
 // Sets a CheckJni abort hook to catch failures. Note that this will cause CheckJNI to carry on

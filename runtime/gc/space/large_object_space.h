@@ -101,8 +101,8 @@ class LargeObjectMapSpace : public LargeObjectSpace {
   mutable Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   std::vector<mirror::Object*,
       accounting::GCAllocator<mirror::Object*> > large_objects_ GUARDED_BY(lock_);
-  typedef SafeMap<mirror::Object*, MemMap*, std::less<mirror::Object*>,
-      accounting::GCAllocator<std::pair<const mirror::Object*, MemMap*> > > MemMaps;
+  typedef SafeMap<mirror::Object*, MEM_MAP*, std::less<mirror::Object*>,
+      accounting::GCAllocator<std::pair<const mirror::Object*, MEM_MAP*> > > MemMaps;
   MemMaps mem_maps_ GUARDED_BY(lock_);
 };
 
@@ -214,7 +214,7 @@ class FreeListSpace : public LargeObjectSpace {
     friend class FreeListSpace;
   };
 
-  FreeListSpace(const std::string& name, MemMap* mem_map, byte* begin, byte* end);
+  FreeListSpace(const std::string& name, MEM_MAP* mem_map, byte* begin, byte* end);
 
   // Removes header from the free blocks set by finding the corresponding iterator and erasing it.
   void RemoveFreePrev(AllocationHeader* header) EXCLUSIVE_LOCKS_REQUIRED(lock_);
@@ -230,7 +230,7 @@ class FreeListSpace : public LargeObjectSpace {
 
   // There is not footer for any allocations at the end of the space, so we keep track of how much
   // free space there is at the end manually.
-  UniquePtr<MemMap> mem_map_;
+  UniquePtr<MEM_MAP> mem_map_;
   Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   size_t free_end_ GUARDED_BY(lock_);
   FreeBlocks free_blocks_ GUARDED_BY(lock_);

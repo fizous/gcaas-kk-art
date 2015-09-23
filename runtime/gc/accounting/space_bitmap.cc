@@ -57,7 +57,7 @@ std::ostream& operator << (std::ostream& stream, const SpaceBitmap& bitmap) {
 }
 
 
-SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, MemMap* mem_map,
+SpaceBitmap* SpaceBitmap::CreateFromMemMap(const std::string& name, MEM_MAP* mem_map,
                                            byte* heap_begin, size_t heap_capacity) {
   CHECK(mem_map != nullptr);
   word* bitmap_begin = reinterpret_cast<word*>(mem_map->Begin());
@@ -71,7 +71,7 @@ SpaceBitmap* SpaceBitmap::Create(const std::string& name, byte* heap_begin,
   CHECK(heap_begin != NULL);
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
   size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
-  UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(name.c_str(), NULL,
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), NULL,
       bitmap_size, PROT_READ | PROT_WRITE, shareMem));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate bitmap " << name;

@@ -99,7 +99,7 @@ class ImageSpace : public MemMapSpace {
 
   UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
 
-  ImageSpace(const std::string& name, MemMap* mem_map, accounting::SPACE_BITMAP* live_bitmap);
+  ImageSpace(const std::string& name, MEM_MAP* mem_map, accounting::SPACE_BITMAP* live_bitmap);
 
   // The OatFile associated with the image during early startup to
   // reserve space contiguous to the image. It is later released to

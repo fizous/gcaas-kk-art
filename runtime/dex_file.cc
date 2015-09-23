@@ -176,7 +176,7 @@ const DexFile* DexFile::OpenFile(int fd,
     return NULL;
   }
   size_t length = sbuf.st_size;
-  UniquePtr<MemMap> map(MemMap::MapFile(length, PROT_READ, MAP_PRIVATE, fd, 0));
+  UniquePtr<MEM_MAP> map(MEM_MAP::MapFile(length, PROT_READ, MAP_PRIVATE, fd, 0));
   if (map.get() == NULL) {
     LOG(ERROR) << "mmap \"" << location << "\" failed";
     close(fd);
@@ -218,7 +218,7 @@ const DexFile* DexFile::OpenZip(int fd, const std::string& location) {
 
 const DexFile* DexFile::OpenMemory(const std::string& location,
                                    uint32_t location_checksum,
-                                   MemMap* mem_map) {
+                                   MEM_MAP* mem_map) {
   return OpenMemory(mem_map->Begin(),
                     mem_map->Size(),
                     location,
@@ -233,7 +233,7 @@ const DexFile* DexFile::Open(const ZipArchive& zip_archive, const std::string& l
     LOG(ERROR) << "Failed to find classes.dex within '" << location << "'";
     return NULL;
   }
-  UniquePtr<MemMap> map(zip_entry->ExtractToMemMap(kClassesDex));
+  UniquePtr<MEM_MAP> map(zip_entry->ExtractToMemMap(kClassesDex));
   if (map.get() == NULL) {
     LOG(ERROR) << "Failed to extract '" << kClassesDex << "' from '" << location << "'";
     return NULL;
@@ -259,7 +259,7 @@ const DexFile* DexFile::OpenMemory(const byte* base,
                                    size_t size,
                                    const std::string& location,
                                    uint32_t location_checksum,
-                                   MemMap* mem_map) {
+                                   MEM_MAP* mem_map) {
   CHECK_ALIGNED(base, 4);  // various dex file structures must be word aligned
   UniquePtr<DexFile> dex_file(new DexFile(base, size, location, location_checksum, mem_map));
   if (!dex_file->Init()) {

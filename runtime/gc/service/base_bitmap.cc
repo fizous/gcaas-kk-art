@@ -276,14 +276,14 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
 
   std::string _str = StringPrintf("allocspace %s mmap", name.c_str());
 
-  AShmemMap* _ashmem = MemMap::CreateAShmemMap(&hb_p->mem_map_, _str.c_str(),
+  AShmemMap* _ashmem = MEM_MAP::CreateAShmemMap(&hb_p->mem_map_, _str.c_str(),
       NULL, bitmap_size, PROT_READ | PROT_WRITE, shareMem);
 
   if (_ashmem == NULL) {
     LOG(FATAL) << "Failed to allocate bitmap BaseBitmap::InitSrvcBitmap" << name;
     return;
   }
-  hb_p->bitmap_begin_ = reinterpret_cast<word*>(MemMap::AshmemBegin(&hb_p->mem_map_));
+  hb_p->bitmap_begin_ = reinterpret_cast<word*>(MEM_MAP::AshmemBegin(&hb_p->mem_map_));
   hb_p->bitmap_size_  = bitmap_size;
   hb_p->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
   strcpy(hb_p->name_, name.c_str());

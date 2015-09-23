@@ -76,7 +76,7 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
   std::string memoryName("GlobalAllocator");
 
   //fill the data of the global header
-  MemMap::AShmemFillData(&region_header_->ashmem_meta_, memoryName, begin,
+  MEM_MAP::AShmemFillData(&region_header_->ashmem_meta_, memoryName, begin,
       memory_size, begin, memory_size, prot, flags, fileDescript);
   region_header_->current_addr_ =
       begin + SERVICE_ALLOC_ALIGN_BYTE(GCSrvcGlobalRegionHeader);

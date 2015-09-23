@@ -122,7 +122,7 @@ class ElfFile {
 
   bool Setup(File* file, bool writable, bool program_header_only);
 
-  bool SetMap(MemMap* map);
+  bool SetMap(MEM_MAP* map);
 
   byte* GetProgramHeadersStart();
   byte* GetSectionHeadersStart();
@@ -146,9 +146,9 @@ class ElfFile {
   bool program_header_only_;
 
   // ELF header mapping. If program_header_only_ is false, will actually point to the entire elf file.
-  UniquePtr<MemMap> map_;
+  UniquePtr<MEM_MAP> map_;
   ::llvm::ELF::Elf32_Ehdr* header_;
-  std::vector<MemMap*> segments_;
+  std::vector<MEM_MAP*> segments_;
 
   // Pointer to start of first PT_LOAD program segment after Load() when program_header_only_ is true.
   byte* base_address_;

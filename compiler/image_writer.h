@@ -186,7 +186,7 @@ class ImageWriter {
   OatFile* oat_file_;
 
   // Memory mapped for generating the image.
-  UniquePtr<MemMap> image_;
+  UniquePtr<MEM_MAP> image_;
 
   // Offset to the free space in image_.
   size_t image_end_;

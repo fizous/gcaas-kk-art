@@ -163,7 +163,7 @@ class AtomicStack {
 
   // Size in number of elements.
   void Init() {
-    mem_map_.reset(MemMap::MapAnonymous(name_.c_str(), NULL, capacity_ * sizeof(T), PROT_READ | PROT_WRITE));
+    mem_map_.reset(MEM_MAP::MapAnonymous(name_.c_str(), NULL, capacity_ * sizeof(T), PROT_READ | PROT_WRITE));
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
@@ -176,7 +176,7 @@ class AtomicStack {
   std::string name_;
 
   // Memory mapping of the atomic stack.
-  UniquePtr<MemMap> mem_map_;
+  UniquePtr<MEM_MAP> mem_map_;
 
   // Back index (index after the last element pushed).
   AtomicInteger back_index_;

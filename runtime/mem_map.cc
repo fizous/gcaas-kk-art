@@ -340,14 +340,14 @@ MEM_MAP* MemBaseMap::MapFileAtAddress(byte* addr, size_t byte_count,
 
 StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot) {
-  AShmemMap* _addr = MemMap::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr,
+  AShmemMap* _addr = MEM_MAP::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr,
       byte_count, prot);
   if(_addr != ashmem_mem_map) {
     LOG(FATAL) << "could not create StructuredMemMap::CreateStructuredMemMap";
     return NULL;
   }
   return new StructuredMemMap(ashmem_mem_map, std::string(ashmem_name), addr,
-      MemMap::AshmemSize(ashmem_mem_map), ashmem_mem_map->base_begin_,
+      MEM_MAP::AshmemSize(ashmem_mem_map), ashmem_mem_map->base_begin_,
       ashmem_mem_map->base_size_, prot);
 
 }

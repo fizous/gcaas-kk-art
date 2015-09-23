@@ -79,7 +79,7 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
 
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   AShmemMap* _mem_map_structure =
-      MemMap::CreateAShmemMap(&(fields_memory->mem_map_), "card table", NULL,
+      MEM_MAP::CreateAShmemMap(&(fields_memory->mem_map_), "card table", NULL,
           capacity + 256, PROT_READ | PROT_WRITE);
 
 
@@ -89,7 +89,7 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
   // don't clear the card table to avoid unnecessary pages being allocated
   COMPILE_ASSERT(kCardClean == 0, card_clean_must_be_0);
 
-  byte* cardtable_begin = MemMap::AshmemBegin(_mem_map_structure);
+  byte* cardtable_begin = MEM_MAP::AshmemBegin(_mem_map_structure);
   CHECK(cardtable_begin != NULL);
 
 
@@ -118,7 +118,7 @@ CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
 
 
 bool CardBaseTable::shareCardTable(void) {
-  AShmemMap* _ashmem_map = MemMap::ShareAShmemMap(&(fields_->mem_map_),
+  AShmemMap* _ashmem_map = MEM_MAP::ShareAShmemMap(&(fields_->mem_map_),
       &(fields_->mem_map_));
   return (_ashmem_map != NULL);
 }

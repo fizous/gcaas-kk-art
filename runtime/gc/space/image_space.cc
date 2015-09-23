@@ -37,7 +37,7 @@ namespace space {
 
 AtomicInteger ImageSpace::bitmap_index_(0);
 
-ImageSpace::ImageSpace(const std::string& name, MemMap* mem_map,
+ImageSpace::ImageSpace(const std::string& name, MEM_MAP* mem_map,
                        accounting::SPACE_BITMAP* live_bitmap)
     : MemMapSpace(name, mem_map, mem_map->Size(), kGcRetentionPolicyNeverCollect) {
   DCHECK(live_bitmap != NULL);
@@ -184,7 +184,7 @@ ImageSpace* ImageSpace::Init(const std::string& image_file_name, bool validate_o
   }
 
   // Note: The image header is part of the image due to mmap page alignment required of offset.
-  UniquePtr<MemMap> map(MemMap::MapFileAtAddress(image_header.GetImageBegin(),
+  UniquePtr<MEM_MAP> map(MEM_MAP::MapFileAtAddress(image_header.GetImageBegin(),
                                                  image_header.GetImageSize(),
                                                  PROT_READ | PROT_WRITE,
                                                  MAP_PRIVATE | MAP_FIXED,
@@ -198,7 +198,7 @@ ImageSpace* ImageSpace::Init(const std::string& image_file_name, bool validate_o
   CHECK_EQ(image_header.GetImageBegin(), map->Begin());
   DCHECK_EQ(0, memcmp(&image_header, map->Begin(), sizeof(ImageHeader)));
 
-  UniquePtr<MemMap> image_map(MemMap::MapFileAtAddress(nullptr, image_header.GetImageBitmapSize(),
+  UniquePtr<MEM_MAP> image_map(MEM_MAP::MapFileAtAddress(nullptr, image_header.GetImageBitmapSize(),
                                                        PROT_READ, MAP_PRIVATE,
                                                        file->Fd(), image_header.GetBitmapOffset(),
                                                        false));
