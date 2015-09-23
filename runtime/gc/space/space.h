@@ -173,12 +173,15 @@ class Space : public ISpace {
 
   virtual ~Space() {}
 
- protected:
-  Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
 
   void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
     gc_retention_policy_ = gc_retention_policy;
   }
+
+ protected:
+  Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
+
+
 
   // Name of the space that may vary due to the Zygote fork.
   std::string name_;
