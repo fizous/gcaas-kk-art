@@ -233,7 +233,7 @@ class AllocSpace {
 
 // Continuous spaces have bitmaps, and an address range. Although not required, objects within
 // continuous spaces can be marked in the card table.
-class IContinuousSpace : public ISpace {
+class IContinuousSpace {
  public:
   // Address at which the space begins
 
@@ -260,7 +260,7 @@ class IContinuousSpace : public ISpace {
   }
 
   virtual ~IContinuousSpace() {}
-  IContinuousSpace():ISpace(){}
+  IContinuousSpace(){}
 };
 
 
