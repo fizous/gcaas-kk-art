@@ -333,7 +333,7 @@ class DiscontinuousSpace : public Space {
 };
 
 
-class IMemMapSpace : public IContinuousSpace {
+class IMemMapSpace /*: public IContinuousSpace*/ {
  public:
   // Maximum which the mapped space can grow to.
   virtual size_t Capacity() const  = 0;
