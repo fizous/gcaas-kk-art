@@ -58,6 +58,22 @@ class LargeObjectSpace : public DiscontinuousSpace, public AllocSpace {
     return total_objects_allocated_;
   }
 
+  void UpdateBytesAllocated(int delta) {
+    num_bytes_allocated_ += delta;
+  }
+
+  void UpdateObjectsAllocated(int delta) {
+    num_objects_allocated_ += delta;
+  }
+
+  void UpdateTotalBytesAllocated(int delta) {
+    total_bytes_allocated_ += delta;
+  }
+
+  void UpdateTotalObjectsAllocated(int delta) {
+    total_objects_allocated_ += delta;
+  }
+
   size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
 
  protected:
