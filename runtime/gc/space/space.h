@@ -345,7 +345,7 @@ class IMemMapSpace /*: public IContinuousSpace*/ {
   virtual MEM_MAP* GetMemMap() = 0;
 
   virtual ~IMemMapSpace(){}
-  IMemMapSpace():IContinuousSpace(){}
+  IMemMapSpace(){}
  private:
   DISALLOW_COPY_AND_ASSIGN(IMemMapSpace);
 };
