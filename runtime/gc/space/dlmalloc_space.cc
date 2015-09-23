@@ -319,6 +319,7 @@ DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
   // Remaining size is for the new alloc space.
+  //TODO: fizo: check what's wrong here?
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
   VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
@@ -336,7 +337,7 @@ DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   MEM_MAP* _space_mem_map = NULL;
   if(shareMem) {
-    _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
+    _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
         capacity, PROT_READ | PROT_WRITE, shareMem);
   } else {
     _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
