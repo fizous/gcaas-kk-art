@@ -79,8 +79,9 @@ enum SpaceType {
 std::ostream& operator<<(std::ostream& os, const SpaceType& space_type);
 
 #if (true || ART_GC_SERVICE)
+
 // A space contains memory allocated for managed objects.
-class ISpace {
+class InterfaceSpace {
  public:
   // Dump space. Also key method for C++ vtables.
   virtual void Dump(std::ostream& os) const;
@@ -134,13 +135,13 @@ class ISpace {
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
 
  protected:
-  ISpace(){}
-  virtual ~ISpace() {}
+  InterfaceSpace(){}
+  virtual ~InterfaceSpace() {}
 };
 
 
 // A space contains memory allocated for managed objects.
-class Space : public ISpace {
+class Space : public InterfaceSpace {
  public:
   // Dump space. Also key method for C++ vtables.
   virtual void Dump(std::ostream& os) const;
