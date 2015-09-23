@@ -87,6 +87,11 @@ public:
     return static_cast<uintptr_t>(index * kAlignment * kBitsPerWord);
   }
 
+  // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
+  // heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
+  static BaseBitmap* Create(const std::string& name, byte* heap_begin,
+      size_t heap_capacity, bool shareMem = false);
+
   // Pack the bits in backwards so they come out in address order when using CLZ.
   static word OffsetToMask(uintptr_t offset_) {
     return static_cast<uintptr_t>(kWordHighBitMask) >> ((offset_ / kAlignment) % kBitsPerWord);

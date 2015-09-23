@@ -290,6 +290,16 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
 }
 
 
+// Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
+// heap_begin of heap_capacity bytes, where objects are guaranteed to be kAlignment-aligned.
+BaseBitmap* BaseBitmap::Create(const std::string& name, byte* heap_begin,
+    size_t heap_capacity, bool shareMem) {
+  accounting::GCSrvceBitmap* _gcServiceBitmapP = NULL;
+  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  InitSrvcBitmap(&_gcServiceBitmapP, name, heap_begin, heap_capacity, bitmap_size);
+  return new SharedSpaceBitmap(_gcServiceBitmapP);
+}
+
 BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     size_t bitmap_size) {
