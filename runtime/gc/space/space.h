@@ -104,14 +104,14 @@ class InterfaceSpace {
 
 
   // Is this an image space, ie one backed by a memory mapped image file.
-  bool IsImageSpace() const {
+  virtual bool IsImageSpace() const {
     return GetType() == kSpaceTypeImageSpace;
   }
 
   virtual ImageSpace* AsImageSpace();
 
   // Is this a dlmalloc backed allocation space?
-  bool IsDlMallocSpace() const {
+  virtual bool IsDlMallocSpace() const {
     SpaceType type = GetType();
     return type == kSpaceTypeAllocSpace || type == kSpaceTypeZygoteSpace;
   }
@@ -120,12 +120,12 @@ class InterfaceSpace {
   virtual DL_MALLOC_SPACE* AsDlMallocSpace();
 
   // Is this the space allocated into by the Zygote and no-longer in use?
-  bool IsZygoteSpace() const {
+  virtual bool IsZygoteSpace() const {
     return GetType() == kSpaceTypeZygoteSpace;
   }
 
   // Does this space hold large objects and implement the large object space abstraction?
-  bool IsLargeObjectSpace() const {
+  virtual bool IsLargeObjectSpace() const {
     return GetType() == kSpaceTypeLargeObjectSpace;
   }
   virtual LargeObjectSpace* AsLargeObjectSpace();
