@@ -134,9 +134,14 @@ class InterfaceSpace {
   // Return the storage space required by obj.
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
 
+
+  virtual ~InterfaceSpace() {}
  protected:
   InterfaceSpace(){}
-  virtual ~InterfaceSpace() {}
+
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(InterfaceSpace);
 };
 
 
