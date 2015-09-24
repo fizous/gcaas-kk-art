@@ -40,7 +40,7 @@
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
  #define GC_HEAP_SRVCE_NO_LOS     true
  #define DL_MALLOC_SPACE DlMallocSpace
- #define DLMALLOC_SPACE_T DlMallocSpace
+ #define DLMALLOC_SPACE_T AbstractDLmallocSpace
  #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
