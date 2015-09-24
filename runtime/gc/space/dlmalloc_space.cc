@@ -613,7 +613,7 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
 
 IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
     size_t initial_size, size_t growth_limit,
-    size_t capacity, byte* requested_begin, bool shareMem = false) {
+    size_t capacity, byte* requested_begin, bool shareMem) {
   return NULL;
 }
 
