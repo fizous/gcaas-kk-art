@@ -254,7 +254,7 @@ class DlMallocSpace : DlMallocSpaceImpl//public MemMapSpace, public AllocSpace
   size_t growth_limit_;
 
   friend class collector::MarkSweep;
-
+  ~DlMallocSpace(){}
   DISALLOW_COPY_AND_ASSIGN(DlMallocSpace);
 };
 #else
