@@ -77,6 +77,8 @@ class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
   // Swap the live and mark bitmaps of this space. This is used by the GC for
   // concurrent sweeping.
   void SwapBitmaps();
+
+  void SetFootprintLimit(size_t limit);
  protected:
   StructuredDlMallocSpaceImpl(){}
  private:

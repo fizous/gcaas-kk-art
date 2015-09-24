@@ -623,6 +623,11 @@ void StructuredDlMallocSpaceImpl::SwapBitmaps() {
 
 }
 
+
+void StructuredDlMallocSpaceImpl::SetFootprintLimit(size_t limit) {
+
+}
+
 }  // namespace space
 }  // namespace gc
 }  // namespace art
