@@ -481,7 +481,7 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
   return !object_bitmap->AtomicTestAndSet(obj);
 }
 
-void MarkSweep::BindLiveToMarkBitmap(space::ContinuousSpace* space) {
+void MarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   CHECK(space->IsDlMallocSpace());
   space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
   accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();

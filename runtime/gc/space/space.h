@@ -35,7 +35,7 @@
 #define DLMALLOC_SPACE_T AbstractDLmallocSpace
 #endif
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T
-#define ABSTRACT_CONTINUOUS_SPACE_T IContinuousSpace
+#define ABSTRACT_CONTINUOUS_SPACE_T AbstractContinuousSpace
 #endif
 #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
@@ -255,7 +255,6 @@ class AllocSpace {
 class IContinuousSpace {
  public:
   // Address at which the space begins
-
   virtual byte* Begin() const = 0;
   virtual byte* End() const = 0;
   virtual void SetEnd(byte*)  = 0;
@@ -279,7 +278,12 @@ class IContinuousSpace {
 };
 
 
-
+class AbstractContinuousSpace : public IContinuousSpace,
+  public InterfaceSpace {
+ public:
+   AbstractContinuousSpace(){}
+   virtual ~AbstractContinuousSpace(){}
+};
 // Continuous spaces have bitmaps, and an address range. Although not required, objects within
 // continuous spaces can be marked in the card table.
 class ContinuousSpace : public IContinuousSpace, public Space {
