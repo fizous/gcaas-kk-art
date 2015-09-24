@@ -421,7 +421,7 @@ protected:
   //virtual ~AbstractDLmallocSpace() {}
 };
 
-class AllocSpaceImpl: public MemMapSpace, public ContinuousSpace {
+class AllocSpaceImpl: public MemMapSpace, public AllocSpace {
 public:
 };
 
