@@ -359,7 +359,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   VLOG(heap) << "zygote space creation done";
-  return alloc_space;
+  return alloc_space->AsAbstractDlMalloc();
 }
 
 mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
