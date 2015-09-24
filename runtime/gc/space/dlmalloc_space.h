@@ -43,6 +43,9 @@ class SharedDlMallocSpace;
 
 class IDlMallocSpace : public AbstractDLmallocSpace {
  public:
+  typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
+
+
  protected:
   IDlMallocSpace(){}
  private:
@@ -52,7 +55,18 @@ class IDlMallocSpace : public AbstractDLmallocSpace {
 
 
 class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
-
+ public:
+  SpaceType GetType() const {
+    if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
+      return kSpaceTypeZygoteSpace;
+    } else {
+      return kSpaceTypeAllocSpace;
+    }
+  }
+ protected:
+  StructuredDlMallocSpaceImpl(){}
+ private:
+  virtual ~StructuredDlMallocSpaceImpl(){}
 };//class StructuredDlMallocSpaceImpl
 
 
