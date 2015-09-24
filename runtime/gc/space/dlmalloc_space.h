@@ -229,6 +229,10 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
 
+  AbstractDLmallocSpace* AsAbstractDlMalloc() {
+    return reinterpret_cast<AbstractDLmallocSpace*>(this);
+  }
+
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);

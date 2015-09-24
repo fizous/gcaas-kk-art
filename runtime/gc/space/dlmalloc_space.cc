@@ -242,7 +242,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
         << " ) " << *space;
   }
-  return space;
+  return space->AsAbstractDlMalloc();
 }
 
 void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_t initial_size) {

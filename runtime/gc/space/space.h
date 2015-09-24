@@ -457,7 +457,7 @@ class IDlMallocSpace : public AllocSpace {
 class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
     public  InterfaceSpace, public IDlMallocSpace {
 public:
-
+  virtual AbstractDLmallocSpace* AsAbstractDlMalloc() = 0;
 protected:
   virtual ~AbstractDLmallocSpace() {}
   AbstractDLmallocSpace(){}
