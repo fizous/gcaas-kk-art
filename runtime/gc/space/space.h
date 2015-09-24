@@ -84,7 +84,7 @@ std::ostream& operator<<(std::ostream& os, const SpaceType& space_type);
 class InterfaceSpace {
  public:
   // Dump space. Also key method for C++ vtables.
-  virtual void Dump(std::ostream& os) const;
+  virtual void Dump(std::ostream& os) const = 0;
 
 
   virtual GcRetentionPolicy GetGcRetentionPolicy() const = 0;
@@ -108,7 +108,7 @@ class InterfaceSpace {
     return GetType() == kSpaceTypeImageSpace;
   }
 
-  virtual ImageSpace* AsImageSpace();
+  virtual ImageSpace* AsImageSpace() = 0;
 
   // Is this a dlmalloc backed allocation space?
   virtual bool IsDlMallocSpace() const {
@@ -117,7 +117,7 @@ class InterfaceSpace {
   }
 
 
-  virtual DL_MALLOC_SPACE* AsDlMallocSpace();
+  virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
 
   // Is this the space allocated into by the Zygote and no-longer in use?
   virtual bool IsZygoteSpace() const {
@@ -128,7 +128,7 @@ class InterfaceSpace {
   virtual bool IsLargeObjectSpace() const {
     return GetType() == kSpaceTypeLargeObjectSpace;
   }
-  virtual LargeObjectSpace* AsLargeObjectSpace();
+  virtual LargeObjectSpace* AsLargeObjectSpace() = 0;
 
 
   // Return the storage space required by obj.
