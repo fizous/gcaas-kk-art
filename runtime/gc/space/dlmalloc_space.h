@@ -40,6 +40,15 @@ namespace space {
 class SharedDlMallocSpace;
 
 #if (true || ART_GC_SERVICE)
+
+class DlMallocSpaceImpl : public AbstractDLmallocSpace {
+ public:
+ protected:
+  DlMallocSpaceImpl(){}
+ private:
+  virtual ~DlMallocSpaceImpl(){}
+};//AbstractDLmallocSpace
+
 // An alloc space is a space where objects may be allocated and garbage collected.
 class DlMallocSpace : public MemMapSpace, public AllocSpace
                       /*public AbstractDLmallocSpace*/ {

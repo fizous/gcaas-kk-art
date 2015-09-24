@@ -402,7 +402,8 @@ class MemMapSpace : public IMemMapSpace, public ContinuousSpace {
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };
 
-class AbstractDLmallocSpace: public AllocSpace {
+class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
+    public  InterfaceSpace {
 public:
   // Set the maximum number of bytes that the heap is allowed to obtain from the system via
   // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
@@ -412,10 +413,7 @@ public:
   virtual void* GetMspace() const = 0;
 
   virtual void SetGrowthLimit(size_t growth_limit) = 0;
-//  virtual size_t GetCapacity() const = 0;
 
-  // Current size of space
-//  virtual size_t GetSize() const = 0;
 protected:
   virtual ~AbstractDLmallocSpace() {}
   AbstractDLmallocSpace(){}
