@@ -611,6 +611,18 @@ SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char*
 
 
 
+IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
+    size_t initial_size, size_t growth_limit,
+    size_t capacity, byte* requested_begin, bool shareMem = false) {
+  return NULL;
+}
+
+// Swap the live and mark bitmaps of this space. This is used by the GC for
+// concurrent sweeping.
+void StructuredDlMallocSpaceImpl::SwapBitmaps() {
+
+}
+
 }  // namespace space
 }  // namespace gc
 }  // namespace art

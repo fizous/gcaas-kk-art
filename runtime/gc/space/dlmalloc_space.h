@@ -44,14 +44,22 @@ class SharedDlMallocSpace;
 class IDlMallocSpace : public AbstractDLmallocSpace {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
+  // Create a AllocSpace with the requested sizes. The requested
+  // base address is not guaranteed to be granted, if it is required,
+  // the caller should call Begin on the returned space to confirm
+  // the request was granted.
+  static IDlMallocSpace* CreateDlMallocSpace(const std::string& name,
+      size_t initial_size, size_t growth_limit,
+      size_t capacity, byte* requested_begin, bool shareMem = false);
 
 
+  virtual void SwapBitmaps() = 0;
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
  private:
 
-};//AbstractDLmallocSpace
+};//IDlMallocSpace
 
 
 
@@ -64,6 +72,11 @@ class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
       return kSpaceTypeAllocSpace;
     }
   }
+
+
+  // Swap the live and mark bitmaps of this space. This is used by the GC for
+  // concurrent sweeping.
+  void SwapBitmaps();
  protected:
   StructuredDlMallocSpaceImpl(){}
  private:
