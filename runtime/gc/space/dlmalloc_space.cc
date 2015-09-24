@@ -303,7 +303,7 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   }
 }
 
-DL_MALLOC_SPACE* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
+DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     bool shareMem) {
   SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
   DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(Begin()));
