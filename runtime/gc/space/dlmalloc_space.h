@@ -230,7 +230,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
 
   IContinuousSpace* AsIContinuousSpace() {
-    return reinterpret_cast<AsIContinuousSpace*>(this);
+    return reinterpret_cast<IContinuousSpace*>(this);
   }
 
   AbstractDLmallocSpace* AsAbstractDlMalloc() {
