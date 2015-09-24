@@ -409,7 +409,7 @@ public:
   // Set the maximum number of bytes that the heap is allowed to obtain from the system via
   // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
   // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
-  virtual void SetFootprintLimit(size_t limit);
+  virtual void SetFootprintLimit(size_t limit) = 0;
 
   virtual void* GetMspace() const = 0;
 
