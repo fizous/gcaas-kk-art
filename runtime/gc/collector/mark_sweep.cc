@@ -1324,7 +1324,7 @@ void MarkSweep::ZygoteSweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {
 }
 
 void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitmaps) {
-  space::DL_MALLOC_SPACE* space = heap_->GetAllocSpace();
+  space::DLMALLOC_SPACE_T* space = heap_->GetAllocSpace();
   timings_.StartSplit("SweepArray");
   // Newly allocated objects MUST be in the alloc space and those are the only objects which we are
   // going to free.
