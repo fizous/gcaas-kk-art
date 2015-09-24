@@ -18,7 +18,7 @@
 #define ART_RUNTIME_GC_SPACE_SPACE_H_
 
 #include <string>
-
+#include "gc/allocator/dlmalloc.h"
 #include "UniquePtr.h"
 #include "base/macros.h"
 #include "base/mutex.h"

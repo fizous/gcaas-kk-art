@@ -41,52 +41,7 @@ class SharedDlMallocSpace;
 
 #if (true || ART_GC_SERVICE)
 
-class IDlMallocSpace : public AllocSpace {
- public:
-  typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
-  // Create a AllocSpace with the requested sizes. The requested
-  // base address is not guaranteed to be granted, if it is required,
-  // the caller should call Begin on the returned space to confirm
-  // the request was granted.
-  static IDlMallocSpace* CreateDlMallocSpace(const std::string& name,
-      size_t initial_size, size_t growth_limit,
-      size_t capacity, byte* requested_begin, bool shareMem = false);
 
-
-  virtual void SwapBitmaps() = 0;
-  virtual void SetInternalGrowthLimit(size_t) = 0;
-
-  // Set the maximum number of bytes that the heap is allowed to obtain from the system via
-  // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
-  // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
-  virtual void SetFootprintLimit(size_t limit) = 0;
-
-  virtual void* GetMspace() const = 0;
-
-  virtual void SetGrowthLimit(size_t growth_limit) = 0;
-
-
-  virtual void* MoreCore(intptr_t increment) = 0;
-
-  // Hands unused pages back to the system.
-  virtual size_t Trim() = 0;
-
-  // Returns the number of bytes that the space has currently obtained from the system. This is
-  // greater or equal to the amount of live data in the space.
-  virtual size_t GetFootprint() = 0;
-
-  // Returns the number of bytes that the heap is allowed to obtain from the system via MoreCore.
-  size_t GetFootprintLimit();
-
-  size_t AllocationNoOverhead(const mirror::Object* obj) {
-    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
-  }
- protected:
-  IDlMallocSpace(){}
-  virtual ~IDlMallocSpace(){}
- private:
-
-};//IDlMallocSpace
 
 
 
