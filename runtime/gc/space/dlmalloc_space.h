@@ -75,7 +75,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   // base address is not guaranteed to be granted, if it is required,
   // the caller should call Begin on the returned space to confirm
   // the request was granted.
-  static DL_MALLOC_SPACE* Create(const std::string& name, size_t initial_size, size_t growth_limit,
+  static DLMALLOC_SPACE_T* Create(const std::string& name, size_t initial_size, size_t growth_limit,
                                size_t capacity, byte* requested_begin, bool shareMem = false);
 
   // Allocate num_bytes without allowing the underlying mspace to grow.

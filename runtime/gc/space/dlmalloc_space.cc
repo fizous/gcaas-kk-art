@@ -170,7 +170,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   }
 }
 
-DL_MALLOC_SPACE* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
+DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
                                      growth_limit, size_t capacity,
                                      byte* requested_begin, bool shareMem) {
   // Memory we promise to dlmalloc before it asks for morecore.
