@@ -31,7 +31,7 @@
 
 #if (true || ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
-#define DLMALLOC_SPACE_T DlMallocSpace
+#define DLMALLOC_SPACE_T DlMallocSpaceImpl
 #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
 #define DL_MALLOC_SPACE  DlMallocSpace
@@ -403,7 +403,7 @@ class MemMapSpace : public IMemMapSpace, public ContinuousSpace {
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };
 
-class IAllocSpace: public IMemMapSpace, public IContinuousSpace,
+class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
     public  InterfaceSpace {
 public:
   // Set the maximum number of bytes that the heap is allowed to obtain from the system via
@@ -416,13 +416,9 @@ public:
   virtual void SetGrowthLimit(size_t growth_limit) = 0;
 
 protected:
-  virtual ~IAllocSpace() {}
-  IAllocSpace(){}
+  virtual ~AbstractDLmallocSpace() {}
+  AbstractDLmallocSpace(){}
   //virtual ~AbstractDLmallocSpace() {}
-};
-
-class AllocSpaceImpl: public MemMapSpace {
-
 };
 
 class SharableSpace {
