@@ -32,8 +32,10 @@
 #if (true || ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
 #define DLMALLOC_SPACE_T DlMallocSpaceImpl
+#define CONTINUOUS_SPACE_T ContinuousSpace
 #else
 #define DL_MALLOC_SPACE  DlMallocSpace
+#define CONTINUOUS_SPACE_T ContinuousSpace
 #endif
 
 namespace art {
@@ -266,8 +268,6 @@ class IContinuousSpace {
     const byte* byte_ptr = reinterpret_cast<const byte*>(obj);
     return byte_ptr < End() && byte_ptr >= Begin();
   }
-
-
 
   virtual ~IContinuousSpace() {}
   IContinuousSpace(){}

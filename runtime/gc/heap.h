@@ -41,11 +41,13 @@
  #define GC_HEAP_SRVCE_NO_LOS     true
  #define DL_MALLOC_SPACE DlMallocSpace
  #define DLMALLOC_SPACE_T DlMallocSpaceImpl
+ #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
  #define GC_HEAP_SRVCE_NO_LOS     false
  #define DL_MALLOC_SPACE DlMallocSpace
-#define DLMALLOC_SPACE_T DlMallocSpace
+ #define DLMALLOC_SPACE_T DlMallocSpace
+ #define CONTINUOUS_SPACE_T ContinuousSpace
 #endif
 
 namespace art {
@@ -238,7 +240,7 @@ class Heap {
   // true if we waited for the GC to complete.
   collector::GcType WaitForConcurrentGcToComplete(Thread* self) LOCKS_EXCLUDED(gc_complete_lock_);
 
-  const std::vector<space::ContinuousSpace*>& GetContinuousSpaces() const {
+  const std::vector<space::CONTINUOUS_SPACE_T*>& GetContinuousSpaces() const {
     return continuous_spaces_;
   }
 
@@ -398,7 +400,7 @@ class Heap {
   // Get the space that corresponds to an object's address. Current implementation searches all
   // spaces in turn. If fail_ok is false then failing to find a space will cause an abort.
   // TODO: consider using faster data structure like binary tree.
-  space::ContinuousSpace* FindContinuousSpaceFromObject(const mirror::Object*, bool fail_ok) const;
+  space::CONTINUOUS_SPACE_T* FindContinuousSpaceFromObject(const mirror::Object*, bool fail_ok) const;
   space::DiscontinuousSpace* FindDiscontinuousSpaceFromObject(const mirror::Object*,
                                                               bool fail_ok) const;
   space::Space* FindSpaceFromObject(const mirror::Object*, bool fail_ok) const;
@@ -577,7 +579,7 @@ class Heap {
 
   size_t GetPercentFree();
 
-  void AddContinuousSpace(space::ContinuousSpace* space) LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+  void AddContinuousSpace(space::CONTINUOUS_SPACE_T* space) LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
   void AddDiscontinuousSpace(space::DiscontinuousSpace* space)
       LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
 
@@ -595,7 +597,7 @@ class Heap {
   void ProcessCards(base::TimingLogger& timings);
 
   // All-known continuous spaces, where objects lie within fixed bounds.
-  std::vector<space::ContinuousSpace*> continuous_spaces_;
+  std::vector<space::CONTINUOUS_SPACE_T*> continuous_spaces_;
 
   // All-known discontinuous spaces, where objects may be placed throughout virtual memory.
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;

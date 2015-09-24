@@ -183,7 +183,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   	GCMMP_VLOG(INFO) << "HeapCreation: image file name was empty: ";
   }
 
-  alloc_space_ = space::DlMallocSpace::Create(Runtime::Current()->IsZygote() ? "zygote space" : "alloc space",
+  alloc_space_ = space::DlMallocSpace::Create(Runtime::Current()->IsZygote() ?
+                                              "zygote space" : "alloc space",
                                               initial_size,
                                               growth_limit, capacity,
                                               requested_alloc_space_begin);
