@@ -40,10 +40,12 @@
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
  #define GC_HEAP_SRVCE_NO_LOS     true
  #define DL_MALLOC_SPACE DlMallocSpace
+ #define DLMALLOC_SPACE_T DlMallocSpaceImpl
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
  #define GC_HEAP_SRVCE_NO_LOS     false
-#define DL_MALLOC_SPACE DlMallocSpace
+ #define DL_MALLOC_SPACE DlMallocSpace
+#define DLMALLOC_SPACE_T DlMallocSpace
 #endif
 
 namespace art {
@@ -81,6 +83,7 @@ namespace space {
   class AllocSpace;
   class DiscontinuousSpace;
   class DL_MALLOC_SPACE;
+  class DLMALLOC_SPACE_T;
   class ImageSpace;
   class LargeObjectSpace;
   class Space;
@@ -458,7 +461,7 @@ class Heap {
   // Assumes there is only one image space.
   space::ImageSpace* GetImageSpace() const;
 
-  space::DL_MALLOC_SPACE* GetAllocSpace() const {
+  space::DLMALLOC_SPACE_T* GetAllocSpace() const {
     return alloc_space_;
   }
 
@@ -598,7 +601,7 @@ class Heap {
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;
 
   // The allocation space we are currently allocating into.
-  space::DL_MALLOC_SPACE* alloc_space_;
+  space::DLMALLOC_SPACE_T* alloc_space_;
 
   // The large object space we are currently allocating into.
   space::LargeObjectSpace* large_object_space_;

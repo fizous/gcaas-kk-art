@@ -31,6 +31,7 @@
 
 #if (true || ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
+#define DLMALLOC_SPACE_T DlMallocSpaceImpl
 #else
 #define DL_MALLOC_SPACE  DlMallocSpace
 #endif
