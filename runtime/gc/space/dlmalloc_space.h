@@ -210,7 +210,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
-
+  ~DlMallocSpace(){}
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
   mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
@@ -254,7 +254,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   size_t growth_limit_;
 
   friend class collector::MarkSweep;
-  ~DlMallocSpace(){}
+
   DISALLOW_COPY_AND_ASSIGN(DlMallocSpace);
 };
 #else
