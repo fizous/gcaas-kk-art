@@ -403,7 +403,7 @@ class MemMapSpace : public IMemMapSpace, public ContinuousSpace {
   DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
 };
 
-class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
+class IAllocSpace: public IMemMapSpace, public IContinuousSpace,
     public  InterfaceSpace {
 public:
   // Set the maximum number of bytes that the heap is allowed to obtain from the system via
@@ -416,9 +416,13 @@ public:
   virtual void SetGrowthLimit(size_t growth_limit) = 0;
 
 protected:
-  virtual ~AbstractDLmallocSpace() {}
-  AbstractDLmallocSpace(){}
+  virtual ~IAllocSpace() {}
+  IAllocSpace(){}
   //virtual ~AbstractDLmallocSpace() {}
+};
+
+class AllocSpaceImpl: public MemMapSpace, public ContinuousSpace {
+public:
 };
 
 class SharableSpace {
