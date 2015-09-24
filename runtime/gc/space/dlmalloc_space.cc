@@ -619,18 +619,18 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
 
 // Swap the live and mark bitmaps of this space. This is used by the GC for
 // concurrent sweeping.
-void StructuredDlMallocSpaceImpl::SwapBitmaps() {
-
-}
-
-
-void StructuredDlMallocSpaceImpl::SetFootprintLimit(size_t limit) {
-
-}
-
-void StructuredDlMallocSpaceImpl::SetInternalGrowthLimit(size_t new_growth_limit) {
-
-}
+//void StructuredDlMallocSpaceImpl::SwapBitmaps() {
+//
+//}
+//
+//
+//void StructuredDlMallocSpaceImpl::SetFootprintLimit(size_t limit) {
+//
+//}
+//
+//void StructuredDlMallocSpaceImpl::SetInternalGrowthLimit(size_t new_growth_limit) {
+//
+//}
 
 }  // namespace space
 }  // namespace gc
