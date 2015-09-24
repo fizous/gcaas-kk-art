@@ -41,17 +41,19 @@ class SharedDlMallocSpace;
 
 #if (true || ART_GC_SERVICE)
 
-class DlMallocSpaceImpl : public AbstractDLmallocSpace {
+class IDlMallocSpace : public AbstractDLmallocSpace {
  public:
  protected:
-  DlMallocSpaceImpl(){}
+  IDlMallocSpace(){}
  private:
-  virtual ~DlMallocSpaceImpl(){}
+  virtual ~IDlMallocSpace(){}
 };//AbstractDLmallocSpace
 
 
 
+class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
 
+};//class StructuredDlMallocSpaceImpl
 
 
 
