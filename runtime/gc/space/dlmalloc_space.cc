@@ -628,6 +628,10 @@ void StructuredDlMallocSpaceImpl::SetFootprintLimit(size_t limit) {
 
 }
 
+void StructuredDlMallocSpaceImpl::SetInternalGrowthLimit(size_t new_growth_limit) {
+
+}
+
 }  // namespace space
 }  // namespace gc
 }  // namespace art

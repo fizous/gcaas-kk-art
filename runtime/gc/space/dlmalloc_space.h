@@ -54,6 +54,7 @@ class IDlMallocSpace : public AbstractDLmallocSpace {
 
 
   virtual void SwapBitmaps() = 0;
+  virtual void SetInternalGrowthLimit(size_t) = 0;
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
@@ -77,7 +78,7 @@ class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
   // Swap the live and mark bitmaps of this space. This is used by the GC for
   // concurrent sweeping.
   void SwapBitmaps();
-
+  void SetInternalGrowthLimit(size_t);
   void SetFootprintLimit(size_t limit);
  protected:
   StructuredDlMallocSpaceImpl(){}
