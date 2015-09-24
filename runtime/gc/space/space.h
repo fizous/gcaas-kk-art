@@ -34,6 +34,9 @@
 #ifndef DLMALLOC_SPACE_T
 #define DLMALLOC_SPACE_T AbstractDLmallocSpace
 #endif
+#ifndef ABSTRACT_CONTINUOUS_SPACE_T
+#define ABSTRACT_CONTINUOUS_SPACE_T IContinuousSpace
+#endif
 #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
 #define DL_MALLOC_SPACE  DlMallocSpace
@@ -446,6 +449,8 @@ class IDlMallocSpace : public AllocSpace {
   size_t AllocationNoOverhead(const mirror::Object* obj) {
     return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
   }
+
+  virtual IContinuousSpace* AsIContinuousSpace() = 0;
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
@@ -458,6 +463,7 @@ class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
     public  InterfaceSpace, public IDlMallocSpace {
 public:
   virtual AbstractDLmallocSpace* AsAbstractDlMalloc() = 0;
+
 protected:
   virtual ~AbstractDLmallocSpace() {}
   AbstractDLmallocSpace(){}

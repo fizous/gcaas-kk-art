@@ -43,6 +43,9 @@
  #ifndef DLMALLOC_SPACE_T
   #define DLMALLOC_SPACE_T AbstractDLmallocSpace
  #endif
+#ifndef ABSTRACT_CONTINUOUS_SPACE_T
+#define ABSTRACT_CONTINUOUS_SPACE_T IContinuousSpace
+#endif
  #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
@@ -242,7 +245,7 @@ class Heap {
   // true if we waited for the GC to complete.
   collector::GcType WaitForConcurrentGcToComplete(Thread* self) LOCKS_EXCLUDED(gc_complete_lock_);
 
-  const std::vector<space::CONTINUOUS_SPACE_T*>& GetContinuousSpaces() const {
+  const std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>& GetContinuousSpaces() const {
     return continuous_spaces_;
   }
 
@@ -581,7 +584,7 @@ class Heap {
 
   size_t GetPercentFree();
 
-  void AddContinuousSpace(space::CONTINUOUS_SPACE_T* space) LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
+  void AddContinuousSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
   void AddDiscontinuousSpace(space::DiscontinuousSpace* space)
       LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
 
@@ -599,7 +602,7 @@ class Heap {
   void ProcessCards(base::TimingLogger& timings);
 
   // All-known continuous spaces, where objects lie within fixed bounds.
-  std::vector<space::CONTINUOUS_SPACE_T*> continuous_spaces_;
+  std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*> continuous_spaces_;
 
   // All-known discontinuous spaces, where objects may be placed throughout virtual memory.
   std::vector<space::DiscontinuousSpace*> discontinuous_spaces_;
