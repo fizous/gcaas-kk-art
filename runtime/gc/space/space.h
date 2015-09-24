@@ -421,8 +421,8 @@ protected:
   //virtual ~AbstractDLmallocSpace() {}
 };
 
-class AllocSpaceImpl: public MemMapSpace, public AllocSpace {
-public:
+class AllocSpaceImpl: public MemMapSpace {
+
 };
 
 class SharableSpace {
