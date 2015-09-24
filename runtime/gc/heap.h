@@ -95,6 +95,7 @@ namespace space {
   class LargeObjectSpace;
   class Space;
   class SpaceTest;
+  class ABSTRACT_CONTINUOUS_SPACE_T;
 }  // namespace space
 
 
