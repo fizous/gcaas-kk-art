@@ -48,8 +48,9 @@ class IDlMallocSpace : public AbstractDLmallocSpace {
 
  protected:
   IDlMallocSpace(){}
- private:
   virtual ~IDlMallocSpace(){}
+ private:
+
 };//AbstractDLmallocSpace
 
 
