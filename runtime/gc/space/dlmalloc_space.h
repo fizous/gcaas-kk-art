@@ -50,7 +50,8 @@ class DlMallocSpaceImpl : public AbstractDLmallocSpace {
 };//AbstractDLmallocSpace
 
 // An alloc space is a space where objects may be allocated and garbage collected.
-class DlMallocSpace : DlMallocSpaceImpl//public MemMapSpace, public AllocSpace
+class DlMallocSpace : public MemMapSpace, public AbstractDLmallocSpace
+//public DlMallocSpaceImpl//public MemMapSpace, public AllocSpace
                       /*public AbstractDLmallocSpace*/ {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
