@@ -41,7 +41,7 @@ class SharedDlMallocSpace;
 
 #if (true || ART_GC_SERVICE)
 
-class IDlMallocSpace : public AbstractDLmallocSpace {
+class IDlMallocSpace : public AllocSpace {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
   // Create a AllocSpace with the requested sizes. The requested
@@ -55,6 +55,15 @@ class IDlMallocSpace : public AbstractDLmallocSpace {
 
   virtual void SwapBitmaps() = 0;
   virtual void SetInternalGrowthLimit(size_t) = 0;
+
+  // Set the maximum number of bytes that the heap is allowed to obtain from the system via
+  // MoreCore. Note this is used to stop the mspace growing beyond the limit to Capacity. When
+  // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
+  virtual void SetFootprintLimit(size_t limit) = 0;
+
+  virtual void* GetMspace() const = 0;
+
+  virtual void SetGrowthLimit(size_t growth_limit) = 0;
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
@@ -64,32 +73,34 @@ class IDlMallocSpace : public AbstractDLmallocSpace {
 
 
 
-class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
- public:
-  SpaceType GetType() const {
-    if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
-      return kSpaceTypeZygoteSpace;
-    } else {
-      return kSpaceTypeAllocSpace;
-    }
-  }
-
-
-  // Swap the live and mark bitmaps of this space. This is used by the GC for
-  // concurrent sweeping.
-  void SwapBitmaps();
-  void SetInternalGrowthLimit(size_t);
-  void SetFootprintLimit(size_t limit);
- protected:
-  StructuredDlMallocSpaceImpl(){}
- private:
-  virtual ~StructuredDlMallocSpaceImpl(){}
-};//class StructuredDlMallocSpaceImpl
-
-
+//class StructuredDlMallocSpaceImpl : public IDlMallocSpace {
+// public:
+//  SpaceType GetType() const {
+//    if (GetGcRetentionPolicy() == kGcRetentionPolicyFullCollect) {
+//      return kSpaceTypeZygoteSpace;
+//    } else {
+//      return kSpaceTypeAllocSpace;
+//    }
+//  }
+//
+//
+//  // Swap the live and mark bitmaps of this space. This is used by the GC for
+//  // concurrent sweeping.
+//  void SwapBitmaps();
+//  void SetInternalGrowthLimit(size_t);
+//  void SetFootprintLimit(size_t limit);
+// protected:
+//  StructuredDlMallocSpaceImpl(){}
+// private:
+//  virtual ~StructuredDlMallocSpaceImpl(){}
+//};//class StructuredDlMallocSpaceImpl
+//
+//class DlMallocSpaceImpl : public MemMapSpace//, public AllocSpace {
+//
+//};
 
 // An alloc space is a space where objects may be allocated and garbage collected.
-class DlMallocSpace : public MemMapSpace, public AllocSpace
+class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocSpace
                       /*public AbstractDLmallocSpace*/ {
  public:
   typedef void(*WalkCallback)(void *start, void *end, size_t num_bytes, void* callback_arg);
