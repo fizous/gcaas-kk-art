@@ -31,8 +31,8 @@ class ModUnionTableToZygoteAllocspace : public ModUnionTableReferenceCache {
   explicit ModUnionTableToZygoteAllocspace(Heap* heap) : ModUnionTableReferenceCache(heap) {}
 
   bool AddReference(const mirror::Object* /* obj */, const mirror::Object* ref) {
-    const std::vector<space::ContinuousSpace*>& spaces = GetHeap()->GetContinuousSpaces();
-    typedef std::vector<space::ContinuousSpace*>::const_iterator It;
+    const std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>& spaces = GetHeap()->GetContinuousSpaces();
+    typedef std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>::const_iterator It;
     for (It it = spaces.begin(); it != spaces.end(); ++it) {
       if ((*it)->Contains(ref)) {
         return (*it)->IsDlMallocSpace();
@@ -50,8 +50,8 @@ class ModUnionTableToAllocspace : public ModUnionTableReferenceCache {
   explicit ModUnionTableToAllocspace(Heap* heap) : ModUnionTableReferenceCache(heap) {}
 
   bool AddReference(const mirror::Object* /* obj */, const mirror::Object* ref) {
-    const std::vector<space::ContinuousSpace*>& spaces = GetHeap()->GetContinuousSpaces();
-    typedef std::vector<space::ContinuousSpace*>::const_iterator It;
+    const std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>& spaces = GetHeap()->GetContinuousSpaces();
+    typedef std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>::const_iterator It;
     for (It it = spaces.begin(); it != spaces.end(); ++it) {
       space::ContinuousSpace* space = *it;
       if (space->Contains(ref)) {

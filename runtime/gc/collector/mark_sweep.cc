@@ -85,7 +85,7 @@ constexpr bool kCountJavaLangRefs = false;
 // Turn off kCheckLocks when profiling the GC since it slows the GC down by up to 40%.
 constexpr bool kCheckLocks = kDebugLocking;
 
-void MarkSweep::ImmuneSpace(space::ContinuousSpace* space) {
+void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
   if (space->GetLiveBitmap() != space->GetMarkBitmap()) {
     BindLiveToMarkBitmap(space);

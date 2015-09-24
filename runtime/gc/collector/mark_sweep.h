@@ -56,7 +56,7 @@ namespace accounting {
 }  // namespace accounting
 
 namespace space {
-  class ContinuousSpace;
+  class ABSTRACT_CONTINUOUS_SPACE_T;
 }  // namespace space
 
 class Heap;
@@ -115,7 +115,7 @@ class MarkSweep : public GarbageCollector {
 
   // Make a space immune, immune spaces have all live objects marked - that is the mark and
   // live bitmaps are bound together.
-  void ImmuneSpace(space::ContinuousSpace* space)
+  void ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
@@ -123,7 +123,7 @@ class MarkSweep : public GarbageCollector {
   // the image. Mark that portion of the heap as immune.
   virtual void BindBitmaps() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  void BindLiveToMarkBitmap(space::ContinuousSpace* space)
+  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   void UnBindBitmaps()
