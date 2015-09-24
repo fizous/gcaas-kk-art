@@ -64,6 +64,23 @@ class IDlMallocSpace : public AllocSpace {
   virtual void* GetMspace() const = 0;
 
   virtual void SetGrowthLimit(size_t growth_limit) = 0;
+
+
+  virtual void* MoreCore(intptr_t increment) = 0;
+
+  // Hands unused pages back to the system.
+  virtual size_t Trim() = 0;
+
+  // Returns the number of bytes that the space has currently obtained from the system. This is
+  // greater or equal to the amount of live data in the space.
+  virtual size_t GetFootprint() = 0;
+
+  // Returns the number of bytes that the heap is allowed to obtain from the system via MoreCore.
+  size_t GetFootprintLimit();
+
+  size_t AllocationNoOverhead(const mirror::Object* obj) {
+    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+  }
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
@@ -147,9 +164,9 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
         kChunkOverhead;
   }
 
-  size_t AllocationNoOverhead(const mirror::Object* obj) {
-    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
-  }
+//  size_t AllocationNoOverhead(const mirror::Object* obj) {
+//    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+//  }
 
   size_t GCPGetAllocationSize(const mirror::Object*);
 
