@@ -102,7 +102,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   // Allocate num_bytes without allowing the underlying mspace to grow.
   virtual mirror::Object* AllocWithGrowth(Thread* self, size_t num_bytes,
-                                          size_t* bytes_allocated) LOCKS_EXCLUDED(lock_data_);
+                                          size_t* bytes_allocated) LOCKS_EXCLUDED(*dlmalloc_space_data_->lock_);
 
   // Allocate num_bytes allowing the underlying mspace to grow.
   virtual mirror::Object* Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated);
@@ -136,7 +136,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   // Perform a mspace_inspect_all which calls back for each allocation chunk. The chunk may not be
   // in use, indicated by num_bytes equaling zero.
-  void Walk(WalkCallback callback, void* arg) LOCKS_EXCLUDED(lock_data_);
+  void Walk(WalkCallback callback, void* arg) LOCKS_EXCLUDED(*dlmalloc_space_data_->lock_);
 
   // Returns the number of bytes that the space has currently obtained from the system. This is
   // greater or equal to the amount of live data in the space.
@@ -256,7 +256,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
   mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
-      EXCLUSIVE_LOCKS_REQUIRED(lock_data_);
+      EXCLUSIVE_LOCKS_REQUIRED(*dlmalloc_space_data_->lock_);
   bool Init(size_t initial_size, size_t maximum_size, size_t growth_size, byte* requested_base);
   void RegisterRecentFree(mirror::Object* ptr);
 
