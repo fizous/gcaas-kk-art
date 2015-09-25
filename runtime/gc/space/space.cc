@@ -22,8 +22,12 @@ namespace art {
 namespace gc {
 namespace space {
 
-Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy)
-    : name_(name), gc_retention_policy_(gc_retention_policy) { }
+Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
+    GCSrvceSpace* memory_alloc) : space_data_(memory_alloc){
+  strcpy(space_data_->name_, name.c_str());
+  space_data_->gc_retention_policy_ = gc_retention_policy;
+}
+
 
 void Space::Dump(std::ostream& os) const {
   os << GetName() << ":" << GetGcRetentionPolicy();
