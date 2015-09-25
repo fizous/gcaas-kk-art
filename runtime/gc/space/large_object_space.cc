@@ -171,7 +171,8 @@ FreeListSpace* FreeListSpace::Create(const std::string& name, byte* requested_be
   return new FreeListSpace(name, mem_map, mem_map->Begin(), mem_map->End());
 }
 
-FreeListSpace::FreeListSpace(const std::string& name, MEM_MAP* mem_map, byte* begin, byte* end)
+FreeListSpace::FreeListSpace(const std::string& name, MEM_MAP* mem_map,
+    byte* begin, byte* end)
     : LargeObjectSpace(name),
       begin_(begin),
       end_(end),
