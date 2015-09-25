@@ -454,7 +454,7 @@ class IDlMallocSpace : public AllocSpace {
     return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
   }
 
-  virtual IContinuousSpace* AsIContinuousSpace() = 0;
+  virtual AbstractContinuousSpace* AsAbstractContinuousSpace() = 0;
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
