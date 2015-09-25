@@ -168,7 +168,7 @@ class Space {
  private:
  DISALLOW_COPY_AND_ASSIGN(Space);
 };//class Space
-
+std::ostream& operator<<(std::ostream& os, const Space& space);
 
 // Continuous spaces have bitmaps, and an address range. Although not required, objects within
 // continuous spaces can be marked in the card table.
