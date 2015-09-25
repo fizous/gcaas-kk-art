@@ -182,7 +182,7 @@ class ContinuousSpace : public Space {
   virtual byte* End()  const  = 0;
 
 
-  virtual void SetEnd(byte*)  const  = 0;
+  virtual void SetEnd(byte*) = 0;
 
   // Current size of space
   virtual size_t Size() const {
