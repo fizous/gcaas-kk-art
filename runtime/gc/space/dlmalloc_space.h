@@ -276,7 +276,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 //  size_t total_bytes_allocated_;
 //  size_t total_objects_allocated_;
 
-  static size_t bitmap_index_;
+  //static size_t bitmap_index_;
 
 
 

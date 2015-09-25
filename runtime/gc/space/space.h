@@ -131,6 +131,8 @@ typedef struct GCSrvDlMallocSpace_S {
   // however, capacity normally can't vary. In the case of the growth_limit_ it can be cleared
   // one time by a call to ClearGrowthLimit.
   size_t growth_limit_;
+
+  static size_t bitmap_index_;
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
 

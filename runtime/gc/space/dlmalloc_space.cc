@@ -126,6 +126,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 };
 
 size_t DlMallocSpace::bitmap_index_ = 0;
+size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem)
@@ -141,10 +142,9 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   dlmalloc_space_data_->total_objects_allocated_= 0;
   dlmalloc_space_data_->mspace_ = mspace;
   dlmalloc_space_data_->growth_limit_ = growth_limit;
-
+  dlmalloc_space_data_->bitmap_index_++;
   CHECK(mspace != NULL);
 
-  size_t bitmap_index = bitmap_index_++;
 
   static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::ConstantsCardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
@@ -152,14 +152,14 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
 
 #if true || ART_GC_SERVICE
   live_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
-       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
+       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
        Begin(), Capacity(), shareMem)));
-   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << bitmap_index;
+   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << dlmalloc_space_data_->bitmap_index_;
 
    mark_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
-       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
+       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
        Begin(), Capacity(), shareMem)));
-   DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
+   DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << dlmalloc_space_data_->bitmap_index_;
 
 #else
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
