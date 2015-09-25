@@ -131,7 +131,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
                        byte* end, size_t growth_limit, bool shareMem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
       lock_("allocation space lock", kAllocSpaceLock) {
-
+  LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
   dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
   dlmalloc_space_data_->recent_free_pos_ = 0;

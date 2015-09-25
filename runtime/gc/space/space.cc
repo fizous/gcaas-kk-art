@@ -40,6 +40,22 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
 }
 
 
+ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
+                byte* begin, byte* end,
+                GCSrvceContinuousSpace* cont_space_data) :
+    Space(name, gc_retention_policy,
+        cont_space_data == NULL ? NULL : &(cont_space_data->space_header_)) {
+  if(cont_space_data == NULL) {
+    LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
+    cont_space_data_ =
+        reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
+            SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));
+  }
+  cont_space_data_->begin_ = begin;
+  cont_space_data_->end_ = end;
+}
+
+
 DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
                                        GcRetentionPolicy gc_retention_policy) :
     Space(name, gc_retention_policy, Space::AllocateSpaceData()),

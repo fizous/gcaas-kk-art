@@ -268,19 +268,7 @@ class ContinuousSpace : public Space {
  protected:
   ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                   byte* begin, byte* end,
-                  GCSrvceContinuousSpace* cont_space_data = NULL) :
-      Space(name, gc_retention_policy,
-          cont_space_data == NULL ? NULL : &(cont_space_data->space_header_)) {
-    if(cont_space_data == NULL) {
-      LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
-      cont_space_data_ =
-          reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
-              SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));
-    }
-    cont_space_data_->begin_ = begin;
-    cont_space_data_->end_ = end;
-  }
-
+                  GCSrvceContinuousSpace* cont_space_data = NULL);
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
 };
@@ -306,6 +294,7 @@ class MemMapSpace : public ContinuousSpace {
                         mem_map->Begin(), mem_map->Begin() + initial_size,
                         ContinuousSpace::AllocateContSpaceMemory()),
         mem_map_(mem_map) {
+    LOG(ERROR) << "MemMapSpace::MemMapSpace-->done";
   }
 
   MEM_MAP* GetMemMap() {
