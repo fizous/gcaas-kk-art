@@ -25,7 +25,8 @@ namespace space {
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
   LOG(ERROR) << "Space::Space --> memory_alloc ? " << (memory_alloc != NULL ? "true" : "False");
-  strcpy(space_data_->name_, name.c_str());
+  strncpy(space_data_->name_, name.c_str(), name.length());
+  space_data_->name_[name.length()] = '\0';
   space_data_->gc_retention_policy_ = gc_retention_policy;
 }
 
@@ -43,8 +44,7 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
 ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 GCSrvceContinuousSpace* cont_space_data) :
-    Space(name, gc_retention_policy,
-        cont_space_data == NULL ? NULL : &(cont_space_data->space_header_)) {
+    Space(name, gc_retention_policy, &(cont_space_data->space_header_)) {
   if(cont_space_data == NULL) {
     LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
     cont_space_data_ =
