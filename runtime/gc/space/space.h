@@ -307,126 +307,126 @@ class MemMapSpace : public ContinuousSpace {
 
 
 
-// A space contains memory allocated for managed objects.
-class InterfaceSpace {
- public:
-  // Dump space. Also key method for C++ vtables.
-  virtual void Dump(std::ostream& os) const = 0;
+//// A space contains memory allocated for managed objects.
+//class InterfaceSpace {
+// public:
+//  // Dump space. Also key method for C++ vtables.
+//  virtual void Dump(std::ostream& os) const = 0;
+//
+//
+//  virtual GcRetentionPolicy GetGcRetentionPolicy() const = 0;
+//
+//  // Does the space support allocation?
+//  virtual bool CanAllocateInto() const {
+//    return true;
+//  }
+//
+//
+//  // Is the given object contained within this space?
+//  virtual bool Contains(const mirror::Object* obj) const = 0;
+//
+//
+//  // The kind of space this: image, alloc, zygote, large object.
+//  virtual SpaceType GetType() const = 0;
+//
+//
+//  // Is this an image space, ie one backed by a memory mapped image file.
+//  virtual bool IsImageSpace() const {
+//    return GetType() == kSpaceTypeImageSpace;
+//  }
+//
+//  virtual ImageSpace* AsImageSpace() = 0;
+//
+//  // Is this a dlmalloc backed allocation space?
+//  virtual bool IsDlMallocSpace() const {
+//    SpaceType type = GetType();
+//    return type == kSpaceTypeAllocSpace || type == kSpaceTypeZygoteSpace;
+//  }
+//
+//
+//  virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
+//
+//
+//  // Is this the space allocated into by the Zygote and no-longer in use?
+//  virtual bool IsZygoteSpace() const {
+//    return GetType() == kSpaceTypeZygoteSpace;
+//  }
+//
+//  // Does this space hold large objects and implement the large object space abstraction?
+//  virtual bool IsLargeObjectSpace() const {
+//    return GetType() == kSpaceTypeLargeObjectSpace;
+//  }
+//  virtual LargeObjectSpace* AsLargeObjectSpace() = 0;
+//
+//
+//  // Return the storage space required by obj.
+//  virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
+//
+//
+// protected:
+//  InterfaceSpace() {}
+//  virtual ~InterfaceSpace() {}
+//
+// private:
+//  DISALLOW_COPY_AND_ASSIGN(InterfaceSpace);
+//};
 
 
-  virtual GcRetentionPolicy GetGcRetentionPolicy() const = 0;
-
-  // Does the space support allocation?
-  virtual bool CanAllocateInto() const {
-    return true;
-  }
-
-
-  // Is the given object contained within this space?
-  virtual bool Contains(const mirror::Object* obj) const = 0;
-
-
-  // The kind of space this: image, alloc, zygote, large object.
-  virtual SpaceType GetType() const = 0;
-
-
-  // Is this an image space, ie one backed by a memory mapped image file.
-  virtual bool IsImageSpace() const {
-    return GetType() == kSpaceTypeImageSpace;
-  }
-
-  virtual ImageSpace* AsImageSpace() = 0;
-
-  // Is this a dlmalloc backed allocation space?
-  virtual bool IsDlMallocSpace() const {
-    SpaceType type = GetType();
-    return type == kSpaceTypeAllocSpace || type == kSpaceTypeZygoteSpace;
-  }
-
-
-  virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
-
-
-  // Is this the space allocated into by the Zygote and no-longer in use?
-  virtual bool IsZygoteSpace() const {
-    return GetType() == kSpaceTypeZygoteSpace;
-  }
-
-  // Does this space hold large objects and implement the large object space abstraction?
-  virtual bool IsLargeObjectSpace() const {
-    return GetType() == kSpaceTypeLargeObjectSpace;
-  }
-  virtual LargeObjectSpace* AsLargeObjectSpace() = 0;
-
-
-  // Return the storage space required by obj.
-  virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
-
-
- protected:
-  InterfaceSpace() {}
-  virtual ~InterfaceSpace() {}
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(InterfaceSpace);
-};
-
-
-// A space contains memory allocated for managed objects.
-class Space : public InterfaceSpace {
- public:
-  // Dump space. Also key method for C++ vtables.
-  virtual void Dump(std::ostream& os) const;
-
-  // Name of the space. May vary, for example before/after the Zygote fork.
-  const char* GetName() const {
-    return name_.c_str();
-  }
-
-  // The policy of when objects are collected associated with this space.
-  virtual GcRetentionPolicy GetGcRetentionPolicy() const {
-    return gc_retention_policy_;
-  }
-
-
-  // Is the given object contained within this space?
-  //virtual bool Contains(const mirror::Object* obj) const = 0;
-
-//  // get the allocated memory for that object?
-//  virtual size_t GetObjectSize(const mirror::Object* obj) const = 0;
-
-  // The kind of space this: image, alloc, zygote, large object.
-  virtual SpaceType GetType() const = 0;
-
-  ImageSpace* AsImageSpace();
-  DL_MALLOC_SPACE* AsDlMallocSpace();
-  LargeObjectSpace* AsLargeObjectSpace();
-
-  virtual ~Space() {}
-
-
-  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
-    gc_retention_policy_ = gc_retention_policy;
-  }
-
- protected:
-  Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
-
-
-
-  // Name of the space that may vary due to the Zygote fork.
-  std::string name_;
-
- private:
-  // When should objects within this space be reclaimed? Not constant as we vary it in the case
-  // of Zygote forking.
-  GcRetentionPolicy gc_retention_policy_;
-
-//  friend class art::gc::Heap;
-
-  DISALLOW_COPY_AND_ASSIGN(Space);
-};
-std::ostream& operator<<(std::ostream& os, const Space& space);
+//// A space contains memory allocated for managed objects.
+//class Space : public InterfaceSpace {
+// public:
+//  // Dump space. Also key method for C++ vtables.
+//  virtual void Dump(std::ostream& os) const;
+//
+//  // Name of the space. May vary, for example before/after the Zygote fork.
+//  const char* GetName() const {
+//    return name_.c_str();
+//  }
+//
+//  // The policy of when objects are collected associated with this space.
+//  virtual GcRetentionPolicy GetGcRetentionPolicy() const {
+//    return gc_retention_policy_;
+//  }
+//
+//
+//  // Is the given object contained within this space?
+//  //virtual bool Contains(const mirror::Object* obj) const = 0;
+//
+////  // get the allocated memory for that object?
+////  virtual size_t GetObjectSize(const mirror::Object* obj) const = 0;
+//
+//  // The kind of space this: image, alloc, zygote, large object.
+//  virtual SpaceType GetType() const = 0;
+//
+//  ImageSpace* AsImageSpace();
+//  DL_MALLOC_SPACE* AsDlMallocSpace();
+//  LargeObjectSpace* AsLargeObjectSpace();
+//
+//  virtual ~Space() {}
+//
+//
+//  void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) {
+//    gc_retention_policy_ = gc_retention_policy;
+//  }
+//
+// protected:
+//  Space(const std::string& name, GcRetentionPolicy gc_retention_policy);
+//
+//
+//
+//  // Name of the space that may vary due to the Zygote fork.
+//  std::string name_;
+//
+// private:
+//  // When should objects within this space be reclaimed? Not constant as we vary it in the case
+//  // of Zygote forking.
+//  GcRetentionPolicy gc_retention_policy_;
+//
+////  friend class art::gc::Heap;
+//
+//  DISALLOW_COPY_AND_ASSIGN(Space);
+//};
+//std::ostream& operator<<(std::ostream& os, const Space& space);
 
 
 // AllocSpace interface.
@@ -470,35 +470,35 @@ class AllocSpace {
   DISALLOW_COPY_AND_ASSIGN(AllocSpace);
 };
 
-// Continuous spaces have bitmaps, and an address range. Although not required, objects within
-// continuous spaces can be marked in the card table.
-class IContinuousSpace {
- public:
-  // Address at which the space begins
-  virtual byte* Begin() const = 0;
-  virtual byte* End() const = 0;
-  virtual void SetEnd(byte*)  = 0;
-  // Current size of space
-  virtual size_t Size() const {
-    return End() - Begin();
-  }
-
-  virtual accounting::SPACE_BITMAP* GetLiveBitmap() const = 0;
-  virtual accounting::SPACE_BITMAP* GetMarkBitmap() const = 0;
-
-  // Is object within this space? We check to see if the pointer is beyond the end first as
-  // continuous spaces are iterated over from low to high.
-  bool HasAddress(const mirror::Object* obj) const {
-    const byte* byte_ptr = reinterpret_cast<const byte*>(obj);
-    return byte_ptr < End() && byte_ptr >= Begin();
-  }
-
-  ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace() {
-    return down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(this));
-  }
-  virtual ~IContinuousSpace() {}
-  IContinuousSpace(){}
-};
+//// Continuous spaces have bitmaps, and an address range. Although not required, objects within
+//// continuous spaces can be marked in the card table.
+//class IContinuousSpace {
+// public:
+//  // Address at which the space begins
+//  virtual byte* Begin() const = 0;
+//  virtual byte* End() const = 0;
+//  virtual void SetEnd(byte*)  = 0;
+//  // Current size of space
+//  virtual size_t Size() const {
+//    return End() - Begin();
+//  }
+//
+//  virtual accounting::SPACE_BITMAP* GetLiveBitmap() const = 0;
+//  virtual accounting::SPACE_BITMAP* GetMarkBitmap() const = 0;
+//
+//  // Is object within this space? We check to see if the pointer is beyond the end first as
+//  // continuous spaces are iterated over from low to high.
+//  bool HasAddress(const mirror::Object* obj) const {
+//    const byte* byte_ptr = reinterpret_cast<const byte*>(obj);
+//    return byte_ptr < End() && byte_ptr >= Begin();
+//  }
+//
+//  ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace() {
+//    return down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(this));
+//  }
+//  virtual ~IContinuousSpace() {}
+//  IContinuousSpace(){}
+//};
 
 
 //class AbstractContinuousSpace : public IContinuousSpace,
@@ -512,48 +512,48 @@ class IContinuousSpace {
 //};
 // Continuous spaces have bitmaps, and an address range. Although not required, objects within
 // continuous spaces can be marked in the card table.
-class ContinuousSpace : public IContinuousSpace, public Space {
- public:
-
-  byte* Begin() const {
-    return begin_;
-  }
-
-  // Address at which the space ends, which may vary as the space is filled.
-  byte* End() const {
-    return end_;
-  }
-
-  // Current size of space
-  size_t Size() const {
-    return End() - Begin();
-  }
-
-  void SetEnd(byte* new_end)  {
-    end_ = new_end;
-  }
-
-  bool Contains(const mirror::Object* obj) const {
-    return HasAddress(obj);
-  }
-
-  virtual ~ContinuousSpace() {}
-
- protected:
-  ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
-                  byte* begin, byte* end) :
-      Space(name, gc_retention_policy), begin_(begin), end_(end) {
-  }
-
-  // The beginning of the storage for fast access.
-  byte* const begin_;
-
-  // Current end of the space.
-  byte* end_;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
-};
+//class ContinuousSpace : public IContinuousSpace, public Space {
+// public:
+//
+//  byte* Begin() const {
+//    return begin_;
+//  }
+//
+//  // Address at which the space ends, which may vary as the space is filled.
+//  byte* End() const {
+//    return end_;
+//  }
+//
+//  // Current size of space
+//  size_t Size() const {
+//    return End() - Begin();
+//  }
+//
+//  void SetEnd(byte* new_end)  {
+//    end_ = new_end;
+//  }
+//
+//  bool Contains(const mirror::Object* obj) const {
+//    return HasAddress(obj);
+//  }
+//
+//  virtual ~ContinuousSpace() {}
+//
+// protected:
+//  ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
+//                  byte* begin, byte* end) :
+//      Space(name, gc_retention_policy), begin_(begin), end_(end) {
+//  }
+//
+//  // The beginning of the storage for fast access.
+//  byte* const begin_;
+//
+//  // Current end of the space.
+//  byte* end_;
+//
+// private:
+//  DISALLOW_COPY_AND_ASSIGN(ContinuousSpace);
+//};
 
 
 // A space where objects may be allocated higgledy-piggledy throughout virtual memory. Currently
@@ -582,61 +582,61 @@ class DiscontinuousSpace : public Space {
 };
 
 
-class IMemMapSpace /*: public IContinuousSpace*/ {
- public:
-  // Maximum which the mapped space can grow to.
-  virtual size_t Capacity() const  = 0;
-
-  // Size of the space without a limit on its growth. By default this is just the Capacity, but
-  // for the allocation space we support starting with a small heap and then extending it.
-  virtual size_t NonGrowthLimitCapacity() const = 0;
-
-  virtual MEM_MAP* GetMemMap() = 0;
-
-  virtual ~IMemMapSpace(){}
-  IMemMapSpace(){}
- private:
-  DISALLOW_COPY_AND_ASSIGN(IMemMapSpace);
-};
-
-
+//class IMemMapSpace /*: public IContinuousSpace*/ {
+// public:
+//  // Maximum which the mapped space can grow to.
+//  virtual size_t Capacity() const  = 0;
+//
+//  // Size of the space without a limit on its growth. By default this is just the Capacity, but
+//  // for the allocation space we support starting with a small heap and then extending it.
+//  virtual size_t NonGrowthLimitCapacity() const = 0;
+//
+//  virtual MEM_MAP* GetMemMap() = 0;
+//
+//  virtual ~IMemMapSpace(){}
+//  IMemMapSpace(){}
+// private:
+//  DISALLOW_COPY_AND_ASSIGN(IMemMapSpace);
+//};
 
 
-class MemMapSpace : public IMemMapSpace, public ContinuousSpace {
- public:
-  // Maximum which the mapped space can grow to.
-  virtual size_t Capacity() const {
-    return mem_map_->Size();
-  }
 
-  // Size of the space without a limit on its growth. By default this is just the Capacity, but
-  // for the allocation space we support starting with a small heap and then extending it.
-  virtual size_t NonGrowthLimitCapacity() const {
-    return Capacity();
-  }
 
- protected:
-  MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
-              GcRetentionPolicy gc_retention_policy)
-      : ContinuousSpace(name, gc_retention_policy,
-                        mem_map->Begin(), mem_map->Begin() + initial_size),
-        mem_map_(mem_map) {
-  }
-
-  MEM_MAP* GetMemMap() {
-    return mem_map_.get();
-  }
-
-  const MEM_MAP* GetMemMap() const {
-    return mem_map_.get();
-  }
-
- private:
-  // Underlying storage of the space
-  UniquePtr<MEM_MAP> mem_map_;
-
-  DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
-};
+//class MemMapSpace : public IMemMapSpace, public ContinuousSpace {
+// public:
+//  // Maximum which the mapped space can grow to.
+//  virtual size_t Capacity() const {
+//    return mem_map_->Size();
+//  }
+//
+//  // Size of the space without a limit on its growth. By default this is just the Capacity, but
+//  // for the allocation space we support starting with a small heap and then extending it.
+//  virtual size_t NonGrowthLimitCapacity() const {
+//    return Capacity();
+//  }
+//
+// protected:
+//  MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
+//              GcRetentionPolicy gc_retention_policy)
+//      : ContinuousSpace(name, gc_retention_policy,
+//                        mem_map->Begin(), mem_map->Begin() + initial_size),
+//        mem_map_(mem_map) {
+//  }
+//
+//  MEM_MAP* GetMemMap() {
+//    return mem_map_.get();
+//  }
+//
+//  const MEM_MAP* GetMemMap() const {
+//    return mem_map_.get();
+//  }
+//
+// private:
+//  // Underlying storage of the space
+//  UniquePtr<MEM_MAP> mem_map_;
+//
+//  DISALLOW_COPY_AND_ASSIGN(MemMapSpace);
+//};
 
 
 class IDlMallocSpace : public AllocSpace {
@@ -690,17 +690,17 @@ class IDlMallocSpace : public AllocSpace {
 };//IDlMallocSpace
 
 
-class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
-    public  InterfaceSpace, public IDlMallocSpace {
-public:
-
-
-protected:
-  virtual ~AbstractDLmallocSpace() {}
-  AbstractDLmallocSpace(){}
-  //virtual ~AbstractDLmallocSpace() {}
-};
-
+//class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
+//    public  InterfaceSpace, public IDlMallocSpace {
+//public:
+//
+//
+//protected:
+//  virtual ~AbstractDLmallocSpace() {}
+//  AbstractDLmallocSpace(){}
+//  //virtual ~AbstractDLmallocSpace() {}
+//};
+//
 class SharableSpace {
 
 };
