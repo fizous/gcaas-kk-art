@@ -126,6 +126,8 @@ class InterfaceSpace {
 
 
   virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
+  virtual ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace() = 0;
+
 
   // Is this the space allocated into by the Zygote and no-longer in use?
   virtual bool IsZygoteSpace() const {
@@ -181,7 +183,7 @@ class Space : public InterfaceSpace {
   ImageSpace* AsImageSpace();
   DL_MALLOC_SPACE* AsDlMallocSpace();
   LargeObjectSpace* AsLargeObjectSpace();
-
+  ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace();
   virtual ~Space() {}
 
 

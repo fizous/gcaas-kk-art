@@ -169,7 +169,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     space::ImageSpace* image_space = space::ImageSpace::Create(image_file_name);
     CHECK(image_space != NULL) << "Failed to create space for " << image_file_name;
     GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " <<   image_file_name;
-    AddContinuousSpace(image_space);
+    AddContinuousSpace(image_space->AsAbstractContSpace());
     // Oat files referenced by image files immediately follow them in memory, ensure alloc space
     // isn't going to get in the middle
     byte* oat_file_end_addr = image_space->GetImageHeader().GetOatFileEnd();
@@ -190,7 +190,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
                                               requested_alloc_space_begin);
   CHECK(alloc_space_ != NULL) << "Failed to create alloc space";
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
-  AddContinuousSpace(alloc_space_);
+  AddContinuousSpace(alloc_space_->AsAbstractContSpace());
 
   // Allocate the large object space.
   if(!GC_HEAP_SRVCE_NO_LOS) {

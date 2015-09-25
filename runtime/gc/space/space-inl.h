@@ -41,6 +41,11 @@ inline LargeObjectSpace* Space::AsLargeObjectSpace() {
   return reinterpret_cast<LargeObjectSpace*>(this);
 }
 
+
+ABSTRACT_CONTINUOUS_SPACE_T* Space::AsAbstractContSpace() {
+  return down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(down_cast<IMemMapSpace*>(this));
+}
+
 }  // namespace space
 }  // namespace gc
 }  // namespace art
