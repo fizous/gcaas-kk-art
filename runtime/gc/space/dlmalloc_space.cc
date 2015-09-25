@@ -242,7 +242,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
         << " ) " << *space;
   }
-  return space->AsAbstractDlMalloc();
+  return space;
 }
 
 void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_t initial_size) {
@@ -359,7 +359,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   VLOG(heap) << "zygote space creation done";
-  return alloc_space->AsAbstractDlMalloc();
+  return alloc_space;
 }
 
 mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
