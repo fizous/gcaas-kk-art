@@ -280,8 +280,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
 
 
-  // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
-  Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+//  // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
+//  Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
 
 //  // Underlying malloc space
 //  void* const mspace_;

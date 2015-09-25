@@ -120,6 +120,8 @@ typedef struct GCSrvDlMallocSpace_S {
   size_t total_bytes_allocated_;
   size_t total_objects_allocated_;
 
+  static size_t bitmap_index_;
+
   // Underlying malloc space
   void* mspace_;
 
@@ -132,7 +134,9 @@ typedef struct GCSrvDlMallocSpace_S {
   // one time by a call to ClearGrowthLimit.
   size_t growth_limit_;
 
-  static size_t bitmap_index_;
+
+  // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
+  Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
 
