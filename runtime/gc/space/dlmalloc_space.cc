@@ -136,7 +136,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
 
-  dlmalloc_space_data_->lock_ = new Mutex("allocation space lock", kAllocSpaceLock);
+  dlmalloc_space_data_->lock_ = new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
   dlmalloc_space_data_->recent_free_pos_ = 0;
   dlmalloc_space_data_->num_bytes_allocated_ = 0;
   dlmalloc_space_data_->num_objects_allocated_ = 0;
