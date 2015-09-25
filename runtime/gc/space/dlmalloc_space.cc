@@ -130,13 +130,13 @@ size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem)
-    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect) {//,
-      //lock_("allocation space lock", kAllocSpaceLock) {
+    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),// {//,
+      lock_data_("allocation space lock", kAllocSpaceLock) {
   LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
   dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
 
-  dlmalloc_space_data_->lock_ = new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
+  dlmalloc_space_data_->lock_ = &lock_data_;//new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
   dlmalloc_space_data_->recent_free_pos_ = 0;
   dlmalloc_space_data_->num_bytes_allocated_ = 0;
   dlmalloc_space_data_->num_objects_allocated_ = 0;
