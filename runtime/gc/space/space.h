@@ -313,7 +313,7 @@ class DiscontinuousSpace : public Space {
 
   UniquePtr<accounting::SpaceSetMap> live_objects_;
   UniquePtr<accounting::SpaceSetMap> mark_objects_;
-
+  GcRetentionPolicy gc_retention_policy_;
  private:
   DISALLOW_COPY_AND_ASSIGN(DiscontinuousSpace);
 };
