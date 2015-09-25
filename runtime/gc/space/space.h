@@ -288,7 +288,7 @@ class AbstractContinuousSpace : public IContinuousSpace,
   public InterfaceSpace {
  public:
    AbstractDLmallocSpace* AsAbstractDlMallocSpace(){
-     return reinterpret_cast<AbstractDLmallocSpace*>(down_cast<IContinuousSpace*>(this));
+     return down_cast<AbstractDLmallocSpace*>(down_cast<IContinuousSpace*>(this));
    }
    AbstractContinuousSpace(){}
    virtual ~AbstractContinuousSpace(){}
