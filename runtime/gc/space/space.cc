@@ -26,7 +26,7 @@ Space::Space(const std::string& name)
     : name_(name) { }
 
 void Space::Dump(std::ostream& os) const {
-  os << GetName() << ":" << GetGcRetentionPolicy();
+  os << GetName() ;//<< ":" << GetGcRetentionPolicy();
 }
 
 std::ostream& operator<<(std::ostream& os, const Space& space) {
