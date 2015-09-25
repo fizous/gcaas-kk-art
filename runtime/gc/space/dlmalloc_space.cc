@@ -519,7 +519,7 @@ size_t DlMallocSpace::GCPGetAllocationSize(const mirror::Object* obj){
 
 size_t DlMallocSpace::Trim() {
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
-  MutexLock mu(Thread::Current(), lock_);
+  MutexLock mu(Thread::Current(), dlmalloc_space_data_->lock_);
   // Trim to release memory at the end of the space.
   mspace_trim(GetMspace(), 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
