@@ -158,7 +158,7 @@ class Space {
 
  virtual void SetGcRetentionPolicy(GcRetentionPolicy gc_retention_policy) = 0;
 
- Space(const std::string& name): name_(name){}
+ Space(const std::string& name);
  virtual ~Space() {}
 
  protected:
