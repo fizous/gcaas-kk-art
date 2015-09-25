@@ -259,11 +259,11 @@ static void VMDebug_getHeapSpaceStats(JNIEnv* env, jclass, jlongArray data) {
   size_t largeObjectsUsed = 0;
 
   gc::Heap* heap = Runtime::Current()->GetHeap();
-  const std::vector<gc::space::ContinuousSpace*>& continuous_spaces = heap->GetContinuousSpaces();
+  const std::vector<gc::space::ABSTRACT_CONTINUOUS_SPACE_T*>& continuous_spaces = heap->GetContinuousSpaces();
   const std::vector<gc::space::DiscontinuousSpace*>& discontinuous_spaces = heap->GetDiscontinuousSpaces();
-  typedef std::vector<gc::space::ContinuousSpace*>::const_iterator It;
+  typedef std::vector<gc::space::ABSTRACT_CONTINUOUS_SPACE_T*>::const_iterator It;
   for (It it = continuous_spaces.begin(), end = continuous_spaces.end(); it != end; ++it) {
-    gc::space::ContinuousSpace* space = *it;
+    gc::space::ABSTRACT_CONTINUOUS_SPACE_T* space = *it;
     if (space->IsImageSpace()) {
       // Currently don't include the image space.
     } else if (space->IsZygoteSpace()) {
