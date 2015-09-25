@@ -125,7 +125,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
   DISALLOW_COPY_AND_ASSIGN(ValgrindDlMallocSpace);
 };
 
-size_t DlMallocSpace::bitmap_index_ = 0;
+//size_t DlMallocSpace::bitmap_index_ = 0;
 size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
