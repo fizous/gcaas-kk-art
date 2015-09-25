@@ -41,10 +41,12 @@
  #define GC_HEAP_SRVCE_NO_LOS     true
  #define DL_MALLOC_SPACE DlMallocSpace
  #ifndef DLMALLOC_SPACE_T
-  #define DLMALLOC_SPACE_T AbstractDLmallocSpace
+  #define DLMALLOC_SPACE_T DlMallocSpace
+//AbstractDLmallocSpace
  #endif
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T
-#define ABSTRACT_CONTINUOUS_SPACE_T AbstractContinuousSpace
+#define ABSTRACT_CONTINUOUS_SPACE_T ContinuousSpace
+//AbstractContinuousSpace
 #endif
  #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
