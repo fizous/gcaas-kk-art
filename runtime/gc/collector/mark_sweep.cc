@@ -97,9 +97,9 @@ void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
     SetImmuneRange(reinterpret_cast<Object*>(space->Begin()),
                    reinterpret_cast<Object*>(space->End()));
   } else {
-    const space::ContinuousSpace* prev_space = nullptr;
+    const space::ABSTRACT_CONTINUOUS_SPACE_T* prev_space = nullptr;
     // Find out if the previous space is immune.
-    for (space::ContinuousSpace* cur_space : GetHeap()->GetContinuousSpaces()) {
+    for (space::ABSTRACT_CONTINUOUS_SPACE_T* cur_space : GetHeap()->GetContinuousSpaces()) {
       if (cur_space == space) {
         break;
       }
