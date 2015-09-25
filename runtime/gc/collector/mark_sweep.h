@@ -50,7 +50,7 @@ namespace accounting {
 #if (true || ART_GC_SERVICE)
 #define SPACE_BITMAP BaseBitmap
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T
-#define ABSTRACT_CONTINUOUS_SPACE_T AbstractContinuousSpace
+#define ABSTRACT_CONTINUOUS_SPACE_T ContinuousSpace
 #endif
 #else
 #define SPACE_BITMAP SpaceBitmap

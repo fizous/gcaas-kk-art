@@ -286,15 +286,15 @@ class IContinuousSpace {
 };
 
 
-class AbstractContinuousSpace : public IContinuousSpace,
-  public InterfaceSpace {
- public:
-   AbstractDLmallocSpace* AsAbstractDlMallocSpace(){
-     return down_cast<AbstractDLmallocSpace*>(down_cast<IContinuousSpace*>(this));
-   }
-   AbstractContinuousSpace(){}
-   virtual ~AbstractContinuousSpace(){}
-};
+//class AbstractContinuousSpace : public IContinuousSpace,
+//  public InterfaceSpace {
+// public:
+//   AbstractDLmallocSpace* AsAbstractDlMallocSpace(){
+//     return down_cast<AbstractDLmallocSpace*>(down_cast<IContinuousSpace*>(this));
+//   }
+//   AbstractContinuousSpace(){}
+//   virtual ~AbstractContinuousSpace(){}
+//};
 // Continuous spaces have bitmaps, and an address range. Although not required, objects within
 // continuous spaces can be marked in the card table.
 class ContinuousSpace : public IContinuousSpace, public Space {
@@ -465,7 +465,7 @@ class IDlMallocSpace : public AllocSpace {
     return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
   }
 
-  virtual AbstractContinuousSpace* AsAbstractContinuousSpace() = 0;
+  //virtual AbstractContinuousSpace* AsAbstractContinuousSpace() = 0;
 
  protected:
   IDlMallocSpace(){}
