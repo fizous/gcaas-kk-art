@@ -31,6 +31,7 @@ Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
   LOG(ERROR) << "Done Copying..." << space_data_->name_;
   space_data_->name_[name.size()] = '\0';
   space_data_->gc_retention_policy_ = gc_retention_policy;
+  LOG(ERROR) << "Leaving Space Constructor";
 }
 
 
@@ -47,12 +48,15 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
 ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 GCSrvceContinuousSpace* cont_space_data) :
-    Space(name, gc_retention_policy, &(cont_space_data->space_header_)) {
-  if(cont_space_data == NULL) {
+    Space(name, gc_retention_policy, &(cont_space_data->space_header_)),
+                                          cont_space_data_(cont_space_data) {
+  if(cont_space_data_ == NULL) {
     LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
     cont_space_data_ =
         reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));
+  } else {
+    LOG(ERROR) << "XXXX Continuous space was not null XXXXX" ;
   }
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
