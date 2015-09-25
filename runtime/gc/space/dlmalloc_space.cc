@@ -175,7 +175,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
       Begin(), Capacity()));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
 #endif
-  for (auto& freed : recent_freed_objects_) {
+  for (auto& freed : dlmalloc_space_data_->recent_freed_objects_) {
     freed.first = nullptr;
     freed.second = nullptr;
   }
@@ -380,8 +380,8 @@ mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
   if (kRecentFreeCount > 0) {
     for (size_t i = 0; i + 1 < kRecentFreeCount + 1; ++i) {
       pos = pos != 0 ? pos - 1 : kRecentFreeMask;
-      if (recent_freed_objects_[pos].first == obj) {
-        return recent_freed_objects_[pos].second;
+      if (dlmalloc_space_data_->recent_freed_objects_[pos].first == obj) {
+        return dlmalloc_space_data_->recent_freed_objects_[pos].second;
       }
     }
   }
@@ -389,8 +389,8 @@ mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
 }
 
 void DlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
-  recent_freed_objects_[GetRecentFreePos()].first = ptr;
-  recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
+  dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].first = ptr;
+  dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
   SetRecentFreePos((GetRecentFreePos() + 1) & kRecentFreeMask);
 }
 

@@ -248,7 +248,9 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 //  AbstractDLmallocSpace* AsAbstractDlMalloc() {
 //    return reinterpret_cast<AbstractDLmallocSpace*>(this);
 //  }
-
+  // Recent allocation buffer.
+  static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
+  static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
@@ -264,10 +266,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
   UniquePtr<accounting::SPACE_BITMAP> mark_bitmap_;
   UniquePtr<accounting::SPACE_BITMAP> temp_bitmap_;
-  // Recent allocation buffer.
-  static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
-  static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
-  std::pair<const mirror::Object*, mirror::Class*> recent_freed_objects_[kRecentFreeCount];
+
+  //std::pair<const mirror::Object*, mirror::Class*> recent_freed_objects_[kRecentFreeCount];
 //  size_t recent_free_pos_;
 //
 //  // Approximate number of bytes which have been allocated into the space.
