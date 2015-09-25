@@ -256,7 +256,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
   mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
-      EXCLUSIVE_LOCKS_REQUIRED(lock_);
+      EXCLUSIVE_LOCKS_REQUIRED(*dlmalloc_space_data_->lock_);
   bool Init(size_t initial_size, size_t maximum_size, size_t growth_size, byte* requested_base);
   void RegisterRecentFree(mirror::Object* ptr);
 
