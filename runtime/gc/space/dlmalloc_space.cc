@@ -130,10 +130,18 @@ size_t DlMallocSpace::bitmap_index_ = 0;
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
-      recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
-      total_bytes_allocated_(0), total_objects_allocated_(0),
-      lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
-      growth_limit_(growth_limit) {
+      lock_("allocation space lock", kAllocSpaceLock) {
+
+  dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
+      SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
+  dlmalloc_space_data_->recent_free_pos_ = 0;
+  dlmalloc_space_data_->num_bytes_allocated_ = 0;
+  dlmalloc_space_data_->num_objects_allocated_ = 0;
+  dlmalloc_space_data_->total_bytes_allocated_ = 0;
+  dlmalloc_space_data_->total_objects_allocated_= 0;
+  dlmalloc_space_data_->mspace_ = mspace;
+  dlmalloc_space_data_->growth_limit_ = growth_limit;
+
   CHECK(mspace != NULL);
 
   size_t bitmap_index = bitmap_index_++;
@@ -363,7 +371,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
 }
 
 mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
-  size_t pos = recent_free_pos_;
+  size_t pos = GetRecentFreePos();
   // Start at the most recently freed object and work our way back since there may be duplicates
   // caused by dlmalloc reusing memory.
   if (kRecentFreeCount > 0) {
@@ -378,9 +386,9 @@ mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
 }
 
 void DlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
-  recent_freed_objects_[recent_free_pos_].first = ptr;
-  recent_freed_objects_[recent_free_pos_].second = ptr->GetClass();
-  recent_free_pos_ = (recent_free_pos_ + 1) & kRecentFreeMask;
+  recent_freed_objects_[GetRecentFreePos()].first = ptr;
+  recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
+  SetRecentFreePos((GetRecentFreePos() + 1) & kRecentFreeMask);
 }
 
 

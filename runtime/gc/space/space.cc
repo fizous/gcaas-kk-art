@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
 
 DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
                                        GcRetentionPolicy gc_retention_policy) :
-    Space(name, gc_retention_policy),
+    Space(name, gc_retention_policy, Space::AllocateSpaceData()),
     live_objects_(new accounting::SpaceSetMap("large live objects")),
     mark_objects_(new accounting::SpaceSetMap("large marked objects")) {
 }

@@ -128,7 +128,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   void* MoreCore(intptr_t increment);
 
   void* GetMspace() const {
-    return mspace_;
+    return dlmalloc_space_data_->mspace_;
   }
 
   // Hands unused pages back to the system.
@@ -158,7 +158,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   // Override capacity so that we only return the possibly limited capacity
   size_t Capacity() const {
-    return growth_limit_;
+    return dlmalloc_space_data_->growth_limit_;
   }
 
   // The total amount of memory reserved for the alloc space.
@@ -186,35 +186,44 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   DLMALLOC_SPACE_T* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
 
   virtual uint64_t GetBytesAllocated() const {
-    return num_bytes_allocated_;
+    return dlmalloc_space_data_->num_bytes_allocated_;
   }
 
   virtual uint64_t GetObjectsAllocated() const {
-    return num_objects_allocated_;
+    return dlmalloc_space_data_->num_objects_allocated_;
   }
 
   virtual uint64_t GetTotalBytesAllocated() const {
-    return total_bytes_allocated_;
+    return dlmalloc_space_data_->total_bytes_allocated_;
   }
 
   virtual uint64_t GetTotalObjectsAllocated() const {
-    return total_objects_allocated_;
+    return dlmalloc_space_data_->total_objects_allocated_;
   }
 
   virtual void UpdateBytesAllocated(int delta) {
-    num_bytes_allocated_ += delta;
+    dlmalloc_space_data_->num_bytes_allocated_ += delta;
   }
 
   virtual void UpdateObjectsAllocated(int delta) {
-    num_objects_allocated_ += delta;
+    dlmalloc_space_data_->num_objects_allocated_ += delta;
   }
 
   virtual void UpdateTotalBytesAllocated(int delta) {
-    total_bytes_allocated_ += delta;
+    dlmalloc_space_data_->total_bytes_allocated_ += delta;
   }
 
   virtual void UpdateTotalObjectsAllocated(int delta) {
-    total_objects_allocated_ += delta;
+    dlmalloc_space_data_->total_objects_allocated_ += delta;
+  }
+
+
+  size_t GetRecentFreePos(){
+    return dlmalloc_space_data_->recent_free_pos_;
+  }
+
+  void SetRecentFreePos(size_t newVal){
+    dlmalloc_space_data_->recent_free_pos_ = newVal;
   }
 
   // Returns the class of a recently freed object.
@@ -223,9 +232,12 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
 
   virtual void SetInternalGrowthLimit(size_t new_growth_limit) {
-    growth_limit_ = new_growth_limit;
+    dlmalloc_space_data_->growth_limit_ = new_growth_limit;
   }
 
+
+
+  GCSrvDlMallocSpace* dlmalloc_space_data_;
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
 
@@ -256,13 +268,13 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
   static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
   std::pair<const mirror::Object*, mirror::Class*> recent_freed_objects_[kRecentFreeCount];
-  size_t recent_free_pos_;
-
-  // Approximate number of bytes which have been allocated into the space.
-  size_t num_bytes_allocated_;
-  size_t num_objects_allocated_;
-  size_t total_bytes_allocated_;
-  size_t total_objects_allocated_;
+//  size_t recent_free_pos_;
+//
+//  // Approximate number of bytes which have been allocated into the space.
+//  size_t num_bytes_allocated_;
+//  size_t num_objects_allocated_;
+//  size_t total_bytes_allocated_;
+//  size_t total_objects_allocated_;
 
   static size_t bitmap_index_;
 
@@ -271,8 +283,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
   Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
 
-  // Underlying malloc space
-  void* const mspace_;
+//  // Underlying malloc space
+//  void* const mspace_;
 
   // The capacity of the alloc space until such time that ClearGrowthLimit is called.
   // The underlying mem_map_ controls the maximum size we allow the heap to grow to. The growth
@@ -281,7 +293,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   // will be set to a lower value. The growth_limit_ is used as the capacity of the alloc_space_,
   // however, capacity normally can't vary. In the case of the growth_limit_ it can be cleared
   // one time by a call to ClearGrowthLimit.
-  size_t growth_limit_;
+//  size_t growth_limit_;
 
   friend class collector::MarkSweep;
 

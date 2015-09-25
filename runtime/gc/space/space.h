@@ -110,6 +110,33 @@ typedef struct GCSrvceContinuousSpace_S {
 }  __attribute__((aligned(8))) GCSrvceContinuousSpace;
 
 
+
+typedef struct GCSrvDlMallocSpace_S {
+
+  size_t recent_free_pos_;
+  // Approximate number of bytes which have been allocated into the space.
+  size_t num_bytes_allocated_;
+  size_t num_objects_allocated_;
+  size_t total_bytes_allocated_;
+  size_t total_objects_allocated_;
+
+  // Underlying malloc space
+  void* mspace_;
+
+  // The capacity of the alloc space until such time that ClearGrowthLimit is called.
+  // The underlying mem_map_ controls the maximum size we allow the heap to grow to. The growth
+  // limit is a value <= to the mem_map_ capacity used for ergonomic reasons because of the zygote.
+  // Prior to forking the zygote the heap will have a maximally sized mem_map_ but the growth_limit_
+  // will be set to a lower value. The growth_limit_ is used as the capacity of the alloc_space_,
+  // however, capacity normally can't vary. In the case of the growth_limit_ it can be cleared
+  // one time by a call to ClearGrowthLimit.
+  size_t growth_limit_;
+}__attribute__((aligned(8))) GCSrvDlMallocSpace;
+
+
+
+
+
 #if (true || ART_GC_SERVICE)
 
 
@@ -176,6 +203,10 @@ class Space {
   // Return the storage space required by obj.
   virtual size_t GCPGetAllocationSize(const mirror::Object*){return 0;}
 
+  static GCSrvceSpace* AllocateSpaceData() {
+    return reinterpret_cast<GCSrvceSpace*>(calloc(1,
+        SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSpace)));
+  }
   GCSrvceSpace* space_data_;
  protected:
   Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
