@@ -49,6 +49,9 @@ namespace accounting {
   typedef AtomicStack<mirror::Object*> ObjectStack;
 #if (true || ART_GC_SERVICE)
 #define SPACE_BITMAP BaseBitmap
+#ifndef ABSTRACT_CONTINUOUS_SPACE_T
+#define ABSTRACT_CONTINUOUS_SPACE_T AbstractContinuousSpace
+#endif
 #else
 #define SPACE_BITMAP SpaceBitmap
 #endif
