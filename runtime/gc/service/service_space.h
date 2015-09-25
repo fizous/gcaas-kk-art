@@ -21,21 +21,21 @@ namespace space {
 static constexpr size_t kRecentFreeCountService = kDebugSpaces ? (1 << 16) : 0;
 static constexpr size_t kRecentFreeMaskService = kRecentFreeCountService - 1;
 
-typedef struct GCSrvceSpace_S {
-  char name_[64];
-  // When should objects within this space be reclaimed? Not constant as we vary it in the case
-  // of Zygote forking.
-  GcRetentionPolicy gc_retention_policy_;
-}  __attribute__((aligned(8))) GCSrvceSpace;
-
-typedef struct GCSrvceContinuousSpace_S {
-  GCSrvceSpace space_header_;
-  // The beginning of the storage for fast access.
-  byte* /*const*/ begin_;
-
-  // Current end of the space.
-  byte* end_;
-}  __attribute__((aligned(8))) GCSrvceContinuousSpace;
+//typedef struct GCSrvceSpace_S {
+//  char name_[64];
+//  // When should objects within this space be reclaimed? Not constant as we vary it in the case
+//  // of Zygote forking.
+//  GcRetentionPolicy gc_retention_policy_;
+//}  __attribute__((aligned(8))) GCSrvceSpace;
+//
+//typedef struct GCSrvceContinuousSpace_S {
+//  GCSrvceSpace space_header_;
+//  // The beginning of the storage for fast access.
+//  byte* /*const*/ begin_;
+//
+//  // Current end of the space.
+//  byte* end_;
+//}  __attribute__((aligned(8))) GCSrvceContinuousSpace;
 
 
 
