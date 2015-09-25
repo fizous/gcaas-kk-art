@@ -184,7 +184,7 @@ class Space : public InterfaceSpace {
   ImageSpace* AsImageSpace();
   DL_MALLOC_SPACE* AsDlMallocSpace();
   LargeObjectSpace* AsLargeObjectSpace();
-  ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace();
+
   virtual ~Space() {}
 
 
@@ -276,6 +276,9 @@ class IContinuousSpace {
     return byte_ptr < End() && byte_ptr >= Begin();
   }
 
+  ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace() {
+    return down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(down_cast<ABSTRACT_CONTINUOUS_SPACE_T*>(this));
+  }
   virtual ~IContinuousSpace() {}
   IContinuousSpace(){}
 };
