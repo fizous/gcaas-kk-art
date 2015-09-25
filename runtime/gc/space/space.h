@@ -127,7 +127,6 @@ class InterfaceSpace {
 
 
   virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
-  virtual ABSTRACT_CONTINUOUS_SPACE_T* AsAbstractContSpace() = 0;
 
 
   // Is this the space allocated into by the Zygote and no-longer in use?
