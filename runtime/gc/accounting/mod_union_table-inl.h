@@ -53,7 +53,7 @@ class ModUnionTableToAllocspace : public ModUnionTableReferenceCache {
     const std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>& spaces = GetHeap()->GetContinuousSpaces();
     typedef std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>::const_iterator It;
     for (It it = spaces.begin(); it != spaces.end(); ++it) {
-      space::ContinuousSpace* space = *it;
+      space::ABSTRACT_CONTINUOUS_SPACE_T* space = *it;
       if (space->Contains(ref)) {
         // The allocation space is always considered for collection whereas the Zygote space is
         //
