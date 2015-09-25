@@ -22,8 +22,8 @@ namespace art {
 namespace gc {
 namespace space {
 
-Space::Space(const std::string& name)
-    : name_(name) { }
+Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy)
+    : name_(name), gc_retention_policy_(gc_retention_policy) { }
 
 void Space::Dump(std::ostream& os) const {
   os << GetName() << ":" << GetGcRetentionPolicy();
@@ -37,10 +37,9 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
 
 DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
                                        GcRetentionPolicy gc_retention_policy) :
-    Space(name),
+    Space(name, gc_retention_policy),
     live_objects_(new accounting::SpaceSetMap("large live objects")),
-    mark_objects_(new accounting::SpaceSetMap("large marked objects")),
-    gc_retention_policy_(gc_retention_policy) {
+    mark_objects_(new accounting::SpaceSetMap("large marked objects")) {
 }
 
 }  // namespace space

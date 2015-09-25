@@ -236,36 +236,12 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 //  AbstractDLmallocSpace* AsAbstractDlMalloc() {
 //    return reinterpret_cast<AbstractDLmallocSpace*>(this);
 //  }
-  GcRetentionPolicy GetGcRetentionPolicy() const {
-    return gc_retention_policy_;
-  }
-
-  byte* Begin() const {
-    return begin_;
-  }
-
-  // Address at which the space ends, which may vary as the space is filled.
-  byte* End() const {
-    return end_;
-  }
-
-  void SetEnd(byte* new_end)  {
-    end_ = new_end;
-  }
 
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
   ~DlMallocSpace(){}
  private:
-  GcRetentionPolicy gc_retention_policy_;
-  // The beginning of the storage for fast access.
-  byte* const begin_;
-
-  // Current end of the space.
-  byte* end_;
-
-
   size_t InternalAllocationSize(const mirror::Object* obj);
   mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
       EXCLUSIVE_LOCKS_REQUIRED(lock_);
