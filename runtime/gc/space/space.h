@@ -69,7 +69,8 @@ class ABSTRACT_CONTINUOUS_SPACE_T;
 class DLMALLOC_SPACE_T;
 
 static constexpr bool kDebugSpaces = kIsDebugBuild;
-
+static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
+static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
 // See Space::GetGcRetentionPolicy.
 enum GcRetentionPolicy {
   // Objects are retained forever with this policy for a space.
@@ -139,7 +140,7 @@ typedef struct GCSrvDlMallocSpace_S {
   Mutex* lock_ ;//DEFAULT_MUTEX_ACQUIRED_AFTER;
 
   std::pair<const mirror::Object*, mirror::Class*>
-                    recent_freed_objects_[DlMallocSpace::kRecentFreeCount];
+                    recent_freed_objects_[kRecentFreeCount];
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
 
