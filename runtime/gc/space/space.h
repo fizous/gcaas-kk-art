@@ -64,6 +64,7 @@ class DL_MALLOC_SPACE;
 class ImageSpace;
 class LargeObjectSpace;
 class AbstractContinuousSpace;
+class AbstractDLmallocSpace;
 
 static constexpr bool kDebugSpaces = kIsDebugBuild;
 
