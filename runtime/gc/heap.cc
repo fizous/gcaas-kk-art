@@ -398,7 +398,7 @@ void Heap::ListenForProcessStateChange() {
   }
 }
 
-void Heap::AddContinuousSpace(space::ContinuousSpace* space) {
+void Heap::AddContinuousSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
   DCHECK(space != NULL);
   DCHECK(space->GetLiveBitmap() != NULL);
@@ -412,7 +412,7 @@ void Heap::AddContinuousSpace(space::ContinuousSpace* space) {
 
   // Ensure that spaces remain sorted in increasing order of start address (required for CMS finger)
   std::sort(continuous_spaces_.begin(), continuous_spaces_.end(),
-            [](const space::ContinuousSpace* a, const space::ContinuousSpace* b) {
+            [](const space::ABSTRACT_CONTINUOUS_SPACE_T* a, const space::ABSTRACT_CONTINUOUS_SPACE_T* b) {
               return a->Begin() < b->Begin();
             });
 
