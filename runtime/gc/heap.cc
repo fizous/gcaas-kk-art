@@ -407,7 +407,7 @@ void Heap::AddContinuousSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   mark_bitmap_->AddContinuousSpaceBitmap(space->GetMarkBitmap());
   continuous_spaces_.push_back(space);
   if (space->IsDlMallocSpace() && !space->IsLargeObjectSpace()) {
-    alloc_space_ = space->AsDlMallocSpace();
+    alloc_space_ = space->AsAbstractDlMallocSpace();//;space->AsDlMallocSpace();
   }
 
   // Ensure that spaces remain sorted in increasing order of start address (required for CMS finger)

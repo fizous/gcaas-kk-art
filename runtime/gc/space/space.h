@@ -127,7 +127,7 @@ class InterfaceSpace {
 
 
   virtual DL_MALLOC_SPACE* AsDlMallocSpace() = 0;
-
+  virtual DL_MALLOC_SPACE_T* AsDlMallocSpace() = 0;
 
   // Is this the space allocated into by the Zygote and no-longer in use?
   virtual bool IsZygoteSpace() const {
@@ -286,6 +286,9 @@ class IContinuousSpace {
 class AbstractContinuousSpace : public IContinuousSpace,
   public InterfaceSpace {
  public:
+   AbstractDLmallocSpace* AsAbstractDlMallocSpace(){
+     return reinterpret_cast<AbstractDLmallocSpace*>(down_cast<IContinuousSpace*>(this));
+   }
    AbstractContinuousSpace(){}
    virtual ~AbstractContinuousSpace(){}
 };
@@ -460,6 +463,7 @@ class IDlMallocSpace : public AllocSpace {
   }
 
   virtual AbstractContinuousSpace* AsAbstractContinuousSpace() = 0;
+
  protected:
   IDlMallocSpace(){}
   virtual ~IDlMallocSpace(){}
@@ -471,7 +475,7 @@ class IDlMallocSpace : public AllocSpace {
 class AbstractDLmallocSpace: public IMemMapSpace, public IContinuousSpace,
     public  InterfaceSpace, public IDlMallocSpace {
 public:
-  virtual AbstractDLmallocSpace* AsAbstractDlMalloc() = 0;
+
 
 protected:
   virtual ~AbstractDLmallocSpace() {}

@@ -36,6 +36,9 @@ inline DL_MALLOC_SPACE* Space::AsDlMallocSpace() {
   return down_cast<DL_MALLOC_SPACE*>(down_cast<MemMapSpace*>(this));
 }
 
+
+
+
 inline LargeObjectSpace* Space::AsLargeObjectSpace() {
   DCHECK_EQ(GetType(), kSpaceTypeLargeObjectSpace);
   return reinterpret_cast<LargeObjectSpace*>(this);
