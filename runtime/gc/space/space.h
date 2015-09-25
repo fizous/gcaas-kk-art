@@ -136,7 +136,7 @@ typedef struct GCSrvDlMallocSpace_S {
 
 
   // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
-  Mutex lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  Mutex* lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
 
