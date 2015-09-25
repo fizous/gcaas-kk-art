@@ -270,8 +270,9 @@ class ContinuousSpace : public Space {
                   byte* begin, byte* end,
                   GCSrvceContinuousSpace* cont_space_data = NULL) :
       Space(name, gc_retention_policy,
-          cont_space_data == NULL ? NULL : &cont_space_data->space_header_) {
+          cont_space_data == NULL ? NULL : &(cont_space_data->space_header_)) {
     if(cont_space_data == NULL) {
+      LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
       cont_space_data_ =
           reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
               SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));

@@ -23,7 +23,8 @@ namespace gc {
 namespace space {
 
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
-    GCSrvceSpace* memory_alloc) : space_data_(memory_alloc){
+    GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
+  LOG(ERROR) << "Space::Space --> memory_alloc ? " << memory_alloc != NULL ? "true" : "False";
   strcpy(space_data_->name_, name.c_str());
   space_data_->gc_retention_policy_ = gc_retention_policy;
 }
