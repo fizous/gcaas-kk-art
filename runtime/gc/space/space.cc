@@ -24,9 +24,12 @@ namespace space {
 
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
+  LOG(ERROR) << "string length = " << name.length() << "size is: " << name.size();
+
   LOG(ERROR) << "Space::Space --> memory_alloc ? " << (memory_alloc != NULL ? "true" : "False");
-  strncpy(space_data_->name_, name.c_str(), name.length());
-  space_data_->name_[name.length()] = '\0';
+  memcpy(space_data_->name_, name.c_str(), name.size());
+  LOG(ERROR) << "Done Copying..." << space_data_->name_;
+  space_data_->name_[name.size()] = '\0';
   space_data_->gc_retention_policy_ = gc_retention_policy;
 }
 
