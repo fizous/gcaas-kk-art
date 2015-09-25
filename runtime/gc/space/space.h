@@ -65,8 +65,8 @@ namespace space {
 class DL_MALLOC_SPACE;
 class ImageSpace;
 class LargeObjectSpace;
-class AbstractContinuousSpace;
-class AbstractDLmallocSpace;
+class ABSTRACT_CONTINUOUS_SPACE_T;
+class DLMALLOC_SPACE_T;
 
 static constexpr bool kDebugSpaces = kIsDebugBuild;
 
