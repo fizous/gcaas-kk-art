@@ -380,9 +380,17 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
         alloc_space_name);
   }
-  DL_MALLOC_SPACE* alloc_space =
-      new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
-          growth_limit, shareMem);
+  DL_MALLOC_SPACE* alloc_space = NULL;
+  if(shareMem) {
+    alloc_space =
+        new SharableDlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
+            growth_limit, shareMem, SharableDlMallocSpace::AllocateDataMemory());
+  } else {
+    alloc_space =
+          new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
+              growth_limit, shareMem);
+  }
+
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
   mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
@@ -653,10 +661,13 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* m
         begin, end, growth_limit, shareMem),
         sharable_space_data_(sharable_data),
         dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
-  //CreateBitmaps();
+
 }
 
-
+GCSrvSharableDlMallocSpace* SharableDlMallocSpace::AllocateDataMemory(void) {
+  return reinterpret_cast<GCSrvSharableDlMallocSpace*>(
+      calloc(1, SERVICE_ALLOC_ALIGN_BYTE(GCSrvSharableDlMallocSpace)));
+}
 ///*
 // * Initialize a HeapBitmap so that it points to a bitmap large
 // * enough to cover a heap at <base> of <maxSize> bytes, where
