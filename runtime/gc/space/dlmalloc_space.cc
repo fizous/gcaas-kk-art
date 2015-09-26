@@ -149,7 +149,7 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
        dlmalloc_space_data_->bitmap_index_;
 
 
-   LOG(ERROR) << "Inside DlMallocSpace::CreateBitmaps .. index: " <<
+   LOG(ERROR) << "Inside DlMallocSpace::CreateBitmaps .." << GetName() << " index: " <<
        dlmalloc_space_data_->bitmap_index_;
    return _result;
 }
@@ -731,7 +731,7 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
            , Begin(), Capacity(), shareMem)));
    DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #"
        << dlmalloc_space_data_->bitmap_index_;
-   LOG(ERROR) << "Inside SharableDlMallocSpace::CreateSharableBitmaps .. index: " <<
+   LOG(ERROR) << "Inside SharableDlMallocSpace::CreateSharableBitmaps " << GetName() << ".. index: " <<
        dlmalloc_space_data_->bitmap_index_;
    return _result;
 
