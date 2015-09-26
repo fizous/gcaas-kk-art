@@ -164,7 +164,9 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem,
                        GCSrvDlMallocSpace* space_data_mem)
-    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),// {//,
+    : MemMapSpace(name, mem_map, end - begin,
+        kGcRetentionPolicyAlwaysCollect, space_data_mem == NULL ? NULL :
+            &(space_data_mem->cont_space_data_)),// {//,
       dlmalloc_space_data_(space_data_mem),
       lock_data_("allocation space lock", kAllocSpaceLock) {
 

@@ -113,7 +113,7 @@ typedef struct GCSrvceContinuousSpace_S {
 
 
 typedef struct GCSrvDlMallocSpace_S {
-
+  GCSrvceContinuousSpace cont_space_data_;
   size_t recent_free_pos_;
   // Approximate number of bytes which have been allocated into the space.
   size_t num_bytes_allocated_;
@@ -314,13 +314,8 @@ class MemMapSpace : public ContinuousSpace {
 
  protected:
   MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
-              GcRetentionPolicy gc_retention_policy)
-      : ContinuousSpace(name, gc_retention_policy,
-                        mem_map->Begin(), mem_map->Begin() + initial_size,
-                        ContinuousSpace::AllocateContSpaceMemory()),
-        mem_map_(mem_map) {
-    LOG(ERROR) << "MemMapSpace::MemMapSpace-->done";
-  }
+              GcRetentionPolicy gc_retention_policy,
+              GCSrvceContinuousSpace* cont_space_data = NULL);
 
   MEM_MAP* GetMemMap() {
     return mem_map_.get();

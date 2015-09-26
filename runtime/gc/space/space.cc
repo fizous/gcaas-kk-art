@@ -62,6 +62,16 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
   cont_space_data_->end_ = end;
 }
 
+MemMapSpace::MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
+            GcRetentionPolicy gc_retention_policy, GCSrvceContinuousSpace* cont_space_data)
+    : ContinuousSpace(name, gc_retention_policy,
+                      mem_map->Begin(), mem_map->Begin() + initial_size,
+                      cont_space_data == NULL ?
+                          ContinuousSpace::AllocateContSpaceMemory() : cont_space_data),
+      mem_map_(mem_map) {
+  LOG(ERROR) << "MemMapSpace::MemMapSpace-->done";
+}
+
 
 DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
                                        GcRetentionPolicy gc_retention_policy) :
