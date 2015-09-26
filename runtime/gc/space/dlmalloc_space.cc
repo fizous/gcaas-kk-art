@@ -130,6 +130,11 @@ size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
 bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
     bool shareMem) {
+  if(shareMem) {
+    LOG(ERROR) << "Skipped Creating Bitmaps DlMallocSpace";
+    return true;
+  }
+
   bool _result = true;
   dlmalloc_space_data_->bitmap_index_++;
 
@@ -189,8 +194,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
 #if true || ART_GC_SERVICE
 
-  if(!shareMem)
-    CreateBitmaps(Begin(), Capacity(), shareMem);
+  CreateBitmaps(Begin(), Capacity(), shareMem);
 
 #else
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
@@ -276,8 +280,6 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
                                       growth_limit, initial_size);
   } else {
     space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
-    if(shareMem)
-      space->CreateBitmaps(space->Begin(), space->Capacity(), shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
@@ -407,9 +409,6 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     }
     alloc_space = new DlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem);
-    if(shareMem)
-      alloc_space->CreateBitmaps(alloc_space->Begin(), alloc_space->Capacity(),
-        shareMem);
   }
 
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
@@ -681,19 +680,19 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
     size_t growth_limit, bool shareMem,
     GCSrvSharableDlMallocSpace* sharable_data) :
         DlMallocSpace (name, mem_map, mspace, begin, end, growth_limit,
-            shareMem, &(sharable_space_data_->dlmalloc_space_data_))
+            shareMem, &(sharable_data->dlmalloc_space_data_))
         , sharable_space_data_(sharable_data)
         , dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
 
 
   if(false) {
-  InterProcessMutex* _ipMutex =
-      new InterProcessMutex("shared-alloc space lock",
-          &sharable_space_data_->ip_lock_.futex_head_, kAllocSpaceLock);
-    dlmalloc_space_data_->lock_ = _ipMutex;
-  sharable_space_data_->cond_ =
-      new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
-          &sharable_space_data_->ip_lock_.cond_var_);
+    InterProcessMutex* _ipMutex =
+        new InterProcessMutex("shared-alloc space lock",
+            &sharable_space_data_->ip_lock_.futex_head_, kAllocSpaceLock);
+      dlmalloc_space_data_->lock_ = _ipMutex;
+    sharable_space_data_->cond_ =
+        new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
+            &sharable_space_data_->ip_lock_.cond_var_);
   }
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
