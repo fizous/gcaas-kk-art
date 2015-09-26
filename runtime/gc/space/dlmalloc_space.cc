@@ -674,12 +674,53 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
   sharable_space_data_->cond_ =
       new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
           &sharable_space_data_->ip_lock_.cond_var_);
+
+  CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
 GCSrvSharableDlMallocSpace* SharableDlMallocSpace::AllocateDataMemory(void) {
   return reinterpret_cast<GCSrvSharableDlMallocSpace*>(
       calloc(1, SERVICE_ALLOC_ALIGN_BYTE(GCSrvSharableDlMallocSpace)));
 }
+
+
+bool SharableDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
+    bool shareMem) {
+  return true;
+
+}
+
+
+bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
+    size_t heap_capacity, bool shareMem) {
+  bool _result = true;
+  dlmalloc_space_data_->bitmap_index_++;
+  accounting::GCSrvceBitmap* _liveP = &sharable_space_data_->live_bitmap_;
+  accounting::GCSrvceBitmap* _markP = &sharable_space_data_->mark_bitmap_;
+  live_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(
+      accounting::SPACE_BITMAP::CreateSharedSpaceBitmap(&_liveP
+          , StringPrintf("allocspace %s live-bitmap %d", GetName()
+              , static_cast<int>(dlmalloc_space_data_->bitmap_index_))
+          , Begin(), Capacity(), shareMem)));
+   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #"
+        << dlmalloc_space_data_->bitmap_index_;
+
+   mark_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(
+       accounting::SPACE_BITMAP::CreateSharedSpaceBitmap(&_markP
+           , StringPrintf("allocspace %s mark-bitmap %d"
+                   , GetName()
+                   , static_cast<int>(dlmalloc_space_data_->bitmap_index_))
+           , Begin(), Capacity(), shareMem)));
+   DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #"
+       << dlmalloc_space_data_->bitmap_index_;
+
+   return _result;
+
+}
+
+
+
+
 ///*
 // * Initialize a HeapBitmap so that it points to a bitmap large
 // * enough to cover a heap at <base> of <maxSize> bytes, where

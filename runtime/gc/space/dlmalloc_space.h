@@ -237,7 +237,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   Mutex* getMu() LOCK_RETURNED(lock_data_) { return reinterpret_cast<Mutex*>(dlmalloc_space_data_->lock_); }
 
-  virtual bool CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem = false);
+  virtual bool CreateBitmaps(byte* heap_begin, size_t heap_capacity,
+      bool shareMem = false);
 
   GCSrvDlMallocSpace* dlmalloc_space_data_;
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
@@ -315,7 +316,10 @@ class SharableDlMallocSpace : public DlMallocSpace {
 //  bool SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
 //      const std::string& name, byte* heap_begin, size_t heap_capacity,
 //      size_t bitmap_size);
-
+  bool CreateBitmaps(byte* heap_begin, size_t heap_capacity,
+        bool shareMem = false);
+  bool CreateSharableBitmaps(byte* heap_begin, size_t heap_capacity,
+      bool shareMem);
   GCSrvSharableDlMallocSpace* sharable_space_data_;
   GCSrvDlMallocSpace* dlmalloc_space_data_;
 
