@@ -308,7 +308,7 @@ mirror::Object* DlMallocSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
 mirror::Object* DlMallocSpace::AllocWithGrowth(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
   mirror::Object* result;
   {
-    MutexLock mu(self, lock_data_);
+    MutexLock mu(self, *getMu());
     // Grow as much as possible within the mspace.
     size_t max_allowed = Capacity();
     mspace_set_footprint_limit(GetMspace(), max_allowed);
@@ -425,7 +425,7 @@ void DlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
 
 
 size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
-  MutexLock mu(self, lock_data_);
+  MutexLock mu(self, *getMu());
   if (kDebugSpaces) {
     CHECK(ptr != NULL);
     CHECK(Contains(ptr)) << "Free (" << ptr << ") not in bounds of heap " << *this;
@@ -463,7 +463,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
   }
 
   if (kRecentFreeCount > 0) {
-    MutexLock mu(self, lock_data_);
+    MutexLock mu(self, *getMu());
     for (size_t i = 0; i < num_ptrs; i++) {
       RegisterRecentFree(ptrs[i]);
     }
@@ -484,7 +484,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
   }
 
   {
-    MutexLock mu(self, lock_data_);
+    MutexLock mu(self, *getMu());
     UpdateBytesAllocated(-bytes_freed);
     UpdateObjectsAllocated(-num_ptrs);//num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
@@ -548,7 +548,7 @@ size_t DlMallocSpace::GCPGetAllocationSize(const mirror::Object* obj){
 
 size_t DlMallocSpace::Trim() {
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
-  MutexLock mu(Thread::Current(), lock_data_);
+  MutexLock mu(Thread::Current(), *getMu());
   // Trim to release memory at the end of the space.
   mspace_trim(GetMspace(), 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
@@ -560,23 +560,23 @@ size_t DlMallocSpace::Trim() {
 
 void DlMallocSpace::Walk(void(*callback)(void *start, void *end, size_t num_bytes, void* callback_arg),
                       void* arg) {
-  MutexLock mu(Thread::Current(), lock_data_);
+  MutexLock mu(Thread::Current(), *getMu());
   mspace_inspect_all(GetMspace(), callback, arg);
   callback(NULL, NULL, 0, arg);  // Indicate end of a space.
 }
 
 size_t DlMallocSpace::GetFootprint() {
-  MutexLock mu(Thread::Current(), lock_data_);
+  MutexLock mu(Thread::Current(), *getMu());
   return mspace_footprint(GetMspace());
 }
 
 size_t DlMallocSpace::GetFootprintLimit() {
-  MutexLock mu(Thread::Current(), lock_data_);
+  MutexLock mu(Thread::Current(), *getMu());
   return mspace_footprint_limit(GetMspace());
 }
 
 void DlMallocSpace::SetFootprintLimit(size_t new_size) {
-  MutexLock mu(Thread::Current(), lock_data_);
+  MutexLock mu(Thread::Current(), *getMu());
   VLOG(heap) << "DLMallocSpace::SetFootprintLimit " << PrettySize(new_size);
   // Compare against the actual footprint, rather than the Size(), because the heap may not have
   // grown all the way to the allowed size yet.
