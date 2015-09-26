@@ -114,6 +114,7 @@ MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr
   StructuredMemMap* _allocated_structured_map =
       new StructuredMemMap(_memory_allocation);
 
+  LOG(ERROR) << "Leaving MemBaseMap::CreateStructedMemMap-->allocating structured memMap";
   return _allocated_structured_map;
 }
 
