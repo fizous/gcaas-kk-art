@@ -235,7 +235,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
     dlmalloc_space_data_->growth_limit_ = new_growth_limit;
   }
 
-
+  virtual bool CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem = false);
 
   GCSrvDlMallocSpace* dlmalloc_space_data_;
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
@@ -249,8 +249,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 //    return reinterpret_cast<AbstractDLmallocSpace*>(this);
 //  }
   // Recent allocation buffer.
-  static constexpr size_t kRecentFreeCount = kDebugSpaces ? (1 << 16) : 0;
-  static constexpr size_t kRecentFreeMask = kRecentFreeCount - 1;
+
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
@@ -299,6 +298,28 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   DISALLOW_COPY_AND_ASSIGN(DlMallocSpace);
 };
+
+
+class SharableDlMallocSpace : public DlMallocSpace {
+ public:
+  SharableDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
+      byte* begin, byte* end, size_t growth_limit, bool shareMem = false,
+      GCSrvSharableDlMallocSpace* sharable_data = NULL);
+
+//  bool CreateBitmaps(byte* heap_begin, size_t heap_capacity);
+//  bool SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
+//      const std::string& name, byte* heap_begin, size_t heap_capacity,
+//      size_t bitmap_size);
+
+  GCSrvSharableDlMallocSpace* sharable_space_data_;
+  GCSrvDlMallocSpace* dlmalloc_space_data_;
+
+
+};//class SharableDlMallocSpace
+
+
+
+
 #else
 // An alloc space is a space where objects may be allocated and garbage collected.
 class DlMallocSpace : public MemMapSpace, public AllocSpace

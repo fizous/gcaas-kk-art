@@ -143,7 +143,15 @@ typedef struct GCSrvDlMallocSpace_S {
                     recent_freed_objects_[kRecentFreeCount];
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
+typedef struct GCSrvSharableDlMallocSpace_S {
 
+  GCSrvDlMallocSpace dlmalloc_space_data_;
+  accounting::GCSrvceBitmap live_bitmap_;
+  accounting::GCSrvceBitmap mark_bitmap_;
+
+
+  SynchronizedLockHead lock_;
+}__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
 
 

@@ -128,6 +128,31 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 //size_t DlMallocSpace::bitmap_index_ = 0;
 size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
+bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
+    bool shareMem) {
+  bool _result = true;
+  dlmalloc_space_data_->bitmap_index_++;
+
+  live_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
+       StringPrintf("allocspace %s live-bitmap %d", GetName(),
+           static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
+       Begin(), Capacity(), shareMem)));
+   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #"
+       << dlmalloc_space_data_->bitmap_index_;
+
+   mark_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
+       StringPrintf("allocspace %s mark-bitmap %d", GetName(),
+           static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
+       Begin(), Capacity(), shareMem)));
+   DCHECK(mark_bitmap_.get() != NULL) <<
+       "could not create allocspace mark bitmap #" <<
+       dlmalloc_space_data_->bitmap_index_;
+
+   return _result;
+}
+
+
+
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),// {//,
@@ -144,7 +169,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   dlmalloc_space_data_->total_objects_allocated_= 0;
   dlmalloc_space_data_->mspace_ = mspace;
   dlmalloc_space_data_->growth_limit_ = growth_limit;
-  dlmalloc_space_data_->bitmap_index_++;
+
   CHECK(mspace != NULL);
 
 
@@ -154,15 +179,8 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
 
 #if true || ART_GC_SERVICE
-  live_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
-       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
-       Begin(), Capacity(), shareMem)));
-   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace live bitmap #" << dlmalloc_space_data_->bitmap_index_;
 
-   mark_bitmap_.reset(reinterpret_cast<accounting::SPACE_BITMAP*>(accounting::SPACE_BITMAP::Create(
-       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(dlmalloc_space_data_->bitmap_index_)),
-       Begin(), Capacity(), shareMem)));
-   DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << dlmalloc_space_data_->bitmap_index_;
+  CreateBitmaps(Begin(), Capacity(), shareMem);
 
 #else
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
@@ -627,6 +645,61 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
     size_t capacity, byte* requested_begin, bool shareMem) {
   return NULL;
 }
+
+
+SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
+    byte* begin, byte* end, size_t growth_limit, bool shareMem,
+    GCSrvSharableDlMallocSpace* sharable_data) : DlMallocSpace (name, mem_map, mspace,
+        begin, end, growth_limit, shareMem),
+        sharable_space_data_(sharable_data),
+        dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
+  CreateBitmaps();
+}
+
+
+///*
+// * Initialize a HeapBitmap so that it points to a bitmap large
+// * enough to cover a heap at <base> of <maxSize> bytes, where
+// * objects are guaranteed to be HB_OBJECT_ALIGNMENT-aligned.
+// */
+//bool SharableDlMallocSpace::SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
+//    const std::string& name, byte* heap_begin, size_t heap_capacity,
+//    size_t bitmap_size) {
+//  std::string _str = StringPrintf("allocspace %s live-bitmap %d", name.c_str(),
+//      static_cast<int>(dlmalloc_space_data_->bitmap_index_));
+//  AShmemMap* _ashmem = MEM_MAP::CreateAShmemMap(&hb->mem_map_, _str.c_str(),
+//      NULL, bitmap_size, PROT_READ | PROT_WRITE);
+//
+//  if (_ashmem == NULL) {
+//    LOG(ERROR) << "Failed to allocate bitmap " << name;
+//    return false;
+//  }
+//  hb->bitmap_begin_ = reinterpret_cast<word*>(MEM_MAP::AshmemBegin(&hb->mem_map_));
+//  hb->bitmap_size_  = bitmap_size;
+//  hb->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
+//
+//  memcpy(hb->name_, name.c_str(), name.size());
+//  hb->name_[name.size()] = '\0';
+//  return true;
+//}
+//
+//bool SharableDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
+//    bool shareMem) {
+//  bool _result = true;
+//  dlmalloc_space_data_->bitmap_index_++;
+//  // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.
+//  size_t bitmap_size =
+//      BitmapOffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+//
+//  _result = SpaceBitmapInit(&sharable_space_data_->live_bitmap_, "live-bitmap", heap_begin,
+//      heap_capacity, bitmap_size);
+//
+//  if(_result) {
+//    _result = SpaceBitmapInit(&sharable_space_data_->mark_bitmap_, "mark-bitmap",
+//                    heap_begin, heap_capacity, bitmap_size);
+//  }
+//  return _result;
+//}
 
 // Swap the live and mark bitmaps of this space. This is used by the GC for
 // concurrent sweeping.
