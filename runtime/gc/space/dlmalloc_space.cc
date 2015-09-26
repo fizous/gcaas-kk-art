@@ -500,7 +500,7 @@ extern "C" void* art_heap_morecore(void* mspace, intptr_t increment) {
 }
 
 void* DlMallocSpace::MoreCore(intptr_t increment) {
-  dlmalloc_space_data_->lock_->AssertHeld(Thread::Current());
+  //dlmalloc_space_data_->lock_->AssertHeld(Thread::Current());
   byte* original_end = End();
   if (increment != 0) {
     VLOG(heap) << "DlMallocSpace::MoreCore " << PrettySize(increment);

@@ -235,6 +235,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
     dlmalloc_space_data_->growth_limit_ = new_growth_limit;
   }
   Mutex* getMu() LOCK_RETURNED(lock_data_) { return reinterpret_cast<Mutex*>(dlmalloc_space_data_->lock_); }
+
   virtual bool CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem = false);
 
   GCSrvDlMallocSpace* dlmalloc_space_data_;
