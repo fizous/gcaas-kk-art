@@ -308,7 +308,7 @@ mirror::Object* DlMallocSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
 mirror::Object* DlMallocSpace::AllocWithGrowth(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
   mirror::Object* result;
   {
-    auto mu(self, *getMu());
+    MutexLock mu(self, *getMu());
     // Grow as much as possible within the mspace.
     size_t max_allowed = Capacity();
     mspace_set_footprint_limit(GetMspace(), max_allowed);
