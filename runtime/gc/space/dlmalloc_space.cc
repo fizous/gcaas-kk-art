@@ -665,7 +665,13 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* m
             shareMem, &(sharable_space_data_->dlmalloc_space_data_))
         , sharable_space_data_(sharable_data)
         , dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
-
+  sharable_space_data_->mu_   =
+      new InterProcessMutex("shared-space mutex",
+          &sharable_space_data_->ip_lock_.futex_head_,
+          "shared-alloc space lock", kAllocSpaceLock);
+  sharable_space_data_->cond_ =
+      new InterProcessConditionVariable("shared-space CondVar", sharable_space_data_->mu_,
+      &sharable_space_data_->ip_lock_.cond_var_);
 }
 
 GCSrvSharableDlMallocSpace* SharableDlMallocSpace::AllocateDataMemory(void) {
