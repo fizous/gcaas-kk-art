@@ -186,7 +186,8 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
 
 #if true || ART_GC_SERVICE
 
-  CreateBitmaps(Begin(), Capacity(), shareMem);
+  if(!shareMem)
+    CreateBitmaps(Begin(), Capacity(), shareMem);
 
 #else
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
@@ -272,6 +273,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
                                       growth_limit, initial_size);
   } else {
     space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
+    if(shareMem)
+      space->CreateBitmaps(space->Begin(), space->Capacity(), shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
@@ -401,6 +404,9 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     }
     alloc_space = new DlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem);
+    if(shareMem)
+      alloc_space->CreateBitmaps(alloc_space->Begin(), alloc_space->Capacity(),
+        shareMem);
   }
 
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
