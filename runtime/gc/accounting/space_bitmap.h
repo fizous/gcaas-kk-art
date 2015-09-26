@@ -100,7 +100,7 @@ public:
 
   static BaseBitmap* CreateSharedSpaceBitmap(GCSrvceBitmap **hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
-      size_t bitmap_size);
+      bool shareMem = false);
 
 
   static void InitSrvcBitmap(GCSrvceBitmap **hb,

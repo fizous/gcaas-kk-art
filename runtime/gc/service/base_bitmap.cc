@@ -305,8 +305,9 @@ BaseBitmap* BaseBitmap::Create(const std::string& name, byte* heap_begin,
 
 BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
-    size_t bitmap_size) {
-  InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size);
+    bool shareMem) {
+  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size, shareMem);
 
   return new SharedSpaceBitmap(*hb);
 }
