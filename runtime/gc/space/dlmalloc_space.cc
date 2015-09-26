@@ -154,13 +154,16 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
 
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
-                       byte* end, size_t growth_limit, bool shareMem)
+                       byte* end, size_t growth_limit, bool shareMem,
+                       GCSrvDlMallocSpace* space_data_mem)
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),// {//,
+      dlmalloc_space_data_(space_data_mem),
       lock_data_("allocation space lock", kAllocSpaceLock) {
   LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
-  dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
-      SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
-
+  if(dlmalloc_space_data_ == NULL) {
+    dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
+        SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
+  }
   dlmalloc_space_data_->lock_ = &lock_data_;//new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
   dlmalloc_space_data_->recent_free_pos_ = 0;
   dlmalloc_space_data_->num_bytes_allocated_ = 0;
@@ -657,10 +660,11 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
 
 SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
     byte* begin, byte* end, size_t growth_limit, bool shareMem,
-    GCSrvSharableDlMallocSpace* sharable_data) : DlMallocSpace (name, mem_map, mspace,
-        begin, end, growth_limit, shareMem),
-        sharable_space_data_(sharable_data),
-        dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
+    GCSrvSharableDlMallocSpace* sharable_data) :
+        DlMallocSpace (name, mem_map, mspace, begin, end, growth_limit,
+            shareMem, &(sharable_space_data_->dlmalloc_space_data_))
+        , sharable_space_data_(sharable_data)
+        , dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
 
 }
 

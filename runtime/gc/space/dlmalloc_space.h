@@ -252,7 +252,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
-      byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
+      byte* begin, byte* end, size_t growth_limit, bool shareMem = false,
+      GCSrvDlMallocSpace* space_data_mem = NULL);
   ~DlMallocSpace(){}
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
