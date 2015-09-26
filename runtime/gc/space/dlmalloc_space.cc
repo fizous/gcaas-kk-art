@@ -670,7 +670,8 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
       new InterProcessMutex("shared-alloc space lock",
           &sharable_space_data_->ip_lock_.futex_head_, kAllocSpaceLock);
 
-  dlmalloc_space_data_->lock_ = _ipMutex;
+  if(false)
+    dlmalloc_space_data_->lock_ = _ipMutex;
   sharable_space_data_->cond_ =
       new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
           &sharable_space_data_->ip_lock_.cond_var_);
