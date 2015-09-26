@@ -653,7 +653,7 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* m
         begin, end, growth_limit, shareMem),
         sharable_space_data_(sharable_data),
         dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
-  CreateBitmaps();
+  //CreateBitmaps();
 }
 
 
