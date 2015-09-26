@@ -162,10 +162,13 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
     : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),// {//,
       dlmalloc_space_data_(space_data_mem),
       lock_data_("allocation space lock", kAllocSpaceLock) {
-  LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
+
   if(dlmalloc_space_data_ == NULL) {
+    LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
     dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
         SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
+  } else {
+    LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->  dlmalloc_space_data_ was already allocated";
   }
   dlmalloc_space_data_->lock_ = &lock_data_;//new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
   dlmalloc_space_data_->recent_free_pos_ = 0;
@@ -178,12 +181,12 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
 
   CHECK(mspace != NULL);
 
-
+  LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> Done Filling dlmalloc_space_data_";
   static const uintptr_t kGcCardSize =
       static_cast<uintptr_t>(accounting::ConstantsCardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
-
+  LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
 #if true || ART_GC_SERVICE
 
   if(!shareMem)
@@ -681,16 +684,17 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
             shareMem, &(sharable_space_data_->dlmalloc_space_data_))
         , sharable_space_data_(sharable_data)
         , dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_)) {
+
+
+  if(false) {
   InterProcessMutex* _ipMutex =
       new InterProcessMutex("shared-alloc space lock",
           &sharable_space_data_->ip_lock_.futex_head_, kAllocSpaceLock);
-
-  if(false)
     dlmalloc_space_data_->lock_ = _ipMutex;
   sharable_space_data_->cond_ =
       new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
           &sharable_space_data_->ip_lock_.cond_var_);
-
+  }
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
