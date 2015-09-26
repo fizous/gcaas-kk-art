@@ -658,8 +658,9 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
 }
 
 
-SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
-    byte* begin, byte* end, size_t growth_limit, bool shareMem,
+SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
+    MEM_MAP* mem_map, void* mspace,  byte* begin, byte* end,
+    size_t growth_limit, bool shareMem,
     GCSrvSharableDlMallocSpace* sharable_data) :
         DlMallocSpace (name, mem_map, mspace, begin, end, growth_limit,
             shareMem, &(sharable_space_data_->dlmalloc_space_data_))

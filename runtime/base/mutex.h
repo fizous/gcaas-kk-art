@@ -500,20 +500,20 @@ class InterProcessConditionVariable {
 
 // Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it
 // upon destruction.
-class SCOPED_LOCKABLE IterProcMutexLock {
+class SCOPED_LOCKABLE IPMutexLock {
  public:
-  explicit IterProcMutexLock(Thread* self, InterProcessMutex& mu) EXCLUSIVE_LOCK_FUNCTION(mu) : self_(self), mu_(mu) {
+  explicit IPMutexLock(Thread* self, InterProcessMutex& mu) EXCLUSIVE_LOCK_FUNCTION(mu) : self_(self), mu_(mu) {
     mu_.ExclusiveLock(self_);
   }
 
-  ~IterProcMutexLock() UNLOCK_FUNCTION() {
+  ~IPMutexLock() UNLOCK_FUNCTION() {
     mu_.ExclusiveUnlock(self_);
   }
 
  private:
   Thread* const self_;
   InterProcessMutex& mu_;
-  DISALLOW_COPY_AND_ASSIGN(IterProcMutexLock);
+  DISALLOW_COPY_AND_ASSIGN(IPMutexLock);
 };
 
 // Scoped locker/unlocker for a regular Mutex that acquires mu upon construction and releases it

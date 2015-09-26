@@ -137,7 +137,7 @@ typedef struct GCSrvDlMallocSpace_S {
 
 
   // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
-  Mutex* lock_ ;//DEFAULT_MUTEX_ACQUIRED_AFTER;
+  BaseMutex* lock_ ;//DEFAULT_MUTEX_ACQUIRED_AFTER;
 
   std::pair<const mirror::Object*, mirror::Class*>
                     recent_freed_objects_[kRecentFreeCount];

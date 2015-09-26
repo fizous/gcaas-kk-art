@@ -86,7 +86,7 @@ mirror::Object* SharedDlMallocSpace::Alloc(Thread* self, size_t num_bytes,
     size_t* bytes_allocated) {
   mirror::Object* obj;
   {
-    IterProcMutexLock interProcMu(self, *mu_);
+    IPMutexLock interProcMu(self, *mu_);
     obj = AllocWithoutGrowthLocked(num_bytes, bytes_allocated);
   }
   if (obj != NULL) {
@@ -100,7 +100,7 @@ mirror::Object* SharedDlMallocSpace::AllocWithGrowth(Thread* self,
     size_t num_bytes, size_t* bytes_allocated) {
   mirror::Object* result;
   {
-    IterProcMutexLock interProcMu(self, *mu_);
+    IPMutexLock interProcMu(self, *mu_);
     // Grow as much as possible within the mspace.
     size_t max_allowed = Capacity();
     mspace_set_footprint_limit(alloc_space_->mspace_, max_allowed);
@@ -123,14 +123,14 @@ mirror::Object* SharedDlMallocSpace::AllocWithGrowth(Thread* self,
 // greater or equal to the amount of live data in the space.
 size_t SharedDlMallocSpace::GetFootprint() {
   Thread* self = Thread::Current();
-  IterProcMutexLock interProcMu(self, *mu_);
+  IPMutexLock interProcMu(self, *mu_);
   return mspace_footprint(alloc_space_->mspace_);
 }
 
 // Returns the number of bytes that the heap is allowed to obtain from the system via MoreCore.
 size_t SharedDlMallocSpace::GetFootprintLimit() {
   Thread* self = Thread::Current();
-  IterProcMutexLock interProcMu(self, *mu_);
+  IPMutexLock interProcMu(self, *mu_);
   return mspace_footprint_limit(alloc_space_->mspace_);
 }
 
@@ -139,7 +139,7 @@ size_t SharedDlMallocSpace::GetFootprintLimit() {
 // allocations fail we GC before increasing the footprint limit and allowing the mspace to grow.
 void SharedDlMallocSpace::SetFootprintLimit(size_t new_size) {
   Thread* self = Thread::Current();
-  IterProcMutexLock interProcMu(self, *mu_);
+  IPMutexLock interProcMu(self, *mu_);
   VLOG(heap) << "SharedDlMallocSpace::SetFootprintLimit " << PrettySize(new_size);
   // Compare against the actual footprint, rather than the Size(), because the heap may not have
   // grown all the way to the allowed size yet.
@@ -153,7 +153,7 @@ void SharedDlMallocSpace::SetFootprintLimit(size_t new_size) {
 
 size_t SharedDlMallocSpace::Trim() {
   Thread* self = Thread::Current();
-  IterProcMutexLock interProcMu(self, *mu_);
+  IPMutexLock interProcMu(self, *mu_);
   // Trim to release memory at the end of the space.
   mspace_trim(alloc_space_->mspace_, 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
@@ -203,7 +203,7 @@ size_t SharedDlMallocSpace::InternalAllocationSize(const mirror::Object* obj) {
 }
 
 size_t SharedDlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
-  IterProcMutexLock interProcMu(self, *mu_);
+  IPMutexLock interProcMu(self, *mu_);
   if (kDebugSpaces) {
     CHECK(ptr != NULL);
     CHECK(Contains(ptr)) << "Free (" << ptr << ") not in bounds of heap " << *this;
@@ -240,7 +240,7 @@ size_t SharedDlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Obje
   }
 
   if (kRecentFreeCountService > 0) {
-    IterProcMutexLock interProcMu(self, *mu_);
+    IPMutexLock interProcMu(self, *mu_);
     for (size_t i = 0; i < num_ptrs; i++) {
       RegisterRecentFree(ptrs[i]);
     }
@@ -261,7 +261,7 @@ size_t SharedDlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Obje
   }
 
   {
-    IterProcMutexLock interProcMu(self, *mu_);
+    IPMutexLock interProcMu(self, *mu_);
     alloc_space_->num_bytes_allocated_ -= bytes_freed;
     alloc_space_->num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(alloc_space_->mspace_, reinterpret_cast<void**>(ptrs), num_ptrs);
@@ -310,7 +310,7 @@ void* SharedDlMallocSpace::MoreCore(intptr_t increment) {
 
 void SharedDlMallocSpace::Walk(void(*callback)(void *start, void *end,
     size_t num_bytes, void* callback_arg), void* arg) {
-  IterProcMutexLock interProcMu(Thread::Current(), *mu_);
+  IPMutexLock interProcMu(Thread::Current(), *mu_);
   mspace_inspect_all(alloc_space_->mspace_, callback, arg);
   callback(NULL, NULL, 0, arg);  // Indicate end of a space.
 }

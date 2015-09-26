@@ -91,7 +91,7 @@ byte* GCServiceGlobalAllocator::allocateSharedSpace(void) {
   size_t _allocation_size =
       SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvceDlMallocSpace);
   Thread* self = Thread::Current();
-  IterProcMutexLock interProcMu(self, *region_header_->service_header_.mu_);
+  IPMutexLock interProcMu(self, *region_header_->service_header_.mu_);
 
   int _counter = region_header_->service_header_.counter_++;
   byte* _addr = allocate(_allocation_size);
