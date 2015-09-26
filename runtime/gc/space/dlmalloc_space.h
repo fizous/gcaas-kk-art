@@ -234,7 +234,9 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   virtual void SetInternalGrowthLimit(size_t new_growth_limit) {
     dlmalloc_space_data_->growth_limit_ = new_growth_limit;
   }
-  Mutex* getMu() LOCK_RETURNED(lock_data_) { return reinterpret_cast<Mutex*>(dlmalloc_space_data_->lock_); }
+
+  template <typename MutexType>
+  MutexType* getMu() LOCK_RETURNED(lock_data_) { return reinterpret_cast<MutexType*>(dlmalloc_space_data_->lock_); }
 
   virtual bool CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem = false);
 

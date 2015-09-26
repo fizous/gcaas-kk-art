@@ -146,14 +146,16 @@ typedef struct GCSrvDlMallocSpace_S {
 typedef struct GCSrvSharableDlMallocSpace_S {
 
   GCSrvDlMallocSpace dlmalloc_space_data_;
+
+  SynchronizedLockHead ip_lock_;
+
+  InterProcessConditionVariable* cond_;
+
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
 
 
-  SynchronizedLockHead ip_lock_;
 
-  InterProcessMutex*    mu_;
-  InterProcessConditionVariable* cond_;
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
 
