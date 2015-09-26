@@ -368,30 +368,36 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   MEM_MAP* _space_mem_map = NULL;
+  DL_MALLOC_SPACE* alloc_space = NULL;
   if(shareMem) {
+    GCSrvSharableDlMallocSpace* _struct_alloc_space =
+        SharableDlMallocSpace::AllocateDataMemory();
     _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
-        capacity, PROT_READ | PROT_WRITE, shareMem);
+            capacity, PROT_READ | PROT_WRITE, shareMem,
+            &(_struct_alloc_space->dlmalloc_space_data_.memory_));
+    UniquePtr<MEM_MAP> mem_map(_space_mem_map);
+    void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
+    // Protect memory beyond the initial size.
+    byte* end = mem_map->Begin() + starting_size;
+    if (capacity - initial_size > 0) {
+      CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+          alloc_space_name);
+    }
+    alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
+        mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
   } else {
     _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
         capacity, PROT_READ | PROT_WRITE, shareMem);
-  }
-  UniquePtr<MEM_MAP> mem_map(_space_mem_map);
-  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
-  // Protect memory beyond the initial size.
-  byte* end = mem_map->Begin() + starting_size;
-  if (capacity - initial_size > 0) {
-    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
-        alloc_space_name);
-  }
-  DL_MALLOC_SPACE* alloc_space = NULL;
-  if(shareMem) {
-    alloc_space =
-        new SharableDlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
-            growth_limit, shareMem, SharableDlMallocSpace::AllocateDataMemory());
-  } else {
-    alloc_space =
-          new DlMallocSpace(alloc_space_name, mem_map.release(), mspace, End(), end,
-              growth_limit, shareMem);
+    UniquePtr<MEM_MAP> mem_map(_space_mem_map);
+    void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
+    // Protect memory beyond the initial size.
+    byte* end = mem_map->Begin() + starting_size;
+    if (capacity - initial_size > 0) {
+      CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+          alloc_space_name);
+    }
+    alloc_space = new DlMallocSpace(alloc_space_name, mem_map.release(),
+        mspace, End(), end, growth_limit, shareMem);
   }
 
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));

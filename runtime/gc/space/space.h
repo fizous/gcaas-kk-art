@@ -122,7 +122,8 @@ typedef struct GCSrvDlMallocSpace_S {
   size_t total_objects_allocated_;
 
   static size_t bitmap_index_;
-
+  /* allocated space memory */
+  AShmemMap memory_;
   // Underlying malloc space
   void* mspace_;
 

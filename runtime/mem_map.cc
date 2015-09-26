@@ -97,13 +97,14 @@ StructuredMemMap::~StructuredMemMap(){
 
 
 MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr,
-    size_t byte_count, int prot, bool shareMem) {
+    size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map ) {
 
-  AShmemMap* _memory_allocation =
+  if(ashmem_mem_map == NULL) {
+    ashmem_mem_map =
       reinterpret_cast<AShmemMap*>(calloc(1, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap)));
-
+  }
   AShmemMap* _checkP =
-      MemBaseMap::CreateAShmemMap(_memory_allocation, ashmem_name, addr, byte_count,
+      MemBaseMap::CreateAShmemMap(ashmem_mem_map, ashmem_name, addr, byte_count,
       prot, shareMem);
 
   if(_checkP == NULL) {
@@ -112,7 +113,7 @@ MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr
   }
 
   StructuredMemMap* _allocated_structured_map =
-      new StructuredMemMap(_memory_allocation);
+      new StructuredMemMap(ashmem_mem_map);
 
   LOG(ERROR) << "Leaving MemBaseMap::CreateStructedMemMap-->allocating structured memMap";
   return _allocated_structured_map;
