@@ -546,7 +546,7 @@ SharedDlMallocSpace::SharedDlMallocSpace(GCSrvceDlMallocSpace* mem_space_struct,
 //}
 
 
-bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity) {
+bool SharedDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem) {
   bool _result = true;
   alloc_space_->bitmap_index_++;
   // Round up since heap_capacity is not necessarily a multiple of kAlignment * kBitsPerWord.

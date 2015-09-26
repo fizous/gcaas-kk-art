@@ -256,7 +256,7 @@ class SharedDlMallocSpace : public SharableSpace, public DlMallocSpace
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
 
-  bool CreateBitmaps(byte* heap_begin, size_t heap_capacity);
+  bool CreateBitmaps(byte* heap_begin, size_t heap_capacity, bool shareMem = false);
   bool SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
       const std::string& name, byte* heap_begin, size_t heap_capacity,
       size_t bitmap_size);
