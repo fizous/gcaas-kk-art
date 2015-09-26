@@ -584,8 +584,8 @@ bool SharedDlMallocSpace::SpaceBitmapInit(accounting::GCSrvceBitmap *hb,
   hb->bitmap_begin_ = reinterpret_cast<word*>(MEM_MAP::AshmemBegin(&hb->mem_map_));
   hb->bitmap_size_  = bitmap_size;
   hb->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
-  strcpy(hb->name_, name.c_str());
-
+  memcpy(hb->name_, name.c_str(), name.size());
+  hb->name_[name.size()] = '\0';
   return true;
 }
 

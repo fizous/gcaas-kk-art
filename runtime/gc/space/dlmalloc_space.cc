@@ -366,7 +366,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   MEM_MAP* _space_mem_map = NULL;
   if(shareMem) {
-    _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
+    _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
         capacity, PROT_READ | PROT_WRITE, shareMem);
   } else {
     _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
