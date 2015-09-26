@@ -53,7 +53,8 @@ typedef struct AShmemMap_S {
         begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
-    strcpy(name_, name.c_str());
+    memcpy(name_, name.c_str(), name.size());
+    name_[name.size()] = '\0';
   }
 } __attribute__((aligned(8))) AShmemMap;
 
@@ -111,7 +112,8 @@ class MemBaseMap {
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
     AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot, flags, fd};
-    strcpy(_data.name_, name.c_str());
+    memcpy(_data.name_, name.c_str(), name.size());
+    _data.name_[name.size()] = '\0';
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 

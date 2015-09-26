@@ -324,7 +324,8 @@ SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
 SharedSpaceBitmap::~SharedSpaceBitmap() {}
 
 void SharedSpaceBitmap::SetName(const std::string& name) {
-  strcpy(bitmap_data_->name_, name.c_str());
+  memcpy(bitmap_data_->name_, name.c_str(), name.size());
+  bitmap_data_->name_[name.size()] = '\0';
 }
 
 
