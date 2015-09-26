@@ -111,7 +111,7 @@ class MemBaseMap {
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
-    AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot, flags, fd};
+    AShmemMap _data = {"g\0", begin, size, base_begin, base_size, prot, flags, fd};
     memcpy(_data.name_, name.c_str(), name.size());
     _data.name_[name.size()] = '\0';
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
