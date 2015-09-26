@@ -258,6 +258,9 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false,
       GCSrvDlMallocSpace* space_data_mem = NULL);
   ~DlMallocSpace(){}
+  UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
+  UniquePtr<accounting::SPACE_BITMAP> mark_bitmap_;
+  UniquePtr<accounting::SPACE_BITMAP> temp_bitmap_;
  private:
   size_t InternalAllocationSize(const mirror::Object* obj);
   mirror::Object* AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
@@ -266,9 +269,9 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   void RegisterRecentFree(mirror::Object* ptr);
 
 
-  UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
-  UniquePtr<accounting::SPACE_BITMAP> mark_bitmap_;
-  UniquePtr<accounting::SPACE_BITMAP> temp_bitmap_;
+//  UniquePtr<accounting::SPACE_BITMAP> live_bitmap_;
+//  UniquePtr<accounting::SPACE_BITMAP> mark_bitmap_;
+//  UniquePtr<accounting::SPACE_BITMAP> temp_bitmap_;
 
   //std::pair<const mirror::Object*, mirror::Class*> recent_freed_objects_[kRecentFreeCount];
 //  size_t recent_free_pos_;
