@@ -198,7 +198,7 @@ public:
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
   // Fill the bitmap with zeroes.  Returns the bitmap's memory to the system as a side-effect.
-  void Clear();
+  virtual void Clear() = 0;
 
   void CopyFrom(BaseBitmap* source_bitmap);
 
@@ -254,6 +254,7 @@ class SharedSpaceBitmap : public BaseBitmap {
   void SetHeapLimit(uintptr_t new_end);
 
   std::string GetName() const;
+  void Clear();
   void SetName(const std::string& name);
   std::string Dump() const;
 
@@ -311,7 +312,7 @@ class SpaceBitmap : public BaseBitmap {
 
   // Set the max address which can covered by the bitmap.
   void SetHeapLimit(uintptr_t new_end);
-
+  void Clear();
   std::string GetName() const;
   void SetName(const std::string& name);
   std::string Dump() const;

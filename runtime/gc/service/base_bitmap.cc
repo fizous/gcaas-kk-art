@@ -24,17 +24,17 @@ namespace art {
 namespace gc {
 namespace accounting {
 
-void BaseBitmap::Clear() {
-  if (Begin() != NULL) {
-    memset(Begin(), 0, Size());
-    // This returns the memory to the system.  Successive page faults will return zeroed memory.
-    //int result = madvise(Begin(), Size(), MADV_DONTNEED);
-//    int result = memset(Begin(), 0, Size());
-//    if (result == -1) {
-//      PLOG(FATAL) << "madvise failed";
-//    }
-  }
-}
+//void BaseBitmap::Clear() {
+//  if (Begin() != NULL) {
+//    memset(Begin(), 0, Size());
+//    // This returns the memory to the system.  Successive page faults will return zeroed memory.
+//    //int result = madvise(Begin(), Size(), MADV_DONTNEED);
+////    int result = memset(Begin(), 0, Size());
+////    if (result == -1) {
+////      PLOG(FATAL) << "madvise failed";
+////    }
+//  }
+//}
 
 
 void BaseBitmap::CopyFrom(BaseBitmap* source_bitmap) {
@@ -325,6 +325,19 @@ SharedSpaceBitmap::~SharedSpaceBitmap() {}
 
 void SharedSpaceBitmap::SetName(const std::string& name) {
   strcpy(bitmap_data_->name_, name.c_str());
+}
+
+
+void SharedSpaceBitmap::Clear() {
+  if (Begin() != NULL) {
+    memset(Begin(), 0, Size());
+    // This returns the memory to the system.  Successive page faults will return zeroed memory.
+    //int result = madvise(Begin(), Size(), MADV_DONTNEED);
+//    int result = memset(Begin(), 0, Size());
+//    if (result == -1) {
+//      PLOG(FATAL) << "madvise failed";
+//    }
+  }
 }
 
 
