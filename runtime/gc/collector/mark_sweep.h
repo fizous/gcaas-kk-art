@@ -168,7 +168,7 @@ class MarkSweep : public GarbageCollector {
   void SweepLargeObjects(bool swap_bitmaps) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   // Sweep only pointers within an array. WARNING: Trashes objects.
-  void SweepArray(accounting::ObjectStack* allocation_stack_, bool swap_bitmaps)
+  void SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocation_stack_, bool swap_bitmaps)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   mirror::Object* GetClearedReferences() {
@@ -427,7 +427,7 @@ class MarkSweep : public GarbageCollector {
   // Cache java.lang.Class for optimization.
   mirror::Class* java_lang_Class_;
 
-  accounting::ObjectStack* mark_stack_;
+  accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
   // Immune range, every object inside the immune range is assumed to be marked.
   mirror::Object* immune_begin_;
