@@ -56,6 +56,7 @@ namespace accounting {
   class BaseBitmap;
   class SpaceBitmap;
   class SpaceBitmap;
+  typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 }  // namespace accounting
 
 class Heap;
@@ -156,6 +157,11 @@ typedef struct GCSrvSharableDlMallocSpace_S {
   accounting::GCSrvceBitmap mark_bitmap_;
 
 
+  CardBaseTableFields card_table_data_;
+
+  StructuredObjectStackData live_stack_data_;
+  StructuredObjectStackData mark_stack_data_;
+  StructuredObjectStackData alloc_stack_data_;
 
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 

@@ -183,7 +183,12 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   void SwapBitmaps();
 
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
-  DLMALLOC_SPACE_T* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
+  DLMALLOC_SPACE_T* CreateZygoteSpace(const char* alloc_space_name,
+      bool shareMem = false);
+
+  DLMALLOC_SPACE_T* CreateSharableZygoteSpace(const char* alloc_space_name,
+      GCSrvSharableDlMallocSpace* sharable_dlmalloc_space, bool shareMem = false);
+
 
   virtual uint64_t GetBytesAllocated() const {
     return dlmalloc_space_data_->num_bytes_allocated_;

@@ -1223,10 +1223,14 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     return;
   }
 
-  //if(!shared_space) {
-    // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
-    // of the remaining available heap memory.
+  space::DLMALLOC_SPACE_T* zygote_space = alloc_space_;
+
+  // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
+  // of the remaining available heap memory.
   if(shared_space) {
+    space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
+          space::SharableDlMallocSpace::AllocateDataMemory();
+
     if(!GetCardTable()->shareCardTable()) {
       LOG(ERROR) << "Error in sharing the Card table";
     } else {
@@ -1236,21 +1240,23 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
       live_stack_.get()->ReShareAllocStack(true);
       mark_stack_.get()->ReShareAllocStack(true);
     }
-  }
-    space::DLMALLOC_SPACE_T* zygote_space = alloc_space_;
+    alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
+        _struct_alloc_space, shared_space);
+  } else {
     alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
-    alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
+  }
+  alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
 
-    // Change the GC retention policy of the zygote space to only collect when full.
-    zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
-    AddContinuousSpace(alloc_space_);
-    have_zygote_space_ = true;
+  // Change the GC retention policy of the zygote space to only collect when full.
+  zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+  AddContinuousSpace(alloc_space_);
+  have_zygote_space_ = true;
 
-    // Reset the cumulative loggers since we now have a few additional timing phases.
-    for (const auto& collector : mark_sweep_collectors_) {
-      collector->ResetCumulativeStatistics();
-    }
-    return;
+  // Reset the cumulative loggers since we now have a few additional timing phases.
+  for (const auto& collector : mark_sweep_collectors_) {
+    collector->ResetCumulativeStatistics();
+  }
+  return;
  // } else {
     // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
     // of the remaining available heap memory.

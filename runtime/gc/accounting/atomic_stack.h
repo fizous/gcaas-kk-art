@@ -69,7 +69,7 @@ struct AtomicStackData {
   bool debug_is_sorted_;
 
   bool is_shared_;
-} ;
+}__attribute__((aligned(8)));
 
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
