@@ -109,17 +109,26 @@ class StructuredAtomicStack {
     stack_data_->front_index_ = 0;
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
-    if(stack_data_->is_shared_) {
-      size_t _mem_length =  sizeof(mirror::Object*) * stack_data_->capacity_;
-      posix_madvise(stack_data_->begin_, _mem_length,
-          POSIX_MADV_DONTNEED);
-      //memset(stack_data_->begin_, 0, sizeof(T) * stack_data_->capacity_);
-    } else {
-      int result = madvise(stack_data_->begin_, sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
-      if (result == -1) {
-        PLOG(WARNING) << "madvise failed";
-      }
+    int result = madvise(stack_data_->begin_,
+        sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
+    if (result == -1) {
+      PLOG(WARNING) << "madvise failed";
     }
+
+//    if(stack_data_->is_shared_) {
+//
+//
+//
+//      size_t _mem_length =  sizeof(T) * old_capacity;
+////      posix_madvise(stack_data_->begin_, _mem_length,
+////          POSIX_MADV_DONTNEED);
+//      memset(stack_data_->begin_, 0, _mem_length);
+//    } else {
+//      int result = madvise(stack_data_->begin_, sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
+//      if (result == -1) {
+//        PLOG(WARNING) << "madvise failed";
+//      }
+//    }
   }
 
   void PushBack(const T& value) {
@@ -206,6 +215,12 @@ class StructuredAtomicStack {
 
   // Size in number of elements.
   void Init(bool shareMem) {
+
+    if(mem_map_.get() != NULL) { // we should unmap first?
+      LOG(ERROR) << "Reinitializing allocation stack to size: " << stack_data_->capacity_;
+    } else {
+      LOG(ERROR) << "Rinitializing allocation stack to initial size: " << stack_data_->capacity_;
+    }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
         stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem,
         &(stack_data_->memory_)));
@@ -226,6 +241,7 @@ class StructuredAtomicStack {
     memcpy(stack_data_->name_, name.c_str(), name.size());
     stack_data_->name_[name.size()] = '\0';
     stack_data_->capacity_ = capacity;
+    mem_map_.reset(NULL);
   }
   StructuredObjectStackData* stack_data_;
 
