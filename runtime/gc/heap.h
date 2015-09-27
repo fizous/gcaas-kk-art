@@ -435,7 +435,7 @@ class Heap {
     return mark_bitmap_.get();
   }
 #endif
-  accounting::ObjectStack* GetLiveStack() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
+  accounting::ATOMIC_OBJ_STACK_T* GetLiveStack() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return live_stack_.get();
   }
 
@@ -451,12 +451,12 @@ class Heap {
 #if (true || ART_GC_SERVICE)
   // Mark all the objects in the allocation stack in the specified bitmap.
   void MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
-                      accounting::ObjectStack* stack)
+                      accounting::ATOMIC_OBJ_STACK_T* stack)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 #else
   // Mark all the objects in the allocation stack in the specified bitmap.
   void MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
-                      accounting::ObjectStack* stack)
+                      accounting::ATOMIC_OBJ_STACK_T* stack)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 #endif
   // Update and mark mod union table based on gc type.
@@ -764,16 +764,16 @@ class Heap {
   UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
 #endif
   // Mark stack that we reuse to avoid re-allocating the mark stack.
-  UniquePtr<accounting::ObjectStack> mark_stack_;
+  UniquePtr<accounting::ATOMIC_OBJ_STACK_T> mark_stack_;
 
   // Allocation stack, new allocations go here so that we can do sticky mark bits. This enables us
   // to use the live bitmap as the old mark bitmap.
   const size_t max_allocation_stack_size_;
   bool is_allocation_stack_sorted_;
-  UniquePtr<accounting::ObjectStack> allocation_stack_;
+  UniquePtr<accounting::ATOMIC_OBJ_STACK_T> allocation_stack_;
 
   // Second allocation stack so that we can process allocation with the heap unlocked.
-  UniquePtr<accounting::ObjectStack> live_stack_;
+  UniquePtr<accounting::ATOMIC_OBJ_STACK_T> live_stack_;
 
   // offset of java.lang.ref.Reference.referent
   MemberOffset reference_referent_offset_;

@@ -280,7 +280,7 @@ void MarkSweep::MarkReachableObjects() {
   // Mark everything allocated since the last as GC live so that we can sweep concurrently,
   // knowing that new allocations won't be marked as live.
   timings_.StartSplit("MarkStackAsLive");
-  accounting::ObjectStack* live_stack = heap_->GetLiveStack();
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
   space::LargeObjectSpace* _LOS = heap_->large_object_space_;
   heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
@@ -308,7 +308,7 @@ void MarkSweep::ReclaimPhase() {
 
     base::TimingLogger::ScopedSplit split("UnMarkAllocStack", &timings_);
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-    accounting::ObjectStack* allocation_stack = GetHeap()->allocation_stack_.get();
+    accounting::ATOMIC_OBJ_STACK_T* allocation_stack = GetHeap()->allocation_stack_.get();
     // The allocation stack contains things allocated since the start of the GC. These may have been
     // marked during this GC meaning they won't be eligible for reclaiming in the next sticky GC.
     // Remove these objects from the mark bitmaps so that they will be eligible for sticky
@@ -1190,7 +1190,7 @@ void MarkSweep::SweepJniWeakGlobals(IsMarkedTester is_marked, void* arg) {
 }
 
 struct ArrayMarkedCheck {
-  accounting::ObjectStack* live_stack;
+  accounting::ATOMIC_OBJ_STACK_T* live_stack;
   MarkSweep* mark_sweep;
 };
 
@@ -1200,7 +1200,7 @@ bool MarkSweep::IsMarkedArrayCallback(const Object* object, void* arg) {
   if (array_check->mark_sweep->IsMarked(object)) {
     return true;
   }
-  accounting::ObjectStack* live_stack = array_check->live_stack;
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = array_check->live_stack;
   if (std::find(live_stack->Begin(), live_stack->End(), object) == live_stack->End()) {
     return true;
   }
@@ -1323,7 +1323,7 @@ void MarkSweep::ZygoteSweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {
   }
 }
 
-void MarkSweep::SweepArray(accounting::ObjectStack* allocations, bool swap_bitmaps) {
+void MarkSweep::SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocations, bool swap_bitmaps) {
   space::DLMALLOC_SPACE_T* space = heap_->GetAllocSpace();
   timings_.StartSplit("SweepArray");
   // Newly allocated objects MUST be in the alloc space and those are the only objects which we are

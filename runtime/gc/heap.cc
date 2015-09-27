@@ -228,10 +228,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 
   // Default mark stack size in bytes.
   static const size_t default_mark_stack_size = 64 * KB;
-  mark_stack_.reset(accounting::ObjectStack::Create("mark stack", default_mark_stack_size));
-  allocation_stack_.reset(accounting::ObjectStack::Create("allocation stack",
+  mark_stack_.reset(accounting::ATOMIC_STACK::Create("mark stack", default_mark_stack_size));
+  allocation_stack_.reset(accounting::ATOMIC_STACK::Create("allocation stack",
                                                           max_allocation_stack_size_));
-  live_stack_.reset(accounting::ObjectStack::Create("live stack",
+  live_stack_.reset(accounting::ATOMIC_STACK::Create("live stack",
                                                     max_allocation_stack_size_));
 
   // It's still too early to take a lock because there are no threads yet, but we can create locks
@@ -1312,10 +1312,10 @@ void Heap::FlushAllocStack() {
 
 #if (true || ART_GC_SERVICE)
 void Heap::MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
-                          accounting::ObjectStack* stack) {
+                          accounting::ATOMIC_STACK* stack) {
 #else
 void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetMap* large_objects,
-                          accounting::ObjectStack* stack) {
+                          accounting::ATOMIC_STACK* stack) {
 #endif
   mirror::Object** limit = stack->End();
   for (mirror::Object** it = stack->Begin(); it != limit; ++it) {
@@ -1530,8 +1530,8 @@ class VerifyReferenceVisitor {
     // Verify that the reference is live.
     if (UNLIKELY(ref != NULL && !IsLive(ref))) {
       accounting::CARD_TABLE* card_table = heap_->GetCardTable();
-      accounting::ObjectStack* alloc_stack = heap_->allocation_stack_.get();
-      accounting::ObjectStack* live_stack = heap_->live_stack_.get();
+      accounting::ATOMIC_STACK* alloc_stack = heap_->allocation_stack_.get();
+      accounting::ATOMIC_STACK* live_stack = heap_->live_stack_.get();
 
       if (!failed_) {
         // Print message on only on first failure to prevent spam.
@@ -1706,7 +1706,7 @@ class VerifyReferenceCardVisitor {
       } else if (!card_table->IsDirty(obj)) {
         // Card should be either kCardDirty if it got re-dirtied after we aged it, or
         // kCardDirty - 1 if it didnt get touched since we aged it.
-        accounting::ObjectStack* live_stack = heap_->live_stack_.get();
+        accounting::ATOMIC_STACK* live_stack = heap_->live_stack_.get();
         if (live_stack->ContainsSorted(const_cast<mirror::Object*>(ref))) {
           if (live_stack->ContainsSorted(const_cast<mirror::Object*>(obj))) {
             LOG(ERROR) << "Object " << obj << " found in live stack";

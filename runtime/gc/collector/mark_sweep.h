@@ -26,6 +26,22 @@
 #include "root_visitor.h"
 #include "UniquePtr.h"
 
+
+#ifndef ATOMIC_STACK_KLASS
+  #if (true || ART_GC_SERVICE)
+    #define ATOMIC_STACK_KLASS    StructuredAtomicStack
+    #define ATOMIC_OBJ_STACK_T    StructuredObjectStack
+  #else
+    #define ATOMIC_STACK_KLASS    AtomicStack
+    #define ATOMIC_OBJ_STACK_T    ObjectStack
+  #endif
+#endif
+
+
+
+
+
+
 namespace art {
 
 namespace mirror {
@@ -40,13 +56,13 @@ class Thread;
 namespace gc {
 
 namespace accounting {
-  template <typename T> class AtomicStack;
+  template <typename T> class ATOMIC_STACK_KLASS;
   class MarkIfReachesAllocspaceVisitor;
   class ModUnionClearCardVisitor;
   class ModUnionVisitor;
   class ModUnionTableBitmap;
   class MarkStackChunk;
-  typedef AtomicStack<mirror::Object*> ObjectStack;
+  typedef ATOMIC_STACK_KLASS<mirror::Object*> ATOMIC_OBJ_STACK_T;
 #if (true || ART_GC_SERVICE)
 #define SPACE_BITMAP BaseBitmap
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T

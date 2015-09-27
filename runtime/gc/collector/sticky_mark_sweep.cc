@@ -56,7 +56,7 @@ void StickyMarkSweep::MarkReachableObjects() {
 }
 
 void StickyMarkSweep::Sweep(bool swap_bitmaps) {
-  accounting::ObjectStack* live_stack = GetHeap()->GetLiveStack();
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = GetHeap()->GetLiveStack();
   SweepArray(live_stack, false);
 }
 
