@@ -110,7 +110,7 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
-      size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
+      size_t _mem_length =  sizeof(mirror::Object*) * stack_data_->capacity_;
       posix_madvise(stack_data_->begin_, _mem_length,
           POSIX_MADV_DONTNEED);
       //memset(stack_data_->begin_, 0, sizeof(T) * stack_data_->capacity_);
