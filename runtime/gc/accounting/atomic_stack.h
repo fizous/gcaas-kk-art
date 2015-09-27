@@ -64,7 +64,7 @@ template <typename T>
 class StructuredAtomicStack {
  public:
   // Capacity is how many elements we can store in the stack.
-  static AtomicStack* Create(const std::string& name, size_t capacity) {
+  static StructuredAtomicStack* Create(const std::string& name, size_t capacity) {
     UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity));
     mark_stack->Init();
     return mark_stack.release();
@@ -72,6 +72,19 @@ class StructuredAtomicStack {
 
   ~StructuredAtomicStack() {}
  private:
+  // Size in number of elements.
+  void Init() {
+
+  }
+
+  StructuredAtomicStack(const std::string& name, const size_t capacity) {
+    stack_data_ =
+        reinterpret_cast<StructuredObjectStackData*>(calloc(1,
+            SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
+    memcpy(stack_data_->name_, name.c_str(), name.size());
+    stack_data_->name_[name.size()] = '\0';
+    stack_data_->capacity_ = capacity;
+  }
   StructuredObjectStackData* stack_data_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
