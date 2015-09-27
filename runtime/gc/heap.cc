@@ -229,13 +229,13 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   // Default mark stack size in bytes.
   static const size_t default_mark_stack_size = 64 * KB;
   mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("mark stack", default_mark_stack_size,
-      (!Runtime::Current()->IsCompiler()) && (true || ART_GC_SERVICE)));
+      false && (!Runtime::Current()->IsCompiler()) && (true || ART_GC_SERVICE)));
   allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("allocation stack",
                                                           max_allocation_stack_size_,
-                                                          (!Runtime::Current()->IsCompiler()) &&       (true || ART_GC_SERVICE)));
+       false &&       (!Runtime::Current()->IsCompiler()) &&       (true || ART_GC_SERVICE)));
   live_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("live stack",
                                                     max_allocation_stack_size_,
-       (!Runtime::Current()->IsCompiler()) &&    (true || ART_GC_SERVICE)));
+       false && (!Runtime::Current()->IsCompiler()) &&    (true || ART_GC_SERVICE)));
 
   // It's still too early to take a lock because there are no threads yet, but we can create locks
   // now. We don't create it earlier to make it clear that you can't use locks during heap
@@ -1231,6 +1231,10 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
       LOG(ERROR) << "Error in sharing the Card table";
     } else {
       LOG(ERROR) << "Success in sharing the Card table";
+
+      allocation_stack_.get()->ReShareAllocStack(true);
+      live_stack_.get()->ReShareAllocStack(true);
+      mark_stack_.get()->ReShareAllocStack(true);
     }
   }
     space::DLMALLOC_SPACE_T* zygote_space = alloc_space_;

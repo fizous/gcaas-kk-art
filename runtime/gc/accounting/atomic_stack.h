@@ -201,6 +201,11 @@ class StructuredAtomicStack {
   // Memory mapping of the atomic stack.
   UniquePtr<MEM_MAP> mem_map_;
 
+  void ReShareAllocStack(bool shareFlag) {
+    if(shareFlag) {
+      Init(shareFlag);
+    }
+  }
  private:
   // Size in number of elements.
   void Init(bool shareMem) {
