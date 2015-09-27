@@ -110,7 +110,9 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
-      memset(stack_data_->begin_, 0, sizeof(T) * stack_data_->capacity_);
+      posix_madvise(stack_data_->begin_, sizeof(T) * stack_data_->capacity_,
+          POSIX_MADV_DONTNEED);
+      //memset(stack_data_->begin_, 0, sizeof(T) * stack_data_->capacity_);
     } else {
       int result = madvise(stack_data_->begin_, sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
