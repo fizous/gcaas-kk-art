@@ -223,7 +223,6 @@ class StructuredAtomicStack {
     memcpy(stack_data_->name_, name.c_str(), name.size());
     stack_data_->name_[name.size()] = '\0';
     stack_data_->capacity_ = capacity;
-    Init(shareMem);
   }
   StructuredObjectStackData* stack_data_;
 
