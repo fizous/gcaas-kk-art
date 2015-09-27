@@ -210,16 +210,20 @@ class StructuredAtomicStack {
   }
   // Memory mapping of the atomic stack.
   UniquePtr<MEM_MAP> mem_map_;
+
  private:
-
-
   // Size in number of elements.
   void Init(bool shareMem) {
 
     if(mem_map_.get() != NULL) { // we should unmap first?
-      LOG(ERROR) << "Reinitializing allocation stack to size: " << stack_data_->capacity_;
+      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
+          stack_data_->capacity_;
+      mem_map_.reset(NULL);
+      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
+          stack_data_->capacity_;
     } else {
-      LOG(ERROR) << "Rinitializing allocation stack to initial size: " << stack_data_->capacity_;
+      LOG(ERROR) << "Rinitializing allocation stack to initial size: " <<
+          stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
         stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem,
