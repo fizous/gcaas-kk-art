@@ -45,7 +45,7 @@ class BaseHeapBitmap {
  public:
 
   static BaseHeapBitmap* CreateHeapBitmap(Heap* heap, bool sharable = false);
-  static BaseHeapBitmap* ReShareHeapBitmap(SharedHeapBitmap* originalBMap,
+  static BaseHeapBitmap* ReShareHeapBitmap(Heap* heap, SharedHeapBitmap* originalBMap,
       GCSrvceSharedHeapBitmap* header_addr);
 
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -198,8 +198,9 @@ class HeapBitmap : public BaseHeapBitmap {
   SpaceSetMap* GetDiscContBitmapFromIndex(int index) {
     return discontinuous_space_sets_[index];
   }
- private:
   const Heap* const heap_;
+ private:
+
 
   // Bitmaps covering continuous spaces.
   SpaceBitmapVector continuous_space_bitmaps_;
