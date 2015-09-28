@@ -53,11 +53,9 @@ namespace mirror {
 namespace gc {
 
 namespace accounting {
-  template <typename T> struct AtomicStackData;
   class BaseBitmap;
   class SpaceBitmap;
   class SpaceBitmap;
-  typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 }  // namespace accounting
 
 class Heap;

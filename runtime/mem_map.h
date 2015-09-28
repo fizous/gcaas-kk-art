@@ -70,6 +70,31 @@ typedef struct CardBaseTableFields_S {
   const size_t offset_;
 } __attribute__((aligned(8))) CardBaseTableFields;
 
+template <class T>
+struct AtomicStackData {
+  char name_[64];
+
+  // Memory mapping of the atomic stack.
+  AShmemMap memory_;
+
+  // Back index (index after the last element pushed).
+  volatile int back_index_;
+
+  // Front index, used for implementing PopFront.
+  volatile int front_index_;
+
+  // Base of the atomic stack.
+  T* begin_;
+
+  // Maximum number of elements.
+  size_t capacity_;
+
+  // Whether or not the stack is sorted, only updated in debug mode to avoid performance overhead.
+  bool debug_is_sorted_;
+
+  bool is_shared_;
+}__attribute__((aligned(8)));
+typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
 
 #if (true || ART_GC_SERVICE)
