@@ -125,7 +125,7 @@ void GCServiceDaemon::mainLoop(void) {
 
 void GCServiceProcess::LaunchGCServiceProcess(void) {
   InitGCServiceProcess(
-      &(GCServiceGlobalAllocator::allocator_instant_->region_header_->service_header_));
+      GCServiceGlobalAllocator::GetServiceHeader());
 }
 
 

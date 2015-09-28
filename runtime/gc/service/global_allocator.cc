@@ -122,7 +122,9 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
   LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator>>>>>>";
 }
 
-
+GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
+  return &(GCServiceGlobalAllocator::allocator_instant_->region_header_->service_header_);
+}
 byte* GCServiceGlobalAllocator::AllocateSharableSpace(void) {
   size_t _allocation_size =
       SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvSharableDlMallocSpace);

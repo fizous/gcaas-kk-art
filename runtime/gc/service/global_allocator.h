@@ -56,6 +56,7 @@ class GCServiceGlobalAllocator {
   static void BlockOnGCProcessCreation(pid_t);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
+  static GCServiceHeader* GetServiceHeader(void);
   static int GCPAllowSharedMemMaps;
  private:
   static const int   kGCServicePageCapacity = 16;
