@@ -55,9 +55,10 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
 
 void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   Thread* self = Thread::Current();
+  LOG(ERROR) << ">>>> GCServiceGlobalAllocator::BlockOnGCProcessCreation";
   IPMutexLock interProcMu(self, *allocator_instant_->region_header_->service_header_.mu_);
   allocator_instant_->UpdateForkService(pid);
-  while(allocator_instant_->region_header_->service_header_.status_ <= GCSERVICE_STATUS_RUNNING) {
+  while(allocator_instant_->region_header_->service_header_.status_ < GCSERVICE_STATUS_RUNNING) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       allocator_instant_->region_header_->service_header_.cond_->Wait(self);
