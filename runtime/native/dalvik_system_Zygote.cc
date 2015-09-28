@@ -435,6 +435,17 @@ static pid_t GCSrvcForkGCService(void) {
     }
 
     SetSchedulerPolicy();
+#if defined(HAVE_ANDROID_OS)
+    {  // NOLINT(whitespace/braces)
+      rc = selinux_android_setcontext(_uid, 0, "system", "gc_service");
+      if (rc == -1) {
+        PLOG(FATAL) << "selinux_android_setcontext(" << _uid << ", ";
+      }
+    }
+#else
+
+#endif
+
     // Our system thread ID, etc, has changed so reset Thread state.
     self->InitAfterFork();
 
