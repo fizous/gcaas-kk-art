@@ -36,6 +36,7 @@
 #include "ScopedPrimitiveArray.h"
 #include "ScopedUtfChars.h"
 #include "thread.h"
+#include "cutils/process_name.h"
 
 #if defined(HAVE_PRCTL)
 #include <sys/prctl.h>
