@@ -39,7 +39,7 @@ namespace accounting {
 #if true || ART_GC_SERVICE
 
 
-
+class SharedHeapBitmap;
 
 class BaseHeapBitmap {
  public:
