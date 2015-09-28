@@ -31,9 +31,10 @@ GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void)
   return allocator_instant_;
 }
 
-byte* GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace(void) {
+space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(void) {
   GCServiceGlobalAllocator* _inst = CreateServiceAllocator();
-  return _inst->allocateSharedSpace();
+  return reinterpret_cast<space::GCSrvSharableDlMallocSpace*>(
+      _inst->AllocateSharableSpace());
 }
 
 
@@ -87,9 +88,9 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
 }
 
 
-byte* GCServiceGlobalAllocator::allocateSharedSpace(void) {
+byte* GCServiceGlobalAllocator::AllocateSharableSpace(void) {
   size_t _allocation_size =
-      SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvceDlMallocSpace);
+      SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvSharableDlMallocSpace);
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *region_header_->service_header_.mu_);
 

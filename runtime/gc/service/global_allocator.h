@@ -47,17 +47,17 @@ typedef struct GCSrvcGlobalRegionHeader_S {
 class GCServiceGlobalAllocator {
  public:
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
-  static byte* GCSrvcAllocateSharedSpace(void);
+  static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(void);
 
   static int GCPAllowSharedMemMaps;
  private:
-  static const int   kGCServicePageCapacity = 32;
+  static const int   kGCServicePageCapacity = 16;
   GCSrvcGlobalRegionHeader* region_header_;
   static GCServiceGlobalAllocator* allocator_instant_;
 
   // constructor
   GCServiceGlobalAllocator(int pages);
-  byte* allocateSharedSpace(void);
+  byte* AllocateSharableSpace(void);
   void initServiceHeader(void);
 
   byte* allocate(size_t num_bytes) {

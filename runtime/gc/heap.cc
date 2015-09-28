@@ -1228,8 +1228,13 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
   // of the remaining available heap memory.
   if(shared_space) {
+
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
-          space::SharableDlMallocSpace::AllocateDataMemory();
+        gc::gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace();
+
+
+//    space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
+//          space::SharableDlMallocSpace::AllocateDataMemory();
 
     if(!GetCardTable()->shareCardTable(&_struct_alloc_space->card_table_data_)) {
       LOG(ERROR) << "Error in sharing the Card table";
