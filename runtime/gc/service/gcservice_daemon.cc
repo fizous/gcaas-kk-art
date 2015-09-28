@@ -27,6 +27,7 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
   GCServiceProcess* _processObj = _daemonObj->process_;
+  LOG(ERROR) << "-------- Inside GCServiceDaemon::RunDaemon ---------";
   Runtime* runtime = Runtime::Current();
   bool _createThread =  runtime->AttachCurrentThread("GCSvcDaemon", true,
       runtime->GetSystemThreadGroup(),
@@ -68,13 +69,12 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
     IPMutexLock interProcMu(self, *process_->service_meta_->mu_);
     process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
     initShutDownSignals();
-
-    CHECK_PTHREAD_CALL(pthread_create,
-        (&pthread_, NULL,
-        &GCServiceDaemon::RunDaemon, this),
-        "GCService Daemon thread");
     process_->service_meta_->cond_->Broadcast(self);
   }
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&pthread_, NULL,
+      &GCServiceDaemon::RunDaemon, this),
+      "GCService Daemon thread");
 
 }
 
