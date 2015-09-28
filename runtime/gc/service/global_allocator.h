@@ -34,6 +34,8 @@ typedef struct GCServiceHeader_S {
   volatile int status_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
+  pid_t service_pid_;
+  GC_SERVICE_STATUS service_status_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
 typedef struct GCSrvcGlobalRegionHeader_S {
@@ -49,7 +51,8 @@ class GCServiceGlobalAllocator {
  public:
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(void);
-
+  static bool ShouldForkService(void);
+  static void UpdateForkService(pid_t);
   static int GCPAllowSharedMemMaps;
  private:
   static const int   kGCServicePageCapacity = 16;

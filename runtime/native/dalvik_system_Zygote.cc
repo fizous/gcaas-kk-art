@@ -406,27 +406,53 @@ static bool NeedsNoRandomizeWorkaround() {
 #if (true || ART_GC_SERVICE)
 
 
-//static pid_t GCSrvcForkGCService() {
-//  Runtime* runtime = Runtime::Current();
-//  CHECK(runtime->IsZygote()) << "Zygote forking the GC Service";
-//  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
-//  Thread* self = Thread::Current();
-//
-//  // dvmDumpLoaderStats("zygote");  // TODO: ?
-//  pid_t pid = fork();
-//  if (pid == 0) {
-//    // The child process.
-//    gMallocLeakZygoteChild = 1;
-//    // Keep capabilities across UID change, unless we're staying root.
-//    EnableKeepCapabilities();
-//    DropCapabilitiesBoundingSet();
-//  } else {
-//    LOG(ERROR) << "------- Zygote Forked the GC Service ----------";
-//
-//  }
-//
-//
-//}
+static pid_t GCSrvcForkGCService(void) {
+  Runtime* runtime = Runtime::Current();
+  CHECK(runtime->IsZygote()) << "Zygote forking the GC Service";
+  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
+  Thread* self = Thread::Current();
+  uid_t _uid = getuid();
+  gid_t _gid = getgid();
+  SetSigChldHandler();
+  // dvmDumpLoaderStats("zygote");  // TODO: ?
+  pid_t pid = fork();
+  if (pid == 0) {
+    // The child process.
+    gMallocLeakZygoteChild = 1;
+    // Keep capabilities across UID change, unless we're staying root.
+    EnableKeepCapabilities();
+    DropCapabilitiesBoundingSet();
+
+    setpgid(0, 0);
+    int rc = setresgid(_gid, _gid, _gid);
+    if (rc == -1) {
+      PLOG(FATAL) << "gcservice: setresgid(" << _gid << ") failed";
+    }
+
+    rc = setresuid(_uid, _uid, _uid);
+    if (rc == -1) {
+      PLOG(FATAL) << "gcservice: setresuid(" << _uid << ") failed";
+    }
+
+    SetSchedulerPolicy();
+    // Our system thread ID, etc, has changed so reset Thread state.
+    self->InitAfterFork();
+
+    UnsetSigChldHandler();
+    runtime->DidForkFromZygote();
+    LOG(ERROR) << "------- GC Service Is initialized  ----------";
+
+
+    while(true) {
+      sleep(10000);
+    }
+  } else {
+    gc::gcservice::GCServiceGlobalAllocator::UpdateForkService(pid);
+    LOG(ERROR) << "------- Zygote Forked the GC Service ---------- " << pid;
+  }
+
+  return pid;
+}
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
@@ -439,7 +465,9 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
   if (!runtime->GCSrvcePreZygoteFork()) {
     LOG(FATAL) << "pre-fork heap failed";
   }
-
+  if(gc::gcservice::GCServiceGlobalAllocator::ShouldForkService()) {
+    GCSrvcForkGCService();
+  }
   SetSigChldHandler();
 
   // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.

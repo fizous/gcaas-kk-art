@@ -28,6 +28,8 @@ GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void)
     return allocator_instant_;
   }
   allocator_instant_ = new GCServiceGlobalAllocator(kGCServicePageCapacity);
+
+
   return allocator_instant_;
 }
 
@@ -38,14 +40,29 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
 }
 
 
+bool GCServiceGlobalAllocator::ShouldForkService() {
+  if(allocator_instant_ != NULL) {
+    if(allocator_instant_->region_header_->service_header_.status_ == GCSERVICE_STATUS_NONE)
+      return true;
+  }
+  return false;
+}
 
+
+void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
+  if(allocator_instant_ != NULL) {
+    allocator_instant_->region_header_->service_header_.status_ =
+        GCSERVICE_STATUS_WAITINGSERVER;
+    allocator_instant_->region_header_->service_header_.service_pid_ = pid;
+  }
+}
 
 void GCServiceGlobalAllocator::initServiceHeader(void) {
   GCServiceHeader* _header_addr = &region_header_->service_header_;
-
+  _header_addr->service_pid_ = -1;
   _header_addr->status_ = GCSERVICE_STATUS_NONE;
   _header_addr->counter_ = 0;
-
+  _header_addr->service_status_ = GCSERVICE_STATUS_NONE;
   SharedFutexData* _futexAddress = &_header_addr->lock_.futex_head_;
   SharedConditionVarData* _condAddress = &_header_addr->lock_.cond_var_;
 
