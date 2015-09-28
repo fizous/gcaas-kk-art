@@ -453,13 +453,10 @@ static pid_t GCSrvcForkGCService(void) {
     UnsetSigChldHandler();
     runtime->DidForkFromZygote();
     LOG(ERROR) << "------- GC Service Is initialized  ----------";
+    gc::gcservice::GCServiceProcess::LaunchGCServiceProcess();
 
-
-    while(true) {
-      sleep(10000);
-    }
   } else {
-    gc::gcservice::GCServiceGlobalAllocator::UpdateForkService(pid);
+    gc::gcservice::GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid);
     LOG(ERROR) << "------- Zygote Forked the GC Service ---------- " << pid;
   }
 
@@ -474,12 +471,11 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
                                      jstring java_se_info, jstring java_se_name, bool is_system_server) {
   Runtime* runtime = Runtime::Current();
   CHECK(runtime->IsZygote()) << "runtime instance not started with -Xzygote";
-  if (!runtime->GCSrvcePreZygoteFork()) {
-    LOG(FATAL) << "pre-fork heap failed";
-  }
-  if(gc::gcservice::GCServiceGlobalAllocator::ShouldForkService()) {
+  if (runtime->GCSrvcePreZygoteFork()) {
+    LOG(ERROR) << "Need to fork the GCService";
     GCSrvcForkGCService();
   }
+
   SetSigChldHandler();
 
   // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.

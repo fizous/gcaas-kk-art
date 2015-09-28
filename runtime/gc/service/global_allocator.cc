@@ -41,7 +41,11 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
 
 
 bool GCServiceGlobalAllocator::ShouldForkService() {
-  if(allocator_instant_ != NULL) {
+  if(allocator_instant_ == NULL) {
+    CreateServiceAllocator();
+    allocator_instant_->region_header_->service_header_.status_ = GCSERVICE_STATUS_NONE;
+    return true;
+  } else {
     if(allocator_instant_->region_header_->service_header_.status_ == GCSERVICE_STATUS_NONE)
       return true;
   }
@@ -49,12 +53,26 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
 }
 
 
-void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
-  if(allocator_instant_ != NULL) {
-    allocator_instant_->region_header_->service_header_.status_ =
-        GCSERVICE_STATUS_WAITINGSERVER;
-    allocator_instant_->region_header_->service_header_.service_pid_ = pid;
+void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self, *allocator_instant_->region_header_->service_header_.mu_);
+  allocator_instant_->UpdateForkService(pid);
+  while(allocator_instant_->region_header_->service_header_.status_ <= GCSERVICE_STATUS_RUNNING) {
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      allocator_instant_->region_header_->service_header_.cond_->Wait(self);
+    }
   }
+
+  region_header_->service_header_.cond_->Broadcast(self);
+
+}
+
+void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
+  region_header_->service_header_.status_ =
+        GCSERVICE_STATUS_WAITINGSERVER;
+  region_header_->service_header_.service_pid_ = pid;
+
 }
 
 void GCServiceGlobalAllocator::initServiceHeader(void) {

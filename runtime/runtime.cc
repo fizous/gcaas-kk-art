@@ -233,11 +233,15 @@ void Runtime::Abort() {
 
 bool Runtime::GCSrvcePreZygoteFork() {
   LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
-  gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
+  bool _should_fork_service = false;
+  if(gc::gcservice::GCServiceGlobalAllocator::ShouldForkService()) {
+    _should_fork_service = true;
+    vmprofiler_->PreForkPreparation();
+  }
 
   heap_->PreZygoteForkNoSpaceFork();
-  vmprofiler_->PreForkPreparation();
-  return true;
+
+  return _should_fork_service;
 }
 
 

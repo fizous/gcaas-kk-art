@@ -1,0 +1,188 @@
+/*
+ * gcservice_daemon.cc
+ *
+ *  Created on: Sep 28, 2015
+ *      Author: hussein
+ */
+#include <string>
+#include <cutils/ashmem.h>
+#include "scoped_thread_state_change.h"
+#include "thread_state.h"
+#include "thread.h"
+#include "mem_map.h"
+#include "gc/service/global_allocator.h"
+
+
+namespace art {
+namespace gc {
+namespace gcservice {
+
+GCServiceProcess* GCServiceProcess::process_ = NULL;
+
+GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process) {
+  return new GCServiceDaemon(process);
+}
+
+
+void* GCServiceDaemon::RunDaemon(void* arg) {
+  GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
+  GCServiceProcess* _processObj = _daemonObj->process_;
+  Runtime* runtime = Runtime::Current();
+  bool _createThread =  runtime->AttachCurrentThread("GCSvcDaemon", true,
+      runtime->GetSystemThreadGroup(),
+      !runtime->IsCompiler());
+
+  if(!_createThread) {
+    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
+    return NULL;
+  }
+  Thread* self = Thread::Current();
+
+
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
+    _daemonObj->thread_ = self;
+    _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
+    _processObj->service_meta_->cond_->Broadcast(self);
+  }
+
+  LOG(ERROR) << "GCServiceDaemon is entering the main loop: " <<
+      _daemonObj->thread_->GetTid();
+
+  while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+    _daemonObj->mainLoop();
+  }
+
+  LOG(ERROR) << "GCServiceDaemon left the main loop: " <<
+      _daemonObj->thread_->GetTid();
+
+  return NULL;
+}
+
+
+GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
+     thread_(NULL), processed_index_(0), process_(process) {
+  Thread* self = Thread::Current();
+  {
+    IPMutexLock interProcMu(self, *process_->service_meta_->mu_);
+    process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
+    initShutDownSignals();
+
+    CHECK_PTHREAD_CALL(pthread_create,
+        (&pthread_, NULL,
+        &GCServiceDaemon::RunDaemon, this),
+        "GCService Daemon thread");
+    process_->service_meta_->cond_->Broadcast(self);
+  }
+
+}
+
+void GCServiceDaemon::initShutDownSignals(void) {
+  Thread* self = Thread::Current();
+  shutdown_mu_ = new Mutex("gcService Shutdown");
+  MutexLock mu(self, *shutdown_mu_);
+  shutdown_cond_.reset(new ConditionVariable("gcService Shutdown condition variable",
+      *shutdown_mu_));
+}
+
+
+bool GCServiceDaemon::waitShutDownSignals(void) {
+  Thread* self = Thread::Current();
+  MutexLock mu(self, *shutdown_mu_);
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    shutdown_cond_->Wait(self);
+  }
+  if(process_->service_meta_->status_ == GCSERVICE_STATUS_STOPPED) {
+    shutdown_cond_->Broadcast(self);
+    return true;
+  }
+  shutdown_cond_->Broadcast(self);
+  return false;
+}
+
+void GCServiceDaemon::mainLoop(void) {
+  IPMutexLock interProcMu(thread_, *process_->service_meta_->mu_);
+  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
+  {
+    process_->service_meta_->cond_->Wait(thread_);
+  }
+  if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+    while(processed_index_ < process_->service_meta_->counter_) {
+      LOG(ERROR) << " processing index registration: " <<
+          processed_index_;
+      processed_index_++;
+    }
+  }
+
+  process_->service_meta_->cond_->Broadcast(thread_);
+}
+
+
+//----------
+//----------------------------- GCServiceProcess ------------------------------
+
+void GCServiceProcess::LaunchGCServiceProcess(void) {
+  InitGCServiceProcess(
+      &(GCServiceGlobalAllocator::allocator_instant_->region_header_->service_header_));
+}
+
+
+GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta) {
+  if(process_ == NULL) {
+    LOG(ERROR) << "initializing process";
+    process_ = new GCServiceProcess(meta);
+  }
+  return process_;
+}
+
+bool GCServiceProcess::initSvcFD(void) {
+  bool returnRes = false;
+  IPMutexLock interProcMu(thread_, *service_meta_->mu_);
+  if(fileMapperSvc_ == NULL) {
+    LOG(ERROR) << " creating fileMapperSvc_ for first time ";
+    fileMapperSvc_ =
+        android::FileMapperService::CreateFileMapperSvc();
+    returnRes = android::FileMapperService::IsServiceReady();
+  } else {
+    LOG(ERROR) << " reconnecting ";
+    returnRes = android::FileMapperService::Reconnect();
+  }
+
+  if(returnRes) {
+    LOG(ERROR) << " the proc found the service initialized ";
+    service_meta_->status_ = GCSERVICE_STATUS_SERVER_INITIALIZED;
+  } else {
+    LOG(ERROR) << " the proc found the service not initialized ";
+  }
+  service_meta_->cond_->Broadcast(thread_);
+  return returnRes;
+}
+
+
+GCServiceProcess::GCServiceProcess(GCServiceHeader* meta) :
+    service_meta_(meta), fileMapperSvc_(NULL), thread_(NULL), srvcReady_(false) {
+  thread_ = Thread::Current();
+  {
+    LOG(ERROR) << " changing status of service to waiting for server ";
+    IPMutexLock interProcMu(thread_, *service_meta_->mu_);
+    service_meta_->status_ = GCSERVICE_STATUS_WAITINGSERVER;
+    service_meta_->cond_->Broadcast(thread_);
+  }
+  srvcReady_ = initSvcFD();
+
+  daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
+
+  LOG(ERROR) << "going to wait for the shutdown signals";
+  while(true) {
+    if(daemon_->waitShutDownSignals())
+      break;
+  }
+  LOG(ERROR) << "GCService process shutdown";
+}
+
+
+}
+}
+}

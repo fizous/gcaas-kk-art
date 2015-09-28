@@ -143,7 +143,9 @@ LIBART_COMMON_SRC_FILES += \
 	gc/service/service_space.cc \
 	gc/service/global_allocator.cc \
 	gc/service/base_bitmap.cc \
-	gc/accounting/card_base_table.cc
+	gc/accounting/card_base_table.cc \
+	gc/service/gcservice_daemon.cc
+
 endif
 
 LIBART_COMMON_SRC_FILES += \

@@ -39,6 +39,7 @@ enum ThreadState {
   kWaitingInMainSignalCatcherLoop,  // WAITING        TS_WAIT      blocking/reading/processing signals
   kWaitingInMainGCMMPCatcherLoop,   // WAITING        TS_WAIT      native thread waiting for the GCMMP Signals
   kWaitingForGCMMPCatcherOutput,   	// WAITING        TS_WAIT      native thread waiting for the GCMMP IO to complete
+  kWaitingForGCProcess,             // WAITING        TS_WAIT      waiting for GC process to change state
   kStarting,                        // NEW            TS_WAIT      native thread started, not yet ready to run managed code
   kNative,                          // RUNNABLE       TS_RUNNING   running in a JNI native method
   kSuspended,                       // RUNNABLE       TS_RUNNING   suspended by GC or debugger
