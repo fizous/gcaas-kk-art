@@ -138,7 +138,7 @@ public:
  void CheckCardValid(byte* card) const ALWAYS_INLINE;
 
 
- bool shareCardTable(void);
+ bool shareCardTable(CardBaseTableFields*);
  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
  virtual byte* BiasedBegin() const {
    return fields_->biased_begin_;
@@ -166,6 +166,10 @@ public:
  virtual ~CardBaseTable();
 
  CardBaseTableFields* fields_;
+
+private:
+ // Mmapped pages for the card table
+ UniquePtr<MEM_MAP> mem_map_;
 };//CardBaseTable
 
 

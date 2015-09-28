@@ -53,6 +53,7 @@ namespace mirror {
 namespace gc {
 
 namespace accounting {
+  template <typename T> struct AtomicStackData;
   class BaseBitmap;
   class SpaceBitmap;
   class SpaceBitmap;

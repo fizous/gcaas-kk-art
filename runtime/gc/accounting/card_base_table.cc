@@ -78,18 +78,21 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
   size_t capacity = heap_capacity / kCardSize;
 
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
-  AShmemMap* _mem_map_structure =
-      MEM_MAP::CreateAShmemMap(&(fields_memory->mem_map_), "card table", NULL,
-          capacity + 256, PROT_READ | PROT_WRITE);
+  mem_map_.reset(MEM_MAP::CreateStructedMemMap("card table", NULL,
+      capacity + 256, PROT_READ | PROT_WRITE, false,
+          &(fields_memory->mem_map_)));
 
 
-  CHECK(_mem_map_structure != NULL) <<
+//  AShmemMap* _mem_map_structure =
+//      MEM_MAP::CreateAShmemMap(&(fields_memory->mem_map_), "card table", NULL,
+//          capacity + 256, PROT_READ | PROT_WRITE);
+  CHECK(mem_map_.get() != NULL) <<
       "couldn't allocate card table";
   // All zeros is the correct initial value; all clean. Anonymous mmaps are initialized to zero, we
   // don't clear the card table to avoid unnecessary pages being allocated
   COMPILE_ASSERT(kCardClean == 0, card_clean_must_be_0);
 
-  byte* cardtable_begin = MEM_MAP::AshmemBegin(_mem_map_structure);
+  byte* cardtable_begin = mem_map_.get()->Begin();
   CHECK(cardtable_begin != NULL);
 
 
@@ -117,10 +120,23 @@ CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
 }
 
 
-bool CardBaseTable::shareCardTable(void) {
-  AShmemMap* _ashmem_map = MEM_MAP::ShareAShmemMap(&(fields_->mem_map_),
-      &(fields_->mem_map_));
-  return (_ashmem_map != NULL);
+bool CardBaseTable::shareCardTable(CardBaseTableFields* fields_memory) {
+  if(fields_memory != fields_) {//new process
+    byte* cardtable_begin = mem_map_.get()->Begin();
+    size_t card_byte_count = mem_map_.get()->BaseSize();
+    mem_map_.reset(NULL);
+    mem_map_.reset(MEM_MAP::CreateStructedMemMap("card table", cardtable_begin,
+        card_byte_count, PROT_READ | PROT_WRITE, true,
+            &(fields_memory->mem_map_)));
+
+    memcpy((void*)&fields_memory->biased_begin_, &fields_->biased_begin_, sizeof(byte*));
+    memcpy((void*)&fields_memory->offset_, &fields_->offset_, sizeof(size_t));
+    free(fields_);
+    fields_ = fields_memory;
+  }
+
+
+  return true;
 }
 
 }  // namespace accounting
