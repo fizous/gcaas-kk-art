@@ -97,6 +97,8 @@ struct AtomicStackData {
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
 
+
+
 #if (true || ART_GC_SERVICE)
 
 // Used to keep track of mmap segments.
