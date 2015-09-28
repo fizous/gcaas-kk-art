@@ -124,8 +124,9 @@ class SharedHeapBitmap : public BaseHeapBitmap {
     return header_->bitmaps_[index];
   }
 
- private:
   GCSrvceSharedHeapBitmap* header_;
+ private:
+
 };
 
 
