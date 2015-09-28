@@ -8,6 +8,7 @@
 #ifndef ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 #define ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 
+#include "ipcfs/ipcfs.h"
 #include "globals.h"
 #include "utils.h"
 #include "runtime.h"
