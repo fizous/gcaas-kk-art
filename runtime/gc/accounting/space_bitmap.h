@@ -43,6 +43,7 @@ namespace mirror {
 }  // namespace mirror
 
 namespace gc {
+class Heap;
 namespace accounting {
 
 
