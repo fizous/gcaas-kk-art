@@ -370,7 +370,7 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
 
 
   GCSrvceDlMallocSpace* _alloc_space =
-      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharedSpace());
+      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace());
 
   StructuredMemMap* _structuredMemMap = InitAllocSpace(_alloc_space,
       name.c_str(), initial_size, capacity, requested_begin, starting_size);
