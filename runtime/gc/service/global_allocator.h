@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "utils.h"
 #include "runtime.h"
+#include "gc/space/space.h"
 
 namespace art {
 namespace gc {
