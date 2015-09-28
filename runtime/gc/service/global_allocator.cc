@@ -64,7 +64,7 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
     }
   }
 
-  region_header_->service_header_.cond_->Broadcast(self);
+  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
 
 }
 
