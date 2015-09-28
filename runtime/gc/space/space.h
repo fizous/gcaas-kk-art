@@ -152,6 +152,9 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   InterProcessConditionVariable* cond_;
 
+  accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
+  accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;
+
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
 

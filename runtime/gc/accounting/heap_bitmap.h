@@ -52,6 +52,8 @@ class BaseHeapBitmap {
  public:
 
   static BaseHeapBitmap* CreateHeapBitmap(Heap* heap, bool sharable = false);
+  static BaseHeapBitmap* ReShareHeapBitmap(SharedHeapBitmap* originalBMap,
+      GCSrvceSharedHeapBitmap* header_addr);
 
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 

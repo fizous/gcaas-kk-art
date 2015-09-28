@@ -32,6 +32,14 @@ BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(Heap* heap, bool sharable) {
   return new SharedHeapBitmap(heap);
 }
 
+BaseHeapBitmap* SharedHeapBitmap::ReShareHeapBitmap(SharedHeapBitmap* originalBMap,
+    GCSrvceSharedHeapBitmap* header_addr) {
+  memcpy(header_addr, originalBMap->header_,
+      SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
+  return new SharedHeapBitmap(header_addr);
+}
+
+
 bool BaseHeapBitmap::Test(const mirror::Object* obj) {
   SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {
@@ -72,16 +80,25 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
     header_addr =
         reinterpret_cast<GCSrvceSharedHeapBitmap*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap)));
+    header_ = header_addr;
+    GCSrvceSharedHeapBitmap _data_values = {heap, 0,
+        {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}};
+    memcpy(header_, &_data_values,
+        SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
+  //  memset(header_->bitmaps_, 0, (8 * sizeof(BaseBitmap*)));
+    LOG(ERROR) << "done creating heap bitmap";
+  } else {
+    header_ = header_addr;
+    LOG(ERROR) << "done re-sharing heap bitmap";
   }
-  header_ = header_addr;
-  GCSrvceSharedHeapBitmap _data_values = {heap, 0,
-      {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}};
-  memcpy(header_, &_data_values,
-      SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
-//  memset(header_->bitmaps_, 0, (8 * sizeof(BaseBitmap*)));
-  LOG(ERROR) << "done creating heap bitmap";
+
 
 }
+
+
+
+
+
 
 
 
