@@ -50,14 +50,7 @@ namespace accounting {
 #if (true || ART_GC_SERVICE)
 
 
-typedef struct GCSrvceSharedHeapBitmap_S {
-  // pointer to the heap
-  const Heap* const heap_;
-  // The index of the bitmap array
-  volatile int index_;
-  //bitmaps array
-  SPACE_BITMAP* bitmaps_[8];
-}  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
+
 
 
 
@@ -356,6 +349,15 @@ class SpaceBitmap : public BaseBitmap {
   std::string name_;
 };
 
+
+typedef struct GCSrvceSharedHeapBitmap_S {
+  // pointer to the heap
+  const Heap* const heap_;
+  // The index of the bitmap array
+  volatile int index_;
+  //bitmaps array
+  SPACE_BITMAP* bitmaps_[8];
+}  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 #else
 
