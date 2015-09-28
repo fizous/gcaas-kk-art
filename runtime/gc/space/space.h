@@ -158,9 +158,9 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   CardBaseTableFields card_table_data_;
 
-  accounting::StructuredObjectStackData live_stack_data_;
-  accounting::StructuredObjectStackData mark_stack_data_;
-  accounting::StructuredObjectStackData alloc_stack_data_;
+  StructuredObjectStackData live_stack_data_;
+  StructuredObjectStackData mark_stack_data_;
+  StructuredObjectStackData alloc_stack_data_;
 
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
