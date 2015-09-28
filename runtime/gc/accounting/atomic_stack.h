@@ -77,9 +77,23 @@ template <typename T>
 class StructuredAtomicStack {
  public:
   // Capacity is how many elements we can store in the stack.
-  static StructuredAtomicStack* Create(const std::string& name, size_t capacity, bool shareMem) {
+  static StructuredAtomicStack* Create(const std::string& name,
+      size_t capacity, bool shareMem) {
     UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem));
     mark_stack->Init(shareMem);
+    return mark_stack.release();
+  }
+
+  // Capacity is how many elements we can store in the stack.
+  static StructuredAtomicStack* ShareStack(StructuredAtomicStack* original,
+      StructuredObjectStackData* memory_data, bool shareMem) {
+    UniquePtr<StructuredAtomicStack> mark_stack(
+        new StructuredAtomicStack(std::string(original->stack_data_->name_),
+            original->stack_data_->capacity_, shareMem));
+    mark_stack->Init(shareMem);
+    if(!original->stack_data_->is_shared_) {
+      free(original->stack_data_);
+    }
     return mark_stack.release();
   }
 
