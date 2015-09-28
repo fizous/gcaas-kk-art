@@ -74,13 +74,19 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
         SERVICE_ALLOC_ALIGN_BYTE(CardBaseTableFields)));
   }
 
+  return new CardBaseTable(heap_begin, heap_capacity, fields_memory);
+}
+
+CardBaseTable::CardBaseTable(const byte* heap_begin, size_t heap_capacity,
+    CardBaseTableFields* fields_memory): fields_(fields_memory) {
+
   /* Set up the card table */
   size_t capacity = heap_capacity / kCardSize;
 
   /* Allocate an extra 256 bytes to allow fixed low-byte of base */
   mem_map_.reset(MEM_MAP::CreateStructedMemMap("card table", NULL,
       capacity + 256, PROT_READ | PROT_WRITE, false,
-          &(fields_memory->mem_map_)));
+          &(fields_->mem_map_)));
 
 
 //  AShmemMap* _mem_map_structure =
@@ -108,16 +114,17 @@ CardBaseTable* CardBaseTable::Create(const byte* heap_begin,
     biased_begin += offset;
   }
   CHECK_EQ(reinterpret_cast<int>(biased_begin) & 0xff, kCardDirty);
-
-  return new CardBaseTable(biased_begin, offset, fields_memory);
-
-}
-
-CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
-    CardBaseTableFields* fields_memory): fields_(fields_memory){
   memcpy((void*)&fields_->biased_begin_, &biased_begin, sizeof(byte*));
   memcpy((void*)&fields_->offset_, &offset, sizeof(size_t));
+
 }
+
+
+//CardBaseTable::CardBaseTable(byte* biased_begin, size_t offset,
+//    CardBaseTableFields* fields_memory): fields_(fields_memory){
+//  memcpy((void*)&fields_->biased_begin_, &biased_begin, sizeof(byte*));
+//  memcpy((void*)&fields_->offset_, &offset, sizeof(size_t));
+//}
 
 
 bool CardBaseTable::shareCardTable(CardBaseTableFields* fields_memory) {

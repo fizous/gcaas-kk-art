@@ -161,8 +161,10 @@ public:
 
  static CardBaseTable* Create(const byte* heap_begin, size_t heap_capacity,
      CardBaseTableFields* fields_memory = NULL);
- CardBaseTable(byte* biased_begin, size_t offset,
+ CardBaseTable(const byte* heap_begin, size_t heap_capacity,
      CardBaseTableFields* fields_memory = NULL);
+// CardBaseTable(byte* biased_begin, size_t offset,
+//     CardBaseTableFields* fields_memory = NULL);
  virtual ~CardBaseTable();
 
  CardBaseTableFields* fields_;
