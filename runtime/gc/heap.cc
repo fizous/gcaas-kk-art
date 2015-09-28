@@ -1231,7 +1231,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
           space::SharableDlMallocSpace::AllocateDataMemory();
 
-    if(!GetCardTable()->shareCardTable()) {
+    if(!GetCardTable()->shareCardTable(&_struct_alloc_space->card_table_data_)) {
       LOG(ERROR) << "Error in sharing the Card table";
     } else {
       LOG(ERROR) << "Success in sharing the Card table";
