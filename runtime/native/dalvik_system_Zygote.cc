@@ -406,28 +406,27 @@ static bool NeedsNoRandomizeWorkaround() {
 #if (true || ART_GC_SERVICE)
 
 
-static pid_t GCSrvcForkGCService() {
-  Runtime* runtime = Runtime::Current();
-  CHECK(runtime->IsZygote()) << "Zygote forking the GC Service";
-  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
-  Thread* self = Thread::Current();
-
-  // dvmDumpLoaderStats("zygote");  // TODO: ?
-  pid_t pid = fork();
-  if (pid == 0) {
-    // The child process.
-    gMallocLeakZygoteChild = 1;
-    // Keep capabilities across UID change, unless we're staying root.
-    if (uid != 0) {
-      EnableKeepCapabilities();
-    }
-  } else {
-    LOG(ERROR) << "------- Zygote Forked the GC Service ----------";
-
-  }
-
-
-}
+//static pid_t GCSrvcForkGCService() {
+//  Runtime* runtime = Runtime::Current();
+//  CHECK(runtime->IsZygote()) << "Zygote forking the GC Service";
+//  // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
+//  Thread* self = Thread::Current();
+//
+//  // dvmDumpLoaderStats("zygote");  // TODO: ?
+//  pid_t pid = fork();
+//  if (pid == 0) {
+//    // The child process.
+//    gMallocLeakZygoteChild = 1;
+//    // Keep capabilities across UID change, unless we're staying root.
+//    EnableKeepCapabilities();
+//    DropCapabilitiesBoundingSet();
+//  } else {
+//    LOG(ERROR) << "------- Zygote Forked the GC Service ----------";
+//
+//  }
+//
+//
+//}
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
