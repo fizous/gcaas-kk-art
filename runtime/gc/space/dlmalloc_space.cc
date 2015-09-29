@@ -820,6 +820,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
         "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
         true);
     if(_local_pointer != NULL) {
+      LOG(ERROR) << "++++++++++++Success Registering Quadrant++++++++++++";
       return true;
     }
     LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
