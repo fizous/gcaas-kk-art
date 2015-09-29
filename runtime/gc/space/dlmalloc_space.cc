@@ -683,56 +683,56 @@ void DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
       se_name_c_str;
 }
 
-SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
-  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
-  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));
-  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(End()));
-  DCHECK(IsAligned<kPageSize>(Begin()));
-  DCHECK(IsAligned<kPageSize>(End()));
-  size_t size = RoundUp(Size(), kPageSize);
-  // Trim the heap so that we minimize the size of the Zygote space.
-  Trim();
-  // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(End());
-  // TODO: Not hardcode these in?
- // const size_t starting_size = kPageSize;
-  const size_t initial_size = 2 * MB;
-  // Remaining size is for the new alloc space.
-  const size_t growth_limit = Capacity() - size;
-  const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin "
-             << reinterpret_cast<const void*>(Begin()) << "\n"
-             << "End " << reinterpret_cast<const void*>(End()) << "\n"
-             << "Size " << size << "\n"
-             << "GrowthLimit " << Capacity() << "\n"
-             << "Capacity " << Capacity();
-  SetGrowthLimit(RoundUp(size, kPageSize));
-  SetFootprintLimit(RoundUp(size, kPageSize));
-  // FIXME: Do we need reference counted pointers here?
-  // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
-  VLOG(heap) << "Creating new AllocSpace: ";
-  VLOG(heap) << "Size " << GetMemMap()->Size();
-  VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
-  VLOG(heap) << "Capacity " << PrettySize(capacity);
-  //UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
-  //void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
-  // Protect memory beyond the initial size.
-  //byte* end = mem_map->Begin() + starting_size;
-  //if (capacity - initial_size > 0) {
-  //  CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
-  //}
-
-
-  SharedDlMallocSpace* _shared_space = SharedDlMallocSpace::Create(alloc_space_name,
-      initial_size, growth_limit, capacity, End());
-
-  live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
-  CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
-  mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
-  CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
-  VLOG(heap) << "zygote space creation done";
-  return _shared_space;
-}
+//SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
+//  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+//  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));
+//  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(End()));
+//  DCHECK(IsAligned<kPageSize>(Begin()));
+//  DCHECK(IsAligned<kPageSize>(End()));
+//  size_t size = RoundUp(Size(), kPageSize);
+//  // Trim the heap so that we minimize the size of the Zygote space.
+//  Trim();
+//  // Trim our mem-map to free unused pages.
+//  GetMemMap()->UnMapAtEnd(End());
+//  // TODO: Not hardcode these in?
+// // const size_t starting_size = kPageSize;
+//  const size_t initial_size = 2 * MB;
+//  // Remaining size is for the new alloc space.
+//  const size_t growth_limit = Capacity() - size;
+//  const size_t capacity = Capacity() - size;
+//  LOG(ERROR) << "CreateZygoteSpaceWithSharedSpace-->Begin "
+//             << reinterpret_cast<const void*>(Begin()) << "\n"
+//             << "End " << reinterpret_cast<const void*>(End()) << "\n"
+//             << "Size " << size << "\n"
+//             << "GrowthLimit " << Capacity() << "\n"
+//             << "Capacity " << Capacity();
+//  SetGrowthLimit(RoundUp(size, kPageSize));
+//  SetFootprintLimit(RoundUp(size, kPageSize));
+//  // FIXME: Do we need reference counted pointers here?
+//  // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
+//  VLOG(heap) << "Creating new AllocSpace: ";
+//  VLOG(heap) << "Size " << GetMemMap()->Size();
+//  VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
+//  VLOG(heap) << "Capacity " << PrettySize(capacity);
+//  //UniquePtr<MemMap> mem_map(MemMap::MapAnonymous(alloc_space_name, End(), capacity, PROT_READ | PROT_WRITE));
+//  //void* mspace = CreateMallocSpace(end_, starting_size, initial_size);
+//  // Protect memory beyond the initial size.
+//  //byte* end = mem_map->Begin() + starting_size;
+//  //if (capacity - initial_size > 0) {
+//  //  CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE), alloc_space_name);
+//  //}
+//
+//
+//  SharedDlMallocSpace* _shared_space = SharedDlMallocSpace::Create(alloc_space_name,
+//      initial_size, growth_limit, capacity, End());
+//
+//  live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+//  CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+//  mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+//  CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+//  VLOG(heap) << "zygote space creation done";
+//  return _shared_space;
+//}
 
 
 

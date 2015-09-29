@@ -37,7 +37,7 @@ namespace collector {
 
 namespace space {
 
-class SharedDlMallocSpace;
+//class SharedDlMallocSpace;
 
 #if (true || ART_GC_SERVICE)
 
@@ -246,7 +246,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
       bool shareMem = false);
 
   GCSrvDlMallocSpace* dlmalloc_space_data_;
-  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
+//  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
 
   virtual void RegisterGlobalCollector(const char* se_name_c_str);
@@ -499,7 +499,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     growth_limit_ = new_growth_limit;
   }
 
-  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
+//  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
 
  protected:
