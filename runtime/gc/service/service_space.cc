@@ -368,9 +368,9 @@ SharedDlMallocSpace* SharedDlMallocSpace::Create(const std::string& name,
   capacity = RoundUp(capacity, kPageSize);
 
 
-
+int garbageP = 0;
   GCSrvceDlMallocSpace* _alloc_space =
-      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace());
+      reinterpret_cast<GCSrvceDlMallocSpace*>(gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(&garbageP));
 
   StructuredMemMap* _structuredMemMap = InitAllocSpace(_alloc_space,
       name.c_str(), initial_size, capacity, requested_begin, starting_size);
