@@ -17,8 +17,10 @@
 #ifndef ART_RUNTIME_GC_SPACE_DLMALLOC_SPACE_H_
 #define ART_RUNTIME_GC_SPACE_DLMALLOC_SPACE_H_
 
-#include "gc/allocator/dlmalloc.h"
 #include "space.h"
+#include "thread.h"
+#include "gc/heap.h"
+#include "gc/allocator/dlmalloc.h"
 #include "gc/accounting/space_bitmap.h"
 #include "gc_profiler/MProfiler.h"
 
