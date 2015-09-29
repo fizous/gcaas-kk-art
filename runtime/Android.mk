@@ -145,7 +145,7 @@ LIBART_COMMON_SRC_FILES += \
 	gc/service/base_bitmap.cc \
 	gc/accounting/card_base_table.cc \
 	gc/service/gcservice_daemon.cc \
-	gc/service/service_space.cc
+	gc/service/service_client.cc
 
 endif
 
