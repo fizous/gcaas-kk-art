@@ -678,9 +678,10 @@ void DlMallocSpace::Dump(std::ostream& os) const {
       << ",name=\"" << GetName() << "\"]";
 }
 
-void DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
+bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   LOG(ERROR) << " ~~~~ DlMallocSpace::RegisterGlobalCollector ~~~~~ " <<
       se_name_c_str;
+  return false;
 }
 
 //SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
@@ -810,7 +811,7 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 
 }
 
-void SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
+bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
   if(strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) {
     LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
@@ -818,13 +819,16 @@ void SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
     AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
         "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
         true);
-    if(_local_pointer == NULL) {
-      LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
+    if(_local_pointer != NULL) {
+      return true;
     }
+    LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
   } else {
     LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
         se_name_c_str << ")";
   }
+
+  return false;
 }
 
 

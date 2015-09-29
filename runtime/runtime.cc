@@ -247,7 +247,7 @@ bool Runtime::GCSrvcePreZygoteFork() {
 
 
 void Runtime::RegisterCollector(const char* se_name_c_str) {
-  heap_->GetAllocSpace()->RegisterGlobalCollector(se_name_c_str);
+  gcservice::GCServiceClient::InitClient(se_name_c_str);
 }
 
 

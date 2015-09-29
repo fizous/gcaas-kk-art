@@ -27,13 +27,15 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
 
 void GCServiceClient::InitClient(const char* se_name_c_str) {
   //Thread* self = Thread::Current();
+
   Runtime* runtime = Runtime::Current();
   gc::Heap* heap = runtime->GetHeap();
-  LOG(ERROR) << " {InitClient} ";
   gc::space::SharableDlMallocSpace* _sharable_space =
-      reinterpret_cast<gc::space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
+        reinterpret_cast<gc::space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
 
-  _sharable_space->RegisterGlobalCollector(se_name_c_str);
+  if(!_sharable_space->RegisterGlobalCollector(se_name_c_str))
+    return;
+  LOG(ERROR) << " {InitClient} ";
   service_client_ = new GCServiceClient(_sharable_space,
       _sharable_space->GetSpaceIndex());
 }
