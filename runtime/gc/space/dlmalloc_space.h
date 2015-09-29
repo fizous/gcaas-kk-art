@@ -249,6 +249,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
 
+  virtual void RegisterGlobalCollector(const char* se_name_c_str);
 //  AbstractContinuousSpace* AsAbstractContinuousSpace() {
 //    return reinterpret_cast<AbstractContinuousSpace*>(this);
 //  }
@@ -328,6 +329,11 @@ class SharableDlMallocSpace : public DlMallocSpace {
         bool shareMem = false);
   bool CreateSharableBitmaps(byte* heap_begin, size_t heap_capacity,
       bool shareMem);
+  void RegisterGlobalCollector(const char* se_name_c_str);
+
+  int GetSpaceIndex(void) {
+    return sharable_space_data_->space_index_;
+  }
   GCSrvSharableDlMallocSpace* sharable_space_data_;
   GCSrvDlMallocSpace* dlmalloc_space_data_;
 

@@ -165,6 +165,12 @@ typedef struct GCSrvSharableDlMallocSpace_S {
   StructuredObjectStackData mark_stack_data_;
   StructuredObjectStackData alloc_stack_data_;
 
+  volatile int register_gc_;
+
+  volatile int space_index_;
+  /* allocated space memory */
+  AShmemMap test_memory_;
+
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
 

@@ -51,7 +51,7 @@ typedef struct GCSrvcGlobalRegionHeader_S {
 class GCServiceGlobalAllocator {
  public:
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
-  static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(void);
+  static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
   static void BlockOnGCProcessCreation(pid_t);
   void UpdateForkService(pid_t);
@@ -65,7 +65,7 @@ class GCServiceGlobalAllocator {
 
   // constructor
   GCServiceGlobalAllocator(int pages);
-  byte* AllocateSharableSpace(void);
+  byte* AllocateSharableSpace(int* index_p);
   void initServiceHeader(void);
 
   byte* allocate(size_t num_bytes) {

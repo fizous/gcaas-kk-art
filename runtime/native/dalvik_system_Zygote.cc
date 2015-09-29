@@ -554,6 +554,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
           se_name.reset(new ScopedUtfChars(env, java_se_name));
           se_name_c_str = se_name->c_str();
           CHECK(se_name_c_str != NULL);
+          runtime->RegisterCollector(se_name_c_str);
           LOG(ERROR) << "SEName: " << se_name_c_str;
       }
       rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
@@ -569,6 +570,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
     UNUSED(java_se_name);
 #endif
 
+    runtime->GCPServiceFinalizeInit();
     // Our system thread ID, etc, has changed so reset Thread state.
     self->InitAfterFork();
 

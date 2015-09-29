@@ -399,6 +399,8 @@ class Runtime {
   void SetStatsEnabled(bool new_state);
 
   bool GCSrvcePreZygoteFork();
+  void RegisterCollector(const char* se_name_c_str);
+  void GCPServiceFinalizeInit() ;
   bool GCSrvcePostZygoteFork(bool);
 
 

@@ -1229,10 +1229,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   // of the remaining available heap memory.
   if(shared_space) {
 
+    int _space_index = 0;
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
-        gc::gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace();
+        gc::gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(&_space_index);
 
-
+    _struct_alloc_space->space_index_ = _space_index;
 //    space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
 //          space::SharableDlMallocSpace::AllocateDataMemory();
 

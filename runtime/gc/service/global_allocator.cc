@@ -33,10 +33,10 @@ GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void)
   return allocator_instant_;
 }
 
-space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(void) {
+space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(int* index_p) {
   GCServiceGlobalAllocator* _inst = CreateServiceAllocator();
   return reinterpret_cast<space::GCSrvSharableDlMallocSpace*>(
-      _inst->AllocateSharableSpace());
+      _inst->AllocateSharableSpace(index_p));
 }
 
 
@@ -58,6 +58,7 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   LOG(ERROR) << ">>>> GCServiceGlobalAllocator::BlockOnGCProcessCreation";
   IPMutexLock interProcMu(self, *allocator_instant_->region_header_->service_header_.mu_);
   allocator_instant_->UpdateForkService(pid);
+  LOG(ERROR) << ">>>> Going to Wait GCServiceGlobalAllocator::BlockOnGCProcessCreation";
   while(allocator_instant_->region_header_->service_header_.status_ < GCSERVICE_STATUS_RUNNING) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
@@ -66,6 +67,7 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   }
 
   allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+  LOG(ERROR) << ">>>> Leaving blocked status GCServiceGlobalAllocator::BlockOnGCProcessCreation";
 
 }
 
@@ -126,7 +128,7 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
 GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
   return &(GCServiceGlobalAllocator::allocator_instant_->region_header_->service_header_);
 }
-byte* GCServiceGlobalAllocator::AllocateSharableSpace(void) {
+byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   size_t _allocation_size =
       SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvSharableDlMallocSpace);
   Thread* self = Thread::Current();
@@ -137,6 +139,7 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(void) {
   region_header_->service_header_.cond_->Broadcast(self);
 
   LOG(ERROR) << "printing counter in GCService: " << _counter;
+  *index_p = _counter;
   return _addr;
 }
 

@@ -67,6 +67,7 @@
 #include "JniConstants.h"  // Last to avoid LOG redefinition in ics-mr1-plus-art.
 
 #include "gc/service/global_allocator.h"
+#include "gc/service/service_client.h"
 
 namespace art {
 
@@ -244,6 +245,15 @@ bool Runtime::GCSrvcePreZygoteFork() {
   return _should_fork_service;
 }
 
+
+void Runtime::RegisterCollector(const char* se_name_c_str) {
+  heap_->GetAllocSpace()->RegisterGlobalCollector(se_name_c_str);
+}
+
+
+void Runtime::GCPServiceFinalizeInit() {
+  gcservice::GCServiceClient::FinalizeInitClient();
+}
 
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
   bool should_share = /*true;//*/(gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps >=0 );
