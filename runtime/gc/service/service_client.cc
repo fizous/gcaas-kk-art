@@ -26,7 +26,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
 }
 
 void GCServiceClient::InitClient(const char* se_name_c_str) {
-  Thread* self = Thread::Current();
+  //Thread* self = Thread::Current();
   Runtime* runtime = Runtime::Current();
   gc::Heap* heap = runtime->GetHeap();
   LOG(ERROR) << " {InitClient} ";
