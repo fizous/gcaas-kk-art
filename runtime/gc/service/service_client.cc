@@ -5,11 +5,12 @@
  *      Author: hussein
  */
 
-#include "ipcfs/ipcfs.h"
+
 #include "gc/space/dlmalloc_space.h"
 #include "gc/service/service_client.h"
 #include "gc/service/global_allocator.h"
 #include "runtime.h"
+#include "ipcfs/ipcfs.h"
 
 namespace art {
 
