@@ -54,6 +54,8 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
   android::FileMapperParameters mapperParams;
   mapperParams.process_id_ = getpid();
   mapperParams.fd_count_ = 1;
+  mapperParams.space_index_  =
+      sharable_space_->sharable_space_data_->space_index_;
   mapperParams.fds_[0] = _test_fd;
   bool _svcRes =
     android::FileMapperService::MapFds(&mapperParams);
