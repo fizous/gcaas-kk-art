@@ -125,7 +125,6 @@ class GCServiceDaemon {
   int processed_index_;
 
   std::vector<android::MappedPairProcessFD*> registered_apps_;
-  //std::vector<accounting::StructuredMappedPairStack*> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);

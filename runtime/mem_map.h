@@ -96,7 +96,7 @@ struct AtomicStackData {
 }__attribute__((aligned(8)));
 
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
-typedef AtomicStackData<android::MappedPairProcessFD*> StructuredMappedStackData;
+
 
 
 
