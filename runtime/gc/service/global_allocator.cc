@@ -135,7 +135,7 @@ GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
 
 
 GCSrvcClientHandShake* GCServiceGlobalAllocator::GetServiceHandShaker(void) {
-  return &(GCServiceGlobalAllocator::allocator_instant_->handShake_);
+  return (GCServiceGlobalAllocator::allocator_instant_->handShake_);
 }
 
 byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
