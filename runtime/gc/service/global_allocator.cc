@@ -231,7 +231,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
         ", " << _rec->process_id_;
 
 
-    memcpy(entry->first, _rec, sizeof(android::FileMapperParameters));
+    memcpy((void*)entry->first, _rec, sizeof(android::FileMapperParameters));
 
 
     android::FileMapperParameters* _recSecond = entry->second;
