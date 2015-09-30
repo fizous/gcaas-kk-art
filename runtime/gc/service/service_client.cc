@@ -57,20 +57,20 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_->space_index_, &_test_fd);
 
-  android::FileMapperParameters mapperParams;
-  mapperParams.process_id_ = getpid();
-  mapperParams.fd_count_ = 1;
-  mapperParams.space_index_  =
-      sharable_space_->sharable_space_data_->space_index_;
-  mapperParams.fds_[0] = _test_fd;
-  bool _svcRes =
-    android::FileMapperService::MapFds(&mapperParams);
-
-  if(_svcRes) {
-    LOG(ERROR) << " __________ GCServiceClient::FinalizeHeapAfterInit:  succeeded";
-  } else {
-    LOG(ERROR) << " __________ GCServiceClient::FinalizeHeapAfterInit:  Failed";
-  }
+//  android::FileMapperParameters mapperParams;
+//  mapperParams.process_id_ = getpid();
+//  mapperParams.fd_count_ = 1;
+//  mapperParams.space_index_  =
+//      sharable_space_->sharable_space_data_->space_index_;
+//  mapperParams.fds_[0] = _test_fd;
+//  bool _svcRes =
+//    android::FileMapperService::MapFds(&mapperParams);
+//
+//  if(_svcRes) {
+//    LOG(ERROR) << " __________ GCServiceClient::FinalizeHeapAfterInit:  succeeded";
+//  } else {
+//    LOG(ERROR) << " __________ GCServiceClient::FinalizeHeapAfterInit:  Failed";
+//  }
 }
 
 
