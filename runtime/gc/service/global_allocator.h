@@ -124,7 +124,7 @@ class GCServiceDaemon {
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
 
-  UniquePtr<accounting::StructuredMapPairProcStack> registered_apps_;
+  UniquePtr<accounting::StructuredMappedPairStack> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);
