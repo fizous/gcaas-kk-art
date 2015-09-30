@@ -31,6 +31,7 @@
   #if (true || ART_GC_SERVICE)
     #define ATOMIC_STACK_KLASS    StructuredAtomicStack
     #define ATOMIC_OBJ_STACK_T    StructuredObjectStack
+    #define ATOMIC_MAPPED_STACK_T StructuredMappedPairStack
   #else
     #define ATOMIC_STACK_KLASS    AtomicStack
     #define ATOMIC_OBJ_STACK_T    ObjectStack
@@ -262,8 +263,7 @@ class StructuredAtomicStack {
 };
 
 typedef StructuredAtomicStack<mirror::Object*> StructuredObjectStack;
-
-typedef StructuredAtomicStack<android::MappedPairProcessFD*> StructuredMapPairProcStack;
+typedef StructuredAtomicStack<android::MappedPairProcessFD*> StructuredMappedPairStack;
 
 #else
 

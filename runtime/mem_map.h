@@ -96,8 +96,8 @@ struct AtomicStackData {
 }__attribute__((aligned(8)));
 
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
+typedef AtomicStackData<android::MappedPairProcessFD*> StructuredMappedStackData;
 
-typedef AtomicStackData<android::MappedPairProcessFD> StructuredGCProcessMapStackData;
 
 
 #if (true || ART_GC_SERVICE)

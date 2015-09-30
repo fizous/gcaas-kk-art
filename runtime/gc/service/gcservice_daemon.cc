@@ -68,7 +68,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
   {
     IPMutexLock interProcMu(self, *process_->service_meta_->mu_);
     process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
-    registered_apps_.reset(accounting::StructuredAtomicStack::Create("registered_apps",
+    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
         64, false));
     initShutDownSignals();
     process_->service_meta_->cond_->Broadcast(self);
