@@ -222,7 +222,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
   //IPMutexLock interProcMu(self, *mem_data_->mu_);
   LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper  " << mem_data_->queued_;
   while(mem_data_->queued_ > 0) {
-    LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_" << mem_data_->queued_;
+    LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_ " << mem_data_->queued_;
     android::FileMapperParameters* _rec =
        &( mem_data_->process_mappers[mem_data_->tail_].first);
     LOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_;
@@ -231,7 +231,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
     android::FileMapperParameters* _recSecond =
        &( mem_data_->process_mappers[mem_data_->tail_].second);
     _recSecond->process_id_ = _rec->process_id_;
-
+    _recSecond->space_index_ = _rec->space_index_;
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
