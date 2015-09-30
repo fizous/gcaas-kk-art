@@ -98,7 +98,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
 }
 
 GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
-    region_header_(NULL) {
+    handShake_(NULL), region_header_(NULL) {
   int prot = PROT_READ | PROT_WRITE;
   int fileDescript = -1;
   size_t memory_size = pages * kPageSize;
@@ -125,6 +125,7 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
       begin + SERVICE_ALLOC_ALIGN_BYTE(GCSrvcGlobalRegionHeader);
 
   initServiceHeader();
+
 
   LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator>>>>>>";
 }
@@ -217,8 +218,11 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceClientHandShake* alloc_mem
 
 void GCSrvcClientHandShake::ProcessQueuedMapper(){
   Thread* self = Thread::Current();
+  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
   IPMutexLock interProcMu(self, *mem_data_->mu_);
+  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after locking mem_data_->queued " << mem_data_->queued_;
   while(mem_data_->queued_ > 0) {
+    LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_" << mem_data_->queued_;
     android::FileMapperParameters* _rec =
        &( mem_data_->process_mappers[mem_data_->tail_].first);
     LOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_;
@@ -239,6 +243,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
     mem_data_->available_ += 1;
     mem_data_->queued_--;
   }
+  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after brodcast" << mem_data_->queued_;
   mem_data_->cond_->Broadcast(self);
 }
 

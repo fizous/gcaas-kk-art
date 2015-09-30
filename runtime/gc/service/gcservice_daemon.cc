@@ -106,10 +106,12 @@ void GCServiceDaemon::mainLoop(void) {
   IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
   ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
   {
+    LOG(ERROR) << "waiting for new Process ";
     process_->handShake_->mem_data_->cond_->Wait(thread_);
   }
+  LOG(ERROR) << "GCServiceDaemon::mainLoop ====  received signal";
   if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
-
+    LOG(ERROR) << "before calling ====  ProcessQueuedMapper";
     process_->handShake_->ProcessQueuedMapper();
 
 
@@ -167,8 +169,8 @@ bool GCServiceProcess::initSvcFD(void) {
 }
 
 
-GCServiceProcess::GCServiceProcess(GCServiceHeader* meta, GCSrvcClientHandShake* handShake) :
-    service_meta_(meta), handShake_(handShake), fileMapperSvc_(NULL),
+GCServiceProcess::GCServiceProcess(GCServiceHeader* meta, GCSrvcClientHandShake* handShakeMemory) :
+    service_meta_(meta), handShake_(handShakeMemory), fileMapperSvc_(NULL),
     thread_(NULL), srvcReady_(false) {
   thread_ = Thread::Current();
   {
