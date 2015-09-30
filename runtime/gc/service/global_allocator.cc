@@ -187,7 +187,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
       &(mem_data_->process_mappers[mem_data_->head_].first);
   _rec->process_id_  = getpid();
   _rec->space_index_ = index;
-
+  _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
   memcpy(_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
 
   bool _svcRes =
