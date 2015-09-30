@@ -53,7 +53,7 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
   LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
       _test_fd;
 
-  gc::gcservice::GCServiceGlobalAllocator::GCServiceGlobalAllocator* _alloc =
+  gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_->space_index_, &_test_fd);
 
