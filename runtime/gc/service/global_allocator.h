@@ -124,7 +124,8 @@ class GCServiceDaemon {
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
 
-  UniquePtr<accounting::StructuredMappedPairStack> registered_apps_;
+  std::vector<android::MappedPairProcessFD*> registered_apps_;
+  //std::vector<accounting::StructuredMappedPairStack*> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);

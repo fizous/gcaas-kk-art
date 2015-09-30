@@ -125,7 +125,7 @@ void GCServiceDaemon::mainLoop(void) {
 
     android::MappedPairProcessFD* _newEntry =
         new std::pair<android::FileMapperParameters*,android::FileMapperParameters*>(_f_mapper_params_a, _f_mapper_params_b);
-    registered_apps_->PushBack(_newEntry);
+    registered_apps_.insert(_newEntry);
     process_->handShake_->ProcessQueuedMapper(_newEntry);
 
 
