@@ -103,20 +103,24 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
 }
 
 void GCServiceDaemon::mainLoop(void) {
-  IPMutexLock interProcMu(thread_, *process_->service_meta_->mu_);
+  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
   ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
   {
-    process_->service_meta_->cond_->Wait(thread_);
+    process_->handShake_->mem_data_->cond_->Wait(thread_);
   }
   if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
-    while(processed_index_ < process_->service_meta_->counter_) {
-      LOG(ERROR) << " processing index registration: " <<
-          processed_index_;
-      processed_index_++;
-    }
+
+    process_->handShake_->ProcessQueuedMapper();
+
+
+//    while(processed_index_ < process_->service_meta_->counter_) {
+//      LOG(ERROR) << " processing index registration: " <<
+//          processed_index_;
+//      processed_index_++;
+//    }
   }
 
-  process_->service_meta_->cond_->Broadcast(thread_);
+  process_->handShake_->mem_data_->cond_->Broadcast(thread_);
 }
 
 
@@ -125,14 +129,16 @@ void GCServiceDaemon::mainLoop(void) {
 
 void GCServiceProcess::LaunchGCServiceProcess(void) {
   InitGCServiceProcess(
-      GCServiceGlobalAllocator::GetServiceHeader());
+      GCServiceGlobalAllocator::GetServiceHeader(),
+      GCServiceGlobalAllocator::GetServiceHandShaker());
 }
 
 
-GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta) {
+GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
+    GCSrvcClientHandShake* handshake) {
   if(process_ == NULL) {
     LOG(ERROR) << "initializing process";
-    process_ = new GCServiceProcess(meta);
+    process_ = new GCServiceProcess(meta, handshake);
   }
   return process_;
 }
@@ -161,8 +167,9 @@ bool GCServiceProcess::initSvcFD(void) {
 }
 
 
-GCServiceProcess::GCServiceProcess(GCServiceHeader* meta) :
-    service_meta_(meta), fileMapperSvc_(NULL), thread_(NULL), srvcReady_(false) {
+GCServiceProcess::GCServiceProcess(GCServiceHeader* meta, GCSrvcClientHandShake* handShake) :
+    service_meta_(meta), handShake_(handShake), fileMapperSvc_(NULL),
+    thread_(NULL), srvcReady_(false) {
   thread_ = Thread::Current();
   {
     LOG(ERROR) << " changing status of service to waiting for server ";

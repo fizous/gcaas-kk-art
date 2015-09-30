@@ -51,6 +51,11 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
   int _test_fd = sharable_space_->sharable_space_data_->test_memory_.fd_;
   LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
       _test_fd;
+
+  gc::gcservice::GCServiceGlobalAllocator::GCServiceGlobalAllocator* _alloc =
+      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  _alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_->space_index_, &_test_fd);
+
   android::FileMapperParameters mapperParams;
   mapperParams.process_id_ = getpid();
   mapperParams.fd_count_ = 1;

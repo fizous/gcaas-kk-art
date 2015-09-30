@@ -39,7 +39,9 @@ typedef struct GCServiceClientHandShake_S {
   MappedPairProcessFD process_mappers[IPC_PROCESS_MAPPER_CAPACITY];
 
   volatile int available_;
+  volatile int tail_;
   volatile int queued_;
+  volatile int head_;
 } __attribute__((aligned(8))) GCServiceClientHandShake;
 
 
@@ -64,6 +66,20 @@ typedef struct GCSrvcGlobalRegionHeader_S {
 }  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
 
 
+class GCSrvcClientHandShake {
+ public:
+  static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
+  GCSrvcClientHandShake(GCServiceClientHandShake*);
+  android::FileMapperParameters* GetMapperRecord(int index, int* fdArr);
+  void ProcessQueuedMapper(void);
+  GCServiceClientHandShake* mem_data_;
+ private:
+  void Init();
+  void ResetProcessMap(MappedPairProcessFD*);
+
+}; //class GCSrvcClientHandShake
+
+
 
 class GCServiceGlobalAllocator {
  public:
@@ -74,11 +90,15 @@ class GCServiceGlobalAllocator {
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
+  static GCSrvcClientHandShake* GetServiceHandShaker(void);
   static int GCPAllowSharedMemMaps;
+
+  GCSrvcClientHandShake* handShake_;
+  static GCServiceGlobalAllocator* allocator_instant_;
  private:
   static const int   kGCServicePageCapacity = 16;
   GCSrvcGlobalRegionHeader* region_header_;
-  static GCServiceGlobalAllocator* allocator_instant_;
+
 
   // constructor
   GCServiceGlobalAllocator(int pages);
@@ -117,15 +137,16 @@ public:
 
 class GCServiceProcess {
 public:
-  static GCServiceProcess* InitGCServiceProcess(GCServiceHeader*);
+  static GCServiceProcess* InitGCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
   static void LaunchGCServiceProcess(void);
   GCServiceHeader* service_meta_;
+  GCSrvcClientHandShake* handShake_;
   GCServiceDaemon* daemon_;
 private:
 
 
   bool initSvcFD(void);
-  GCServiceProcess(GCServiceHeader*);
+  GCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
   static GCServiceProcess* process_;
 
   android::FileMapperService* fileMapperSvc_;

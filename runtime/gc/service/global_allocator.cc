@@ -6,6 +6,7 @@
  */
 #include <string>
 #include <cutils/ashmem.h>
+#include "ipcfs/ipcfs.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
@@ -91,6 +92,9 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->mu_   = new InterProcessMutex("GCServiceD Mutex", _futexAddress);
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
+
+
+  handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 
 GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
@@ -128,6 +132,12 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
 GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
   return &(GCServiceGlobalAllocator::allocator_instant_->region_header_->service_header_);
 }
+
+
+GCSrvcClientHandShake* GCServiceGlobalAllocator::GetServiceHandShaker(void) {
+  return &(GCServiceGlobalAllocator::allocator_instant_->handShake_);
+}
+
 byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   size_t _allocation_size =
       SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvSharableDlMallocSpace);
@@ -141,6 +151,95 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   LOG(ERROR) << "printing counter in GCService: " << _counter;
   *index_p = _counter;
   return _addr;
+}
+
+
+void GCSrvcClientHandShake::ResetProcessMap(MappedPairProcessFD* record) {
+  memset(&(record->first), 0, sizeof(MappedPairProcessFD));
+  memset(&(record->second), 0, sizeof(MappedPairProcessFD));
+}
+
+void GCSrvcClientHandShake::Init() {
+  mem_data_->available_ = KProcessMapperCapacity;
+  mem_data_->queued_ = 0;
+  mem_data_->tail_ = 0;
+  mem_data_->head_ = KProcessMapperCapacity - 1;
+
+  SharedFutexData* _futexAddress = &mem_data_->lock_.futex_head_;
+  SharedConditionVarData* _condAddress = &mem_data_->lock_.cond_var_;
+
+
+  mem_data_->mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
+  mem_data_->cond_ = new InterProcessConditionVariable("HandShake CondVar",
+      *mem_data_->mu_, _condAddress);
+
+  for(int i = 0; i < KProcessMapperCapacity; i++) {
+    ResetProcessMap(&(mem_data_->process_mappers[i]));
+  }
+}
+
+android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
+    int* fdArr) {
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self, *mem_data_->mu_);
+  mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
+  android::FileMapperParameters* _rec =
+      &(mem_data_->process_mappers[mem_data_->head_].first);
+  _rec->process_id_  = getpid();
+  _rec->space_index_ = index;
+
+  memcpy(_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+
+  bool _svcRes =
+    android::FileMapperService::MapFds(_rec);
+
+  if(_svcRes) {
+    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded";
+  } else {
+    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  Failed";
+  }
+
+  mem_data_->available_ -= 1;
+  mem_data_->queued_++;
+
+  mem_data_->cond_->Broadcast(self);
+
+  return _rec;
+}
+
+
+
+
+GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceClientHandShake* alloc_mem) :
+    mem_data_(alloc_mem) {
+  Init();
+}
+
+void GCSrvcClientHandShake::ProcessQueuedMapper(){
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self, *mem_data_->mu_);
+  while(mem_data_->queued_ > 0) {
+    android::FileMapperParameters* _rec =
+       &( mem_data_->process_mappers[mem_data_->tail_].first);
+    LOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_;
+    LOG(ERROR) << "Process existing record:.. " << _rec->space_index_ <<
+        ", " << _rec->process_id_;
+    android::FileMapperParameters* _recSecond =
+       &( mem_data_->process_mappers[mem_data_->tail_].second);
+    _recSecond->process_id_ = _rec->process_id_;
+
+    bool _svcRes =
+      android::FileMapperService::GetMapFds(_recSecond);
+    if(_svcRes) {
+      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded";
+    } else {
+      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  Failed";
+    }
+    mem_data_->tail_ = (mem_data_->tail_ + 1) % KProcessMapperCapacity;
+    mem_data_->available_ += 1;
+    mem_data_->queued_--;
+  }
+  mem_data_->cond_->Broadcast(self);
 }
 
 
