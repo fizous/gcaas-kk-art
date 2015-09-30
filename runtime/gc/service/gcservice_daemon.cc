@@ -68,6 +68,8 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
   {
     IPMutexLock interProcMu(self, *process_->service_meta_->mu_);
     process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
+    registered_apps_ = gc::accounting::StructuredAtomicStack::Create("registered_apps",
+        64, false);
     initShutDownSignals();
     process_->service_meta_->cond_->Broadcast(self);
   }
@@ -112,7 +114,18 @@ void GCServiceDaemon::mainLoop(void) {
   LOG(ERROR) << "GCServiceDaemon::mainLoop ====  received signal";
   if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
     LOG(ERROR) << "before calling ====  ProcessQueuedMapper";
-    process_->handShake_->ProcessQueuedMapper();
+
+
+    android::FileMapperParameters* _f_mapper_params_a =
+        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
+            sizeof(android::FileMapperParameters)));
+    android::FileMapperParameters* _f_mapper_params_b =
+        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
+            sizeof(android::FileMapperParameters)));
+
+    android::MappedPairProcessFD* _newEntry = std::make_pair(_f_mapper_params_a, _f_mapper_params_b);
+    registered_apps_->PushBack(_newEntry);
+    process_->handShake_->ProcessQueuedMapper(_newEntry);
 
 
 //    while(processed_index_ < process_->service_meta_->counter_) {

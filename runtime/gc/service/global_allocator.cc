@@ -156,9 +156,8 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
 }
 
 
-void GCSrvcClientHandShake::ResetProcessMap(android::MappedPairProcessFD* record) {
-  memset(&(record->first), 0, sizeof(android::MappedPairProcessFD));
-  memset(&(record->second), 0, sizeof(android::MappedPairProcessFD));
+void GCSrvcClientHandShake::ResetProcessMap(android::FileMapperParameters* record) {
+  memset(record, 0, sizeof(android::FileMapperParameters));
 }
 
 void GCSrvcClientHandShake::Init() {
@@ -176,7 +175,7 @@ void GCSrvcClientHandShake::Init() {
       *mem_data_->mu_, _condAddress);
 
   for(int i = 0; i < KProcessMapperCapacity; i++) {
-    ResetProcessMap(&(mem_data_->process_mappers[i]));
+    ResetProcessMap(&(mem_data_->process_mappers_[i]));
   }
 }
 
@@ -186,7 +185,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
   IPMutexLock interProcMu(self, *mem_data_->mu_);
   mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
   android::FileMapperParameters* _rec =
-      &(mem_data_->process_mappers[mem_data_->head_].first);
+      &(mem_data_->process_mappers_[mem_data_->head_]);
   _rec->process_id_  = getpid();
   _rec->space_index_ = index;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
@@ -196,7 +195,8 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
     android::FileMapperService::MapFds(_rec);
 
   if(_svcRes) {
-    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded";
+    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded; " <<
+        _rec->process_id_ << ", "<< _rec->space_index_ <<", "<<  _rec->fd_count_ <<", "<< _rec->fds_[0];
   } else {
     LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  Failed";
   }
@@ -217,7 +217,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceClientHandShake* alloc_mem
   Init();
 }
 
-void GCSrvcClientHandShake::ProcessQueuedMapper(){
+void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* entry){
  // Thread* self = Thread::Current();
   //LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
   //IPMutexLock interProcMu(self, *mem_data_->mu_);
@@ -225,14 +225,19 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
   while(mem_data_->queued_ > 0) {
     LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_ " << mem_data_->queued_;
     android::FileMapperParameters* _rec =
-       &( mem_data_->process_mappers[mem_data_->tail_].first);
-    LOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_;
+       &(mem_data_->process_mappers_[mem_data_->tail_]);
+    LOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_ <<", head is " << mem_data_->head_;
     LOG(ERROR) << "Process existing record:.. " << _rec->space_index_ <<
         ", " << _rec->process_id_;
-    android::FileMapperParameters* _recSecond =
-       &( mem_data_->process_mappers[mem_data_->tail_].second);
+
+
+    memcpy(entry->first, _rec, sizeof(android::FileMapperParameters));
+
+
+    android::FileMapperParameters* _recSecond = entry->second;
     _recSecond->process_id_ = _rec->process_id_;
     _recSecond->space_index_ = _rec->space_index_;
+    _recSecond->fd_count_ = _rec->fd_count_;
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {

@@ -36,7 +36,7 @@ typedef struct GCServiceClientHandShake_S {
   SynchronizedLockHead lock_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
-  android::MappedPairProcessFD process_mappers[IPC_PROCESS_MAPPER_CAPACITY];
+  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
 
   volatile int available_;
   volatile int tail_;
@@ -71,11 +71,11 @@ class GCSrvcClientHandShake {
   static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
   GCSrvcClientHandShake(GCServiceClientHandShake*);
   android::FileMapperParameters* GetMapperRecord(int index, int* fdArr);
-  void ProcessQueuedMapper(void);
+  void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
   GCServiceClientHandShake* mem_data_;
  private:
   void Init();
-  void ResetProcessMap(android::MappedPairProcessFD*);
+  void ResetProcessMap(android::FileMapperParameters*);
 
 }; //class GCSrvcClientHandShake
 
@@ -123,6 +123,9 @@ class GCServiceDaemon {
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
+
+  gc::accounting::StructuredMapPairProcStack registered_apps_;
+
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);
   void mainLoop(void);
