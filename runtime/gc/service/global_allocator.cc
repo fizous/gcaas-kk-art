@@ -217,7 +217,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceClientHandShake* alloc_mem
 }
 
 void GCSrvcClientHandShake::ProcessQueuedMapper(){
-  Thread* self = Thread::Current();
+ // Thread* self = Thread::Current();
   //LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
   //IPMutexLock interProcMu(self, *mem_data_->mu_);
   LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper  " << mem_data_->queued_;
