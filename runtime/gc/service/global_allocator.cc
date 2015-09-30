@@ -218,9 +218,9 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceClientHandShake* alloc_mem
 
 void GCSrvcClientHandShake::ProcessQueuedMapper(){
   Thread* self = Thread::Current();
-  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
-  IPMutexLock interProcMu(self, *mem_data_->mu_);
-  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after locking mem_data_->queued " << mem_data_->queued_;
+  //LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
+  //IPMutexLock interProcMu(self, *mem_data_->mu_);
+  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper  " << mem_data_->queued_;
   while(mem_data_->queued_ > 0) {
     LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_" << mem_data_->queued_;
     android::FileMapperParameters* _rec =
@@ -243,8 +243,8 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
     mem_data_->available_ += 1;
     mem_data_->queued_--;
   }
-  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after brodcast" << mem_data_->queued_;
-  mem_data_->cond_->Broadcast(self);
+  LOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after while" << mem_data_->queued_;
+  //mem_data_->cond_->Broadcast(self);
 }
 
 
