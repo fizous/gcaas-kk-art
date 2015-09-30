@@ -18,7 +18,7 @@
 #define ART_RUNTIME_MEM_MAP_H_
 
 #include <string>
-
+#include "ipcfs/ipcfs.h"
 #include <stddef.h>
 #include <sys/mman.h>  // For the PROT_* and MAP_* constants.
 #include <sys/types.h>
@@ -94,9 +94,10 @@ struct AtomicStackData {
 
   bool is_shared_;
 }__attribute__((aligned(8)));
+
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
-
+typedef AtomicStackData<android::MappedPairProcessFD> StructuredGCProcessMapStackData;
 
 
 #if (true || ART_GC_SERVICE)

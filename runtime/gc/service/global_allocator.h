@@ -9,6 +9,7 @@
 #define ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 
 #include "ipcfs/ipcfs.h"
+#include "mem_map.h"
 #include "globals.h"
 #include "utils.h"
 #include "runtime.h"
@@ -29,14 +30,13 @@ typedef enum {
 } GC_SERVICE_STATUS;
 
 
-typedef std::pair<android::FileMapperParameters,
-    android::FileMapperParameters> MappedPairProcessFD;
+
 
 typedef struct GCServiceClientHandShake_S {
   SynchronizedLockHead lock_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
-  MappedPairProcessFD process_mappers[IPC_PROCESS_MAPPER_CAPACITY];
+  android::MappedPairProcessFD process_mappers[IPC_PROCESS_MAPPER_CAPACITY];
 
   volatile int available_;
   volatile int tail_;
@@ -75,7 +75,7 @@ class GCSrvcClientHandShake {
   GCServiceClientHandShake* mem_data_;
  private:
   void Init();
-  void ResetProcessMap(MappedPairProcessFD*);
+  void ResetProcessMap(android::MappedPairProcessFD*);
 
 }; //class GCSrvcClientHandShake
 

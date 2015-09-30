@@ -5,6 +5,7 @@
  *      Author: hussein
  */
 #include <string>
+#include "mem_map.h"
 #include <cutils/ashmem.h>
 #include "ipcfs/ipcfs.h"
 #include "scoped_thread_state_change.h"
@@ -155,9 +156,9 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
 }
 
 
-void GCSrvcClientHandShake::ResetProcessMap(MappedPairProcessFD* record) {
-  memset(&(record->first), 0, sizeof(MappedPairProcessFD));
-  memset(&(record->second), 0, sizeof(MappedPairProcessFD));
+void GCSrvcClientHandShake::ResetProcessMap(android::MappedPairProcessFD* record) {
+  memset(&(record->first), 0, sizeof(android::MappedPairProcessFD));
+  memset(&(record->second), 0, sizeof(android::MappedPairProcessFD));
 }
 
 void GCSrvcClientHandShake::Init() {
@@ -189,7 +190,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
   _rec->process_id_  = getpid();
   _rec->space_index_ = index;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
-  memcpy(_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+  memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
 
   bool _svcRes =
     android::FileMapperService::MapFds(_rec);

@@ -263,7 +263,7 @@ class StructuredAtomicStack {
 
 typedef StructuredAtomicStack<mirror::Object*> StructuredObjectStack;
 
-
+typedef StructuredAtomicStack<android::MappedPairProcessFD*> StructuredMapPairProcStack;
 
 #else
 
