@@ -231,7 +231,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(){
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded";
+      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _recSecond->fds_[0];
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  Failed";
     }
