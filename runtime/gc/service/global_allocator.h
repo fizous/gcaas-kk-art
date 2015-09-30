@@ -29,6 +29,22 @@ typedef enum {
 } GC_SERVICE_STATUS;
 
 
+typedef std::pair<android::FileMapperParameters,
+    android::FileMapperParameters> MappedPairProcessFD;
+
+typedef struct GCServiceClientHandShake_S {
+  SynchronizedLockHead lock_;
+  InterProcessMutex* mu_;
+  InterProcessConditionVariable* cond_;
+  MappedPairProcessFD process_mappers[IPC_PROCESS_MAPPER_CAPACITY];
+
+  volatile int available_;
+  volatile int queued_;
+} __attribute__((aligned(8))) GCServiceClientHandShake;
+
+
+
+
 typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
   volatile int counter_;
@@ -42,6 +58,7 @@ typedef struct GCServiceHeader_S {
 typedef struct GCSrvcGlobalRegionHeader_S {
   // This bitmap itself, word sized for efficiency in scanning.
   AShmemMap ashmem_meta_;
+  GCServiceClientHandShake gc_handshake_;
   byte* current_addr_;
   GCServiceHeader service_header_;
 }  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
