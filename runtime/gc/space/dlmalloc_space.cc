@@ -813,7 +813,8 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 
 bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
-  if(strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) {
+  if((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
+      (strcmp(se_name_c_str, "purdue.dacapo") == 0)) {
     LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
     sharable_space_data_->register_gc_ = 1;
     AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
