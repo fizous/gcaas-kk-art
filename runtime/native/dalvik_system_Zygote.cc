@@ -421,8 +421,8 @@ static pid_t GCSrvcForkGCService(void) {
     // The child process.
     gMallocLeakZygoteChild = 1;
     // Keep capabilities across UID change, unless we're staying root.
-    EnableKeepCapabilities();
-    DropCapabilitiesBoundingSet();
+//    EnableKeepCapabilities();
+//    DropCapabilitiesBoundingSet();
 
     setpgid(0, 0);
     int rc = setresgid(_gid, _gid, _gid);
