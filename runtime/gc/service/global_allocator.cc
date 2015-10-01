@@ -206,7 +206,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
       LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
     } else {
       LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
-          " " << StringPrintf("0x%08x",reinterpret_cast<void*>(actual)) ;
+          " " << StringPrintf("%p",reinterpret_cast<void*>(actual)) ;
 
     }
   } else {
