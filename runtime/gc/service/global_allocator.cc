@@ -199,16 +199,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
         _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_
         <<", "<< _rec->fds_[0];
 
-    byte* actual = reinterpret_cast<byte*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED,
-        _rec->fds_[0], 0));
 
-    if(actual == MAP_FAILED) {
-      LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
-    } else {
-      LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
-          " " << StringPrintf("%p",reinterpret_cast<void*>(actual)) ;
-
-    }
   } else {
     LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  Failed";
   }
@@ -255,7 +246,16 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
     if(_svcRes) {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _recSecond->fds_[0];
 
+      byte* actual = reinterpret_cast<byte*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED,
+          _recSecond->fds_[0], 0));
 
+      if(actual == MAP_FAILED) {
+        LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
+      } else {
+        LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
+            " " << StringPrintf("%p",reinterpret_cast<void*>(actual)) ;
+
+      }
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  Failed";
     }
