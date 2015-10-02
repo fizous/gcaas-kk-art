@@ -39,6 +39,9 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   FillAshMemMapData(&rec->mem_maps_[0],
       &(sharable_space_->sharable_space_data_->test_memory_));
+  FillAshMemMapData(&rec->mem_maps_[1],
+      &(sharable_space_->sharable_space_data_->dlmalloc_space_data_.memory_));
+
 }
 
 
