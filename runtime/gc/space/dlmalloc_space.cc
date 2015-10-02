@@ -16,6 +16,7 @@
 #include "dlmalloc_space.h"
 #include "dlmalloc_space-inl.h"
 #include "gc/service/service_space.h"
+#include "gc/service/service_client.h"
 #include "gc/accounting/card_table.h"
 #include "gc/heap.h"
 #include "mirror/object-inl.h"
