@@ -9,6 +9,7 @@
 #define ART_RUNTIME_GC_SERVICE_SERVICE_CLIENT_H_
 
 #include "gc/space/dlmalloc_space.h"
+#include "ipcfs/ipcfs.h"
 
 namespace art {
 
