@@ -23,9 +23,6 @@ class GCServiceClient {
   static void FinalizeInitClient();
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);
-  gc::space::SharableDlMallocSpace* GetSharableSpace() {
-    return sharable_space_;
-  }
  private:
   GCServiceClient(gc::space::SharableDlMallocSpace*, int);
 

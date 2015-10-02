@@ -17,7 +17,6 @@
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_space.h"
-#include "gc/service/service_client.h"
 
 namespace art {
 namespace gc {
@@ -180,32 +179,26 @@ void GCSrvcClientHandShake::Init() {
   }
 }
 
-android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord() {
+android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
+    int* fdArr, int* byte_counts) {
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *mem_data_->mu_);
   mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
   android::FileMapperParameters* _rec =
       &(mem_data_->process_mappers_[mem_data_->head_]);
-
-
-  space::SharableDlMallocSpace* _space =
-      art::gcservice::GCServiceClient::service_client_->GetSharableSpace();
-
-  _space->FillMemoryMappers(_rec);
-
-
-//  _rec->process_id_  = getpid();
-//  _rec->space_index_ = index;
-//  _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
-//  memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
-//  memcpy((void*)_rec->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+  _rec->process_id_  = getpid();
+  _rec->space_index_ = index;
+  _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
+  memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+  memcpy((void*)_rec->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
 
   bool _svcRes =
     android::FileMapperService::MapFds(_rec);
 
   if(_svcRes) {
     LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded; " <<
-        _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_;
+        _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_
+        <<", "<< _rec->fds_[0];
 
 
   } else {
@@ -252,33 +245,18 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  "
-          "succeeded..";
+      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _recSecond->fds_[0];
 
-      int _fd_value = 0;
-      size_t _bytes_cnt = 0;
-      for(int i = 0; i < _recSecond->fd_count_; i++) {
-        _fd_value = _recSecond->mapped_recs_[i].fd_;
-        _bytes_cnt = entry->first->mapped_recs_[i].size_;
-        _recSecond->mapped_recs_[i].size_ = _bytes_cnt;
-        _recSecond->mapped_recs_[i].flags_ = entry->first->mapped_recs_[i].flags_;
-        _recSecond->mapped_recs_[i].prot_ = entry->first->mapped_recs_[i].prot_;
-        byte* actual = reinterpret_cast<byte*>(mmap(NULL,
-            1024,
-            PROT_READ | PROT_WRITE,/*_recSecond->mapped_recs_[i].prot_*/
-            MAP_SHARED, /*_recSecond->mapped_recs_[i].flags_*/
-            _recSecond->mapped_recs_[i].fd_, 0));
-        if(actual == MAP_FAILED) {
-          LOG(ERROR) << "MMap failed in creating file descriptor..." << _fd_value <<
-              ", size: " << _recSecond->mapped_recs_[i].size_;
-        } else {
-          LOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
-              _fd_value << " " <<
-              StringPrintf("fd[%d], size = %u, address: %p; content: 0x%x",
-                 i, _bytes_cnt, reinterpret_cast<void*>(actual),
-                  *(reinterpret_cast<unsigned int*>(actual))) ;
+      byte* actual = reinterpret_cast<byte*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED,
+          _recSecond->fds_[0], 0));
 
-        }
+      if(actual == MAP_FAILED) {
+        LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
+      } else {
+        LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
+            " " << StringPrintf("address: %p; content: 0x%x",
+                reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual))) ;
+
       }
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  Failed";
