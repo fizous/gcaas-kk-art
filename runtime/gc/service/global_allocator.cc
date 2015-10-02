@@ -17,6 +17,7 @@
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_space.h"
+#include "gc/service/service_client.h"
 
 namespace art {
 namespace gc {
@@ -190,8 +191,8 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
   _rec->space_index_ = index;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
 
-  _rec->mem_maps_[0].fd_ = fdArr[0];
 
+  art::gcservice::GCServiceClient::service_client_->FillMemMapData(_rec);
 
   //memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
   //memcpy((void*)_rec->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));

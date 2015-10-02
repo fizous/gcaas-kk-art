@@ -23,6 +23,11 @@ class GCServiceClient {
   static void FinalizeInitClient();
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);
+
+  void FillMemMapData(android::FileMapperParameters* rec);
+
+  void FillAshMemMapData(android::IPCAShmemMap* rec,
+      AShmemMap* shmem_map);
  private:
   GCServiceClient(gc::space::SharableDlMallocSpace*, int);
 

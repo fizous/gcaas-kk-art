@@ -7,7 +7,7 @@
 
 
 #include "gc/space/dlmalloc_space.h"
-#include "gc/service/service_client.h"
+
 #include "gc/service/global_allocator.h"
 #include "runtime.h"
 #include "ipcfs/ipcfs.h"
@@ -18,6 +18,19 @@ namespace gcservice {
 
 GCServiceClient* GCServiceClient::service_client_ = NULL;
 
+
+void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
+    AShmemMap* shmem_map) {
+  recP->fd_ = shmem_map->fd_;
+  recP->flags_ = shmem_map->flags_;
+  recP->prot_ = shmem_map->prot_;
+  recP->size_ = shmem_map->size_;
+}
+
+void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
+  FillAshMemMapData(&rec->mem_maps_[0],
+      &(sharable_space_->sharable_space_data_->test_memory_));
+}
 
 GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
     int index) : index_(index), sharable_space_(sharable_space) {
