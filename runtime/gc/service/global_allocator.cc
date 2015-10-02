@@ -262,11 +262,15 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
             _result->prot_, _result->flags_, _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
-          LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_;
+          LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
+              << ", size: " << _result->size_ << ", flags: " << _result->flags_
+              << ", prot: " << _result->flags_;
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _result->fd_ <<
               " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _result->fd_,
-                  reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual))) ;
+                  reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual)))
+                  << ", size: " << _result->size_ << ", flags: " << _result->flags_
+                                << ", prot: " << _result->flags_;
 
         }
       }
