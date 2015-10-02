@@ -180,7 +180,7 @@ void GCSrvcClientHandShake::Init() {
 }
 
 android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
-    int* fdArr) {
+    int* fdArr, int* byte_counts) {
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *mem_data_->mu_);
   mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
@@ -190,6 +190,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
   _rec->space_index_ = index;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
   memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+  memcpy((void*)_rec->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
 
   bool _svcRes =
     android::FileMapperService::MapFds(_rec);
@@ -253,7 +254,8 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
         LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
       } else {
         LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
-            " " << StringPrintf("%p",reinterpret_cast<void*>(actual)) ;
+            " " << StringPrintf("address: %p; content: 0x%x",
+                reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual))) ;
 
       }
     } else {
