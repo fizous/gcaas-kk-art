@@ -245,16 +245,17 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _recSecond->fds_[0];
+      android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[0]);
+      LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
 
       byte* actual = reinterpret_cast<byte*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED,
-          _recSecond->fds_[0], 0));
+          _result->fd_, 0));
 
       if(actual == MAP_FAILED) {
         LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
       } else {
         LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
-            " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _recSecond->fds_[0],
+            " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _result->fd_,
                 reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual))) ;
 
       }
