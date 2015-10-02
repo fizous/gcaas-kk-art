@@ -65,7 +65,8 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
         reinterpret_cast<byte*>(obj_with_rdz) + kValgrindRedZoneBytes);
     // Make redzones as no access.
     VALGRIND_MAKE_MEM_NOACCESS(obj_with_rdz, kValgrindRedZoneBytes);
-    VALGRIND_MAKE_MEM_NOACCESS(reinterpret_cast<byte*>(result) + num_bytes, kValgrindRedZoneBytes);
+    VALGRIND_MAKE_MEM_NOACCESS(reinterpret_cast<byte*>(result) + num_bytes,
+        kValgrindRedZoneBytes);
     return result;
   }
 
@@ -79,7 +80,8 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
         reinterpret_cast<byte*>(obj_with_rdz) + kValgrindRedZoneBytes);
     // Make redzones as no access.
     VALGRIND_MAKE_MEM_NOACCESS(obj_with_rdz, kValgrindRedZoneBytes);
-    VALGRIND_MAKE_MEM_NOACCESS(reinterpret_cast<byte*>(result) + num_bytes, kValgrindRedZoneBytes);
+    VALGRIND_MAKE_MEM_NOACCESS(reinterpret_cast<byte*>(result) + num_bytes,
+        kValgrindRedZoneBytes);
     return result;
   }
 
@@ -281,7 +283,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
                                       growth_limit, initial_size);
   } else {
-    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
+    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(),
+        end, growth_limit, shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
@@ -833,6 +836,46 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   }
 
   return false;
+}
+
+void SharableDlMallocSpace::CopyMappedRedcords(android::FileMapperParameters* record,
+    AShmemMap* mem_mapped, int index) {
+  android::IPCAShmemMap* _ipcAshmem = &record->mapped_recs_[index];
+  _ipcAshmem->begin_ = mem_mapped->begin_;
+  _ipcAshmem->fd_ = mem_mapped->fd_;
+  _ipcAshmem->flags_ = mem_mapped->flags_;
+  _ipcAshmem->prot_ = mem_mapped->prot_;
+  _ipcAshmem->size_ = mem_mapped->size_;
+}
+
+void SharableDlMallocSpace::FillMemoryMappers(android::FileMapperParameters* record) {
+  record->process_id_  = getpid();
+  record->space_index_ = sharable_space_data_->space_index_;
+  record->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
+  //CardTable
+  CopyMappedRedcords(record, &(sharable_space_data_->card_table_data_.mem_map_), 0);
+  //mem_space
+  CopyMappedRedcords(record, &(sharable_space_data_->dlmalloc_space_data_.memory_), 1);
+  //live_bitmap
+  CopyMappedRedcords(record, &(sharable_space_data_->live_bitmap_.mem_map_), 2);
+  //live_bitmap
+  CopyMappedRedcords(record, &(sharable_space_data_->mark_bitmap_.mem_map_), 3);
+
+  //live_stack
+  CopyMappedRedcords(record, &(sharable_space_data_->live_stack_data_.memory_), 4);
+  //mark_stack
+  CopyMappedRedcords(record, &(sharable_space_data_->mark_stack_data_.memory_), 5);
+  //alloc_stack
+  CopyMappedRedcords(record, &(sharable_space_data_->mark_stack_data_.memory_), 6);
+
+  //test_memory_
+  CopyMappedRedcords(record, &(sharable_space_data_->test_memory_), 7);
+//  sharable_space_data_->card_table_data_.mem_map_.fd_;
+//  record->fds_[]
+//  record->byte_counts_
+//
+//  memcpy((void*)record->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
+//  memcpy((void*)record->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
 }
 
 

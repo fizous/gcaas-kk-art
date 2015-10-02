@@ -333,6 +333,10 @@ class SharableDlMallocSpace : public DlMallocSpace {
       bool shareMem);
   bool RegisterGlobalCollector(const char* se_name_c_str);
 
+  void FillMemoryMappers(android::FileMapperParameters* record);
+  void CopyMappedRedcords(android::FileMapperParameters* record,
+      AShmemMap* mem_mapped, int index);
+
   int GetSpaceIndex(void) {
     return sharable_space_data_->space_index_;
   }
