@@ -70,8 +70,7 @@ class GCSrvcClientHandShake {
  public:
   static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
   GCSrvcClientHandShake(GCServiceClientHandShake*);
-  android::FileMapperParameters* GetMapperRecord(int index, int* fdArr,
-      int* byte_counts);
+  android::FileMapperParameters* GetMapperRecord(void);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
   GCServiceClientHandShake* mem_data_;
  private:

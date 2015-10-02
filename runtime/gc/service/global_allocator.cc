@@ -180,8 +180,7 @@ void GCSrvcClientHandShake::Init() {
   }
 }
 
-android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
-    int* fdArr, int* byte_counts) {
+android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord() {
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *mem_data_->mu_);
   mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
@@ -190,7 +189,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
 
 
   space::SharableDlMallocSpace* _space =
-      GCServiceClient::service_client_->GetSharableSpace();
+      art::gcservice::GCServiceClient::service_client_->GetSharableSpace();
 
   _space->FillMemoryMappers(_rec);
 
