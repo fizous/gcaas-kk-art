@@ -17,6 +17,7 @@
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_space.h"
+#include "gc/service/service_client.h"
 
 namespace art {
 namespace gc {
@@ -188,8 +189,8 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
       &(mem_data_->process_mappers_[mem_data_->head_]);
 
 
-  gc::space::SharableDlMallocSpace* _space =
-      art::gcservice::GCServiceClient::service_client_->GetSharableSpace();
+  space::SharableDlMallocSpace* _space =
+      GCServiceClient::service_client_->GetSharableSpace();
 
   _space->FillMemoryMappers(_rec);
 
