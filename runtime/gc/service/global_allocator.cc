@@ -264,7 +264,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
         _recSecond->mapped_recs_[i].flags_ = entry->first->mapped_recs_[i].flags_;
         _recSecond->mapped_recs_[i].prot_ = entry->first->mapped_recs_[i].prot_;
         byte* actual = reinterpret_cast<byte*>(mmap(NULL,
-            _bytes_cnt,
+            1024,
             _recSecond->mapped_recs_[i].prot_,
             _recSecond->mapped_recs_[i].flags_,
             _recSecond->mapped_recs_[i].fd_, 0));
