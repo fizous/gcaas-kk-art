@@ -853,6 +853,7 @@ void SharableDlMallocSpace::FillMemoryMappers(android::FileMapperParameters* rec
   record->process_id_  = getpid();
   record->space_index_ = sharable_space_data_->space_index_;
   record->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
+  if(false) {
   //CardTable
   CopyMappedRedcords(record, &(sharable_space_data_->card_table_data_.mem_map_), 0);
   //mem_space
@@ -868,7 +869,7 @@ void SharableDlMallocSpace::FillMemoryMappers(android::FileMapperParameters* rec
   CopyMappedRedcords(record, &(sharable_space_data_->mark_stack_data_.memory_), 5);
   //alloc_stack
   CopyMappedRedcords(record, &(sharable_space_data_->mark_stack_data_.memory_), 6);
-
+  }
   //test_memory_
   CopyMappedRedcords(record, &(sharable_space_data_->test_memory_), 7);
 //  sharable_space_data_->card_table_data_.mem_map_.fd_;
