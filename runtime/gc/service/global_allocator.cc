@@ -256,6 +256,8 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
     if(_svcRes) {
       for(int i = 0; i < _recSecond->fd_count_; i++) {
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
+        _result->flags_ = MAP_SHARED;
+        _result->flags_ = PROT_READ | PROT_WRITE;
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
 
         byte* actual = reinterpret_cast<byte*>(mmap(NULL, _result->size_,
