@@ -263,8 +263,8 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
             StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
                 _result->fd_, _result->flags_, _result->prot_, _result->size_);
 
-        _result->flags_ = MAP_SHARED;
-        _result->prot_ = PROT_READ | PROT_WRITE;
+        _result->flags_ &= MAP_SHARED;
+        //_result->prot_ = PROT_READ | PROT_WRITE;
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
 
         byte* actual = reinterpret_cast<byte*>(mmap(NULL, _result->size_,
