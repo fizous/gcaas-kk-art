@@ -241,12 +241,16 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
 
 
     memcpy((void*)entry->first, _rec, sizeof(android::FileMapperParameters));
-
-
     android::FileMapperParameters* _recSecond = entry->second;
+
+
+
     _recSecond->process_id_ = _rec->process_id_;
     _recSecond->space_index_ = _rec->space_index_;
     _recSecond->fd_count_ = _rec->fd_count_;
+    memcpy((void*)(_recSecond->mem_maps_), _rec->mem_maps_,
+        _rec->fd_count_ *  sizeof(android::IPCAShmemMap));
+
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
@@ -254,11 +258,11 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
 
-        byte* actual = reinterpret_cast<byte*>(mmap(NULL, 1024, PROT_READ | PROT_WRITE, MAP_SHARED,
-            _result->fd_, 0));
+        byte* actual = reinterpret_cast<byte*>(mmap(NULL, _result->size_,
+            _result->prot_, _result->flags_, _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
-          LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->mem_maps_[i].fd_;
+          LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_;
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _result->fd_ <<
               " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _result->fd_,
