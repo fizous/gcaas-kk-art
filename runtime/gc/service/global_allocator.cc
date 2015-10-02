@@ -202,7 +202,7 @@ android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
   if(_svcRes) {
     LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded; " <<
         _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_
-        <<", "<< _rec->fds_[0];
+        <<", "<< _rec->mem_maps_[0].fd_;
 
 
   } else {
@@ -256,9 +256,9 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
           _result->fd_, 0));
 
       if(actual == MAP_FAILED) {
-        LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->fds_[0];
+        LOG(ERROR) << "MMap failed in creating file descriptor..." << _rec->mem_maps_[0].fd_;
       } else {
-        LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _rec->fds_[0] <<
+        LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _result->fd_ <<
             " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _result->fd_,
                 reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual))) ;
 
