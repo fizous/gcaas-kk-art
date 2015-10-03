@@ -248,10 +248,11 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
     _recSecond->process_id_ = _rec->process_id_;
     _recSecond->space_index_ = _rec->space_index_;
     _recSecond->fd_count_ = _rec->fd_count_;
-    memcpy((void*)&(_recSecond->mem_maps_[0]), &(_rec->mem_maps_[0]),
-        sizeof(android::IPCAShmemMap));
-    memcpy((void*)&(_recSecond->mem_maps_[1]), &(_rec->mem_maps_[1]),
-        sizeof(android::IPCAShmemMap));
+    for(int i = 0; i < _recSecond->fd_count_; i++) {
+      memcpy((void*)&(_recSecond->mem_maps_[i]), &(_rec->mem_maps_[i]),
+          sizeof(android::IPCAShmemMap));
+    }
+
 
     bool _svcRes =
       android::FileMapperService::GetMapFds(_recSecond);
