@@ -5,8 +5,9 @@
  *      Author: hussein
  */
 #include <string>
-#include "mem_map.h"
 #include <cutils/ashmem.h>
+#include "globals.h"
+#include "mem_map.h"
 #include "ipcfs/ipcfs.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
@@ -262,7 +263,8 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
 
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
             StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
-                _result->fd_, _result->flags_, _result->prot_, _result->size_);
+                _result->fd_, _result->flags_, _result->prot_,
+                PrettySize(_result->size_));
 
         _result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
@@ -273,14 +275,14 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
 
         if(actual == MAP_FAILED) {
           LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
-              << ", size: " << _result->size_ << ", flags: " << _result->flags_
+              << ", size: " << PrettySize(_result->size)_ << ", flags: " << _result->flags_
               << ", prot: " << _result->prot_;
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." << _result->fd_ <<
               " " << StringPrintf("fd:%d, address: %p; content: 0x%x", _result->fd_,
                   reinterpret_cast<void*>(actual), *(reinterpret_cast<unsigned int*>(actual)))
-                  << ", size: " << _result->size_ << ", flags: " << _result->flags_
-                                << ", prot: " << _result->prot_;
+                  << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                  _result->flags_ << ", prot: " << _result->prot_;
 
         }
       }
