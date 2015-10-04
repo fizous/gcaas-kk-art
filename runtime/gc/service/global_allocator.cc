@@ -264,7 +264,7 @@ void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* en
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
             StringPrintf("fd: %d, flags:%d, prot:%d, size:%s",
                 _result->fd_, _result->flags_, _result->prot_,
-                PrettySize(_result->size_));
+                PrettySize(_result->size_).c_str());
 
         _result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
