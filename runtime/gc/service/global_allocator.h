@@ -70,8 +70,7 @@ class GCSrvcClientHandShake {
  public:
   static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
   GCSrvcClientHandShake(GCServiceClientHandShake*);
-  android::FileMapperParameters* GetMapperRecord(int index, int* fdArr,
-      int* byte_counts);
+  android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
   GCServiceClientHandShake* mem_data_;
  private:
@@ -117,6 +116,22 @@ class GCServiceGlobalAllocator {
 
 class GCServiceProcess;
 
+
+
+typedef struct GCServiceClientRecord_S {
+  gc::space::GCSrvSharableDlMallocSpace* sharable_space_;
+  android::MappedPairProcessFD* pair_mapps_;
+}  __attribute__((aligned(8))) GCServiceClientRecord;
+
+
+class GCSrvceAgent {
+ public:
+  GCSrvceAgent(android::MappedPairProcessFD*);
+ private:
+  GCServiceClientRecord binding_;
+};//class GCSrvceAgent
+
+
 class GCServiceDaemon {
   Thread*   thread_;
   pthread_t pthread_;
@@ -125,12 +140,14 @@ class GCServiceDaemon {
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
 
-  std::vector<android::MappedPairProcessFD*> registered_apps_;
+  //std::vector<android::MappedPairProcessFD*> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);
   void mainLoop(void);
   void initShutDownSignals(void);
+
+  std::vector<GCSrvceAgent> client_agents_;
 
 public:
   GCServiceProcess* process_;

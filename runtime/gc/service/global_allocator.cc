@@ -181,17 +181,19 @@ void GCSrvcClientHandShake::Init() {
   }
 }
 
-android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(int index,
-    int* fdArr, int* byte_counts) {
+android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(void* params) {
+  gc::space::GCSrvSharableDlMallocSpace* _shared_space =
+      reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
+
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *mem_data_->mu_);
   mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
   android::FileMapperParameters* _rec =
       &(mem_data_->process_mappers_[mem_data_->head_]);
   _rec->process_id_  = getpid();
-  _rec->space_index_ = index;
+  _rec->space_index_ = _shared_space->space_index_;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
-
+  _rec->shared_space_addr_ = _shared_space;
 
   art::gcservice::GCServiceClient::service_client_->FillMemMapData(_rec);
 
