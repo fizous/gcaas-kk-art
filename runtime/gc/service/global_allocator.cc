@@ -353,6 +353,8 @@ void GCSrvcClientHandShake::ReqConcCollection() {
 
   _entry->req_type_ = GC_SERVICE_TASK_CONC;
 
+  LOG(ERROR) << "GCSrvcClientHandShake::ReqConcCollection";
+
   gcservice_data_->cond_->Broadcast(self);
 }
 
@@ -507,6 +509,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
     }
+  } else if (_req_type == GC_SERVICE_TASK_CONC) {
+    LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
+        _req_type << " ~~~~~ " << _entry->req_type_;
   }
 }
 

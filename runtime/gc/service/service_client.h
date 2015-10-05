@@ -22,6 +22,7 @@ class GCServiceClient {
   static GCServiceClient* service_client_;
   static void InitClient(const char* se_name_c_str);
   static void FinalizeInitClient();
+  static void RequestConcGC(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);
 

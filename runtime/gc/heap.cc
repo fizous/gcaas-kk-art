@@ -60,6 +60,7 @@
 #if (true || ART_GC_SERVICE)
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_space.h"
+#include "gc/service/service_client.h"
 #endif
 
 namespace art {
@@ -2244,6 +2245,9 @@ void Heap::RequestConcurrentGC(Thread* self) {
   // concurrent_start_bytes_.
   concurrent_start_bytes_ = std::numeric_limits<size_t>::max();
 
+#if (true || ART_GC_SERVICE)
+  art::gcservice::GCServiceClient::RequestConcGC();
+#endif
   JNIEnv* env = self->GetJniEnv();
   DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
   DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
