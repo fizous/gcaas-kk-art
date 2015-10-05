@@ -105,6 +105,7 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
 }
 
 void GCServiceDaemon::mainLoop(void) {
+  process_->handShake_->ListenToRequests(this);
 //  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
 //  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
 //  {
@@ -128,7 +129,7 @@ void GCServiceDaemon::mainLoop(void) {
 //        android::FileMapperParameters*>(_f_mapper_params_a, _f_mapper_params_b);
     //registered_apps_.push_back(_newEntry);
     //process_->handShake_->ProcessQueuedMapper(_newEntry);
-    process_->handShake_->ListenToRequests(this);
+
 
 //
 //    client_agents_.push_back(GCSrvceAgent(_newEntry));

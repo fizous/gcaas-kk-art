@@ -122,6 +122,7 @@ class GCSrvcClientHandShake {
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
   void ListenToRequests(void*);
+  void ProcessGCRequest(void* args);
   //GCServiceClientHandShake* mem_data_;
   GCServiceRequestsBuffer* gcservice_data_;
  private:

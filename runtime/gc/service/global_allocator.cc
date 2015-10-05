@@ -411,34 +411,12 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
 }
 
 
-
-void GCSrvcClientHandShake::ListenToRequests(void* args) {
-  Thread* self = Thread::Current();
+void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   GCServiceReq* _entry = NULL;
-  IPMutexLock interProcMu(self, *gcservice_data_->mu_);
-
-  LOG(ERROR) << "ListenToRequests: after locking the gcserviceData mutex";
-  {
-    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-    {
-      while(gcservice_data_->queued_ == 0) {
-        LOG(ERROR) << "ListenToRequests: going to wait until we receive broadcast";
-
-        LOG(ERROR) << "Pull: waiting for new Process ";
-        gcservice_data_->cond_->Wait(self);
-        LOG(ERROR) << "ListenToRequests: Somehow we received signal: " << gcservice_data_->queued_;
-      }
-    }
-  }
-
-
-
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KProcessMapperCapacity);
   gcservice_data_->available_ += 1;
   gcservice_data_->queued_ -= 1;
-
-
 
   GC_SERVICE_TASK _req_type =
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
@@ -521,8 +499,25 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
       }
   }
+}
 
-  gcservice_data_->cond_->Broadcast(self);
+
+void GCSrvcClientHandShake::ListenToRequests(void* args) {
+  Thread* self = Thread::Current();
+
+  ScopedThreadStateChange tsc(self, kWaitingForGcToComplete);
+  {
+    IPMutexLock interProcMu(self, *gcservice_data_->mu_);
+    LOG(ERROR) << "ListenToRequests: after locking the gcserviceData mutex";
+    while(gcservice_data_->queued_ == 0) {
+      LOG(ERROR) << "Pull: waiting for broadcast ";
+      gcservice_data_->cond_->Wait(self);
+      LOG(ERROR) << "ListenToRequests: Somehow we received signal: " << gcservice_data_->queued_;
+    }
+    LOG(ERROR) << "before calling processGCRequest";
+    ProcessGCRequest(args);
+    gcservice_data_->cond_->Broadcast(self);
+  }
 }
 
 
