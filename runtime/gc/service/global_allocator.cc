@@ -420,7 +420,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
 
 
-  LOG(ERROR) << " ~~~~ Request type: " << _req_type << " ~~~~~ ";
+  LOG(ERROR) << " ~~~~ Request type: " << _req_type << " ~~~~~ " << _entry->req_type_;
 
   if(_req_type == GC_SERVICE_TASK_REG) {
     android::FileMapperParameters* _fMapsP =
