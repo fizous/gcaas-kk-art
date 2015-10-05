@@ -261,6 +261,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 //  }
   // Recent allocation buffer.
 
+  virtual void SetHeapMeta(DlMallocSpace*){}
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false,
@@ -336,6 +337,9 @@ class SharableDlMallocSpace : public DlMallocSpace {
   int GetSpaceIndex(void) {
     return sharable_space_data_->space_index_;
   }
+
+  void SetHeapMeta(DlMallocSpace* old_alloc_space);
+
   GCSrvSharableDlMallocSpace* sharable_space_data_;
   GCSrvDlMallocSpace* dlmalloc_space_data_;
 

@@ -36,6 +36,7 @@ class GCServiceClient {
 
   int index_;
   gc::space::SharableDlMallocSpace* sharable_space_;
+  gc::collector::IPCMarkSweep collector_;
 };//GCServiceClient
 
 }//namespace gcservice

@@ -16,7 +16,7 @@
 #include "gc/space/space.h"
 
 
-#define GC_SERVICE_BUFFER_REQ_CAP   32
+#define GC_SERVICE_BUFFER_REQ_CAP   64
 
 namespace art {
 namespace gc {

@@ -144,6 +144,35 @@ typedef struct GCSrvDlMallocSpace_S {
                     recent_freed_objects_[kRecentFreeCount];
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
+
+typedef enum {
+  IPC_GC_PHASE_NONE = 0,
+  IPC_GC_PHASE_INIT,
+  IPC_GC_PHASE_ROOT_MARK,
+  IPC_GC_PHASE_CONC_MARK,
+  IPC_GC_PHASE_RECLAIM,
+  IPC_GC_PHASE_FINISH,
+  IPC_GC_PHASE_MAX
+} IPC_GC_PHASE_ENUM;
+
+typedef struct GCSrvSharableHeapData_S {
+  byte* const zygote_begin_;
+  byte* const zygote_end_;
+
+  /* GC synchronization locks used for phases*/
+  SynchronizedLockHead phase_lock_;
+  volatile IPC_GC_PHASE_ENUM gc_phase_;
+
+  /* gc barrier */
+  SynchronizedLockHead gc_barrier_lock_;
+  volatile int barrier_count_;
+
+  /* collection stats */
+  volatile int32_t freed_objects_;
+  volatile int32_t freed_bytes_;
+
+} __attribute__((aligned(8))) GCSrvSharableHeapData;
+
 typedef struct GCSrvSharableDlMallocSpace_S {
 
   GCSrvDlMallocSpace dlmalloc_space_data_;
@@ -171,6 +200,9 @@ typedef struct GCSrvSharableDlMallocSpace_S {
   /* allocated space memory */
   AShmemMap test_memory_;
 
+
+  /* heap data */
+  GCSrvSharableHeapData heap_meta_;
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
 

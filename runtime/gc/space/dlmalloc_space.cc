@@ -768,6 +768,19 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
+void SharableDlMallocSpace::SetHeapMeta(DlMallocSpace* old_alloc_space) {
+  *(const_cast<byte*>(&(sharable_space_data_->heap_meta_.zygote_begin_))) =
+      old_alloc_space->Begin();
+  *(const_cast<byte*>(&(sharable_space_data_->heap_meta_.zygote_end_))) =
+      old_alloc_space->End();
+
+
+//  GCSrvSharableHeapData _heap_temp_meta = { old_alloc_space->Begin(),
+//      old_alloc_space->End() };
+//  memcpy(&(sharable_space_data_->heap_meta_), &_heap_temp_meta,
+//      sizeof(GCSrvSharableHeapData));
+}
+
 GCSrvSharableDlMallocSpace* SharableDlMallocSpace::AllocateDataMemory(void) {
   return reinterpret_cast<GCSrvSharableDlMallocSpace*>(
       calloc(1, SERVICE_ALLOC_ALIGN_BYTE(GCSrvSharableDlMallocSpace)));
