@@ -512,10 +512,9 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
       } else {
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
       }
-
       break;
     case GC_SERVICE_TASK_CONC:
-      break;
+      //break;
     default:
       break;
   }
