@@ -414,7 +414,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KProcessMapperCapacity);
   gcservice_data_->available_ = gcservice_data_->available_ + 1;
-  gcservice_data_->queued_ = gcservice_data_->available_ - 1;
+  gcservice_data_->queued_ = gcservice_data_->queued_ - 1;
 
   GC_SERVICE_TASK _req_type =
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
