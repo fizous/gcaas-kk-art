@@ -431,7 +431,7 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
 
 
 
-  GC_SERVICE_TASK_REG _req_type =
+  GC_SERVICE_TASK _req_type =
       static_cast<GC_SERVICE_TASK_REG>(_entry->req_type_);
 
 
