@@ -328,7 +328,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
 //}
 
 
-#define GC_BUFFER_PUSH_REQUEST(ENTRY, self) \
+#define GC_BUFFER_PUSH_REQUEST(ENTRY, THREAD) \
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);  \
     IPMutexLock interProcMu(self, *gcservice_data_->mu_);\
     while(gcservice_data_->available_ == 0) {\
