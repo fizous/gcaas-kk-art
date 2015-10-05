@@ -333,7 +333,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
     while(gcservice_data_->available_ == 0) {                                  \
       ScopedThreadStateChange tsc(self, kWaitingForGCProcess);                 \
       {                                                                        \
-        LOG(ERROR) << "waiting for new Process ";                              \
+        LOG(ERROR) << "Push: waiting for new Process ";                              \
         gcservice_data_->cond_->Wait(self);                                    \
       }                                                                        \
     }                                                                          \
@@ -419,7 +419,7 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
   while(gcservice_data_->queued_ == 0) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
-        LOG(ERROR) << "waiting for new Process ";
+        LOG(ERROR) << "Pull: waiting for new Process ";
         gcservice_data_->cond_->Wait(self);
     }
   }
