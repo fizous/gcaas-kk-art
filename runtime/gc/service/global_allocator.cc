@@ -328,7 +328,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
 //}
 
 
-#define GC_BUFFER_PUSH_REQUEST(entry, self) \
+#define GC_BUFFER_PUSH_REQUEST(ENTRY, self) \
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);  \
     IPMutexLock interProcMu(self, *gcservice_data_->mu_);\
     while(gcservice_data_->available_ == 0) {\
@@ -337,11 +337,12 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
     }\
     LOG(ERROR) << "passed the condition of the available space";\
     gcservice_data_->head_ = ((gcservice_data_->head_ + 1) %  GC_SERVICE_BUFFER_REQ_CAP); \
-    gcservice_data_->available_ -= 1;\
-    gcservice_data_->queued_ += 1;\
-    entry = &(gcservice_data_->entries_[gcservice_data_->head_]);\
-    entry->pid_ = getpid();\
-    entry->status_ = GC_SERVICE_REQ_NEW;
+    gcservice_data_->available_ = gcservice_data_->available_ - 1;\
+    gcservice_data_->queued_ = gcservice_data_->queued_ + 1;\
+    LOG(ERROR) << "push: updating entry# " << gcservice_data_->head_;\
+    ENTRY = &(gcservice_data_->entries_[gcservice_data_->head_]);\
+    ENTRY->pid_ = getpid();\
+    ENTRY->status_ = GC_SERVICE_REQ_NEW;
 
 
 void GCSrvcClientHandShake::ReqConcCollection() {
@@ -365,6 +366,9 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_REG;
+
+  LOG(ERROR) << "ReqRegistration: entry address: " << reinterpret_cast<void*>(_entry);
+
   gc::space::GCSrvSharableDlMallocSpace* _shared_space =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
 
@@ -412,9 +416,14 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
 void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   GCServiceReq* _entry = NULL;
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
+  LOG(ERROR) << "ProcessGCRequest: tail=" << gcservice_data_->tail_ << ", " <<
+      "address: " <<  reinterpret_cast<void*>(_entry);
   gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KProcessMapperCapacity);
   gcservice_data_->available_ = gcservice_data_->available_ + 1;
   gcservice_data_->queued_ = gcservice_data_->queued_ - 1;
+
+
+
 
   GC_SERVICE_TASK _req_type =
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
