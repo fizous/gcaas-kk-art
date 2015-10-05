@@ -331,9 +331,10 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
 #define GC_BUFFER_PUSH_REQUEST(entry, self)                                    \
     IPMutexLock interProcMu(self, *gcservice_data_->mu_);                      \
     while(gcservice_data_->available_ == 0) {                                  \
+      LOG(ERROR) << "Push: no space available";                                \
       ScopedThreadStateChange tsc(self, kWaitingForGCProcess);                 \
       {                                                                        \
-        LOG(ERROR) << "Push: waiting for new Process ";                              \
+        LOG(ERROR) << "Push: waiting for new Process ";                        \
         gcservice_data_->cond_->Wait(self);                                    \
       }                                                                        \
     }                                                                          \
@@ -416,7 +417,10 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
   GCServiceReq* _entry = NULL;
   IPMutexLock interProcMu(self, *gcservice_data_->mu_);
 
+  LOG(ERROR) << "ListenToRequests: after locking the gcserviceData mutex";
+
   while(gcservice_data_->queued_ == 0) {
+    LOG(ERROR) << "ListenToRequests: going to wait until we receive broadcast";
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
         LOG(ERROR) << "Pull: waiting for new Process ";
