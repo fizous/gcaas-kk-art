@@ -418,7 +418,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   LOG(ERROR) << "ProcessGCRequest: tail=" << gcservice_data_->tail_ << ", " <<
       "address: " <<  reinterpret_cast<void*>(_entry);
-  gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KProcessMapperCapacity);
+  gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KGCRequestBufferCapacity);
   gcservice_data_->available_ = gcservice_data_->available_ + 1;
   gcservice_data_->queued_ = gcservice_data_->queued_ - 1;
 
