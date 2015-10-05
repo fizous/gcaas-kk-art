@@ -410,7 +410,7 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_TRIM;
-
+  LOG(ERROR) << "GCSrvcClientHandShake::ReqHeapTrim";
   gcservice_data_->cond_->Broadcast(self);
 }
 
@@ -512,6 +512,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   } else if (_req_type == GC_SERVICE_TASK_CONC) {
     LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
+  } else if (_req_type == GC_SERVICE_TASK_TRIM) {
+    LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
+        _req_type << " ~~~~~ " << _entry->req_type_;
   }
 }
 
@@ -526,7 +529,8 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
     while(gcservice_data_->queued_ == 0) {
       LOG(ERROR) << "Pull: waiting for broadcast ";
       gcservice_data_->cond_->Wait(self);
-      LOG(ERROR) << "ListenToRequests: Somehow we received signal: " << gcservice_data_->queued_;
+      LOG(ERROR) << "ListenToRequests: Somehow we received signal: " <<
+          gcservice_data_->queued_;
     }
     LOG(ERROR) << "before calling processGCRequest";
     ProcessGCRequest(args);

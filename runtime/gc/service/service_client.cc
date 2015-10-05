@@ -83,6 +83,15 @@ void GCServiceClient::RequestConcGC(void) {
   _alloc->handShake_->ReqConcCollection();
 }
 
+
+void GCServiceClient::RequestHeapTrim(void) {
+  if(service_client_ == NULL)
+    return;
+  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  _alloc->handShake_->ReqHeapTrim();
+}
+
 void GCServiceClient::FinalizeHeapAfterInit(void) {
   int* _test_fd = &(sharable_space_->sharable_space_data_->test_memory_.fd_);
   LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<

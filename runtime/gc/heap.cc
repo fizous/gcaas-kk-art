@@ -2312,6 +2312,9 @@ void Heap::RequestHeapTrim() {
   last_trim_time_ms_ = ms_time;
   ListenForProcessStateChange();
 
+#if (true || ART_GC_SERVICE)
+  art::gcservice::GCServiceClient::RequestHeapTrim();
+#endif
   // Trim only if we do not currently care about pause times.
   if (!care_about_pause_times_) {
     JNIEnv* env = self->GetJniEnv();
