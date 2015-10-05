@@ -516,6 +516,8 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
       break;
     case GC_SERVICE_TASK_CONC:
       break;
+    default:
+      break;
   }
 
   gcservice_data_->cond_->Broadcast(self);
