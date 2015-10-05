@@ -167,10 +167,10 @@ void GCSrvcClientHandShake::ResetProcessMap(android::FileMapperParameters* recor
 }
 
 void GCSrvcClientHandShake::Init() {
-  gcservice_data_->available_ = KProcessMapperCapacity;
+  gcservice_data_->available_ = KGCRequestBufferCapacity;
   gcservice_data_->queued_ = 0;
   gcservice_data_->tail_ = 0;
-  gcservice_data_->head_ = KProcessMapperCapacity - 1;
+  gcservice_data_->head_ = KGCRequestBufferCapacity - 1;
 
   SharedFutexData* _futexAddress = &gcservice_data_->lock_.futex_head_;
   SharedConditionVarData* _condAddress = &gcservice_data_->lock_.cond_var_;
@@ -329,14 +329,14 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
 
 
 #define GC_BUFFER_PUSH_REQUEST(ENTRY, THREAD) \
-    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);  \
-    IPMutexLock interProcMu(self, *gcservice_data_->mu_);\
+    ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess);  \
+    IPMutexLock interProcMu(THREAD, *gcservice_data_->mu_);\
     while(gcservice_data_->available_ == 0) {\
       LOG(ERROR) << "Push: no space available";\
-      gcservice_data_->cond_->Wait(self);\
+      gcservice_data_->cond_->Wait(THREAD);\
     }\
     LOG(ERROR) << "passed the condition of the available space";\
-    gcservice_data_->head_ = ((gcservice_data_->head_ + 1) %  GC_SERVICE_BUFFER_REQ_CAP); \
+    gcservice_data_->head_ = ((gcservice_data_->head_ + 1) %  KGCRequestBufferCapacity); \
     gcservice_data_->available_ = gcservice_data_->available_ - 1;\
     gcservice_data_->queued_ = gcservice_data_->queued_ + 1;\
     LOG(ERROR) << "push: updating entry# " << gcservice_data_->head_;\
