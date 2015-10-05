@@ -418,15 +418,20 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
   IPMutexLock interProcMu(self, *gcservice_data_->mu_);
 
   LOG(ERROR) << "ListenToRequests: after locking the gcserviceData mutex";
-
-  while(gcservice_data_->queued_ == 0) {
-    LOG(ERROR) << "ListenToRequests: going to wait until we receive broadcast";
+  {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
+      while(gcservice_data_->queued_ == 0) {
+        LOG(ERROR) << "ListenToRequests: going to wait until we receive broadcast";
+
         LOG(ERROR) << "Pull: waiting for new Process ";
         gcservice_data_->cond_->Wait(self);
+        LOG(ERROR) << "ListenToRequests: Somehow we received signal: " << gcservice_data_->queued_;
+      }
     }
   }
+
+
 
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KProcessMapperCapacity);
