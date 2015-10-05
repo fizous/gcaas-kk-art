@@ -1,0 +1,55 @@
+/*
+ * ipc_mark_sweep.cc
+ *
+ *  Created on: Oct 5, 2015
+ *      Author: hussein
+ */
+
+
+#include "gc/space/space.h"
+#include "gc/collector/ipc_mark_sweep.h"
+
+namespace art {
+
+namespace gc {
+
+namespace collector {
+
+IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
+    byte* zygote_begin, byte* zygote_end) :
+    meta_(meta_alloc) {
+
+  /* initialize locks */
+  SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
+  SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
+
+  phase_mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
+  phase_cond_ = new InterProcessConditionVariable("HandShake CondVar",
+      *phase_mu_, _condAddress);
+
+
+  SharedFutexData* _futexBarrierAdd =
+      &meta_->gc_barrier_lock_.futex_head_;
+  SharedConditionVarData* _condBarrierAdd =
+      &meta_->gc_barrier_lock_.cond_var_;
+
+  barrier_mu_   = new InterProcessMutex("HandShake Mutex", _futexBarrierAdd);
+  barrier_cond_ = new InterProcessConditionVariable("HandShake CondVar",
+      *barrier_mu_, _condBarrierAdd);
+
+  ResetMetaDataUnlocked();
+
+}
+
+
+void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
+  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  meta_->freed_objects_ = 0;
+  meta_->freed_bytes_ = 0;
+  meta_->barrier_count_ = 0;
+}
+
+
+}
+}
+}
