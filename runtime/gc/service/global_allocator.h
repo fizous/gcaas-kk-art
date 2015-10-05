@@ -15,6 +15,9 @@
 #include "runtime.h"
 #include "gc/space/space.h"
 
+
+#define GC_SERVICE_BUFFER_REQ_CAP   32
+
 namespace art {
 namespace gc {
 namespace gcservice{
@@ -30,21 +33,58 @@ typedef enum {
 } GC_SERVICE_STATUS;
 
 
+typedef enum {
+  GC_SERVICE_TASK_NOP = 0,
+  GC_SERVICE_TASK_REG,
+  GC_SERVICE_TASK_CONC,
+  GC_SERVICE_TASK_TRIM,
+  GC_SERVICE_TASK_STATS,
+  GC_SERVICE_TASK_MAX_LIMIT
+} GC_SERVICE_TASK;
+
+typedef enum {
+  GC_SERVICE_REQ_NONE = 0,
+  GC_SERVICE_REQ_NEW,
+  GC_SERVICE_REQ_STARTED,
+  GC_SERVICE_REQ_COMPLETE,
+  GC_SERVICE_REQ__MAX_LIMIT
+} GC_SERVICE_REQ_STATUS;
 
 
-typedef struct GCServiceClientHandShake_S {
+//typedef struct GCServiceClientHandShake_S {
+//  SynchronizedLockHead lock_;
+//  InterProcessMutex* mu_;
+//  InterProcessConditionVariable* cond_;
+//  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
+//
+//  volatile int available_;
+//  volatile int tail_;
+//  volatile int queued_;
+//  volatile int head_;
+//} __attribute__((aligned(8))) GCServiceClientHandShake;
+
+typedef struct GCServiceConcReq_S {
+  volatile int pid_;
+  volatile int req_type_;
+  volatile int status_;
+  volatile uintptr_t data_addr_;
+} __attribute__((aligned(8))) GCServiceReq;
+
+typedef struct GCServiceRequestsBuffer_S {
   SynchronizedLockHead lock_;
-  InterProcessMutex* mu_;
-  InterProcessConditionVariable* cond_;
-  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
-
-  volatile int available_;
+  volatile int head_;
   volatile int tail_;
   volatile int queued_;
-  volatile int head_;
-} __attribute__((aligned(8))) GCServiceClientHandShake;
+  volatile int available_;
+  GCServiceReq entries_[GC_SERVICE_BUFFER_REQ_CAP];
 
+  InterProcessMutex* mu_;
+  InterProcessConditionVariable* cond_;
 
+  volatile int mapper_head_;
+  volatile int mapper_tail_;
+  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
+} __attribute__((aligned(8))) GCServiceRequestsBuffer;
 
 
 typedef struct GCServiceHeader_S {
@@ -57,25 +97,37 @@ typedef struct GCServiceHeader_S {
   GC_SERVICE_STATUS service_status_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
+
+
 typedef struct GCSrvcGlobalRegionHeader_S {
   // This bitmap itself, word sized for efficiency in scanning.
   AShmemMap ashmem_meta_;
-  GCServiceClientHandShake gc_handshake_;
+  GCServiceRequestsBuffer gc_handshake_;
   byte* current_addr_;
   GCServiceHeader service_header_;
 }  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
 
 
+
+
+
 class GCSrvcClientHandShake {
  public:
+  static const int KGCRequestBufferCapacity = GC_SERVICE_BUFFER_REQ_CAP;
   static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
-  GCSrvcClientHandShake(GCServiceClientHandShake*);
+  GCSrvcClientHandShake(GCServiceRequestsBuffer*);
   android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
-  GCServiceClientHandShake* mem_data_;
+  void ReqConcCollection(void);
+  void ReqRegistration(void*);
+  void ReqHeapTrim(void);
+  void ListenToRequests(void*);
+  //GCServiceClientHandShake* mem_data_;
+  GCServiceRequestsBuffer* gcservice_data_;
  private:
   void Init();
   void ResetProcessMap(android::FileMapperParameters*);
+  void ResetRequestEntry(GCServiceReq* entry);
 
 }; //class GCSrvcClientHandShake
 
@@ -118,6 +170,7 @@ class GCServiceProcess;
 
 
 
+
 typedef struct GCServiceClientRecord_S {
   gc::space::GCSrvSharableDlMallocSpace* sharable_space_;
   android::MappedPairProcessFD* pair_mapps_;
@@ -147,10 +200,9 @@ class GCServiceDaemon {
   void mainLoop(void);
   void initShutDownSignals(void);
 
-  std::vector<GCSrvceAgent> client_agents_;
-
 public:
   GCServiceProcess* process_;
+  std::vector<GCSrvceAgent> client_agents_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
 };//class GCServiceDaemon

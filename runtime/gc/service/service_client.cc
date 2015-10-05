@@ -81,7 +81,8 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
-  _alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_);
+  _alloc->handShake_->ReqRegistration(sharable_space_->sharable_space_data_);
+  //_alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_);
 
 
 

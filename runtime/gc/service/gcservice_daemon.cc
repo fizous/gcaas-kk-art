@@ -105,39 +105,41 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
 }
 
 void GCServiceDaemon::mainLoop(void) {
-  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
-  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
-  {
-    LOG(ERROR) << "waiting for new Process ";
-    process_->handShake_->mem_data_->cond_->Wait(thread_);
-  }
-  LOG(ERROR) << "GCServiceDaemon::mainLoop ====  received signal";
-  if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
-    LOG(ERROR) << "before calling ====  ProcessQueuedMapper";
-
-
-    android::FileMapperParameters* _f_mapper_params_a =
-        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
-            sizeof(android::FileMapperParameters)));
-    android::FileMapperParameters* _f_mapper_params_b =
-        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
-            sizeof(android::FileMapperParameters)));
-
-    android::MappedPairProcessFD* _newEntry =
-        new std::pair<android::FileMapperParameters*, android::FileMapperParameters*>(_f_mapper_params_a, _f_mapper_params_b);
+//  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
+//  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
+//  {
+//    LOG(ERROR) << "waiting for new Process ";
+//    process_->handShake_->mem_data_->cond_->Wait(thread_);
+//  }
+//  LOG(ERROR) << "GCServiceDaemon::mainLoop ====  received signal";
+//  if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+//    LOG(ERROR) << "before calling ====  ProcessQueuedMapper";
+//
+//
+//    android::FileMapperParameters* _f_mapper_params_a =
+//        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
+//            sizeof(android::FileMapperParameters)));
+//    android::FileMapperParameters* _f_mapper_params_b =
+//        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
+//            sizeof(android::FileMapperParameters)));
+//
+//    android::MappedPairProcessFD* _newEntry =
+//        new std::pair<android::FileMapperParameters*,
+//        android::FileMapperParameters*>(_f_mapper_params_a, _f_mapper_params_b);
     //registered_apps_.push_back(_newEntry);
-    process_->handShake_->ProcessQueuedMapper(_newEntry);
+    //process_->handShake_->ProcessQueuedMapper(_newEntry);
+    process_->handShake_->ListenToRequests(this);
 
-
-    client_agents_.push_back(GCSrvceAgent(_newEntry));
+//
+//    client_agents_.push_back(GCSrvceAgent(_newEntry));
 //    while(processed_index_ < process_->service_meta_->counter_) {
 //      LOG(ERROR) << " processing index registration: " <<
 //          processed_index_;
 //      processed_index_++;
 //    }
-  }
+//  }
 
-  process_->handShake_->mem_data_->cond_->Broadcast(thread_);
+//  process_->handShake_->mem_data_->cond_->Broadcast(thread_);
 }
 
 
