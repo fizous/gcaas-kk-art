@@ -435,8 +435,7 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
 
 
-  switch(_req_type) {
-    case GC_SERVICE_TASK_REG:
+  if(_req_type == GC_SERVICE_TASK_REG) {
       android::FileMapperParameters* _fMapsP =
           reinterpret_cast<android::FileMapperParameters*>(_entry->data_addr_);
       LOG(ERROR) << "Process Indexing tail.. " << gcservice_data_->tail_ <<
@@ -512,11 +511,6 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
       } else {
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
       }
-      break;
-    case GC_SERVICE_TASK_CONC:
-      //break;
-    default:
-      break;
   }
 
   gcservice_data_->cond_->Broadcast(self);
