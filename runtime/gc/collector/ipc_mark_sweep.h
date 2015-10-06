@@ -8,8 +8,9 @@
 #ifndef ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
 #define ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
 
-
-
+#include "ipcfs/ipcfs.h"
+#include "thread.h"
+#include "gc/heap.h"
 #include "gc/space/space.h"
 
 namespace art {
