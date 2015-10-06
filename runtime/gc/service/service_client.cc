@@ -32,6 +32,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
 
 void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
     AShmemMap* shmem_map) {
+  recP->begin_ = (unsigned int)shmem_map->begin_;
   recP->fd_ = shmem_map->fd_;
   recP->flags_ = shmem_map->flags_;
   recP->prot_ = shmem_map->prot_;
