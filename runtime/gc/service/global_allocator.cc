@@ -485,6 +485,11 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         //_result->prot_ = PROT_READ | PROT_WRITE;
         LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
 
+
+
+
+
+
         byte* actual = reinterpret_cast<byte*>(mmap((void*)(_result->begin_), _result->size_,
             _result->prot_, _result->flags_, _result->fd_, 0));
 
@@ -501,7 +506,30 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   _result->flags_ << ", prot: " << _result->prot_ <<
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
+
+          if(i == 0) { //test that we can remap the pages
+            byte* test_remap_address = reinterpret_cast<byte*>(mremap(NULL, _result->size_,
+                _result->prot_, _result->flags_ &= MAP_SHARED, _result->fd_, 0));
+            if(test_remap_address == MAP_FAILED) {
+              LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
+                  << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+                  << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_result->begin_);
+            } else {
+              LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
+                  _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
+                      _result->fd_, reinterpret_cast<void*>(test_remap_address),
+                      *(reinterpret_cast<unsigned int*>(test_remap_address)))
+                      << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                      _result->flags_ << ", prot: " << _result->prot_ <<
+                      ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
+          }
+
         }
+
+
+
+
+
       }
 
       GCServiceDaemon* daemon = reinterpret_cast<GCServiceDaemon*>(args);
