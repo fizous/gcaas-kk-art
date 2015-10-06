@@ -508,23 +508,29 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
 
           if(i == 0) { //test that we can remap the pages
-            byte* test_remap_address = reinterpret_cast<byte*>(mremap(actual, _result->size_,
-                _result->size_, MREMAP_FIXED | MREMAP_MAYMOVE, (void*)(_recSecond->mem_maps_[i+1].begin_)));
-            if(test_remap_address == MAP_FAILED) {
-              LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
-                  << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
-                  << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
+            int _munmap_result = munmap(actual, _result->size_);
+            if (_munmap_result == -1) {
+              LOG(ERROR) << "munmap failed";
             } else {
-              LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
-                  _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
-                      _result->fd_, reinterpret_cast<void*>(test_remap_address),
-                      *(reinterpret_cast<unsigned int*>(test_remap_address)))
-                      << ", size: " << PrettySize(_result->size_) << ", flags: " <<
-                      _result->flags_ << ", prot: " << _result->prot_ <<
-                      ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
-          }
+              byte* test_remap_address = reinterpret_cast<byte*>(mmap((void*)(_recSecond->mem_maps_[i+1].begin_), _result->size_,
+                  _result->prot_, _result->flags_ | MAP_FIXED, _result->fd_, 0));
+              if(test_remap_address == MAP_FAILED) {
+                LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
+                    << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+                    << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
+              } else {
+                LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
+                    _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
+                        _result->fd_, reinterpret_cast<void*>(test_remap_address),
+                        *(reinterpret_cast<unsigned int*>(test_remap_address)))
+                        << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                        _result->flags_ << ", prot: " << _result->prot_ <<
+                        ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
+              }
 
-        }
+            }
+
+          }
 
         }
 
