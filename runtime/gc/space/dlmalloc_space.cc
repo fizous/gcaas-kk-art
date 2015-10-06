@@ -430,7 +430,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   //TODO: fizo: check what's wrong here?
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
-  VLOG(heap) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+  /*VLOG(heap)*/ LOG(ERROR) << "CREATEZYGOTE: :" << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << Capacity() << "\n"
