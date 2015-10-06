@@ -508,8 +508,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
 
           if(i == 0) { //test that we can remap the pages
-            byte* test_remap_address = reinterpret_cast<byte*>(mremap(NULL, _result->size_,
-                _result->prot_, _result->flags_ &= MAP_SHARED, _result->fd_, 0));
+            byte* test_remap_address = reinterpret_cast<byte*>(mremap(actual, _result->size_,
+                _result->size_));
             if(test_remap_address == MAP_FAILED) {
               LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
                   << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
