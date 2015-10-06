@@ -56,6 +56,35 @@ void IPCMarkSweep::DumpValues(void){
       << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
 }
 
+
+
+void IPCMarkSweep::InitialPhase(){
+  ResetMetaDataUnlocked();
+}
+
+
+void IPCMarkSweep::MarkRootPhase(void){
+
+}
+
+void IPCMarkSweep::ConcMarkPhase(void){
+  Thread* currThread = Thread::Current();
+  ScopedThreadStateChange tsc(currThread, kWaitingForGCProcess);
+  IPMutexLock interProcMu(currThread, *phase_mu_);
+}
+
+
+void IPCMarkSweep::ReclaimPhase(void){
+
+}
+
+
+void IPCMarkSweep::FinishPhase(void){
+
+}
+
+
+
 }
 }
 }

@@ -33,6 +33,15 @@ class IPCMarkSweep {
   IPCMarkSweep(space::GCSrvSharableHeapData*);
   void ResetMetaDataUnlocked();
   void DumpValues(void);
+
+
+
+  /** GC Phases **/
+  void InitialPhase(void);
+  void MarkRootPhase(void);
+  void ConcMarkPhase(void);
+  void ReclaimPhase(void);
+  void FinishPhase(void);
 }; //class IPCMarkSweep
 
 

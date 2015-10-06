@@ -282,6 +282,12 @@ void Heap::CreateThreadPool() {
   byte* zygote_space_end =  alloc_space_->End();
   LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
       << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
+  byte* image_space_begin =  GetImageSpace()->Begin();
+  byte* image_space_end =  GetImageSpace()->End();
+
+
+  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: " << image_space_begin
+      << ", imageSpaceEnd: " << image_space_end;
 }
 
 void Heap::DeleteThreadPool() {

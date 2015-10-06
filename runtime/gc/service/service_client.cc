@@ -95,6 +95,14 @@ void GCServiceClient::RequestHeapTrim(void) {
 }
 
 void GCServiceClient::FinalizeHeapAfterInit(void) {
+
+  byte* image_begin = Runtime::Current()->GetHeap()->GetImageSpace()->Begin();
+  byte* image_end = Runtime::Current()->GetHeap()->GetImageSpace()->End();
+
+  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: " << image_begin
+      << ", imageSpaceEnd: " << image_end;
+
+
   int* _test_fd = &(sharable_space_->sharable_space_data_->test_memory_.fd_);
   LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
       *_test_fd;
