@@ -10,6 +10,7 @@
 
 #include "gc/space/dlmalloc_space.h"
 #include "ipcfs/ipcfs.h"
+#include "gc/collector/ipc_mark_sweep.h"
 
 namespace art {
 
