@@ -226,7 +226,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   uint64_t start_time = 0;
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     start_time = NanoTime();
-    VLOG(startup) << "Space::CreateAllocSpace entering " << name
+    LOG(ERROR) << "STARTUP:: "/*VLOG(startup)*/ << "Space::CreateAllocSpace entering " << name
                   << " initial_size=" << PrettySize(initial_size)
                   << " growth_limit=" << PrettySize(growth_limit)
                   << " capacity=" << PrettySize(capacity)

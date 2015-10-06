@@ -278,6 +278,10 @@ void Heap::CreateThreadPool() {
   if (num_threads != 0) {
     thread_pool_.reset(new ThreadPool(num_threads));
   }
+  byte* zygote_space_begin =  alloc_space_->Begin();
+  byte* zygote_space_end =  alloc_space_->End();
+  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
+      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
 }
 
 void Heap::DeleteThreadPool() {
