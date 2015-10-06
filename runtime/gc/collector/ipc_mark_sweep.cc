@@ -5,7 +5,10 @@
  *      Author: hussein
  */
 
-
+#include "globals.h"
+#include "mem_map.h"
+#include "ipcfs/ipcfs.h"
+#include "scoped_thread_state_change.h"
 #include "gc/space/space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 
@@ -71,6 +74,10 @@ void IPCMarkSweep::ConcMarkPhase(void){
   Thread* currThread = Thread::Current();
   ScopedThreadStateChange tsc(currThread, kWaitingForGCProcess);
   IPMutexLock interProcMu(currThread, *phase_mu_);
+  meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
+
+
+
 }
 
 
