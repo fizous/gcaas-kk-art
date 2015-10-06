@@ -406,7 +406,7 @@ class Runtime {
 
   bool PreZygoteFork();
   bool InitZygote();
-  void DidForkFromZygote();
+  void DidForkFromZygote(bool initialize = true);
 
   instrumentation::Instrumentation* GetInstrumentation() {
     return &instrumentation_;

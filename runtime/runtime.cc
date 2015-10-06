@@ -921,18 +921,20 @@ bool Runtime::InitZygote() {
   return true;
 }
 
-void Runtime::DidForkFromZygote() {
+void Runtime::DidForkFromZygote(bool initialize) {
   is_zygote_ = false;
 
   GCMMP_VLOG(INFO) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
   // Create the thread pool.
-  heap_->CreateThreadPool();
+  if(initialize) {
+    heap_->CreateThreadPool();
 
-  StartSignalCatcher();
+    StartSignalCatcher();
 
-  // Start the JDWP thread. If the command-line debugger flags specified "suspend=y",
-  // this will pause the runtime, so we probably want this to come last.
-  Dbg::StartJdwp();
+    // Start the JDWP thread. If the command-line debugger flags specified "suspend=y",
+    // this will pause the runtime, so we probably want this to come last.
+    Dbg::StartJdwp();
+  }
 }
 
 void Runtime::StartSignalCatcher() {

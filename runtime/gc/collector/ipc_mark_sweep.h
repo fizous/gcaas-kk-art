@@ -42,6 +42,7 @@ class IPCMarkSweep {
   void ConcMarkPhase(void);
   void ReclaimPhase(void);
   void FinishPhase(void);
+  void Run(void);
 }; //class IPCMarkSweep
 
 

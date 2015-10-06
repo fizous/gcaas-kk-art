@@ -61,35 +61,45 @@ void IPCMarkSweep::DumpValues(void){
 
 
 
+#define GC_IPC_COLLECT_PHASE(PHASE, THREAD) \
+    ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess);  \
+    IPMutexLock interProcMu(THREAD, *phase_mu_); \
+    meta_->gc_phase_ = PHASE;
+
 void IPCMarkSweep::InitialPhase(){
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
   ResetMetaDataUnlocked();
 }
 
 
 void IPCMarkSweep::MarkRootPhase(void){
-
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
 }
 
 void IPCMarkSweep::ConcMarkPhase(void){
   Thread* currThread = Thread::Current();
-  ScopedThreadStateChange tsc(currThread, kWaitingForGCProcess);
-  IPMutexLock interProcMu(currThread, *phase_mu_);
-  meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
-
-
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
 
 }
 
 
 void IPCMarkSweep::ReclaimPhase(void){
-
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
 }
 
 
 void IPCMarkSweep::FinishPhase(void){
-
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
 }
 
+
+void IPCMarkSweep::Run(void) {
+
+}
 
 
 }

@@ -451,7 +451,7 @@ static pid_t GCSrvcForkGCService(void) {
     self->InitAfterFork();
     set_process_name("gc_service");
     UnsetSigChldHandler();
-    runtime->DidForkFromZygote();
+    runtime->DidForkFromZygote(false);
     LOG(ERROR) << "------- GC Service Is initialized  ----------";
     gc::gcservice::GCServiceProcess::LaunchGCServiceProcess();
 
