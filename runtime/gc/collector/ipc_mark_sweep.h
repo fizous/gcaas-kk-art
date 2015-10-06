@@ -29,7 +29,7 @@ class IPCMarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-  IPCMarkSweep(space::GCSrvSharableHeapData*, byte*, byte*);
+  IPCMarkSweep(space::GCSrvSharableHeapData*);
   void ResetMetaDataUnlocked();
 }; //class IPCMarkSweep
 

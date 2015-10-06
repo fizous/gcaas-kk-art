@@ -769,10 +769,12 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
 }
 
 void SharableDlMallocSpace::SetHeapMeta(DlMallocSpace* old_alloc_space) {
-  *(const_cast<byte*>(&(sharable_space_data_->heap_meta_.zygote_begin_))) =
-      old_alloc_space->Begin();
-  *(const_cast<byte*>(&(sharable_space_data_->heap_meta_.zygote_end_))) =
-      old_alloc_space->End();
+  byte* zygote_begin = old_alloc_space->Begin();
+  byte* zygote_end = old_alloc_space->End();
+  memcpy((void*)&(sharable_space_data_->heap_meta_.zygote_begin_),
+      &zygote_begin, sizeof(byte*));
+  memcpy((void*)&(sharable_space_data_->heap_meta_.zygote_end_),
+      &zygote_end, sizeof(byte*));
 
 
 //  GCSrvSharableHeapData _heap_temp_meta = { old_alloc_space->Begin(),

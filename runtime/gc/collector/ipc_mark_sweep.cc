@@ -15,8 +15,7 @@ namespace gc {
 
 namespace collector {
 
-IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
-    byte* zygote_begin, byte* zygote_end) :
+IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
     meta_(meta_alloc) {
 
   /* initialize locks */
