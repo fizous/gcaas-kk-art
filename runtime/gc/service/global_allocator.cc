@@ -513,7 +513,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
             if(test_remap_address == MAP_FAILED) {
               LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
                   << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
-                  << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_result->begin_);
+                  << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
             } else {
               LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
                   _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
