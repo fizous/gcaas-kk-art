@@ -526,7 +526,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         }
 
-
+        }
 
 
 
