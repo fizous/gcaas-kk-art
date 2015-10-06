@@ -286,8 +286,9 @@ void Heap::CreateThreadPool() {
   byte* image_space_end =  GetImageSpace()->End();
 
 
-  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: " << image_space_begin
-      << ", imageSpaceEnd: " << image_space_end;
+  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: "
+      << reinterpret_cast<void*>(image_space_begin)
+      << ", imageSpaceEnd: " << reinterpret_cast<void*>(image_space_end);
 }
 
 void Heap::DeleteThreadPool() {
