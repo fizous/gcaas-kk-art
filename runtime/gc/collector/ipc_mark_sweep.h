@@ -32,6 +32,7 @@ class IPCMarkSweep {
 
   IPCMarkSweep(space::GCSrvSharableHeapData*);
   void ResetMetaDataUnlocked();
+  void DumpValues(void);
 }; //class IPCMarkSweep
 
 

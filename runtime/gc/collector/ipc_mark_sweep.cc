@@ -37,7 +37,7 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
       *barrier_mu_, _condBarrierAdd);
 
   ResetMetaDataUnlocked();
-
+  DumpValues();
 }
 
 
@@ -48,6 +48,11 @@ void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
   meta_->barrier_count_ = 0;
 }
 
+
+void IPCMarkSweep::DumpValues(void){
+  LOG(ERROR) << "IPCMARKSWEEP: " << "zygote_begin: " << reinterpret_cast<void*>(meta_->zygote_begin_)
+      << ", zygote_end: " << reinterpret_cast<void*>(meta_->zygote_end_);
+}
 
 }
 }
