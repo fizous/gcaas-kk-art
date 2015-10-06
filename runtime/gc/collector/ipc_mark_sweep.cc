@@ -51,7 +51,9 @@ void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
 
 void IPCMarkSweep::DumpValues(void){
   LOG(ERROR) << "IPCMARKSWEEP: " << "zygote_begin: " << reinterpret_cast<void*>(meta_->zygote_begin_)
-      << ", zygote_end: " << reinterpret_cast<void*>(meta_->zygote_end_);
+      << "\n zygote_end: " << reinterpret_cast<void*>(meta_->zygote_end_)
+      << "\n image_begin: " << reinterpret_cast<void*>(meta_->image_space_begin_)
+      << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
 }
 
 }

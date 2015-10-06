@@ -156,6 +156,8 @@ typedef enum {
 } IPC_GC_PHASE_ENUM;
 
 typedef struct GCSrvSharableHeapData_S {
+  byte* const image_space_begin_;
+  byte* const image_space_end_;
   byte* const zygote_begin_;
   byte* const zygote_end_;
 

@@ -1268,7 +1268,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     }
     alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
         _struct_alloc_space, shared_space);
-    alloc_space_->SetHeapMeta(zygote_space);
+    alloc_space_->SetHeapMeta(zygote_space, GetImageSpace()->cont_space_data_);
   } else {
     alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
   }
