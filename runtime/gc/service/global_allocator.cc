@@ -526,6 +526,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                         << ", size: " << PrettySize(_result->size_) << ", flags: " <<
                         _result->flags_ << ", prot: " << _result->prot_ <<
                         ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
+
+                int _remap_fd = remap_file_pages(test_remap_address, _result->size_, 0, 0, 0);
+                LOG(ERROR) << "_remap_fd = " << _remap_fd;
               }
 
             }
