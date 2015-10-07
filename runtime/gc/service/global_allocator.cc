@@ -507,7 +507,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
 
-          if(i == 0) { //test that we can remap the pages
+          if(i == 1) { //test that we can remap the pages
             int _munmap_result = munmap(actual, _result->size_);
             if (_munmap_result == -1) {
               LOG(ERROR) << "munmap failed";
@@ -527,8 +527,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                         _result->flags_ << ", prot: " << _result->prot_ <<
                         ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
-                int _remap_fd = remap_file_pages(test_remap_address, _result->size_, 0, 0, 0);
-                LOG(ERROR) << "_remap_fd = " << _remap_fd;
+//                int _remap_fd = remap_file_pages(test_remap_address, _result->size_, 0, 0, 0);
+//                LOG(ERROR) << "_remap_fd = " << _remap_fd;
               }
 
             }
