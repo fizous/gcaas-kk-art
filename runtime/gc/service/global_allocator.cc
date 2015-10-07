@@ -487,7 +487,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       for(int i = 0; i < _recSecond->fd_count_; i++) {
 
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
-        _result->size_ = 4096;
+        //_result->size_ = 4096;
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
             StringPrintf("fd: %d, flags:%d, prot:%d, size:%s",
                 _result->fd_, _result->flags_, _result->prot_,
@@ -515,6 +515,12 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
           _mapping_addr += RoundUp(_result->size_, kPageSize);
+          int _munmap_result = munmap(actual, _result->size_);
+                    if (_munmap_result == -1) {
+                      LOG(ERROR) << "munmap failed";
+                    }
+
+          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(_mapping_addr);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";
