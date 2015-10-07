@@ -511,7 +511,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
             int _munmap_result = munmap(actual, _result->size_);
             if (_munmap_result == -1) {
               LOG(ERROR) << "munmap failed";
-            } else {
+            } /*else {
               byte* test_remap_address = reinterpret_cast<byte*>(mmap((void*)(_recSecond->mem_maps_[i+1].begin_), _result->size_,
                   _result->prot_, _result->flags_ | MAP_FIXED, _result->fd_, 0));
               if(test_remap_address == MAP_FAILED) {
@@ -531,7 +531,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //                LOG(ERROR) << "_remap_fd = " << _remap_fd;
               }
 
-            }
+            }*/
 
           }
 
