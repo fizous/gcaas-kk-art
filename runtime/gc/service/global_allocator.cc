@@ -513,6 +513,21 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                 _result->size_,
                 _result->size_, MREMAP_MAYMOVE | MREMAP_FIXED));
 
+
+            if(test_remap_address == MAP_FAILED) {
+              LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
+                  << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+                  << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
+            } else {
+              LOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
+                  _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
+                      _result->fd_, reinterpret_cast<void*>(test_remap_address),
+                      *(reinterpret_cast<unsigned int*>(test_remap_address)))
+                      << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                      _result->flags_ << ", prot: " << _result->prot_ <<
+                      ", _result->begin_:" << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
+            }
+
 //            int _munmap_result = munmap(actual, _result->size_);
 //            if (_munmap_result == -1) {
 //              LOG(ERROR) << "munmap failed";
