@@ -7,11 +7,23 @@
 
 #ifndef ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
 #define ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
-
+#include "mark_sweep.h"
 #include "ipcfs/ipcfs.h"
 #include "thread.h"
 #include "gc/heap.h"
 #include "gc/space/space.h"
+
+
+#define GC_IPC_COLLECT_PHASE(PHASE, THREAD) \
+    ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess);  \
+    IPMutexLock interProcMu(THREAD, *phase_mu_); \
+    meta_->gc_phase_ = PHASE;
+
+#define GC_IPC_BLOCK_ON_PHASE(PHASE, THREAD) \
+    ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess); \
+    IPMutexLock interProcMu(THREAD, *phase_mu_); \
+    while(meta_->gc_phase_ != PHASE) \
+      phase_cond_->Wait(THREAD);
 
 namespace art {
 
@@ -19,7 +31,7 @@ namespace gc {
 
 namespace collector {
 
-class IPCMarkSweep {
+class IPCMarkSweep : public MarkSweep {
  public:
   space::GCSrvSharableHeapData* meta_;
 
@@ -42,7 +54,14 @@ class IPCMarkSweep {
   void ConcMarkPhase(void);
   void ReclaimPhase(void);
   void FinishPhase(void);
-  void Run(void);
+  void ServerRun(void);
+
+  void ClientRun(void);
+  void ClientInitialPhase(void);
+  void ClientMarkRootPhase(void);
+  void ClientConcMarkPhase(void);
+  void ClientReclaimPhase(void);
+  void ClientFinishPhase(void);
 }; //class IPCMarkSweep
 
 
