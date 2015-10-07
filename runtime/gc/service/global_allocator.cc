@@ -495,10 +495,6 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         //_result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
-        LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
-
-
-
 
 
 

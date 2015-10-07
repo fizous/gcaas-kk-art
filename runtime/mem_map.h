@@ -145,6 +145,7 @@ class MemBaseMap {
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 
+  static byte* max_covered_address;
   // Releases the memory mapping
   virtual ~MemBaseMap();
 

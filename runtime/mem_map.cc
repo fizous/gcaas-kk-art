@@ -71,6 +71,8 @@ static void CheckMapRequest(byte*, size_t) { }
 
 #if (true || ART_GC_SERVICE)
 
+byte* MemBaseMap::max_covered_address = NULL;
+
 
 void StructuredMemMap::SetSize(size_t new_size) {
   ashmem_->size_ = new_size;
@@ -189,6 +191,8 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
     return NULL;
   }
 
+  max_covered_address = std::max(max_covered_address, addr + page_aligned_byte_count);
+
   MemBaseMap::AShmemFillData(ashmem_mem_map, debug_friendly_name, actual,
       byte_count, actual, page_aligned_byte_count, prot, flags, _fd);
 
@@ -239,6 +243,7 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
                 << "\n" << maps;
     return NULL;
   }
+  max_covered_address = std::max(max_covered_address, actual + source_ashmem_mem_map->base_size_);
   dest_ashmem_mem_map->flags_ = flags;
   dest_ashmem_mem_map->fd_ = _fd;
   //todo: change the file descriptor here
@@ -330,6 +335,7 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count, 
                 << "\n" << maps;
     return NULL;
   }
+  max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   if(shareMem) {
     int result = madvise((void*)actual, page_aligned_byte_count, MADV_DONTFORK);
     if (result == -1) {
@@ -408,6 +414,7 @@ MEM_MAP* MemBaseMap::MapFileAtAddress(byte* addr, size_t byte_count,
                 << ") failed\n" << maps;
     return NULL;
   }
+  max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   return new MemMap("file", actual + page_offset, byte_count, actual, page_aligned_byte_count,
                     prot);
 }
