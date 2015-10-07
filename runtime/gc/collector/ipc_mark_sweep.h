@@ -7,10 +7,11 @@
 
 #ifndef ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
 #define ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
-#include "mark_sweep.h"
+
 #include "ipcfs/ipcfs.h"
 #include "thread.h"
 #include "gc/heap.h"
+#include "mark_sweep.h"
 #include "gc/space/space.h"
 
 
@@ -42,7 +43,8 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-  IPCMarkSweep(space::GCSrvSharableHeapData*);
+ // IPCMarkSweep(space::GCSrvSharableHeapData*);
+  IPCMarkSweep(space::GCSrvSharableHeapData* alloc_meta, Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
   void ResetMetaDataUnlocked();
   void DumpValues(void);
 

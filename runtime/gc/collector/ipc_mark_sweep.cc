@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
+#include "mark_sweep.h"
 #include "scoped_thread_state_change.h"
 #include "gc/space/space.h"
 #include "gc/collector/ipc_mark_sweep.h"
@@ -18,9 +19,10 @@ namespace gc {
 
 namespace collector {
 
-IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
-    meta_(meta_alloc) {
 
+IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
+              Heap* heap, bool is_concurrent, const std::string& name_prefix)
+    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial"), meta_(meta_alloc) {
   /* initialize locks */
   SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
@@ -42,6 +44,12 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
   ResetMetaDataUnlocked();
   DumpValues();
 }
+
+//IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
+//    meta_(meta_alloc) {
+//
+//
+//}
 
 
 void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
