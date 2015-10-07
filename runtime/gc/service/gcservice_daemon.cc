@@ -208,6 +208,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
   }
   srvcReady_ = initSvcFD();
 
+  import_address_ = Runtime::Current()->GetHeap()->GetMaxAddress();
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   LOG(ERROR) << "going to wait for the shutdown signals";

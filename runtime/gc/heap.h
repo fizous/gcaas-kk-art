@@ -522,6 +522,8 @@ class Heap {
   	return capacity_;
   }
 
+  byte* GetMaxAddress();
+
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

@@ -762,6 +762,12 @@ void Heap::VerifyObjectImpl(const mirror::Object* obj) {
   VerifyObjectBody(obj);
 }
 
+
+byte* Heap::GetMaxAddress() {
+  //TODO: I ignore the LOS here
+  return continuous_spaces_.back()->End();
+}
+
 void Heap::DumpSpaces() {
   for (const auto& space : continuous_spaces_) {
 #if (true || ART_GC_SERVICE)

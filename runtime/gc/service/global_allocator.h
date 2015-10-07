@@ -216,6 +216,9 @@ public:
   GCServiceHeader* service_meta_;
   GCSrvcClientHandShake* handShake_;
   GCServiceDaemon* daemon_;
+
+  byte* import_address_;
+
 private:
 
 
