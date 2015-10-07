@@ -769,7 +769,7 @@ byte* Heap::GetMaxAddress() {
 }
 
 void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
-  collector::MarkSweep* collector = NULL;
+
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
     if((*iter)->GetGcType() == collector::kGcTypeFull) {
