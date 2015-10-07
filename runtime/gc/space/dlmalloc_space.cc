@@ -459,6 +459,11 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
       CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
           alloc_space_name);
     }
+    /* test that we can share the zygote space */
+    byte* _newptr = mremap(GetMspace(), size, size, MREMAP_FIXED | MREMAP_MAYMOVE);
+    if((_newptr == MAP_FAILED)) {
+      LOG(ERROR) << "XXXXXXSharing zygote space failedXXXXXXXXXXXXX";
+    }
     alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
   } else {
