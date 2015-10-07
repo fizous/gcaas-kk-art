@@ -199,7 +199,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
                                   GCSrvcClientHandShake* handShakeMemory) :
     service_meta_(meta), handShake_(handShakeMemory), fileMapperSvc_(NULL),
     thread_(NULL), srvcReady_(false) {
-  LOG(ERROR) << "Import Address ------ " << reinterpret_cast<byte*>(import_address_);
+
   thread_ = Thread::Current();
   {
     LOG(ERROR) << " changing status of service to waiting for server ";
@@ -211,7 +211,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 
   import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
       MemBaseMap::max_covered_address);
-
+  LOG(ERROR) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   LOG(ERROR) << "going to wait for the shutdown signals";
