@@ -524,6 +524,9 @@ class Heap {
 
   byte* GetMaxAddress();
 
+
+  void GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector);
+
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

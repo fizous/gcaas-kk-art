@@ -768,6 +768,22 @@ byte* Heap::GetMaxAddress() {
   return continuous_spaces_.back()->End();
 }
 
+void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
+  collector::MarkSweep* collector = NULL;
+  std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
+  while( iter != mark_sweep_collectors_.end()) {
+    if((*iter)->GetGcType() == collector::kGcTypeFull) {
+      LOG(ERROR) << "Removing original Marksweep";
+
+      mark_sweep_collectors_.erase(iter);
+      break;
+    }
+  }
+  LOG(ERROR) << "Added the new marksweep (IPC)";
+  mark_sweep_collectors_.push_back(newCollector);
+
+}
+
 void Heap::DumpSpaces() {
   for (const auto& space : continuous_spaces_) {
 #if (true || ART_GC_SERVICE)
