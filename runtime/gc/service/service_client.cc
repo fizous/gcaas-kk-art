@@ -23,7 +23,8 @@ GCServiceClient* GCServiceClient::service_client_ = NULL;
 GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
     int index) : index_(index), sharable_space_(sharable_space) {
   collector_ =
-      new gc::collector::IPCMarkSweep(&(sharable_space_->sharable_space_data_->heap_meta_));
+      new gc::collector::IPCMarkSweep(Runtime::Current()->GetHeap(),
+          false, "mark-sweep-", &(sharable_space_->sharable_space_data_->heap_meta_));
 //  heap_meta_ = GCService::service_->GetAllocator()->AllocateHeapMeta();
 //  GCSERV_CLIENT_ILOG << " address of the heap meta is: " <<
 //      reinterpret_cast<void*>(heap_meta_);
