@@ -368,7 +368,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   //TODO: fizo: check what's wrong here?
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+  LOG(ERROR) << "A] Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << Capacity() << "\n"
@@ -399,6 +399,15 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
           alloc_space_name);
   }
+
+  /* test sharing zygote space */
+//  byte* old_zyg = GetMspace();
+//  CHECK_MEMORY_CALL(munmap, (old_zyg, size), "zygote - mspace");
+//  int _fd = 0;
+//  byte* _new_zygote_ptr = reinterpret_cast<byte*>(mmap(old_zyg, size,
+//        prot, MAP_SHARED | MAP_FIXED, _fd, 0));
+
+
   alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
 
@@ -459,11 +468,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
       CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
           alloc_space_name);
     }
-    /* test that we can share the zygote space */
-    byte* _newptr = mremap(GetMspace(), size, size, MREMAP_FIXED | MREMAP_MAYMOVE);
-    if((_newptr == MAP_FAILED)) {
-      LOG(ERROR) << "XXXXXXSharing zygote space failedXXXXXXXXXXXXX";
-    }
+
     alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
   } else {
