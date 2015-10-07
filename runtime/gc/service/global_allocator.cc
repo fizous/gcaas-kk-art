@@ -487,7 +487,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       for(int i = 0; i < _recSecond->fd_count_; i++) {
 
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
-
+        _result->size_ = 4096;
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
             StringPrintf("fd: %d, flags:%d, prot:%d, size:%s",
                 _result->fd_, _result->flags_, _result->prot_,
