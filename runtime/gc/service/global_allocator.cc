@@ -515,6 +515,27 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
           _mapping_addr += RoundUp(_result->size_, kPageSize);
+          int _munmap_result = munmap(actual, _result->size_);
+          if (_munmap_result == -1) {
+            LOG(ERROR) << "munmap failed";
+          }
+          byte* actual_after_unmap = reinterpret_cast<byte*>(mmap((void*)(_mapping_addr), _result->size_,
+              _result->prot_, _result->flags_ , _result->fd_, 0));
+          if(actual == MAP_FAILED) {
+            LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
+                << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+                << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_mapping_addr);
+          } else {
+            LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
+                _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
+                    _result->fd_, reinterpret_cast<void*>(actual_after_unmap),
+                    *(reinterpret_cast<unsigned int*>(actual_after_unmap)))
+                    << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                    _result->flags_ << ", prot: " << _result->prot_ <<
+                    ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
+          }
+
+          //_mapping_addr += RoundUp(_result->size_, kPageSize);
           if(false) {
             if(i == 1) { //test that we can remap the pages
 
