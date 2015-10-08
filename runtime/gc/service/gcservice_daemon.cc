@@ -25,7 +25,7 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 
 
 GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
-  for (const auto& client : client_agents_) {
+  for (auto& client : client_agents_) {
      if(client.binding_.pair_mapps_->first->process_id_ == pid) {
        return client;
      }
@@ -158,7 +158,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-  collector_ = new ServerCollector(&binding_.sharable_space_->heap_meta_);
+  collector_ = ServerCollector::CreateServerCollector(&binding_.sharable_space_->heap_meta_);
 }
 
 
