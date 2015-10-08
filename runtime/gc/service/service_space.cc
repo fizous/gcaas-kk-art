@@ -6,7 +6,7 @@
  */
 
 
-//#include "gc/service/service_space.h"
+#include "gc/service/service_space.h"
 //
 #include "gc/service/global_allocator.h"
 #include "utils.h"
