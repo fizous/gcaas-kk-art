@@ -620,7 +620,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     }
   } else if (_req_type == GC_SERVICE_TASK_CONC) {
     LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
-        _req_type << " ~~~~~ " << _entry->req_type_;
+        _req_type << " ~~~~~ " << _entry->req_type_ <<
+        (GCServiceProcess::process_ == NULL ? "process is null" : "process is not null");
     GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
     if(_dmon == NULL) {
       LOG(ERROR) << "_dmon is null: " << _entry->pid_;
