@@ -170,6 +170,7 @@ void IPCMarkSweep::PreInitCollector(void) {
 /******* overriding marksweep code *************/
 
 void IPCMarkSweep::FinishPhase() {
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase";
   MarkSweep::FinishPhase();
   Thread* currThread = Thread::Current();
   GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
@@ -177,6 +178,7 @@ void IPCMarkSweep::FinishPhase() {
 }
 
 void IPCMarkSweep::InitializePhase() {
+  LOG(ERROR) << "IPCMarkSweep::InitializePhase";
   PreInitCollector();
   MarkSweep::InitializePhase();
 

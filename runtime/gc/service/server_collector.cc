@@ -38,6 +38,7 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 
 
 void ServerCollector::SignalCollector(void) {
+  LOG(ERROR) << "ServerCollector::SignalCollector";
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
@@ -46,6 +47,7 @@ void ServerCollector::SignalCollector(void) {
 }
 
 void ServerCollector::WaitForRequest(void) {
+  LOG(ERROR) << "ServerCollector::WaitForRequest";
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
@@ -56,6 +58,7 @@ void ServerCollector::WaitForRequest(void) {
 }
 
 void ServerCollector::ExecuteGC(void) {
+  LOG(ERROR) << "ServerCollector::ExecuteGC";
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   IPMutexLock interProcMu(self, *phase_mu_);
@@ -66,6 +69,7 @@ void ServerCollector::ExecuteGC(void) {
 
 
 void ServerCollector::WaitForGCTask(void) {
+  LOG(ERROR) << "ServerCollector::WaitForGCTask";
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   IPMutexLock interProcMu(self, *phase_mu_);
@@ -77,6 +81,7 @@ void ServerCollector::WaitForGCTask(void) {
 }
 
 void ServerCollector::Run(void) {
+  LOG(ERROR) << "ServerCollector::Run";
   while(true) {
     WaitForRequest();
     ExecuteGC();
