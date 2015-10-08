@@ -775,11 +775,12 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
 //  }
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
-    if((*iter)->GetGcType() == collector::kGcTypeFull && (*iter)->IsConcurrent()) {
+    if(((*iter)->GetGcType() == collector::kGcTypeFull) && ((*iter)->IsConcurrent())) {
       LOG(ERROR) << "Removing original Marksweep; full and concurrent";
       mark_sweep_collectors_.erase(iter);
       break;
     }
+    ++iter;
   }
   LOG(ERROR) << "Postcollectors size is: " << mark_sweep_collectors_.size();
   LOG(ERROR) << "Added the new marksweep (IPC)";
@@ -787,7 +788,7 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
   for (const auto& cur_collector : mark_sweep_collectors_) {
-    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
+    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() << ", type: " << cur_collector->GetGcType();
   }
 
 
