@@ -769,7 +769,7 @@ byte* Heap::GetMaxAddress() {
 }
 
 void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
-
+  LOG(ERROR) << "Precollectors size is: " << mark_sweep_collectors_.size();
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
     if((*iter)->GetGcType() == collector::kGcTypeFull) {
@@ -779,8 +779,10 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
       break;
     }
   }
+  LOG(ERROR) << "Postcollectors size is: " << mark_sweep_collectors_.size();
   LOG(ERROR) << "Added the new marksweep (IPC)";
   mark_sweep_collectors_.push_back(newCollector);
+  LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
 }
 
