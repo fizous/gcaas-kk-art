@@ -623,7 +623,13 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         _req_type << " ~~~~~ " << _entry->req_type_;
     GCSrvceAgent* _agent =
         GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    _agent->collector_->SignalCollector();
+    if(_agent == NULL) {
+      LOG(ERROR) << "_agent is null: " << _entry->pid_;
+    } else {
+      _agent->collector_->SignalCollector();
+    }
+
+
   } else if (_req_type == GC_SERVICE_TASK_TRIM) {
     LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
