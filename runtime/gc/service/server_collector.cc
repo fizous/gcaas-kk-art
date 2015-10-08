@@ -15,7 +15,7 @@ namespace gcservice {
 
 ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     heap_data_(meta_alloc) {
-  Thread* self = Thread::Current();
+//  Thread* self = Thread::Current();
   run_mu_ = new Mutex("gcService Shutdown");
   run_cond_.reset(new ConditionVariable("gcService Shutdown condition variable",
       *run_mu_));
