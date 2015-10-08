@@ -38,28 +38,30 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 
 
 void ServerCollector::SignalCollector(void) {
-  LOG(ERROR) << "ServerCollector::SignalCollector";
   Thread* self = Thread::Current();
+  LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
   status_ = 1;
   run_cond_->Broadcast(self);
+  LOG(ERROR) << "ServerCollector::Leaving SignalCollector..." << self->GetTid();
 }
 
 void ServerCollector::WaitForRequest(void) {
-  LOG(ERROR) << "ServerCollector::WaitForRequest";
   Thread* self = Thread::Current();
+  LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
   status_ = 0;
   while(status_ == 0) {
     run_cond_->Wait(self);
   }
+  LOG(ERROR) << "leaving ServerCollector::WaitForRequest";
 }
 
 void ServerCollector::ExecuteGC(void) {
-  LOG(ERROR) << "ServerCollector::ExecuteGC";
   Thread* self = Thread::Current();
+  LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   IPMutexLock interProcMu(self, *phase_mu_);
   heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
@@ -69,13 +71,15 @@ void ServerCollector::ExecuteGC(void) {
 
 
 void ServerCollector::WaitForGCTask(void) {
-  LOG(ERROR) << "ServerCollector::WaitForGCTask";
   Thread* self = Thread::Current();
+  LOG(ERROR) << "ServerCollector::WaitForGCTask.." << self->GetTid();
+
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   IPMutexLock interProcMu(self, *phase_mu_);
   while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH) {
     phase_cond_->Wait(self);
   }
+  LOG(ERROR) << "ServerCollector::WaitForGCTask..left the wait condition.." << self->GetTid();
   heap_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   phase_cond_->Broadcast(self);
 }
