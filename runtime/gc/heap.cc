@@ -784,6 +784,7 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   mark_sweep_collectors_.push_back(newCollector);
   LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
+  DumpGcPerformanceInfo(LOG(ERROR));
 }
 
 void Heap::DumpSpaces() {
