@@ -22,7 +22,7 @@ namespace collector {
 
 IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
               Heap* heap, bool is_concurrent, const std::string& name_prefix)
-    : MarkSweep(heap, false, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc) {
+    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc) {
   /* initialize locks */
   SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
