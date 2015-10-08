@@ -330,6 +330,14 @@ InterProcessMutex::InterProcessMutex(SharedFutexData* futexMem, const char* name
         futexData_ = futexMem;
 }
 
+InterProcessMutex::InterProcessMutex(bool reinitialize, SharedFutexData* futexMem,
+    const char* name, LockLevel level, int recursive) : BaseMutex(name, level) {
+  futexData_ = futexMem;
+  if(reinitialize) {
+
+  }
+}
+
 
 InterProcessMutex::~InterProcessMutex(){
 #if ART_USE_FUTEXES

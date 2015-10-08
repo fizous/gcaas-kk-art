@@ -6,9 +6,10 @@
  */
 
 
+#include "../service/service_client.h"
+
+#include "../service/global_allocator.h"
 #include "gc/space/dlmalloc_space.h"
-#include "gc/service/service_client.h"
-#include "gc/service/global_allocator.h"
 #include "runtime.h"
 #include "ipcfs/ipcfs.h"
 #include "gc/collector/ipc_mark_sweep.h"
@@ -86,7 +87,7 @@ void GCServiceClient::RequestConcGC(void) {
     return;
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
-  _alloc->handShake_->ReqConcCollection();
+  _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 }
 
 

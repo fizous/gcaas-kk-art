@@ -4,8 +4,13 @@
  *  Created on: Sep 13, 2015
  *      Author: hussein
  */
+#include "../service/global_allocator.h"
+
 #include <string>
 #include <cutils/ashmem.h>
+#include "gc/service/service_client.h"
+#include "gc/service/service_space.h"
+#include "gc/service/server_collector.h"
 #include "globals.h"
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
@@ -16,9 +21,6 @@
 #include "os.h"
 #include "runtime.h"
 #include "mem_map.h"
-#include "gc/service/global_allocator.h"
-#include "gc/service/service_space.h"
-#include "gc/service/service_client.h"
 
 namespace art {
 namespace gc {
@@ -345,13 +347,14 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
     ENTRY->status_ = GC_SERVICE_REQ_NEW;
 
 
-void GCSrvcClientHandShake::ReqConcCollection() {
+void GCSrvcClientHandShake::ReqConcCollection(void* args) {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
 
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_CONC;
+  _entry->data_addr_ = args;
 
   LOG(ERROR) << "GCSrvcClientHandShake::ReqConcCollection";
 
@@ -476,6 +479,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     _recSecond->process_id_ = _fMapsP->process_id_;
     _recSecond->space_index_ = _fMapsP->space_index_;
     _recSecond->fd_count_ = _fMapsP->fd_count_;
+    _recSecond->shared_space_addr_ = _fMapsP->shared_space_addr_;
     for(int i = 0; i < _recSecond->fd_count_; i++) {
       memcpy((void*)&(_recSecond->mem_maps_[i]), &(_fMapsP->mem_maps_[i]),
           sizeof(android::IPCAShmemMap));
@@ -605,12 +609,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
           }
 
         }
-
-
-
       }
-
-
       _daemon->client_agents_.push_back(GCSrvceAgent(_newPairEntry));
 
     } else {
@@ -619,6 +618,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   } else if (_req_type == GC_SERVICE_TASK_CONC) {
     LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
+    GCSrvceAgent* _agent =
+        GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
+    _agent->collector_->SignalCollector();
   } else if (_req_type == GC_SERVICE_TASK_TRIM) {
     LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;

@@ -6,11 +6,11 @@
  */
 #include <string>
 #include <cutils/ashmem.h>
+#include "../service/global_allocator.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-#include "gc/service/global_allocator.h"
 
 
 namespace art {
@@ -23,6 +23,15 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
   return new GCServiceDaemon(process);
 }
 
+
+GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
+  for (const auto& client : client_agents_) {
+     if(client.binding_.pair_mapps_->first->process_id_ == pid) {
+       return &client;
+     }
+  }
+  return NULL;
+}
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
@@ -149,6 +158,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
+  collector_ = new ServerCollector(&binding_.sharable_space_->heap_meta_);
 }
 
 

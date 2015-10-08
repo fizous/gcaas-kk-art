@@ -15,7 +15,6 @@
  */
 #include "dlmalloc_space.h"
 #include "dlmalloc_space-inl.h"
-#include "gc/service/service_space.h"
 #include "gc/accounting/card_table.h"
 #include "gc/heap.h"
 #include "mirror/object-inl.h"
@@ -25,6 +24,7 @@
 
 #include <valgrind.h>
 #include <../memcheck/memcheck.h>
+#include "../server_collector.cc/service_space.h"
 #include "gc_profiler/MProfiler.h"
 namespace art {
 

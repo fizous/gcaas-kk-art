@@ -118,7 +118,7 @@ class GCSrvcClientHandShake {
   GCSrvcClientHandShake(GCServiceRequestsBuffer*);
   android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
-  void ReqConcCollection(void);
+  void ReqConcCollection(void*);
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
   void ListenToRequests(void*);
@@ -181,8 +181,10 @@ typedef struct GCServiceClientRecord_S {
 class GCSrvceAgent {
  public:
   GCSrvceAgent(android::MappedPairProcessFD*);
- private:
+  ServerCollector collector_;
   GCServiceClientRecord binding_;
+ private:
+
 };//class GCSrvceAgent
 
 
@@ -202,10 +204,12 @@ class GCServiceDaemon {
   void initShutDownSignals(void);
 
 public:
+  static GCServiceDaemon* gcdaemon_inst_;
   GCServiceProcess* process_;
   std::vector<GCSrvceAgent> client_agents_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
+  GCSrvceAgent* GetAgentByPid(int pid);
 };//class GCServiceDaemon
 
 

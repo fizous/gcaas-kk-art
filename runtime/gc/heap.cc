@@ -58,9 +58,9 @@
 #include "gc_profiler/MProfilerTypes.h"
 
 #if (true || ART_GC_SERVICE)
-#include "gc/service/global_allocator.h"
-#include "gc/service/service_space.h"
-#include "gc/service/service_client.h"
+#include "service/global_allocator.h"
+#include "service/service_space.h"
+#include "service/service_client.h"
 #endif
 
 namespace art {

@@ -49,8 +49,13 @@ class IPCMarkSweep : public MarkSweep {
   void DumpValues(void);
 
 
-
+  /* overriding the Marksweep code*/
+  void InitializePhase(void);
+  void FinishPhase();
   /** GC Phases **/
+
+  void PreInitCollector(void);
+
   void InitialPhase(void);
   void MarkRootPhase(void);
   void ConcMarkPhase(void);

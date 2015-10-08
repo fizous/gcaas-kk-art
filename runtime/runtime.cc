@@ -36,6 +36,8 @@
 #include "debugger.h"
 #include "gc/accounting/card_table-inl.h"
 #include "gc/heap.h"
+#include "gc/service/global_allocator.h"
+#include "gc/service/service_client.h"
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "gc/space/space.h"
@@ -66,8 +68,6 @@
 
 #include "JniConstants.h"  // Last to avoid LOG redefinition in ics-mr1-plus-art.
 
-#include "gc/service/global_allocator.h"
-#include "gc/service/service_client.h"
 
 namespace art {
 
