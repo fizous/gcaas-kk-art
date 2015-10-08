@@ -770,9 +770,9 @@ byte* Heap::GetMaxAddress() {
 
 void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   LOG(ERROR) << "Precollectors size is: " << mark_sweep_collectors_.size();
-  for (const auto& cur_collector : mark_sweep_collectors_) {
-    LOG(ERROR) << "A-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
-  }
+//  for (const auto& cur_collector : mark_sweep_collectors_) {
+//    LOG(ERROR) << "A-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
+//  }
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
     if((*iter)->GetGcType() == collector::kGcTypeFull && (*iter)->IsConcurrent()) {
