@@ -162,8 +162,8 @@ void IPCMarkSweep::ClientRun(void) {
 
 void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " pending inside preInit";
-  Thread* currThread = Thread::Current();
-  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+  //Thread* currThread = Thread::Current();
+  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
   LOG(ERROR) << " leaving inside preInit";
 }
 
@@ -172,9 +172,9 @@ void IPCMarkSweep::PreInitCollector(void) {
 void IPCMarkSweep::FinishPhase() {
   LOG(ERROR) << "IPCMarkSweep::FinishPhase";
   MarkSweep::FinishPhase();
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-  phase_cond_->Broadcast(currThread);
+ // Thread* currThread = Thread::Current();
+  //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+  //phase_cond_->Broadcast(currThread);
 }
 
 void IPCMarkSweep::InitializePhase() {
