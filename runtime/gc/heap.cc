@@ -770,11 +770,13 @@ byte* Heap::GetMaxAddress() {
 
 void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   LOG(ERROR) << "Precollectors size is: " << mark_sweep_collectors_.size();
+  for (const auto& cur_collector : mark_sweep_collectors_) {
+    LOG(ERROR) << "A-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
+  }
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
-    if((*iter)->GetGcType() == collector::kGcTypeFull) {
-      LOG(ERROR) << "Removing original Marksweep";
-
+    if((*iter)->GetGcType() == collector::kGcTypeFull && (*iter)->IsConcurrent()) {
+      LOG(ERROR) << "Removing original Marksweep; full and concurrent";
       mark_sweep_collectors_.erase(iter);
       break;
     }
@@ -785,7 +787,7 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
   for (const auto& cur_collector : mark_sweep_collectors_) {
-    LOG(ERROR) << "Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
+    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
   }
 
 
