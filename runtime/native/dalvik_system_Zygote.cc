@@ -50,7 +50,7 @@
 #include <sys/capability.h>
 #endif
 
-#include "../gc/server_collector.cc/global_allocator.h"
+#include "gc/service/global_allocator.h"
 
 namespace art {
 
