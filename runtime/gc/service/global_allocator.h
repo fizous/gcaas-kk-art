@@ -213,7 +213,7 @@ class ServerCollector {
 class GCSrvceAgent {
  public:
   GCSrvceAgent(android::MappedPairProcessFD*);
-  ServerCollector collector_;
+  ServerCollector* collector_;
   GCServiceClientRecord binding_;
  private:
 
