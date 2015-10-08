@@ -6,7 +6,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-#include "gc/service/server_collector.h"
+#include "gc/service/global_allocator.h"
 
 
 namespace art {

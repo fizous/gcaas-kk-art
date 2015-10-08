@@ -168,7 +168,6 @@ class GCServiceGlobalAllocator {
 
 
 class GCServiceProcess;
-class ServerCollector;
 
 
 
@@ -176,6 +175,39 @@ typedef struct GCServiceClientRecord_S {
   gc::space::GCSrvSharableDlMallocSpace* sharable_space_;
   android::MappedPairProcessFD* pair_mapps_;
 }  __attribute__((aligned(8))) GCServiceClientRecord;
+
+
+
+class ServerCollector {
+ public:
+  ServerCollector(space::GCSrvSharableHeapData* meta_alloc);
+
+  void Run(void);
+  space::GCSrvSharableHeapData* heap_data_;
+  Mutex* run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  UniquePtr<ConditionVariable> run_cond_ GUARDED_BY(shutdown_mu_);
+
+
+  volatile int status_;
+
+  InterProcessMutex* phase_mu_;
+  InterProcessConditionVariable* phase_cond_;
+
+
+  Thread*   thread_;
+  pthread_t pthread_;
+
+  void SignalCollector(void);
+  void WaitForRequest(void);
+  void WaitForGCTask(void);
+  void ExecuteGC(void);
+
+
+
+  static void* RunCollectorDaemon(void*);
+  static ServerCollector* CreateServerCollector(void* args);
+
+};//class ServerCollector
 
 
 class GCSrvceAgent {
