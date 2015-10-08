@@ -4,13 +4,11 @@
  *  Created on: Sep 13, 2015
  *      Author: hussein
  */
-#include "../service/global_allocator.h"
+
 
 #include <string>
 #include <cutils/ashmem.h>
-#include "gc/service/service_client.h"
-#include "gc/service/service_space.h"
-#include "gc/service/server_collector.h"
+
 #include "globals.h"
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
@@ -21,6 +19,11 @@
 #include "os.h"
 #include "runtime.h"
 #include "mem_map.h"
+
+#include "gc/service/global_allocator.h"
+#include "gc/service/service_client.h"
+#include "gc/service/service_space.h"
+#include "gc/service/server_collector.h"
 
 namespace art {
 namespace gc {
