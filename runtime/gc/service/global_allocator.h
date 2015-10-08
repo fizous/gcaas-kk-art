@@ -168,7 +168,7 @@ class GCServiceGlobalAllocator {
 
 
 class GCServiceProcess;
-
+class ServerCollector;
 
 
 
