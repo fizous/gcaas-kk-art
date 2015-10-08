@@ -6,9 +6,9 @@
  */
 
 
-#include "../server_collector.cc/service_space.h"
+#include "gc/service/service_space.h"
 
-#include "../server_collector.cc/global_allocator.h"
+#include "gc/service/global_allocator.h"
 #include "utils.h"
 #include "runtime.h"
 #include "gc/space/space.h"
