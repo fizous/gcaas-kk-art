@@ -784,6 +784,12 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   mark_sweep_collectors_.push_back(newCollector);
   LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
+  for (const auto& cur_collector : mark_sweep_collectors_) {
+    LOG(ERROR) << "Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
+  }
+
+
+
   DumpGcPerformanceInfo(LOG(ERROR));
 }
 
