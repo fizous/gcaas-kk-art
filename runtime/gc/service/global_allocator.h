@@ -185,7 +185,7 @@ class ServerCollector {
   void Run(void);
   space::GCSrvSharableHeapData* heap_data_;
   Mutex* run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
-  UniquePtr<ConditionVariable> run_cond_ GUARDED_BY(shutdown_mu_);
+  UniquePtr<ConditionVariable> run_cond_ GUARDED_BY(run_mu_);
 
 
   volatile int status_;
