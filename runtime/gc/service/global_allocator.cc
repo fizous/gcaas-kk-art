@@ -613,7 +613,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         }
       }
-      _daemon->client_agents_.push_back(GCSrvceAgent(_newPairEntry));
+      _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
 
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";

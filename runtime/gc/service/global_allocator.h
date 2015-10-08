@@ -238,7 +238,7 @@ class GCServiceDaemon {
 public:
   static GCServiceDaemon* gcdaemon_inst_;
   GCServiceProcess* process_;
-  std::vector<GCSrvceAgent> client_agents_;
+  std::vector<GCSrvceAgent*> client_agents_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
