@@ -24,7 +24,7 @@
 
 #include <valgrind.h>
 #include <../memcheck/memcheck.h>
-#include "../server_collector.cc/service_space.h"
+#include "gc/service/service_space.h"
 #include "gc_profiler/MProfiler.h"
 namespace art {
 
