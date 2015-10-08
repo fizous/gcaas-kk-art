@@ -237,7 +237,7 @@ class GCServiceDaemon {
 
 public:
   static GCServiceDaemon* gcdaemon_inst_;
-  GCServiceProcess* process_;
+  //GCServiceProcess* process_;
   std::vector<GCSrvceAgent*> client_agents_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
@@ -260,6 +260,7 @@ private:
 
   bool initSvcFD(void);
   GCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
+  void SetGCDaemon(void);
 
 
   android::FileMapperService* fileMapperSvc_;

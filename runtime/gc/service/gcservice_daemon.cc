@@ -35,7 +35,7 @@ GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
-  GCServiceProcess* _processObj = _daemonObj->process_;
+  GCServiceProcess* _processObj = GCServiceProcess::process_;
   LOG(ERROR) << "-------- Inside GCServiceDaemon::RunDaemon ---------";
   Runtime* runtime = Runtime::Current();
   bool _createThread =  runtime->AttachCurrentThread("GCSvcDaemon", true,
@@ -72,16 +72,17 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), processed_index_(0), process_(process) {
+     thread_(NULL), processed_index_(0) {
   Thread* self = Thread::Current();
   {
-    IPMutexLock interProcMu(self, *process_->service_meta_->mu_);
-    process_->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
+    IPMutexLock interProcMu(self, *process->service_meta_->mu_);
+    process->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
 //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
 //        64, false));
     initShutDownSignals();
-    process_->service_meta_->cond_->Broadcast(self);
+    process->service_meta_->cond_->Broadcast(self);
   }
+
   CHECK_PTHREAD_CALL(pthread_create,
       (&pthread_, NULL,
       &GCServiceDaemon::RunDaemon, this),
@@ -105,7 +106,7 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
   {
     shutdown_cond_->Wait(self);
   }
-  if(process_->service_meta_->status_ == GCSERVICE_STATUS_STOPPED) {
+  if(GCServiceProcess::process_->service_meta_->status_ == GCSERVICE_STATUS_STOPPED) {
     shutdown_cond_->Broadcast(self);
     return true;
   }
@@ -114,7 +115,7 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
 }
 
 void GCServiceDaemon::mainLoop(void) {
-  process_->handShake_->ListenToRequests(this);
+  GCServiceProcess::process_->handShake_->ListenToRequests(this);
 //  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
 //  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
 //  {
@@ -174,11 +175,13 @@ void GCServiceProcess::LaunchGCServiceProcess(void) {
 
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
     GCSrvcClientHandShake* handshake) {
-  if(process_ == NULL) {
+  if(GCServiceProcess::process_ == NULL) {
     LOG(ERROR) << "initializing process";
-    process_ = new GCServiceProcess(meta, handshake);
+    GCServiceProcess::process_ = new GCServiceProcess(meta, handshake);
+    GCServiceProcess::process_->SetGCDaemon();
+
   }
-  return process_;
+  return GCServiceProcess::process_;
 }
 
 bool GCServiceProcess::initSvcFD(void) {
@@ -221,6 +224,10 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 
   import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
       MemBaseMap::max_covered_address);
+
+}
+
+void GCServiceProcess::SetGCDaemon(void) {
   LOG(ERROR) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 

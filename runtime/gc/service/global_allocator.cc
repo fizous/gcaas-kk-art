@@ -490,7 +490,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      byte* _mapping_addr = _daemon->process_->import_address_;
+      byte* _mapping_addr = GCServiceProcess::process_->import_address_;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
 
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
