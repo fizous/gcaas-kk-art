@@ -95,7 +95,7 @@ void IPCMarkSweep::ReclaimPhase(void){
 }
 
 
-void IPCMarkSweep::FinishPhase(void){
+void IPCMarkSweep::FinalizePhase(void){
   Thread* currThread = Thread::Current();
   GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
 }

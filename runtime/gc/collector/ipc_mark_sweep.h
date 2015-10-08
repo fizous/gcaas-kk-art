@@ -60,7 +60,7 @@ class IPCMarkSweep : public MarkSweep {
   void MarkRootPhase(void);
   void ConcMarkPhase(void);
   void ReclaimPhase(void);
-  void FinishPhase(void);
+  void FinalizePhase(void);
   void ServerRun(void);
 
   void ClientRun(void);
