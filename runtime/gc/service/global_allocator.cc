@@ -357,7 +357,7 @@ void GCSrvcClientHandShake::ReqConcCollection(void* args) {
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_CONC;
-  _entry->data_addr_ = args;
+  _entry->data_addr_ = (uintptr_t)args;
 
   LOG(ERROR) << "GCSrvcClientHandShake::ReqConcCollection";
 
