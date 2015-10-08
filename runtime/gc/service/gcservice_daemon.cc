@@ -27,7 +27,7 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
   for (auto& client : client_agents_) {
      if(client.binding_.pair_mapps_->first->process_id_ == pid) {
-       return client;
+       return &client;
      }
   }
   return NULL;
