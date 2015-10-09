@@ -27,9 +27,9 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
               Heap* heap, bool is_concurrent, const std::string& name_prefix)
     : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc),
       ms_lock_("ipc lock"),
-      ms_cond_("ipcs::cond_", ms_lock_){
+      ms_cond_("ipcs::cond_", ms_lock_),
+      collector_daemon_(NULL){
 
-  collector_daemon_ = NULL;
   /* initialize locks */
   SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
@@ -99,6 +99,8 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
   while (collector_daemon_ == NULL) {
     ms_cond_.Wait(self);
   }
+
+  LOG(ERROR) << "StartCollectorDaemon--->leaving";
 
   return true;
 }
@@ -233,18 +235,14 @@ bool IPCMarkSweep::RunCollectorDaemon() {
 }
 
 void* IPCMarkSweep::RunDaemon(void* arg) {
-  Runtime* runtime = Runtime::Current();
   IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
-  bool _createThread =  runtime->AttachCurrentThread("IPC-MS-Daem", true,
-      runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler());
-
-  if(!_createThread) {
-    LOG(ERROR) << "-------- could not attach internal GC IPCMarkSweep runDAemon ---------";
-    return NULL;
-  }
-
+  Runtime* runtime = Runtime::Current();
   Thread* self = Thread::Current();
+
+  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, runtime->GetSystemThreadGroup(),
+                                     !runtime->IsCompiler()));
+
+  LOG(ERROR) << "RunDaemon::After attach current" ;
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, _ipc_ms->ms_lock_);
@@ -252,7 +250,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
     _ipc_ms->ms_cond_.Broadcast(self);
   }
 
-
+  LOG(ERROR) << "RunDaemon::Broadcast" ;
   bool collector_loop = true;
   while(collector_loop) {
     collector_loop = _ipc_ms->RunCollectorDaemon();
