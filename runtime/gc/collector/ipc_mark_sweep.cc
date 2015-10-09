@@ -239,8 +239,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
   Runtime* runtime = Runtime::Current();
   Thread* self = Thread::Current();
 
-  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, runtime->GetSystemThreadGroup(),
-                                     !runtime->IsCompiler()));
+  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
 
   LOG(ERROR) << "RunDaemon::After attach current" ;
   DCHECK_NE(self->GetState(), kRunnable);
