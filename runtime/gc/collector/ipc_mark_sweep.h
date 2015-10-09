@@ -43,6 +43,19 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
+  Thread*   collector_daemon_;
+  pthread_t collector_pthread_;
+
+  InterProcessMutex* conc_req_cond_mu_;
+  InterProcessConditionVariable* conc_req_cond_;
+  volatile int conc_flag_;
+
+  bool RunCollectorDaemon(void);
+  bool StartCollectorDaemon(void);
+
+  static void* RunDaemon(void* arg);
+
+
  // IPCMarkSweep(space::GCSrvSharableHeapData*);
   IPCMarkSweep(space::GCSrvSharableHeapData* alloc_meta, Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
   void ResetMetaDataUnlocked();

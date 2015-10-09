@@ -4,12 +4,15 @@
  *  Created on: Oct 5, 2015
  *      Author: hussein
  */
-
+#include <string>
+#include <cutils/ashmem.h>
 #include "globals.h"
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
 #include "mark_sweep.h"
 #include "scoped_thread_state_change.h"
+#include "thread_state.h"
+#include "thread.h"
 #include "gc/space/space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 
@@ -41,6 +44,18 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
   barrier_cond_ = new InterProcessConditionVariable("HandShake CondVar",
       *barrier_mu_, _condBarrierAdd);
 
+
+  /* initialize locks */
+  SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
+  SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
+
+
+  conc_req_cond_mu_ = new InterProcessMutex("GCConc Mutex", _conc_futexAddress);
+  conc_req_cond_ = new InterProcessConditionVariable("GCConc CondVar",
+      *conc_req_cond_mu_, _conc_condAddress);
+
+
+
   ResetMetaDataUnlocked();
   DumpValues();
 }
@@ -57,6 +72,7 @@ void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
   meta_->freed_objects_ = 0;
   meta_->freed_bytes_ = 0;
   meta_->barrier_count_ = 0;
+  meta_->conc_flag_ = 0;
 }
 
 
@@ -67,6 +83,14 @@ void IPCMarkSweep::DumpValues(void){
       << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
 }
 
+bool IPCMarkSweep::StartCollectorDaemon(void) {
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&collector_pthread_, NULL,
+      &IPCMarkSweep::RunDaemon, this),
+      "IPC mark-sweep Daemon thread");
+
+  return true;
+}
 
 //void IPCMarkSweep::InitialPhase(){
 //  Thread* currThread = Thread::Current();
@@ -174,6 +198,55 @@ void IPCMarkSweep::FinalizePhase(void){
 //  Thread* currThread = Thread::Current();
 //  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
 //}
+
+
+
+bool IPCMarkSweep::RunCollectorDaemon() {
+  Thread* self = Thread::Current();
+  LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
+
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- before while";
+    while(conc_flag_ <= 0) {
+      conc_req_cond_->Wait(self);
+    }
+    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- leaving wait";
+    conc_flag_ = conc_flag_ - 1;
+  }
+  Runtime* runtime = Runtime::Current();
+  runtime->GetHeap()->GCServiceSignalConcGC(self);
+
+  return true;
+}
+
+void* IPCMarkSweep::RunDaemon(void* arg) {
+  Runtime* runtime = Runtime::Current();
+  IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
+  bool _createThread =  runtime->AttachCurrentThread("IPC-MS-Daem", true,
+      runtime->GetSystemThreadGroup(),
+      !runtime->IsCompiler());
+
+  if(!_createThread) {
+    LOG(ERROR) << "-------- could not attach internal GC IPCMarkSweep runDAemon ---------";
+    return NULL;
+  }
+
+  Thread* self = Thread::Current();
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    _ipc_ms->collector_daemon_ = self;
+
+  }
+
+  bool collector_loop = true;
+  while(collector_loop) {
+    collector_loop = _ipc_ms->RunCollectorDaemon();
+  }
+
+  return NULL;
+}
 
 /******* overriding marksweep code *************/
 
