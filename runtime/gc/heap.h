@@ -526,7 +526,7 @@ class Heap {
 
 
   void GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector);
-
+  void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -559,7 +559,7 @@ class Heap {
   void EnqueueClearedReferences(mirror::Object** cleared_references);
 
   void RequestHeapTrim() LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
-  void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
+  v
   void RequestConcurrentGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
   bool IsGCRequestPending() const;
 
