@@ -2297,6 +2297,7 @@ void Heap::GCServiceSignalConcGC(Thread* self) {
   CHECK(!env->ExceptionCheck());
   return;
 }
+
 void Heap::RequestConcurrentGC(Thread* self) {
   // Make sure that we can do a concurrent GC.
   Runtime* runtime = Runtime::Current();
