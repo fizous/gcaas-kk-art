@@ -176,7 +176,7 @@ void IPCMarkSweep::FinishPhase() {
   Thread* currThread = Thread::Current();
   //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   //phase_cond_->Broadcast(currThread);
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left";
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
 
 void IPCMarkSweep::InitializePhase() {
