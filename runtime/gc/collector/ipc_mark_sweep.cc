@@ -162,9 +162,9 @@ void IPCMarkSweep::ClientRun(void) {
 
 void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " pending inside preInit";
-  Thread* currThread = Thread::Current();
-  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-  LOG(ERROR) << " leaving inside preInit";
+//  Thread* currThread = Thread::Current();
+ // GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+ // LOG(ERROR) << " leaving inside preInit";
 }
 
 /******* overriding marksweep code *************/

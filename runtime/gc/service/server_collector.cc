@@ -42,9 +42,11 @@ void ServerCollector::SignalCollector(void) {
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
-  status_ = 1;
+  if(status_ == 0) {
+    status_ = 1;
+    LOG(ERROR) << "ServerCollector::Setting status to 1..." << self->GetTid();
+  }
   run_cond_->Broadcast(self);
-  LOG(ERROR) << "ServerCollector::Leaving SignalCollector..." << self->GetTid();
 }
 
 void ServerCollector::WaitForRequest(void) {
@@ -52,20 +54,24 @@ void ServerCollector::WaitForRequest(void) {
   LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, *run_mu_);
-  status_ = 0;
   while(status_ == 0) {
     run_cond_->Wait(self);
   }
-  LOG(ERROR) << "leaving ServerCollector::WaitForRequest";
+  LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
 }
 
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  IPMutexLock interProcMu(self, *phase_mu_);
-  heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
-  phase_cond_->Broadcast(self);
+//  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+//  IPMutexLock interProcMu(self, *phase_mu_);
+//  if(heap_data_->gc_phase_ == space::IPC_GC_PHASE_NONE) {
+//    heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
+//    LOG(ERROR) << "ServerCollector::ExecuteGC..setting phase to init: " << self->GetTid();
+//    phase_cond_->Broadcast(self);
+//  } else {
+//    LOG(ERROR) << "ServerCollector::ExecuteGC.. skipped setting phase to init: " << self->GetTid();
+//  }
 }
 
 
@@ -73,15 +79,20 @@ void ServerCollector::ExecuteGC(void) {
 void ServerCollector::WaitForGCTask(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForGCTask.." << self->GetTid();
-
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  IPMutexLock interProcMu(self, *phase_mu_);
-  while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH) {
-    phase_cond_->Wait(self);
-  }
-  LOG(ERROR) << "ServerCollector::WaitForGCTask..left the wait condition.." << self->GetTid();
-  heap_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-  phase_cond_->Broadcast(self);
+  MutexLock mu(self, *run_mu_);
+  status_ = 0;
+  LOG(ERROR) << "ServerCollector::WaitForGCTask.. leaving" << self->GetTid();
+//  IPMutexLock interProcMu(self, *phase_mu_);
+//  while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH) {
+//    LOG(ERROR) << "ServerCollector::WaitForGCTask..inside while loop." << self->GetTid();
+//    phase_cond_->Wait(self);
+//  }
+//  LOG(ERROR) << "ServerCollector::WaitForGCTask..left the wait condition.." << self->GetTid();
+//  if(heap_data_->gc_phase_ == space::IPC_GC_PHASE_FINISH) {
+//    heap_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+//  }
+//  phase_cond_->Broadcast(self);
 }
 
 void ServerCollector::Run(void) {
