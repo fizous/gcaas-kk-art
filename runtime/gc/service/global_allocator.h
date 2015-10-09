@@ -8,11 +8,13 @@
 #ifndef ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 #define ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 
+
 #include "ipcfs/ipcfs.h"
 #include "mem_map.h"
 #include "globals.h"
 #include "utils.h"
 #include "runtime.h"
+#include "thread_pool.h"
 #include "gc/space/space.h"
 
 
@@ -239,6 +241,7 @@ public:
   static GCServiceDaemon* gcdaemon_inst_;
   //GCServiceProcess* process_;
   std::vector<GCSrvceAgent*> client_agents_;
+  UniquePtr<ThreadPool> thread_pool_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
