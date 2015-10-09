@@ -80,6 +80,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
 //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
 //        64, false));
     initShutDownSignals();
+    LOG(ERROR) << "Thread_POOL----" << "resetting thread pool for gcservice daemon";
     thread_pool_.reset(new ThreadPool(4));
     process->service_meta_->cond_->Broadcast(self);
   }
