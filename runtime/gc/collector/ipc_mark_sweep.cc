@@ -53,7 +53,7 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
 
 
 void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
-  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  meta_->gc_phase_ = space::IPC_GC_PHASE_INIT;//space::IPC_GC_PHASE_NONE;
   meta_->freed_objects_ = 0;
   meta_->freed_bytes_ = 0;
   meta_->barrier_count_ = 0;
@@ -162,9 +162,9 @@ void IPCMarkSweep::ClientRun(void) {
 
 void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " pending inside preInit";
-//  Thread* currThread = Thread::Current();
- // GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
- // LOG(ERROR) << " leaving inside preInit";
+  Thread* currThread = Thread::Current();
+  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+  LOG(ERROR) << " left blocking on init condition inside preInit";
 }
 
 /******* overriding marksweep code *************/
@@ -172,10 +172,11 @@ void IPCMarkSweep::PreInitCollector(void) {
 void IPCMarkSweep::FinishPhase() {
   LOG(ERROR) << "IPCMarkSweep::FinishPhase";
   MarkSweep::FinishPhase();
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase";
-//  Thread* currThread = Thread::Current();
-//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-//  phase_cond_->Broadcast(currThread);
+
+  Thread* currThread = Thread::Current();
+  //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+  //phase_cond_->Broadcast(currThread);
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left";
 }
 
 void IPCMarkSweep::InitializePhase() {
