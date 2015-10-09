@@ -25,7 +25,11 @@ namespace collector {
 
 IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
               Heap* heap, bool is_concurrent, const std::string& name_prefix)
-    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc) {
+    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc),
+      ms_lock_("ipc lock"),
+      ms_cond_("ipcs::cond_", ms_lock_){
+
+  collector_daemon_ = NULL;
   /* initialize locks */
   SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
@@ -88,6 +92,13 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
       (&collector_pthread_, NULL,
       &IPCMarkSweep::RunDaemon, this),
       "IPC mark-sweep Daemon thread");
+
+
+  Thread* self = Thread::Current();
+  MutexLock mu(self, ms_lock_);
+  while (collector_daemon_ == NULL) {
+    ms_cond_.Wait(self);
+  }
 
   return true;
 }
@@ -236,9 +247,11 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
   Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
+    MutexLock mu(self, _ipc_ms->ms_lock_);
     _ipc_ms->collector_daemon_ = self;
-
+    _ipc_ms->ms_cond_.Broadcast(self);
   }
+
 
   bool collector_loop = true;
   while(collector_loop) {
