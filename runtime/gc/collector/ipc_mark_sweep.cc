@@ -220,7 +220,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- before while";
-    while(conc_flag_ <= 0) {
+    while(conc_flag_ == 0) {
       conc_req_cond_->Wait(self);
     }
     LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- leaving wait";
