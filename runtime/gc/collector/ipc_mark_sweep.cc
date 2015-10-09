@@ -169,22 +169,24 @@ void IPCMarkSweep::DumpValues(void){
 
 /******* overriding marksweep code *************/
 
-/*void IPCMarkSweep::FinishPhase() {
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase";
+void IPCMarkSweep::FinishPhase() {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   MarkSweep::FinishPhase();
 
-  Thread* currThread = Thread::Current();
+
   //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   //phase_cond_->Broadcast(currThread);
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
 
 void IPCMarkSweep::InitializePhase() {
-  LOG(ERROR) << "IPCMarkSweep::InitializePhase";
-  PreInitCollector();
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "IPCMarkSweep::InitializePhase...begin:" << currThread->GetTid();
+ // PreInitCollector();
   MarkSweep::InitializePhase();
-
-}*/
+  LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
+}
 
 
 
