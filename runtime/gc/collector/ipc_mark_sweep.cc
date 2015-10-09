@@ -95,10 +95,7 @@ void IPCMarkSweep::DumpValues(void){
 //}
 //
 //
-//void IPCMarkSweep::FinalizePhase(void){
-//  Thread* currThread = Thread::Current();
-//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-//}
+
 //
 //
 //void IPCMarkSweep::ServerRun(void) {
@@ -160,11 +157,22 @@ void IPCMarkSweep::DumpValues(void){
 //}
 //
 //
-//void IPCMarkSweep::PreInitCollector(void) {
-//  LOG(ERROR) << " pending inside preInit";
-//  Thread* currThread = Thread::Current();
+void IPCMarkSweep::PreInitCollector(void) {
+  LOG(ERROR) << " pending inside preInit";
+  Thread* currThread = Thread::Current();
 //  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-//  LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
+  LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
+}
+
+void IPCMarkSweep::FinalizePhase(void){
+  Thread* currThread = Thread::Current();
+  //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+  LOG(ERROR) << "IPCMarkSweep::FinalizePhase...end:" << currThread->GetTid();
+}
+
+//void IPCMarkSweep::ReclaimPhase(void){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
 //}
 
 /******* overriding marksweep code *************/
@@ -177,14 +185,16 @@ void IPCMarkSweep::FinishPhase() {
 
   //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   //phase_cond_->Broadcast(currThread);
+  FinalizePhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
 
 void IPCMarkSweep::InitializePhase() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...begin:" << currThread->GetTid();
- // PreInitCollector();
+  PreInitCollector();
   MarkSweep::InitializePhase();
+
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
 }
 

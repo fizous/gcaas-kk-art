@@ -54,13 +54,13 @@ class IPCMarkSweep : public MarkSweep {
   void FinishPhase();
   /** GC Phases **/
 
-//  void PreInitCollector(void);
+  void PreInitCollector(void);
 //
 //  void InitialPhase(void);
 //  void MarkRootPhase(void);
 //  void ConcMarkPhase(void);
 //  void ReclaimPhase(void);
-//  void FinalizePhase(void);
+  void FinalizePhase(void);
 //  void ServerRun(void);
 //
 //  void ClientRun(void);
