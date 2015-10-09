@@ -2269,6 +2269,34 @@ void Heap::EnqueueClearedReferences(mirror::Object** cleared) {
   }
 }
 
+
+void Heap::GCServiceSignalConcGC(Thread* self) {
+  // Make sure that we can do a concurrent GC.
+  LOG(ERROR) << "Signaling ConcurrentGC Request";
+  Runtime* runtime = Runtime::Current();
+  DCHECK(concurrent_gc_);
+  if (runtime == NULL || !runtime->IsFinishedStarting() ||
+      !runtime->IsConcurrentGcEnabled()) {
+    return;
+  }
+  {
+    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+    if (runtime->IsShuttingDown()) {
+      return;
+    }
+  }
+  if (self->IsHandlingStackOverflow()) {
+    return;
+  }
+
+  JNIEnv* env = self->GetJniEnv();
+  DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+  DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
+  env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+                            WellKnownClasses::java_lang_Daemons_requestGC);
+  CHECK(!env->ExceptionCheck());
+  return;
+}
 void Heap::RequestConcurrentGC(Thread* self) {
   // Make sure that we can do a concurrent GC.
   Runtime* runtime = Runtime::Current();
@@ -2292,14 +2320,27 @@ void Heap::RequestConcurrentGC(Thread* self) {
   concurrent_start_bytes_ = std::numeric_limits<size_t>::max();
 
 #if (true || ART_GC_SERVICE)
-  art::gcservice::GCServiceClient::RequestConcGC();
-#endif
+  if(true|| (!art::gcservice::GCServiceClient::RequestConcGC())) {
+    JNIEnv* env = self->GetJniEnv();
+    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+    DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
+    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+                              WellKnownClasses::java_lang_Daemons_requestGC);
+    CHECK(!env->ExceptionCheck());
+    return;
+  }
+  /**/
+  LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
+
+
+#else
   JNIEnv* env = self->GetJniEnv();
   DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
   DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
   env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
                             WellKnownClasses::java_lang_Daemons_requestGC);
   CHECK(!env->ExceptionCheck());
+#endif
 }
 
 void Heap::ConcurrentGC(Thread* self) {

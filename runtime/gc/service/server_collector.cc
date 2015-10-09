@@ -24,7 +24,7 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
 
-  if(false) {
+  if(true) {
     phase_mu_ = new InterProcessMutex(_futexAddress, "GCServiceD Mutex");
     phase_cond_ =  new InterProcessConditionVariable(*phase_mu_,
         "GCServiceD CondVar", _condAddress);

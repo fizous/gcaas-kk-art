@@ -23,7 +23,7 @@ class GCServiceClient {
   static GCServiceClient* service_client_;
   static void InitClient(const char* se_name_c_str);
   static void FinalizeInitClient();
-  static void RequestConcGC(void);
+  static bool RequestConcGC(void);
   static void RequestHeapTrim(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);
@@ -38,6 +38,12 @@ class GCServiceClient {
   int index_;
   gc::space::SharableDlMallocSpace* sharable_space_;
   gc::collector::IPCMarkSweep* collector_;
+
+
+
+
+
+
 };//GCServiceClient
 
 }//namespace gcservice

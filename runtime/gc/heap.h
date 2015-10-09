@@ -559,6 +559,7 @@ class Heap {
   void EnqueueClearedReferences(mirror::Object** cleared_references);
 
   void RequestHeapTrim() LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
+  void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
   void RequestConcurrentGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
   bool IsGCRequestPending() const;
 

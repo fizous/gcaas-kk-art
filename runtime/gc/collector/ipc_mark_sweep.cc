@@ -53,7 +53,7 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
 
 
 void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
-  meta_->gc_phase_ = space::IPC_GC_PHASE_INIT;//space::IPC_GC_PHASE_NONE;
+  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   meta_->freed_objects_ = 0;
   meta_->freed_bytes_ = 0;
   meta_->barrier_count_ = 0;
