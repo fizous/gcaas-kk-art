@@ -169,7 +169,7 @@ void IPCMarkSweep::PreInitCollector(void) {
 
 /******* overriding marksweep code *************/
 
-void IPCMarkSweep::FinishPhase() {
+/*void IPCMarkSweep::FinishPhase() {
   LOG(ERROR) << "IPCMarkSweep::FinishPhase";
   MarkSweep::FinishPhase();
 
@@ -184,7 +184,7 @@ void IPCMarkSweep::InitializePhase() {
   PreInitCollector();
   MarkSweep::InitializePhase();
 
-}
+}*/
 
 
 
