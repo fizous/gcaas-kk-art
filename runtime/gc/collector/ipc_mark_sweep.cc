@@ -68,104 +68,104 @@ void IPCMarkSweep::DumpValues(void){
 }
 
 
-void IPCMarkSweep::InitialPhase(){
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-  ResetMetaDataUnlocked();
-}
-
-
-void IPCMarkSweep::MarkRootPhase(void){
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
-  phase_cond_->Broadcast(currThread);
-}
-
-void IPCMarkSweep::ConcMarkPhase(void){
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
-
-  //do the conc marking here
-}
-
-
-void IPCMarkSweep::ReclaimPhase(void){
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
-}
-
-
-void IPCMarkSweep::FinalizePhase(void){
-  Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-}
-
-
-void IPCMarkSweep::ServerRun(void) {
-  InitialPhase();
-  /* block until client marks the roots */
-  MarkRootPhase();
-
-  ConcMarkPhase();
-
-
-  ReclaimPhase();
-
-
-  FinishPhase();
-
-}
-
-
-
-void IPCMarkSweep::ClientInitialPhase(void) {
-  Thread* currThread = Thread::Current();
-  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
-}
-
-void IPCMarkSweep::ClientMarkRootPhase(void) {
-  Thread* currThread = Thread::Current();
-  // do marking roots here
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
-  phase_cond_->Broadcast(currThread);
-}
-
-void IPCMarkSweep::ClientConcMarkPhase(void) {
-
-}
-
-
-void IPCMarkSweep::ClientReclaimPhase(void) {
-
-}
-
-void IPCMarkSweep::ClientFinishPhase(void) {
-
-}
-
-void IPCMarkSweep::ClientRun(void) {
-  //wait for signal to mark the roots
-  ClientInitialPhase();
-  /* start the root marking phase */
-  ClientMarkRootPhase();
-
-  ClientConcMarkPhase();
-
-  ClientReclaimPhase();
-
-
-
-  ClientFinishPhase();
-
-}
-
-
-void IPCMarkSweep::PreInitCollector(void) {
-  LOG(ERROR) << " pending inside preInit";
-  Thread* currThread = Thread::Current();
-  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-  LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
-}
+//void IPCMarkSweep::InitialPhase(){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+//  ResetMetaDataUnlocked();
+//}
+//
+//
+//void IPCMarkSweep::MarkRootPhase(void){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+//  phase_cond_->Broadcast(currThread);
+//}
+//
+//void IPCMarkSweep::ConcMarkPhase(void){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+//
+//  //do the conc marking here
+//}
+//
+//
+//void IPCMarkSweep::ReclaimPhase(void){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
+//}
+//
+//
+//void IPCMarkSweep::FinalizePhase(void){
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+//}
+//
+//
+//void IPCMarkSweep::ServerRun(void) {
+//  InitialPhase();
+//  /* block until client marks the roots */
+//  MarkRootPhase();
+//
+//  ConcMarkPhase();
+//
+//
+//  ReclaimPhase();
+//
+//
+//  FinishPhase();
+//
+//}
+//
+//
+//
+//void IPCMarkSweep::ClientInitialPhase(void) {
+//  Thread* currThread = Thread::Current();
+//  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+//}
+//
+//void IPCMarkSweep::ClientMarkRootPhase(void) {
+//  Thread* currThread = Thread::Current();
+//  // do marking roots here
+//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+//  phase_cond_->Broadcast(currThread);
+//}
+//
+//void IPCMarkSweep::ClientConcMarkPhase(void) {
+//
+//}
+//
+//
+//void IPCMarkSweep::ClientReclaimPhase(void) {
+//
+//}
+//
+//void IPCMarkSweep::ClientFinishPhase(void) {
+//
+//}
+//
+//void IPCMarkSweep::ClientRun(void) {
+//  //wait for signal to mark the roots
+//  ClientInitialPhase();
+//  /* start the root marking phase */
+//  ClientMarkRootPhase();
+//
+//  ClientConcMarkPhase();
+//
+//  ClientReclaimPhase();
+//
+//
+//
+//  ClientFinishPhase();
+//
+//}
+//
+//
+//void IPCMarkSweep::PreInitCollector(void) {
+//  LOG(ERROR) << " pending inside preInit";
+//  Thread* currThread = Thread::Current();
+//  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+//  LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
+//}
 
 /******* overriding marksweep code *************/
 

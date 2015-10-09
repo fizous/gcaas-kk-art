@@ -23,7 +23,7 @@ GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
     int index) : index_(index), sharable_space_(sharable_space) {
-  if(false)
+  if(true)
   {  collector_ =
       new gc::collector::IPCMarkSweep(&(sharable_space_->sharable_space_data_->heap_meta_),Runtime::Current()->GetHeap(),
           true, "mark-sweep-");
