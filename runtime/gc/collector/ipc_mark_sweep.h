@@ -50,7 +50,6 @@ class IPCMarkSweep : public MarkSweep {
 
   InterProcessMutex* conc_req_cond_mu_;
   InterProcessConditionVariable* conc_req_cond_;
-  volatile int conc_flag_;
 
 
 

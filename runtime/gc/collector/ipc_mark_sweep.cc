@@ -219,12 +219,12 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- before while: conc flag = " << conc_flag_;
-    while(conc_flag_ == 0) {
+    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
+    while(meta_->conc_flag_ == 0) {
       conc_req_cond_->Wait(self);
     }
-    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- leaving wait: conc flag = " << conc_flag_;
-    conc_flag_ = conc_flag_ - 1;
+    LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
+    meta_->conc_flag_ = meta_->conc_flag_ - 1;
   }
   Runtime* runtime = Runtime::Current();
   runtime->GetHeap()->GCServiceSignalConcGC(self);
