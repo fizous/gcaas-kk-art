@@ -24,16 +24,17 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
 
-  phase_mu_ = new InterProcessMutex(_futexAddress, "GCServiceD Mutex");
-  phase_cond_ =  new InterProcessConditionVariable(*phase_mu_,
-      "GCServiceD CondVar", _condAddress);
-  thread_ = NULL;
+  if(false) {
+    phase_mu_ = new InterProcessMutex(_futexAddress, "GCServiceD Mutex");
+    phase_cond_ =  new InterProcessConditionVariable(*phase_mu_,
+        "GCServiceD CondVar", _condAddress);
+    thread_ = NULL;
 
-  CHECK_PTHREAD_CALL(pthread_create,
-      (&pthread_, NULL,
-      &RunCollectorDaemon, this),
-      "Server-Collector");
-
+    CHECK_PTHREAD_CALL(pthread_create,
+        (&pthread_, NULL,
+        &RunCollectorDaemon, this),
+        "Server-Collector");
+  }
 }
 
 
