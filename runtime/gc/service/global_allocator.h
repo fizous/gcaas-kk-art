@@ -186,18 +186,18 @@ class ServerCollector {
 
   void Run(void);
   space::GCSrvSharableHeapData* heap_data_;
-  Mutex* run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
-  UniquePtr<ConditionVariable> run_cond_ GUARDED_BY(run_mu_);
+  Mutex run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  ConditionVariable run_cond_ GUARDED_BY(run_mu_);
+  Thread*   thread_ GUARDED_BY(run_mu_);
+  pthread_t pthread_ GUARDED_BY(run_mu_);
 
-
-  volatile int status_;
+  volatile int status_ GUARDED_BY(run_mu_);
 
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
 
-  Thread*   thread_;
-  pthread_t pthread_;
+
 
   void SignalCollector(void);
   void WaitForRequest(void);

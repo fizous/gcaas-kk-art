@@ -151,8 +151,8 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 
   LOG(ERROR) << "------------------StartCollectorDaemon--->leaving";
 
-  thread_pool_->AddTask(self,
-      new ClientIpcCollectorTask(conc_req_cond_mu_, conc_req_cond_));
+ // thread_pool_->AddTask(self,
+ //     new ClientIpcCollectorTask(conc_req_cond_mu_, conc_req_cond_));
 
 
 

@@ -14,12 +14,11 @@ namespace gc {
 namespace gcservice {
 
 ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
-    heap_data_(meta_alloc) {
-//  Thread* self = Thread::Current();
-  run_mu_ = new Mutex("gcService Shutdown");
-  run_cond_.reset(new ConditionVariable("gcService Shutdown condition variable",
-      *run_mu_));
-  status_ = 0;
+    heap_data_(meta_alloc),
+    run_mu_("ServerLock"),
+    run_cond_("ServerLock::cond_", run_mu_),
+    thread_(NULL),
+    status_(0) {
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
@@ -28,12 +27,20 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     phase_mu_ = new InterProcessMutex(_futexAddress, "GCServiceD Mutex");
     phase_cond_ =  new InterProcessConditionVariable(*phase_mu_,
         "GCServiceD CondVar", _condAddress);
-    thread_ = NULL;
+
 
     CHECK_PTHREAD_CALL(pthread_create,
         (&pthread_, NULL,
         &RunCollectorDaemon, this),
         "Server-Collector");
+
+
+    Thread* self = Thread::Current();
+    MutexLock mu(self, run_mu_);
+    LOG(ERROR) << "------------------ServerCollector--->going to wait for initialization of Daemon";
+    while (thread_ == NULL) {
+      run_cond_.Wait(self);
+    }
   }
 }
 
@@ -54,9 +61,9 @@ void ServerCollector::WaitForRequest(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  MutexLock mu(self, *run_mu_);
+  MutexLock mu(self, run_mu_);
   while(status_ == 0) {
-    run_cond_->Wait(self);
+    run_cond_.Wait(self);
   }
   LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
 }
@@ -81,7 +88,7 @@ void ServerCollector::WaitForGCTask(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForGCTask.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  MutexLock mu(self, *run_mu_);
+  MutexLock mu(self, run_mu_);
   status_ = 0;
   LOG(ERROR) << "ServerCollector::WaitForGCTask.. leaving" << self->GetTid();
 //  IPMutexLock interProcMu(self, *phase_mu_);
@@ -109,16 +116,26 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
   ServerCollector* _server = reinterpret_cast<ServerCollector*>(args);
 
   Runtime* runtime = Runtime::Current();
-  bool _createThread =  runtime->AttachCurrentThread("serverCollector", true,
-      runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler());
+  CHECK(runtime->AttachCurrentThread("serverCollector", true, NULL, false));
 
-  if(!_createThread) {
-    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
-    return NULL;
+  Thread* self = Thread::Current();
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    MutexLock mu(self, _server->run_mu_);
+    _server->thread_ = self;
+    _server->run_cond_.Broadcast(self);
   }
 
-  _server->thread_ = Thread::Current();
+//  bool _createThread =  runtime->AttachCurrentThread("serverCollector", true,
+//      runtime->GetSystemThreadGroup(),
+//      !runtime->IsCompiler());
+//
+//  if(!_createThread) {
+//    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
+//    return NULL;
+//  }
+  LOG(ERROR) << "ServerCollector::RunCollectorDaemon after broadcast" ;
+
   _server->Run();
 
   return NULL;
