@@ -48,13 +48,15 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 void ServerCollector::SignalCollector(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
-//  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-//  MutexLock mu(self, *run_mu_);
-//  if(status_ == 0) {
-//    status_ = 1;
-//    LOG(ERROR) << "ServerCollector::Setting status to 1..." << self->GetTid();
-//  }
-//  run_cond_->Broadcast(self);
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    MutexLock mu(self, run_mu_);
+    if(status_ == 0) {
+      status_ = 1;
+    }
+  }
+  run_cond_.Broadcast(self);
+  LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
 void ServerCollector::WaitForRequest(void) {
@@ -62,7 +64,7 @@ void ServerCollector::WaitForRequest(void) {
   LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   MutexLock mu(self, run_mu_);
-  while(status_ == 0) {
+  while(status_ != 100) {
     run_cond_.Wait(self);
   }
   LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
