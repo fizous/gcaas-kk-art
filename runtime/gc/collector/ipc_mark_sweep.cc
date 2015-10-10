@@ -144,6 +144,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 
   Thread* self = Thread::Current();
   MutexLock mu(self, ms_lock_);
+  LOG(ERROR) << "------------------StartCollectorDaemon--->going to wait";
   while (collector_daemon_ == NULL) {
     ms_cond_.Wait(self);
   }
@@ -290,18 +291,19 @@ bool IPCMarkSweep::RunCollectorDaemon() {
 void* IPCMarkSweep::RunDaemon(void* arg) {
   LOG(ERROR) << "IPCMarkSweep::RunDaemon::Begin" ;
   IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
-  Runtime* runtime = Runtime::Current();
-  Thread* self = Thread::Current();
+  CHECK(_ipc_ms != NULL);
 
+  Runtime* runtime = Runtime::Current();
   CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
 
-  LOG(ERROR) << "RunDaemon::After attach current" ;
+  Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, _ipc_ms->ms_lock_);
     _ipc_ms->collector_daemon_ = self;
     _ipc_ms->ms_cond_.Broadcast(self);
   }
+
 
   LOG(ERROR) << "IPCMarkSweep::RunDaemon::Broadcast" ;
   bool collector_loop = true;
