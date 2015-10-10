@@ -88,11 +88,11 @@ void IPCMarkSweep::DumpValues(void){
 }
 
 bool IPCMarkSweep::StartCollectorDaemon(void) {
-return true;
-//  CHECK_PTHREAD_CALL(pthread_create,
-//      (&collector_pthread_, NULL,
-//      &IPCMarkSweep::RunDaemon, this),
-//      "IPC mark-sweep Daemon thread");
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&collector_pthread_, NULL,
+      &IPCMarkSweep::RunDaemon, this),
+      "IPC mark-sweep Daemon thread");
+  return true;
 //
 //
 //  Thread* self = Thread::Current();
@@ -236,6 +236,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
 }
 
 void* IPCMarkSweep::RunDaemon(void* arg) {
+  LOG(ERROR) << "IPCMarkSweep::RunDaemon::Begin" ;
   IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
   Runtime* runtime = Runtime::Current();
   Thread* self = Thread::Current();
