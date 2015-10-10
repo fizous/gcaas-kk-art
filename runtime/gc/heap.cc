@@ -2321,7 +2321,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
   concurrent_start_bytes_ = std::numeric_limits<size_t>::max();
 
 #if (true || ART_GC_SERVICE)
-  if(true|| (!art::gcservice::GCServiceClient::RequestConcGC())) {
+  if(!art::gcservice::GCServiceClient::RequestConcGC()) {
     JNIEnv* env = self->GetJniEnv();
     DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
     DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
@@ -2329,11 +2329,16 @@ void Heap::RequestConcurrentGC(Thread* self) {
                               WellKnownClasses::java_lang_Daemons_requestGC);
     CHECK(!env->ExceptionCheck());
     return;
+  } else {
+    /**/
+    LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
+    JNIEnv* env = self->GetJniEnv();
+    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+    DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
+    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+                              WellKnownClasses::java_lang_Daemons_requestGC);
+    CHECK(!env->ExceptionCheck());
   }
-  /**/
-  LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
-
-
 #else
   JNIEnv* env = self->GetJniEnv();
   DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
