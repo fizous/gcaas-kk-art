@@ -618,7 +618,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     } else {
       LOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
     }
-  } else if (false && _req_type == GC_SERVICE_TASK_CONC) {
+  } else if (_req_type == GC_SERVICE_TASK_CONC) {
     LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_ <<
         (GCServiceProcess::process_ == NULL ? "process is null" : "process is not null");
