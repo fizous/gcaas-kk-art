@@ -169,13 +169,15 @@ typedef struct GCSrvSharableHeapData_S {
   SynchronizedLockHead gc_barrier_lock_;
   volatile int barrier_count_;
 
+  /* GC concurrent signals */
+  SynchronizedLockHead conc_lock_;
+  volatile int conc_flag_;
+
   /* collection stats */
   volatile int32_t freed_objects_;
   volatile int32_t freed_bytes_;
 
-  /* GC concurrent signals */
-  SynchronizedLockHead conc_lock_;
-  volatile int conc_flag_;
+
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {
