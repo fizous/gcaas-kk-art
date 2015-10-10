@@ -54,8 +54,9 @@ void ServerCollector::SignalCollector(void) {
     if(status_ == 0) {
       status_ = 1;
     }
+    run_cond_.Broadcast(self);
   }
-  run_cond_.Broadcast(self);
+
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
@@ -63,9 +64,11 @@ void ServerCollector::WaitForRequest(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  MutexLock mu(self, run_mu_);
-  while(status_ != 100) {
-    run_cond_.Wait(self);
+  {
+    MutexLock mu(self, run_mu_);
+    while(status_ != 100) {
+      run_cond_.Wait(self);
+    }
   }
   LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
 }
@@ -90,9 +93,11 @@ void ServerCollector::WaitForGCTask(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForGCTask.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  MutexLock mu(self, run_mu_);
-  status_ = 0;
-  LOG(ERROR) << "ServerCollector::WaitForGCTask.. leaving" << self->GetTid();
+  {
+    MutexLock mu(self, run_mu_);
+    status_ = 0;
+    LOG(ERROR) << "ServerCollector::WaitForGCTask.. leaving" << self->GetTid();
+  }
 //  IPMutexLock interProcMu(self, *phase_mu_);
 //  while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH) {
 //    LOG(ERROR) << "ServerCollector::WaitForGCTask..inside while loop." << self->GetTid();
