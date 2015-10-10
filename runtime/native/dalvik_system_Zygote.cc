@@ -570,7 +570,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
     UNUSED(java_se_name);
 #endif
 
-    runtime->GCPServiceFinalizeInit();
+
     // Our system thread ID, etc, has changed so reset Thread state.
     self->InitAfterFork();
 
