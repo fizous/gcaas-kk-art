@@ -48,14 +48,14 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 void ServerCollector::SignalCollector(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  {
-    MutexLock mu(self, run_mu_);
-    if(status_ == 0) {
-      status_ = 1;
-    }
-    run_cond_.Broadcast(self);
-  }
+//  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+//  {
+//    MutexLock mu(self, run_mu_);
+//    if(status_ == 0) {
+//      status_ = 1;
+//    }
+//    run_cond_.Broadcast(self);
+//  }
 
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
