@@ -270,7 +270,7 @@ void IPCMarkSweep::FinalizePhase(void){
 
 bool IPCMarkSweep::RunCollectorDaemon() {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid();
+  LOG(ERROR) << "IPCMarkSweep::WaitForRequest.." << self->GetTid();
 
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
