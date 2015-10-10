@@ -53,13 +53,15 @@ void ServerCollector::SignalCollector(void) {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid();
+      status_ = 1;
+      run_cond_.Broadcast(self);
     } else {
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
     }
 //    if(status_ == 0) {
 //      status_ = 1;
 //    }
-//    run_cond_.Broadcast(self);
+//
   }
 
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
