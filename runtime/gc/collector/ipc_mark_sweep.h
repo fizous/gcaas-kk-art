@@ -37,6 +37,8 @@ class IPCMarkSweep : public MarkSweep {
   space::GCSrvSharableHeapData* meta_;
   mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);
+  Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
+  pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
 
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
@@ -45,8 +47,7 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-  Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
-  pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
+
 
   InterProcessMutex* conc_req_cond_mu_;
   InterProcessConditionVariable* conc_req_cond_;
