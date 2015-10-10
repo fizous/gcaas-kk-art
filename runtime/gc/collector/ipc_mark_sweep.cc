@@ -145,7 +145,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
       &IPCMarkSweep::RunDaemon, this),
       "IPC mark-sweep Daemon thread");
 
-  Thread* self = Thread::Current();
+
   MutexLock mu(self, ms_lock_);
   while (collector_daemon_ == NULL) {
     ms_cond_.Wait(self);
