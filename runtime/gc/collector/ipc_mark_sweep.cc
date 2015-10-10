@@ -89,6 +89,8 @@ void IPCMarkSweep::DumpValues(void){
 
 bool IPCMarkSweep::StartCollectorDaemon(void) {
   LOG(ERROR) << "Start Collector IPC Daemon";
+
+  thread_pool_.reset(new ThreadPool(1));
 //  CHECK_PTHREAD_CALL(pthread_create,
 //      (&collector_pthread_, NULL,
 //      &IPCMarkSweep::RunDaemon, this),

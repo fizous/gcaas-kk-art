@@ -52,6 +52,8 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* conc_req_cond_;
 
 
+  // Parallel GC data structures.
+  UniquePtr<ThreadPool> thread_pool_;
 
   bool halt_ GUARDED_BY(ms_lock_);
 
