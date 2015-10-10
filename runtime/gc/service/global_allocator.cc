@@ -632,7 +632,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       if(_agent == NULL) {
         LOG(ERROR) << "_agent is null: " << _entry->pid_;
       } else {
-      //  _agent->collector_->SignalCollector();
+        _agent->collector_->SignalCollector();
       }
     }
 
