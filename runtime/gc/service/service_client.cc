@@ -27,7 +27,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
   {  collector_ =
       new gc::collector::IPCMarkSweep(&(sharable_space_->sharable_space_data_->heap_meta_),Runtime::Current()->GetHeap(),
           true, "mark-sweep-");
-    collector_->StartCollectorDaemon();
+
     Runtime::Current()->GetHeap()->GCPSrvcReinitMarkSweep(collector_);
   } else {
     Runtime::Current()->GetHeap()->GCPSrvcReinitMarkSweep(new gc::collector::MarkSweep(Runtime::Current()->GetHeap(),
@@ -114,6 +114,7 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  collector_->StartCollectorDaemon();
   _alloc->handShake_->ReqRegistration(sharable_space_->sharable_space_data_);
   //_alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_);
 
