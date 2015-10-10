@@ -62,6 +62,14 @@ IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
 
   ResetMetaDataUnlocked();
   DumpValues();
+
+
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&collector_pthread_, NULL,
+      &IPCMarkSweep::RunDaemon, this),
+      "IPC mark-sweep Daemon thread");
+
+  LOG(ERROR) << "StartCollectorDaemon--->leaving";
 }
 
 //IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
@@ -87,12 +95,9 @@ void IPCMarkSweep::DumpValues(void){
       << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
 }
 
-bool IPCMarkSweep::StartCollectorDaemon(void) {
-  CHECK_PTHREAD_CALL(pthread_create,
-      (&collector_pthread_, NULL,
-      &IPCMarkSweep::RunDaemon, this),
-      "IPC mark-sweep Daemon thread");
-  return true;
+//bool IPCMarkSweep::StartCollectorDaemon(void) {
+//
+//  return true;
 //
 //
 //  Thread* self = Thread::Current();
@@ -104,7 +109,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 //  LOG(ERROR) << "StartCollectorDaemon--->leaving";
 //
 //  return true;
-}
+//}
 
 //void IPCMarkSweep::InitialPhase(){
 //  Thread* currThread = Thread::Current();
@@ -244,6 +249,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
   CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
 
   LOG(ERROR) << "RunDaemon::After attach current" ;
+  if(false) {
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, _ipc_ms->ms_lock_);
@@ -256,7 +262,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
   while(collector_loop) {
     collector_loop = _ipc_ms->RunCollectorDaemon();
   }
-
+  }
   return NULL;
 }
 

@@ -56,7 +56,7 @@ class IPCMarkSweep : public MarkSweep {
   bool halt_ GUARDED_BY(ms_lock_);
 
   bool RunCollectorDaemon(void);
-  bool StartCollectorDaemon(void);
+//  bool StartCollectorDaemon(void);
 
   static void* RunDaemon(void* arg);
 
