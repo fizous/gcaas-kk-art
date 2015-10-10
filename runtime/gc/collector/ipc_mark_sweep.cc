@@ -139,16 +139,17 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
   Thread* self = Thread::Current();
   thread_pool_->AddTask(self,
       new ClientIpcCollectorTask(conc_req_cond_mu_, conc_req_cond_));
-//  CHECK_PTHREAD_CALL(pthread_create,
-//      (&collector_pthread_, NULL,
-//      &IPCMarkSweep::RunDaemon, this),
-//      "IPC mark-sweep Daemon thread");
-//
-//  Thread* self = Thread::Current();
-//  MutexLock mu(self, ms_lock_);
-//  while (collector_daemon_ == NULL) {
-//    ms_cond_.Wait(self);
-//  }
+
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&collector_pthread_, NULL,
+      &IPCMarkSweep::RunDaemon, this),
+      "IPC mark-sweep Daemon thread");
+
+  Thread* self = Thread::Current();
+  MutexLock mu(self, ms_lock_);
+  while (collector_daemon_ == NULL) {
+    ms_cond_.Wait(self);
+  }
 
   LOG(ERROR) << "StartCollectorDaemon--->leaving";
 
