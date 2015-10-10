@@ -249,7 +249,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
     _ipc_ms->ms_cond_.Broadcast(self);
   }
 
-  LOG(ERROR) << "RunDaemon::Broadcast" ;
+  LOG(ERROR) << "IPCMarkSweep::RunDaemon::Broadcast" ;
   bool collector_loop = true;
   while(collector_loop) {
     collector_loop = _ipc_ms->RunCollectorDaemon();

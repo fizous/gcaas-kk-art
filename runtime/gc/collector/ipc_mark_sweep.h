@@ -45,8 +45,8 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-  Thread*   collector_daemon_;
-  pthread_t collector_pthread_;
+  Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
+  pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
 
   InterProcessMutex* conc_req_cond_mu_;
   InterProcessConditionVariable* conc_req_cond_;
