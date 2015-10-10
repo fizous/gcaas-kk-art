@@ -73,7 +73,7 @@ void ServerCollector::WaitForRequest(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
-    while(status_ != 100) {
+    while(status_ < 10000) {
       run_cond_.Wait(self);
     }
   }
