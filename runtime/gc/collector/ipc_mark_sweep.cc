@@ -87,10 +87,58 @@ void IPCMarkSweep::DumpValues(void){
       << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
 }
 
+
+
+class ClientIpcCollectorTask : public Task {
+ public:
+  ClientIpcCollectorTask(InterProcessMutex* ipcMutex,
+      InterProcessConditionVariable* ipcCond) : ipcMutex_(ipcMutex),
+      ipcCond_(ipcCond) {
+    Thread* currThread = Thread::Current();
+    LOG(ERROR) << "ClientIpcCollectorTask: create new task " << currThread->GetTid();
+  }
+//      : barrier_(barrier),
+//        count1_(count1),
+//        count2_(count2),
+//        count3_(count3) {}
+
+  void Run(Thread* self) {
+    LOG(ERROR) << "Running collector task: " << self->GetTid();
+    Runtime* runtime = Runtime::Current();
+    runtime->GetHeap()->GCServiceSignalConcGC(self);
+
+    LOG(ERROR) << "leaving collector task: " << self->GetTid();
+//    LOG(INFO) << "Before barrier 1 " << *self;
+//    ++*count1_;
+//    barrier_->Wait(self);
+//    ++*count2_;
+//    LOG(INFO) << "Before barrier 2 " << *self;
+//    barrier_->Wait(self);
+//    ++*count3_;
+//    LOG(INFO) << "After barrier 2 " << *self;
+  }
+
+  virtual void Finalize() {
+    delete this;
+  }
+
+  private:
+   InterProcessMutex* ipcMutex_;
+   InterProcessConditionVariable* ipcCond_;
+//  Barrier* const barrier_;
+//  AtomicInteger* const count1_;
+//  AtomicInteger* const count2_;
+//  AtomicInteger* const count3_;
+};
+
+
 bool IPCMarkSweep::StartCollectorDaemon(void) {
   LOG(ERROR) << "Start Collector IPC Daemon";
 
   thread_pool_.reset(new ThreadPool(1));
+  Thread* self = Thread::Current();
+  thread_pool_->AddTask(self,
+      new ClientIpcCollectorTask(conc_req_cond_mu_, conc_req_cond_));
 //  CHECK_PTHREAD_CALL(pthread_create,
 //      (&collector_pthread_, NULL,
 //      &IPCMarkSweep::RunDaemon, this),
