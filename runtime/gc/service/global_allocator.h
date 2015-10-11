@@ -204,7 +204,7 @@ class ServerCollector {
   void WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteGC(void);
-
+  void WaitForFinishPhaseGC(void);
 
 
   static void* RunCollectorDaemon(void*);

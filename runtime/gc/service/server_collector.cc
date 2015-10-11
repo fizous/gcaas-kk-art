@@ -85,8 +85,21 @@ void ServerCollector::WaitForRequest(void) {
     LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest; status=" << status_;
     run_cond_.Broadcast(self);
   }
+}
 
 
+
+void ServerCollector::WaitForFinishPhaseGC(void) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH)
+      phase_cond_->Wait(self);
+    LOG(ERROR) << "Server Acknowledge the finishing phase";
+    heap_data_->gc_phase_ = space::IPC_GC_PHASE_POST_FINISH;
+    phase_cond_->Broadcast(self);
+  }
 }
 
 void ServerCollector::ExecuteGC(void) {
@@ -107,6 +120,8 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
+
+  WaitForFinishPhaseGC();
 
 
   if(false) {
