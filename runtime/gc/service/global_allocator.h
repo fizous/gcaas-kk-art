@@ -192,7 +192,6 @@ class ServerCollector {
   pthread_t pthread_ GUARDED_BY(run_mu_);
 
   volatile int status_ GUARDED_BY(run_mu_);
-  volatile int conc_count_;
 
 
   InterProcessMutex* phase_mu_;

@@ -79,6 +79,7 @@ void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
   meta_->conc_flag_ = 0;
   meta_->is_gc_complete_ = 0;
   meta_->is_gc_running_ = 0;
+  meta_->conc_count_ = 0;
 }
 
 
@@ -174,12 +175,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 //  phase_cond_->Broadcast(currThread);
 //}
 //
-//void IPCMarkSweep::ConcMarkPhase(void){
-//  Thread* currThread = Thread::Current();
-//  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
-//
-//  //do the conc marking here
-//}
+
 //
 //
 //void IPCMarkSweep::ReclaimPhase(void){
@@ -259,10 +255,20 @@ void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
 }
 
-void IPCMarkSweep::FinalizePhase(void){
+
+void IPCMarkSweep::ConcMarkPhase(void) {
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+  phase_cond_->Broadcast(currThread);
+  //do the conc marking here
+}
+
+void IPCMarkSweep::FinalizePhase(void) {
   Thread* currThread = Thread::Current();
   //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   LOG(ERROR) << "IPCMarkSweep::FinalizePhase...end:" << currThread->GetTid();
+  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_POST_FINISH, currThread);
+  LOG(ERROR) << "Done waiting for post Finish phase";
 }
 
 //void IPCMarkSweep::ReclaimPhase(void){
@@ -298,12 +304,14 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   }
   LOG(ERROR) << ">>>>>>>>>Heap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   runtime->GetHeap()->ConcurrentGC(self);
-  LOG(ERROR) << "<<<<<<<<<Heap::ConcurrentGC...Done: " << self->GetTid() << " >>>>>>>>>>>>>>>";
+  meta_->conc_count_ = meta_->conc_count_ + 1;
+  LOG(ERROR) << "<<<<<<<<<Heap::ConcurrentGC...Done: " << self->GetTid() <<
+      " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
   ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->is_gc_complete_ = 1;
-    meta_->is_gc_running_ = 0;
+    meta_->is_gc_running_  = 0;
     conc_req_cond_->Broadcast(self);
   }
   return true;
@@ -337,7 +345,7 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
 
 /******* overriding marksweep code *************/
 
-void IPCMarkSweep::FinishPhase() {
+void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
@@ -348,7 +356,7 @@ void IPCMarkSweep::FinishPhase() {
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
 
-void IPCMarkSweep::InitializePhase() {
+void IPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...begin:" << currThread->GetTid();
   PreInitCollector();
@@ -357,6 +365,13 @@ void IPCMarkSweep::InitializePhase() {
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
 }
 
+
+void IPCMarkSweep::MarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+  MarkSweep::MarkingPhase();
+  ConcMarkPhase();
+}
 
 
 

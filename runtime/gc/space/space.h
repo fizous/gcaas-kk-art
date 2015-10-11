@@ -184,6 +184,7 @@ typedef struct GCSrvSharableHeapData_S {
   /* collection stats */
   volatile int32_t freed_objects_;
   volatile int32_t freed_bytes_;
+  volatile int32_t conc_count_;
 
 
 } __attribute__((aligned(8))) GCSrvSharableHeapData;

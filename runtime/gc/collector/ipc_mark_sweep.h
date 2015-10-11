@@ -47,8 +47,6 @@ class IPCMarkSweep : public MarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-
-
   InterProcessMutex* conc_req_cond_mu_;
   InterProcessConditionVariable* conc_req_cond_;
 
@@ -73,13 +71,15 @@ class IPCMarkSweep : public MarkSweep {
   /* overriding the Marksweep code*/
   void InitializePhase(void);
   void FinishPhase();
+  void MarkingPhase(void);
   /** GC Phases **/
 
   void PreInitCollector(void);
+  void ConcMarkPhase(void);
 //
 //  void InitialPhase(void);
 //  void MarkRootPhase(void);
-//  void ConcMarkPhase(void);
+//
 //  void ReclaimPhase(void);
   void FinalizePhase(void);
 //  void ServerRun(void);
