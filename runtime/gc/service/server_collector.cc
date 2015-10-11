@@ -106,6 +106,15 @@ void ServerCollector::ExecuteGC(void) {
 void ServerCollector::WaitForGCTask(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::WaitForGCTask.." << self->GetTid();
+
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    heap_data_->gc_phase_ = space::IPC_GC_PHASE_FINISH;
+    LOG(ERROR) << "ServerCollector::WaitForGCTask..setting phase to IPC_GC_PHASE_FINISH: " << self->GetTid();
+    phase_cond_->Wait(self);
+  }
+
 //  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
 //  {
 //    MutexLock mu(self, run_mu_);
