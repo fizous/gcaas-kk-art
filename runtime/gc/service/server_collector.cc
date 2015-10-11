@@ -82,10 +82,11 @@ void ServerCollector::WaitForRequest(void) {
       run_cond_.Wait(self);
     }
     status_ = 0;
+    LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest; status=" << status_;
     run_cond_.Broadcast(self);
   }
 
-  LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest; status=" << status_;
+
 }
 
 void ServerCollector::ExecuteGC(void) {
