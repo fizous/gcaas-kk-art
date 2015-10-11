@@ -71,7 +71,7 @@ class IPCMarkSweep : public MarkSweep {
   /* overriding the Marksweep code*/
   void InitializePhase(void);
   void FinishPhase();
-  void MarkingPhase(void);
+  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   /** GC Phases **/
 
   void PreInitCollector(void);
