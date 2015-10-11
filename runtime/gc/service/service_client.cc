@@ -98,6 +98,8 @@ bool GCServiceClient::RequestConcGC(void) {
 
 
 void GCServiceClient::RequestHeapTrim(void) {
+  if(true)
+    return;
   if(service_client_ == NULL)
     return;
   gc::gcservice::GCServiceGlobalAllocator* _alloc =

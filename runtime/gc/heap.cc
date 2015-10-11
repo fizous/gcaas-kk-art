@@ -2350,7 +2350,6 @@ void Heap::RequestConcurrentGC(Thread* self) {
 }
 
 void Heap::ConcurrentGC(Thread* self) {
-  LOG(ERROR) << "Heap::ConcurrentGC...Starting" << self->GetTid();
 
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);

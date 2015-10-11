@@ -293,8 +293,9 @@ bool IPCMarkSweep::RunCollectorDaemon() {
     meta_->is_gc_running_ = 1;
     meta_->is_gc_complete_ = 0;
   }
-
+  LOG(ERROR) << ">>>>>>>>>Heap::ConcurrentGC...Starting: " << self->GetTid() + " <<<<<<<<<<<<<<<";
   runtime->GetHeap()->ConcurrentGC(self);
+  LOG(ERROR) << "<<<<<<<<<Heap::ConcurrentGC...Done: " << self->GetTid() + " >>>>>>>>>>>>>>>";
   ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
