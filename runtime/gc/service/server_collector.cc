@@ -18,8 +18,7 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
     thread_(NULL),
-    status_(0),
-    conc_count_(0) {
+    status_(0) {
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
