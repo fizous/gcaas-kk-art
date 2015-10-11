@@ -287,7 +287,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   }
   Runtime* runtime = Runtime::Current();
 
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->is_gc_running_ = 1;
@@ -295,7 +295,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   }
 
   runtime->GetHeap()->ConcurrentGC(self);
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->conc_flag_ = meta_->conc_flag_ - 1;
