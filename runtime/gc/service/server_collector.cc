@@ -78,14 +78,14 @@ void ServerCollector::WaitForRequest(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
-    while(status_ == 0) {
+    while(status_ <= 0) {
       run_cond_.Wait(self);
     }
-    status_ = status_ - 1;
+    status_ = 0;
     run_cond_.Broadcast(self);
   }
 
-  LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
+  LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest; status=" << status_;
 }
 
 void ServerCollector::ExecuteGC(void) {
@@ -94,12 +94,17 @@ void ServerCollector::ExecuteGC(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    if(heap_data_->conc_flag_ == 0 && heap_data_->is_gc_running_ == 0) {
-      heap_data_->conc_flag_ = heap_data_->conc_flag_ + 1;
-      conc_req_cond_->Broadcast(self);
-      LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
-          ", setting conc flag to " << heap_data_->conc_flag_;
+    while(heap_data_->is_gc_running_ == 1 && heap_data_->conc_flag_ == 1) {
+      LOG(ERROR) << "__________ServerCollector::ExecuteGC: going to wait for running flags";
+      conc_req_cond_->Wait(self);
     }
+    LOG(ERROR) << "__________ServerCollector::ExecuteGC: left wait for running flags";
+    heap_data_->conc_flag_ = 1;
+    heap_data_->is_gc_complete_ = 0;
+    heap_data_->is_gc_running_ = 0;
+    conc_req_cond_->Broadcast(self);
+    LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
+              ", setting conc flag to " << heap_data_->conc_flag_;
   }
 
 
@@ -138,6 +143,7 @@ void ServerCollector::WaitForGCTask(void) {
     LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
         ", leaving while flag " << heap_data_->conc_flag_;
     heap_data_->is_gc_complete_ = 0;
+    heap_data_->conc_flag_ = 0;
 //    heap_data_->conc_flag_ = heap_data_->conc_flag_ - 1;
     conc_req_cond_->Broadcast(self);
   }
