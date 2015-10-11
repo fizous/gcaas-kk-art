@@ -18,7 +18,8 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
     thread_(NULL),
-    status_(0) {
+    status_(0),
+    conc_count_(0) {
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
@@ -96,7 +97,8 @@ void ServerCollector::WaitForFinishPhaseGC(void) {
     IPMutexLock interProcMu(self, *phase_mu_);
     while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH)
       phase_cond_->Wait(self);
-    LOG(ERROR) << "Server Acknowledge the finishing phase";
+    conc_count_ = conc_count_ + 1;
+    LOG(ERROR) << "Server Acknowledge the finishing phase: count = " << conc_count_;
     heap_data_->gc_phase_ = space::IPC_GC_PHASE_POST_FINISH;
     phase_cond_->Broadcast(self);
   }
