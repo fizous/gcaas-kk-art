@@ -151,7 +151,7 @@ class GCServiceGlobalAllocator {
   GCSrvcClientHandShake* handShake_;
   static GCServiceGlobalAllocator* allocator_instant_;
  private:
-  static const int   kGCServicePageCapacity = 16;
+  static const int   kGCServicePageCapacity = 32;
   GCSrvcGlobalRegionHeader* region_header_;
 
 

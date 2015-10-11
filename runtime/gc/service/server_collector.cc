@@ -85,8 +85,13 @@ void ServerCollector::WaitForRequest(void) {
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
-//  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-//  IPMutexLock interProcMu(self, *phase_mu_);
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
+    LOG(ERROR) << "ServerCollector::ExecuteGC..setting phase to init: " << self->GetTid();
+    phase_cond_->Broadcast(self);
+  }
 //  if(heap_data_->gc_phase_ == space::IPC_GC_PHASE_NONE) {
 //    heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
 //    LOG(ERROR) << "ServerCollector::ExecuteGC..setting phase to init: " << self->GetTid();
