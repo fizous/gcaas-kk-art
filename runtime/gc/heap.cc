@@ -2367,7 +2367,6 @@ void Heap::ConcurrentGC(Thread* self) {
   mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   //mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
-  LOG(ERROR) << "Heap::ConcurrentGC...Leaving" << self->GetTid();
 }
 
 void Heap::RequestHeapTrim() {
