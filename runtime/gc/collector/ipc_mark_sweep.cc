@@ -253,7 +253,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " pending inside preInit";
   Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_INIT, currThread);
   phase_cond_->Broadcast(currThread);
 //  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
   LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
