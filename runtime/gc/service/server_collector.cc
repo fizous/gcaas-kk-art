@@ -22,12 +22,17 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
+  SharedFutexData* _conc_futexAddress = &heap_data_->conc_lock_.futex_head_;
+  SharedConditionVarData* _conc_condAddress = &heap_data_->conc_lock_.cond_var_;
 
   if(true) {
     phase_mu_ = new InterProcessMutex(_futexAddress, "GCServiceD Mutex");
     phase_cond_ =  new InterProcessConditionVariable(*phase_mu_,
         "GCServiceD CondVar", _condAddress);
 
+    conc_req_cond_mu_ = new InterProcessMutex(_conc_futexAddress, "GCConc Mutex");
+    conc_req_cond_ = new InterProcessConditionVariable(*conc_req_cond_mu_,
+        "GCConc CondVar", _conc_condAddress);
 
     CHECK_PTHREAD_CALL(pthread_create,
         (&pthread_, NULL,
@@ -79,6 +84,7 @@ void ServerCollector::WaitForRequest(void) {
     status_ = status_ - 1;
     run_cond_.Broadcast(self);
   }
+
   LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest";
 }
 
@@ -87,10 +93,24 @@ void ServerCollector::ExecuteGC(void) {
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
-    IPMutexLock interProcMu(self, *phase_mu_);
-    heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
-    LOG(ERROR) << "ServerCollector::ExecuteGC..setting phase to init: " << self->GetTid();
-    phase_cond_->Broadcast(self);
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    if(heap_data_->conc_flag_ == 0 && heap_data_->is_gc_running_ == 0) {
+      heap_data_->conc_flag_ = heap_data_->conc_flag_ + 1;
+      conc_req_cond_->Broadcast(self);
+      LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
+          ", setting conc flag to " << heap_data_->conc_flag_;
+    }
+  }
+
+
+  if(false) {
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *phase_mu_);
+      heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
+      LOG(ERROR) << "ServerCollector::ExecuteGC..setting phase to init: " << self->GetTid();
+      phase_cond_->Broadcast(self);
+    }
   }
 //  if(heap_data_->gc_phase_ == space::IPC_GC_PHASE_NONE) {
 //    heap_data_->gc_phase_ = space::IPC_GC_PHASE_INIT;
@@ -109,10 +129,28 @@ void ServerCollector::WaitForGCTask(void) {
 
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
-    IPMutexLock interProcMu(self, *phase_mu_);
-    heap_data_->gc_phase_ = space::IPC_GC_PHASE_FINISH;
-    LOG(ERROR) << "ServerCollector::WaitForGCTask..setting phase to IPC_GC_PHASE_FINISH: " << self->GetTid();
-    phase_cond_->Wait(self);
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    while(heap_data_->is_gc_complete_ != 1) {
+      conc_req_cond_->Wait(self);
+      LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
+          ", setting conc flag to " << heap_data_->conc_flag_;
+    }
+    LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
+        ", leaving while flag " << heap_data_->conc_flag_;
+    heap_data_->is_gc_complete_ = 0;
+//    heap_data_->conc_flag_ = heap_data_->conc_flag_ - 1;
+    conc_req_cond_->Broadcast(self);
+  }
+
+  if(false) {
+
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *phase_mu_);
+      heap_data_->gc_phase_ = space::IPC_GC_PHASE_FINISH;
+      LOG(ERROR) << "ServerCollector::WaitForGCTask..setting phase to IPC_GC_PHASE_FINISH: " << self->GetTid();
+      phase_cond_->Wait(self);
+    }
   }
 
 //  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);

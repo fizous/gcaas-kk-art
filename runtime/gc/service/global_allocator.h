@@ -196,7 +196,8 @@ class ServerCollector {
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
-
+  InterProcessMutex* conc_req_cond_mu_;
+  InterProcessConditionVariable* conc_req_cond_;
 
 
   void SignalCollector(void);

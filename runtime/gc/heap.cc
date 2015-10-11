@@ -2332,12 +2332,12 @@ void Heap::RequestConcurrentGC(Thread* self) {
   } else {
     /**/
     LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
-    JNIEnv* env = self->GetJniEnv();
-    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
-    DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
-    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
-                              WellKnownClasses::java_lang_Daemons_requestGC);
-    CHECK(!env->ExceptionCheck());
+//    JNIEnv* env = self->GetJniEnv();
+//    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+//    DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
+//    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+//                              WellKnownClasses::java_lang_Daemons_requestGC);
+//    CHECK(!env->ExceptionCheck());
   }
 #else
   JNIEnv* env = self->GetJniEnv();
@@ -2350,6 +2350,8 @@ void Heap::RequestConcurrentGC(Thread* self) {
 }
 
 void Heap::ConcurrentGC(Thread* self) {
+  LOG(ERROR) << "Heap::ConcurrentGC...Starting" << self->GetTid();
+
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
     if (Runtime::Current()->IsShuttingDown()) {
@@ -2366,6 +2368,7 @@ void Heap::ConcurrentGC(Thread* self) {
   mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   //mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
+  LOG(ERROR) << "Heap::ConcurrentGC...Leaving" << self->GetTid();
 }
 
 void Heap::RequestHeapTrim() {

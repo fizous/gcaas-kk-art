@@ -156,22 +156,28 @@ typedef enum {
 } IPC_GC_PHASE_ENUM;
 
 typedef struct GCSrvSharableHeapData_S {
+  /* gc barrier */
+  SynchronizedLockHead gc_barrier_lock_;
+  /* GC synchronization locks used for phases*/
+  SynchronizedLockHead phase_lock_;
+  /* GC concurrent signals */
+  SynchronizedLockHead conc_lock_;
+
   byte* const image_space_begin_;
   byte* const image_space_end_;
   byte* const zygote_begin_;
   byte* const zygote_end_;
 
-  /* GC synchronization locks used for phases*/
-  SynchronizedLockHead phase_lock_;
+
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
-  /* gc barrier */
-  SynchronizedLockHead gc_barrier_lock_;
+
   volatile int barrier_count_;
 
-  /* GC concurrent signals */
-  SynchronizedLockHead conc_lock_;
+
   volatile int conc_flag_;
+  volatile int is_gc_running_;
+  volatile int is_gc_complete_;
 
   /* collection stats */
   volatile int32_t freed_objects_;

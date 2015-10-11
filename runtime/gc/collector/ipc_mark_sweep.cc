@@ -77,6 +77,8 @@ void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
   meta_->freed_bytes_ = 0;
   meta_->barrier_count_ = 0;
   meta_->conc_flag_ = 0;
+  meta_->is_gc_complete_ = 0;
+  meta_->is_gc_running_ = 0;
 }
 
 
@@ -251,6 +253,7 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " pending inside preInit";
   Thread* currThread = Thread::Current();
+
 //  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
   LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
 }
@@ -280,11 +283,25 @@ bool IPCMarkSweep::RunCollectorDaemon() {
       conc_req_cond_->Wait(self);
     }
     LOG(ERROR) << "-------- IPCMarkSweep::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
-    meta_->conc_flag_ = meta_->conc_flag_ - 1;
+
   }
   Runtime* runtime = Runtime::Current();
-  runtime->GetHeap()->GCServiceSignalConcGC(self);
 
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->is_gc_running_ = 1;
+    meta_->is_gc_complete_ = 0;
+  }
+
+  runtime->GetHeap()->ConcurrentGC(self);
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->conc_flag_ = meta_->conc_flag_ - 1;
+    meta_->is_gc_complete_ = 1;
+    conc_req_cond_->Broadcast(self);
+  }
   return true;
 }
 
