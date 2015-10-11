@@ -368,7 +368,10 @@ void IPCMarkSweep::InitializePhase(void) {
 
 void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
   MarkSweep::MarkingPhase();
   ConcMarkPhase();
 }
