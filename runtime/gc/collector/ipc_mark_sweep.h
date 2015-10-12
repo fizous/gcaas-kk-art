@@ -11,7 +11,7 @@
 #include "ipcfs/ipcfs.h"
 #include "thread.h"
 #include "gc/heap.h"
-#include "mark_sweep.h"
+#include "sticky_mark_sweep.h"
 #include "gc/space/space.h"
 
 

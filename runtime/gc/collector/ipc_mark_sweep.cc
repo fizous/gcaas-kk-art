@@ -9,7 +9,7 @@
 #include "globals.h"
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
-#include "mark_sweep.h"
+#include "sticky_mark_sweep.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
