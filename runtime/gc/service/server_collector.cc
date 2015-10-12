@@ -94,6 +94,7 @@ void ServerCollector::WaitForFinishPhaseGC(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *phase_mu_);
+    LOG(ERROR) << "Server going to wait for finish phase = " << heap_data_->gc_phase_;
     while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH)
       phase_cond_->Wait(self);
     LOG(ERROR) << "Server Acknowledge the finishing phase: count = " << heap_data_->conc_count_;
