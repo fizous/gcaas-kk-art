@@ -394,41 +394,6 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
   return NULL;
 }
 
-/******* overriding marksweep code *************/
-
-void IPCMarkSweep::FinishPhase(void) {
-  Thread* currThread = Thread::Current();
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
-  {
-    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. starting: " <<
-        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-    phase_cond_->Broadcast(currThread);
-    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
-        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-  }
-  MarkSweep::FinishPhase();
-  FinalizePhase();
-  ResetPhase();
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
-}
-
-void IPCMarkSweep::InitializePhase(void) {
-  Thread* currThread = Thread::Current();
-  PreInitCollector();
-
-  {
-    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
-        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-    phase_cond_->Broadcast(currThread);
-    MarkSweep::InitializePhase();
-    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. endingB: " <<
-        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-  }
-  LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
-}
-
 void IPCMarkSweep::PreConcMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. starting: " <<
@@ -441,20 +406,57 @@ void IPCMarkSweep::PreConcMarkingPhase(void) {
   LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. ending: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
+
+/******* overriding marksweep code *************/
+
+void IPCMarkSweep::FinishPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
+//  {
+//    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. starting: " <<
+//        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+//    phase_cond_->Broadcast(currThread);
+//    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
+//        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+//  }
+  MarkSweep::FinishPhase();
+  //FinalizePhase();
+  //ResetPhase();
+  //LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
+}
+
+void IPCMarkSweep::InitializePhase(void) {
+  Thread* currThread = Thread::Current();
+ // PreInitCollector();
+
+  {
+    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+    //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+   // phase_cond_->Broadcast(currThread);
+    MarkSweep::InitializePhase();
+    //LOG(ERROR) << "     IPCMarkSweep::InitializePhase. endingB: " <<
+    //    currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  }
+ // LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
+}
+
+
 void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-  {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
-    phase_cond_->Broadcast(currThread);
-  }
-  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
-      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+//  {
+//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+//    phase_cond_->Broadcast(currThread);
+//  }
+//  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
+//      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   MarkSweep::MarkingPhase();
-  PreConcMarkingPhase();
-  ConcMarkPhase();
-  ReclaimClientPhase();
+//  PreConcMarkingPhase();
+//  ConcMarkPhase();
+//  ReclaimClientPhase();
 }
 
 
