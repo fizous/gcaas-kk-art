@@ -73,8 +73,10 @@ class IPCMarkSweep : public MarkSweep {
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   /** GC Phases **/
+
   void ReclaimClientPhase(void);
   void PreInitCollector(void);
+  void PreConcMarkingPhase(void);
   void ConcMarkPhase(void);
   void ResetPhase(void);
 //

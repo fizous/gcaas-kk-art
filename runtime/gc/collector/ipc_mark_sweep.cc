@@ -276,7 +276,7 @@ void IPCMarkSweep::ConcMarkPhase(void) {
   LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. starting: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
     phase_cond_->Broadcast(currThread);
   }
   LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. ending: " <<
@@ -416,7 +416,17 @@ void IPCMarkSweep::InitializePhase(void) {
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
 }
 
-
+void IPCMarkSweep::PreConcMarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+  LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. ending: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+}
 void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
@@ -428,6 +438,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   MarkSweep::MarkingPhase();
+  PreConcMarkingPhase();
   ConcMarkPhase();
   ReclaimClientPhase();
 }

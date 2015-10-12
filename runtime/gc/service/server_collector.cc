@@ -99,16 +99,32 @@ void ServerCollector::WaitForConcMarkPhaseGC(void) {
   }
 }
 
+#define GC_IPC_SERVER_BLOCK_ON_PHASE(PHASE, THREAD) \
+    ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess); \
+    IPMutexLock interProcMu(THREAD, *phase_mu_); \
+    while(heap_data_->gc_phase_ != PHASE) \
+      phase_cond_->Wait(THREAD);
 
 void ServerCollector::ConcMarkPhaseGC(void) {
-  Thread* self = Thread::Current();
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "ServerCollector::ConcMarkPhaseGC. startingA: " <<
+      currThread->GetTid() << "; phase:" << heap_data_->gc_phase_;
   {
-    IPMutexLock interProcMu(self, *phase_mu_);
-    heap_data_->gc_phase_ = space::IPC_GC_PHASE_RECLAIM;
-    LOG(ERROR) << "Server going to wait for finish phase = " << heap_data_->gc_phase_;
-    phase_cond_->Broadcast(self);
+    GC_IPC_SERVER_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+//    phase_cond_->Broadcast(currThread);
   }
+  LOG(ERROR) << "ServerCollector::ConcMarkPhaseGC. endingA: " <<
+      currThread->GetTid() << "; phase:" << heap_data_->gc_phase_;
+  {
+    ScopedThreadStateChange tsc(currThread, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(currThread, *phase_mu_);
+      heap_data_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
+      phase_cond_->Broadcast(currThread);
+    }
+  }
+  LOG(ERROR) << "ServerCollector::ConcMarkPhaseGC. endingB: " <<
+      currThread->GetTid() << "; phase:" << heap_data_->gc_phase_;
 }
 
 void ServerCollector::WaitForFinishPhaseGC(void) {
@@ -154,6 +170,7 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
+  ConcMarkPhaseGC();
 //  WaitForConcMarkPhaseGC();
 //  ConcMarkPhaseGC();
 //  WaitForFinishPhaseGC();

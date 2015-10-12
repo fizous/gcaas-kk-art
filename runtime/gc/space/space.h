@@ -150,6 +150,7 @@ typedef enum {
   IPC_GC_PHASE_PRE_INIT,
   IPC_GC_PHASE_INIT,
   IPC_GC_PHASE_ROOT_MARK,
+  IPC_GC_PHASE_PRE_CONC_ROOT_MARK,
   IPC_GC_PHASE_CONC_MARK,
   IPC_GC_PHASE_RECLAIM,
   IPC_GC_PHASE_FINISH,
@@ -175,7 +176,6 @@ typedef struct GCSrvSharableHeapData_S {
 
 
   volatile int barrier_count_;
-
 
   volatile int conc_flag_;
   volatile int is_gc_running_;
