@@ -399,10 +399,17 @@ void IPCMarkSweep::FinishPhase(void) {
 
 void IPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "IPCMarkSweep::InitializePhase...begin:" << currThread->GetTid();
   PreInitCollector();
-  MarkSweep::InitializePhase();
 
+  {
+    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+    phase_cond_->Broadcast(currThread);
+    MarkSweep::InitializePhase();
+    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. endingB: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  }
   LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
 }
 
