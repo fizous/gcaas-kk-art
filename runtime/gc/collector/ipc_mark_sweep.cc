@@ -388,8 +388,12 @@ void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   {
+    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. starting: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
     phase_cond_->Broadcast(currThread);
+    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   }
   MarkSweep::FinishPhase();
   FinalizePhase();
