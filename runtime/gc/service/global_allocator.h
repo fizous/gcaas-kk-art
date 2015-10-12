@@ -205,6 +205,9 @@ class ServerCollector {
   void WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteGC(void);
+
+  void ConcMarkPhaseGC(void);
+  void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);
 
 

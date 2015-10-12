@@ -255,6 +255,13 @@ void IPCMarkSweep::PreInitCollector(void) {
   LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
 }
 
+void IPCMarkSweep::ReclaimClientPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << " pending inside ReclaimClientPhase: " <<  currThread->GetTid()
+      << "; phase = " << meta_->gc_phase_;
+  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
+  LOG(ERROR) << " leaving ReclaimClientPhase: " <<  currThread->GetTid();
+}
 
 void IPCMarkSweep::ConcMarkPhase(void) {
   Thread* currThread = Thread::Current();
@@ -378,6 +385,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   }
   MarkSweep::MarkingPhase();
   ConcMarkPhase();
+  ReclaimClientPhase();
 }
 
 

@@ -87,7 +87,29 @@ void ServerCollector::WaitForRequest(void) {
   }
 }
 
+void ServerCollector::WaitForConcMarkPhaseGC(void) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    LOG(ERROR) << "Server going to wait for finish phase = " << heap_data_->gc_phase_;
+    while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_CONC_MARK)
+      phase_cond_->Wait(self);
+    LOG(ERROR) << "Server Acknowledge the finishing phase: phase = " << heap_data_->gc_phase_;
+  }
+}
 
+
+void ServerCollector::ConcMarkPhaseGC(void) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    heap_data_->gc_phase_ = space::IPC_GC_PHASE_RECLAIM;
+    LOG(ERROR) << "Server going to wait for finish phase = " << heap_data_->gc_phase_;
+    phase_cond_->Broadcast(self);
+  }
+}
 
 void ServerCollector::WaitForFinishPhaseGC(void) {
   Thread* self = Thread::Current();
@@ -121,8 +143,9 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
-
-  WaitForFinishPhaseGC();
+  WaitForConcMarkPhaseGC();
+  ConcMarkPhaseGC();
+  //WaitForFinishPhaseGC();
 
 
   if(false) {
