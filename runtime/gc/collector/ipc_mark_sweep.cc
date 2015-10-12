@@ -301,13 +301,13 @@ void IPCMarkSweep::FinalizePhase(void) {
 
 void IPCMarkSweep::ResetPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. starting: " <<
+  LOG(ERROR) << "     IPCMarkSweep::ResetPhase. starting: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_NONE, currThread);
     phase_cond_->Broadcast(currThread);
   }
-  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. ending: " <<
+  LOG(ERROR) << "     IPCMarkSweep::ResetPhase. ending: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
 //void IPCMarkSweep::ReclaimPhase(void){
@@ -393,6 +393,7 @@ void IPCMarkSweep::FinishPhase(void) {
   }
   MarkSweep::FinishPhase();
   FinalizePhase();
+  ResetPhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
 
