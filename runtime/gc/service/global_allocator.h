@@ -209,7 +209,7 @@ class ServerCollector {
   void ConcMarkPhaseGC(void);
   void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);
-
+  void PostFinishPhaseGC(void);
 
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);

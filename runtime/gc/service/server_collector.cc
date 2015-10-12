@@ -120,10 +120,21 @@ void ServerCollector::WaitForFinishPhaseGC(void) {
     while(heap_data_->gc_phase_ != space::IPC_GC_PHASE_FINISH)
       phase_cond_->Wait(self);
     LOG(ERROR) << "Server Acknowledge the finishing phase: count = " << heap_data_->conc_count_;
-    heap_data_->gc_phase_ = space::IPC_GC_PHASE_POST_FINISH;
-    phase_cond_->Broadcast(self);
   }
 }
+
+void ServerCollector::PostFinishPhaseGC(void) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *phase_mu_);
+    LOG(ERROR) << "Server inside post finish phase = " << heap_data_->gc_phase_;
+    heap_data_->gc_phase_ = space::IPC_GC_PHASE_POST_FINISH;
+    phase_cond_->Broadcast(self);
+    LOG(ERROR) << "Server leaving post finish phase: phase = " << heap_data_->gc_phase_;
+  }
+}
+
 
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
@@ -145,8 +156,8 @@ void ServerCollector::ExecuteGC(void) {
   }
   WaitForConcMarkPhaseGC();
   ConcMarkPhaseGC();
-  //WaitForFinishPhaseGC();
-
+  WaitForFinishPhaseGC();
+  PostFinishPhaseGC();
 
   if(false) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
