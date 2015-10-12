@@ -171,6 +171,9 @@ void ServerCollector::ExecuteGC(void) {
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
  // ConcMarkPhaseGC();
+
+
+
 //  WaitForConcMarkPhaseGC();
 //  ConcMarkPhaseGC();
 //  WaitForFinishPhaseGC();

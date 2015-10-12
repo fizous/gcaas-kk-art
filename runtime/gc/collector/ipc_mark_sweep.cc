@@ -336,8 +336,8 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->is_gc_running_ = 1;
-    meta_->conc_flag_ = 0;
-    meta_->is_gc_complete_ = 0;
+    //meta_->conc_flag_ = 0;
+   // meta_->is_gc_complete_ = 0;
     conc_req_cond_->Broadcast(self);
   }
   LOG(ERROR) << ">>>>>>>>>Heap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
@@ -417,6 +417,8 @@ void IPCMarkSweep::InitializePhase(void) {
 }
 
 void IPCMarkSweep::PreConcMarkingPhase(void) {
+  if(true)
+    return;
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. starting: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
