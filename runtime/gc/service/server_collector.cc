@@ -89,7 +89,7 @@ void ServerCollector::WaitForRequest(void) {
         run_cond_.Wait(self);
       }
       status_ = 0;
-      LOG(ERROR) << "leaving ServerCollector:: leaving WaitForRequest; status=" << status_;
+      LOG(ERROR) << "ServerCollector::WaitForRequest:: leaving WaitForRequest; status=" << status_;
       run_cond_.Broadcast(self);
     }
   }
@@ -172,7 +172,7 @@ void ServerCollector::ExecuteGC(void) {
 //      LOG(ERROR) << "__________ServerCollector::ExecuteGC: going to wait for running flags";
 //      conc_req_cond_->Wait(self);
 //    }
-    LOG(ERROR) << "__________ServerCollector::ExecuteGC: left wait for running flags";
+    LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
     heap_data_->conc_flag_ = 1;
     //heap_data_->is_gc_complete_ = 0;
     //heap_data_->is_gc_running_ = 0;
@@ -221,12 +221,13 @@ void ServerCollector::WaitForGCTask(void) {
       LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
           ", setting conc flag to " << heap_data_->conc_flag_;
     }
+
+    heap_data_->is_gc_complete_ = 0;
     LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
         ", leaving while flag " << heap_data_->conc_flag_;
-    //heap_data_->is_gc_complete_ = 0;
-//    heap_data_->conc_flag_ = 0;
+   // heap_data_->conc_flag_ = 0;
 //    heap_data_->conc_flag_ = heap_data_->conc_flag_ - 1;
-    //conc_req_cond_->Broadcast(self);
+    conc_req_cond_->Broadcast(self);
   }
 
   if(false) {
