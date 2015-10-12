@@ -164,13 +164,13 @@ void ServerCollector::ExecuteGC(void) {
     }
     LOG(ERROR) << "__________ServerCollector::ExecuteGC: left wait for running flags";
     heap_data_->conc_flag_ = 1;
-    heap_data_->is_gc_complete_ = 0;
-    heap_data_->is_gc_running_ = 0;
+    //heap_data_->is_gc_complete_ = 0;
+    //heap_data_->is_gc_running_ = 0;
     conc_req_cond_->Broadcast(self);
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
-  ConcMarkPhaseGC();
+ // ConcMarkPhaseGC();
 //  WaitForConcMarkPhaseGC();
 //  ConcMarkPhaseGC();
 //  WaitForFinishPhaseGC();
@@ -248,6 +248,7 @@ void ServerCollector::WaitForGCTask(void) {
 void ServerCollector::Run(void) {
   LOG(ERROR) << "ServerCollector::Run";
   while(true) {
+    LOG(ERROR) << "---------------run ServerCollector-----------";
     WaitForRequest();
     ExecuteGC();
     WaitForGCTask();
