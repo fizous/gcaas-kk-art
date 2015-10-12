@@ -276,7 +276,7 @@ void IPCMarkSweep::ConcMarkPhase(void) {
   LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. starting: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   {
-    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
     phase_cond_->Broadcast(currThread);
   }
   LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. ending: " <<
