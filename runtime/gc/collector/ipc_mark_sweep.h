@@ -76,6 +76,7 @@ class IPCMarkSweep : public MarkSweep {
   void ReclaimClientPhase(void);
   void PreInitCollector(void);
   void ConcMarkPhase(void);
+  void ResetPhase(void);
 //
 //  void InitialPhase(void);
 //  void MarkRootPhase(void);

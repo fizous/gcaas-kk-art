@@ -154,10 +154,10 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
-  WaitForConcMarkPhaseGC();
-  ConcMarkPhaseGC();
-  WaitForFinishPhaseGC();
-  PostFinishPhaseGC();
+//  WaitForConcMarkPhaseGC();
+//  ConcMarkPhaseGC();
+//  WaitForFinishPhaseGC();
+//  PostFinishPhaseGC();
 
   if(false) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);

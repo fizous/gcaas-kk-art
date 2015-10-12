@@ -247,39 +247,69 @@ bool IPCMarkSweep::StartCollectorDaemon(void) {
 //
 //
 void IPCMarkSweep::PreInitCollector(void) {
-  LOG(ERROR) << " pending inside preInit";
   Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_INIT, currThread);
-  phase_cond_->Broadcast(currThread);
+  LOG(ERROR) << "     IPCMarkSweep::PreInitCollector. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_INIT, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
 //  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-  LOG(ERROR) << " left blocking on init condition inside preInit: " << currThread->GetTid();
+  LOG(ERROR) << "     IPCMarkSweep::PreInitCollector. leaving: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
 
 void IPCMarkSweep::ReclaimClientPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << " pending inside ReclaimClientPhase: " <<  currThread->GetTid()
-      << "; phase = " << meta_->gc_phase_;
-  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
-  LOG(ERROR) << " leaving ReclaimClientPhase: " <<  currThread->GetTid();
+  LOG(ERROR) << "     IPCMarkSweep::ReclaimClientPhase. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
+  LOG(ERROR) << "     IPCMarkSweep::ReclaimClientPhase. ending: " <<
+        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
 
 void IPCMarkSweep::ConcMarkPhase(void) {
   Thread* currThread = Thread::Current();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
-  phase_cond_->Broadcast(currThread);
+  LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_CONC_MARK, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+  LOG(ERROR) << "     IPCMarkSweep::ConcMarkPhase. ending: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   //do the conc marking here
 }
 
 void IPCMarkSweep::FinalizePhase(void) {
   Thread* currThread = Thread::Current();
-  //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-  LOG(ERROR) << "IPCMarkSweep::FinalizePhase...start..waiting for post finish:" << currThread->GetTid();
-  GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_POST_FINISH, currThread);
-  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-  phase_cond_->Broadcast(currThread);
-  LOG(ERROR) << "Done waiting for post Finish phase";
+  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_POST_FINISH, currThread);
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_POST_FINISH, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. ending: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
 
+
+void IPCMarkSweep::ResetPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. starting: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_NONE, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+  LOG(ERROR) << "     IPCMarkSweep::FinalizePhase. ending: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+}
 //void IPCMarkSweep::ReclaimPhase(void){
 //  Thread* currThread = Thread::Current();
 //  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
@@ -356,13 +386,12 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
 
 void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
-
-  MarkSweep::FinishPhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
     phase_cond_->Broadcast(currThread);
   }
+  MarkSweep::FinishPhase();
   FinalizePhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
