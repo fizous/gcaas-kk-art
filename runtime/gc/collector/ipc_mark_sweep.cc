@@ -25,7 +25,7 @@ namespace collector {
 
 IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
               Heap* heap, bool is_concurrent, const std::string& name_prefix)
-    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc),
+    : StickyMarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc),
       ms_lock_("ipc lock"),
       ms_cond_("ipcs::cond_", ms_lock_),
       collector_daemon_(NULL){
@@ -420,7 +420,7 @@ void IPCMarkSweep::FinishPhase(void) {
 //    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
 //        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 //  }
-  MarkSweep::FinishPhase();
+  StickyMarkSweep::FinishPhase();
   //FinalizePhase();
   //ResetPhase();
   //LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
@@ -435,7 +435,7 @@ void IPCMarkSweep::InitializePhase(void) {
         currThread->GetTid() << "; phase:" << meta_->gc_phase_;
     //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
    // phase_cond_->Broadcast(currThread);
-    MarkSweep::InitializePhase();
+    StickyMarkSweep::InitializePhase();
     //LOG(ERROR) << "     IPCMarkSweep::InitializePhase. endingB: " <<
     //    currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   }
@@ -453,7 +453,7 @@ void IPCMarkSweep::MarkingPhase(void) {
 //  }
 //  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
 //      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-  MarkSweep::MarkingPhase();
+  StickyMarkSweep::MarkingPhase();
 //  PreConcMarkingPhase();
 //  ConcMarkPhase();
 //  ReclaimClientPhase();

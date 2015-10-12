@@ -32,7 +32,7 @@ namespace gc {
 
 namespace collector {
 
-class IPCMarkSweep : public MarkSweep {
+class IPCMarkSweep : public StickyMarkSweep {
  public:
   space::GCSrvSharableHeapData* meta_;
   mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
