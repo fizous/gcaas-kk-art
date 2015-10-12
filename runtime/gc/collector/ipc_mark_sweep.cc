@@ -267,7 +267,6 @@ void IPCMarkSweep::ReclaimClientPhase(void) {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
     phase_cond_->Broadcast(currThread);
   }
-  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_RECLAIM, currThread);
   LOG(ERROR) << "     IPCMarkSweep::ReclaimClientPhase. ending: " <<
         currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
@@ -420,10 +419,14 @@ void IPCMarkSweep::InitializePhase(void) {
 
 void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
     phase_cond_->Broadcast(currThread);
   }
+  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   MarkSweep::MarkingPhase();
   ConcMarkPhase();
   ReclaimClientPhase();
