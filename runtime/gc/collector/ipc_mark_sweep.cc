@@ -353,16 +353,17 @@ bool IPCMarkSweep::RunCollectorDaemon() {
     meta_->conc_flag_ = 0;
     conc_req_cond_->Broadcast(self);
   }
-
-  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
   {
-    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    while(meta_->is_gc_complete_ == 1) {
-      LOG(ERROR) << "      IPCMarkSweep::RunCollectorDaemon: waiting for gc_complete reset";
-      conc_req_cond_->Wait(self);
+    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      while(meta_->is_gc_complete_ == 1) {
+        LOG(ERROR) << "      IPCMarkSweep::RunCollectorDaemon: waiting for gc_complete reset";
+        conc_req_cond_->Wait(self);
+      }
+      conc_req_cond_->Broadcast(self);
+      LOG(ERROR) << "      IPCMarkSweep::RunCollectorDaemon: leave waiting for gc_complete reset";
     }
-    conc_req_cond_->Broadcast(self);
-    LOG(ERROR) << "      IPCMarkSweep::RunCollectorDaemon: leave waiting for gc_complete reset";
   }
   return true;
 }
