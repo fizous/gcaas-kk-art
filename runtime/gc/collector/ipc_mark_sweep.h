@@ -34,6 +34,9 @@ namespace collector {
 
 class IPCMarkSweep : public StickyMarkSweep {
  public:
+//  virtual GcType GetGcType() const {
+//    return kGcTypeSticky;
+//  }
   space::GCSrvSharableHeapData* meta_;
   mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);

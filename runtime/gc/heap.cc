@@ -775,7 +775,7 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
 //  }
   std::vector<collector::MarkSweep*>::iterator iter = mark_sweep_collectors_.begin();
   while( iter != mark_sweep_collectors_.end()) {
-    if(((*iter)->GetGcType() == collector::kGcTypeFull) && ((*iter)->IsConcurrent())) {
+    if(((*iter)->GetGcType() == newCollector->GetGcType()/*collector::kGcTypeFull*/) && ((*iter)->IsConcurrent())) {
       LOG(ERROR) << "Removing original Marksweep; full and concurrent";
       mark_sweep_collectors_.erase(iter);
       break;
