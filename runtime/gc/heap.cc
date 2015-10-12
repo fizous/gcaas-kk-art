@@ -1481,7 +1481,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
     gc_type = collector::kGcTypePartial;
   }
 
-  //GCMMP_VLOG(INFO) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+  if(gc_cause == kGcCauseBackground)
+    LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   DCHECK_LT(gc_type, collector::kGcTypeMax);
   DCHECK_NE(gc_type, collector::kGcTypeNone);
   DCHECK_LE(gc_cause, kGcCauseExplicit);
@@ -1492,6 +1493,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
   for (const auto& cur_collector : mark_sweep_collectors_) {
     if (cur_collector->IsConcurrent() == concurrent_gc_ && cur_collector->GetGcType() == gc_type) {
       collector = cur_collector;
+      if(gc_cause == kGcCauseBackground)
+        LOG(ERROR) << "========collector: " << collector->GetName();
       break;
     }
   }

@@ -262,7 +262,7 @@ void ServerCollector::WaitForGCTask(void) {
 void ServerCollector::Run(void) {
   LOG(ERROR) << "ServerCollector::Run";
   while(true) {
-    LOG(ERROR) << "---------------run ServerCollector-----------";
+    LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
     WaitForRequest();
     ExecuteGC();
     WaitForGCTask();
