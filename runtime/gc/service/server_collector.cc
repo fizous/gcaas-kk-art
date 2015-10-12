@@ -80,7 +80,7 @@ void ServerCollector::WaitForRequest(void) {
     heap_data_->is_gc_running_ = 0;
     conc_req_cond_->Broadcast(self);
   }
-  LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid()  << "status ="   << status_;
+ // LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid()  << "status ="   << status_;
   {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
