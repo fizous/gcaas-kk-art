@@ -268,6 +268,8 @@ void IPCMarkSweep::FinalizePhase(void) {
   //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   LOG(ERROR) << "IPCMarkSweep::FinalizePhase...end..waiting for post finish:" << currThread->GetTid();
   GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_POST_FINISH, currThread);
+  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  phase_cond_->Broadcast(currThread);
   LOG(ERROR) << "Done waiting for post Finish phase";
 }
 
@@ -347,13 +349,13 @@ void* IPCMarkSweep::RunDaemon(void* arg) {
 
 void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
+
+  MarkSweep::FinishPhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
     phase_cond_->Broadcast(currThread);
   }
-  MarkSweep::FinishPhase();
-
   FinalizePhase();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
 }
