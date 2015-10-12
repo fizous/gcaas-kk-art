@@ -417,13 +417,12 @@ void IPCMarkSweep::InitializePhase(void) {
 }
 
 void IPCMarkSweep::PreConcMarkingPhase(void) {
-  if(true)
-    return;
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. starting: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+    //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
     phase_cond_->Broadcast(currThread);
   }
   LOG(ERROR) << "     IPCMarkSweep::PreConcMarkingPhase. ending: " <<
