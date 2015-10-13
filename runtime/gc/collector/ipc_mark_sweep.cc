@@ -315,7 +315,7 @@ StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     StickyIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
     StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
-        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+        name_prefix + (name_prefix.empty() ? "" : " ") + "stickyipcMS") {
 
 }
 
