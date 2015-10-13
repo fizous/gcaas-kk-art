@@ -23,74 +23,330 @@ namespace gc {
 namespace collector {
 
 
-IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc,
-              Heap* heap, bool is_concurrent, const std::string& name_prefix)
-    : StickyMarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "ipc"), meta_(meta_alloc),
-      ms_lock_("ipc lock"),
-      ms_cond_("ipcs::cond_", ms_lock_),
-      collector_daemon_(NULL){
+IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
+    ms_lock_("heap-ipc lock"),
+    ms_cond_("heap-ipcs::cond_", ms_lock_),
+    meta_(heap_meta),
+    local_heap_(heap),
+    collector_daemon_(NULL) {
 
   /* initialize locks */
-  SharedFutexData* _futexAddress = &meta_->phase_lock_.futex_head_;
-  SharedConditionVarData* _condAddress = &meta_->phase_lock_.cond_var_;
+  SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
+  SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
+
+  conc_req_cond_mu_ = new InterProcessMutex("GCConc Mutex", _conc_futexAddress);
+  conc_req_cond_ = new InterProcessConditionVariable("GCConc CondVar",
+      *conc_req_cond_mu_, _conc_condAddress);
+
+//  if(!StartCollectorDaemon()) {
+//    LOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
+//        << " daemon .. XXXXXXXXX";
+//  }
+
+  ResetHeapMetaDataUnlocked();
+
+}
+
+
+void IPCHeap::SetCollectorDaemon(Thread* thread) {
+  MutexLock mu(thread, ms_lock_);
+  collector_daemon_ = thread;
+  ms_cond_.Broadcast(thread);
+}
+
+bool IPCHeap::StartCollectorDaemon(void) {
+
+
+
+  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
+
+  CHECK_PTHREAD_CALL(pthread_create,
+      (&collector_pthread_, NULL,
+      &IPCHeap::RunDaemon, this),
+      "IPCHeap Daemon thread");
+
+  Thread* self = Thread::Current();
+  MutexLock mu(self, ms_lock_);
+  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon going " <<
+      "waits for daemon initialization";
+  while (collector_daemon_ == NULL) {
+    ms_cond_.Wait(self);
+  }
+
+  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon done " <<
+      "with creating daemon ";
+
+  //CreateCollectors();
+
+  return true;
+}
+
+void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
+  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  meta_->freed_objects_   = 0;
+  meta_->freed_bytes_     = 0;
+  meta_->barrier_count_   = 0;
+  meta_->conc_flag_       = 0;
+  meta_->is_gc_complete_  = 0;
+  meta_->is_gc_running_   = 0;
+  meta_->conc_count_      = 0;
+}
+
+
+void* IPCHeap::RunDaemon(void* arg) {
+  LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
+  IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
+  CHECK(_ipc_ms != NULL);
+
+  Runtime* runtime = Runtime::Current();
+  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
+
+  Thread* self = Thread::Current();
+  DCHECK_NE(self->GetState(), kRunnable);
+  {
+    SetCollectorDaemon(self);
+  }
+
+
+  LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: broadcast" ;
+  bool collector_loop = true;
+  while(collector_loop) {
+    collector_loop = _ipc_ms->RunCollectorDaemon();
+  }
+
+  return NULL;
+}
+
+
+void IPCHeap::CreateCollectors(void) {
+  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
+      "fullIPC"));
+  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
+      "partialIPC"));
+
+
+  StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
+      "stickyIPC");
+  ipc_mark_sweep_collectors_.push_back(stickyIPCMS);
+  local_heap_->GCPSrvcReinitMarkSweep(stickyIPCMS);
+}
+
+
+
+void IPCHeap::ConcurrentGC(void) {
+  local_heap_->ConcurrentGC(collector_daemon_);
+}
+
+bool IPCHeap::RunCollectorDaemon() {
+  Thread* self = Thread::Current();
+  LOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
+
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
+    while(meta_->conc_flag_ == 0) {
+      conc_req_cond_->Wait(self);
+    }
+    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
+
+  }
+  Runtime* runtime = Runtime::Current();
+
+  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->is_gc_running_ = 1;
+    //meta_->conc_flag_ = 0;
+   // meta_->is_gc_complete_ = 0;
+    conc_req_cond_->Broadcast(self);
+  }
+  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
+  ConcurrentGC();
+  meta_->conc_count_ = meta_->conc_count_ + 1;
+  LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
+      " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
+  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->is_gc_complete_ = 1;
+    meta_->is_gc_running_  = 0;
+    meta_->conc_flag_ = 0;
+    conc_req_cond_->Broadcast(self);
+  }
+  {
+    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      while(meta_->is_gc_complete_ == 1) {
+        LOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
+        conc_req_cond_->Wait(self);
+      }
+      conc_req_cond_->Broadcast(self);
+      LOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
+    }
+  }
+  return true;
+}
+
+AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap,
+    bool is_concurrent, const std::string& name_prefix):
+    ipc_heap_(ipcHeap),
+    heap_meta_(ipc_heap_->meta_) {
+
+  /* initialize locks */
+  SharedFutexData* _futexAddress = &heap_meta_->phase_lock_.futex_head_;
+  SharedConditionVarData* _condAddress = &heap_meta_->phase_lock_.cond_var_;
 
   phase_mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
   phase_cond_ = new InterProcessConditionVariable("HandShake CondVar",
       *phase_mu_, _condAddress);
 
-
   SharedFutexData* _futexBarrierAdd =
-      &meta_->gc_barrier_lock_.futex_head_;
+      &heap_meta_->gc_barrier_lock_.futex_head_;
   SharedConditionVarData* _condBarrierAdd =
-      &meta_->gc_barrier_lock_.cond_var_;
+      &heap_meta_->gc_barrier_lock_.cond_var_;
+
 
   barrier_mu_   = new InterProcessMutex("HandShake Mutex", _futexBarrierAdd);
   barrier_cond_ = new InterProcessConditionVariable("HandShake CondVar",
       *barrier_mu_, _condBarrierAdd);
 
 
-  /* initialize locks */
-  SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
-  SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
-
-
-  conc_req_cond_mu_ = new InterProcessMutex("GCConc Mutex", _conc_futexAddress);
-  conc_req_cond_ = new InterProcessConditionVariable("GCConc CondVar",
-      *conc_req_cond_mu_, _conc_condAddress);
-
-
-
   ResetMetaDataUnlocked();
+
   DumpValues();
 }
 
-//IPCMarkSweep::IPCMarkSweep(space::GCSrvSharableHeapData* meta_alloc) :
-//    meta_(meta_alloc) {
-//
-//
-//}
+void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
+  heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  heap_meta_->freed_objects_ = 0;
+  heap_meta_->freed_bytes_ = 0;
+  heap_meta_->barrier_count_ = 0;
+  heap_meta_->conc_flag_ = 0;
+  heap_meta_->is_gc_complete_ = 0;
+  heap_meta_->is_gc_running_ = 0;
+  heap_meta_->conc_count_ = 0;
+}
 
-
-void IPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
-  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-  meta_->freed_objects_ = 0;
-  meta_->freed_bytes_ = 0;
-  meta_->barrier_count_ = 0;
-  meta_->conc_flag_ = 0;
-  meta_->is_gc_complete_ = 0;
-  meta_->is_gc_running_ = 0;
-  meta_->conc_count_ = 0;
+void AbstractIPCMarkSweep::DumpValues(void){
+  LOG(ERROR) << "Dump AbstractIPCMarkSweep: " << "zygote_begin: "
+      << reinterpret_cast<void*>(heap_meta_->zygote_begin_)
+      << "\n     zygote_end: " << reinterpret_cast<void*>(heap_meta_->zygote_end_)
+      << "\n     image_begin: " << reinterpret_cast<void*>(heap_meta_->image_space_begin_)
+      << "\n     image_end: " << reinterpret_cast<void*>(heap_meta_->image_space_end_);
 }
 
 
-void IPCMarkSweep::DumpValues(void){
-  LOG(ERROR) << "IPCMARKSWEEP: " << "zygote_begin: " << reinterpret_cast<void*>(meta_->zygote_begin_)
-      << "\n zygote_end: " << reinterpret_cast<void*>(meta_->zygote_end_)
-      << "\n image_begin: " << reinterpret_cast<void*>(meta_->image_space_begin_)
-      << "\n image_end: " << reinterpret_cast<void*>(meta_->image_space_end_);
+
+
+
+
+IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+    const std::string& name_prefix) :
+    AbstractIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
+    MarkSweep(ipcHeap->local_heap_, is_concurrent,
+        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+
+}
+
+void IPCMarkSweep::FinishPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
+  MarkSweep::FinishPhase();
+}
+
+void IPCMarkSweep::InitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  {
+    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
+        currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+    MarkSweep::InitializePhase();
+  }
 }
 
 
+void IPCMarkSweep::MarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+
+  MarkSweep::MarkingPhase();
+
+}
+
+
+PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+    const std::string& name_prefix) :
+    PartialIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
+    PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
+        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+
+}
+
+
+void PartialIPCMarkSweep::FinishPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     PartialIPCMarkSweep::FinishPhase...begin:" <<
+      currThread->GetTid();
+  MarkSweep::FinishPhase();
+}
+
+void PartialIPCMarkSweep::InitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  {
+    LOG(ERROR) << "     PartialIPCMarkSweep::InitializePhase. startingB: " <<
+        currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+    MarkSweep::InitializePhase();
+  }
+}
+
+
+void PartialIPCMarkSweep::MarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     PartialIPCMarkSweep::MarkingPhase. startingA: " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+
+  MarkSweep::MarkingPhase();
+
+}
+
+StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+    const std::string& name_prefix) :
+    StickyIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
+    StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
+        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+
+}
+
+
+
+void StickyIPCMarkSweep::FinishPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     StickyIPCMarkSweep::FinishPhase...begin:" <<
+      currThread->GetTid();
+  StickyMarkSweep::FinishPhase();
+}
+
+void StickyIPCMarkSweep::InitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  {
+    LOG(ERROR) << "     StickyIPCMarkSweep::InitializePhase. startingB: " <<
+        currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+    StickyMarkSweep::InitializePhase();
+  }
+}
+
+void StickyIPCMarkSweep::MarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "     StickyIPCMarkSweep::MarkingPhase. startingA: " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+
+  StickyMarkSweep::MarkingPhase();
+
+}
+
+#if 0
 
 class ClientIpcCollectorTask : public Task {
  public:
@@ -135,32 +391,7 @@ class ClientIpcCollectorTask : public Task {
 };
 
 
-bool IPCMarkSweep::StartCollectorDaemon(void) {
-  LOG(ERROR) << "------------------Start Collector IPC Daemon";
 
-  thread_pool_.reset(new ThreadPool(1));
-
-  CHECK_PTHREAD_CALL(pthread_create,
-      (&collector_pthread_, NULL,
-      &IPCMarkSweep::RunDaemon, this),
-      "IPC mark-sweep Daemon thread");
-
-  Thread* self = Thread::Current();
-  MutexLock mu(self, ms_lock_);
-  LOG(ERROR) << "------------------StartCollectorDaemon--->going to wait";
-  while (collector_daemon_ == NULL) {
-    ms_cond_.Wait(self);
-  }
-
-  LOG(ERROR) << "------------------StartCollectorDaemon--->leaving";
-
- // thread_pool_->AddTask(self,
- //     new ClientIpcCollectorTask(conc_req_cond_mu_, conc_req_cond_));
-
-
-
-  return true;
-}
 
 //void IPCMarkSweep::InitialPhase(){
 //  Thread* currThread = Thread::Current();
@@ -368,31 +599,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
   return true;
 }
 
-void* IPCMarkSweep::RunDaemon(void* arg) {
-  LOG(ERROR) << "IPCMarkSweep::RunDaemon::Begin" ;
-  IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
-  CHECK(_ipc_ms != NULL);
 
-  Runtime* runtime = Runtime::Current();
-  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
-
-  Thread* self = Thread::Current();
-  DCHECK_NE(self->GetState(), kRunnable);
-  {
-    MutexLock mu(self, _ipc_ms->ms_lock_);
-    _ipc_ms->collector_daemon_ = self;
-    _ipc_ms->ms_cond_.Broadcast(self);
-  }
-
-
-  LOG(ERROR) << "IPCMarkSweep::RunDaemon::Broadcast" ;
-  bool collector_loop = true;
-  while(collector_loop) {
-    collector_loop = _ipc_ms->RunCollectorDaemon();
-  }
-
-  return NULL;
-}
 
 void IPCMarkSweep::PreConcMarkingPhase(void) {
   Thread* currThread = Thread::Current();
@@ -420,7 +627,7 @@ void IPCMarkSweep::FinishPhase(void) {
 //    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
 //        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 //  }
-  StickyMarkSweep::FinishPhase();
+  MarkSweep::FinishPhase();
   //FinalizePhase();
   //ResetPhase();
   //LOG(ERROR) << "IPCMarkSweep::FinishPhase...Left:" << currThread->GetTid();
@@ -453,14 +660,14 @@ void IPCMarkSweep::MarkingPhase(void) {
 //  }
 //  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
 //      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-  StickyMarkSweep::MarkingPhase();
+  MarkSweep::MarkingPhase();
 //  PreConcMarkingPhase();
 //  ConcMarkPhase();
 //  ReclaimClientPhase();
 }
 
 
-
+#endif
 }
 }
 }

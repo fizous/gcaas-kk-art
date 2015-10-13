@@ -11,7 +11,9 @@
 #include "ipcfs/ipcfs.h"
 #include "thread.h"
 #include "gc/heap.h"
+#include "mark_sweep.h"
 #include "sticky_mark_sweep.h"
+#include "partial_mark_sweep.h"
 #include "gc/space/space.h"
 
 
@@ -32,16 +34,10 @@ namespace gc {
 
 namespace collector {
 
-class IPCMarkSweep : public StickyMarkSweep {
- public:
-//  virtual GcType GetGcType() const {
-//    return kGcTypeSticky;
-//  }
-  space::GCSrvSharableHeapData* meta_;
-  mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
-  ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);
-  Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
-  pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
+
+class IPCHeap;
+
+class AbstractIPCMarkSweep {
 
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
@@ -50,26 +46,67 @@ class IPCMarkSweep : public StickyMarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
+  IPCHeap* ipc_heap_;
+  space::GCSrvSharableHeapData* heap_meta_;
+
+
+  // IPCMarkSweep(space::GCSrvSharableHeapData*);
+  AbstractIPCMarkSweep(IPCHeap* ipcHeap,
+       bool is_concurrent, const std::string& name_prefix = "");
+
+  void ResetMetaDataUnlocked();
+
+  void DumpValues(void);
+};//AbstractIPCMarkSweep
+
+
+class IPCHeap {
+ public:
+  mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);
+
+  IPCHeap(space::GCSrvSharableHeapData*, Heap*);
+
+  space::GCSrvSharableHeapData* meta_;
+  Heap* local_heap_;
+
   InterProcessMutex* conc_req_cond_mu_;
   InterProcessConditionVariable* conc_req_cond_;
 
 
+  Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
+  pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
+
+  // vector of collectors
+  std::vector<collector::AbstractIPCMarkSweep*> ipc_mark_sweep_collectors_;
+
+  void SetCollectorDaemon(Thread* thread);
+
+  static void* RunDaemon(void* arg);
+  bool StartCollectorDaemon(void);
+  bool RunCollectorDaemon(void);
+
+  void ResetHeapMetaDataUnlocked(void);
+  void CreateCollectors(void);
+
+
+  void ConcurrentGC(void);
+};
+
+
+class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
+ public:
+
   // Parallel GC data structures.
   UniquePtr<ThreadPool> thread_pool_;
 
-  bool halt_ GUARDED_BY(ms_lock_);
+ // bool halt_ GUARDED_BY(ms_lock_);
 
   bool RunCollectorDaemon(void);
-  bool StartCollectorDaemon(void);
-
-  static void* RunDaemon(void* arg);
 
 
- // IPCMarkSweep(space::GCSrvSharableHeapData*);
-  IPCMarkSweep(space::GCSrvSharableHeapData* alloc_meta, Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
-  void ResetMetaDataUnlocked();
-  void DumpValues(void);
-
+  IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+      const std::string& name_prefix = "");
 
   /* overriding the Marksweep code*/
   void InitializePhase(void);
@@ -77,17 +114,20 @@ class IPCMarkSweep : public StickyMarkSweep {
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   /** GC Phases **/
 
-  void ReclaimClientPhase(void);
-  void PreInitCollector(void);
-  void PreConcMarkingPhase(void);
-  void ConcMarkPhase(void);
-  void ResetPhase(void);
+//  void ReclaimClientPhase(void);
+//  void PreInitCollector(void);
+//  void PreConcMarkingPhase(void);
+//  void ConcMarkPhase(void);
+//  void ResetPhase(void);
+//  void FinalizePhase(void);
+
+
 //
 //  void InitialPhase(void);
 //  void MarkRootPhase(void);
 //
 //  void ReclaimPhase(void);
-  void FinalizePhase(void);
+
 //  void ServerRun(void);
 //
 //  void ClientRun(void);
@@ -97,6 +137,29 @@ class IPCMarkSweep : public StickyMarkSweep {
 //  void ClientReclaimPhase(void);
 //  void ClientFinishPhase(void);
 }; //class IPCMarkSweep
+
+
+class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep {
+ public:
+  PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+      const std::string& name_prefix = "");
+  /* overriding the PartialMarkSweep code*/
+  void InitializePhase(void);
+  void FinishPhase();
+  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+};
+
+class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
+ public:
+  StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+      const std::string& name_prefix = "");
+
+  /* overriding the PartialMarkSweep code*/
+  void InitializePhase(void);
+  void FinishPhase();
+  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+};
+
 
 
 
