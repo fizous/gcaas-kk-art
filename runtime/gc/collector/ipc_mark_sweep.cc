@@ -278,9 +278,9 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    PartialIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
-    PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
-        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+        PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
+            name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS"),
+    PartialIPCMarkSweep(ipcHeap, is_concurrent, name_prefix){
 
 }
 
