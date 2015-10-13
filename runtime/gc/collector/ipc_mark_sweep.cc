@@ -95,8 +95,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 
 void* IPCHeap::RunDaemon(void* arg) {
   LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
-  IPCMarkSweep* _ipc_ms = reinterpret_cast<IPCMarkSweep*>(arg);
-  CHECK(_ipc_ms != NULL);
+  IPCHeap* _ipc_heap = reinterpret_cast<IPCHeap*>(arg);
+  CHECK(_ipc_heap != NULL);
 
   Runtime* runtime = Runtime::Current();
   CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
@@ -104,14 +104,14 @@ void* IPCHeap::RunDaemon(void* arg) {
   Thread* self = Thread::Current();
   DCHECK_NE(self->GetState(), kRunnable);
   {
-    SetCollectorDaemon(self);
+    _ipc_heap->SetCollectorDaemon(self);
   }
 
 
   LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: broadcast" ;
   bool collector_loop = true;
   while(collector_loop) {
-    collector_loop = _ipc_ms->RunCollectorDaemon();
+    collector_loop = _ipc_heap->RunCollectorDaemon();
   }
 
   return NULL;
