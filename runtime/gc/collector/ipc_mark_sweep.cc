@@ -133,8 +133,8 @@ void IPCHeap::CreateCollectors(void) {
 
 
 
-void IPCHeap::ConcurrentGC(void) {
-  local_heap_->ConcurrentGC(collector_daemon_);
+void IPCHeap::ConcurrentGC(Thread* self) {
+  local_heap_->ConcurrentGC(self);
 }
 
 bool IPCHeap::RunCollectorDaemon() {
@@ -162,7 +162,7 @@ bool IPCHeap::RunCollectorDaemon() {
     conc_req_cond_->Broadcast(self);
   }
   LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
-  ConcurrentGC();
+  ConcurrentGC(self);
   meta_->conc_count_ = meta_->conc_count_ + 1;
   LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;

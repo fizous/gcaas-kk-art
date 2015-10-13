@@ -92,7 +92,7 @@ class IPCHeap {
   void CreateCollectors(void);
 
 
-  void ConcurrentGC(void);
+  void ConcurrentGC(Thread* self);
   ~IPCHeap() {}
 };
 
