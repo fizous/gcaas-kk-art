@@ -151,7 +151,7 @@ bool IPCHeap::RunCollectorDaemon() {
     LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
 
   }
-  Runtime* runtime = Runtime::Current();
+  //Runtime* runtime = Runtime::Current();
 
   ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
   {
