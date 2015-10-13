@@ -279,7 +279,7 @@ PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
     PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
-        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+        name_prefix + (name_prefix.empty() ? "" : " ") + "partialIpcMS") {
 
 }
 
@@ -288,7 +288,7 @@ void PartialIPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     PartialIPCMarkSweep::FinishPhase...begin:" <<
       currThread->GetTid();
-  MarkSweep::FinishPhase();
+  PartialMarkSweep::FinishPhase();
 }
 
 void PartialIPCMarkSweep::InitializePhase(void) {
@@ -296,7 +296,7 @@ void PartialIPCMarkSweep::InitializePhase(void) {
   {
     LOG(ERROR) << "     PartialIPCMarkSweep::InitializePhase. startingB: " <<
         currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
-    MarkSweep::InitializePhase();
+    PartialMarkSweep::InitializePhase();
   }
 }
 
@@ -306,7 +306,7 @@ void PartialIPCMarkSweep::MarkingPhase(void) {
   LOG(ERROR) << "     PartialIPCMarkSweep::MarkingPhase. startingA: " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
 
-  MarkSweep::MarkingPhase();
+  PartialMarkSweep::MarkingPhase();
 
 }
 
@@ -314,7 +314,7 @@ StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
     StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
-        name_prefix + (name_prefix.empty() ? "" : " ") + "stickyipcMS") {
+        name_prefix + (name_prefix.empty() ? "" : " ") + "stickyIpcMS") {
 
 }
 
