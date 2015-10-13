@@ -39,6 +39,7 @@ class IPCHeap;
 
 class AbstractIPCMarkSweep {
  public:
+  IPCHeap* ipc_heap_;
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
@@ -46,13 +47,12 @@ class AbstractIPCMarkSweep {
   InterProcessConditionVariable* barrier_cond_;
 
 
-  IPCHeap* ipc_heap_;
+
   space::GCSrvSharableHeapData* heap_meta_;
 
 
   // IPCMarkSweep(space::GCSrvSharableHeapData*);
-  AbstractIPCMarkSweep(IPCHeap* ipcHeap,
-       bool is_concurrent, const std::string& name_prefix = "");
+  AbstractIPCMarkSweep(IPCHeap* ipcHeap);
 
   void ResetMetaDataUnlocked();
 
@@ -101,7 +101,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
  public:
 
   // Parallel GC data structures.
-  UniquePtr<ThreadPool> thread_pool_;
+//  UniquePtr<ThreadPool> thread_pool_;
 
  // bool halt_ GUARDED_BY(ms_lock_);
 

@@ -189,8 +189,7 @@ bool IPCHeap::RunCollectorDaemon() {
   return true;
 }
 
-AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap,
-    bool is_concurrent, const std::string& name_prefix):
+AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap):
     ipc_heap_(ipcHeap),
     heap_meta_(ipc_heap_->meta_) {
 
@@ -244,7 +243,7 @@ void AbstractIPCMarkSweep::DumpValues(void){
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    AbstractIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
+    AbstractIPCMarkSweep(ipcHeap),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
 
@@ -278,9 +277,9 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-        PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
-            name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS"),
-    PartialIPCMarkSweep(ipcHeap, is_concurrent, name_prefix){
+    AbstractIPCMarkSweep(ipcHeap),
+    PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
+        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
 
 }
 
@@ -313,7 +312,7 @@ void PartialIPCMarkSweep::MarkingPhase(void) {
 
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    StickyIPCMarkSweep(ipcHeap, is_concurrent, name_prefix),
+    AbstractIPCMarkSweep(ipcHeap),
     StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "stickyipcMS") {
 
