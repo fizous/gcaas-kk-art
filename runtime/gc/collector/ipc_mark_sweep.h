@@ -38,7 +38,7 @@ namespace collector {
 class IPCHeap;
 
 class AbstractIPCMarkSweep {
-
+ public:
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
