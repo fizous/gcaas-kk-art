@@ -57,6 +57,8 @@ class AbstractIPCMarkSweep {
   void ResetMetaDataUnlocked();
 
   void DumpValues(void);
+
+  ~AbstractIPCMarkSweep() {}
 };//AbstractIPCMarkSweep
 
 
@@ -91,6 +93,7 @@ class IPCHeap {
 
 
   void ConcurrentGC(void);
+  ~IPCHeap() {}
 };
 
 
@@ -107,11 +110,13 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 
   IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       const std::string& name_prefix = "");
+  ~IPCMarkSweep() {}
 
   /* overriding the Marksweep code*/
   void InitializePhase(void);
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   /** GC Phases **/
 
 //  void ReclaimClientPhase(void);
@@ -143,6 +148,7 @@ class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep
  public:
   PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       const std::string& name_prefix = "");
+  ~PartialIPCMarkSweep() {}
   /* overriding the PartialMarkSweep code*/
   void InitializePhase(void);
   void FinishPhase();
@@ -153,7 +159,7 @@ class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
  public:
   StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       const std::string& name_prefix = "");
-
+  ~StickyIPCMarkSweep() {}
   /* overriding the PartialMarkSweep code*/
   void InitializePhase(void);
   void FinishPhase();
