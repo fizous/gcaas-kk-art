@@ -119,10 +119,10 @@ void* IPCHeap::RunDaemon(void* arg) {
 
 
 void IPCHeap::CreateCollectors(void) {
-  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-      "fullIPC"));
-  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
-      "partialIPC"));
+//  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
+//      "fullIPC"));
+//  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
+//      "partialIPC"));
 
 
   StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
