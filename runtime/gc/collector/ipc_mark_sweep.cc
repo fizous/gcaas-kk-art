@@ -108,6 +108,10 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 }
 
 
+void IPCHeap::AssignNextGCType(void) {
+  next_gc_type_ = local_heap_->next_gc_type_;
+}
+
 void* IPCHeap::RunDaemon(void* arg) {
   LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
   IPCHeap* _ipc_heap = reinterpret_cast<IPCHeap*>(arg);
@@ -387,6 +391,7 @@ void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
   MarkSweep::FinishPhase();
+  ipc_heap_->AssignNextGCType();
 }
 
 void IPCMarkSweep::InitializePhase(void) {
@@ -423,6 +428,7 @@ void PartialIPCMarkSweep::FinishPhase(void) {
   LOG(ERROR) << "     PartialIPCMarkSweep::FinishPhase...begin:" <<
       currThread->GetTid();
   PartialMarkSweep::FinishPhase();
+  ipc_heap_->AssignNextGCType();
 }
 
 void PartialIPCMarkSweep::InitializePhase(void) {
@@ -459,6 +465,8 @@ void StickyIPCMarkSweep::FinishPhase(void) {
   LOG(ERROR) << "     StickyIPCMarkSweep::FinishPhase...begin:" <<
       currThread->GetTid();
   StickyMarkSweep::FinishPhase();
+  ipc_heap_->AssignNextGCType();
+
 }
 
 void StickyIPCMarkSweep::InitializePhase(void) {

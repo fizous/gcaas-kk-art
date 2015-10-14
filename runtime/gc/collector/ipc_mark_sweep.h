@@ -59,6 +59,16 @@ class AbstractIPCMarkSweep {
   void DumpValues(void);
 
   ~AbstractIPCMarkSweep() {}
+
+  /************************
+   * cumulative statistics
+   ************************/
+
+  // Cumulative statistics.
+//  uint64_t total_time_ns_;
+//  uint64_t total_paused_time_ns_;
+//  uint64_t total_freed_objects_;
+//  uint64_t total_freed_bytes_;
 };//AbstractIPCMarkSweep
 
 
@@ -91,6 +101,8 @@ class IPCHeap {
 
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
+
+  void AssignNextGCType(void);
 
   ~IPCHeap() {}
 
