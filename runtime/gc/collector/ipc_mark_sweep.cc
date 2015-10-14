@@ -13,6 +13,7 @@
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
+#include "gc/space/dlmalloc_space-inl.h"
 #include "gc/space/space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 
