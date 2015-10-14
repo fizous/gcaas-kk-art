@@ -102,8 +102,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   next_gc_type_ = collector::kGcTypePartial;
 
   /* heap statistics */
-  meta_->total_objects_freed_ever_  = local_heap_->total_objects_freed_ever_;
-  meta_->total_bytes_freed_ever_    = local_heap_->total_bytes_freed_ever_;
+  meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
+  meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
 }
 
 
