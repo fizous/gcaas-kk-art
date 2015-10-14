@@ -119,40 +119,13 @@ void* IPCHeap::RunDaemon(void* arg) {
 
 
 void IPCHeap::CreateCollectors(void) {
-//  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-//      "fullIPC"));
-//  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
-//      "partialIPC"));
+  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, true,
+      "ipcMS")));
+  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, true,
+      "stickyIPC")));
+  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, true,
+      "partialIPC")));
 
-  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-      "ipcMS"));
-  ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
-      "stickyIPC"));
-  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
-      "partialIPC"));
-
-  // Reset the cumulative loggers since we now have a few additional timing phases.
-  for (const auto& ipcCollector : ipc_mark_sweep_collectors_) {
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(ipcCollector));
-  }
-//  local_heap_->GCPSrvcReinitMarkSweep(iPCMS);
-//  local_heap_->GCPSrvcReinitMarkSweep(partialIPCMS);
-//  local_heap_->GCPSrvcReinitMarkSweep(stickyIPCMS);
-
-//  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-//      "partialIPC"));
-//  ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
-//      "stickyIPC"));
-//  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
-//      "partialIPC"));
-//
-//  std::vector<collector::AbstractIPCMarkSweep*>::iterator iter =
-//      ipc_mark_sweep_collectors_.begin();
-//  while( iter != ipc_mark_sweep_collectors_.end()) {
-//
-//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(*iter));
-//    ++iter;
-//  }
 
 }
 

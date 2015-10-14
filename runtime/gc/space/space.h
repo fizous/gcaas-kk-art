@@ -164,7 +164,14 @@ typedef struct GCSrvSharableHeapData_S {
   /* GC synchronization locks used for phases*/
   SynchronizedLockHead phase_lock_;
   /* GC concurrent signals */
+  // Guards access to the state of GC, associated conditional variable is used to signal when a GC
+  // completes.
   SynchronizedLockHead conc_lock_;
+
+
+  // Guards access to the state of GC, associated conditional variable is used to signal when a GC
+  // completes.
+  SynchronizedLockHead gc_complete_lock_;
 
   byte* const image_space_begin_;
   byte* const image_space_end_;
@@ -174,12 +181,11 @@ typedef struct GCSrvSharableHeapData_S {
 
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
-
   volatile int barrier_count_;
 
+  // used to signal the gc daemon. gurded by conc_lock_
   volatile int conc_flag_;
-  volatile int is_gc_running_;
-  volatile int is_gc_complete_;
+
 
   /* collection stats */
   volatile int32_t freed_objects_;
@@ -192,7 +198,11 @@ typedef struct GCSrvSharableHeapData_S {
   // What kind of concurrency behavior is the runtime after? True for concurrent mark sweep GC,
   // false for stop-the-world mark sweep.
   int concurrent_gc_;
-
+  // True while the garbage collector is running. guarded by gc_complete_lock_
+  volatile int is_gc_running_;
+  // Guards access to the state of GC, associated conditional variable is used to signal when a GC
+  // completes.
+  volatile int is_gc_complete_;
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {

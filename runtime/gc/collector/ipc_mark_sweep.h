@@ -79,9 +79,6 @@ class IPCHeap {
   Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
   pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
 
-  // vector of collectors
-  std::vector<collector::AbstractIPCMarkSweep*> ipc_mark_sweep_collectors_;
-
   void SetCollectorDaemon(Thread* thread);
 
   static void* RunDaemon(void* arg);
