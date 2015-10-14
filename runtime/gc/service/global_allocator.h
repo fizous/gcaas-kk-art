@@ -201,6 +201,9 @@ class ServerCollector {
   InterProcessConditionVariable* conc_req_cond_;
 
 
+  InterProcessMutex* gc_complete_mu_;
+  InterProcessConditionVariable* gc_complete_cond_;
+
   void SignalCollector(void);
   void WaitForRequest(void);
   void WaitForGCTask(void);

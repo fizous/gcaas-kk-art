@@ -262,6 +262,9 @@ class MarkSweep : public GarbageCollector {
     return *gc_barrier_;
   }
 
+  void SetClearSoftReferences(bool val) {
+    clear_soft_references_ = val;
+  }
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarked(const mirror::Object* object) const;

@@ -233,7 +233,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << "Could not find garbage collector with concurrent=" << meta_->concurrent_gc_
       << " and type=" << gc_type;
 
-  collector->clear_soft_references_ = clear_soft_references;
+  collector->SetClearSoftReferences(clear_soft_references);
   collector->Run();
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
   meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
@@ -283,8 +283,7 @@ bool IPCHeap::RunCollectorDaemon() {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 //    meta_->is_gc_complete_ = 1;
-    meta_->is_gc_running_  = 0;
-    meta_->conc_flag_ = 0;
+    meta_->conc_flag_ = 2;
     conc_req_cond_->Broadcast(self);
   }
 //  {
