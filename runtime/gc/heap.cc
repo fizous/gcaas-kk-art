@@ -2107,14 +2107,14 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
     } else if (target_size < bytes_allocated + min_free_) {
       target_size = bytes_allocated + min_free_;
     }
-    next_gc_type_ = collector::kGcTypeSticky;
+    SetNextGCType(collector::kGcTypeSticky);
   } else {
     // Based on how close the current heap size is to the target size, decide
     // whether or not to do a partial or sticky GC next.
     if (bytes_allocated + min_free_ <= max_allowed_footprint_) {
-      next_gc_type_ = collector::kGcTypeSticky;
+      SetNextGCType(collector::kGcTypeSticky);
     } else {
-      next_gc_type_ = collector::kGcTypePartial;
+      SetNextGCType(collector::kGcTypePartial);
     }
 
     // If we have freed enough memory, shrink the heap back down.

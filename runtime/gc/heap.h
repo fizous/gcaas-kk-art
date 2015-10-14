@@ -532,6 +532,11 @@ class Heap {
 
   void GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector);
   void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
+
+
+  volatile void SetNextGCType(collector::GcType gc_type) {
+    next_gc_type_ = gc_type;
+  }
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

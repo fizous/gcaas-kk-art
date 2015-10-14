@@ -97,6 +97,7 @@ class IPCHeap {
   /* Collection methods */
   void ConcurrentGC(Thread* self);
   void ExplicitGC(bool clear_soft_references);
+  void TrimHeap(void);
   collector::GcType WaitForConcurrentIPCGcToComplete(Thread* self);
 
   collector::GcType CollectGarbageIPC(collector::GcType gc_type,

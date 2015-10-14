@@ -147,7 +147,16 @@ void IPCHeap::CreateCollectors(void) {
 
 
 void IPCHeap::ConcurrentGC(Thread* self) {
-  local_heap_->ConcurrentGC(self);
+  {
+    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+    if (Runtime::Current()->IsShuttingDown()) {
+      return;
+    }
+  }
+  if (local_heap_->WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
+    CollectGarbageIPC(local_heap_->next_gc_type_, kGcCauseBackground, false);
+  }
+//  local_heap_->ConcurrentGC(self);
 //  {
 //    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
 //    if (Runtime::Current()->IsShuttingDown()) {
@@ -165,6 +174,9 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
 }
 
+void IPCHeap::TrimHeap(void)  {
+  local_heap_->Trim();
+}
 
 collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
   collector::GcType last_gc_type = collector::kGcTypeNone;
