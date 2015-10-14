@@ -134,10 +134,10 @@ void IPCHeap::CreateCollectors(void) {
   ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
       "partialIPC"));
 
-  std::vector<collector::MarkSweep*>::iterator iter =
+  std::vector<collector::AbstractIPCMarkSweep*>::iterator iter =
       ipc_mark_sweep_collectors_.begin();
   while( iter != ipc_mark_sweep_collectors_.end()) {
-    local_heap_->GCPSrvcReinitMarkSweep(*iter);
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(*iter));
     iter++;
   }
 
