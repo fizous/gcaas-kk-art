@@ -125,7 +125,7 @@ void IPCHeap::CreateCollectors(void) {
 //      "partialIPC"));
 
   ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-      "partialIPC"));
+      "ipcMS"));
   ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
       "stickyIPC"));
   ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
