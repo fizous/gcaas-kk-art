@@ -138,14 +138,16 @@ void* IPCHeap::RunDaemon(void* arg) {
 
 
 void IPCHeap::CreateCollectors(void) {
-  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, true,
-      "ipcMS")));
-  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, true,
-      "stickyIPC")));
-  local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, true,
-      "partialIPC")));
-
-
+  bool _conc_flag = false;
+  for(int i = 0 ; i < 2 ; i ++) {
+    _conc_flag = (i != 0);
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, _conc_flag,
+        "ipcMS")));
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, _conc_flag,
+        "stickyIPC")));
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, _conc_flag,
+        "partialIPC")));
+  }
 }
 
 
