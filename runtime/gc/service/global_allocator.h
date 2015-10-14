@@ -39,6 +39,7 @@ typedef enum {
   GC_SERVICE_TASK_NOP = 0,
   GC_SERVICE_TASK_REG,
   GC_SERVICE_TASK_CONC,
+  GC_SERVICE_TASK_EXPLICIT,
   GC_SERVICE_TASK_TRIM,
   GC_SERVICE_TASK_STATS,
   GC_SERVICE_TASK_MAX_LIMIT
@@ -121,6 +122,7 @@ class GCSrvcClientHandShake {
   android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
   void ReqConcCollection(void*);
+  void ReqExplicitCollection(void*);
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
   void ListenToRequests(void*);

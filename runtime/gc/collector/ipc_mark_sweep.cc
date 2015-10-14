@@ -97,7 +97,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 //  meta_->is_gc_complete_  = 0;
   meta_->is_gc_running_   = 0;
   meta_->conc_count_      = 0;
-
+  meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;;
   /* heap members */
   last_gc_type_ = collector::kGcTypeNone;
   next_gc_type_ = collector::kGcTypePartial;
@@ -148,11 +148,21 @@ void IPCHeap::CreateCollectors(void) {
 
 void IPCHeap::ConcurrentGC(Thread* self) {
   local_heap_->ConcurrentGC(self);
+//  {
+//    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+//    if (Runtime::Current()->IsShuttingDown()) {
+//      return;
+//    }
+//  }
+//  if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
+//    CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
+//  }
 }
 
-void IPCHeap::CollectGarbage(bool clear_soft_references)  {
-//  Thread* self = Thread::Current();
-//  WaitForConcurrentGcToComplete(self);
+void IPCHeap::ExplicitGC(bool clear_soft_references)  {
+  Thread* self = Thread::Current();
+  WaitForConcurrentIPCGcToComplete(self);
+  CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
 }
 
 
