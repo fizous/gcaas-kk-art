@@ -215,6 +215,21 @@ void ServerCollector::ExecuteGC(void) {
 }
 
 
+class ServerIPCListenerTask : public WorkStealingTask {
+ public:
+  ServerIPCListenerTask() : WorkStealingTask() {
+    LOG(ERROR) << "creating worker stealing task listener";
+  }
+  void StealFrom(Thread* self, WorkStealingTask* source) {
+    source->Run(self);
+  }
+
+  // Scans all of the objects
+  virtual void Run(Thread* self) {
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran @@@@@@@@@@@@@@@@@@@ " << self->GetTid();
+  }
+};
+
 
 void ServerCollector::WaitForGCTask(void) {
   Thread* self = Thread::Current();
@@ -265,6 +280,12 @@ void ServerCollector::WaitForGCTask(void) {
 
 void ServerCollector::Run(void) {
   LOG(ERROR) << "ServerCollector::Run";
+
+  /* initialize gc_workers_pool_ */
+  Thread* self = Thread::Current();
+  gc_workers_pool_ = new WorkStealingThreadPool(3);
+  gc_workers_pool_->AddTask(self, new ServerIPCListenerTask());
+
   while(true) {
     LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
     WaitForRequest();

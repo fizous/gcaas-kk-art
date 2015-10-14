@@ -219,6 +219,10 @@ class ServerCollector {
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);
 
+  ThreadPool* gc_workers_pool_;
+  /*********** task queues ************/
+
+
 };//class ServerCollector
 
 
