@@ -213,7 +213,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   }
 
   if (gc_type == collector::kGcTypeSticky &&
-      local_heap_->alloc_space_->Size() < local_heap_->min_alloc_space_size_for_sticky_gc_) {
+      local_heap_->GetAllocSpace()->Size() < local_heap_->GetMinAllocSpaceSizeForSticky()) {
     gc_type = collector::kGcTypePartial;
   }
 
