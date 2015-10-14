@@ -25,7 +25,7 @@
 #define GC_IPC_BLOCK_ON_PHASE(PHASE, THREAD) \
     ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess); \
     IPMutexLock interProcMu(THREAD, *phase_mu_); \
-    while(meta_->gc_phase_ != PHASE) \
+    while(heap_meta_->gc_phase_ != PHASE) \
       phase_cond_->Wait(THREAD);
 
 namespace art {
@@ -59,6 +59,8 @@ class AbstractIPCMarkSweep {
   void DumpValues(void);
 
   ~AbstractIPCMarkSweep() {}
+
+  void HandshakeMarkingPhase(void);
 
   /************************
    * cumulative statistics
@@ -120,6 +122,9 @@ class IPCHeap {
   //protected by gc_complete_lock_
   volatile collector::GcType last_gc_type_;
   collector::GcType next_gc_type_;
+
+  //indicated that the cycle was executed by a ipc collector due to signal from server.
+  volatile int ipc_flag_raised_;
 };
 
 

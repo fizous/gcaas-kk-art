@@ -29,7 +29,8 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     ms_cond_("heap-ipcs::cond_", ms_lock_),
     meta_(heap_meta),
     local_heap_(heap),
-    collector_daemon_(NULL) {
+    collector_daemon_(NULL),
+    ipc_flag_raised_(0) {
 
   /* concurrent glags locks */
   SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
@@ -160,6 +161,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
     }
   }
   if (local_heap_->WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
+    ipc_flag_raised_ = 1;
     CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
   }
 //  local_heap_->ConcurrentGC(self);
@@ -378,7 +380,26 @@ void AbstractIPCMarkSweep::DumpValues(void){
 
 
 
+void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
 
+  if(ipc_heap_->ipc_flag_raised_ == 1) {
+    LOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
+    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+    heap_meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
+    LOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
+    ipc_heap_->ipc_flag_raised_ = 0;
+    phase_cond_->Broadcast(currThread);
+  } else {
+    LOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
+}
 
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
@@ -418,13 +439,14 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 
 
+
+
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<IPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
   {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-    phase_cond_->Broadcast(currThread);
+    HandshakeMarkingPhase();
   }
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
@@ -474,8 +496,8 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
   {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-    phase_cond_->Broadcast(currThread);
+
+    HandshakeMarkingPhase();
   }
   PartialMarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
@@ -526,8 +548,7 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << " <<StickyIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
   {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-    phase_cond_->Broadcast(currThread);
+    HandshakeMarkingPhase();
   }
   StickyMarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
