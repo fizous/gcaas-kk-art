@@ -134,8 +134,6 @@ void IPCHeap::CreateCollectors(void) {
   // Reset the cumulative loggers since we now have a few additional timing phases.
   for (const auto& ipcCollector : ipc_mark_sweep_collectors_) {
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(ipcCollector));
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(ipcCollector));
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(ipcCollector));
   }
 //  local_heap_->GCPSrvcReinitMarkSweep(iPCMS);
 //  local_heap_->GCPSrvcReinitMarkSweep(partialIPCMS);
