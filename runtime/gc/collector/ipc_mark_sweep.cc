@@ -125,10 +125,22 @@ void IPCHeap::CreateCollectors(void) {
 //      "partialIPC"));
 
 
-  StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
-      "stickyIPC");
-  ipc_mark_sweep_collectors_.push_back(stickyIPCMS);
-  local_heap_->GCPSrvcReinitMarkSweep(stickyIPCMS);
+//  StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
+//      "stickyIPC");
+  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
+      "partialIPC"));
+  ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
+      "stickyIPC"));
+  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
+      "partialIPC"));
+
+  std::vector<collector::MarkSweep*>::iterator iter =
+      ipc_mark_sweep_collectors_.begin();
+  while( iter != ipc_mark_sweep_collectors_.end()) {
+    local_heap_->GCPSrvcReinitMarkSweep(*iter);
+    iter++;
+  }
+
 }
 
 
