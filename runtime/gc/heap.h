@@ -824,6 +824,7 @@ class Heap {
   const bool running_on_valgrind_;
 
   friend class collector::MarkSweep;
+  friend class collector::IPCHeap;
   friend class VerifyReferenceCardVisitor;
   friend class VerifyReferenceVisitor;
   friend class VerifyObjectVisitor;
