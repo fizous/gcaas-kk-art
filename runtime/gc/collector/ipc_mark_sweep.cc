@@ -240,7 +240,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 
   {
-      MutexLock mu(self, *gc_complete_mu_);
+      IPMutexLock interProcMu(self, *gc_complete_mu_);
       meta_->is_gc_running_ = false;
       last_gc_type_ = gc_type;
       // Wake anyone who may have been waiting for the GC to complete.
