@@ -30,13 +30,19 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     local_heap_(heap),
     collector_daemon_(NULL) {
 
-  /* initialize locks */
+  /* concurrent glags locks */
   SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
   SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
-
   conc_req_cond_mu_ = new InterProcessMutex("GCConc Mutex", _conc_futexAddress);
   conc_req_cond_ = new InterProcessConditionVariable("GCConc CondVar",
       *conc_req_cond_mu_, _conc_condAddress);
+
+  /* initialize gc complete locks */
+  SharedFutexData* _complete_futexAddress = &meta_->gc_complete_lock_.futex_head_;
+  SharedConditionVarData* _complete_condAddress = &meta_->gc_complete_lock_.cond_var_;
+  gc_complete_mu_ = new InterProcessMutex("GCComplete Mutex", _complete_futexAddress);
+  gc_complete_cond_ = new InterProcessConditionVariable("GCcomplete CondVar",
+      *gc_complete_mu_, _complete_condAddress);
 
 //  if(!StartCollectorDaemon()) {
 //    LOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
@@ -87,9 +93,17 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->freed_bytes_     = 0;
   meta_->barrier_count_   = 0;
   meta_->conc_flag_       = 0;
-  meta_->is_gc_complete_  = 0;
+//  meta_->is_gc_complete_  = 0;
   meta_->is_gc_running_   = 0;
   meta_->conc_count_      = 0;
+
+  /* heap members */
+  last_gc_type_ = collector::kGcTypeNone;
+  next_gc_type_ = collector::kGcTypePartial;
+
+  /* heap statistics */
+  meta_->total_objects_freed_ever_  = local_heap_->total_objects_freed_ever_;
+  meta_->total_bytes_freed_ever_    = local_heap_->total_bytes_freed_ever_;
 }
 
 
@@ -141,6 +155,100 @@ void IPCHeap::CollectGarbage(bool clear_soft_references)  {
 }
 
 
+collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
+  collector::GcType last_gc_type = collector::kGcTypeNone;
+  bool do_wait = false;
+  if(meta_->concurrent_gc_) { // the heap is concurrent
+    {
+      IPMutexLock interProcMu(self, *gc_complete_mu_);
+      do_wait = meta_->is_gc_running_;
+    }
+    if(do_wait) {
+      // We must wait, change thread state then sleep on gc_complete_cond_;
+      ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGcToComplete);
+      IPMutexLock interProcMu(self, *gc_complete_mu_);
+      while (meta_->is_gc_running_ == 1) {
+        gc_complete_cond_->Wait(self);
+      }
+      last_gc_type = last_gc_type_;
+    }
+  }
+  return last_gc_type;
+}
+
+
+collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
+    GcCause gc_cause, bool clear_soft_references) {
+  Thread* self = Thread::Current();
+
+  ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
+  Locks::mutator_lock_->AssertNotHeld(self);
+
+  if (self->IsHandlingStackOverflow()) {
+    LOG(WARNING) << "Performing GC on a thread that is handling a stack overflow.";
+  }
+
+  // Ensure there is only one GC at a time.
+  bool start_collect = false;
+  while (!start_collect) {
+    {
+      IPMutexLock interProcMu(self, *gc_complete_mu_);
+      if (meta_->is_gc_running_ == 0) {
+        meta_->is_gc_running_ = 1;
+        start_collect = true;
+      }
+    }
+    if (!start_collect) {
+      // TODO: timinglog this.
+      WaitForConcurrentIPCGcToComplete(self);
+
+      // TODO: if another thread beat this one to do the GC, perhaps we should just return here?
+      //       Not doing at the moment to ensure soft references are cleared.
+    }
+  }
+
+  if (gc_cause == kGcCauseForAlloc && Runtime::Current()->HasStatsEnabled()) {
+    ++Runtime::Current()->GetStats()->gc_for_alloc_count;
+    ++Thread::Current()->GetStats()->gc_for_alloc_count;
+  }
+
+  if (gc_type == collector::kGcTypeSticky &&
+      local_heap_->alloc_space_->Size() < local_heap_->min_alloc_space_size_for_sticky_gc_) {
+    gc_type = collector::kGcTypePartial;
+  }
+
+  collector::MarkSweep* collector = NULL;
+
+  for (const auto& cur_collector : local_heap_->mark_sweep_collectors_) {
+    if (cur_collector->IsConcurrent() == meta_->concurrent_gc_ && cur_collector->GetGcType() == gc_type) {
+      collector = cur_collector;
+      if(gc_cause == kGcCauseBackground)
+        LOG(ERROR) << "========collector: " << collector->GetName();
+      break;
+    }
+  }
+
+  CHECK(collector != NULL)
+      << "Could not find garbage collector with concurrent=" << meta_->concurrent_gc_
+      << " and type=" << gc_type;
+
+  collector->clear_soft_references_ = clear_soft_references;
+  collector->Run();
+  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
+  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
+
+
+  {
+      MutexLock mu(self, *gc_complete_mu_);
+      meta_->is_gc_running_ = false;
+      last_gc_type_ = gc_type;
+      // Wake anyone who may have been waiting for the GC to complete.
+      gc_complete_cond_->Broadcast(self);
+  }
+
+  return gc_type;
+}
+
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
   LOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
@@ -157,14 +265,14 @@ bool IPCHeap::RunCollectorDaemon() {
   }
   //Runtime* runtime = Runtime::Current();
 
-  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
-  {
-    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->is_gc_running_ = 1;
-    //meta_->conc_flag_ = 0;
-   // meta_->is_gc_complete_ = 0;
-    conc_req_cond_->Broadcast(self);
-  }
+//  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
+//  {
+//    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+//    meta_->is_gc_running_ = 1;
+//    //meta_->conc_flag_ = 0;
+//   // meta_->is_gc_complete_ = 0;
+//    conc_req_cond_->Broadcast(self);
+//  }
   LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   ConcurrentGC(self);
   meta_->conc_count_ = meta_->conc_count_ + 1;
@@ -173,7 +281,7 @@ bool IPCHeap::RunCollectorDaemon() {
   ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->is_gc_complete_ = 1;
+//    meta_->is_gc_complete_ = 1;
     meta_->is_gc_running_  = 0;
     meta_->conc_flag_ = 0;
     conc_req_cond_->Broadcast(self);
@@ -227,7 +335,7 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
   heap_meta_->freed_bytes_ = 0;
   heap_meta_->barrier_count_ = 0;
   heap_meta_->conc_flag_ = 0;
-  heap_meta_->is_gc_complete_ = 0;
+//  heap_meta_->is_gc_complete_ = 0;
   heap_meta_->is_gc_running_ = 0;
   heap_meta_->conc_count_ = 0;
 }

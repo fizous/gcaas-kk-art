@@ -167,8 +167,6 @@ typedef struct GCSrvSharableHeapData_S {
   // Guards access to the state of GC, associated conditional variable is used to signal when a GC
   // completes.
   SynchronizedLockHead conc_lock_;
-
-
   // Guards access to the state of GC, associated conditional variable is used to signal when a GC
   // completes.
   SynchronizedLockHead gc_complete_lock_;
@@ -200,9 +198,14 @@ typedef struct GCSrvSharableHeapData_S {
   int concurrent_gc_;
   // True while the garbage collector is running. guarded by gc_complete_lock_
   volatile int is_gc_running_;
-  // Guards access to the state of GC, associated conditional variable is used to signal when a GC
-  // completes.
-  volatile int is_gc_complete_;
+//  // Guards access to the state of GC, associated conditional variable is used to signal when a GC
+//  // completes.
+//  volatile int is_gc_complete_;
+  // Since the heap was created, how many bytes have been freed.
+  size_t total_bytes_freed_ever_;
+
+  // Since the heap was created, how many objects have been freed.
+  size_t total_objects_freed_ever_;
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {

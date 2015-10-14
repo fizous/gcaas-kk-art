@@ -76,6 +76,10 @@ class IPCHeap {
   InterProcessConditionVariable* conc_req_cond_;
 
 
+  InterProcessMutex* gc_complete_mu_;
+  InterProcessConditionVariable* gc_complete_cond_;
+
+
   Thread*   collector_daemon_ GUARDED_BY(ms_lock_);
   pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
 
@@ -93,7 +97,16 @@ class IPCHeap {
   /* Collection methods */
   void ConcurrentGC(Thread* self);
   void CollectGarbage(bool clear_soft_references);
+  collector::GcType WaitForConcurrentIPCGcToComplete(Thread* self);
 
+  collector::GcType CollectGarbageIPC(collector::GcType gc_type,
+      GcCause gc_cause, bool clear_soft_references);
+
+  /* members replacing the heap main members */
+  //Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
+  //protected by gc_complete_lock_
+  volatile collector::GcType last_gc_type_;
+  collector::GcType next_gc_type_;
 };
 
 
