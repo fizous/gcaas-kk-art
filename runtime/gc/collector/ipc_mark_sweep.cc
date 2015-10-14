@@ -392,6 +392,7 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   MarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
 }
@@ -421,6 +422,8 @@ void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<IPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+  phase_cond_->Broadcast(currThread);
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
@@ -462,6 +465,19 @@ void PartialIPCMarkSweep::MarkingPhase(void) {
 
 }
 
+
+
+void PartialIPCMarkSweep::MarkReachableObjects() {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
+      currThread->GetTid() ;
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+  phase_cond_->Broadcast(currThread);
+  PartialMarkSweep::MarkReachableObjects();
+  LOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
+      currThread->GetTid() ;
+}
+
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
@@ -497,6 +513,19 @@ void StickyIPCMarkSweep::MarkingPhase(void) {
 
   StickyMarkSweep::MarkingPhase();
 
+}
+
+
+
+void StickyIPCMarkSweep::MarkReachableObjects() {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << " <<StickyIPCMarkSweep::MarkReachableObjects. starting: " <<
+      currThread->GetTid() ;
+  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+  phase_cond_->Broadcast(currThread);
+  StickyMarkSweep::MarkReachableObjects();
+  LOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
+      currThread->GetTid() ;
 }
 
 #if 0

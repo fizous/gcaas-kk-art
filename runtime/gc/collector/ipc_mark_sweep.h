@@ -20,7 +20,7 @@
 #define GC_IPC_COLLECT_PHASE(PHASE, THREAD) \
     ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess);  \
     IPMutexLock interProcMu(THREAD, *phase_mu_); \
-    meta_->gc_phase_ = PHASE;
+    heap_meta_->gc_phase_ = PHASE;
 
 #define GC_IPC_BLOCK_ON_PHASE(PHASE, THREAD) \
     ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess); \
@@ -181,6 +181,9 @@ class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep
   void InitializePhase(void);
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  void MarkReachableObjects()
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 };
 
 class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
@@ -192,6 +195,9 @@ class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
   void InitializePhase(void);
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  void MarkReachableObjects()
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 };
 
 
