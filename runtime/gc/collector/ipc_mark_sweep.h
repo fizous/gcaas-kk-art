@@ -95,7 +95,7 @@ class IPCHeap {
 
   /* Collection methods */
   void ConcurrentGC(Thread* self);
-  void IPCHeap::CollectGarbage(bool clear_soft_references);
+  void CollectGarbage(bool clear_soft_references);
 
 };
 
