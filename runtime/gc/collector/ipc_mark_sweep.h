@@ -142,7 +142,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void InitializePhase(void);
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
+  void MarkReachableObjects()
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   /** GC Phases **/
 
 //  void ReclaimClientPhase(void);

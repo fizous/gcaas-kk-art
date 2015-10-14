@@ -158,7 +158,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
     }
   }
   if (local_heap_->WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
-    CollectGarbageIPC(local_heap_->next_gc_type_, kGcCauseBackground, false);
+    CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
   }
 //  local_heap_->ConcurrentGC(self);
 //  {
@@ -413,6 +413,16 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 }
 
+
+
+void IPCMarkSweep::MarkReachableObjects() {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << " <<IPCMarkSweep::MarkReachableObjects. starting: " <<
+      currThread->GetTid() ;
+  MarkSweep::MarkReachableObjects();
+  LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
+      currThread->GetTid() ;
+}
 
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
