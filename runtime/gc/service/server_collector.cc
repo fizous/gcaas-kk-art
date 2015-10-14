@@ -182,19 +182,25 @@ class ServerMarkReachableTask : public WorkStealingTask {
   // Scans all of the objects
   virtual void Run(Thread* self) {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ " << self->GetTid();
+//    {
+//      ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+//      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
+//      while(server_instant_->heap_data_->gc_phase_ != space::IPC_GC_PHASE_MARK_REACHABLES) {
+//        server_instant_->phase_cond_->Wait(self);
+//      }
+//      LOG(ERROR) << "Phase TASK noticed change" << self->GetTid();
+//    }
     {
-      ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
-      while(server_instant_->heap_data_->gc_phase_ != space::IPC_GC_PHASE_MARK_REACHABLES) {
-        server_instant_->phase_cond_->Wait(self);
-      }
-      LOG(ERROR) << "Phase TASK noticed change" << self->GetTid();
+      LOG(ERROR) << "@@@@@@@@@@@@@@@@Phase TASK updated the phase of the GC: " << self->GetTid() << server_instant_->heap_data_->gc_phase_;
       server_instant_->heap_data_->gc_phase_ = space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK;
       server_instant_->phase_cond_->Broadcast(self);
+      LOG(ERROR) << "@@@@@@@@@@@@@@@@Phase TASK updated the phase of the GC: " << self->GetTid() << server_instant_->heap_data_->gc_phase_;
     }
   }
 
   virtual void Finalize() {
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@Finalize@@@@@@@@@@@@";
     delete this;
   }
 };
@@ -205,6 +211,7 @@ void ServerCollector::ExecuteGC(void) {
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
 
   gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks";
   gc_workers_pool_->StartWorkers(self);
 
 
@@ -225,6 +232,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->Wait(self, true, true);
+  LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call";
  // ConcMarkPhaseGC();
 
 

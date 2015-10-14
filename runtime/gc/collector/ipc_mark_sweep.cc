@@ -422,8 +422,10 @@ void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<IPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-  phase_cond_->Broadcast(currThread);
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
@@ -471,8 +473,10 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-  phase_cond_->Broadcast(currThread);
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
   PartialMarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
@@ -521,8 +525,10 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<StickyIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-  phase_cond_->Broadcast(currThread);
+  {
+    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+    phase_cond_->Broadcast(currThread);
+  }
   StickyMarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
