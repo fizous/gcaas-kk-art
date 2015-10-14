@@ -324,7 +324,7 @@ void ServerCollector::Run(void) {
   LOG(ERROR) << "ServerCollector::Run";
 
   /* initialize gc_workers_pool_ */
-  Thread* self = Thread::Current();
+ // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
 
 
