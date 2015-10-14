@@ -91,9 +91,12 @@ class IPCHeap {
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
 
-
-  void ConcurrentGC(Thread* self);
   ~IPCHeap() {}
+
+  /* Collection methods */
+  void ConcurrentGC(Thread* self);
+  void IPCHeap::CollectGarbage(bool clear_soft_references);
+
 };
 
 

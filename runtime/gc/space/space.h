@@ -187,6 +187,12 @@ typedef struct GCSrvSharableHeapData_S {
   volatile int32_t conc_count_;
 
 
+  /****** variables from original heap members *****/
+
+  // What kind of concurrency behavior is the runtime after? True for concurrent mark sweep GC,
+  // false for stop-the-world mark sweep.
+  int concurrent_gc_;
+
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {

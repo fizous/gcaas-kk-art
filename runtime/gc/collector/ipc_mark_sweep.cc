@@ -124,22 +124,32 @@ void IPCHeap::CreateCollectors(void) {
 //  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
 //      "partialIPC"));
 
+  IPCMarkSweep* iPCMS = new IPCMarkSweep(this, true,
+      "partialIPC");
+  StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
+      "stickyIPC");
+  PartialIPCMarkSweep* partialIPCMS = new PartialIPCMarkSweep(this, true,
+      "partialIPC");
 
-//  StickyIPCMarkSweep* stickyIPCMS = new StickyIPCMarkSweep(this, true,
-//      "stickyIPC");
-  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
-      "partialIPC"));
-  ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
-      "stickyIPC"));
-  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
-      "partialIPC"));
 
-  std::vector<collector::AbstractIPCMarkSweep*>::iterator iter =
-      ipc_mark_sweep_collectors_.begin();
-  while( iter != ipc_mark_sweep_collectors_.end()) {
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(*iter));
-    iter++;
-  }
+  local_heap_->GCPSrvcReinitMarkSweep(iPCMS);
+  local_heap_->GCPSrvcReinitMarkSweep(partialIPCMS);
+  local_heap_->GCPSrvcReinitMarkSweep(stickyIPCMS);
+
+//  ipc_mark_sweep_collectors_.push_back(new IPCMarkSweep(this, true,
+//      "partialIPC"));
+//  ipc_mark_sweep_collectors_.push_back(new StickyIPCMarkSweep(this, true,
+//      "stickyIPC"));
+//  ipc_mark_sweep_collectors_.push_back(new PartialIPCMarkSweep(this, true,
+//      "partialIPC"));
+//
+//  std::vector<collector::AbstractIPCMarkSweep*>::iterator iter =
+//      ipc_mark_sweep_collectors_.begin();
+//  while( iter != ipc_mark_sweep_collectors_.end()) {
+//
+//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(*iter));
+//    ++iter;
+//  }
 
 }
 
@@ -148,6 +158,12 @@ void IPCHeap::CreateCollectors(void) {
 void IPCHeap::ConcurrentGC(Thread* self) {
   local_heap_->ConcurrentGC(self);
 }
+
+void IPCHeap::CollectGarbage(bool clear_soft_references)  {
+//  Thread* self = Thread::Current();
+//  WaitForConcurrentGcToComplete(self);
+}
+
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
