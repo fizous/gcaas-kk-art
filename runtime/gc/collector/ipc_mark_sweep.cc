@@ -241,7 +241,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
-      meta_->is_gc_running_ = false;
+      meta_->is_gc_running_ = 0;
       last_gc_type_ = gc_type;
       // Wake anyone who may have been waiting for the GC to complete.
       gc_complete_cond_->Broadcast(self);
@@ -258,7 +258,7 @@ bool IPCHeap::RunCollectorDaemon() {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
-    while(meta_->conc_flag_ == 0) {
+    while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
     LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
