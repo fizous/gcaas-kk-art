@@ -86,6 +86,7 @@ class HeapBitmap;
 namespace collector {
   class GarbageCollector;
   class MarkSweep;
+  class IPCHeap;
 }  // namespace collector
 
 namespace space {
