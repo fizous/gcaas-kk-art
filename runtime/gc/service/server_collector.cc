@@ -76,7 +76,7 @@ void ServerCollector::WaitForRequest(void) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    heap_data_->is_gc_complete_ = 0;
+//    heap_data_->is_gc_complete_ = 0;
     heap_data_->is_gc_running_ = 0;
     conc_req_cond_->Broadcast(self);
   }
@@ -216,13 +216,13 @@ void ServerCollector::WaitForGCTask(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    while(heap_data_->is_gc_complete_ != 1) {
+   /* while(heap_data_->is_gc_complete_ != 1) {
       conc_req_cond_->Wait(self);
       LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
           ", setting conc flag to " << heap_data_->conc_flag_;
-    }
+    }*/
 
-    heap_data_->is_gc_complete_ = 0;
+    /*heap_data_->is_gc_complete_ = 0;*/
     LOG(ERROR) << "ServerCollector::WaitForGCTask.. " << self->GetTid() <<
         ", leaving while flag " << heap_data_->conc_flag_;
    // heap_data_->conc_flag_ = 0;
