@@ -183,7 +183,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   //fizo, we need to override this
   // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
   virtual void SwapBitmaps();
-
+  virtual void BindLiveToMarkBitmap(void);
+  virtual void UnBindBitmaps(void);
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
   DLMALLOC_SPACE_T* CreateZygoteSpace(const char* alloc_space_name,
       bool shareMem = false);
@@ -262,7 +263,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   // Recent allocation buffer.
 
   virtual void SetHeapMeta(DlMallocSpace*, GCSrvceContinuousSpace*){}
-  virtual void BindLiveToMarkBitmap(void);
+
 
 
  protected:

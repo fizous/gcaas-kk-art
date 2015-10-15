@@ -694,6 +694,28 @@ bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   return false;
 }
 
+void DlMallocSpace::BindLiveToMarkBitmap(void) {
+  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
+  accounting::SharedSpaceBitmap* live_bitmap = live_bitmap_.get();
+  accounting::SharedSpaceBitmap* mark_bitmap = mark_bitmap_.get();
+  Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+  temp_bitmap_.reset(mark_bitmap);
+  mark_bitmap_.reset(live_bitmap);
+}
+
+
+void DlMallocSpace::UnBindBitmaps(void) {
+  LOG(ERROR) << " ~~~~~~ DlMallocSpace::UnBindBitmaps ~~~~~~~";
+  if (temp_bitmap_.get() != NULL) {
+    // At this point, the temp_bitmap holds our old mark bitmap.
+    accounting::SPACE_BITMAP* new_bitmap = temp_bitmap_.release();
+    Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap_.get(), new_bitmap);
+    CHECK_EQ(mark_bitmap_.release(), live_bitmap_.get());
+    mark_bitmap_.reset(new_bitmap);
+    DCHECK(temp_bitmap_.get() == NULL);
+  }
+}
+
 //SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
 //  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
 //  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));

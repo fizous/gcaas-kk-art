@@ -492,8 +492,8 @@ void IPCMarkSweep::UnBindBitmaps() {
   LOG(ERROR) << "IPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
-      space::SharableDlMallocSpace* _space =
-          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
+//          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
       _space->UnBindBitmaps();
     }
   }
@@ -502,9 +502,9 @@ void IPCMarkSweep::UnBindBitmaps() {
 void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   LOG(ERROR) << "IPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
-  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
-  space::SharableDlMallocSpace* _space =
-      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
+//  space::SharableDlMallocSpace* _space =
+//      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
   _space->BindLiveToMarkBitmap();
 }
 
@@ -597,8 +597,8 @@ void PartialIPCMarkSweep::UnBindBitmaps() {
   LOG(ERROR) << "PartialIPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
-      space::SharableDlMallocSpace* _space =
-          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
+//          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
       _space->UnBindBitmaps();
     }
   }
@@ -607,9 +607,9 @@ void PartialIPCMarkSweep::UnBindBitmaps() {
 void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   LOG(ERROR) << "PartialIPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
-  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
-  space::SharableDlMallocSpace* _space =
-      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
+//  space::SharableDlMallocSpace* _space =
+//      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
   _space->BindLiveToMarkBitmap();
 }
 
@@ -701,8 +701,8 @@ void StickyIPCMarkSweep::UnBindBitmaps() {
   LOG(ERROR) << "StickyIPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
-      space::SharableDlMallocSpace* _space =
-          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
+//          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
       _space->UnBindBitmaps();
     }
   }
@@ -711,9 +711,9 @@ void StickyIPCMarkSweep::UnBindBitmaps() {
 void StickyIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   LOG(ERROR) << "StickyIPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
-  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
-  space::SharableDlMallocSpace* _space =
-      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
+//  space::SharableDlMallocSpace* _space =
+//      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
   _space->BindLiveToMarkBitmap();
 }
 
