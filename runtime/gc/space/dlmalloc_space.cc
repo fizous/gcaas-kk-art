@@ -696,8 +696,8 @@ bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
 void DlMallocSpace::BindLiveToMarkBitmap(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
-  accounting::SharedSpaceBitmap* live_bitmap = live_bitmap_.get();
-  accounting::SharedSpaceBitmap* mark_bitmap = mark_bitmap_.get();
+  accounting::SPACE_BITMAP* live_bitmap = live_bitmap_.get();
+  accounting::SPACE_BITMAP* mark_bitmap = mark_bitmap_.get();
   Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
   temp_bitmap_.reset(mark_bitmap);
   mark_bitmap_.reset(live_bitmap);
