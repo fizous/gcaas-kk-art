@@ -848,16 +848,18 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
       (strcmp(se_name_c_str, "purdue.dacapo") == 0))) {
     LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
     sharable_space_data_->register_gc_ = 1;
-    AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
-        "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
-        true);
-    if(_local_pointer != NULL) {
-      LOG(ERROR) << "++++++++++++Success Registering " << se_name_c_str << "++++++++++++";
-      unsigned int* _addr = reinterpret_cast<unsigned int*>(_local_pointer->begin_);
-      *_addr = 0xdeadcafe;
-      return true;
+    if(false){
+      AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
+          "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
+          true);
+      if(_local_pointer != NULL) {
+        LOG(ERROR) << "++++++++++++Success Registering " << se_name_c_str << "++++++++++++";
+        unsigned int* _addr = reinterpret_cast<unsigned int*>(_local_pointer->begin_);
+        *_addr = 0xdeadcafe;
+        return true;
+      }
+      LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
     }
-    LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
   } else {
     LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
         se_name_c_str << ")";
