@@ -299,6 +299,10 @@ class Space {
   bool IsLargeObjectSpace() const {
     return GetType() == kSpaceTypeLargeObjectSpace;
   }
+
+  virtual bool IsSharableAllocSpace() {
+    return false;
+  }
   LargeObjectSpace* AsLargeObjectSpace();
 
   virtual ~Space() {}
