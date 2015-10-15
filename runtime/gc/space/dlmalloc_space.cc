@@ -860,6 +860,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
       }
       LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
     }
+    return true;
   } else {
     LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
         se_name_c_str << ")";
