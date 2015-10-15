@@ -713,20 +713,23 @@ void DlMallocSpace::BindLiveToMarkBitmap(void) {
   temp_bitmap_.reset(mark_bitmap);
   mark_bitmap_.reset(live_bitmap);
 }
-
+*/
 
 void DlMallocSpace::UnBindBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ DlMallocSpace::UnBindBitmaps ~~~~~~~";
   if (temp_bitmap_.get() != NULL) {
     // At this point, the temp_bitmap holds our old mark bitmap.
     accounting::SPACE_BITMAP* new_bitmap = temp_bitmap_.release();
-    Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap_.get(), new_bitmap);
-    CHECK_EQ(mark_bitmap_.release(), live_bitmap_.get());
     mark_bitmap_.reset(new_bitmap);
-    DCHECK(temp_bitmap_.get() == NULL);
+//
+//
+//    Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap_.get(), new_bitmap);
+//    CHECK_EQ(mark_bitmap_.release(), live_bitmap_.get());
+//    mark_bitmap_.reset(new_bitmap);
+//    DCHECK(temp_bitmap_.get() == NULL);
   }
 }
-*/
+
 //SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
 //  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
 //  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));
@@ -920,6 +923,25 @@ void SharableDlMallocSpace::SwapBitmaps () {
   live_bitmap_->SetName(mark_bitmap_->GetName());
   mark_bitmap_->SetName(temp_name);
 }
+
+
+void SharableDlMallocSpace::BindLiveToMarkBitmaps(void) {
+  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
+  accounting::SharedSpaceBitmap* _mark_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
+  accounting::SharedSpaceBitmap* _live_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+
+  memcpy(&sharable_space_data_->temp_bitmap_, _mark_beetmap->bitmap_data_,
+      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+  memcpy(_mark_beetmap->bitmap_data_, _live_beetmap->bitmap_data_,
+      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+
+  accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
+  temp_bitmap_.reset(_mark_bitmap_content);
+  mark_bitmap_.reset(live_bitmap_.get());
+}
+
 
 /*
 void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
