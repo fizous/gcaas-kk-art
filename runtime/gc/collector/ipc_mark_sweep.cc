@@ -17,6 +17,7 @@
 #include "gc/space/space.h"
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_mark_sweep.h"
+#include "gc/accounting/heap_bitmap.h"
 #include "gc/accounting/space_bitmap.h"
 
 
