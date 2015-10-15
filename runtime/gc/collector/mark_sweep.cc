@@ -484,11 +484,18 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
 void MarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   CHECK(space->IsDlMallocSpace());
   space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
+  accounting::SPACE_BITMAP* live_bitmap = alloc_space->GetLiveBitmap();
+  accounting::SPACE_BITMAP* mark_bitmap = alloc_space->GetMarkBitmap();
+  GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+  alloc_space->BindLiveToMarkBitmaps();
+  /*
+  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
   accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
   accounting::SPACE_BITMAP* mark_bitmap = alloc_space->mark_bitmap_.release();
   GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
   alloc_space->temp_bitmap_.reset(mark_bitmap);
   alloc_space->mark_bitmap_.reset(live_bitmap);
+  */
 }
 #else
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {

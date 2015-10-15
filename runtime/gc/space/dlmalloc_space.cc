@@ -310,6 +310,13 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
   return msp;
 }
 
+void DlMallocSpace::BindLiveToMarkBitmaps(void) {
+  LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
+  accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
+  temp_bitmap_.reset(_mark_bitmap_content);
+  mark_bitmap_.reset(live_bitmap_.get());
+}
+
 void DlMallocSpace::SwapBitmaps() {
   live_bitmap_.swap(mark_bitmap_);
   // Swap names to get more descriptive diagnostics.
@@ -899,7 +906,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
 void SharableDlMallocSpace::SwapBitmaps () {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
-  DlMallocSpace::SwapBitmaps();
+  //DlMallocSpace::SwapBitmaps();
 //  accounting::SharedSpaceBitmap* _live_beetmap =
 //      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
 //  accounting::SharedSpaceBitmap* _mark_beetmap =
@@ -907,11 +914,11 @@ void SharableDlMallocSpace::SwapBitmaps () {
 //  accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
 //      _mark_beetmap);
 
-//  live_bitmap_.swap(mark_bitmap_);
-//  // Swap names to get more descriptive diagnostics.
-//  std::string temp_name(live_bitmap_->GetName());
-//  live_bitmap_->SetName(mark_bitmap_->GetName());
-//  mark_bitmap_->SetName(temp_name);
+  live_bitmap_.swap(mark_bitmap_);
+  // Swap names to get more descriptive diagnostics.
+  std::string temp_name(live_bitmap_->GetName());
+  live_bitmap_->SetName(mark_bitmap_->GetName());
+  mark_bitmap_->SetName(temp_name);
 }
 
 /*
