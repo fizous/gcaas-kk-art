@@ -101,11 +101,11 @@ class StructuredAtomicStack {
   static void SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
     StructuredObjectStackData _temp_data;
     memcpy(&_temp_data, stackA->stack_data_,
-        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
     memcpy(stackA->stack_data_, stackB->stack_data_,
-        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
     memcpy(stackB->stack_data_, &_temp_data,
-        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
   }
 
   ~StructuredAtomicStack() {}
