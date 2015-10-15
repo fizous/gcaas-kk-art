@@ -276,8 +276,9 @@ class SharedSpaceBitmap : public BaseBitmap {
 
   ~SharedSpaceBitmap();
 
- private:
   GCSrvceBitmap* bitmap_data_;
+ private:
+
 };
 
 std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap);
