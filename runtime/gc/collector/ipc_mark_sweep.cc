@@ -15,6 +15,7 @@
 #include "thread.h"
 #include "gc/space/dlmalloc_space-inl.h"
 #include "gc/space/space.h"
+#include "gc/space/space-inl.h"
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/accounting/heap_bitmap.h"
