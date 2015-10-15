@@ -899,12 +899,13 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
 void SharableDlMallocSpace::SwapBitmaps () {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
-  accounting::SharedSpaceBitmap* _live_beetmap =
-      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
-  accounting::SharedSpaceBitmap* _mark_beetmap =
-      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
-  accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
-      _mark_beetmap);
+  DlMallocSpace::SwapBitmaps();
+//  accounting::SharedSpaceBitmap* _live_beetmap =
+//      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+//  accounting::SharedSpaceBitmap* _mark_beetmap =
+//      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
+//  accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
+//      _mark_beetmap);
 
 //  live_bitmap_.swap(mark_bitmap_);
 //  // Swap names to get more descriptive diagnostics.
