@@ -913,7 +913,7 @@ void SharableDlMallocSpace::SwapBitmaps () {
 //  mark_bitmap_->SetName(temp_name);
 }
 
-
+/*
 void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
   accounting::SharedSpaceBitmap* _live_beetmap =
@@ -948,6 +948,9 @@ void SharableDlMallocSpace::UnBindBitmaps(void) {
         SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   }
 }
+*/
+
+
 
 ///*
 // * Initialize a HeapBitmap so that it points to a bitmap large
