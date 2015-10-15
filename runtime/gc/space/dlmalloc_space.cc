@@ -310,6 +310,9 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
   return msp;
 }
 
+
+
+
 void DlMallocSpace::BindLiveToMarkBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
   accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();

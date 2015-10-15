@@ -87,9 +87,13 @@ constexpr bool kCheckLocks = kDebugLocking;
 
 void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
-  if (space->GetLiveBitmap() != space->GetMarkBitmap()) {
+  if (!space->HasBitmapsBound()) {
     BindLiveToMarkBitmap(space);
   }
+
+  /*if (space->GetLiveBitmap() != space->GetMarkBitmap()) {
+    BindLiveToMarkBitmap(space);
+  }*/
 
   // Add the space to the immune region.
   if (immune_begin_ == NULL) {

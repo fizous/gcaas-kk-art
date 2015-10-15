@@ -348,6 +348,7 @@ class SharableDlMallocSpace : public DlMallocSpace {
       GCSrvceContinuousSpace* image_space_data);
 
   void SwapBitmaps();
+
 //  void BindLiveToMarkBitmaps(void);
 //  accounting::SPACE_BITMAP* UnBindBitmaps(void);
 //  void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

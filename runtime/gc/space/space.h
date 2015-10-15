@@ -351,6 +351,9 @@ class ContinuousSpace : public Space {
   virtual accounting::SPACE_BITMAP* GetLiveBitmap() const = 0;
   virtual accounting::SPACE_BITMAP* GetMarkBitmap() const = 0;
 
+  virtual bool HasBitmapsBound(void) {
+    return (GetLiveBitmap() == GetMarkBitmap());
+  }
 
   // Is object within this space? We check to see if the pointer is beyond the end first as
   // continuous spaces are iterated over from low to high.

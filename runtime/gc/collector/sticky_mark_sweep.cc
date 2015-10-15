@@ -39,7 +39,10 @@ void StickyMarkSweep::BindBitmaps() {
   // and live bitmap is that marking the objects will place them in the live bitmap.
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) {
-      BindLiveToMarkBitmap(space);
+      if(!space->HasBitmapsBound()) {
+        BindLiveToMarkBitmap(space);
+      }
+      //BindLiveToMarkBitmap(space);
     }
   }
   space::LargeObjectSpace* _LOS = GetHeap()->GetLargeObjectsSpace();
