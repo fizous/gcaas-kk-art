@@ -150,13 +150,13 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
-  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
-  void UnBindBitmaps()
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//
+//  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//
+//  void UnBindBitmaps()
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   /** GC Phases **/
 
 //  void ReclaimClientPhase(void);
@@ -196,12 +196,12 @@ class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
-  void UnBindBitmaps()
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//
+//  void UnBindBitmaps()
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 };
 
 class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
@@ -216,12 +216,12 @@ class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
-  void UnBindBitmaps()
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//
+//  void UnBindBitmaps()
+//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 };
 
 

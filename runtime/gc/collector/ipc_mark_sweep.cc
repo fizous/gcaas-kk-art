@@ -461,7 +461,7 @@ void IPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
-
+/*
 void IPCMarkSweep::SwapBitmaps() {
   LOG(ERROR) << "IPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
@@ -513,7 +513,7 @@ void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* spac
   _space->BindLiveToMarkBitmap();
 }
 
-
+*/
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
@@ -566,6 +566,7 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
+/*
 void PartialIPCMarkSweep::SwapBitmaps() {
   LOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
@@ -618,7 +619,7 @@ void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_
   _space->BindLiveToMarkBitmap();
 }
 
-
+*/
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
@@ -670,7 +671,7 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
-
+/*
 void StickyIPCMarkSweep::SwapBitmaps() {
   LOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
@@ -721,7 +722,7 @@ void StickyIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T
 //      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
   _space->BindLiveToMarkBitmap();
 }
-
+*/
 #if 0
 
 class ClientIpcCollectorTask : public Task {

@@ -144,7 +144,7 @@ void SharedHeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap,
       return;
     }
   }
-  LOG(FATAL) << "bitmap " << static_cast<const void*>(old_bitmap) << " not found";
+  LOG(FATAL) << "SharedHeapBitmap::ReplaceBitmap...bitmap " << static_cast<const void*>(old_bitmap) << " not found";
 }
 
 
@@ -155,7 +155,7 @@ void HeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap, SPACE_BITMAP* new_bitmap)
       return;
     }
   }
-  LOG(FATAL) << "bitmap " << static_cast<const void*>(old_bitmap) << " not found";
+  LOG(FATAL) << "HeapBitmap::ReplaceBitmap; bitmap " << static_cast<const void*>(old_bitmap) << " not found";
 }
 
 void HeapBitmap::ReplaceObjectSet(SpaceSetMap* old_set, SpaceSetMap* new_set) {

@@ -183,8 +183,8 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   //fizo, we need to override this
   // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
   virtual void SwapBitmaps();
-  virtual void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  virtual void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  virtual void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  virtual void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
   DLMALLOC_SPACE_T* CreateZygoteSpace(const char* alloc_space_name,
       bool shareMem = false);
@@ -346,8 +346,8 @@ class SharableDlMallocSpace : public DlMallocSpace {
       GCSrvceContinuousSpace* image_space_data);
 
   void SwapBitmaps();
-  void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+//  void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
   GCSrvSharableDlMallocSpace* sharable_space_data_;
