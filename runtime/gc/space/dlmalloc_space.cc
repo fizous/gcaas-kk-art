@@ -715,12 +715,13 @@ void DlMallocSpace::BindLiveToMarkBitmap(void) {
 }
 */
 
-void DlMallocSpace::UnBindBitmaps(void) {
+accounting::SPACE_BITMAP* DlMallocSpace::UnBindBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ DlMallocSpace::UnBindBitmaps ~~~~~~~";
   if (temp_bitmap_.get() != NULL) {
     // At this point, the temp_bitmap holds our old mark bitmap.
-    accounting::SPACE_BITMAP* new_bitmap = temp_bitmap_.release();
-    mark_bitmap_.reset(new_bitmap);
+    accounting::SPACE_BITMAP* new_bitmap = mark_bitmap_.release();
+    mark_bitmap_.reset(temp_bitmap_.release());
+    return new_bitmap;
 //
 //
 //    Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap_.get(), new_bitmap);
@@ -728,7 +729,9 @@ void DlMallocSpace::UnBindBitmaps(void) {
 //    mark_bitmap_.reset(new_bitmap);
 //    DCHECK(temp_bitmap_.get() == NULL);
   }
+  return NULL;
 }
+
 
 //SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
 //  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
