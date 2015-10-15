@@ -932,8 +932,8 @@ void SharableDlMallocSpace::UnBindBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ~~~~~~~";
   if(bound_mark_bitmaps_) {
     bound_mark_bitmaps_ = 0;
-    accounting::SharedSpaceBitmap* _live_beetmap =
-        reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+//    accounting::SharedSpaceBitmap* _live_beetmap =
+//        reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
     accounting::SharedSpaceBitmap* _mark_beetmap =
         reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
     memcpy(_mark_beetmap->bitmap_data_, &sharable_space_data_->temp_bitmap_,
