@@ -98,6 +98,16 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
+  static void SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
+    StructuredObjectStackData _temp_data;
+    memcpy(&_temp_data, stackA->stack_data_,
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+    memcpy(stackA->stack_data_, stackB->stack_data_,
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+    memcpy(stackB->stack_data_, &_temp_data,
+        SERVICE_ALLOC_ALIGN_BYTE(StructuredAtomicStack));
+  }
+
   ~StructuredAtomicStack() {}
 
   // Returns false if we overflowed the stack.

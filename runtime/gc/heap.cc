@@ -1887,7 +1887,11 @@ bool Heap::VerifyMissingCardMarks() {
 }
 
 void Heap::SwapStacks() {
+#if (true || ART_GC_SERVICE)
+  accounting::ATOMIC_STACK_KLASS::SwapStacks(allocation_stack_.get(), live_stack_.get());
+#else
   allocation_stack_.swap(live_stack_);
+#endif
 }
 
 void Heap::ProcessCards(base::TimingLogger& timings) {
