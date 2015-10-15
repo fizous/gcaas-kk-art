@@ -924,7 +924,7 @@ void SharableDlMallocSpace::SwapBitmaps () {
   mark_bitmap_->SetName(temp_name);
 }
 
-
+/*
 void SharableDlMallocSpace::BindLiveToMarkBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
   accounting::SharedSpaceBitmap* _mark_beetmap =
@@ -943,7 +943,7 @@ void SharableDlMallocSpace::BindLiveToMarkBitmaps(void) {
 }
 
 
-/*
+
 void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
   accounting::SharedSpaceBitmap* _live_beetmap =
