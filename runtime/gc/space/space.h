@@ -222,7 +222,7 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
-
+  accounting::GCSrvceBitmap temp_bitmap_;
 
   CardBaseTableFields card_table_data_;
 

@@ -359,6 +359,9 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap):
   DumpValues();
 }
 
+
+
+
 void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
   heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   heap_meta_->freed_objects_ = 0;
@@ -453,6 +456,59 @@ void IPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
+
+void IPCMarkSweep::SwapBitmaps() {
+  LOG(ERROR) << "IPCMarkSweep::SwapBitmaps()";
+  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
+  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
+  // bits of dead objects in the live bitmap.
+  const GcType gc_type = GetGcType();
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    // We never allocate into zygote spaces.
+    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
+        (gc_type == kGcTypeFull &&
+         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
+      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
+      if (live_bitmap != mark_bitmap) {
+//        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
+//        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+        space->AsDlMallocSpace()->SwapBitmaps();
+      }
+    }
+  }
+  for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
+    space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
+    accounting::SpaceSetMap* live_set = space->GetLiveObjects();
+    accounting::SpaceSetMap* mark_set = space->GetMarkObjects();
+    heap_->GetLiveBitmap()->ReplaceObjectSet(live_set, mark_set);
+    heap_->GetMarkBitmap()->ReplaceObjectSet(mark_set, live_set);
+    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
+  }
+}
+
+void IPCMarkSweep::UnBindBitmaps() {
+  LOG(ERROR) << "IPCMarkSweep::UnBindBitmaps";
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->IsDlMallocSpace()) {
+      space::SharableDlMallocSpace* _space =
+          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      _space->UnBindBitmaps();
+    }
+  }
+}
+
+void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
+  LOG(ERROR) << "IPCMarkSweep::BindLiveToMarkBitmap";
+  CHECK(space->IsDlMallocSpace());
+  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
+  space::SharableDlMallocSpace* _space =
+      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  _space->BindLiveToMarkBitmap();
+}
+
+
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap),
@@ -492,6 +548,7 @@ void PartialIPCMarkSweep::MarkingPhase(void) {
 
 
 void PartialIPCMarkSweep::MarkReachableObjects() {
+
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
@@ -503,6 +560,59 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
+
+void PartialIPCMarkSweep::SwapBitmaps() {
+  LOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
+  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
+  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
+  // bits of dead objects in the live bitmap.
+  const GcType gc_type = GetGcType();
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    // We never allocate into zygote spaces.
+    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
+        (gc_type == kGcTypeFull &&
+         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
+      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
+      if (live_bitmap != mark_bitmap) {
+//        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
+//        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+        space->AsDlMallocSpace()->SwapBitmaps();
+      }
+    }
+  }
+  for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
+    space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
+    accounting::SpaceSetMap* live_set = space->GetLiveObjects();
+    accounting::SpaceSetMap* mark_set = space->GetMarkObjects();
+    heap_->GetLiveBitmap()->ReplaceObjectSet(live_set, mark_set);
+    heap_->GetMarkBitmap()->ReplaceObjectSet(mark_set, live_set);
+    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
+  }
+}
+
+
+void PartialIPCMarkSweep::UnBindBitmaps() {
+  LOG(ERROR) << "PartialIPCMarkSweep::UnBindBitmaps";
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->IsDlMallocSpace()) {
+      space::SharableDlMallocSpace* _space =
+          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      _space->UnBindBitmaps();
+    }
+  }
+}
+
+void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
+  LOG(ERROR) << "PartialIPCMarkSweep::BindLiveToMarkBitmap";
+  CHECK(space->IsDlMallocSpace());
+  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
+  space::SharableDlMallocSpace* _space =
+      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  _space->BindLiveToMarkBitmap();
+}
+
 
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
@@ -553,6 +663,58 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
   StickyMarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
+}
+
+
+void StickyIPCMarkSweep::SwapBitmaps() {
+  LOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
+  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
+  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
+  // bits of dead objects in the live bitmap.
+  const GcType gc_type = GetGcType();
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    // We never allocate into zygote spaces.
+    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
+        (gc_type == kGcTypeFull &&
+         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
+      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
+      if (live_bitmap != mark_bitmap) {
+//        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
+//        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+        space->AsDlMallocSpace()->SwapBitmaps();
+      }
+    }
+  }
+  for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
+    space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
+    accounting::SpaceSetMap* live_set = space->GetLiveObjects();
+    accounting::SpaceSetMap* mark_set = space->GetMarkObjects();
+    heap_->GetLiveBitmap()->ReplaceObjectSet(live_set, mark_set);
+    heap_->GetMarkBitmap()->ReplaceObjectSet(mark_set, live_set);
+    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
+  }
+}
+
+void StickyIPCMarkSweep::UnBindBitmaps() {
+  LOG(ERROR) << "StickyIPCMarkSweep::UnBindBitmaps";
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->IsDlMallocSpace()) {
+      space::SharableDlMallocSpace* _space =
+          reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace());
+      _space->UnBindBitmaps();
+    }
+  }
+}
+
+void StickyIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
+  LOG(ERROR) << "StickyIPCMarkSweep::BindLiveToMarkBitmap";
+  CHECK(space->IsDlMallocSpace());
+  space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
+  space::SharableDlMallocSpace* _space =
+      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
+  _space->BindLiveToMarkBitmap();
 }
 
 #if 0

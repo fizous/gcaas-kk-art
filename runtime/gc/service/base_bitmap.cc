@@ -341,6 +341,17 @@ void SharedSpaceBitmap::Clear() {
   }
 }
 
+void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
+    SharedSpaceBitmap* bitmapB) {
+  accounting::GCSrvceBitmap _temp_bitmap_data;
+  memcpy(&_temp_bitmap_data, bitmapA->bitmap_data_,
+      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+  memcpy(bitmapA->bitmap_data_, bitmapB->bitmap_data_,
+      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+  memcpy(bitmapB->bitmap_data_, &_temp_bitmap_data,
+      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+  LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
+}
 
 }  // namespace accounting
 }  // namespace gc

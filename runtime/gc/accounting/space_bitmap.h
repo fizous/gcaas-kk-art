@@ -232,6 +232,8 @@ class SharedSpaceBitmap : public BaseBitmap {
   static void SweepWalk(const SharedSpaceBitmap& live, const SharedSpaceBitmap& mark, uintptr_t base,
                         uintptr_t max, SweepCallback* thunk, void* arg);
 
+  static void SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
+      SharedSpaceBitmap* bitmapB);
 
   void Walk(Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -270,6 +272,7 @@ class SharedSpaceBitmap : public BaseBitmap {
 
 
   SharedSpaceBitmap(GCSrvceBitmap*);
+
 
   ~SharedSpaceBitmap();
 
