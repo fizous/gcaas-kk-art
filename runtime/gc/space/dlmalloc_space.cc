@@ -899,8 +899,10 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
 void SharableDlMallocSpace::SwapBitmaps () {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
-  accounting::SharedSpaceBitmap* _live_beetmap = live_bitmap_.get();
-  accounting::SharedSpaceBitmap* _mark_beetmap = mark_bitmap_.get();
+  accounting::SharedSpaceBitmap* _live_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+  accounting::SharedSpaceBitmap* _mark_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
   accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
       _mark_beetmap);
 
@@ -914,8 +916,10 @@ void SharableDlMallocSpace::SwapBitmaps () {
 
 void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
-  accounting::SharedSpaceBitmap* _live_beetmap = live_bitmap_.get();
-  accounting::SharedSpaceBitmap* _mark_beetmap = mark_bitmap_.get();
+  accounting::SharedSpaceBitmap* _live_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+  accounting::SharedSpaceBitmap* _mark_beetmap =
+      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
   memcpy(&sharable_space_data_->temp_bitmap_, _mark_beetmap->bitmap_data_,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   memcpy(_mark_beetmap->bitmap_data_, _live_beetmap->bitmap_data_,
@@ -928,8 +932,10 @@ void SharableDlMallocSpace::UnBindBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ~~~~~~~";
   if(bound_mark_bitmaps_) {
     bound_mark_bitmaps_ = 0;
-    accounting::SharedSpaceBitmap* _live_beetmap = live_bitmap_.get();
-    accounting::SharedSpaceBitmap* _mark_beetmap = mark_bitmap_.get();
+    accounting::SharedSpaceBitmap* _live_beetmap =
+        reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+    accounting::SharedSpaceBitmap* _mark_beetmap =
+        reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
     memcpy(_mark_beetmap->bitmap_data_, &sharable_space_data_->temp_bitmap_,
         SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   }
