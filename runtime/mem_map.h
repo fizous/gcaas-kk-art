@@ -55,7 +55,8 @@ typedef struct AShmemMap_S {
         prot_(prot), flags_(flags), fd_(fd) {
     memcpy(name_, name.c_str(), name.size());
     name_[name.size()] = '\0';
-  }
+  };
+  AShmemMap_S(){}
 } __attribute__((aligned(8))) AShmemMap;
 
 
