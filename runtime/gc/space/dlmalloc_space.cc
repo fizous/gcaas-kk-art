@@ -699,7 +699,7 @@ bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 }
 
 void DlMallocSpace::BindLiveToMarkBitmap(void) {
-  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
+  LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
   accounting::SPACE_BITMAP* live_bitmap = live_bitmap_.get();
   accounting::SPACE_BITMAP* mark_bitmap = mark_bitmap_.get();
   Runtime::Current()->GetHeap()->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
@@ -920,6 +920,13 @@ void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
       reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
   accounting::SharedSpaceBitmap* _mark_beetmap =
       reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
+  if(_mark_beetmap->bitmap_data_->mem_map_.begin_ ==
+      _live_beetmap->bitmap_data_->mem_map_.begin_) {
+    LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap: bitmaps already points to same data..skip ~~~~~~~";
+    return;
+  } else {
+    LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmap: binding";
+  }
   memcpy(&sharable_space_data_->temp_bitmap_, _mark_beetmap->bitmap_data_,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   memcpy(_mark_beetmap->bitmap_data_, _live_beetmap->bitmap_data_,
@@ -930,7 +937,8 @@ void SharableDlMallocSpace::BindLiveToMarkBitmap(void) {
 
 void SharableDlMallocSpace::UnBindBitmaps(void) {
   LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ~~~~~~~";
-  if(bound_mark_bitmaps_) {
+  if(bound_mark_bitmaps_ == 1) {
+    LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ; bound_mark_bitmaps_ was 1 ~~~~~~~";
     bound_mark_bitmaps_ = 0;
 //    accounting::SharedSpaceBitmap* _live_beetmap =
 //        reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
