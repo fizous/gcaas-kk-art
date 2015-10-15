@@ -25,6 +25,10 @@
 #include <valgrind.h>
 #include <../memcheck/memcheck.h>
 #include "gc/service/service_space.h"
+#include "gc/accounting/space_bitmap-inl.h"
+#include "gc/accounting/heap_bitmap.h"
+#include "gc/accounting/space_bitmap.h"
+
 #include "gc_profiler/MProfiler.h"
 namespace art {
 
