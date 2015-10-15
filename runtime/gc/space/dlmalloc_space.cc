@@ -697,7 +697,7 @@ bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
       se_name_c_str;
   return false;
 }
-
+/*
 void DlMallocSpace::BindLiveToMarkBitmap(void) {
   LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmap ~~~~~~~";
   accounting::SPACE_BITMAP* live_bitmap = live_bitmap_.get();
@@ -719,7 +719,7 @@ void DlMallocSpace::UnBindBitmaps(void) {
     DCHECK(temp_bitmap_.get() == NULL);
   }
 }
-
+*/
 //SharedDlMallocSpace* DlMallocSpace::CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name) {
 //  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
 //  DCHECK(IsAligned<accounting::CARD_TABLE::kCardSize>(Begin()));
