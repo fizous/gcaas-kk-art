@@ -545,6 +545,9 @@ class Heap {
   }
   // Clear cards and update the mod union table.
   void ProcessCards(base::TimingLogger& timings);
+
+  // Swap the allocation stack with the live stack.
+  void SwapStacks();
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -622,8 +625,7 @@ class Heap {
   static void VerificationCallback(mirror::Object* obj, void* arg)
       SHARED_LOCKS_REQUIRED(GlobalSychronization::heap_bitmap_lock_);
 
-  // Swap the allocation stack with the live stack.
-  void SwapStacks();
+
 
 
 
