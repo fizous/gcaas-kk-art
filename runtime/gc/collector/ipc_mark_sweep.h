@@ -63,7 +63,7 @@ class AbstractIPCMarkSweep {
   ~AbstractIPCMarkSweep() {}
 
   void HandshakeMarkingPhase(void);
-
+  accounting::GCSrvceBitmap* SetMarkBitmap(void);
   /************************
    * cumulative statistics
    ************************/
@@ -122,6 +122,7 @@ class IPCHeap {
   /* members replacing the heap main members */
   //Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //protected by gc_complete_lock_
+
   volatile collector::GcType last_gc_type_;
   collector::GcType next_gc_type_;
 
@@ -167,6 +168,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   mirror::Object* GetImmuneEnd() const {
     return meta_data_->immune_end_;
   }
+
+  // Find the default mark bitmap.
+  void FindDefaultMarkBitmap();
 
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)

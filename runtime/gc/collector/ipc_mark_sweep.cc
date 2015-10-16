@@ -21,7 +21,11 @@
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/accounting/heap_bitmap.h"
 #include "gc/accounting/space_bitmap.h"
+#include "mirror/class-inl.h"
+#include "mirror/class_loader.h"
+#include "mirror/dex_cache.h"
 
+using ::art::mirror::Class;
 using ::art::mirror::Object;
 namespace art {
 
@@ -401,6 +405,14 @@ void AbstractIPCMarkSweep::DumpValues(void){
 }
 
 
+accounting::GCSrvceBitmap* AbstractIPCMarkSweep::SetMarkBitmap(void) {
+  accounting::SPACE_BITMAP* _bitmap =
+      ipc_heap_->local_heap_->GetAllocSpace()->GetMarkBitmap();
+
+  accounting::GCSrvceBitmap* _bitmap_meta =
+      (reinterpret_cast<accounting::SharedSpaceBitmap*>(_bitmap))->bitmap_data_;
+  return _bitmap_meta;
+}
 
 void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
   Thread* currThread = Thread::Current();
@@ -445,13 +457,43 @@ void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
   meta_data_->immune_end_ = end;
 }
 
+
+void IPCMarkSweep::FindDefaultMarkBitmap(void) {
+  current_mark_bitmap_ = SetMarkBitmap();
+}
+
 void IPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
-  {
-    LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
-        currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
-    MarkSweep::InitializePhase();
-  }
+
+  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+
+  mark_stack_ = heap_->mark_stack_.get();
+  SetImmuneRange(nullptr, nullptr);
+  soft_reference_list_ = nullptr;
+  weak_reference_list_ = nullptr;
+  finalizer_reference_list_ = nullptr;
+  phantom_reference_list_ = nullptr;
+  cleared_reference_list_ = nullptr;
+  freed_bytes_ = 0;
+  freed_large_object_bytes_ = 0;
+  freed_objects_ = 0;
+  freed_large_objects_ = 0;
+  class_count_ = 0;
+  array_count_ = 0;
+  other_count_ = 0;
+  large_object_test_ = 0;
+  large_object_mark_ = 0;
+  classes_marked_ = 0;
+  overhead_time_ = 0;
+  work_chunks_created_ = 0;
+  work_chunks_deleted_ = 0;
+  reference_count_ = 0;
+  java_lang_Class_ = Class::GetJavaLangClass();
+
+  FindDefaultMarkBitmap();
+
+  ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
 

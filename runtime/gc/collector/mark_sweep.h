@@ -105,7 +105,7 @@ class MarkSweep : public GarbageCollector {
   void Init();
 
   // Find the default mark bitmap.
-  void FindDefaultMarkBitmap();
+  virtual void FindDefaultMarkBitmap();
 
   // Marks the root set at the start of a garbage collection.
   void MarkRoots()
