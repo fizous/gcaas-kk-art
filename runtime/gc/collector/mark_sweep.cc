@@ -1820,8 +1820,7 @@ void MarkSweep::UnBindBitmaps() {
 
       if(space->HasBitmapsBound()) {
         accounting::SPACE_BITMAP* new_bitmap = alloc_space->UnBindBitmaps();
-        if(new_bitmap != NULL)
-          GetHeap()->GetMarkBitmap()->ReplaceBitmap(new_bitmap, alloc_space->mark_bitmap_.get());
+        GetHeap()->GetMarkBitmap()->ReplaceBitmap(new_bitmap, alloc_space->mark_bitmap_.get());
       }
 
 

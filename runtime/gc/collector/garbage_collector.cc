@@ -129,10 +129,8 @@ void GarbageCollector::SwapBitmaps() {
       accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
 
       if (live_bitmap != mark_bitmap) {
-        if(!space->IsSharableAllocSpace()) {
-          heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
-          heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-        }
+        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
+        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
         space->AsDlMallocSpace()->SwapBitmaps();
       }
     }

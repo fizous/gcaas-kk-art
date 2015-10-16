@@ -347,16 +347,16 @@ class SharableDlMallocSpace : public DlMallocSpace {
   void SetHeapMeta(DlMallocSpace* old_alloc_space,
       GCSrvceContinuousSpace* image_space_data);
 
-  void SwapBitmaps();
+
 
   bool IsSharableAllocSpace() {
     return true;
   }
 
-  bool HasBitmapsBound(void) {
-    return (bound_mark_bitmaps_ == 1);
-  }
-
+//  bool HasBitmapsBound(void) {
+//    return (bound_mark_bitmaps_ == 1);
+//  }
+  void SwapBitmaps();
   void BindLiveToMarkBitmaps(void);
   accounting::SPACE_BITMAP* UnBindBitmaps(void);
 //  void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
