@@ -511,7 +511,6 @@ void IPCMarkSweep::MarkingPhase(void) {
   LOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
-  MarkSweep::MarkingPhase();
   BindBitmaps();
   FindDefaultMarkBitmap();
 
@@ -549,8 +548,10 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << " <<IPCMarkSweep::MarkReachableObjects. starting: " <<
-      currThread->GetTid() ;
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+
   {
     HandshakeMarkingPhase();
   }
