@@ -155,7 +155,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   ~IPCMarkSweep() {}
 
   /* overriding the Marksweep code*/
-  void InitializePhase(void);
+  /*void InitializePhase(void);
   // Everything inside the immune range is assumed to be marked.
   void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
   void FinishPhase();
@@ -166,7 +166,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  bool IsConcurrent() const;
+  bool IsConcurrent() const;*/
   //void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
@@ -179,7 +179,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   }
 
   // Find the default mark bitmap.
-  void FindDefaultMarkBitmap();
+  //void FindDefaultMarkBitmap();
 
   void PreInitializePhase(void);
   void HandshakeIPCSweepMarkingPhase(void);

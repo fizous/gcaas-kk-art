@@ -472,7 +472,22 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       << GetGcType() << " ###########";
 }
 
-void IPCMarkSweep::FinishPhase(void) {
+
+
+
+
+
+
+void IPCMarkSweep::PreInitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
+  LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  ipc_heap_->meta_->collect_index_ = collector_index_;
+  ipc_heap_->meta_->current_collector_ = meta_data_;
+}
+/*
+ void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
   LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
@@ -480,7 +495,6 @@ void IPCMarkSweep::FinishPhase(void) {
   MarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
 }
-
 bool IPCMarkSweep::IsConcurrent() const {
   return (meta_data_->is_concurrent_ != 0);
 }
@@ -490,21 +504,11 @@ void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
   meta_data_->immune_end_ = end;
 }
 
-
 void IPCMarkSweep::FindDefaultMarkBitmap(void) {
   current_mark_bitmap_ = SetMarkBitmap();
   meta_data_->current_mark_bitmap_ =
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
 }
-void IPCMarkSweep::PreInitializePhase(void) {
-  Thread* currThread = Thread::Current();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-  LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->meta_->collect_index_ = collector_index_;
-  ipc_heap_->meta_->current_collector_ = meta_data_;
-}
-
 void IPCMarkSweep::InitializePhase(void) {
   //PreInitializePhase();
 
@@ -592,7 +596,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
   MarkReachableObjects();
 }
-
+*/
 
 
 void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
@@ -616,7 +620,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
 
-
+/*
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
@@ -627,7 +631,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
-
+*/
 
 //void IPCMarkSweep::SwapBitmaps() {
 //  LOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
