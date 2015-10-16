@@ -115,7 +115,7 @@ class MarkSweep : public GarbageCollector {
   void MarkNonThreadRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  void MarkConcurrentRoots();
+  virtual void MarkConcurrentRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   void MarkRootsCheckpoint(Thread* self)

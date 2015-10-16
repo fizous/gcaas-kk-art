@@ -62,10 +62,10 @@ class AbstractIPCMarkSweep {
 
   ~AbstractIPCMarkSweep() {}
 
-  void HandshakeMarkingPhase(void);
+  virtual void HandshakeMarkingPhase(void);
 
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
-
+  void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
   /************************
    * cumulative statistics
@@ -158,6 +158,8 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   // Everything inside the immune range is assumed to be marked.
   void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
   void FinishPhase();
+  void MarkConcurrentRoots()
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
@@ -175,6 +177,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 
   // Find the default mark bitmap.
   void FindDefaultMarkBitmap();
+
+
+  void HandshakeMarkingPhase(void);
 
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)

@@ -442,6 +442,19 @@ void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
   phase_cond_->Broadcast(thread);
 }
 
+
+void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
+    space::IPC_GC_PHASE_ENUM phase) {
+  ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(thread, *phase_mu_);
+    while( meta_data_->gc_phase_ != meta_data_->gc_phase_) {
+      phase_cond_->Wait(thread);
+    }
+  }
+}
+
+
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
@@ -505,6 +518,17 @@ void IPCMarkSweep::InitializePhase(void) {
 }
 
 
+void IPCMarkSweep::MarkConcurrentRoots() {
+//  timings_.StartSplit("MarkConcurrentRoots");
+  // Visit all runtime roots and clear dirty flags.
+  Thread* currThread = Thread::Current();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_CONC_MARK);
+  LOG(ERROR) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  Runtime::Current()->VisitConcurrentRoots(MarkObjectCallback, this, false, true);
+//  timings_.EndSplit();
+}
+
 void IPCMarkSweep::MarkingPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
@@ -521,6 +545,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   // Need to do this before the checkpoint since we don't want any threads to add references to
   // the live stack during the recursive mark.
   timings_.NewSplit("SwapStacks");
+  //Fizo: here we can make the server gets which one is the right stack
   ipc_heap_->local_heap_->SwapStacks();
 
   WriterMutexLock mu(currThread, *Locks::heap_bitmap_lock_);
@@ -545,17 +570,29 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 
 
+void IPCMarkSweep::HandshakeMarkingPhase(void) {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  if(ipc_heap_->ipc_flag_raised_ == 1) {
+    BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+    LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
+    UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+    ipc_heap_->ipc_flag_raised_ = 0;
+  } else {
+    LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
+  }
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+  LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
+}
 
 
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-
-  {
-    HandshakeMarkingPhase();
-  }
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  HandshakeMarkingPhase();
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
