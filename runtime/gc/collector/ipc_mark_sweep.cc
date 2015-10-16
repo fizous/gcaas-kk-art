@@ -592,7 +592,8 @@ void IPCMarkSweep::HandshakeMarkingPhase(void) {
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   if(ipc_heap_->ipc_flag_raised_ == 1) {
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-    BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+    if(false)
+      BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
     ipc_heap_->ipc_flag_raised_ = 0;
