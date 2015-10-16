@@ -405,13 +405,11 @@ void AbstractIPCMarkSweep::DumpValues(void){
 }
 
 
-accounting::GCSrvceBitmap* AbstractIPCMarkSweep::SetMarkBitmap(void) {
+accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
   accounting::SPACE_BITMAP* _bitmap =
       ipc_heap_->local_heap_->GetAllocSpace()->GetMarkBitmap();
 
-  accounting::GCSrvceBitmap* _bitmap_meta =
-      (reinterpret_cast<accounting::SharedSpaceBitmap*>(_bitmap))->bitmap_data_;
-  return _bitmap_meta;
+  return _bitmap;
 }
 
 void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
@@ -460,6 +458,8 @@ void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
 
 void IPCMarkSweep::FindDefaultMarkBitmap(void) {
   current_mark_bitmap_ = SetMarkBitmap();
+  meta_data_->current_mark_bitmap_ =
+      (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
 }
 
 void IPCMarkSweep::InitializePhase(void) {

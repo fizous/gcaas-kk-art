@@ -63,7 +63,7 @@ class AbstractIPCMarkSweep {
   ~AbstractIPCMarkSweep() {}
 
   void HandshakeMarkingPhase(void);
-  accounting::GCSrvceBitmap* SetMarkBitmap(void);
+  accounting::SPACE_BITMAP* SetMarkBitmap(void);
   /************************
    * cumulative statistics
    ************************/
