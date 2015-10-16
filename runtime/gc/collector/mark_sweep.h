@@ -105,7 +105,7 @@ class MarkSweep : public GarbageCollector {
   void Init();
 
   // Find the default mark bitmap.
-  virtual void FindDefaultMarkBitmap();
+  void FindDefaultMarkBitmap();
 
   // Marks the root set at the start of a garbage collection.
   void MarkRoots()
@@ -115,7 +115,7 @@ class MarkSweep : public GarbageCollector {
   void MarkNonThreadRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  virtual void MarkConcurrentRoots()
+  void MarkConcurrentRoots();
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
   void MarkRootsCheckpoint(Thread* self)
