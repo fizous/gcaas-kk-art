@@ -434,6 +434,14 @@ void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
 }
 
 
+void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
+    space::IPC_GC_PHASE_ENUM phase) {
+  ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
+  IPMutexLock interProcMu(thread, *phase_mu_);
+  meta_data_->gc_phase_ = phase;
+  phase_cond_->Broadcast(thread);
+}
+
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
@@ -464,7 +472,7 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
 
 void IPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
-
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
 
@@ -499,11 +507,40 @@ void IPCMarkSweep::InitializePhase(void) {
 
 void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
-      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
+  LOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   MarkSweep::MarkingPhase();
+  BindBitmaps();
+  FindDefaultMarkBitmap();
 
+  // Process dirty cards and add dirty cards to mod union tables.
+  ipc_heap_->local_heap_->ProcessCards(timings_);
+
+  // Need to do this before the checkpoint since we don't want any threads to add references to
+  // the live stack during the recursive mark.
+  timings_.NewSplit("SwapStacks");
+  heap_->SwapStacks();
+
+  WriterMutexLock mu(currThread, *Locks::heap_bitmap_lock_);
+  if (Locks::mutator_lock_->IsExclusiveHeld(currThread)) {
+    // If we exclusively hold the mutator lock, all threads must be suspended.
+    MarkRoots();
+    LOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
+        currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  } else { //concurrent
+    LOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
+        currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+    MarkThreadRoots(self);
+    // At this point the live stack should no longer have any mutators which push into it.
+    MarkNonThreadRoots();
+  }
+  live_stack_freeze_size_ = ipc_heap_->local_heap_->GetLiveStack()->Size();
+  MarkConcurrentRoots();
+
+  ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
+  MarkReachableObjects();
 }
 
 
@@ -524,7 +561,7 @@ void IPCMarkSweep::MarkReachableObjects() {
 
 
 void IPCMarkSweep::SwapBitmaps() {
-  LOG(ERROR) << "IPCMarkSweep::SwapBitmaps()";
+  LOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
   // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
   // bits of dead objects in the live bitmap.

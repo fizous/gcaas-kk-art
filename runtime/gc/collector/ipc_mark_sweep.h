@@ -63,10 +63,14 @@ class AbstractIPCMarkSweep {
   ~AbstractIPCMarkSweep() {}
 
   void HandshakeMarkingPhase(void);
+
+  void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
+
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
   /************************
    * cumulative statistics
    ************************/
+
 
   // Cumulative statistics.
 //  uint64_t total_time_ns_;
