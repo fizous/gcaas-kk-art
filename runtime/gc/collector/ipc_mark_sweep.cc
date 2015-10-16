@@ -532,7 +532,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   } else { //concurrent
     LOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
         currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-    MarkThreadRoots(self);
+    MarkThreadRoots(currThread);
     // At this point the live stack should no longer have any mutators which push into it.
     MarkNonThreadRoots();
   }
