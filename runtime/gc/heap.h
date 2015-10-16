@@ -539,6 +539,11 @@ class Heap {
   }
 
   void PreGcVerification(collector::GarbageCollector* gc);
+
+  accounting::ATOMIC_OBJ_STACK_T* GetHeapMarkStack(void){
+    return mark_stack_.get();
+  }
+
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.

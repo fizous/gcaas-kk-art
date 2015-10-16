@@ -468,7 +468,7 @@ void IPCMarkSweep::InitializePhase(void) {
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
 
-  mark_stack_ = heap_->mark_stack_.get();
+  mark_stack_ = ipc_heap_->local_heap_->GetHeapMarkStack();
   SetImmuneRange(nullptr, nullptr);
   soft_reference_list_ = nullptr;
   weak_reference_list_ = nullptr;
