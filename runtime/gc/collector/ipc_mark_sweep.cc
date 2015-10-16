@@ -461,14 +461,7 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
 }
 
 
-void AbstractIPCMarkSweep::PreInitializePhase(void) {
-  Thread* currThread = Thread::Current();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-  LOG(ERROR) << "_______AbstractIPCMarkSweep::PreInitializePhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->meta_->collect_index_ = collector_index_;
-  ipc_heap_->meta_->current_collector_ = meta_data_;
-}
+
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
@@ -498,6 +491,14 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
   current_mark_bitmap_ = SetMarkBitmap();
   meta_data_->current_mark_bitmap_ =
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
+}
+void IPCMarkSweep::PreInitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
+  LOG(ERROR) << "_______AbstractIPCMarkSweep::PreInitializePhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  ipc_heap_->meta_->collect_index_ = collector_index_;
+  ipc_heap_->meta_->current_collector_ = meta_data_;
 }
 
 void IPCMarkSweep::InitializePhase(void) {
@@ -589,12 +590,13 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 
 
-void IPCMarkSweep::HandshakeMarkingPhase(void) {
+void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  if(true)
-    return;
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  if(true)
+    return;
+
   if(ipc_heap_->ipc_flag_raised_ == 1) {
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     if(false)
@@ -615,7 +617,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
-  HandshakeMarkingPhase();
+  HandshakeIPCSweepMarkingPhase();
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;

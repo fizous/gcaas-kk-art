@@ -67,7 +67,6 @@ class AbstractIPCMarkSweep {
 
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
-  void PreInitializePhase(void);
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
   /************************
    * cumulative statistics
@@ -180,8 +179,8 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   // Find the default mark bitmap.
   void FindDefaultMarkBitmap();
 
-
-  void HandshakeMarkingPhase(void);
+  void PreInitializePhase(void);
+  void HandshakeIPCSweepMarkingPhase(void);
 
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
