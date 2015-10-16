@@ -222,11 +222,11 @@ class MarkSweep : public GarbageCollector {
     return total_freed_bytes_;
   }
 
-  virtual mirror::Object* GetImmuneBegin() {
+  virtual mirror::Object* GetImmuneBegin() const{
     return immune_begin_;
   }
 
-  virtual  mirror::Object* GetImmuneEnd() {
+  virtual  mirror::Object* GetImmuneEnd() const {
     return immune_end_;
   }
 

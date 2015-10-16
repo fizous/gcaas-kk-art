@@ -50,8 +50,6 @@ class AbstractIPCMarkSweep {
   InterProcessMutex* barrier_mu_;
   InterProcessConditionVariable* barrier_cond_;
 
-
-
   space::GCSrvSharableHeapData* heap_meta_;
   space::GCSrvSharableCollectorData* meta_data_;
 
@@ -162,11 +160,11 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
-  mirror::Object* GetImmuneBegin() {
+  mirror::Object* GetImmuneBegin() const {
     return meta_data_->immune_begin_;
   }
 
-  mirror::Object* GetImmuneEnd() {
+  mirror::Object* GetImmuneEnd() const {
     return meta_data_->immune_end_;
   }
 
