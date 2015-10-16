@@ -96,8 +96,8 @@ void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   }*/
 
   // Add the space to the immune region.
-  if (immune_begin_ == NULL) {
-    DCHECK(immune_end_ == NULL);
+  if (GetImmuneBegin() == NULL) {
+    DCHECK(GetImmuneEnd() == NULL);
     SetImmuneRange(reinterpret_cast<Object*>(space->Begin()),
                    reinterpret_cast<Object*>(space->End()));
   } else {
@@ -112,10 +112,10 @@ void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
     // If previous space was immune, then extend the immune region. Relies on continuous spaces
     // being sorted by Heap::AddContinuousSpace.
     if (prev_space != NULL &&
-        immune_begin_ <= reinterpret_cast<Object*>(prev_space->Begin()) &&
-        immune_end_ >= reinterpret_cast<Object*>(prev_space->End())) {
-      immune_begin_ = std::min(reinterpret_cast<Object*>(space->Begin()), immune_begin_);
-      immune_end_ = std::max(reinterpret_cast<Object*>(space->End()), immune_end_);
+        GetImmuneBegin() <= reinterpret_cast<Object*>(prev_space->Begin()) &&
+        GetImmuneEnd() >= reinterpret_cast<Object*>(prev_space->End())) {
+      SetImmuneRange(std::min(reinterpret_cast<Object*>(space->Begin()), GetImmuneBegin()),
+          std::max(reinterpret_cast<Object*>(space->End()), GetImmuneEnd()));
     }
   }
 }

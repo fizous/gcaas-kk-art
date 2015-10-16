@@ -13,6 +13,7 @@
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
+#include "mirror/object-inl.h"
 #include "gc/space/dlmalloc_space-inl.h"
 #include "gc/space/space.h"
 #include "gc/space/space-inl.h"
@@ -21,7 +22,7 @@
 #include "gc/accounting/heap_bitmap.h"
 #include "gc/accounting/space_bitmap.h"
 
-
+using ::art::mirror::Object;
 namespace art {
 
 namespace gc {
@@ -437,6 +438,11 @@ void IPCMarkSweep::FinishPhase(void) {
   GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
   MarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
+}
+
+void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
+  meta_data_->immune_begin_ = begin;
+  meta_data_->immune_end_ = end;
 }
 
 void IPCMarkSweep::InitializePhase(void) {

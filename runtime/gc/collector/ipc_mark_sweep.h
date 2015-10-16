@@ -29,7 +29,11 @@
       phase_cond_->Wait(THREAD);
 
 namespace art {
-
+namespace mirror {
+  class Class;
+  class Object;
+  template<class T> class ObjectArray;
+}  // namespace mirror
 namespace gc {
 
 namespace collector {
@@ -148,12 +152,24 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 
   /* overriding the Marksweep code*/
   void InitializePhase(void);
+  // Everything inside the immune range is assumed to be marked.
+  void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
   void FinishPhase();
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
+
+  mirror::Object* GetImmuneBegin() {
+    return meta_data_->immune_begin_;
+  }
+
+  mirror::Object* GetImmuneEnd() {
+    return meta_data_->immune_end_;
+  }
+
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
 //      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

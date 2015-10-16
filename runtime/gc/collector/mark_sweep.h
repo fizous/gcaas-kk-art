@@ -222,8 +222,16 @@ class MarkSweep : public GarbageCollector {
     return total_freed_bytes_;
   }
 
+  virtual mirror::Object* GetImmuneBegin() {
+    return immune_begin_;
+  }
+
+  virtual  mirror::Object* GetImmuneEnd() {
+    return immune_end_;
+  }
+
   // Everything inside the immune range is assumed to be marked.
-  void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
+  virtual void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
 
   void SweepSystemWeaks()
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -338,7 +346,7 @@ class MarkSweep : public GarbageCollector {
 
   // Returns true if an object is inside of the immune region (assumed to be marked).
   bool IsImmune(const mirror::Object* obj) const {
-    return obj >= immune_begin_ && obj < immune_end_;
+    return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
 
   static void VerifyRootCallback(const mirror::Object* root, void* arg, size_t vreg,
