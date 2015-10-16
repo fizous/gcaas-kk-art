@@ -537,6 +537,8 @@ class Heap {
   void SetNextGCType(collector::GcType gc_type) {
     next_gc_type_ = gc_type;
   }
+
+  void PreGcVerification(collector::GarbageCollector* gc);
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -585,7 +587,7 @@ class Heap {
                      Locks::heap_bitmap_lock_,
                      Locks::thread_suspend_count_lock_);
 
-  void PreGcVerification(collector::GarbageCollector* gc);
+
   void PreSweepingGcVerification(collector::GarbageCollector* gc)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void PostGcVerification(collector::GarbageCollector* gc);
