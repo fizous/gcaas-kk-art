@@ -101,7 +101,7 @@ bool IPCHeap::StartCollectorDaemon(void) {
 }
 
 void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
-  meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  //meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   meta_->freed_objects_   = 0;
   meta_->freed_bytes_     = 0;
   meta_->barrier_count_   = 0;
@@ -157,10 +157,10 @@ void IPCHeap::CreateCollectors(void) {
     _conc_flag = (i != 0);
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, _conc_flag,
         "ipcMS")));
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, _conc_flag,
-        "stickyIPC")));
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, _conc_flag,
-        "partialIPC")));
+//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, _conc_flag,
+//        "stickyIPC")));
+//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, _conc_flag,
+//        "partialIPC")));
   }
 }
 
@@ -380,7 +380,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 
 void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
-  heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+ // heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   heap_meta_->freed_objects_ = 0;
   heap_meta_->freed_bytes_ = 0;
   heap_meta_->barrier_count_ = 0;
@@ -440,9 +440,12 @@ void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
 void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
     space::IPC_GC_PHASE_ENUM phase) {
   ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
-  IPMutexLock interProcMu(thread, *phase_mu_);
-  meta_data_->gc_phase_ = phase;
-  phase_cond_->Broadcast(thread);
+  {
+    IPMutexLock interProcMu(thread, *phase_mu_);
+    meta_data_->gc_phase_ = phase;
+    phase_cond_->Broadcast(thread);
+  }
+
 }
 
 
@@ -462,7 +465,7 @@ void AbstractIPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
   LOG(ERROR) << "_______AbstractIPCMarkSweep::PreInitializePhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->meta_->collect_index_ = collector_index_;
   ipc_heap_->meta_->current_collector_ = meta_data_;
 }
@@ -480,7 +483,7 @@ void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
   LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   MarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
 }

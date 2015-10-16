@@ -103,6 +103,8 @@ void GCServiceClient::FinalizeInitClient() {
 bool GCServiceClient::RequestConcGC(void) {
   if(service_client_ == NULL)
     return false;
+  else
+    return false;
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
