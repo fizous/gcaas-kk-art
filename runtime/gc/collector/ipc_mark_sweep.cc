@@ -369,7 +369,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
       *barrier_mu_, _condBarrierAdd);
 
 
-  meta_data_->is_concurrent_ = concurrent;
+  meta_data_->is_concurrent_ = concurrent ? 1 : 0;
   LOG(ERROR) << "############ Initializing IPC: " << ipcHeap->collector_entry_;
   ResetMetaDataUnlocked();
 
@@ -481,6 +481,10 @@ void IPCMarkSweep::FinishPhase(void) {
   ipc_heap_->AssignNextGCType();
 }
 
+bool IPCMarkSweep::IsConcurrent() const {
+  return (meta_data_->is_concurrent_ != 0);
+}
+
 void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
   meta_data_->immune_begin_ = begin;
   meta_data_->immune_end_ = end;
@@ -495,14 +499,14 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
 void IPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-  LOG(ERROR) << "_______AbstractIPCMarkSweep::PreInitializePhase. starting: _______ " <<
+  LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->meta_->collect_index_ = collector_index_;
   ipc_heap_->meta_->current_collector_ = meta_data_;
 }
 
 void IPCMarkSweep::InitializePhase(void) {
-  PreInitializePhase();
+  //PreInitializePhase();
 
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
@@ -533,7 +537,8 @@ void IPCMarkSweep::InitializePhase(void) {
   java_lang_Class_ = Class::GetJavaLangClass();
 
   FindDefaultMarkBitmap();
-
+  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
   ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
