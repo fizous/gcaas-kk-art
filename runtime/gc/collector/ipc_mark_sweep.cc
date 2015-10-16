@@ -506,6 +506,7 @@ void IPCMarkSweep::InitializePhase(void) {
 
 
 void IPCMarkSweep::MarkingPhase(void) {
+  base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
   LOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
@@ -517,6 +518,9 @@ void IPCMarkSweep::MarkingPhase(void) {
   // Process dirty cards and add dirty cards to mod union tables.
   ipc_heap_->local_heap_->ProcessCards(timings_);
 
+  // Need to do this before the checkpoint since we don't want any threads to add references to
+  // the live stack during the recursive mark.
+  timings_.NewSplit("SwapStacks");
   // Need to do this before the checkpoint since we don't want any threads to add references to
   // the live stack during the recursive mark.
   timings_.NewSplit("SwapStacks");
