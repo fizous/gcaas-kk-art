@@ -521,7 +521,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   // Need to do this before the checkpoint since we don't want any threads to add references to
   // the live stack during the recursive mark.
   timings_.NewSplit("SwapStacks");
-  heap_->SwapStacks();
+  ipc_heap_->local_heap_->SwapStacks();
 
   WriterMutexLock mu(currThread, *Locks::heap_bitmap_lock_);
   if (Locks::mutator_lock_->IsExclusiveHeld(currThread)) {

@@ -543,7 +543,8 @@ class Heap {
   accounting::ATOMIC_OBJ_STACK_T* GetHeapMarkStack(void){
     return mark_stack_.get();
   }
-
+  // Clear cards and update the mod union table.
+  void ProcessCards(base::TimingLogger& timings);
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -624,8 +625,7 @@ class Heap {
   // Swap the allocation stack with the live stack.
   void SwapStacks();
 
-  // Clear cards and update the mod union table.
-  void ProcessCards(base::TimingLogger& timings);
+
 
   // All-known continuous spaces, where objects lie within fixed bounds.
   std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*> continuous_spaces_;
