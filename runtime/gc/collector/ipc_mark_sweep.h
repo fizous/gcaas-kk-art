@@ -60,7 +60,7 @@ class AbstractIPCMarkSweep {
 
   void DumpValues(void);
 
-  ~AbstractIPCMarkSweep() {}
+  virtual ~AbstractIPCMarkSweep() {}
 
   virtual void HandshakeMarkingPhase(void);
 
