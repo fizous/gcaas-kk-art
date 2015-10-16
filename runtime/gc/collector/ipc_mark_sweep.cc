@@ -586,6 +586,8 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 void IPCMarkSweep::HandshakeMarkingPhase(void) {
   Thread* currThread = Thread::Current();
+  if(true)
+    return;
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   if(ipc_heap_->ipc_flag_raised_ == 1) {

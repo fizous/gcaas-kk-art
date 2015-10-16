@@ -127,7 +127,7 @@ void ServerCollector::ConcMarkPhaseGC(void) {
   LOG(ERROR) << "ServerCollector::ConcMarkPhaseGC. startingA: " <<
       currThread->GetTid() << "; phase:" << heap_data_->gc_phase_;
   {
-    GC_IPC_SERVER_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+//    GC_IPC_SERVER_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
 //    phase_cond_->Broadcast(currThread);
   }
   LOG(ERROR) << "ServerCollector::ConcMarkPhaseGC. endingA: " <<
@@ -244,7 +244,7 @@ void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
 
-  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+ // gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks ";
   gc_workers_pool_->StartWorkers(self);
