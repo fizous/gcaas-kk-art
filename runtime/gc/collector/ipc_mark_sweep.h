@@ -44,6 +44,7 @@ class IPCHeap;
 class AbstractIPCMarkSweep {
  public:
   IPCHeap* ipc_heap_;
+  int collector_index_;
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
@@ -66,6 +67,7 @@ class AbstractIPCMarkSweep {
 
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
+  void PreInitializePhase(void);
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
   /************************
    * cumulative statistics
@@ -164,7 +166,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  //void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
 
   mirror::Object* GetImmuneBegin() const {
@@ -226,7 +228,7 @@ class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+ // void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
 //      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //
@@ -246,7 +248,7 @@ class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  //void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
 //      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //

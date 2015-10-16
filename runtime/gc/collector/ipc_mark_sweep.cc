@@ -346,8 +346,9 @@ bool IPCHeap::RunCollectorDaemon() {
 
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
     ipc_heap_(ipcHeap),
+    collector_index_(ipc_heap_->collector_entry_++),
     heap_meta_(ipc_heap_->meta_),
-    meta_data_(&(heap_meta_->collectors_[ipcHeap->collector_entry_++])) {
+    meta_data_(&(heap_meta_->collectors_[collector_index_])) {
 
   /* initialize locks */
   SharedFutexData* _futexAddress = &heap_meta_->phase_lock_.futex_head_;
@@ -455,18 +456,29 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
 }
 
 
+void AbstractIPCMarkSweep::PreInitializePhase(void) {
+  Thread* currThread = Thread::Current();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
+  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+  ipc_heap_->meta_->collect_index_ = collector_index_;
+  ipc_heap_->meta_->current_collector_ = meta_data_;
+}
+
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
-  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
+  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
+      << GetGcType() << " ###########";
 }
 
 void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
-  GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
+  LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
   MarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
 }
@@ -484,6 +496,8 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
 }
 
 void IPCMarkSweep::InitializePhase(void) {
+  PreInitializePhase();
+
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
@@ -575,6 +589,7 @@ void IPCMarkSweep::HandshakeMarkingPhase(void) {
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   if(ipc_heap_->ipc_flag_raised_ == 1) {
+    LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
@@ -599,36 +614,36 @@ void IPCMarkSweep::MarkReachableObjects() {
 }
 
 
-void IPCMarkSweep::SwapBitmaps() {
-  LOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
-  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
-  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
-  // bits of dead objects in the live bitmap.
-  const GcType gc_type = GetGcType();
-  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
-    // We never allocate into zygote spaces.
-    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
-        (gc_type == kGcTypeFull &&
-         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
-      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
-      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
-
-      if (live_bitmap != mark_bitmap) {
-        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
-        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
-        space->AsDlMallocSpace()->SwapBitmaps();
-      }
-    }
-  }
-  for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
-    space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
-    accounting::SpaceSetMap* live_set = space->GetLiveObjects();
-    accounting::SpaceSetMap* mark_set = space->GetMarkObjects();
-    heap_->GetLiveBitmap()->ReplaceObjectSet(live_set, mark_set);
-    heap_->GetMarkBitmap()->ReplaceObjectSet(mark_set, live_set);
-    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
-  }
-}
+//void IPCMarkSweep::SwapBitmaps() {
+//  LOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
+//  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
+//  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
+//  // bits of dead objects in the live bitmap.
+//  const GcType gc_type = GetGcType();
+//  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+//    // We never allocate into zygote spaces.
+//    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect ||
+//        (gc_type == kGcTypeFull &&
+//         space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect)) {
+//      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+//      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+//
+//      if (live_bitmap != mark_bitmap) {
+//        heap_->GetLiveBitmap()->ReplaceBitmap(live_bitmap, mark_bitmap);
+//        heap_->GetMarkBitmap()->ReplaceBitmap(mark_bitmap, live_bitmap);
+//        space->AsDlMallocSpace()->SwapBitmaps();
+//      }
+//    }
+//  }
+//  for (const auto& disc_space : GetHeap()->GetDiscontinuousSpaces()) {
+//    space::LargeObjectSpace* space = down_cast<space::LargeObjectSpace*>(disc_space);
+//    accounting::SpaceSetMap* live_set = space->GetLiveObjects();
+//    accounting::SpaceSetMap* mark_set = space->GetMarkObjects();
+//    heap_->GetLiveBitmap()->ReplaceObjectSet(live_set, mark_set);
+//    heap_->GetMarkBitmap()->ReplaceObjectSet(mark_set, live_set);
+//    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
+//  }
+//}
 /*
 void IPCMarkSweep::UnBindBitmaps() {
   LOG(ERROR) << "IPCMarkSweep::UnBindBitmaps";

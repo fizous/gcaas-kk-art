@@ -195,6 +195,7 @@ typedef struct GCSrvSharableHeapData_S {
   /************ collectors array ******/
   GCSrvSharableCollectorData collectors_[6];
   volatile int collect_index_;
+  volatile GCSrvSharableCollectorData* current_collector_;
   /****** variables from original Marksweep members *****/
 
 
