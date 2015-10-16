@@ -159,6 +159,18 @@ typedef enum {
   IPC_GC_PHASE_MAX
 } IPC_GC_PHASE_ENUM;
 
+typedef struct GCSrvSharableCollectorData_S {
+  // Immune range, every object inside the immune range is assumed to be marked.
+  mirror::Object* immune_begin_;
+  mirror::Object* immune_end_;
+  volatile IPC_GC_PHASE_ENUM gc_phase_;
+
+  volatile accounting::GCSrvceBitmap*  current_mark_bitmap_;
+
+  int is_concurrent_;
+} __attribute__((aligned(8))) GCSrvSharableCollectorData;
+
+
 typedef struct GCSrvSharableHeapData_S {
   /* gc barrier */
   SynchronizedLockHead gc_barrier_lock_;
@@ -176,6 +188,12 @@ typedef struct GCSrvSharableHeapData_S {
   byte* const image_space_end_;
   byte* const zygote_begin_;
   byte* const zygote_end_;
+
+
+  /************ collectors array ******/
+  GCSrvSharableCollectorData collectors_[6];
+  volatile int collect_index_;
+  /****** variables from original Marksweep members *****/
 
 
   volatile IPC_GC_PHASE_ENUM gc_phase_;

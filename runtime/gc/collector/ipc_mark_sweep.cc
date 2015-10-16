@@ -35,7 +35,8 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     meta_(heap_meta),
     local_heap_(heap),
     collector_daemon_(NULL),
-    ipc_flag_raised_(0) {
+    ipc_flag_raised_(0),
+    collector_entry_(0) {
 
   /* concurrent glags locks */
   SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
@@ -104,6 +105,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->is_gc_running_   = 0;
   meta_->conc_count_      = 0;
   meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;;
+  meta_->collect_index_ = 0;
+
   /* heap members */
   last_gc_type_ = collector::kGcTypeNone;
   next_gc_type_ = collector::kGcTypePartial;
@@ -336,9 +339,10 @@ bool IPCHeap::RunCollectorDaemon() {
   return true;
 }
 
-AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap):
+AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
     ipc_heap_(ipcHeap),
-    heap_meta_(ipc_heap_->meta_) {
+    heap_meta_(ipc_heap_->meta_),
+    meta_data_(&(heap_meta_->collectors_[ipcHeap->collector_entry_++])) {
 
   /* initialize locks */
   SharedFutexData* _futexAddress = &heap_meta_->phase_lock_.futex_head_;
@@ -359,6 +363,8 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap):
       *barrier_mu_, _condBarrierAdd);
 
 
+  meta_data_->is_concurrent_ = concurrent;
+  LOG(ERROR) << "############ Initializing IPC: " << ipcHeap->collector_entry_;
   ResetMetaDataUnlocked();
 
   DumpValues();
@@ -376,6 +382,13 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
 //  heap_meta_->is_gc_complete_ = 0;
   heap_meta_->is_gc_running_ = 0;
   heap_meta_->conc_count_ = 0;
+
+
+  /////////
+  meta_data_->immune_begin_ = NULL;
+  meta_data_->immune_end_ = NULL;
+  meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  meta_data_->current_mark_bitmap_ = NULL;
 }
 
 void AbstractIPCMarkSweep::DumpValues(void){
@@ -412,10 +425,10 @@ void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    AbstractIPCMarkSweep(ipcHeap),
+    AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
-
+  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
 }
 
 void IPCMarkSweep::FinishPhase(void) {
@@ -516,10 +529,10 @@ void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* spac
 */
 PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    AbstractIPCMarkSweep(ipcHeap),
+    AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "partialIpcMS") {
-
+  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
 }
 
 
@@ -654,10 +667,10 @@ void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_
 */
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
-    AbstractIPCMarkSweep(ipcHeap),
+    AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "stickyIpcMS") {
-
+  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
 }
 
 

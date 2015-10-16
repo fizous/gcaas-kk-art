@@ -49,10 +49,10 @@ class AbstractIPCMarkSweep {
 
 
   space::GCSrvSharableHeapData* heap_meta_;
-
+  space::GCSrvSharableCollectorData* meta_data_;
 
   // IPCMarkSweep(space::GCSrvSharableHeapData*);
-  AbstractIPCMarkSweep(IPCHeap* ipcHeap);
+  AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent);
 
   void ResetMetaDataUnlocked();
 
@@ -125,6 +125,9 @@ class IPCHeap {
 
   //indicated that the cycle was executed by a ipc collector due to signal from server.
   volatile int ipc_flag_raised_;
+
+
+  int collector_entry_;
 };
 
 
