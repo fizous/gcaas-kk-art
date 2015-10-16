@@ -414,6 +414,8 @@ accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
 }
 
 void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
+  if(true)
+    return;
   Thread* currThread = Thread::Current();
   {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
@@ -459,7 +461,7 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
 void AbstractIPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
+  LOG(ERROR) << "_______AbstractIPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
   ipc_heap_->meta_->collect_index_ = collector_index_;
   ipc_heap_->meta_->current_collector_ = meta_data_;
