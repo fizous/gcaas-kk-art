@@ -356,9 +356,9 @@ class SharableDlMallocSpace : public DlMallocSpace {
 //  bool HasBitmapsBound(void) {
 //    return (bound_mark_bitmaps_ == 1);
 //  }
-  void SwapBitmaps();
-  void BindLiveToMarkBitmaps(void);
-  accounting::SPACE_BITMAP* UnBindBitmaps(void);
+//  void SwapBitmaps();
+//  void BindLiveToMarkBitmaps(void);
+//  accounting::SPACE_BITMAP* UnBindBitmaps(void);
 //  void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //  void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //  void BindLiveToMarkBitmaps(void);

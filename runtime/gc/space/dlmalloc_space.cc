@@ -914,54 +914,54 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 }
 
 
-void SharableDlMallocSpace::SwapBitmaps () {
-  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
- // DlMallocSpace::SwapBitmaps();
-  accounting::SharedSpaceBitmap* _live_beetmap =
-      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
-  accounting::SharedSpaceBitmap* _mark_beetmap =
-      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
-  accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
-      _mark_beetmap);
+//void SharableDlMallocSpace::SwapBitmaps () {
+//  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
+// // DlMallocSpace::SwapBitmaps();
+//  accounting::SharedSpaceBitmap* _live_beetmap =
+//      reinterpret_cast<accounting::SharedSpaceBitmap*>(live_bitmap_.get());
+//  accounting::SharedSpaceBitmap* _mark_beetmap =
+//      reinterpret_cast<accounting::SharedSpaceBitmap*>(mark_bitmap_.get());
+//  accounting::SharedSpaceBitmap::SwapSharedBitmaps(_live_beetmap,
+//      _mark_beetmap);
+//
+////  live_bitmap_.swap(mark_bitmap_);
+////  // Swap names to get more descriptive diagnostics.
+////  std::string temp_name(live_bitmap_->GetName());
+////  live_bitmap_->SetName(mark_bitmap_->GetName());
+////  mark_bitmap_->SetName(temp_name);
+//}
 
-//  live_bitmap_.swap(mark_bitmap_);
-//  // Swap names to get more descriptive diagnostics.
-//  std::string temp_name(live_bitmap_->GetName());
-//  live_bitmap_->SetName(mark_bitmap_->GetName());
-//  mark_bitmap_->SetName(temp_name);
-}
 
+//void SharableDlMallocSpace::BindLiveToMarkBitmaps(void) {
+//  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
+//  DlMallocSpace::BindLiveToMarkBitmaps();
+////  bound_mark_bitmaps_ = 1;
+////  memcpy(&sharable_space_data_->temp_bitmap_, &sharable_space_data_->mark_bitmap_,
+////      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+////  memcpy(&sharable_space_data_->mark_bitmap_, &sharable_space_data_->live_bitmap_,
+////      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+//
+////  accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
+////  temp_bitmap_.reset(_mark_bitmap_content);
+////  mark_bitmap_.reset(live_bitmap_.get());
+//
+//}
 
-void SharableDlMallocSpace::BindLiveToMarkBitmaps(void) {
-  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
-  DlMallocSpace::BindLiveToMarkBitmaps();
-//  bound_mark_bitmaps_ = 1;
-//  memcpy(&sharable_space_data_->temp_bitmap_, &sharable_space_data_->mark_bitmap_,
-//      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-//  memcpy(&sharable_space_data_->mark_bitmap_, &sharable_space_data_->live_bitmap_,
-//      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-
-//  accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
-//  temp_bitmap_.reset(_mark_bitmap_content);
-//  mark_bitmap_.reset(live_bitmap_.get());
-
-}
-
-accounting::SPACE_BITMAP* SharableDlMallocSpace::UnBindBitmaps(void) {
-  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ~~~~~~~";
-  return DlMallocSpace::UnBindBitmaps();
-//  if ( bound_mark_bitmaps_ == 1) {
-//    bound_mark_bitmaps_ = 0;
-//    // At this point, the temp_bitmap holds our old mark bitmap.
-//    memcpy(&sharable_space_data_->mark_bitmap_, &sharable_space_data_->temp_bitmap_,
-//        SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-//    LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::DoneCopying ~~~~~~~";
-////    accounting::SPACE_BITMAP* new_bitmap = mark_bitmap_.release();
-////    mark_bitmap_.reset(temp_bitmap_.release());
-////    return new_bitmap;
-//  }
- // return NULL;
-}
+//accounting::SPACE_BITMAP* SharableDlMallocSpace::UnBindBitmaps(void) {
+//  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::UnBindBitmaps ~~~~~~~";
+//  return DlMallocSpace::UnBindBitmaps();
+////  if ( bound_mark_bitmaps_ == 1) {
+////    bound_mark_bitmaps_ = 0;
+////    // At this point, the temp_bitmap holds our old mark bitmap.
+////    memcpy(&sharable_space_data_->mark_bitmap_, &sharable_space_data_->temp_bitmap_,
+////        SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+////    LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::DoneCopying ~~~~~~~";
+//////    accounting::SPACE_BITMAP* new_bitmap = mark_bitmap_.release();
+//////    mark_bitmap_.reset(temp_bitmap_.release());
+//////    return new_bitmap;
+////  }
+// // return NULL;
+//}
 
 
 /*
