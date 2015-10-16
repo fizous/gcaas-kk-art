@@ -544,14 +544,14 @@ void IPCMarkSweep::InitializePhase(void) {
 
 
 void IPCMarkSweep::MarkConcurrentRoots() {
-//  timings_.StartSplit("MarkConcurrentRoots");
+  timings_.StartSplit("MarkConcurrentRoots");
   // Visit all runtime roots and clear dirty flags.
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_CONC_MARK);
   LOG(ERROR) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   Runtime::Current()->VisitConcurrentRoots(MarkObjectCallback, this, false, true);
-//  timings_.EndSplit();
+  timings_.EndSplit();
 }
 
 void IPCMarkSweep::MarkingPhase(void) {
