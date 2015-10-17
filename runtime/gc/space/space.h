@@ -23,7 +23,7 @@
 #include "base/macros.h"
 #include "base/mutex.h"
 #include "gc/accounting/space_bitmap.h"
-
+#include "gc/collector/gc_type.h"
 #include "globals.h"
 #include "image.h"
 #include "mem_map.h"
