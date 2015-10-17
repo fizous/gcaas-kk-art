@@ -228,6 +228,11 @@ typedef struct GCSrvSharableHeapData_S {
 
   // Since the heap was created, how many objects have been freed.
   size_t total_objects_freed_ever_;
+
+  // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
+  //guarded by (gc_complete_lock_);
+  volatile collector::GcType last_gc_type_;
+  collector::GcType next_gc_type_;
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {
