@@ -234,8 +234,17 @@ typedef struct GCSrvSharableHeapData_S {
   //guarded by (gc_complete_lock_);
   volatile gc::collector::GcType last_gc_type_;
   gc::collector::GcType next_gc_type_;
+  // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
+  // it completes ahead of an allocation failing.
+  size_t concurrent_start_bytes_;
+  // The nanosecond time at which the last GC ended.
+  uint64_t last_gc_time_ns_;
 
-
+  // How many bytes were allocated at the end of the last GC.
+  uint64_t last_gc_size_;
+  // Estimated allocation rate (bytes / second). Computed between the time of the last GC cycle
+  // and the start of the current one.
+  uint64_t allocation_rate_;
   /*
    * process state of the application. this helps to know the priority  of the
    * app and apply the the trimming with minimum pause overheads.

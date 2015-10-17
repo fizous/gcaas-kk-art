@@ -31,7 +31,7 @@ using ::art::mirror::Object;
 namespace art {
 
 namespace gc {
-
+static constexpr size_t kMinConcurrentRemainingBytes = 128 * KB;
 namespace collector {
 
 
@@ -117,8 +117,11 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->last_gc_type_ = collector::kGcTypeNone;
   meta_->next_gc_type_ = collector::kGcTypePartial;
   meta_->total_wait_time_ = 0;
+  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
+  meta_->last_gc_size_ = local_heap_->last_gc_size_;
+  meta_->last_gc_time_ns_ = local_heap_->last_gc_time_ns_;
 
-  meta_->last_trim_time_ms_ = local_heap_->last_trim_time_ms_;
+
 
   /* heap statistics */
   meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
@@ -417,6 +420,65 @@ bool IPCHeap::RunCollectorDaemon() {
 //    }
 //  }
   return true;
+}
+
+
+
+void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
+  size_t bytes_allocated = meta_->last_gc_size_;
+  size_t target_size;
+  if (gc_type != collector::kGcTypeSticky) {
+    // Grow the heap for non sticky GC.
+    target_size = bytes_allocated / local_heap_->GetTargetHeapUtilization();
+    if (target_size > bytes_allocated + local_heap_->max_free_) {
+      target_size = bytes_allocated + local_heap_->max_free_;
+    } else if (target_size < bytes_allocated + local_heap_->min_free_) {
+      target_size = bytes_allocated + local_heap_->min_free_;
+    }
+    meta_->next_gc_type_ = collector::kGcTypeSticky;
+  } else {
+    // Based on how close the current heap size is to the target size, decide
+    // whether or not to do a partial or sticky GC next.
+    if (bytes_allocated + local_heap_->min_free_ <= local_heap_->max_allowed_footprint_) {
+      local_heap_->SetNextGCType(collector::kGcTypeSticky);
+    } else {
+      local_heap_->SetNextGCType(collector::kGcTypePartial);
+    }
+
+    // If we have freed enough memory, shrink the heap back down.
+    if (bytes_allocated + local_heap_->max_free_ < local_heap_->max_allowed_footprint_) {
+      target_size = bytes_allocated + local_heap_->max_free_;
+    } else {
+      target_size = std::max(bytes_allocated, local_heap_->max_allowed_footprint_);
+    }
+  }
+
+  if (!local_heap_->ignore_max_footprint_) {
+    local_heap_->SetIdealFootprint(target_size);
+
+    if (meta_->concurrent_gc_) {
+      // Calculate when to perform the next ConcurrentGC.
+
+      // Calculate the estimated GC duration.
+      double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
+      // Estimate how many remaining bytes we will have when we need to start the next GC.
+      size_t remaining_bytes = meta_->allocation_rate_ * gc_duration_seconds;
+      remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
+      if (UNLIKELY(remaining_bytes > local_heap_->max_allowed_footprint_)) {
+        // A never going to happen situation that from the estimated allocation rate we will exceed
+        // the applications entire footprint with the given estimated allocation rate. Schedule
+        // another GC straight away.
+        meta_->concurrent_start_bytes_ = bytes_allocated;
+      } else {
+        // Start a concurrent GC when we get close to the estimated remaining bytes. When the
+        // allocation rate is very high, remaining_bytes could tell us that we should start a GC
+        // right away.
+        meta_->concurrent_start_bytes_ = std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
+      }
+//      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
+//      DCHECK_LE(max_allowed_footprint_, growth_limit_);
+    }
+  }
 }
 
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):

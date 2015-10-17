@@ -6,9 +6,9 @@
  */
 
 
-#include "../service/service_client.h"
+#include "gc/service/service_client.h"
 
-#include "../service/global_allocator.h"
+#include "gc/service/global_allocator.h"
 #include "gc/space/dlmalloc_space.h"
 #include "runtime.h"
 #include "ipcfs/ipcfs.h"

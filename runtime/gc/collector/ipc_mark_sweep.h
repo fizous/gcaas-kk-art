@@ -129,6 +129,8 @@ class IPCHeap {
   collector::GcType CollectGarbageIPC(collector::GcType gc_type,
       GcCause gc_cause, bool clear_soft_references);
 
+  void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
+
   /* members replacing the heap main members */
   //Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //protected by gc_complete_lock_
