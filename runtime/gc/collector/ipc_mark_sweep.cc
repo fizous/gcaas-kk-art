@@ -346,8 +346,8 @@ bool IPCHeap::RunCollectorDaemon() {
 
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
     ipc_heap_(ipcHeap),
-    collector_index_(ipc_heap_->collector_entry_++),
-    heap_meta_(ipc_heap_->meta_),
+    collector_index_(ipcHeap->collector_entry_++),
+    heap_meta_(ipcHeap->meta_),
     meta_data_(&(heap_meta_->collectors_[collector_index_])) {
 
   /* initialize locks */
@@ -370,7 +370,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 
   meta_data_->is_concurrent_ = concurrent ? 1 : 0;
-  LOG(ERROR) << "############ Initializing IPC: " << ipcHeap->collector_entry_;
+  LOG(ERROR) << "############ Initializing IPC: " << collector_index_;
   ResetMetaDataUnlocked();
 
   DumpValues();
