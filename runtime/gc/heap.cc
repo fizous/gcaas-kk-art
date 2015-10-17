@@ -2182,6 +2182,23 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   UpdateMaxNativeFootprint();
 }
 
+
+void Heap::SetNextGCType(collector::GcType gc_type) {
+  if(!art::gcservice::GCServiceClient::SetNextGCType(gc_type)) {
+    next_gc_type_ = gc_type;
+  }
+
+}
+
+collector::GcType Heap::GetNextGCType(void) {
+  collector::GcType gc_type;
+
+  if(!art::gcservice::GCServiceClient::GetNextGCType(&gc_type)) {
+    return next_gc_type_;
+  }
+  return gc_type;
+}
+
 void Heap::ClearGrowthLimit() {
   growth_limit_ = capacity_;
   alloc_space_->ClearGrowthLimit();
@@ -2394,7 +2411,7 @@ void Heap::ConcurrentGC(Thread* self) {
   //mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
-    CollectGarbageInternal(next_gc_type_, kGcCauseBackground, false);
+    CollectGarbageInternal(GetNextGCType(), kGcCauseBackground, false);
   }
   mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();

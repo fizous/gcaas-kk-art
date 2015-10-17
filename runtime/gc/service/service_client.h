@@ -29,6 +29,8 @@ class GCServiceClient {
   static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
   static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
       bool clear_soft_references, gc::collector::GcType* gctype);
+  static bool SetNextGCType(gc::collector::GcType gc_type);
+  static bool GetNextGCType(gc::collector::GcType* gc_type);
   static void RequestHeapTrim(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);

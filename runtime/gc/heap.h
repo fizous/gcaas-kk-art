@@ -534,9 +534,8 @@ class Heap {
   void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
 
 
-  void SetNextGCType(collector::GcType gc_type) {
-    next_gc_type_ = gc_type;
-  }
+  void SetNextGCType(collector::GcType gc_type);
+  collector::GcType GetNextGCType(void);
 
   void PreGcVerification(collector::GarbageCollector* gc);
 

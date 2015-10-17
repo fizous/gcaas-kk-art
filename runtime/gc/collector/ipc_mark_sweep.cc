@@ -549,7 +549,7 @@ void IPCMarkSweep::FinishPhase(void) {
  LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
  MarkSweep::FinishPhase();
- ipc_heap_->AssignNextGCType();
+ //ipc_heap_->AssignNextGCType();
 }
 
 void IPCMarkSweep::FindDefaultMarkBitmap(void) {
