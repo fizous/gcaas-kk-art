@@ -133,7 +133,7 @@ bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCau
   if(service_client_ == NULL) {
     return false;
   }
-  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC *** "
+  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC *** ";
   *gctype = service_client_->ipcHeap_->CollectGarbageIPC(gc_type, gc_cause,
       clear_soft_references);
   LOG(ERROR) << " *** GCServiceClient::RequestInternalGC -- returned *** " << *gctype;
