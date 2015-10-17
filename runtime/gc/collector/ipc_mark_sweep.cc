@@ -14,6 +14,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mirror/object-inl.h"
+#include "gc/service/service_client.h"
 #include "gc/space/dlmalloc_space-inl.h"
 #include "gc/space/space-inl.h"
 #include "gc/space/space.h"
@@ -228,15 +229,15 @@ bool IPCHeap::CheckTrimming() {
   // Trim only if we do not currently care about pause times.
   if (!local_heap_->care_about_pause_times_) {
     #if (true || ART_GC_SERVICE)
-      art::gcservice::GCServiceClient::RequestHeapTrim();
+      gcservice::GCServiceClient::RequestHeapTrim();
     #endif
 
-    JNIEnv* env = self->GetJniEnv();
-    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
-    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
-    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
-                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
-    CHECK(!env->ExceptionCheck());
+//    JNIEnv* env = self->GetJniEnv();
+//    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+//    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
+//    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+//                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
+//    CHECK(!env->ExceptionCheck());
     LOG(ERROR) << "bool IPCHeap::Posted a Request()";
     return true;
   }
