@@ -15,8 +15,8 @@
 #include "thread.h"
 #include "mirror/object-inl.h"
 #include "gc/space/dlmalloc_space-inl.h"
-#include "gc/space/space.h"
 #include "gc/space/space-inl.h"
+#include "gc/space/space.h"
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/accounting/heap_bitmap.h"
@@ -113,8 +113,11 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->collect_index_ = 0;
 
   /* heap members */
-  last_gc_type_ = collector::kGcTypeNone;
-  next_gc_type_ = collector::kGcTypePartial;
+  meta_->last_gc_type_ = collector::kGcTypeNone;
+  meta_->next_gc_type_ = collector::kGcTypePartial;
+
+
+
 
   /* heap statistics */
   meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
@@ -123,7 +126,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 
 
 void IPCHeap::AssignNextGCType(void) {
-  next_gc_type_ = local_heap_->next_gc_type_;
+  meta_->next_gc_type_ = local_heap_->next_gc_type_;
 }
 
 void* IPCHeap::RunDaemon(void* arg) {
@@ -175,7 +178,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
   }
   if (local_heap_->WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     ipc_flag_raised_ = 1;
-    CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
+    CollectGarbageIPC(meta_->next_gc_type_, kGcCauseBackground, false);
   }
 //  local_heap_->ConcurrentGC(self);
 //  {
@@ -214,7 +217,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
       while (meta_->is_gc_running_ == 1) {
         gc_complete_cond_->Wait(self);
       }
-      last_gc_type = last_gc_type_;
+      last_gc_type = meta_->last_gc_type_;
     }
   }
   return last_gc_type;
@@ -285,7 +288,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
       meta_->is_gc_running_ = 0;
-      last_gc_type_ = gc_type;
+      meta_->last_gc_type_ = gc_type;
       // Wake anyone who may have been waiting for the GC to complete.
       gc_complete_cond_->Broadcast(self);
   }
@@ -493,7 +496,7 @@ void IPCMarkSweep::InitializePhase(void) {
   base::TimingLogger::ScopedSplit split("InitializePhase", &timings_);
   PreInitializePhase();
 
-  Thread* currThread = Thread::Current();
+  art::Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;

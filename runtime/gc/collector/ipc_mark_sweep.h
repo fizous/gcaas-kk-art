@@ -9,12 +9,15 @@
 #define ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_
 
 #include "ipcfs/ipcfs.h"
+#include "scoped_thread_state_change.h"
+#include "thread_state.h"
 #include "thread.h"
+#include "gc/space/space.h"
 #include "gc/heap.h"
 #include "mark_sweep.h"
 #include "sticky_mark_sweep.h"
 #include "partial_mark_sweep.h"
-#include "gc/space/space.h"
+
 
 
 #define GC_IPC_COLLECT_PHASE(PHASE, THREAD) \
@@ -128,8 +131,8 @@ class IPCHeap {
   //Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //protected by gc_complete_lock_
 
-  volatile collector::GcType last_gc_type_;
-  collector::GcType next_gc_type_;
+//  volatile collector::GcType last_gc_type_;
+//  collector::GcType next_gc_type_;
 
   //indicated that the cycle was executed by a ipc collector due to signal from server.
   volatile int ipc_flag_raised_;
