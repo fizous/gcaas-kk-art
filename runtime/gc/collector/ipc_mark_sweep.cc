@@ -118,7 +118,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->next_gc_type_ = collector::kGcTypePartial;
   meta_->total_wait_time_ = 0;
 
-
+  meta_->last_trim_time_ms_ = local_heap_->last_trim_time_ms_;
 
   /* heap statistics */
   meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
@@ -199,13 +199,20 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
 }
 
+void IPCHeap::SetLastProcessID(void) { //here we set the process of the app
+  int _lastProcessID = local_heap_->GetLastProcessStateID();
+  meta_->process_state_ = _lastProcessID;
+  LOG(ERROR) << "++++++ IPCHeap::SetLastProcessID: " << meta_->process_state_;
+}
+
+
 bool IPCHeap::CheckTrimming() {
   LOG(ERROR) << "bool IPCHeap::CheckTrimming()";
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
   if ((utilization > 0.75f && !local_heap_->IsLowMemoryMode()) ||
-      ((ms_time - local_heap_->last_trim_time_ms_) < 2 * 1000)) {
+      ((ms_time - meta_->last_trim_time_ms_) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
     // not enabled, or if a heap trim occurred in the last two seconds.
     return false;
@@ -223,7 +230,9 @@ bool IPCHeap::CheckTrimming() {
     }
   }
 
-  local_heap_->last_trim_time_ms_ = ms_time;
+  SetLastProcessID();
+
+  meta_->last_trim_time_ms_ = ms_time;
   local_heap_->ListenForProcessStateChange();
 
   // Trim only if we do not currently care about pause times.

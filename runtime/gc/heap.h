@@ -471,7 +471,7 @@ class Heap {
 
   // Gets called when we get notified by ActivityThread that the process state has changed.
   void ListenForProcessStateChange();
-
+  int GetLastProcessStateID(void);
   // DEPRECATED: Should remove in "near" future when support for multiple image spaces is added.
   // Assumes there is only one image space.
   space::ImageSpace* GetImageSpace() const;

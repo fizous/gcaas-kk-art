@@ -306,6 +306,42 @@ static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name, int* out
   return true;
 }
 
+
+int Heap::GetLastProcessStateID(void) {
+  Thread* self = Thread::Current();
+  JNIEnvExt* env = self->GetJniEnv();
+  if (application_thread_class_ != NULL && application_thread_ == NULL) {
+    jmethodID get_application_thread =
+        env->GetMethodID(activity_thread_class_, "getApplicationThread",
+                         "()Landroid/app/ActivityThread$ApplicationThread;");
+    if (get_application_thread == NULL) {
+      LOG(WARNING) << "Could not get method ID for get application thread";
+      return -1;
+    }
+
+    jobject obj = env->CallObjectMethod(activity_thread_, get_application_thread);
+    if (obj == NULL) {
+      LOG(WARNING) << "Could not get application thread";
+      return -1;
+    }
+
+    application_thread_ = env->NewGlobalRef(obj);
+  }
+
+  if (application_thread_ != NULL && last_process_state_id_ != NULL) {
+    int process_state = env->GetIntField(application_thread_, last_process_state_id_);
+    env->ExceptionClear();
+
+    care_about_pause_times_ = process_state_cares_about_pause_time_.find(process_state) !=
+        process_state_cares_about_pause_time_.end();
+
+    /*VLOG(heap)*/LOG(ERROR) << "New process state " << process_state
+               << " care about pauses " << care_about_pause_times_;
+    return process_state;
+  }
+  return -1;
+}
+
 void Heap::ListenForProcessStateChange() {
   VLOG(heap) << "Heap notified of process state change";
 

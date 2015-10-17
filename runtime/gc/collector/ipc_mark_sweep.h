@@ -123,6 +123,7 @@ class IPCHeap {
   void ExplicitGC(bool clear_soft_references);
   void TrimHeap(void);
   bool CheckTrimming();
+  void SetLastProcessID(void);
   collector::GcType WaitForConcurrentIPCGcToComplete(Thread* self);
 
   collector::GcType CollectGarbageIPC(collector::GcType gc_type,
