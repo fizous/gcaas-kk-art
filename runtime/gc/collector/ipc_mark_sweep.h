@@ -122,6 +122,7 @@ class IPCHeap {
   void ConcurrentGC(Thread* self);
   void ExplicitGC(bool clear_soft_references);
   void TrimHeap(void);
+  bool CheckTrimming();
   collector::GcType WaitForConcurrentIPCGcToComplete(Thread* self);
 
   collector::GcType CollectGarbageIPC(collector::GcType gc_type,
@@ -168,6 +169,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  void ApplyTrimming(void);
   /*
 
 

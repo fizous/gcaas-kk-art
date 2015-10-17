@@ -234,6 +234,16 @@ typedef struct GCSrvSharableHeapData_S {
   //guarded by (gc_complete_lock_);
   volatile gc::collector::GcType last_gc_type_;
   gc::collector::GcType next_gc_type_;
+
+
+  /*
+   * process state of the application. this helps to know the priority  of the
+   * app and apply the the trimming with minimum pause overheads.
+   */
+  volatile int process_state_;
+
+  // for triming
+  uint64_t last_trim_time_ms_;
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {

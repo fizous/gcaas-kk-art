@@ -1838,6 +1838,10 @@ void MarkSweep::UnBindBitmaps() {
   }
 }
 
+void MarkSweep::ApplyTrimming() {
+  GetHeap()->RequestHeapTrim();
+}
+
 void MarkSweep::FinishPhase() {
   base::TimingLogger::ScopedSplit split("FinishPhase", &timings_);
   // Can't enqueue references if we hold the mutator lock.
@@ -1853,8 +1857,7 @@ void MarkSweep::FinishPhase() {
   heap->GrowForUtilization(GetGcType(), GetDurationNs());
 
   timings_.NewSplit("RequestHeapTrim");
-  heap->RequestHeapTrim();
-
+  ApplyTrimming();
   // Update the cumulative statistics
   total_time_ns_ += GetDurationNs();
   total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,

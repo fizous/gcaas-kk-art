@@ -198,6 +198,52 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
 }
 
+bool IPCHeap::CheckTrimming() {
+  LOG(ERROR) << "bool IPCHeap::CheckTrimming()";
+  uint64_t ms_time = MilliTime();
+  float utilization =
+      static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
+  if ((utilization > 0.75f && !local_heap_->IsLowMemoryMode()) ||
+      ((ms_time - local_heap_->last_trim_time_ms_) < 2 * 1000)) {
+    // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
+    // not enabled, or if a heap trim occurred in the last two seconds.
+    return false;
+  }
+
+  Thread* self = Thread::Current();
+  {
+    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+    Runtime* runtime = Runtime::Current();
+    if (runtime == NULL || !runtime->IsFinishedStarting() || runtime->IsShuttingDown()) {
+      // Heap trimming isn't supported without a Java runtime or Daemons (such as at dex2oat time)
+      // Also: we do not wish to start a heap trim if the runtime is shutting down (a racy check
+      // as we don't hold the lock while requesting the trim).
+      return false;
+    }
+  }
+
+  local_heap_->last_trim_time_ms_ = ms_time;
+  local_heap_->ListenForProcessStateChange();
+
+  // Trim only if we do not currently care about pause times.
+  if (!local_heap_->care_about_pause_times_) {
+    #if (true || ART_GC_SERVICE)
+      art::gcservice::GCServiceClient::RequestHeapTrim();
+    #endif
+
+    JNIEnv* env = self->GetJniEnv();
+    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
+    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
+    CHECK(!env->ExceptionCheck());
+    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
+    return true;
+  }
+  return false;
+}
+
+
 void IPCHeap::TrimHeap(void)  {
   local_heap_->Trim();
 }
@@ -543,6 +589,12 @@ void IPCMarkSweep::InitializePhase(void) {
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
   ipc_heap_->local_heap_->PreGcVerification(this);
 }
+
+void IPCMarkSweep::ApplyTrimming(void) {
+  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
+  ipc_heap_->CheckTrimming();
+}
+
 void IPCMarkSweep::FinishPhase(void) {
  Thread* currThread = Thread::Current();
  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
