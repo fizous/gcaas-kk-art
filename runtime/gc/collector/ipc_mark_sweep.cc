@@ -233,7 +233,11 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
   return last_gc_type;
 }
 
-
+const char* gc_cause_and_type_strings[4][4] = {
+    {"", "GC Alloc Sticky", "GC Alloc Partial", "GC Alloc Full"},
+    {"", "GC Background Sticky", "GC Background Partial", "GC Background Full"},
+    {"", "GC Explicit Sticky", "GC Explicit Partial", "GC Explicit Full"},
+    {"", "GC Profile Sticky", "GC Profile Partial", "GC Profile Full"}};
 collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     GcCause gc_cause, bool clear_soft_references) {
   Thread* self = Thread::Current();
