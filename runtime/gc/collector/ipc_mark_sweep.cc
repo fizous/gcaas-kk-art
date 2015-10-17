@@ -486,29 +486,8 @@ void IPCMarkSweep::PreInitializePhase(void) {
   ipc_heap_->meta_->collect_index_ = collector_index_;
   ipc_heap_->meta_->current_collector_ = meta_data_;
 }
-/*
- void IPCMarkSweep::FinishPhase(void) {
-  Thread* currThread = Thread::Current();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
-  LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  MarkSweep::FinishPhase();
-  ipc_heap_->AssignNextGCType();
-}
-bool IPCMarkSweep::IsConcurrent() const {
-  return (meta_data_->is_concurrent_ != 0);
-}
 
-void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
-  meta_data_->immune_begin_ = begin;
-  meta_data_->immune_end_ = end;
-}
 
-void IPCMarkSweep::FindDefaultMarkBitmap(void) {
-  current_mark_bitmap_ = SetMarkBitmap();
-  meta_data_->current_mark_bitmap_ =
-      (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
-}
 void IPCMarkSweep::InitializePhase(void) {
   //PreInitializePhase();
 
@@ -545,6 +524,32 @@ void IPCMarkSweep::InitializePhase(void) {
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
   ipc_heap_->local_heap_->PreGcVerification(this);
 }
+void IPCMarkSweep::FinishPhase(void) {
+ Thread* currThread = Thread::Current();
+ UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
+ LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
+     currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+ MarkSweep::FinishPhase();
+ ipc_heap_->AssignNextGCType();
+}
+
+/*
+
+bool IPCMarkSweep::IsConcurrent() const {
+  return (meta_data_->is_concurrent_ != 0);
+}
+
+void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
+  meta_data_->immune_begin_ = begin;
+  meta_data_->immune_end_ = end;
+}
+
+void IPCMarkSweep::FindDefaultMarkBitmap(void) {
+  current_mark_bitmap_ = SetMarkBitmap();
+  meta_data_->current_mark_bitmap_ =
+      (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
+}
+
 
 
 void IPCMarkSweep::MarkConcurrentRoots() {
