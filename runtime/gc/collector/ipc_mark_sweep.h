@@ -61,9 +61,9 @@ class AbstractIPCMarkSweep {
 
   void DumpValues(void);
 
-  virtual ~AbstractIPCMarkSweep() {}
+//  virtual ~AbstractIPCMarkSweep() {}
 
-  virtual void HandshakeMarkingPhase(void);
+  void HandshakeMarkingPhase(void);
 
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
@@ -179,7 +179,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   }
 
   // Find the default mark bitmap.
-  //void FindDefaultMarkBitmap();
+  void FindDefaultMarkBitmap();
 
   void PreInitializePhase(void);
   void HandshakeIPCSweepMarkingPhase(void);

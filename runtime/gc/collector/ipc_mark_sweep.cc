@@ -469,7 +469,7 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
   LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
-      << GetGcType() << " ###########";
+      << GetGcType() << "; conc:" << IsConcurrent() <<" ###########";
 }
 
 
