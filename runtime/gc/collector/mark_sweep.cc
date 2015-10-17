@@ -1842,6 +1842,21 @@ void MarkSweep::ApplyTrimming() {
   GetHeap()->RequestHeapTrim();
 }
 
+void MarkSweep::ClearMarkHolders(void) {
+  // Clear all of the spaces' mark bitmaps.
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->GetGcRetentionPolicy() != space::kGcRetentionPolicyNeverCollect) {
+      space->GetMarkBitmap()->Clear();
+    }
+  }
+  mark_stack_->Reset();
+
+  // Reset the marked large objects.
+  space::LargeObjectSpace* large_objects = GetHeap()->GetLargeObjectsSpace();
+  if (large_objects != NULL)
+    large_objects->GetMarkObjects()->Clear();
+}
+
 void MarkSweep::FinishPhase() {
   base::TimingLogger::ScopedSplit split("FinishPhase", &timings_);
   // Can't enqueue references if we hold the mutator lock.
@@ -1898,18 +1913,7 @@ void MarkSweep::FinishPhase() {
   cumulative_timings_.AddLogger(timings_);
   cumulative_timings_.End();
 
-  // Clear all of the spaces' mark bitmaps.
-  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
-    if (space->GetGcRetentionPolicy() != space::kGcRetentionPolicyNeverCollect) {
-      space->GetMarkBitmap()->Clear();
-    }
-  }
-  mark_stack_->Reset();
-
-  // Reset the marked large objects.
-  space::LargeObjectSpace* large_objects = GetHeap()->GetLargeObjectsSpace();
-  if (large_objects != NULL)
-    large_objects->GetMarkObjects()->Clear();
+  ClearMarkHolders();
 }
 
 }  // namespace collector

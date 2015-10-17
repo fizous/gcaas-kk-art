@@ -94,6 +94,7 @@ class MarkSweep : public GarbageCollector {
   virtual void MarkingPhase() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   virtual void ReclaimPhase() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   virtual void FinishPhase();
+  virtual void ClearMarkHolders(void);
   virtual void ApplyTrimming();
   virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)

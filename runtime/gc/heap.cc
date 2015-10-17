@@ -332,11 +332,6 @@ int Heap::GetLastProcessStateID(void) {
     int process_state = env->GetIntField(application_thread_, last_process_state_id_);
     env->ExceptionClear();
 
-    care_about_pause_times_ = process_state_cares_about_pause_time_.find(process_state) !=
-        process_state_cares_about_pause_time_.end();
-
-    /*VLOG(heap)*/LOG(ERROR) << "New process state " << process_state
-               << " care about pauses " << care_about_pause_times_;
     return process_state;
   }
   return -1;

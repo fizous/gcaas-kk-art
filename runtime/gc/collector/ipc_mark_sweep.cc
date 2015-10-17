@@ -232,6 +232,8 @@ bool IPCHeap::CheckTrimming() {
 
   SetLastProcessID();
 
+
+  //todo : we will need to get rid of that. and use static initialization defined at the service
   meta_->last_trim_time_ms_ = ms_time;
   local_heap_->ListenForProcessStateChange();
 
@@ -547,7 +549,16 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 
 
 
-
+void IPCMarkSweep::ClearMarkHolders(void) {
+  LOG(ERROR) << "IPCMarkSweep::ClearMarkHolders..............";
+  // Clear all of the spaces' mark bitmaps.
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->GetGcRetentionPolicy() != space::kGcRetentionPolicyNeverCollect) {
+      space->GetMarkBitmap()->Clear();
+    }
+  }
+  mark_stack_->Reset();
+}
 
 
 
