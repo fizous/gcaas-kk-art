@@ -103,8 +103,8 @@ bool GCServiceClient::SetNextGCType(gc::collector::GcType gc_type) {
   if(service_client_ == NULL) {
     return false;
   }
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+//  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+//        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   service_client_->ipcHeap_->meta_->next_gc_type_ = gc_type;
   return true;
 }
@@ -113,8 +113,8 @@ bool GCServiceClient::GetNextGCType(gc::collector::GcType* gc_type) {
   if(service_client_ == NULL) {
     return false;
   }
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+//  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+//        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   *gc_type = service_client_->ipcHeap_->meta_->next_gc_type_;
   return true;
 }
