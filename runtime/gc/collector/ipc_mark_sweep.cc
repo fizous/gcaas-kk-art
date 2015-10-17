@@ -541,16 +541,18 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
 }
 
+void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
+  meta_data_->immune_begin_ = begin;
+  meta_data_->immune_end_ = end;
+}
+
 /*
 
 bool IPCMarkSweep::IsConcurrent() const {
   return (meta_data_->is_concurrent_ != 0);
 }
 
-void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
-  meta_data_->immune_begin_ = begin;
-  meta_data_->immune_end_ = end;
-}
+
 
 
 
