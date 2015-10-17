@@ -489,7 +489,9 @@ void IPCMarkSweep::PreInitializePhase(void) {
 
 
 void IPCMarkSweep::InitializePhase(void) {
-  //PreInitializePhase();
+  timings_.Reset();
+  base::TimingLogger::ScopedSplit split("InitializePhase", &timings_);
+  PreInitializePhase();
 
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
