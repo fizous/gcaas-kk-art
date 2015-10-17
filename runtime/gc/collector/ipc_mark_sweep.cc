@@ -115,7 +115,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   /* heap members */
   meta_->last_gc_type_ = collector::kGcTypeNone;
   meta_->next_gc_type_ = collector::kGcTypePartial;
-
+  meta_->total_wait_time_ = 0;
 
 
 
@@ -203,21 +203,31 @@ void IPCHeap::TrimHeap(void)  {
 }
 
 collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
+  LOG(ERROR) << "*****Executing the WaitForConcurrentIPCGcToComplete**** " << self->GetTid();
   collector::GcType last_gc_type = collector::kGcTypeNone;
   bool do_wait = false;
   if(meta_->concurrent_gc_) { // the heap is concurrent
+    uint64_t wait_start = NanoTime();
     {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
       do_wait = meta_->is_gc_running_;
     }
     if(do_wait) {
+      uint64_t wait_time;
       // We must wait, change thread state then sleep on gc_complete_cond_;
       ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGcToComplete);
-      IPMutexLock interProcMu(self, *gc_complete_mu_);
-      while (meta_->is_gc_running_ == 1) {
-        gc_complete_cond_->Wait(self);
+      {
+        IPMutexLock interProcMu(self, *gc_complete_mu_);
+        while (meta_->is_gc_running_ == 1) {
+          gc_complete_cond_->Wait(self);
+        }
+        last_gc_type = meta_->last_gc_type_;
+        wait_time = NanoTime() - wait_start;
+        meta_->total_wait_time_ += wait_time;
       }
-      last_gc_type = meta_->last_gc_type_;
+      if (wait_time > local_heap_->long_pause_log_threshold_) {
+        LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
+      }
     }
   }
   return last_gc_type;
@@ -269,8 +279,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   for (const auto& cur_collector : local_heap_->mark_sweep_collectors_) {
     if (cur_collector->IsConcurrent() == meta_->concurrent_gc_ && cur_collector->GetGcType() == gc_type) {
       collector = cur_collector;
-      if(gc_cause == kGcCauseBackground)
-        LOG(ERROR) << "========collector: " << collector->GetName();
+      LOG(ERROR) << "========collector: " << collector->GetName();
       break;
     }
   }
@@ -281,6 +290,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   collector->SetClearSoftReferences(clear_soft_references);
   collector->Run();
+  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
   meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
 

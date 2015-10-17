@@ -127,6 +127,41 @@ bool GCServiceClient::RequestAllocateGC(void) {
 
 }
 
+
+bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
+    bool clear_soft_references, gc::collector::GcType* gctype) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC *** "
+  *gctype = service_client_->ipcHeap_->CollectGarbageIPC(gc_type, gc_cause,
+      clear_soft_references);
+  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC -- returned *** " << *gctype;
+  return true;
+}
+
+bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  Thread* self = Thread::Current();
+  LOG(ERROR) << " *** GCServiceClient::RequestWaitForConcurrentGC *** " << self->GetTid()
+
+  *type  = service_client_->ipcHeap_->WaitForConcurrentIPCGcToComplete(self);
+  LOG(ERROR) << " *** GCServiceClient::RequestWaitForConcurrentGC *** --- > " << *type;
+  return true;
+
+//  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+//        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+//
+//  if(gc::gcservice::GCServiceGlobalAllocator::kGCServiceFWDAllocationGC ==
+//      gc::gcservice::GC_SERVICE_HANDLE_ALLOC_DAEMON) { // we need to fwd this to daemon
+//    _alloc->handShake_->ReqAllocationGC();
+//    return true;
+//  }
+
+}
+
 bool GCServiceClient::RequestExplicitGC(void) {
   return false;
 //  if(service_client_ == NULL)

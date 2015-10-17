@@ -1441,6 +1441,12 @@ const char* gc_cause_and_type_strings[4][4] = {
 
 collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCause gc_cause,
                                                bool clear_soft_references) {
+
+  collector::GcType returned_gc_type = collector::kGcTypeNone;
+  if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
+      clear_soft_references, &returned_gc_type)) {
+    return returned_gc_type;
+  }
   Thread* self = Thread::Current();
 
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
@@ -2031,6 +2037,11 @@ void Heap::PostGcVerification(collector::GarbageCollector* gc) {
 }
 
 collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
+  collector::GcType returned_gc_type = collector::kGcTypeNone;
+  if(art::gcservice::GCServiceClient::RequestWaitForConcurrentGC(&returned_gc_type)) {
+    return returned_gc_type;
+  }
+
   collector::GcType last_gc_type = collector::kGcTypeNone;
   if (concurrent_gc_) {
     ATRACE_BEGIN("GC: Wait For Concurrent");

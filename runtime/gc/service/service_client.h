@@ -11,7 +11,7 @@
 #include "gc/space/dlmalloc_space.h"
 #include "ipcfs/ipcfs.h"
 #include "gc/collector/ipc_mark_sweep.h"
-
+#include "gc/heap.h"
 namespace art {
 
 namespace gcservice {
@@ -26,6 +26,9 @@ class GCServiceClient {
   static bool RequestConcGC(void);
   static bool RequestExplicitGC(void);
   static bool RequestAllocateGC(void) ;
+  static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
+  static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
+      bool clear_soft_references, gc::collector::GcType* gctype);
   static void RequestHeapTrim(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);

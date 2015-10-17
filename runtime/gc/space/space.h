@@ -214,7 +214,8 @@ typedef struct GCSrvSharableHeapData_S {
 
 
   /****** variables from original heap members *****/
-
+  // Total time which mutators are paused or waiting for GC to complete.
+  uint64_t total_wait_time_;
   // What kind of concurrency behavior is the runtime after? True for concurrent mark sweep GC,
   // false for stop-the-world mark sweep.
   int concurrent_gc_;
