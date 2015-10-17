@@ -133,10 +133,10 @@ bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCau
   if(service_client_ == NULL) {
     return false;
   }
-  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC *** ";
+  LOG(ERROR) << " <<<<<<<<<<< GCServiceClient::RequestInternalGC >>>>>>>>>> type: " << gc_type << ", gCause: " << gc_cause;
   *gctype = service_client_->ipcHeap_->CollectGarbageIPC(gc_type, gc_cause,
       clear_soft_references);
-  LOG(ERROR) << " *** GCServiceClient::RequestInternalGC -- returned *** " << *gctype;
+  LOG(ERROR) << " >>>>>>>>>> GCServiceClient::RequestInternalGC -- returned <<<<<<<<<< " << *gctype;
   return true;
 }
 
@@ -145,10 +145,10 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
     return false;
   }
   Thread* self = Thread::Current();
-  LOG(ERROR) << " *** GCServiceClient::RequestWaitForConcurrentGC *** " << self->GetTid();
+  LOG(ERROR) << " <<<<< GCServiceClient::RequestWaitForConcurrentGC >>>> " << self->GetTid();
 
   *type  = service_client_->ipcHeap_->WaitForConcurrentIPCGcToComplete(self);
-  LOG(ERROR) << " *** GCServiceClient::RequestWaitForConcurrentGC *** --- > " << *type;
+  LOG(ERROR) << " >>>>> GCServiceClient::RequestWaitForConcurrentGC *** <<<<< " << *type;
   return true;
 
 //  gc::gcservice::GCServiceGlobalAllocator* _alloc =
