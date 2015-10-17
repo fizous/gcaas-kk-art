@@ -231,8 +231,8 @@ typedef struct GCSrvSharableHeapData_S {
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //guarded by (gc_complete_lock_);
-  volatile collector::GcType last_gc_type_;
-  collector::GcType next_gc_type_;
+  volatile gc::collector::GcType last_gc_type_;
+  gc::collector::GcType next_gc_type_;
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 typedef struct GCSrvSharableDlMallocSpace_S {
