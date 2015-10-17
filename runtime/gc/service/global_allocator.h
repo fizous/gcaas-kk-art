@@ -41,6 +41,7 @@ typedef enum {
   GC_SERVICE_TASK_CONC,
   GC_SERVICE_TASK_EXPLICIT,
   GC_SERVICE_TASK_TRIM,
+  GC_SERVICE_TASK_GC_ALLOC,
   GC_SERVICE_TASK_STATS,
   GC_SERVICE_TASK_MAX_LIMIT
 } GC_SERVICE_TASK;
@@ -52,6 +53,13 @@ typedef enum {
   GC_SERVICE_REQ_COMPLETE,
   GC_SERVICE_REQ__MAX_LIMIT
 } GC_SERVICE_REQ_STATUS;
+
+
+typedef enum {
+  GC_SERVICE_HANDLE_ALLOC_NONE = 0,
+  GC_SERVICE_HANDLE_ALLOC_MUT,
+  GC_SERVICE_HANDLE_ALLOC_DAEMON
+} GC_SERVICE_HANDLE_ALLOC_GC;
 
 
 //typedef struct GCServiceClientHandShake_S {
@@ -125,6 +133,7 @@ class GCSrvcClientHandShake {
   void ReqExplicitCollection(void*);
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
+  void ReqAllocationGC(void);
   void ListenToRequests(void*);
   void ProcessGCRequest(void* args);
   //GCServiceClientHandShake* mem_data_;
@@ -140,6 +149,7 @@ class GCSrvcClientHandShake {
 
 class GCServiceGlobalAllocator {
  public:
+  static const int kGCServiceFWDAllocationGC = GC_SERVICE_HANDLE_ALLOC_DAEMON;
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
@@ -154,6 +164,7 @@ class GCServiceGlobalAllocator {
   static GCServiceGlobalAllocator* allocator_instant_;
  private:
   static const int   kGCServicePageCapacity = 32;
+
   GCSrvcGlobalRegionHeader* region_header_;
 
 

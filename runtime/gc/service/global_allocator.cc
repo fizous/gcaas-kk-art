@@ -422,6 +422,17 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 }
 
 
+void GCSrvcClientHandShake::ReqAllocationGC() {
+  Thread* self = Thread::Current();
+  GCServiceReq* _entry = NULL;
+
+  GC_BUFFER_PUSH_REQUEST(_entry, self);
+
+  _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
+  LOG(ERROR) << "GCSrvcClientHandShake::ReqGCAlloc";
+  gcservice_data_->cond_->Broadcast(self);
+}
+
 void GCSrvcClientHandShake::ReqHeapTrim() {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
@@ -654,6 +665,13 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   } else if (_req_type == GC_SERVICE_TASK_TRIM) {
     LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
+  } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
+    LOG(ERROR) << " processing Allocation GC Request ~~~~ Request type: " <<
+        _req_type << " ~~~~~ " << _entry->req_type_;
+    //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
+    //GCSrvceAgent* _agent =
+    //    GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
+    //_agent->collector_->SignalCollector();
   } else if (_req_type == GC_SERVICE_TASK_EXPLICIT) {
     LOG(ERROR) << " processing EXplicit GC Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;

@@ -979,6 +979,10 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     }
   }
 
+  bool fwd_to_gcservice = false;
+
+
+
   // Loop through our different Gc types and try to Gc until we get enough free memory.
   for (size_t i = static_cast<size_t>(last_gc) + 1;
       i < static_cast<size_t>(collector::kGcTypeMax); ++i) {
@@ -1002,17 +1006,27 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     }
 
     if (run_gc) {
-    	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
-    	// If we actually ran a different type of Gc than requested, we can skip the index forwards.
-      collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
-      mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
-      DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
-      i = static_cast<size_t>(gc_type_ran);
 
-      // Did we free sufficient memory for the allocation to succeed?
-      ptr = TryToAllocate(self, space, alloc_size, false, bytes_allocated);
-      if (ptr != NULL) {
-        return ptr;
+      if(art::gcservice::GCServiceClient::RequestAllocateGC()) {
+        // Allocations have failed after GCs;  this is an exceptional state.
+        // Try harder, growing the heap if necessary.
+        ptr = TryToAllocate(self, space, alloc_size, true, bytes_allocated);
+        if (ptr != NULL) {
+          return ptr;
+        }
+      } else {
+        mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
+        // If we actually ran a different type of Gc than requested, we can skip the index forwards.
+        collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
+        mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent();
+        DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
+        i = static_cast<size_t>(gc_type_ran);
+
+        // Did we free sufficient memory for the allocation to succeed?
+        ptr = TryToAllocate(self, space, alloc_size, false, bytes_allocated);
+        if (ptr != NULL) {
+          return ptr;
+        }
       }
     }
   }

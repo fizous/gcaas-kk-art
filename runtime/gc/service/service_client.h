@@ -25,6 +25,7 @@ class GCServiceClient {
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
   static bool RequestExplicitGC(void);
+  static bool RequestAllocateGC(void) ;
   static void RequestHeapTrim(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);

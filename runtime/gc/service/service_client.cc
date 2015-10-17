@@ -112,6 +112,21 @@ bool GCServiceClient::RequestConcGC(void) {
 }
 
 
+bool GCServiceClient::RequestAllocateGC(void) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+
+  if(gc::gcservice::GCServiceGlobalAllocator::kGCServiceFWDAllocationGC ==
+      gc::gcservice::GC_SERVICE_HANDLE_ALLOC_DAEMON) { // we need to fwd this to daemon
+    _alloc->handShake_->ReqAllocationGC();
+    return true;
+  }
+
+}
+
 bool GCServiceClient::RequestExplicitGC(void) {
   return false;
 //  if(service_client_ == NULL)

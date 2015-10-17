@@ -597,34 +597,6 @@ void IPCMarkSweep::MarkingPhase(void) {
   MarkReachableObjects();
 }
 
-
-void IPCMarkSweep::MarkReachableObjects() {
-  Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
-  HandshakeIPCSweepMarkingPhase();
-  MarkSweep::MarkReachableObjects();
-  LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
-      currThread->GetTid() ;
-}
-
-/*
-
-bool IPCMarkSweep::IsConcurrent() const {
-  return (meta_data_->is_concurrent_ != 0);
-}
-
-
-
-
-
-
-
-
-*/
-
-
 void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
@@ -645,6 +617,25 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
+
+
+/*
+
+bool IPCMarkSweep::IsConcurrent() const {
+  return (meta_data_->is_concurrent_ != 0);
+}
+
+
+
+
+
+
+
+
+*/
+
+
+
 
 /*
 
