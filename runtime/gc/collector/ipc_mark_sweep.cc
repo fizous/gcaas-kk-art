@@ -546,17 +546,6 @@ void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
   meta_data_->immune_end_ = end;
 }
 
-/*
-
-bool IPCMarkSweep::IsConcurrent() const {
-  return (meta_data_->is_concurrent_ != 0);
-}
-
-
-
-
-
-
 
 void IPCMarkSweep::MarkConcurrentRoots() {
   timings_.StartSplit("MarkConcurrentRoots");
@@ -607,6 +596,32 @@ void IPCMarkSweep::MarkingPhase(void) {
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
   MarkReachableObjects();
 }
+
+
+void IPCMarkSweep::MarkReachableObjects() {
+  Thread* currThread = Thread::Current();
+  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  HandshakeIPCSweepMarkingPhase();
+  MarkSweep::MarkReachableObjects();
+  LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
+      currThread->GetTid() ;
+}
+
+/*
+
+bool IPCMarkSweep::IsConcurrent() const {
+  return (meta_data_->is_concurrent_ != 0);
+}
+
+
+
+
+
+
+
+
 */
 
 
@@ -632,16 +647,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 }
 
 /*
-void IPCMarkSweep::MarkReachableObjects() {
-  Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
-  HandshakeIPCSweepMarkingPhase();
-  MarkSweep::MarkReachableObjects();
-  LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
-      currThread->GetTid() ;
-}
+
 */
 
 //void IPCMarkSweep::SwapBitmaps() {

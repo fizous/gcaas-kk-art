@@ -159,13 +159,15 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void InitializePhase(void);
   // Everything inside the immune range is assumed to be marked.
   void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
-  /*
   void MarkConcurrentRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  /*
+
+
 
   bool IsConcurrent() const;*/
   //void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
