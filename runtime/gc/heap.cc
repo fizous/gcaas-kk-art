@@ -979,10 +979,6 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     }
   }
 
-  bool fwd_to_gcservice = false;
-
-
-
   // Loop through our different Gc types and try to Gc until we get enough free memory.
   for (size_t i = static_cast<size_t>(last_gc) + 1;
       i < static_cast<size_t>(collector::kGcTypeMax); ++i) {
