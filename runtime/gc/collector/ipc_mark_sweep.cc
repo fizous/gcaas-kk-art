@@ -805,6 +805,8 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCPartialMarkSweep::BindBitmaps() {
+  LOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
+      "; phase:" << meta_data_->gc_phase_;
   MarkSweep::BindBitmaps();
 
   WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
@@ -828,6 +830,8 @@ IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCStickyMarkSweep::BindBitmaps() {
+  LOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
+      "; phase:" << meta_data_->gc_phase_;
   IPCMarkSweep::BindBitmaps();
 
   WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
@@ -848,6 +852,8 @@ void IPCStickyMarkSweep::BindBitmaps() {
 }
 
 void IPCStickyMarkSweep::MarkReachableObjects() {
+  LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
+      "; phase:" << meta_data_->gc_phase_;
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
   // TODO: Not put these objects in the mark stack in the first place.
@@ -861,6 +867,8 @@ void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
 }
 
 void IPCStickyMarkSweep::MarkThreadRoots(Thread* self) {
+  LOG(ERROR) << "IPCStickyMarkSweep::MarkThreadRoots. starting: _______ " <<
+      "; phase:" << meta_data_->gc_phase_;
   MarkRootsCheckpoint(self);
 }
 

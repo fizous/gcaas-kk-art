@@ -162,17 +162,17 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   ~IPCMarkSweep() {}
 
   /* overriding the Marksweep code*/
-  void FinishPhase();
-  void InitializePhase(void);
+  virtual void FinishPhase();
+  virtual void InitializePhase(void);
   // Everything inside the immune range is assumed to be marked.
   void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
-  void MarkConcurrentRoots()
+  virtual void MarkConcurrentRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  virtual void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  void ApplyTrimming(void);
+  virtual void ApplyTrimming(void);
   void ClearMarkHolders(void);
   /*
 
@@ -238,6 +238,7 @@ class IPCPartialMarkSweep : public IPCMarkSweep {
   virtual GcType GetGcType() const {
     return kGcTypePartial;
   }
+ protected:
   // Bind the live bits to the mark bits of bitmaps for spaces that aren't collected for partial
   // collections, ie the Zygote space. Also mark this space is immune.
   virtual void BindBitmaps() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -263,7 +264,7 @@ class IPCStickyMarkSweep : public IPCPartialMarkSweep {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  virtual void MarkThreadRoots(Thread* self)
+  void MarkThreadRoots(Thread* self)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
