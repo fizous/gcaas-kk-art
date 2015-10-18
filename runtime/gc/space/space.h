@@ -199,7 +199,7 @@ typedef struct GCSrvSharableHeapData_S {
   /****** variables from original Marksweep members *****/
 
 
-  volatile IPC_GC_PHASE_ENUM gc_phase_;
+//  volatile IPC_GC_PHASE_ENUM gc_phase_;
 
   volatile int barrier_count_;
 

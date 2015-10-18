@@ -599,28 +599,28 @@ accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
   return _bitmap;
 }
 
-void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
-  if(true)
-    return;
-  Thread* currThread = Thread::Current();
-  {
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-    phase_cond_->Broadcast(currThread);
-  }
-
-  if(ipc_heap_->ipc_flag_raised_ == 1) {
-    LOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
-    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
-    heap_meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
-    LOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
-    ipc_heap_->ipc_flag_raised_ = 0;
-    phase_cond_->Broadcast(currThread);
-  } else {
-    LOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
-    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
-    phase_cond_->Broadcast(currThread);
-  }
-}
+//void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
+//  if(true)
+//    return;
+//  Thread* currThread = Thread::Current();
+//  {
+//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
+//    phase_cond_->Broadcast(currThread);
+//  }
+//
+//  if(ipc_heap_->ipc_flag_raised_ == 1) {
+//    LOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
+//    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+//    heap_meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
+//    LOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
+//    ipc_heap_->ipc_flag_raised_ = 0;
+//    phase_cond_->Broadcast(currThread);
+//  } else {
+//    LOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
+//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
+//    phase_cond_->Broadcast(currThread);
+//  }
+//}
 
 
 void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
@@ -680,6 +680,9 @@ void IPCMarkSweep::PreInitializePhase(void) {
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->meta_->collect_index_ = collector_index_;
   ipc_heap_->meta_->current_collector_ = meta_data_;
+  LOG(ERROR) << "Setting current collectoras follows: " <<
+      "index = " << ipc_heap_->meta_->collect_index_ <<
+      "\n    address = " << reinterpret_cast<void*>(ipc_heap_->meta_->current_collector_);
 }
 
 
@@ -691,7 +694,7 @@ void IPCMarkSweep::InitializePhase(void) {
   art::Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   mark_stack_ = ipc_heap_->local_heap_->GetHeapMarkStack();
   SetImmuneRange(nullptr, nullptr);
@@ -718,7 +721,7 @@ void IPCMarkSweep::InitializePhase(void) {
 
   FindDefaultMarkBitmap();
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<
-      currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->local_heap_->PreGcVerification(this);
 }
 

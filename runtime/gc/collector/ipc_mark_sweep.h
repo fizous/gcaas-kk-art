@@ -66,7 +66,7 @@ class AbstractIPCMarkSweep {
 
 //  virtual ~AbstractIPCMarkSweep() {}
 
-  void HandshakeMarkingPhase(void);
+  //void HandshakeMarkingPhase(void);
 
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
