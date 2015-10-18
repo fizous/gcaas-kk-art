@@ -117,7 +117,7 @@ class IPCHeap {
   void AssignNextGCType(void);
   void RaiseServerFlag(void);
   void ResetServerFlag(void);
-  void SetCurrentCollector(IPCMarkSweep collector);
+  void SetCurrentCollector(IPCMarkSweep* collector);
   ~IPCHeap() {}
 
   /* Collection methods */

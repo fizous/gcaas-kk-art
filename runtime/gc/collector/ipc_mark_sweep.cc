@@ -402,7 +402,7 @@ void IPCHeap::RaiseServerFlag(void) {
 
 }
 
-void IPCHeap::SetCurrentCollector(IPCMarkSweep collector) {
+void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
