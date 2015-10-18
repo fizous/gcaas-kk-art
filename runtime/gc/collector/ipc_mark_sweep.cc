@@ -799,7 +799,7 @@ void IPCMarkSweep::MarkReachableObjects() {
 
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
-    const std::string& name_prefix = "")
+    const std::string& name_prefix)
     : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
   cumulative_timings_.SetName(GetName());
 }
