@@ -181,7 +181,7 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
   LOG(ERROR) << " <<<<< GCServiceClient::RequestWaitForConcurrentGC >>>> " << self->GetTid();
 
   *type  = service_client_->ipcHeap_->WaitForConcurrentIPCGcToComplete(self);
-  LOG(ERROR) << " >>>>> GCServiceClient::RequestWaitForConcurrentGC *** <<<<< " << *type;
+  LOG(ERROR) << " >>>>> GCServiceClient::RequestWaitForConcurrentGC <<<<< " << *type;
   return true;
 
 //  gc::gcservice::GCServiceGlobalAllocator* _alloc =
