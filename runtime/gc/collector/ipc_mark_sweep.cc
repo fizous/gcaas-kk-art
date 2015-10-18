@@ -833,7 +833,7 @@ IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 void IPCStickyMarkSweep::BindBitmaps() {
   LOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
-  IPCMarkSweep::BindBitmaps();
+  IPCPartialMarkSweep::BindBitmaps();
 
   WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
   // For sticky GC, we want to bind the bitmaps of all spaces as the allocation stack lets us
