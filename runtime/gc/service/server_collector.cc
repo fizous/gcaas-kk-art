@@ -110,22 +110,42 @@ class ServerIPCListenerTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
+  volatile int* collector_index_;
+
   ServerIPCListenerTask(ServerCollector* server_object) : WorkStealingTask() ,
     server_instant_(server_object),
-    curr_collector_addr_(NULL) {
-    curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
-
-    LOG(ERROR) << "creating worker stealing task ServerIPCListenerTask: " <<
-        "index = " << server_instant_->heap_data_->collect_index_ <<
-        "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
+    curr_collector_addr_(NULL),
+    collector_index_(-1) {
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
     source->Run(self);
   }
 
+
+  void SetCurrentCollector(void) {
+    curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
+    *collector_index_ = server_instant_->heap_data_->collect_index_;
+    LOG(ERROR) << "creating worker stealing task ServerIPCListenerTask: " <<
+        "index = " << server_instant_->heap_data_->collect_index_ <<
+        "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
+  }
+
+  void WaitForCollector(Thread* self) {
+    LOG(ERROR) << "@@@@ going to wait for collector @@@" << self->GetTid();
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
+      while(*collector_index_ == -1) {
+        server_instant_->phase_cond_->Wait(self);
+      }
+      SetCurrentCollector();
+    }
+  }
+
   // Scans all of the objects
   virtual void Run(Thread* self) {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ Run Wait completion task @@@@@@@@@@@@@@@@@@@ " << self->GetTid();
+    WaitForCollector(self);
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));

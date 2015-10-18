@@ -111,7 +111,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->is_gc_running_   = 0;
   meta_->conc_count_      = 0;
   meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;;
-  meta_->collect_index_ = 0;
+  meta_->collect_index_ = -1;
 
   /* heap members */
   meta_->last_gc_type_ = collector::kGcTypeNone;
@@ -402,6 +402,18 @@ void IPCHeap::RaiseServerFlag(void) {
 
 }
 
+void IPCHeap::SetCurrentCollector(IPCMarkSweep collector) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->collect_index_ = collector->collector_index_;
+    meta_->current_collector_ = collector->meta_data_;
+    LOG(ERROR) << "Client notified server of the type of its type";
+    conc_req_cond_->Broadcast(self);
+  }
+}
+
 
 void IPCHeap::ResetServerFlag(void) {
   if (curr_gc_cause_ == kGcCauseForAlloc) { //a mutator is performing an allocation. do not involve service to get things done faster
@@ -415,6 +427,18 @@ void IPCHeap::ResetServerFlag(void) {
 
   } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag, &ipc_flag_raised_) != 0);
 
+}
+
+void IPCHeap::NotifyCompleteConcurrentTask(void) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    meta_->conc_flag_ = 0;
+    meta_->collect_index_ = -1;
+    meta_->current_collector_ = NULL;
+    conc_req_cond_->Broadcast(self);
+  }
 }
 
 bool IPCHeap::RunCollectorDaemon() {
@@ -446,13 +470,14 @@ bool IPCHeap::RunCollectorDaemon() {
   meta_->conc_count_ = meta_->conc_count_ + 1;
   LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
-  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
-  {
-    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-//    meta_->is_gc_complete_ = 1;
-    meta_->conc_flag_ = 2;
-    conc_req_cond_->Broadcast(self);
-  }
+  NotifyCompleteConcurrentTask();
+//  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+//  {
+//    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+////    meta_->is_gc_complete_ = 1;
+//    meta_->conc_flag_ = 2;
+//    conc_req_cond_->Broadcast(self);
+//  }
 //  {
 //    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
 //    {
@@ -677,8 +702,7 @@ void IPCMarkSweep::PreInitializePhase(void) {
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
   LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->meta_->collect_index_ = collector_index_;
-  ipc_heap_->meta_->current_collector_ = meta_data_;
+  ipc_heap_->SetCurrentCollector(this);
   LOG(ERROR) << "Setting current collectoras follows: " <<
       "index = " << ipc_heap_->meta_->collect_index_ <<
       "\n    address = " << reinterpret_cast<void*>(ipc_heap_->meta_->current_collector_);

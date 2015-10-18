@@ -110,14 +110,14 @@ class IPCHeap {
   static void* RunDaemon(void* arg);
   bool StartCollectorDaemon(void);
   bool RunCollectorDaemon(void);
-
+  void NotifyCompleteConcurrentTask(void);
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
 
   void AssignNextGCType(void);
   void RaiseServerFlag(void);
   void ResetServerFlag(void);
-
+  void SetCurrentCollector(IPCMarkSweep collector);
   ~IPCHeap() {}
 
   /* Collection methods */
