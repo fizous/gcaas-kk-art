@@ -115,7 +115,8 @@ class ServerIPCListenerTask : public WorkStealingTask {
   ServerIPCListenerTask(ServerCollector* server_object) : WorkStealingTask() ,
     server_instant_(server_object),
     curr_collector_addr_(NULL),
-    collector_index_(-1) {
+    collector_index_(NULL) {
+    collector_index_ = &(server_instant_->heap_data_->collect_index_);
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
     source->Run(self);
@@ -124,7 +125,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
 
   void SetCurrentCollector(void) {
     curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
-    *collector_index_ = server_instant_->heap_data_->collect_index_;
+//    *collector_index_ = server_instant_->heap_data_->collect_index_;
     LOG(ERROR) << "creating worker stealing task ServerIPCListenerTask: " <<
         "index = " << server_instant_->heap_data_->collect_index_ <<
         "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
@@ -149,7 +150,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
-      while(server_instant_->heap_data_->conc_flag_ != 2) {
+      while(server_instant_->heap_data_->conc_flag_ != 0) {
         server_instant_->conc_req_cond_->Wait(self);
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
