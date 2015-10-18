@@ -41,7 +41,7 @@ namespace gc {
 
 namespace collector {
 
-
+class IPCMarkSweep;
 class IPCHeap;
 
 class AbstractIPCMarkSweep {
