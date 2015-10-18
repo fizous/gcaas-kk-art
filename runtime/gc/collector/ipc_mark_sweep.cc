@@ -180,8 +180,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
       return;
     }
   }
-  if (local_heap_->WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
-    ipc_flag_raised_ = 1;
+  if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageIPC(meta_->next_gc_type_, kGcCauseBackground, false);
   }
 //  local_heap_->ConcurrentGC(self);

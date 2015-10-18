@@ -81,12 +81,12 @@ void ServerCollector::SignalCollector(void) {
 }
 
 void ServerCollector::WaitForRequest(void) {
-  Thread* self = Thread::Current();
-  {
-    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    heap_data_->is_gc_running_ = 0;
-    conc_req_cond_->Broadcast(self);
-  }
+    Thread* self = Thread::Current();
+//  {
+//    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+//    heap_data_->is_gc_running_ = 0;
+//    conc_req_cond_->Broadcast(self);
+//  }
  // LOG(ERROR) << "ServerCollector::WaitForRequest.." << self->GetTid()  << "status ="   << status_;
   {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
