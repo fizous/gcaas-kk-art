@@ -164,10 +164,10 @@ void IPCHeap::CreateCollectors(void) {
     _conc_flag = (i != 0);
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, _conc_flag,
         "ipcMS")));
-//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new StickyIPCMarkSweep(this, _conc_flag,
-//        "stickyIPC")));
-//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new PartialIPCMarkSweep(this, _conc_flag,
-//        "partialIPC")));
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCStickyMarkSweep(this, _conc_flag,
+        "stickyIPC")));
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCPartialMarkSweep(this, _conc_flag,
+        "partialIPC")));
   }
 }
 
@@ -795,6 +795,76 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
+
+
+
+IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+    const std::string& name_prefix = "")
+    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
+  cumulative_timings_.SetName(GetName());
+}
+
+void IPCPartialMarkSweep::BindBitmaps() {
+  MarkSweep::BindBitmaps();
+
+  WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
+  // For partial GCs we need to bind the bitmap of the zygote space so that all objects in the
+  // zygote space are viewed as marked.
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect) {
+      CHECK(space->IsZygoteSpace());
+      ImmuneSpace(space);
+    }
+  }
+}
+
+
+
+IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+    const std::string& name_prefix)
+    : IPCPartialMarkSweep(ipcHeap, is_concurrent,
+                       name_prefix + (name_prefix.empty() ? "" : " ") + "sticky") {
+  cumulative_timings_.SetName(GetName());
+}
+
+void IPCStickyMarkSweep::BindBitmaps() {
+  IPCMarkSweep::BindBitmaps();
+
+  WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
+  // For sticky GC, we want to bind the bitmaps of all spaces as the allocation stack lets us
+  // know what was allocated since the last GC. A side-effect of binding the allocation space mark
+  // and live bitmap is that marking the objects will place them in the live bitmap.
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) {
+      if(!space->HasBitmapsBound()) {
+        BindLiveToMarkBitmap(space);
+      }
+      //BindLiveToMarkBitmap(space);
+    }
+  }
+  space::LargeObjectSpace* _LOS = GetHeap()->GetLargeObjectsSpace();
+  if (_LOS != NULL)
+    GetHeap()->GetLargeObjectsSpace()->CopyLiveToMarked();
+}
+
+void IPCStickyMarkSweep::MarkReachableObjects() {
+  // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
+  // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
+  // TODO: Not put these objects in the mark stack in the first place.
+  mark_stack_->Reset();
+  RecursiveMarkDirtyObjects(false, accounting::ConstantsCardTable::kCardDirty - 1);
+}
+
+void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = GetHeap()->GetLiveStack();
+  SweepArray(live_stack, false);
+}
+
+void IPCStickyMarkSweep::MarkThreadRoots(Thread* self) {
+  MarkRootsCheckpoint(self);
+}
+
+
 /*
 
 bool IPCMarkSweep::IsConcurrent() const {
@@ -869,7 +939,8 @@ void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* spac
 }
 
 */
-PartialIPCMarkSweep::PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+/*
+IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
@@ -1006,7 +1077,7 @@ void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_
   _space->BindLiveToMarkBitmap();
 }
 
-*/
+
 StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
@@ -1058,7 +1129,7 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
-
+*/
 //void StickyIPCMarkSweep::SwapBitmaps() {
 //  LOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
 //  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps

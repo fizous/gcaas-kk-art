@@ -169,7 +169,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void MarkConcurrentRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-  void MarkReachableObjects()
+  virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void ApplyTrimming(void);
@@ -229,44 +229,48 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 }; //class IPCMarkSweep
 
 
-class PartialIPCMarkSweep : public AbstractIPCMarkSweep, public PartialMarkSweep {
+class IPCPartialMarkSweep : public IPCMarkSweep {
  public:
-  PartialIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+  IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       const std::string& name_prefix = "");
-  ~PartialIPCMarkSweep() {}
-  /* overriding the PartialMarkSweep code*/
-  void InitializePhase(void);
-  void FinishPhase();
-  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-  void MarkReachableObjects()
-      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
-      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
- // void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-//  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
-//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-//
-//  void UnBindBitmaps()
-//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  ~IPCPartialMarkSweep() {}
+
+  virtual GcType GetGcType() const {
+    return kGcTypePartial;
+  }
+  // Bind the live bits to the mark bits of bitmaps for spaces that aren't collected for partial
+  // collections, ie the Zygote space. Also mark this space is immune.
+  virtual void BindBitmaps() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(IPCPartialMarkSweep);
 };
 
-class StickyIPCMarkSweep : public AbstractIPCMarkSweep, public StickyMarkSweep {
+class IPCStickyMarkSweep : public IPCPartialMarkSweep {
  public:
-  StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
+  IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
       const std::string& name_prefix = "");
-  ~StickyIPCMarkSweep() {}
-  /* overriding the PartialMarkSweep code*/
-  void InitializePhase(void);
-  void FinishPhase();
-  void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  ~IPCStickyMarkSweep() {}
+
+  GcType GetGcType() const {
+    return kGcTypeSticky;
+  }
+ protected:
+  // Bind the live bits to the mark bits of bitmaps for all spaces, all spaces other than the
+  // alloc space will be marked as immune.
+  void BindBitmaps() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-  //void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-//  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
-//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-//
-//  void UnBindBitmaps()
-//      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
+  virtual void MarkThreadRoots(Thread* self)
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
+  void Sweep(bool swap_bitmaps) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(IPCStickyMarkSweep);
 };
 
 
