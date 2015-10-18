@@ -256,7 +256,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 
   if (ignore_max_footprint_) {
     SetIdealFootprint(std::numeric_limits<size_t>::max());
-    concurrent_start_bytes_ = max_allowed_footprint_;
+    SetConcurrentStartBytes(max_allowed_footprint_);
   }
 
   // Create our garbage collectors.
@@ -677,7 +677,7 @@ mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_co
     if (Dbg::IsAllocTrackingEnabled()) {
       Dbg::RecordAllocation(c, byte_count);
     }
-    if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_) >= concurrent_start_bytes_)) {
+    if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_) >= GetConcurrentStartBytes())) {
       // The SirtRef is necessary since the calls in RequestConcurrentGC are a safepoint.
       SirtRef<mirror::Object> ref(self, obj);
       RequestConcurrentGC(self);
@@ -2118,10 +2118,10 @@ size_t Heap::GetPercentFree() {
 }
 
 size_t Heap::GetConcStartBytes() {
-	if(concurrent_start_bytes_ == std::numeric_limits<size_t>::max()) {
+	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
 		return max_allowed_footprint_;
 	}
-	return concurrent_start_bytes_;
+	return GetConcurrentStartBytes();
 }
 size_t Heap::GetMaxAllowedFootPrint() {
 	return max_allowed_footprint_;
@@ -2198,14 +2198,14 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule
         // another GC straight away.
-        concurrent_start_bytes_ = bytes_allocated;
+        SetConcurrentStartBytes(bytes_allocated);
       } else {
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        concurrent_start_bytes_ = std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated);
+        SetConcurrentStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
       }
-      DCHECK_LE(concurrent_start_bytes_, max_allowed_footprint_);
+      DCHECK_LE(GetConcurrentStartBytes(), max_allowed_footprint_);
       DCHECK_LE(max_allowed_footprint_, growth_limit_);
     }
   }
@@ -2219,6 +2219,20 @@ void Heap::SetNextGCType(collector::GcType gc_type) {
     next_gc_type_ = gc_type;
   }
 
+}
+
+void Heap::SetConcurrentStartBytes(size_t new_value) {
+  if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
+    concurrent_start_bytes_ = new_value;
+  }
+}
+
+size_t Heap::GetConcurrentStartBytes(void) {
+  size_t return_val = 0;
+  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+    return_val = concurrent_start_bytes_;
+  }
+  return return_val;
 }
 
 collector::GcType Heap::GetNextGCType(void) {
@@ -2398,7 +2412,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
 
   // We already have a request pending, no reason to start more until we update
   // concurrent_start_bytes_.
-  concurrent_start_bytes_ = std::numeric_limits<size_t>::max();
+  SetConcurrentStartBytes(std::numeric_limits<size_t>::max());
 
 #if (true || ART_GC_SERVICE)
   if(!art::gcservice::GCServiceClient::RequestConcGC()) {
@@ -2510,7 +2524,7 @@ size_t Heap::Trim() {
 }
 
 bool Heap::IsGCRequestPending() const {
-  return concurrent_start_bytes_ != std::numeric_limits<size_t>::max();
+  return GetConcurrentStartBytes() != std::numeric_limits<size_t>::max();
 }
 
 void Heap::RegisterNativeAllocation(int bytes) {

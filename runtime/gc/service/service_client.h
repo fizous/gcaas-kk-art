@@ -31,6 +31,8 @@ class GCServiceClient {
       bool clear_soft_references, gc::collector::GcType* gctype);
   static bool SetNextGCType(gc::collector::GcType gc_type);
   static bool GetNextGCType(gc::collector::GcType* gc_type);
+  static bool SetConcStartBytes(size_t conc_start);
+  static bool GetConcStartBytes(size_t* conc_start);
   static void RequestHeapTrim(void);
   void FinalizeHeapAfterInit(void);
   void ConstructHeap(void);

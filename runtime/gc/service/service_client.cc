@@ -119,6 +119,21 @@ bool GCServiceClient::GetNextGCType(gc::collector::GcType* gc_type) {
   return true;
 }
 
+bool GCServiceClient::GetConcStartBytes(size_t* conc_start) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  *conc_start = service_client_->ipcHeap_->meta_->concurrent_start_bytes_;
+  return true;
+}
+
+bool GCServiceClient::SetConcStartBytes(size_t conc_start) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  service_client_->ipcHeap_->meta_->concurrent_start_bytes_  = conc_start;
+  return true;
+}
 
 bool GCServiceClient::RequestConcGC(void) {
   if(service_client_ == NULL)

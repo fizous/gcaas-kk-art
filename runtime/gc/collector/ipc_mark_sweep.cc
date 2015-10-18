@@ -334,6 +334,18 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     ++Thread::Current()->GetStats()->gc_for_alloc_count;
   }
 
+  uint64_t gc_start_time_ns = NanoTime();
+  uint64_t gc_start_size = local_heap_->GetBytesAllocated();
+  // Approximate allocation rate in bytes / second.
+  if (UNLIKELY(gc_start_time_ns == meta_->last_gc_time_ns_)) {
+    LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
+  }
+  uint64_t ms_delta = NsToMs(gc_start_time_ns - meta_->last_gc_time_ns_);
+  if (ms_delta != 0) {
+    meta_->allocation_rate_ = ((gc_start_size - meta_->last_gc_size_) * 1000) / ms_delta;
+    VLOG(heap) << "Allocation rate: " << PrettySize(meta_->allocation_rate_) << "/s";
+  }
+
   if (gc_type == collector::kGcTypeSticky &&
       local_heap_->GetAllocSpace()->Size() < local_heap_->GetMinAllocSpaceSizeForSticky()) {
     gc_type = collector::kGcTypePartial;
@@ -344,7 +356,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   for (const auto& cur_collector : local_heap_->mark_sweep_collectors_) {
     if (cur_collector->IsConcurrent() == meta_->concurrent_gc_ && cur_collector->GetGcType() == gc_type) {
       collector = cur_collector;
-      LOG(ERROR) << "========collector: " << collector->GetName();
+      LOG(ERROR) << "*** collector: " << collector->GetName();
       break;
     }
   }
@@ -479,6 +491,8 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
 //      DCHECK_LE(max_allowed_footprint_, growth_limit_);
     }
   }
+
+  local_heap_->UpdateMaxNativeFootprint();
 }
 
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
