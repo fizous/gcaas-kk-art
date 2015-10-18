@@ -808,7 +808,7 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 void IPCPartialMarkSweep::BindBitmaps() {
   LOG(ERROR) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
-  MarkSweep::BindBitmaps();
+  IPCMarkSweep::BindBitmaps();
 
   WriterMutexLock mu(Thread::Current(), *Locks::heap_bitmap_lock_);
   // For partial GCs we need to bind the bitmap of the zygote space so that all objects in the
