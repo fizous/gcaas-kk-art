@@ -1024,7 +1024,7 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
 //    down_cast<space::LargeObjectSpace*>(space)->SwapBitmaps();
 //  }
 //}
-/*
+
 void PartialIPCMarkSweep::SwapBitmaps() {
   LOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
