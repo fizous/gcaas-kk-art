@@ -366,8 +366,9 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  collector->Run();
   LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+  collector->Run();
+
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
   meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
 
@@ -805,7 +806,7 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCPartialMarkSweep::BindBitmaps() {
-  LOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
+  LOG(ERROR) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   MarkSweep::BindBitmaps();
 
