@@ -2524,7 +2524,11 @@ size_t Heap::Trim() {
 }
 
 bool Heap::IsGCRequestPending() const {
-  return (GetConcurrentStartBytes() != std::numeric_limits<size_t>::max());
+  size_t return_val = 0;
+  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+    return_val = concurrent_start_bytes_;
+  }
+  return (return_val != std::numeric_limits<size_t>::max());
 }
 
 void Heap::RegisterNativeAllocation(int bytes) {
