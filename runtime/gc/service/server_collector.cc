@@ -134,9 +134,9 @@ class ServerIPCListenerTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@ going to wait for collector @@@" << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
-      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
+      IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
       while(*collector_index_ == -1) {
-        server_instant_->phase_cond_->Wait(self);
+        server_instant_->conc_req_cond_->Wait(self);
       }
       SetCurrentCollector();
     }
