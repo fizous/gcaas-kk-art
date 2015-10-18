@@ -115,6 +115,8 @@ class IPCHeap {
   void CreateCollectors(void);
 
   void AssignNextGCType(void);
+  void RaiseServerFlag(void);
+  void ResetServerFlag(void);
 
   ~IPCHeap() {}
 
@@ -131,6 +133,9 @@ class IPCHeap {
 
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
+
+  /* protected by gc_complete_mu_ */
+  GcCause curr_gc_cause_;
   /* members replacing the heap main members */
   //Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //protected by gc_complete_lock_

@@ -318,6 +318,9 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       if (meta_->is_gc_running_ == 0) {
         meta_->is_gc_running_ = 1;
         start_collect = true;
+        curr_gc_cause_ = gc_cause;
+        RaiseServerFlag();
+
       }
     }
     if (!start_collect) {
@@ -377,11 +380,42 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       IPMutexLock interProcMu(self, *gc_complete_mu_);
       meta_->is_gc_running_ = 0;
       meta_->last_gc_type_ = gc_type;
+      ResetServerFlag();
       // Wake anyone who may have been waiting for the GC to complete.
       gc_complete_cond_->Broadcast(self);
   }
 
   return gc_type;
+}
+
+
+void IPCHeap::RaiseServerFlag(void) {
+  if (curr_gc_cause_ == kGcCauseForAlloc) { //a mutator is performing an allocation. do not involve service to get things done faster
+    return;
+  }
+
+  int _expected_flag_value, _new_raised_flag;
+  do {
+    _expected_flag_value = 0;
+    _new_raised_flag = 1;
+
+  } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag, &ipc_flag_raised_) != 0);
+
+}
+
+
+void IPCHeap::ResetServerFlag(void) {
+  if (curr_gc_cause_ == kGcCauseForAlloc) { //a mutator is performing an allocation. do not involve service to get things done faster
+    return;
+  }
+
+  int _expected_flag_value, _new_raised_flag;
+  do {
+    _expected_flag_value = 1;
+    _new_raised_flag = 0;
+
+  } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag, &ipc_flag_raised_) != 0);
+
 }
 
 bool IPCHeap::RunCollectorDaemon() {
@@ -777,7 +811,6 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
       BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
-    ipc_heap_->ipc_flag_raised_ = 0;
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
   }
