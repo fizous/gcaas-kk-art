@@ -209,7 +209,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
       while(*collector_index_ == -1) {
         server_instant_->conc_req_cond_->Wait(self);
       }
-      SetCurrentCollector(self);
+      //SetCurrentCollector(self);
 
     }
   }
@@ -247,9 +247,7 @@ void ServerCollector::ExecuteGC(void) {
 
   ServerMarkReachableTask* reachable_task = new ServerMarkReachableTask(this);
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this, reachable_task));
-  gc_workers_pool_->AddTask(self, reachable_task);
-
-
+  //gc_workers_pool_->AddTask(self, reachable_task);
 
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
@@ -262,6 +260,7 @@ void ServerCollector::ExecuteGC(void) {
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
+  gc_workers_pool_->SetMaxActiveWorkers(3);
   gc_workers_pool_->StartWorkers(self);
   gc_workers_pool_->Wait(self, true, true);
   LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call";
