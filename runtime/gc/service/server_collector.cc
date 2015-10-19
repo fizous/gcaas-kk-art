@@ -234,7 +234,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
       }
       LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
           ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
-      server_instant_->heap_data_->conc_flag_ = 0;
+//      server_instant_->heap_data_->conc_flag_ = 0;
       server_instant_->conc_req_cond_->Broadcast(self);
     }
   }
@@ -266,7 +266,7 @@ void ServerCollector::BlockOnCollectorAddress(Thread* self) {
 
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
+  LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
     MutexLock mu(self, shake_hand_mu_);
     curr_collector_addr_ = NULL;
@@ -290,6 +290,9 @@ void ServerCollector::ExecuteGC(void) {
   }
   gc_workers_pool_->Wait(self, true, true);
   LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call @@@@@";
+
+  gc_workers_pool_->StopWorkers(self);
+  LOG(ERROR) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 }
 
 
