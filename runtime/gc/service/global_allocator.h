@@ -237,7 +237,7 @@ class ServerCollector {
   /*********** task queues ************/
   Mutex shake_hand_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable shake_hand_cond_ GUARDED_BY(shake_hand_mu_);
-  space::GCSrvSharableCollectorData* curr_collector_addr_;
+  space::GCSrvSharableCollectorData* volatile curr_collector_addr_;
 
 };//class ServerCollector
 

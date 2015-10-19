@@ -108,7 +108,7 @@ void ServerCollector::WaitForRequest(void) {
 
 }
 
-/*
+
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
@@ -136,7 +136,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
-      while(true) {
+      while(false) {
         if(curr_collector_addr_ != NULL) {
           if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
             break;
@@ -144,7 +144,8 @@ class ServerMarkReachableTask : public WorkStealingTask {
         }
         server_instant_->phase_cond_->Wait(self);
       }
-      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid();
+      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
+          << " phase=" << curr_collector_addr_->gc_phase_;
     }
   }
 
@@ -176,7 +177,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@Finalize@@@@@@@@@@@@";
     delete this;
   }
-};*/
+};
 
 
 class ServerIPCListenerTask : public WorkStealingTask {
@@ -280,7 +281,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
-  //gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
