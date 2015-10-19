@@ -108,7 +108,7 @@ void ServerCollector::WaitForRequest(void) {
 
 }
 
-
+/*
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
@@ -177,7 +177,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@Finalize@@@@@@@@@@@@";
     delete this;
   }
-};
+};*/
 
 
 class ServerIPCListenerTask : public WorkStealingTask {
@@ -247,16 +247,18 @@ class ServerIPCListenerTask : public WorkStealingTask {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
       LOG(ERROR) << " server: RUN IPC LISTERNERS: server_instant_->heap_data_->collect_index_: "
           <<  server_instant_->heap_data_->collect_index_ << ", tid:" << self->GetTid();
-      while(server_instant_->heap_data_->conc_flag_ != 5) {
+      while(server_instant_->heap_data_->conc_flag_ < 5) {
         server_instant_->conc_req_cond_->Wait(self);
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
       }
-      server_instant_->heap_data_->conc_flag_ = 6;
-      LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
-          ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
+      if(server_instant_->heap_data_->conc_flag_ == 5) {
+        server_instant_->heap_data_->conc_flag_ = 6;
+        LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
+            ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
+        server_instant_->conc_req_cond_->Broadcast(self);
+      }
 
-      server_instant_->conc_req_cond_->Broadcast(self);
     }
   }
   virtual void Finalize() {
@@ -303,7 +305,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
-  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  //gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
