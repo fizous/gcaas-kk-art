@@ -389,7 +389,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 
 void IPCHeap::RaiseServerFlag(void) {
-  if (curr_gc_cause_ == kGcCauseForAlloc) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
@@ -444,7 +444,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
 
 
 void IPCHeap::ResetServerFlag(void) {
-  if (curr_gc_cause_ == kGcCauseForAlloc) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
