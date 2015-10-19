@@ -209,10 +209,17 @@ class ServerIPCListenerTask : public WorkStealingTask {
   }
 
   void WaitForCollector(Thread* self) {
-    LOG(ERROR) << "@@@@ going to wait for collector @@@" << self->GetTid();
+
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
+      LOG(ERROR) << "@@@@ going to wait for collector @@@" << self->GetTid()
+          << "; conc flag = " << server_instant_->heap_data_->conc_flag_;
+      if(server_instant_->heap_data_->conc_flag_ > 3) {
+        LOG(ERROR) << "@@@@ rturning @@@" << self->GetTid()
+            << "; conc flag = " << server_instant_->heap_data_->conc_flag_;
+        return;
+      }
       while(true) {
         if(server_instant_->heap_data_->conc_flag_ == 2) {
           if(*collector_index_ != -1) {
