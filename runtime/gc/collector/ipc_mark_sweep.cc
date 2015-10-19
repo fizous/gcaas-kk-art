@@ -428,6 +428,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      collector->server_synchronize_ = 0;
       meta_->collect_index_ = -1;
       meta_->current_collector_ = NULL;
       LOG(ERROR) << "Client notified server of the type of its type";
@@ -578,6 +579,7 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
     ipc_heap_(ipcHeap),
     collector_index_(ipcHeap->collector_entry_++),
+    server_synchronize_(0),
     heap_meta_(ipcHeap->meta_),
     meta_data_(&(heap_meta_->collectors_[collector_index_])) {
 
@@ -851,16 +853,16 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   if(true)
     return;
 
-  if(ipc_heap_->ipc_flag_raised_ == 1) {
+  if(server_synchronize_ == 1) {
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-    if(false)
-      BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+    BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
+    UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   }
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
 
