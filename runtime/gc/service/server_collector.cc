@@ -114,7 +114,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
-  static int performed_cycle_index_;
+  static volatile int performed_cycle_index_;
 
   ServerMarkReachableTask(ServerCollector* server_object) :
     WorkStealingTask(), server_instant_(server_object),
@@ -122,7 +122,9 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "creating worker stealing task listener";
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
-    source->Run(self);
+    if(ServerMarkReachableTask::performed_cycle_index_ !=
+        server_instant_->cycles_count_)
+      source->Run(self);
   }
 
   void WaitForPhaseAddress(Thread* self) {
@@ -185,14 +187,14 @@ class ServerMarkReachableTask : public WorkStealingTask {
     delete this;
   }
 };
-int ServerMarkReachableTask::performed_cycle_index_ = -1;
+volatile int ServerMarkReachableTask::performed_cycle_index_ = -1;
 
 class ServerIPCListenerTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
   volatile int* collector_index_;
-  static int performed_cycle_index_;
+  static volatile int performed_cycle_index_;
 
   ServerIPCListenerTask(ServerCollector* server_object) : WorkStealingTask() ,
     server_instant_(server_object),
@@ -201,7 +203,9 @@ class ServerIPCListenerTask : public WorkStealingTask {
     collector_index_ = &(server_instant_->heap_data_->collect_index_);
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
-    source->Run(self);
+    if(ServerIPCListenerTask::performed_cycle_index_ !=
+        server_instant_->cycles_count_)
+      source->Run(self);
   }
 
 
@@ -282,7 +286,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
     delete this;
   }
 };
-int ServerIPCListenerTask::performed_cycle_index_ = -1;
+volatile int ServerIPCListenerTask::performed_cycle_index_ = -1;
 
 void ServerCollector::UpdateCollectorAddress(Thread* self,
     space::GCSrvSharableCollectorData* address) {
