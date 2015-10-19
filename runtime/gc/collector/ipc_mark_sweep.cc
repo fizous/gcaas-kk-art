@@ -403,15 +403,38 @@ void IPCHeap::RaiseServerFlag(void) {
 }
 
 void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
+  collector->server_synchronize_ = ipc_flag_raised_;
   Thread* self = Thread::Current();
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-  {
-    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->collect_index_ = collector->collector_index_;
-    meta_->current_collector_ = collector->meta_data_;
-    LOG(ERROR) << "Client notified server of the type of its type";
-    conc_req_cond_->Broadcast(self);
+  if(collector->server_synchronize_) {
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      meta_->collect_index_ = collector->collector_index_;
+      meta_->current_collector_ = collector->meta_data_;
+      LOG(ERROR) << "Client notified server of the type of its type";
+      LOG(ERROR) << "Setting current collectoras follows: " <<
+          "index = " << meta_->collect_index_ <<
+          "\n    address = " << reinterpret_cast<void*>(>meta_->current_collector_);
+      conc_req_cond_->Broadcast(self);
+    }
   }
+
+}
+
+
+void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
+  Thread* self = Thread::Current();
+  if(collector->server_synchronize_) {
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      meta_->collect_index_ = -1;
+      meta_->current_collector_ = NULL;
+      LOG(ERROR) << "Client notified server of the type of its type";
+      conc_req_cond_->Broadcast(self);
+    }
+  }
+
 }
 
 
@@ -435,8 +458,6 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->conc_flag_ = 0;
-    meta_->collect_index_ = -1;
-    meta_->current_collector_ = NULL;
     conc_req_cond_->Broadcast(self);
   }
 }
@@ -703,9 +724,7 @@ void IPCMarkSweep::PreInitializePhase(void) {
   LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->SetCurrentCollector(this);
-  LOG(ERROR) << "Setting current collectoras follows: " <<
-      "index = " << ipc_heap_->meta_->collect_index_ <<
-      "\n    address = " << reinterpret_cast<void*>(ipc_heap_->meta_->current_collector_);
+
 }
 
 
@@ -759,6 +778,7 @@ void IPCMarkSweep::FinishPhase(void) {
  LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
  MarkSweep::FinishPhase();
+ ipc_heap_->ResetCurrentCollector(this);
  //ipc_heap_->AssignNextGCType();
 }
 

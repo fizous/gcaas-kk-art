@@ -48,6 +48,7 @@ class AbstractIPCMarkSweep {
  public:
   IPCHeap* ipc_heap_;
   int collector_index_;
+  int server_synchronize_;
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
@@ -118,6 +119,7 @@ class IPCHeap {
   void RaiseServerFlag(void);
   void ResetServerFlag(void);
   void SetCurrentCollector(IPCMarkSweep* collector);
+  void ResetCurrentCollector(IPCMarkSweep* collector);
   ~IPCHeap() {}
 
   /* Collection methods */
