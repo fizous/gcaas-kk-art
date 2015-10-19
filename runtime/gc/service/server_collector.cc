@@ -248,7 +248,7 @@ void ServerCollector::ExecuteGC(void) {
   ServerMarkReachableTask* reachable_task = new ServerMarkReachableTask(this);
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this, reachable_task));
   gc_workers_pool_->AddTask(self, reachable_task);
-  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks ";
+  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
   gc_workers_pool_->StartWorkers(self);
 
 
