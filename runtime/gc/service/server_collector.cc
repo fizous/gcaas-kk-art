@@ -248,8 +248,7 @@ void ServerCollector::ExecuteGC(void) {
   ServerMarkReachableTask* reachable_task = new ServerMarkReachableTask(this);
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this, reachable_task));
   gc_workers_pool_->AddTask(self, reachable_task);
-  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
-  gc_workers_pool_->StartWorkers(self);
+
 
 
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
@@ -262,7 +261,8 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
-
+  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
+  gc_workers_pool_->StartWorkers(self);
   gc_workers_pool_->Wait(self, true, true);
   LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call";
 }
