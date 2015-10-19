@@ -113,7 +113,7 @@ void ServerCollector::WaitForRequest(void) {
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
-  space::GCSrvSharableCollectorData* curr_collector_addr_;
+  space::GCSrvSharableCollectorData* volatile curr_collector_addr_;
   static volatile int performed_cycle_index_;
 
   ServerMarkReachableTask(ServerCollector* server_object) :
@@ -150,23 +150,28 @@ class ServerMarkReachableTask : public WorkStealingTask {
       }
       LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
           << " phase=" << curr_collector_addr_->gc_phase_;
-    }
-  }
-
-  void ExecuteReachableMarking(Thread* self) {
-    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
-    {
-      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
-      LOG(ERROR) << " ++++ pre Phase TASK updated the phase of the GC: "
-          << self->GetTid() << curr_collector_addr_->gc_phase_;
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
       performed_cycle_index_ = server_instant_->cycles_count_;
       server_instant_->phase_cond_->Broadcast(self);
-
     }
   }
+
+//  void ExecuteReachableMarking(Thread* self) {
+//    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+//    {
+//      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
+//      LOG(ERROR) << " ++++ pre Phase TASK updated the phase of the GC: "
+//          << self->GetTid() << curr_collector_addr_->gc_phase_;
+//      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
+//      LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
+//          << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
+//      performed_cycle_index_ = server_instant_->cycles_count_;
+//      server_instant_->phase_cond_->Broadcast(self);
+//
+//    }
+//  }
   // Scans all of the objects
   virtual void Run(Thread* self) {
     if(performed_cycle_index_ == server_instant_->cycles_count_) {
@@ -179,7 +184,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
         << self->GetTid();
     WaitForReachablePhaseAddress(self);
-    ExecuteReachableMarking(self);
+    //ExecuteReachableMarking(self);
   }
 
   virtual void Finalize() {
@@ -192,7 +197,7 @@ volatile int ServerMarkReachableTask::performed_cycle_index_ = -1;
 class ServerIPCListenerTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
-  space::GCSrvSharableCollectorData* curr_collector_addr_;
+  space::GCSrvSharableCollectorData* volatile curr_collector_addr_;
   volatile int* collector_index_;
   static volatile int performed_cycle_index_;
 
@@ -227,7 +232,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
       LOG(ERROR) << "@@@@ going to wait for collector @@@" << self->GetTid()
           << "; conc flag = " << server_instant_->heap_data_->conc_flag_;
-      if(server_instant_->heap_data_->conc_flag_ > 3) {
+      if(server_instant_->heap_data_->conc_flag_ >= 3) {
         LOG(ERROR) << "@@@@ rturning @@@" << self->GetTid()
             << "; conc flag = " << server_instant_->heap_data_->conc_flag_;
         return;
@@ -244,6 +249,8 @@ class ServerIPCListenerTask : public WorkStealingTask {
             break;
           }
         }
+        if(server_instant_->heap_data_->conc_flag_ >= 3)
+          break;
         server_instant_->conc_req_cond_->Wait(self);
       }
     }
@@ -326,7 +333,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
-  //gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
