@@ -109,11 +109,12 @@ void ServerCollector::WaitForRequest(void) {
 
 }
 
-/*
+
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
+  static int performed_cycle_index_;
 
   ServerMarkReachableTask(ServerCollector* server_object) :
     WorkStealingTask(), server_instant_(server_object),
@@ -159,12 +160,17 @@ class ServerMarkReachableTask : public WorkStealingTask {
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
+      performed_cycle_index_ = server_instant_->cycles_count_;
       server_instant_->phase_cond_->Broadcast(self);
 
     }
   }
   // Scans all of the objects
   virtual void Run(Thread* self) {
+    if(performed_cycle_index_ == server_instant_->cycles_count_) {
+      LOG(ERROR) << " XXXX No need to rerun the Phase reachable XXXX";
+      return;
+    }
     WaitForPhaseAddress(self);
 
 
@@ -178,8 +184,8 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@Finalize@@@@@@@@@@@@";
     delete this;
   }
-};*/
-
+};
+int ServerMarkReachableTask::performed_cycle_index_ = -1;
 
 class ServerIPCListenerTask : public WorkStealingTask {
  public:
@@ -316,7 +322,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
-  //gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
