@@ -409,12 +409,12 @@ void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      meta_->conc_flag_ = 2;
       meta_->collect_index_ = collector->collector_index_;
       meta_->current_collector_ = collector->meta_data_;
-      LOG(ERROR) << "Client notified server of the type of its type";
-      LOG(ERROR) << "Setting current collectoras follows: " <<
+      LOG(ERROR) << "\t client: Setting current collector as follows: " <<
           "index = " << meta_->collect_index_ <<
-          "\n    address = " << reinterpret_cast<void*>(meta_->current_collector_);
+          "\n\t    address = " << reinterpret_cast<void*>(meta_->current_collector_);
       conc_req_cond_->Broadcast(self);
     }
   }
@@ -428,10 +428,11 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+      meta_->conc_flag_ = 3;
       collector->server_synchronize_ = 0;
       meta_->collect_index_ = -1;
       meta_->current_collector_ = NULL;
-      LOG(ERROR) << "Client notified server of the type of its type";
+      LOG(ERROR) << "\t client: Client notified completion";
       conc_req_cond_->Broadcast(self);
     }
   }
@@ -458,7 +459,7 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->conc_flag_ = 0;
+    meta_->conc_flag_ = 3;
     conc_req_cond_->Broadcast(self);
   }
 }

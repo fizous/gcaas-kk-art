@@ -199,7 +199,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
   void SetCurrentCollector(Thread* self) {
     curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
 //    *collector_index_ = server_instant_->heap_data_->collect_index_;
-    LOG(ERROR) << "creating worker stealing task ServerIPCListenerTask: " <<
+    LOG(ERROR) << " server: creating worker stealing task ServerIPCListenerTask: " <<
         "index = " << server_instant_->heap_data_->collect_index_ <<
         "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
 
@@ -213,13 +213,14 @@ class ServerIPCListenerTask : public WorkStealingTask {
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
       while(true) {
-        if(*collector_index_ == -1) {
-          server_instant_->conc_req_cond_->Wait(self);
-        } else{
-          SetCurrentCollector(self);
-          LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~" << self->GetTid();
-          break;
+        if(server_instant_->heap_data_->conc_flag_ == 2) {
+          if(*collector_index_ != -1) {
+            SetCurrentCollector(self);
+            LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~" << self->GetTid();
+            break;
+          }
         }
+        server_instant_->conc_req_cond_->Wait(self);
       }
     }
   }
@@ -231,16 +232,16 @@ class ServerIPCListenerTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
-      LOG(ERROR) << "RUN IPC LISTERNERS: server_instant_->heap_data_->collect_index_: "
+      LOG(ERROR) << " server: RUN IPC LISTERNERS: server_instant_->heap_data_->collect_index_: "
           <<  server_instant_->heap_data_->collect_index_ << ", tid:" << self->GetTid();
-      while(server_instant_->heap_data_->conc_flag_ != 0) {
+      while(server_instant_->heap_data_->conc_flag_ != 3) {
         server_instant_->conc_req_cond_->Wait(self);
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
       }
       LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
           ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
-//      server_instant_->heap_data_->conc_flag_ = 0;
+      server_instant_->heap_data_->conc_flag_ = 0;
       server_instant_->conc_req_cond_->Broadcast(self);
     }
   }
