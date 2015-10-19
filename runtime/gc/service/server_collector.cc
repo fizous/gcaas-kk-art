@@ -143,9 +143,10 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << " ++++ pre Phase TASK updated the phase of the GC: "
           << self->GetTid() << curr_collector_addr_->gc_phase_;
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
-      server_instant_->phase_cond_->Broadcast(self);
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
+      server_instant_->phase_cond_->Broadcast(self);
+
     }
   }
   // Scans all of the objects
