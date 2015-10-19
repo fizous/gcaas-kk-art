@@ -132,7 +132,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     server_instant_->BlockOnCollectorAddress(self);
     curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
     LOG(ERROR) << " ++++ Phase done waiting for current addreess  ++++ "
-        << self->GetTid() << "; address " << reinterpret_cast<void*>(curr_collector_addr_);;
+        << self->GetTid() << "; address " << reinterpret_cast<void*>(curr_collector_addr_);
   }
 
   void WaitForReachablePhaseAddress(Thread* self) {
@@ -140,7 +140,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
-      while(false) {
+      while(true) {
         if(curr_collector_addr_ != NULL) {
           if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
             break;
