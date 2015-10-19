@@ -108,7 +108,7 @@ void ServerCollector::WaitForRequest(void) {
 
 }
 
-/*
+
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
@@ -177,7 +177,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@Finalize@@@@@@@@@@@@";
     delete this;
   }
-};*/
+};
 
 
 class ServerIPCListenerTask : public WorkStealingTask {
@@ -282,7 +282,7 @@ void ServerCollector::ExecuteGC(void) {
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
-  //gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
