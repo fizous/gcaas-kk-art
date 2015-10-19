@@ -459,7 +459,7 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->conc_flag_ = 3;
+    meta_->conc_flag_ = 4;
     conc_req_cond_->Broadcast(self);
   }
 }
