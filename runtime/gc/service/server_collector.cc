@@ -108,14 +108,10 @@ void ServerCollector::WaitForRequest(void) {
 class ServerMarkReachableTask : public WorkStealingTask {
  public:
   ServerCollector* server_instant_;
-  Mutex run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
-  ConditionVariable run_cond_ GUARDED_BY(run_mu_);
   space::GCSrvSharableCollectorData* curr_collector_addr_;
 
   ServerMarkReachableTask(ServerCollector* server_object) :
     WorkStealingTask(), server_instant_(server_object),
-    run_mu_("ServerReachable"),
-    run_cond_("ServerReach::cond_", run_mu_),
     curr_collector_addr_(NULL) {
     LOG(ERROR) << "creating worker stealing task listener";
   }
@@ -127,27 +123,21 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
-      MutexLock mu(self, run_mu_);
-      while(curr_collector_addr_ == NULL) {
-        run_cond_.Wait(self);
-      }
-    }
-  }
-  // Scans all of the objects
-  virtual void Run(Thread* self) {
-    WaitForInitialTask(self);
-
-
-    LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
-        << self->GetTid() << "; phase=" << curr_collector_addr_->gc_phase_;
-    {
-      ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
-      while(curr_collector_addr_->gc_phase_ != space::IPC_GC_PHASE_MARK_REACHABLES) {
+      while(true) {
+        if(server_instant_->heap_data_->current_collector_ != NULL) {
+          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
+            break;
+          }
+        }
         server_instant_->phase_cond_->Wait(self);
       }
       LOG(ERROR) << "Phase TASK noticed change" << self->GetTid();
     }
+  }
+
+  void ExecuteReachableMarking(Thread* self) {
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
       LOG(ERROR) << " ++++ pre Phase TASK updated the phase of the GC: "
@@ -157,6 +147,16 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
     }
+  }
+  // Scans all of the objects
+  virtual void Run(Thread* self) {
+    WaitForInitialTask(self);
+
+
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
+        << self->GetTid();
+    WaitForInitialTask(self);
+    ExecuteReachableMarking(self);
   }
 
   virtual void Finalize() {
@@ -171,14 +171,11 @@ class ServerIPCListenerTask : public WorkStealingTask {
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
   volatile int* collector_index_;
-  ServerMarkReachableTask* phase_task_;
 
-  ServerIPCListenerTask(ServerCollector* server_object,
-      ServerMarkReachableTask* phase_task) : WorkStealingTask() ,
+  ServerIPCListenerTask(ServerCollector* server_object) : WorkStealingTask() ,
     server_instant_(server_object),
     curr_collector_addr_(NULL),
-    collector_index_(NULL),
-    phase_task_(phase_task) {
+    collector_index_(NULL) {
     collector_index_ = &(server_instant_->heap_data_->collect_index_);
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
@@ -192,12 +189,6 @@ class ServerIPCListenerTask : public WorkStealingTask {
     LOG(ERROR) << "creating worker stealing task ServerIPCListenerTask: " <<
         "index = " << server_instant_->heap_data_->collect_index_ <<
         "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
-
-    {
-      MutexLock mu(self, phase_task_->run_mu_);
-      phase_task_->curr_collector_addr_ = curr_collector_addr_;
-      phase_task_->run_cond_.Broadcast(self);
-    }
 
   }
 
@@ -244,11 +235,12 @@ class ServerIPCListenerTask : public WorkStealingTask {
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
-
-  ServerMarkReachableTask* reachable_task = new ServerMarkReachableTask(this);
-  gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this, reachable_task));
+  gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
+  gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
+  gc_workers_pool_->SetMaxActiveWorkers(2);
   //gc_workers_pool_->AddTask(self, reachable_task);
-
+  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
+  gc_workers_pool_->StartWorkers(self);
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -259,11 +251,8 @@ void ServerCollector::ExecuteGC(void) {
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
   }
-  LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
-  gc_workers_pool_->SetMaxActiveWorkers(3);
-  gc_workers_pool_->StartWorkers(self);
   gc_workers_pool_->Wait(self, true, true);
-  LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call";
+  LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call @@@@@";
 }
 
 

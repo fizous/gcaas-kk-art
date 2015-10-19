@@ -687,7 +687,7 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
   ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
-    while( meta_data_->gc_phase_ != meta_data_->gc_phase_) {
+    while( meta_data_->gc_phase_ != phase) {
       phase_cond_->Wait(thread);
     }
   }
@@ -853,7 +853,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 
   if(server_synchronize_ == 1) {
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-    //BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+    BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   } else {
