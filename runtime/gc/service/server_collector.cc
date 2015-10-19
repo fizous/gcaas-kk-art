@@ -21,7 +21,8 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     status_(0),
     shake_hand_mu_("shake_hand"),
     shake_hand_cond_("ServerLock::cond_", shake_hand_mu_),
-    curr_collector_addr_(NULL) {
+    curr_collector_addr_(NULL),
+    cycles_count_(0) {
 
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
@@ -185,11 +186,12 @@ class ServerIPCListenerTask : public WorkStealingTask {
   ServerCollector* server_instant_;
   space::GCSrvSharableCollectorData* curr_collector_addr_;
   volatile int* collector_index_;
+  static int performed_cycle_index_;
 
   ServerIPCListenerTask(ServerCollector* server_object) : WorkStealingTask() ,
     server_instant_(server_object),
     curr_collector_addr_(NULL),
-    collector_index_(NULL) {
+    collector_index_(NULL){
     collector_index_ = &(server_instant_->heap_data_->collect_index_);
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
@@ -239,6 +241,10 @@ class ServerIPCListenerTask : public WorkStealingTask {
 
   // Scans all of the objects
   virtual void Run(Thread* self) {
+    if(performed_cycle_index_ == server_instant_->cycles_count_) {
+      LOG(ERROR) << " XXXX No need to Run since we already done for that tour XXXX ";
+      return;
+    }
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ Run Wait completion task @@@@@@@@@@@@@@@@@@@ "
         << self->GetTid() << "; conc_flag=" << server_instant_->heap_data_->conc_flag_;
     WaitForCollector(self);
@@ -256,17 +262,21 @@ class ServerIPCListenerTask : public WorkStealingTask {
         server_instant_->heap_data_->conc_flag_ = 6;
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
+        performed_cycle_index_ = server_instant_->cycles_count_;
         server_instant_->conc_req_cond_->Broadcast(self);
       }
 
     }
+
+
+
   }
   virtual void Finalize() {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ Finalize ServerIPCListenerTask @@@@@@@@@@@@";
     delete this;
   }
 };
-
+int ServerIPCListenerTask::performed_cycle_index_ = -1;
 
 void ServerCollector::UpdateCollectorAddress(Thread* self,
     space::GCSrvSharableCollectorData* address) {
@@ -302,6 +312,7 @@ void ServerCollector::ExecuteGC(void) {
   {
     MutexLock mu(self, shake_hand_mu_);
     curr_collector_addr_ = NULL;
+    cycles_count_++;
   }
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));

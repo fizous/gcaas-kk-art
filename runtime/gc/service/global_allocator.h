@@ -239,6 +239,9 @@ class ServerCollector {
   ConditionVariable shake_hand_cond_ GUARDED_BY(shake_hand_mu_);
   space::GCSrvSharableCollectorData* volatile curr_collector_addr_;
 
+
+  volatile int cycles_count_;
+
 };//class ServerCollector
 
 
