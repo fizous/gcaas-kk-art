@@ -178,7 +178,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
     server_instant_(server_object),
     curr_collector_addr_(NULL),
     collector_index_(NULL),
-    phase_task_(phase_task_) {
+    phase_task_(phase_task) {
     collector_index_ = &(server_instant_->heap_data_->collect_index_);
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
