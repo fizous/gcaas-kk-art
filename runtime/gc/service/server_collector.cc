@@ -212,11 +212,15 @@ class ServerIPCListenerTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
-      while(*collector_index_ == -1) {
-        server_instant_->conc_req_cond_->Wait(self);
+      while(true) {
+        if(*collector_index_ == -1) {
+          server_instant_->conc_req_cond_->Wait(self);
+        } else{
+          SetCurrentCollector(self);
+          LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~" << self->GetTid();
+          break;
+        }
       }
-      SetCurrentCollector(self);
-
     }
   }
 
@@ -227,6 +231,8 @@ class ServerIPCListenerTask : public WorkStealingTask {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
+      LOG(ERROR) << "RUN IPC LISTERNERS: server_instant_->heap_data_->collect_index_: "
+          <<  server_instant_->heap_data_->collect_index_ << ", tid:" << self->GetTid();
       while(server_instant_->heap_data_->conc_flag_ != 0) {
         server_instant_->conc_req_cond_->Wait(self);
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
