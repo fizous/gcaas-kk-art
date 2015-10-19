@@ -18,7 +18,11 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
     thread_(NULL),
-    status_(0) {
+    status_(0),
+    shake_hand_mu_("shake_hand"),
+    shake_hand_cond_("ServerLock::cond_", shake_hand_cond_),
+    curr_collector_addr_(NULL) {
+
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
   SharedConditionVarData* _condAddress = &heap_data_->phase_lock_.cond_var_;
@@ -119,20 +123,28 @@ class ServerMarkReachableTask : public WorkStealingTask {
     source->Run(self);
   }
 
-  void WaitForInitialTask(Thread* self) {
+  void WaitForPhaseAddress(Thread* self) {
+    LOG(ERROR) << " ++++ Phase going for current addreess  ++++ " << self->GetTid();
+    server_instant_->BlockOnCollectorAddress(self);
+    curr_collector_addr_ = server_instant_->heap_data_->current_collector_;
+    LOG(ERROR) << " ++++ Phase done waiting for current addreess  ++++ "
+        << self->GetTid() << "; address " << reinterpret_cast<void*>(curr_collector_addr_);;
+  }
+
+  void WaitForReachablePhaseAddress(Thread* self) {
     LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
       while(true) {
-        if(server_instant_->heap_data_->current_collector_ != NULL) {
+        if(curr_collector_addr_ != NULL) {
           if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
             break;
           }
         }
         server_instant_->phase_cond_->Wait(self);
       }
-      LOG(ERROR) << "Phase TASK noticed change" << self->GetTid();
+      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid();
     }
   }
 
@@ -151,12 +163,12 @@ class ServerMarkReachableTask : public WorkStealingTask {
   }
   // Scans all of the objects
   virtual void Run(Thread* self) {
-    WaitForInitialTask(self);
+    WaitForPhaseAddress(self);
 
 
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
         << self->GetTid();
-    WaitForInitialTask(self);
+    WaitForReachablePhaseAddress(self);
     ExecuteReachableMarking(self);
   }
 
@@ -191,6 +203,8 @@ class ServerIPCListenerTask : public WorkStealingTask {
         "index = " << server_instant_->heap_data_->collect_index_ <<
         "\n    address = " << reinterpret_cast<void*>(curr_collector_addr_);
 
+    server_instant_->UpdateCollectorAddress(self, curr_collector_addr_);
+
   }
 
   void WaitForCollector(Thread* self) {
@@ -201,7 +215,7 @@ class ServerIPCListenerTask : public WorkStealingTask {
       while(*collector_index_ == -1) {
         server_instant_->conc_req_cond_->Wait(self);
       }
-      //SetCurrentCollector(self);
+      SetCurrentCollector(self);
 
     }
   }
@@ -231,11 +245,33 @@ class ServerIPCListenerTask : public WorkStealingTask {
 };
 
 
+void ServerCollector::UpdateCollectorAddress(Thread* self,
+    space::GCSrvSharableCollectorData* address) {
+  MutexLock mu(self, shake_hand_mu_);
+  curr_collector_addr_ = address;
+  LOG(ERROR) << "ServerCollector::UpdateCollectorAddress " <<  self->GetTid()
+      << ", address: " << reinterpret_cast<void*>(address);
+  shake_hand_cond_.Broadcast(self);
+}
 
+void ServerCollector::BlockOnCollectorAddress(Thread* self) {
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    MutexLock mu(self, shake_hand_mu_);
+    while(curr_collector_addr_ == NULL) {
+      shake_hand_cond_.Wait(self);
+    }
+  }
+}
 
 void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
+  {
+    MutexLock mu(self, shake_hand_mu_);
+    curr_collector_addr_ = NULL;
+  }
+
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
   gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(2);

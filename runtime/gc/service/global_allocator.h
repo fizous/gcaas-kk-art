@@ -221,6 +221,9 @@ class ServerCollector {
   void WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteGC(void);
+  void UpdateCollectorAddress(Thread* self,
+      space::GCSrvSharableCollectorData* address);
+  void BlockOnCollectorAddress(Thread* self);
 
   void ConcMarkPhaseGC(void);
   void WaitForConcMarkPhaseGC(void);
@@ -232,7 +235,9 @@ class ServerCollector {
 
   ThreadPool* gc_workers_pool_;
   /*********** task queues ************/
-
+  Mutex shake_hand_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+  ConditionVariable shake_hand_cond_ GUARDED_BY(shake_hand_mu_);
+  space::GCSrvSharableCollectorData* curr_collector_addr_;
 
 };//class ServerCollector
 
