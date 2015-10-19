@@ -414,7 +414,7 @@ void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
       LOG(ERROR) << "Client notified server of the type of its type";
       LOG(ERROR) << "Setting current collectoras follows: " <<
           "index = " << meta_->collect_index_ <<
-          "\n    address = " << reinterpret_cast<void*>(>meta_->current_collector_);
+          "\n    address = " << reinterpret_cast<void*>(meta_->current_collector_);
       conc_req_cond_->Broadcast(self);
     }
   }
