@@ -20,7 +20,7 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     thread_(NULL),
     status_(0),
     shake_hand_mu_("shake_hand"),
-    shake_hand_cond_("ServerLock::cond_", shake_hand_cond_),
+    shake_hand_cond_("ServerLock::cond_", shake_hand_mu_),
     curr_collector_addr_(NULL) {
 
 
