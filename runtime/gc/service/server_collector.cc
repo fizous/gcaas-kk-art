@@ -217,7 +217,11 @@ class ServerIPCListenerTask : public WorkStealingTask {
         if(server_instant_->heap_data_->conc_flag_ == 2) {
           if(*collector_index_ != -1) {
             SetCurrentCollector(self);
-            LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~" << self->GetTid();
+            server_instant_->heap_data_->conc_flag_ = 3;
+            LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~"
+                << self->GetTid() << "; conc_flag = "
+                << server_instant_->heap_data_->conc_flag_;
+            server_instant_->conc_req_cond_->Broadcast(self);
             break;
           }
         }
@@ -236,12 +240,12 @@ class ServerIPCListenerTask : public WorkStealingTask {
       IPMutexLock interProcMu(self, *(server_instant_->conc_req_cond_mu_));
       LOG(ERROR) << " server: RUN IPC LISTERNERS: server_instant_->heap_data_->collect_index_: "
           <<  server_instant_->heap_data_->collect_index_ << ", tid:" << self->GetTid();
-      while(server_instant_->heap_data_->conc_flag_ != 4) {
+      while(server_instant_->heap_data_->conc_flag_ != 5) {
         server_instant_->conc_req_cond_->Wait(self);
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
       }
-      server_instant_->heap_data_->conc_flag_ = 5;
+      server_instant_->heap_data_->conc_flag_ = 6;
       LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
           ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
 

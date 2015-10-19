@@ -428,7 +428,10 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-      meta_->conc_flag_ = 3;
+      while(meta_->conc_flag_ < 3) {
+        conc_req_cond_->Wait(self);
+      }
+      meta_->conc_flag_ = 4;
       collector->server_synchronize_ = 0;
       meta_->collect_index_ = -1;
       meta_->current_collector_ = NULL;
@@ -459,7 +462,7 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    meta_->conc_flag_ = 4;
+    meta_->conc_flag_ = 5;
     conc_req_cond_->Broadcast(self);
   }
 }
