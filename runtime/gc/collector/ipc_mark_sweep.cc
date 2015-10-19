@@ -850,8 +850,6 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  if(true)
-    return;
 
   if(server_synchronize_ == 1) {
     LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
