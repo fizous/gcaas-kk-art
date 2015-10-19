@@ -228,7 +228,8 @@ class ServerIPCListenerTask : public WorkStealingTask {
 
   // Scans all of the objects
   virtual void Run(Thread* self) {
-    LOG(ERROR) << "@@@@@@@@@@@@@@@@ Run Wait completion task @@@@@@@@@@@@@@@@@@@ " << self->GetTid();
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@ Run Wait completion task @@@@@@@@@@@@@@@@@@@ "
+        << self->GetTid() << "; conc_flag=" << server_instant_->heap_data_->conc_flag_;
     WaitForCollector(self);
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
@@ -240,11 +241,11 @@ class ServerIPCListenerTask : public WorkStealingTask {
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
       }
-//      server_instant_->heap_data_->conc_flag_ = 0;
-//      LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
-//          ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
-//
-//      server_instant_->conc_req_cond_->Broadcast(self);
+      server_instant_->heap_data_->conc_flag_ = 5;
+      LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
+          ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
+
+      server_instant_->conc_req_cond_->Broadcast(self);
     }
   }
   virtual void Finalize() {
