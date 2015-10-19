@@ -124,7 +124,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
   }
 
   void WaitForInitialTask(Thread* self) {
-    LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ ";
+    LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       MutexLock mu(self, run_mu_);
@@ -246,8 +246,8 @@ void ServerCollector::ExecuteGC(void) {
   LOG(ERROR) << "ServerCollector::ExecuteGC.." << self->GetTid();
 
   ServerMarkReachableTask* reachable_task = new ServerMarkReachableTask(this);
-  gc_workers_pool_->AddTask(self, reachable_task);
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this, reachable_task));
+  gc_workers_pool_->AddTask(self, reachable_task);
   LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks ";
   gc_workers_pool_->StartWorkers(self);
 
