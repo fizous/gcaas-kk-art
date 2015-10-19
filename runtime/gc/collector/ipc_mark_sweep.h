@@ -47,8 +47,8 @@ class IPCHeap;
 class AbstractIPCMarkSweep {
  public:
   IPCHeap* ipc_heap_;
-  int collector_index_;
-  int server_synchronize_;
+  volatile int collector_index_;
+  volatile int server_synchronize_;
   InterProcessMutex* phase_mu_;
   InterProcessConditionVariable* phase_cond_;
 
