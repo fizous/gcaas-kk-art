@@ -224,7 +224,7 @@ class ServerCollector {
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
   void BlockOnCollectorAddress(Thread* self);
-
+  void FinalizeGC(Thread* self);
   void ConcMarkPhaseGC(void);
   void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);

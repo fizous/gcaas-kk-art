@@ -240,11 +240,11 @@ class ServerIPCListenerTask : public WorkStealingTask {
         LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
             ", setting conc flag to " << server_instant_->heap_data_->conc_flag_;
       }
-      server_instant_->heap_data_->conc_flag_ = 0;
-      LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
-          ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
-
-      server_instant_->conc_req_cond_->Broadcast(self);
+//      server_instant_->heap_data_->conc_flag_ = 0;
+//      LOG(ERROR) << "@@ServerCollector::WaitForGCTask.. " << self->GetTid() <<
+//          ", leaving while flag " << server_instant_->heap_data_->conc_flag_;
+//
+//      server_instant_->conc_req_cond_->Broadcast(self);
     }
   }
   virtual void Finalize() {
@@ -270,6 +270,15 @@ void ServerCollector::BlockOnCollectorAddress(Thread* self) {
     while(curr_collector_addr_ == NULL) {
       shake_hand_cond_.Wait(self);
     }
+  }
+}
+
+void ServerCollector::FinalizeGC(Thread* self) {
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
+    heap_data_->conc_flag_ = 0;
+    conc_req_cond_->Broadcast(self);
   }
 }
 
@@ -301,6 +310,7 @@ void ServerCollector::ExecuteGC(void) {
   LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call @@@@@";
 
   gc_workers_pool_->StopWorkers(self);
+  FinalizeGC(self);
   LOG(ERROR) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 }
 
