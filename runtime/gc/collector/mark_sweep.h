@@ -401,7 +401,7 @@ class MarkSweep : public GarbageCollector {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
   // Recursively blackens objects on the mark stack.
-  void ProcessMarkStack(bool paused)
+  virtual void ProcessMarkStack(bool paused)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

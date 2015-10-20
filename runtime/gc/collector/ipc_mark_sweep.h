@@ -182,6 +182,10 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   virtual void ProcessMarkStackParallel(size_t thread_count)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  // Recursively blackens objects on the mark stack.
+  virtual void ProcessMarkStack(bool paused)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   virtual void ApplyTrimming(void);
   void ClearMarkHolders(void);
   /*
