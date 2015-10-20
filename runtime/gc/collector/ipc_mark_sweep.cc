@@ -13,6 +13,7 @@
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
+#include "thread_list.h"
 #include "mirror/object-inl.h"
 #include "gc/service/service_client.h"
 #include "gc/space/dlmalloc_space-inl.h"
@@ -850,16 +851,25 @@ void IPCMarkSweep::MarkingPhase(void) {
   MarkReachableObjects();
 }
 
+void IPCMarkSweep::RequestAppSuspension(void) {
+  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  Thread* currThread = Thread::Current();
+  thread_list->SuspendAll();
+  LOG(ERROR) << "SSSSSSSSSSS Suspended app threads to handshake with service process SSSSSSSSSSSSSSS";
+  BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+  thread_list->ResumeAll();
+  LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+
+}
+
 void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   if(server_synchronize_ == 1) {
-    LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-    BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
-    LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-    UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+    RequestAppSuspension();
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);

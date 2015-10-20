@@ -209,7 +209,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 
   void PreInitializePhase(void);
   void HandshakeIPCSweepMarkingPhase(void);
-
+  void RequestAppSuspension(void);
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)
 //      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
