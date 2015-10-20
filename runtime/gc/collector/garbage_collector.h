@@ -85,6 +85,9 @@ class GarbageCollector {
   // Mark all reachable objects, done concurrently.
   virtual void MarkingPhase() = 0;
 
+  // Mark all reachable objects, done concurrently.
+  virtual void PostMarkingPhase(){}
+
   // Only called for concurrent GCs. Gets called repeatedly until it succeeds.
   virtual bool HandleDirtyObjectsPhase() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

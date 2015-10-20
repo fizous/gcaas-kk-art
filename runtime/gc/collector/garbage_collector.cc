@@ -86,6 +86,7 @@ void GarbageCollector::Run() {
       ReaderMutexLock mu(self, *Locks::mutator_lock_);
       MarkingPhase();
     }
+    PostMarkingPhase();
     bool done = false;
     while (!done) {
       uint64_t pause_start = NanoTime();

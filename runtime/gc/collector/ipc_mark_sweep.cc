@@ -812,7 +812,17 @@ void IPCMarkSweep::MarkConcurrentRoots() {
   timings_.EndSplit();
 }
 
-void IPCMarkSweep::MarkingPhase(void) {
+
+void IPCMarkSweep::PostMarkingPhase(void){
+  Thread* currThread = Thread::Current();
+  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the threads: " << currThread->GetTid();
+  thread_list->SuspendAll();
+  LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+  thread_list->ResumeAll();
+}
+
+void IPCMarkSweep::IPCMarkRootsPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
@@ -848,7 +858,14 @@ void IPCMarkSweep::MarkingPhase(void) {
   MarkConcurrentRoots();
 
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
+}
+
+void IPCMarkSweep::IPCMarkReachablePhase(void) {
   MarkReachableObjects();
+}
+void IPCMarkSweep::MarkingPhase(void) {
+  IPCMarkRootsPhase();
+  IPCMarkReachablePhase();
 }
 
 void IPCMarkSweep::RequestAppSuspension(void) {
