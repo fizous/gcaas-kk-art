@@ -314,14 +314,14 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
 
 
 void DlMallocSpace::BindLiveToMarkBitmaps(void) {
-  LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
+  //LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
   accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
   temp_bitmap_.reset(_mark_bitmap_content);
   mark_bitmap_.reset(live_bitmap_.get());
 }
 
 void DlMallocSpace::SwapBitmaps() {
-  LOG(ERROR) << " ~~~~~~ DlMallocSpace::SwapBitmaps ~~~~~~~";
+  //LOG(ERROR) << " ~~~~~~ DlMallocSpace::SwapBitmaps ~~~~~~~";
   live_bitmap_.swap(mark_bitmap_);
   // Swap names to get more descriptive diagnostics.
   std::string temp_name(live_bitmap_->GetName());
@@ -720,7 +720,7 @@ void DlMallocSpace::BindLiveToMarkBitmap(void) {
 */
 
 accounting::SPACE_BITMAP* DlMallocSpace::UnBindBitmaps(void) {
-  LOG(ERROR) << " ~~~~~~ DlMallocSpace::UnBindBitmaps ~~~~~~~";
+  //LOG(ERROR) << " ~~~~~~ DlMallocSpace::UnBindBitmaps ~~~~~~~";
   if (temp_bitmap_.get() != NULL) {
     // At this point, the temp_bitmap holds our old mark bitmap.
     accounting::SPACE_BITMAP* new_bitmap = mark_bitmap_.release();
