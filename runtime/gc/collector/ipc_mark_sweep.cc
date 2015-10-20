@@ -858,6 +858,8 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   MarkConcurrentRoots();
 
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
+
+  MarkReachableObjects();
 }
 
 void IPCMarkSweep::IPCMarkReachablePhase(void) {
@@ -865,7 +867,7 @@ void IPCMarkSweep::IPCMarkReachablePhase(void) {
 }
 void IPCMarkSweep::MarkingPhase(void) {
   IPCMarkRootsPhase();
-  MarkReachableObjects();
+
 }
 
 void IPCMarkSweep::RequestAppSuspension(void) {
