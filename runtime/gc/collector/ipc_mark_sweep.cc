@@ -868,7 +868,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
 
-void MarkSweep::ProcessMarkStack(bool paused) {
+void IPCMarkSweep::ProcessMarkStack(bool paused) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
       currThread->GetTid() ;
