@@ -179,6 +179,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  virtual void ProcessMarkStackParallel(size_t thread_count)
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   virtual void ApplyTrimming(void);
   void ClearMarkHolders(void);
   /*

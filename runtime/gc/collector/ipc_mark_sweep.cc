@@ -880,7 +880,28 @@ void IPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
-
+void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
+  Thread* self = Thread::Current();
+  LOG(ERROR) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
+      << "; tid:" << self->GetTid();
+  ThreadPool* thread_pool = GetHeap()->GetThreadPool();
+  const size_t chunk_size = std::min(mark_stack_->Size() / thread_count + 1,
+                                     static_cast<size_t>(MarkStackTask<false>::kMaxSize));
+  CHECK_GT(chunk_size, 0U);
+  // Split the current mark stack up into work tasks.
+  for (mirror::Object **it = mark_stack_->Begin(), **end = mark_stack_->End(); it < end; ) {
+    const size_t delta = std::min(static_cast<size_t>(end - it), chunk_size);
+    thread_pool->AddTask(self, new MarkStackTask<false>(thread_pool, this, delta,
+                                                        const_cast<const mirror::Object**>(it)));
+    it += delta;
+  }
+  thread_pool->SetMaxActiveWorkers(thread_count - 1);
+  thread_pool->StartWorkers(self);
+  thread_pool->Wait(self, true, true);
+  thread_pool->StopWorkers(self);
+  mark_stack_->Reset();
+  CHECK_EQ(work_chunks_created_, work_chunks_deleted_) << " some of the work chunks were leaked";
+}
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
