@@ -861,11 +861,11 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
 }
 
 void IPCMarkSweep::IPCMarkReachablePhase(void) {
-  MarkReachableObjects();
+
 }
 void IPCMarkSweep::MarkingPhase(void) {
   IPCMarkRootsPhase();
-  IPCMarkReachablePhase();
+  MarkReachableObjects();
 }
 
 void IPCMarkSweep::RequestAppSuspension(void) {
