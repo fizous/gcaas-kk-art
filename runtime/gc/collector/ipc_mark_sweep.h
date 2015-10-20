@@ -213,7 +213,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void PreInitializePhase(void);
   void HandshakeIPCSweepMarkingPhase(void);
   void RequestAppSuspension(void);
-  void IPCMarkReachablePhase(void);
+  void IPCMarkReachablePhase(void); SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
 //
