@@ -852,12 +852,12 @@ void IPCMarkSweep::MarkingPhase(void) {
 }
 
 void IPCMarkSweep::RequestAppSuspension(void) {
-  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
-  thread_list->SuspendAll();
+  //thread_list->SuspendAll();
   LOG(ERROR) << "SSSSSSSSSSS Suspended app threads to handshake with service process SSSSSSSSSSSSSSS";
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
-  thread_list->ResumeAll();
+  //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
