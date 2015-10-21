@@ -24,14 +24,18 @@ namespace space {
 
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
-  LOG(ERROR) << "string length = " << name.length() << "size is: " << name.size();
+  if(0)
+    LOG(ERROR) << "string length = " << name.length() << "size is: " << name.size();
 
-  LOG(ERROR) << "Space::Space --> memory_alloc ? " << (memory_alloc != NULL ? "true" : "False");
+  if(0)
+    LOG(ERROR) << "Space::Space --> memory_alloc ? " << (memory_alloc != NULL ? "true" : "False");
   memcpy(space_data_->name_, name.c_str(), name.size());
-  LOG(ERROR) << "Done Copying..." << space_data_->name_;
+  if(0)
+    LOG(ERROR) << "Done Copying..." << space_data_->name_;
   space_data_->name_[name.size()] = '\0';
   space_data_->gc_retention_policy_ = gc_retention_policy;
-  LOG(ERROR) << "Leaving Space Constructor";
+  if(0)
+    LOG(ERROR) << "Leaving Space Constructor";
 }
 
 
@@ -51,12 +55,14 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
     Space(name, gc_retention_policy, &(cont_space_data->space_header_)),
                                           cont_space_data_(cont_space_data) {
   if(cont_space_data_ == NULL) {
-    LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
+    if(0)
+      LOG(ERROR) << "XXXX Continuous space was null XXXXX" ;
     cont_space_data_ =
         reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));
   } else {
-    LOG(ERROR) << "XXXX Continuous space was not null XXXXX" ;
+    if(0)
+      LOG(ERROR) << "XXXX Continuous space was not null XXXXX" ;
   }
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
@@ -69,7 +75,8 @@ MemMapSpace::MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initi
                       cont_space_data == NULL ?
                           ContinuousSpace::AllocateContSpaceMemory() : cont_space_data),
       mem_map_(mem_map) {
-  LOG(ERROR) << "MemMapSpace::MemMapSpace-->done";
+  if(0)
+    LOG(ERROR) << "MemMapSpace::MemMapSpace-->done";
 }
 
 

@@ -175,11 +175,13 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
       lock_data_("allocation space lock", kAllocSpaceLock) {
 
   if(dlmalloc_space_data_ == NULL) {
-    LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
+    if(0)
+      LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->Allocating dlmalloc_space_data_";
     dlmalloc_space_data_ = reinterpret_cast<GCSrvDlMallocSpace*>(calloc(1,
         SERVICE_ALLOC_ALIGN_BYTE(GCSrvDlMallocSpace)));
   } else {
-    LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->  dlmalloc_space_data_ was already allocated";
+    if(0L)
+      LOG(ERROR) << "DlMallocSpace::DlMallocSpace-->  dlmalloc_space_data_ was already allocated";
   }
   dlmalloc_space_data_->lock_ = &lock_data_;//new Mutex("allocation space lock", kAllocSpaceLock) DEFAULT_MUTEX_ACQUIRED_AFTER;
   dlmalloc_space_data_->recent_free_pos_ = 0;
