@@ -71,9 +71,7 @@ void ServerCollector::SignalCollector(bool isExplicit) {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
       if(isExplicit) {
-        status_ = status_ | (gc::collector::IPCHeap::KGCAgentExplicitGCSignal);
-      } else {
-        status_ = status_ | (gc::collector::IPCHeap::KGCAgentConcGCSignal);
+        status_ = status_ | (gc::collector::IPCHeap::KGCAgentGCSignalRaised);
       }
       status_ = status_ + 1;
 
@@ -326,6 +324,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
   {
     IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
     heap_data_->conc_flag_ = 0;
+    heap_data_->gc_type_ = 0;
     conc_req_cond_->Broadcast(self);
   }
 }
@@ -350,12 +349,12 @@ void ServerCollector::ExecuteGC(volatile int param) {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 
     LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
-    if((param & (gc::collector::IPCHeap::KGCAgentExplicitGCSignal)) > 0) { // give higher priority to explicit becausei t is full
-      heap_data_->conc_flag_ = gc::collector::IPCHeap::KGCAgentExplicitGCSignal;
+    if((param & (gc::collector::IPCHeap::KGCAgentGCSignalRaised)) > 0) { // give higher priority to explicit becausei t is full
+      heap_data_->gc_type_ = (int)gc::collector::kGcTypeFull;
     } else {
-      heap_data_->conc_flag_ = gc::collector::IPCHeap::KGCAgentConcGCSignal;
+      heap_data_->gc_type_ = 0;
     }
-
+    heap_data_->conc_flag_ = 1;
     conc_req_cond_->Broadcast(self);
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;

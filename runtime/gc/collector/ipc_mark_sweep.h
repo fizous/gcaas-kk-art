@@ -89,9 +89,18 @@ class AbstractIPCMarkSweep {
 
 class IPCHeap {
  public:
-  static constexpr int KGCAgentConcGCSignal = (1<<16);
-  static constexpr int KGCAgentExplicitGCSignal = (1<<17);
-  static constexpr int KGCAgentGCSignalRaised = (KGCAgentConcGCSignal | KGCAgentConcGCSignal);
+  static constexpr unsigned int KGCAgentReservedSignalBits = 4;
+  static constexpr unsigned int KGCAgentConcGCSignal = 1;
+  static constexpr unsigned int KGCAgentExplicitGCSignal = 2;
+  static constexpr unsigned int KGCAgentMaskTypeBits =  ((1 << (32 - KGCAgentReservedSignalBits)) - 1);
+  static constexpr unsigned int KGCAgentMaskPhaseBits = (~KGCAgentMaskTypeBits);
+
+  static constexpr unsigned int KGCAgentGCSignalRaised =
+      ((KGCAgentExplicitGCSignal | KGCAgentConcGCSignal)
+          << (32 - KGCAgentReservedSignalBits));
+
+
+
   mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);
 
