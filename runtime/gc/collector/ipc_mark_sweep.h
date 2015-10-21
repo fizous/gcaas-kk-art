@@ -46,6 +46,8 @@ class IPCHeap;
 
 class AbstractIPCMarkSweep {
  public:
+
+
   IPCHeap* ipc_heap_;
   volatile int collector_index_;
   volatile int server_synchronize_;
@@ -87,6 +89,9 @@ class AbstractIPCMarkSweep {
 
 class IPCHeap {
  public:
+  static constexpr int KGCAgentConcGCSignal = (1<<16);
+  static constexpr int KGCAgentExplicitGCSignal = (1<<17);
+  static constexpr int KGCAgentGCSignalRaised = (KGCAgentConcGCSignal | KGCAgentConcGCSignal);
   mutable Mutex ms_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable ms_cond_ GUARDED_BY(ms_lock_);
 

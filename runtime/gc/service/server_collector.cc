@@ -63,14 +63,20 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 }
 
 
-void ServerCollector::SignalCollector(void) {
+void ServerCollector::SignalCollector(bool isExplicit) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
+      if(isExplicit) {
+        status_ = status_ | collector::IPCHeap::KGCAgentExplicitGCSignal;
+      } else {
+        status_ = status_ | collector::IPCHeap::KGCAgentConcGCSignal;
+      }
       status_ = status_ + 1;
+
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
@@ -85,7 +91,7 @@ void ServerCollector::SignalCollector(void) {
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
-void ServerCollector::WaitForRequest(void) {
+void ServerCollector::WaitForRequest(volatile int* param) {
     Thread* self = Thread::Current();
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -100,6 +106,7 @@ void ServerCollector::WaitForRequest(void) {
       while(status_ <= 0) {
         run_cond_.Wait(self);
       }
+      *param = status_;
       status_ = 0;
       LOG(ERROR) << "ServerCollector::WaitForRequest:: leaving WaitForRequest; status=" << status_;
       run_cond_.Broadcast(self);
@@ -323,7 +330,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
   }
 }
 
-void ServerCollector::ExecuteGC(void) {
+void ServerCollector::ExecuteGC(volatile int param) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
@@ -343,7 +350,12 @@ void ServerCollector::ExecuteGC(void) {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 
     LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
-    heap_data_->conc_flag_ = 1;
+    if((param & collector::IPCHeap::KGCAgentExplicitGCSignal) > 0) { // give higher priority to explicit becausei t is full
+      heap_data_->conc_flag_ = collector::IPCHeap::KGCAgentExplicitGCSignal;
+    } else {
+      heap_data_->conc_flag_ = collector::IPCHeap::KGCAgentConcGCSignal;
+    }
+
     conc_req_cond_->Broadcast(self);
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
               ", setting conc flag to " << heap_data_->conc_flag_;
@@ -369,12 +381,12 @@ void ServerCollector::Run(void) {
   /* initialize gc_workers_pool_ */
  // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
-
+  volatile int _request_parameter = 0;
 
   while(true) {
     LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
-    WaitForRequest();
-    ExecuteGC();
+    WaitForRequest(&_request_parameter);
+    ExecuteGC(_request_parameter);
 
     LOG(ERROR) << "---------------workers are done ------";
     //WaitForGCTask();
