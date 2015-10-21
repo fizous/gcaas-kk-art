@@ -7,7 +7,7 @@
 #include "thread.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
-
+#include "gc/collector/ipc_mark_sweep.h"
 
 namespace art {
 namespace gc {
