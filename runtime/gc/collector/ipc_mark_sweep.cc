@@ -479,7 +479,8 @@ bool IPCHeap::RunCollectorDaemon() {
     while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
-    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
+    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_
+        << ", gctype = " << meta_->gc_type_;
 
   }
   //Runtime* runtime = Runtime::Current();

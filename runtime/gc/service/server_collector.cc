@@ -63,7 +63,7 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 }
 
 
-void ServerCollector::SignalCollector(void) {
+void ServerCollector::SignalCollector(bool is_explicit) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
@@ -71,6 +71,9 @@ void ServerCollector::SignalCollector(void) {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
       status_ = status_ + 1;
+      if(is_explicit) {
+        status_ |= (1<<30);
+      }
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
@@ -85,7 +88,8 @@ void ServerCollector::SignalCollector(void) {
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
-void ServerCollector::WaitForRequest(void) {
+int ServerCollector::WaitForRequest(void) {
+  int _result = 1;
     Thread* self = Thread::Current();
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -100,11 +104,15 @@ void ServerCollector::WaitForRequest(void) {
       while(status_ <= 0) {
         run_cond_.Wait(self);
       }
+      if((status_ & (1<<30) ) > 0) {
+        _result = 2;
+      }
       status_ = 0;
       LOG(ERROR) << "ServerCollector::WaitForRequest:: leaving WaitForRequest; status=" << status_;
       run_cond_.Broadcast(self);
     }
   }
+  return _result;
 
 
 }
@@ -323,7 +331,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
   }
 }
 
-void ServerCollector::ExecuteGC(void) {
+void ServerCollector::ExecuteGC(int gc_type) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
@@ -344,9 +352,11 @@ void ServerCollector::ExecuteGC(void) {
 
     LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
     heap_data_->conc_flag_ = 1;
+    heap_data_->gc_type_ = gc_type;
     conc_req_cond_->Broadcast(self);
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
-              ", setting conc flag to " << heap_data_->conc_flag_;
+              ", setting conc flag to " << heap_data_->conc_flag_ <<
+              "gctype=" << heap_data_->gc_type_;
   }
   gc_workers_pool_->Wait(self, true, true);
   LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call @@@@@";
@@ -370,11 +380,11 @@ void ServerCollector::Run(void) {
  // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
 
-
+  int _gc_type = 0;
   while(true) {
     LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
-    WaitForRequest();
-    ExecuteGC();
+    _gc_type = WaitForRequest();
+    ExecuteGC(_gc_type);
 
     LOG(ERROR) << "---------------workers are done ------";
     //WaitForGCTask();

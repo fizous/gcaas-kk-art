@@ -205,7 +205,7 @@ typedef struct GCSrvSharableHeapData_S {
 
   // used to signal the gc daemon. gurded by conc_lock_
   volatile int conc_flag_;
-
+  volatile int gc_type_;
 
   /* collection stats */
   volatile int32_t freed_objects_;

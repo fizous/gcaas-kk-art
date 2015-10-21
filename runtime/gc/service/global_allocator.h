@@ -217,10 +217,10 @@ class ServerCollector {
   InterProcessMutex* gc_complete_mu_;
   InterProcessConditionVariable* gc_complete_cond_;
 
-  void SignalCollector(void);
-  void WaitForRequest(void);
+  void SignalCollector(bool is_explicit = false);
+  int WaitForRequest(void);
   void WaitForGCTask(void);
-  void ExecuteGC(void);
+  void ExecuteGC(int);
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
   void BlockOnCollectorAddress(Thread* self);
