@@ -155,10 +155,16 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
     LOG(ERROR) << "Zygote: Done initializing with global allocator";
   }
-  live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
-      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
-  mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
-      (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+  if(Runtime::Current()->IsCompiler()) {
+    live_bitmap_.reset(new accounting::HeapBitmap(this));
+    mark_bitmap_.reset(new accounting::HeapBitmap(this));
+  } else {
+    live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+        (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+    mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+        (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
+  }
+
 #else
   live_bitmap_.reset(new accounting::HeapBitmap(this));
   mark_bitmap_.reset(new accounting::HeapBitmap(this));
