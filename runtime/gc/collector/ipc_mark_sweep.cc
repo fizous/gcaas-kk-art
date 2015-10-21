@@ -925,7 +925,7 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
   MarkSweep::MarkReachableObjects();
