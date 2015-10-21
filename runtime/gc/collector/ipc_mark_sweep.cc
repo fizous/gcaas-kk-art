@@ -110,7 +110,6 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->conc_flag_       = 0;
 //  meta_->is_gc_complete_  = 0;
   meta_->is_gc_running_   = 0;
-  meta_->conc_count_      = 0;
   meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;;
   meta_->collect_index_ = -1;
 
@@ -127,6 +126,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   /* heap statistics */
   meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
   meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
+  meta_->conc_count_ = 0;
+  meta_->explicit_count_ = 0;
 }
 
 
@@ -494,14 +495,17 @@ bool IPCHeap::RunCollectorDaemon() {
 //    conc_req_cond_->Broadcast(self);
 //  }
   LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
-  if(meta_->gc_type_ == 1)
+  if(meta_->gc_type_ == 1) {
     ConcurrentGC(self);
-  else if(meta_->gc_type_ ==2) {
+    meta_->conc_count_ = meta_->conc_count_ + 1;
+  } else if(meta_->gc_type_ == 2) {
     ExplicitGC(false);
+    meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }
-  meta_->conc_count_ = meta_->conc_count_ + 1;
+
   LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
-      " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
+      " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
+      <<"; explicit_count:" << meta_->explicit_count_;
   NotifyCompleteConcurrentTask();
 //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
 //  {
@@ -630,7 +634,7 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
   heap_meta_->conc_flag_ = 0;
 //  heap_meta_->is_gc_complete_ = 0;
   heap_meta_->is_gc_running_ = 0;
-  heap_meta_->conc_count_ = 0;
+
 
 
   /////////

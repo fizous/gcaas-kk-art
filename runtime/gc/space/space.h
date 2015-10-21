@@ -211,7 +211,7 @@ typedef struct GCSrvSharableHeapData_S {
   volatile int32_t freed_objects_;
   volatile int32_t freed_bytes_;
   volatile int32_t conc_count_;
-
+  volatile int32_t explicit_count_;
 
   /****** variables from original heap members *****/
   // Total time which mutators are paused or waiting for GC to complete.

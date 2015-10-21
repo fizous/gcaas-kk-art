@@ -382,7 +382,7 @@ void ServerCollector::Run(void) {
 
   int _gc_type = 0;
   while(true) {
-    LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
+    LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
     _gc_type = WaitForRequest();
     ExecuteGC(_gc_type);
 
