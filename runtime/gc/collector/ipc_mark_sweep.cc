@@ -390,7 +390,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 
 void IPCHeap::RaiseServerFlag(void) {
-  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (!(curr_gc_cause_ == kGcCauseBackground || curr_gc_cause_ == kGcCauseExplicit)) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
@@ -445,7 +445,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
 
 
 void IPCHeap::ResetServerFlag(void) {
-  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (!(curr_gc_cause_ == kGcCauseBackground || curr_gc_cause_ == kGcCauseExplicit))  { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
@@ -494,7 +494,11 @@ bool IPCHeap::RunCollectorDaemon() {
 //    conc_req_cond_->Broadcast(self);
 //  }
   LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
-  ConcurrentGC(self);
+  if(meta_->gc_type_ == 1)
+    ConcurrentGC(self);
+  else if(meta_->gc_type_ ==2) {
+    ExplicitGC(false);
+  }
   meta_->conc_count_ = meta_->conc_count_ + 1;
   LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
