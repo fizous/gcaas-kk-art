@@ -919,7 +919,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
-      currThread->GetTid() ;
+      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
   MarkSweep::ProcessMarkStack(paused);
 }
 void IPCMarkSweep::MarkReachableObjects() {
