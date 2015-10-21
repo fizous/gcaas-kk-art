@@ -102,6 +102,9 @@ class MarkSweep : public GarbageCollector {
   virtual GcType GetGcType() const {
     return kGcTypeFull;
   }
+  virtual bool IsInterprocess() const {
+    return false;
+  }
 
   // Initializes internal structures.
   void Init();

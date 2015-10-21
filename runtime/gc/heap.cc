@@ -1612,7 +1612,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
 void Heap::UpdateAndMarkModUnion(collector::MarkSweep* mark_sweep, base::TimingLogger& timings,
                                  collector::GcType gc_type) {
 
-  LOG(ERROR) << " ##### Heap::UpdateAndMarkModUnion:: gctype = " << gc_type << "; IPC=" << (mark_sweep->IsInterprocess());
+  LOG(ERROR) << " ##### Heap::UpdateAndMarkModUnion:: gctype = " << gc_type
+      << "; IPC= " << (mark_sweep->IsInterprocess() ? "true" : "false");
   if (gc_type == collector::kGcTypeSticky) {
     // Don't need to do anything for mod union table in this case since we are only scanning dirty
     // cards.
