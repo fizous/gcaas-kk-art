@@ -45,6 +45,10 @@ class GarbageCollector {
 
   virtual GcType GetGcType() const = 0;
 
+  virtual bool IsInterprocess() const {
+    return false;
+  }
+
   // Run the garbage collector.
   void Run();
 

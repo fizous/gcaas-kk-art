@@ -304,6 +304,10 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
     auto start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
     auto end = start + ConstantsCardTable::kCardSize;
     auto obj_start = reinterpret_cast<Object*>(start);
+    if(mark_sweep->IsInterprocess) {
+      LOG(ERROR) << "------ModUnionTableCardCache::MarkReferences---" <<
+          reinterpret_cast<void*>(obj_start);
+    }
     if (UNLIKELY(space == nullptr || !space->Contains(obj_start))) {
       space = heap_->FindContinuousSpaceFromObject(obj_start, false);
       DCHECK(space != nullptr);
