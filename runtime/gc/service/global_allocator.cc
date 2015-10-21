@@ -678,7 +678,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
     GCSrvceAgent* _agent =
         GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    _agent->collector_->SignalCollector(true);
+    _agent->collector_->SignalCollector();
   }
 
 }

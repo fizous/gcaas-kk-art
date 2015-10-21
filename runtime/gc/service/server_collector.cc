@@ -7,7 +7,7 @@
 #include "thread.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
-#include "gc/collector/ipc_mark_sweep.h"
+
 
 namespace art {
 namespace gc {
@@ -63,18 +63,14 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
 }
 
 
-void ServerCollector::SignalCollector(bool isExplicit) {
+void ServerCollector::SignalCollector(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
-      if(isExplicit) {
-        status_ = status_ | (gc::collector::IPCHeap::KGCAgentGCSignalRaised);
-      }
       status_ = status_ + 1;
-
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
@@ -89,7 +85,7 @@ void ServerCollector::SignalCollector(bool isExplicit) {
   LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
-void ServerCollector::WaitForRequest(volatile int* param) {
+void ServerCollector::WaitForRequest(void) {
     Thread* self = Thread::Current();
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -104,7 +100,6 @@ void ServerCollector::WaitForRequest(volatile int* param) {
       while(status_ <= 0) {
         run_cond_.Wait(self);
       }
-      *param = status_;
       status_ = 0;
       LOG(ERROR) << "ServerCollector::WaitForRequest:: leaving WaitForRequest; status=" << status_;
       run_cond_.Broadcast(self);
@@ -324,12 +319,11 @@ void ServerCollector::FinalizeGC(Thread* self) {
   {
     IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
     heap_data_->conc_flag_ = 0;
-    heap_data_->gc_type_ = 0;
     conc_req_cond_->Broadcast(self);
   }
 }
 
-void ServerCollector::ExecuteGC(volatile int param) {
+void ServerCollector::ExecuteGC(void) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
@@ -349,11 +343,6 @@ void ServerCollector::ExecuteGC(volatile int param) {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 
     LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
-    if((param & (gc::collector::IPCHeap::KGCAgentGCSignalRaised)) > 0) { // give higher priority to explicit becausei t is full
-      heap_data_->gc_type_ = (int)gc::collector::kGcTypeFull;
-    } else {
-      heap_data_->gc_type_ = 0;
-    }
     heap_data_->conc_flag_ = 1;
     conc_req_cond_->Broadcast(self);
     LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
@@ -380,12 +369,12 @@ void ServerCollector::Run(void) {
   /* initialize gc_workers_pool_ */
  // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
-  volatile int _request_parameter = 0;
+
 
   while(true) {
     LOG(ERROR) << "---------------run ServerCollector----------- " << heap_data_->conc_count_;
-    WaitForRequest(&_request_parameter);
-    ExecuteGC(_request_parameter);
+    WaitForRequest();
+    ExecuteGC();
 
     LOG(ERROR) << "---------------workers are done ------";
     //WaitForGCTask();

@@ -165,11 +165,10 @@ void IPCHeap::CreateCollectors(void) {
     _conc_flag = (i != 0);
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, _conc_flag,
         "ipcMS")));
-    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCPartialMarkSweep(this, _conc_flag,
-        "partialIPC")));
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCStickyMarkSweep(this, _conc_flag,
         "stickyIPC")));
-
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCPartialMarkSweep(this, _conc_flag,
+        "partialIPC")));
   }
 }
 
@@ -370,9 +369,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> "
-      << gc_cause_and_type_strings[gc_cause][gc_type]
-      << " from thread ID:" << self->GetTid();
+  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
@@ -380,12 +377,12 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 
   {
-    IPMutexLock interProcMu(self, *gc_complete_mu_);
-    meta_->is_gc_running_ = 0;
-    meta_->last_gc_type_ = gc_type;
-    ResetServerFlag();
-    // Wake anyone who may have been waiting for the GC to complete.
-    gc_complete_cond_->Broadcast(self);
+      IPMutexLock interProcMu(self, *gc_complete_mu_);
+      meta_->is_gc_running_ = 0;
+      meta_->last_gc_type_ = gc_type;
+      ResetServerFlag();
+      // Wake anyone who may have been waiting for the GC to complete.
+      gc_complete_cond_->Broadcast(self);
   }
 
   return gc_type;
@@ -393,7 +390,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 
 void IPCHeap::RaiseServerFlag(void) {
-  if (!((curr_gc_cause_ == kGcCauseBackground) || (curr_gc_cause_ == kGcCauseExplicit))) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
@@ -448,8 +445,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
 
 
 void IPCHeap::ResetServerFlag(void) {
-  if (!((curr_gc_cause_ == kGcCauseBackground) ||
-      (curr_gc_cause_ == kGcCauseExplicit))) { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (curr_gc_cause_ != kGcCauseBackground) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
@@ -458,7 +454,7 @@ void IPCHeap::ResetServerFlag(void) {
     _expected_flag_value = 1;
     _new_raised_flag = 0;
 
-  } while (android_atomic_cas(_expected_flag_value, _new_raised_flag, &ipc_flag_raised_) != 0);
+  } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag, &ipc_flag_raised_) != 0);
 
 }
 
@@ -476,7 +472,6 @@ bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
   LOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
 
- // int _gc_type = 1; //concurrent
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -484,12 +479,7 @@ bool IPCHeap::RunCollectorDaemon() {
     while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
-//    if(meta_->conc_flag_ & KGCAgentExplicitGCSignal) {
-//      _gc_type = 2;
-//
-//    }
-    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = "
-        << meta_->conc_flag_ << "; gctype = " << meta_->gc_type_;
+    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_;
 
   }
   //Runtime* runtime = Runtime::Current();
@@ -502,14 +492,8 @@ bool IPCHeap::RunCollectorDaemon() {
 //   // meta_->is_gc_complete_ = 0;
 //    conc_req_cond_->Broadcast(self);
 //  }
-  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid()
-      << " <<<<<<<<<<<<<<<";
-  if(((GcType) meta_->gc_type_) == kGcTypeFull) {
-    ExplicitGC(false);
-  } else {
-    ConcurrentGC(self);
-  }
-
+  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
+  ConcurrentGC(self);
   meta_->conc_count_ = meta_->conc_count_ + 1;
   LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_;
