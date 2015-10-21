@@ -135,9 +135,6 @@ class IPCHeap {
 
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
-  bool IsInterprocess() const {
-    return true;
-  }
 
   /* protected by gc_complete_mu_ */
   GcCause curr_gc_cause_;
@@ -172,6 +169,10 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   ~IPCMarkSweep() {}
 
   /* overriding the Marksweep code*/
+
+  bool IsInterprocess() const {
+    return true;
+  }
   virtual void FinishPhase();
   virtual void InitializePhase(void);
   // Everything inside the immune range is assumed to be marked.
