@@ -203,7 +203,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 //  gc::gcservice::GCServiceGlobalAllocator* _alloc =
 //      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
 //  _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
-  return true;
+//  return true;
 }
 
 

@@ -481,7 +481,7 @@ bool IPCHeap::RunCollectorDaemon() {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
-    while(meta_->conc_flag_  == 0) {
+    while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
 //    if(meta_->conc_flag_ & KGCAgentExplicitGCSignal) {
