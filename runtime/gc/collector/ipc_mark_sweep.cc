@@ -254,7 +254,7 @@ bool IPCHeap::CheckTrimming() {
 //    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
 //                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
 //    CHECK(!env->ExceptionCheck());
-    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
+//    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
     return true;
   }
   return false;
@@ -803,6 +803,8 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
   current_mark_bitmap_ = SetMarkBitmap();
   meta_data_->current_mark_bitmap_ =
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
+  LOG(ERROR) << "IPCMarkSweep::FindDefaultMarkBitmap--- MarkBitmaps address: "
+      << reinterpret_cast<void*>(meta_data_->current_mark_bitmap_);
 }
 
 void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
