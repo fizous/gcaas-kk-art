@@ -289,7 +289,8 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         meta_->total_wait_time_ += wait_time;
       }
       if (wait_time > local_heap_->long_pause_log_threshold_) {
-        LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
+        LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for "
+            << PrettyDuration(wait_time);
       }
     }
   }
@@ -371,7 +372,9 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+  LOG(ERROR) << "GCMMP collect -> "
+      << gc_cause_and_type_strings[gc_cause][gc_type]
+      << " from thread ID:" << self->GetTid();
   collector->Run();
 
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
@@ -495,7 +498,8 @@ bool IPCHeap::RunCollectorDaemon() {
 //   // meta_->is_gc_complete_ = 0;
 //    conc_req_cond_->Broadcast(self);
 //  }
-  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
+  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: "
+      << self->GetTid() << " <<<<<<<<<<<<<<<";
   if(meta_->gc_type_ == 1) {
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
@@ -940,18 +944,21 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
-      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
+      currThread->GetTid() << " .. stack_struct_addr: "
+      << mark_stack_->GetStackStructAddr()<< "... stack_mmap_addr = "
+      << mark_stack_->Begin() <<", Size=" << mark_stack_->Size();
   MarkSweep::ProcessMarkStack(paused);
 }
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
+  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ "
+      << currThread->GetTid() << "; phase:" << meta_data_->gc_phase_
+      << "... MarkStackSize=" << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
   MarkSweep::RecursiveMark();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
-      currThread->GetTid() ;
+      currThread->GetTid();
 }
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {

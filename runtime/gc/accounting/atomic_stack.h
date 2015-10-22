@@ -231,6 +231,10 @@ class StructuredAtomicStack {
       Init(shareFlag);
     }
   }
+
+  StructuredObjectStackData* GetStackStructAddr(void) {
+    return stack_data_;
+  }
  private:
   // Size in number of elements.
   void Init(bool shareMem) {

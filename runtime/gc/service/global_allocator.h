@@ -195,10 +195,12 @@ typedef struct GCServiceClientRecord_S {
 
 class ServerCollector {
  public:
-  ServerCollector(space::GCSrvSharableHeapData* meta_alloc);
+  ServerCollector(space::GCSrvSharableDlMallocSpace* meta_alloc);
 
   void Run(void);
+  space::GCSrvSharableDlMallocSpace* alloc_space_data_;
   space::GCSrvSharableHeapData* heap_data_;
+
   Mutex run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable run_cond_ GUARDED_BY(run_mu_);
   Thread*   thread_ GUARDED_BY(run_mu_);

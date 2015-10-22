@@ -13,8 +13,9 @@ namespace art {
 namespace gc {
 namespace gcservice {
 
-ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
-    heap_data_(meta_alloc),
+ServerCollector::ServerCollector(space::GCSrvSharableDlMallocSpace* meta_alloc) :
+    alloc_space_data_(meta_alloc),
+    heap_data_(&alloc_space_data_->heap_meta_),
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
     thread_(NULL),
@@ -162,6 +163,13 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
           << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
 
+      LOG(ERROR) << "server: stack_struct_addr: "
+          << reinterpret_cast<void*>(&(server_instant_->alloc_space_data_->mark_stack_data_))
+          << "... stack_mmap_addr = "
+          << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
+          <<", Size=" <<
+          (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
+              server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
@@ -430,8 +438,8 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 
 
 ServerCollector* ServerCollector::CreateServerCollector(void* args) {
-  space::GCSrvSharableHeapData* _meta_alloc =
-      (space::GCSrvSharableHeapData*) args;
+  space::GCSrvSharableDlMallocSpace* _meta_alloc =
+      (space::GCSrvSharableDlMallocSpace*) args;
   return new ServerCollector(_meta_alloc);
 }
 
