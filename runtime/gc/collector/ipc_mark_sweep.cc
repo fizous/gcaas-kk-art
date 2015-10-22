@@ -1010,7 +1010,7 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
