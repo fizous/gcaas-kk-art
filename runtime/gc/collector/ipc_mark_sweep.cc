@@ -890,7 +890,15 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   MarkConcurrentRoots();
 
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
-
+  // Mark everything allocated since the last as GC live so that we can sweep concurrently,
+  // knowing that new allocations won't be marked as live.
+  timings_.StartSplit("MarkStackAsLive");
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
+  space::LargeObjectSpace* _LOS = heap_->large_object_space_;
+  heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
+      _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
+  live_stack->Reset();
+  timings_.EndSplit();
   //MarkReachableObjects();
 }
 
@@ -941,7 +949,7 @@ void IPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
-  MarkSweep::MarkReachableObjects();
+  MarkSweep::RecursiveMark();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
