@@ -895,7 +895,7 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   timings_.StartSplit("MarkStackAsLive");
   accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
   space::LargeObjectSpace* _LOS = heap_->GetLargeObjectsSpace();
-  heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
+  heap_->MarkAllocStack(heap_->GetAllocSpace()->GetLiveBitmap(),
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
