@@ -166,12 +166,12 @@ class ServerMarkReachableTask : public WorkStealingTask {
       StructuredObjectStackData* _mark_struct =
           &(server_instant_->alloc_space_data_->mark_stack_data_);
       LOG(ERROR) << "server: stack_struct_addr: "
-          << reinterpret_cast<void*>(_mark_struct);
-//          << "... stack_mmap_addr = "
-//          << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
-//          <<", Size=" <<
-//          (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
-//              server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
+          << reinterpret_cast<void*>(_mark_struct)
+          << "... stack_mmap_addr = "
+          << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
+          << ", Size = " <<
+          (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
+              server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
