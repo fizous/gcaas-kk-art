@@ -150,7 +150,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
       while(true) {
         if(curr_collector_addr_ != NULL) {
-          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
+          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_SERVER_MARK_REACHABLES) {
             break;
           }
         }
@@ -162,7 +162,10 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
           << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
 
-      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
+      gc::accounting::SharedSpaceBitmap* client_mark_BM =
+          new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
+      LOG(ERROR) << client_mark_BM;
+      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
       performed_cycle_index_ = server_instant_->cycles_count_;

@@ -839,6 +839,7 @@ void IPCMarkSweep::MarkConcurrentRoots() {
 void IPCMarkSweep::PostMarkingPhase(void){
   Thread* currThread = Thread::Current();
   ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_POST_MARK);
   LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
       "threads: " << currThread->GetTid();
   thread_list->SuspendAll();
@@ -906,10 +907,10 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
   LOG(ERROR) << "SSSSSSSSSSS Suspended app threads to handshake with service process SSSSSSSSSSSSSSS";
-  BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+  BlockForGCPhase(currThread, space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
 
 }
 
@@ -922,7 +923,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
     RequestAppSuspension();
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
-    UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
+    UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
   }
 
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
@@ -938,7 +939,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
   MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
