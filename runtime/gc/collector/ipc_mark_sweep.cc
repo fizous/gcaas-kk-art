@@ -894,7 +894,7 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   // knowing that new allocations won't be marked as live.
   timings_.StartSplit("MarkStackAsLive");
   accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
-  space::LargeObjectSpace* _LOS = heap_->large_object_space_;
+  space::LargeObjectSpace* _LOS = heap_->GetLargeObjectsSpace();
   heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
