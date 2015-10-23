@@ -183,7 +183,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
 //      LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
 //          reinterpret_cast<void*>(mappedAddr->begin_);
-      //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      atomic_stack_dup->DumpDataEntries(/*(art::mirror::Object**)(mappedAddr->begin_)*/);
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
