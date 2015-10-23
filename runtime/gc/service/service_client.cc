@@ -55,8 +55,8 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
   recP->size_ = shmem_map->size_;
 
   LOG(ERROR) << "FillAshMemMapData: " <<
-      StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
-      recP->fd_, recP->flags_, recP->prot_, recP->size_);
+      StringPrintf("address: %p,  fd: %d, flags:%d, prot:%d, size:%d",
+      reinterpret_cast<void*>(recP->begin_), recP->fd_, recP->flags_, recP->prot_, recP->size_);
 }
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
