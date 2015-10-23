@@ -245,7 +245,7 @@ class StructuredAtomicStack {
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
       int _index = 0;
-      T* limit = const_cast<T*>(start_pos + const_cast<T*>(End() - Begin()));
+      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
       T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
       for (T* it = startIter; it != limit  ; ++it) {
         T obj = *it;
