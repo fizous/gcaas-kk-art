@@ -243,7 +243,7 @@ class StructuredAtomicStack {
 
   void DumpDataEntries(T* start_pos){
     T* temp = stack_data_->begin_;
-    stack_data_->begin_ = reinterpret_cast<byte*>(start_pos);
+    stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
       int _index = 0;
