@@ -533,9 +533,12 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
             _result->prot_, _result->flags_ , _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
-          LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
-              << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
-              << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_mapping_addr);
+          LOG(ERROR) << "MMap failed in creating file descriptor..."
+              << _result->fd_
+              << ", size: " << PrettySize(_result->size_) << ", flags: "
+              << _result->flags_
+              << ", prot: " << _result->prot_ << ", address: "
+              << reinterpret_cast<void*>(_mapping_addr);
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
               _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",

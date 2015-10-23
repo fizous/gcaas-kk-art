@@ -195,9 +195,11 @@ typedef struct GCServiceClientRecord_S {
 
 class ServerCollector {
  public:
-  ServerCollector(space::GCSrvSharableDlMallocSpace* meta_alloc);
+  ServerCollector(GCServiceClientRecord* client_record,
+      space::GCSrvSharableDlMallocSpace* meta_alloc);
 
   void Run(void);
+  GCServiceClientRecord* client_rec_;
   space::GCSrvSharableDlMallocSpace* alloc_space_data_;
   space::GCSrvSharableHeapData* heap_data_;
 

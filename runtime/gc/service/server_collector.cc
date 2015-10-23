@@ -14,7 +14,9 @@ namespace art {
 namespace gc {
 namespace gcservice {
 
-ServerCollector::ServerCollector(space::GCSrvSharableDlMallocSpace* meta_alloc) :
+ServerCollector::ServerCollector(GCServiceClientRecord* client_record,
+    space::GCSrvSharableDlMallocSpace* meta_alloc) :
+    client_rec_(client_record),
     alloc_space_data_(meta_alloc),
     heap_data_(&alloc_space_data_->heap_meta_),
     run_mu_("ServerLock"),
@@ -174,9 +176,13 @@ class ServerMarkReachableTask : public WorkStealingTask {
           (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
               server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
+      android::IPCAShmemMap* mappedAddr =
+          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[3]);
       accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
           accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
-      atomic_stack_dup->DumpDataEntries();
+
+      LOG(ERROR) << "server: stack_struct_addr memory mapped: " << reinterpret_cast<void*>(mappedAddr->begin_);
+      //atomic_stack_dup->DumpDataEntries();
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
@@ -445,9 +451,10 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 
 
 ServerCollector* ServerCollector::CreateServerCollector(void* args) {
+  GCServiceClientRecord* _client_binding = (GCServiceClientRecord*) args;
   space::GCSrvSharableDlMallocSpace* _meta_alloc =
-      (space::GCSrvSharableDlMallocSpace*) args;
-  return new ServerCollector(_meta_alloc);
+      (space::GCSrvSharableDlMallocSpace*) _client_binding->sharable_space_;
+  return new ServerCollector(_client_binding, _meta_alloc);
 }
 
 
