@@ -954,9 +954,10 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ "
       << currThread->GetTid() << "; phase:" << meta_data_->gc_phase_
       << "... MarkStackSize=" << mark_stack_->Size();
-  mark_stack_->DumpDataEntries();
+
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
+  mark_stack_->DumpDataEntries();
   MarkSweep::RecursiveMark();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid();

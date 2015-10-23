@@ -242,18 +242,27 @@ class StructuredAtomicStack {
   }
 
   void DumpDataEntries(T* start_pos){
+    T* temp = Begin();
+    stack_data_->memory_.begin_ = reinterpret_cast<byte*>(start_pos);
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
       int _index = 0;
-      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
-      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
-      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
-          "limit= " << reinterpret_cast<void*>(limit);
-      for (T* it = startIter; it != limit  ; ++it) {
+      T* limit = End();
+      for (T* it = Begin(); it != limit; ++it) {
         T obj = *it;
         LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
             reinterpret_cast<void*>(obj);
       }
+//      int _index = 0;
+//      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
+//      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
+//      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
+//          "limit= " << reinterpret_cast<void*>(limit);
+//      for (T* it = startIter; it != limit  ; ++it) {
+//        T obj = *it;
+//        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
+//            reinterpret_cast<void*>(obj);
+//      }
     }
 //    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
 //      LOG(ERROR) << " = entry = " << i << "addr= " <<
