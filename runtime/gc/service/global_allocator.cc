@@ -547,7 +547,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   << ", size: " << PrettySize(_result->size_) << ", flags: " <<
                   _result->flags_ << ", prot: " << _result->prot_ <<
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
-
+          _result->begin_ = reinterpret_cast<unsigned int>(actual);
           _mapping_addr += RoundUp(_result->size_, kPageSize);
 //          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {
