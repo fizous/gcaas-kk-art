@@ -286,8 +286,8 @@ void Heap::CreateThreadPool() {
   }
   byte* zygote_space_begin =  alloc_space_->Begin();
   byte* zygote_space_end =  alloc_space_->End();
-  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
-      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
+  LOG(ERROR) << "+++ alloc_space_begin = " << reinterpret_cast<void*>(zygote_space_begin)
+      << "+++ alloc_space_end = " << reinterpret_cast<void*>(zygote_space_end);
   byte* image_space_begin =  GetImageSpace()->Begin();
   byte* image_space_end =  GetImageSpace()->End();
 
