@@ -178,10 +178,11 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
       android::IPCAShmemMap* mappedAddr =
           &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[3]);
-      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
-          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
+//      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
+//          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
 
-      LOG(ERROR) << "server: stack_struct_addr memory mapped: " << reinterpret_cast<void*>(mappedAddr->begin_);
+      LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
+          reinterpret_cast<void*>(mappedAddr->begin_);
       //atomic_stack_dup->DumpDataEntries();
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
