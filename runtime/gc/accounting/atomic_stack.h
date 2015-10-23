@@ -269,7 +269,7 @@ class StructuredAtomicStack {
 //          reinterpret_cast<void*>(stack_data_->begin_[i]);
 //    }
     LOG(ERROR) << "___________________________________________________________________";
-    stack_data_->begin_ = reinterpret_cast<byte*>(temp);
+    stack_data_->begin_ = temp;
   }
 
   void DumpDataEntries(){
