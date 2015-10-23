@@ -177,7 +177,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
               server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
       android::IPCAShmemMap* mappedAddr =
-          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[3]);
+          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[4]);
       accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
           accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
 
