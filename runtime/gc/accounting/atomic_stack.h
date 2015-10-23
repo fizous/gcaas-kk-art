@@ -98,6 +98,11 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
+  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data) {
+    return new StructuredAtomicStack(memory_data);
+  }
+
+
   static void SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
     StructuredObjectStackData _temp_data;
     memcpy(&_temp_data, stackA->stack_data_,
@@ -235,6 +240,15 @@ class StructuredAtomicStack {
   StructuredObjectStackData* GetStackStructAddr(void) {
     return stack_data_;
   }
+
+  void DumpDataEntries(){
+    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
+    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
+      LOG(ERROR) << " = entry = " << i << "addr= " <<
+          reinterpret_cast<void*>(stack_data_->begin_[i]);
+    }
+    LOG(ERROR) << "___________________________________________________________________";
+  }
  private:
   // Size in number of elements.
   void Init(bool shareMem) {
@@ -260,6 +274,9 @@ class StructuredAtomicStack {
     stack_data_->is_shared_ = shareMem;
     Reset();
   }
+
+  StructuredAtomicStack(StructuredObjectStackData* stack_data) :
+    stack_data_(stack_data) {}
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
       bool shareMem, StructuredObjectStackData* stack_data) :

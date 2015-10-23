@@ -7,6 +7,7 @@
 #include "thread.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
+#include "gc/accounting/atomic_stack.h"
 
 
 namespace art {
@@ -172,6 +173,10 @@ class ServerMarkReachableTask : public WorkStealingTask {
           << ", Size = " <<
           (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
               server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
+
+      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
+          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
+      atomic_stack_dup->DumpDataEntries();
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
