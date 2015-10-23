@@ -248,7 +248,7 @@ class StructuredAtomicStack {
       T* limit = End();
       for (T* it = Begin(); it != limit; ++it) {
         T obj = *it;
-        LOG(ERROR) << " = entry = " << _index++ << "addr= " <<
+        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
             reinterpret_cast<void*>(obj);
       }
     }
