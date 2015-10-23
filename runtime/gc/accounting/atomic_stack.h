@@ -247,6 +247,8 @@ class StructuredAtomicStack {
       int _index = 0;
       T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
       T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
+      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
+          "limit= " << reinterpret_cast<void*>(limit);
       for (T* it = startIter; it != limit  ; ++it) {
         T obj = *it;
         LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
