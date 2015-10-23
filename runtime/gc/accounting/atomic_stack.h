@@ -243,10 +243,19 @@ class StructuredAtomicStack {
 
   void DumpDataEntries(){
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
-    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
-      LOG(ERROR) << " = entry = " << i << "addr= " <<
-          reinterpret_cast<void*>(stack_data_->begin_[i]);
+    if(Size() > 0) {
+      int _index = 0;
+      T* limit = End();
+      for (T* it = Begin(); it != limit; ++it) {
+        T obj = *it;
+        LOG(ERROR) << " = entry = " << _index++ << "addr= " <<
+            reinterpret_cast<void*>(obj);
+      }
     }
+//    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
+//      LOG(ERROR) << " = entry = " << i << "addr= " <<
+//          reinterpret_cast<void*>(stack_data_->begin_[i]);
+//    }
     LOG(ERROR) << "___________________________________________________________________";
   }
  private:
