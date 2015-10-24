@@ -129,8 +129,8 @@ mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr
   android::IPCAShmemMap* mappedAddr =
       &(client_rec_->pair_mapps_->second->mem_maps_[0]);
   byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
-  uintptr_t address_offset = static_cast<uintptr_t>(remote_addr) -
-      static_cast<uintptr_t>(heap_data_->zygote_end_);
+  uintptr_t address_offset = reinterpret_cast<uintptr_t>(remote_addr) -
+      reinterpret_cast<uintptr_t>(heap_data_->zygote_end_);
   return reinterpret_cast<mirror::Object*>(address_offset + _mapped_space);
 
 }
