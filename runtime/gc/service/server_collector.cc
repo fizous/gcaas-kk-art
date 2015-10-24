@@ -8,7 +8,7 @@
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
 #include "gc/accounting/atomic_stack.h"
-
+#include "mirror/object-inl.h"
 
 namespace art {
 namespace gc {
