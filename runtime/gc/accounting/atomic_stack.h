@@ -248,7 +248,7 @@ class StructuredAtomicStack {
     stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
-      int _index = 0;
+      //int _index = 0;
       T* limit = End();
       for (T* it = Begin(); it != limit; ++it) {
         T obj = *it;
