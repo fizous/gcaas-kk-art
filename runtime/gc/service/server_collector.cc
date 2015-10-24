@@ -151,12 +151,13 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
       LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
           << " mapped: " << mapped_obj << ", class:"
           << /*(printName ?*/ clazz->GetName();// : reinterpret_cast<void*>(clazz));
-    } else {
-    //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
-    LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
-        << " mapped: " << mapped_obj << ", class:"
-        << (printName ? clazz->GetName() : reinterpret_cast<void*>(clazz));
     }
+//    else {
+//    //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
+//    LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
+//        << " mapped: " << mapped_obj << ", class:"
+//        << (printName ? clazz->GetName() : reinterpret_cast<void*>(clazz));
+//    }
   } else {
     LOG(ERROR) << "zygote_space: " << reinterpret_cast<void*>(obj);
   }
