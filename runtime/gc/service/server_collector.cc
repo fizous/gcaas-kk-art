@@ -147,10 +147,18 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     bool printName = ((reinterpret_cast<byte*>(clazz)) < heap_data_->zygote_end_);
 
     if(printName) {
+      bool _clzz_verified = Runtime::Current()->GetHeap()->VerifyObjectImpl(clazz);
+
       //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
-      LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
-          << " mapped: " << mapped_obj << ", classZ:"
-          << /*(printName ?*/ clazz->GetName();// : reinterpret_cast<void*>(clazz));
+      if(_clzz_verified) {
+        LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
+            << " mapped: " << mapped_obj << ", classN: " << clazz->GetName();
+      } else {
+        LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
+            << " mapped: " << mapped_obj << ", classZ: " << clazz;
+      }
+
+          //<< /*(printName ?*/ // : reinterpret_cast<void*>(clazz));
     }
 //    else {
 //    //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
