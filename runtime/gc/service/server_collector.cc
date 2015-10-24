@@ -139,8 +139,11 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   bool exist_in_alloc_Space =
       !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
   if(exist_in_alloc_Space) {
+    mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
     LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
-        << " mapped: " << MapRemoteObjAddress(obj);
+        << " mapped: " << mapped_obj << ", class:"
+        << reinterpret_cast<void*>(mapped_obj->GetClass());
+
   } else {
     LOG(ERROR) << "zygote_space: " << reinterpret_cast<void*>(obj);
   }
