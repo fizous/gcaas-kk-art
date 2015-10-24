@@ -243,7 +243,7 @@ class StructuredAtomicStack {
 
   typedef void Callback(T obj, void* arg);
 
-  void DumpDataEntries(T* start_pos, Callback* visitor){
+  void DumpDataEntries(T* start_pos, Callback* visitor, void* args){
     T* temp = stack_data_->begin_;
     stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
@@ -252,7 +252,7 @@ class StructuredAtomicStack {
       T* limit = End();
       for (T* it = Begin(); it != limit; ++it) {
         T obj = *it;
-        visitor(obj, NULL);
+        visitor(obj, args);
       }
 //      int _index = 0;
 //      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
