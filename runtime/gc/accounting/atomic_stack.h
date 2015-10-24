@@ -241,6 +241,37 @@ class StructuredAtomicStack {
     return stack_data_;
   }
 
+  typedef void Callback(T obj, void* arg);
+
+  void DumpDataEntries(T* start_pos, Callback* visitor){
+    T* temp = stack_data_->begin_;
+    stack_data_->begin_ = start_pos;
+    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
+    if(Size() > 0) {
+      int _index = 0;
+      T* limit = End();
+      for (T* it = Begin(); it != limit; ++it) {
+        T obj = *it;
+        visitor(obj, NULL);
+      }
+//      int _index = 0;
+//      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
+//      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
+//      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
+//          "limit= " << reinterpret_cast<void*>(limit);
+//      for (T* it = startIter; it != limit  ; ++it) {
+//        T obj = *it;
+//        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
+//            reinterpret_cast<void*>(obj);
+//      }
+    }
+//    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
+//      LOG(ERROR) << " = entry = " << i << "addr= " <<
+//          reinterpret_cast<void*>(stack_data_->begin_[i]);
+//    }
+    LOG(ERROR) << "___________________________________________________________________";
+    stack_data_->begin_ = temp;
+  }
   void DumpDataEntries(T* start_pos){
     T* temp = stack_data_->begin_;
     stack_data_->begin_ = start_pos;

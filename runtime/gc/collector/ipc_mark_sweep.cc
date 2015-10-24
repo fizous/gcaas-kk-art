@@ -972,7 +972,8 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
-    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
+    : IPCMarkSweep(ipcHeap, is_concurrent,
+        name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
   cumulative_timings_.SetName(GetName());
 }
 

@@ -237,6 +237,9 @@ class ServerCollector {
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);
 
+  void ScanRemoteObject(const mirror::Object* obj);
+
+
   ThreadPool* gc_workers_pool_;
   /*********** task queues ************/
   Mutex shake_hand_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;

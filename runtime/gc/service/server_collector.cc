@@ -117,8 +117,18 @@ int ServerCollector::WaitForRequest(void) {
     }
   }
   return _result;
+}
 
 
+static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
+  ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
+  server->ScanRemoteObject(t);
+}
+void ServerCollector::ScanRemoteObject(const mirror::Object* obj) {
+  bool exist_in_alloc_Space =
+      !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
+  LOG(ERROR) << (exist_in_alloc_Space ? "alloc_space: " : "zygote_space: ")
+  << reinterpret_cast<void*>(obj);
 }
 
 
@@ -183,7 +193,9 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
       LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
           reinterpret_cast<void*>(mappedAddr->begin_);
-      atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
+          DumpObjectsInMarkStack);
       gc::accounting::SharedSpaceBitmap* client_mark_BM =
           new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
       LOG(ERROR) << client_mark_BM;
@@ -321,15 +333,16 @@ class ServerIPCListenerTask : public WorkStealingTask {
       }
 
     }
-
-
-
   }
   virtual void Finalize() {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ Finalize ServerIPCListenerTask @@@@@@@@@@@@";
     delete this;
   }
 };
+
+
+
+
 volatile int ServerIPCListenerTask::performed_cycle_index_ = -1;
 
 void ServerCollector::UpdateCollectorAddress(Thread* self,
@@ -359,6 +372,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
     conc_req_cond_->Broadcast(self);
   }
 }
+
 
 void ServerCollector::ExecuteGC(int gc_type) {
   Thread* self = Thread::Current();

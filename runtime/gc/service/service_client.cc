@@ -71,9 +71,7 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   FillAshMemMapData(&rec->mem_maps_[4],
       &(sharable_space_->sharable_space_data_->mark_stack_data_.memory_));
 
-  StructuredObjectStackData live_stack_data_;
-  StructuredObjectStackData mark_stack_data_;
-  StructuredObjectStackData alloc_stack_data_;
+
 //  FillAshMemMapData(&rec->mem_maps_[3],
 //      &(sharable_space_->sharable_space_data_->test_memory_));
 //  FillAshMemMapData(&rec->mem_maps_[2],
