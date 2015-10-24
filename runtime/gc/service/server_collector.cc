@@ -215,7 +215,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
           accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
       //android::IPCAShmemMap* mappedAddr =
       server_instant_->mapped_alloc_space_ =
-          reinterpret_cast<byte*>( &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0]));
+          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
 //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
       LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
           reinterpret_cast<void*>(mappedAddr->begin_);
