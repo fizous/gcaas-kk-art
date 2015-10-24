@@ -233,6 +233,8 @@ class ServerCollector {
   void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);
   void PostFinishPhaseGC(void);
+  mirror::Object* MapRemoteObjAddress(mirror::Object*);
+
 
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);

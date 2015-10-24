@@ -124,11 +124,26 @@ static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
   ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
   server->ScanRemoteObject(t);
 }
+
+mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr) {
+  android::IPCAShmemMap* mappedAddr =
+      &(client_rec_->pair_mapps_->second->mem_maps_[0]);
+  byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
+  uintptr_t address_offset = static_cast<uintptr_t>(remote_addr) -
+      static_cast<uintptr_t>(heap_data_->zygote_end_);
+  return reinterpret_cast<mirror::Object*>(address_offset + _mapped_space);
+
+}
+
 void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   bool exist_in_alloc_Space =
       !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
-  LOG(ERROR) << (exist_in_alloc_Space ? "alloc_space: " : "zygote_space: ")
-  << reinterpret_cast<void*>(obj);
+  if(exist_in_alloc_Space) {
+    LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
+        << " mapped: " << MapRemoteObjAddress;
+  } else {
+    LOG(ERROR) << "zygote_space: " << reinterpret_cast<void*>(obj);
+  }
 }
 
 
