@@ -237,7 +237,7 @@ class ServerCollector {
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);
 
-  void ScanRemoteObject(const mirror::Object* obj);
+  void ScanRemoteObject(mirror::Object* obj);
 
 
   ThreadPool* gc_workers_pool_;

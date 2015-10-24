@@ -124,7 +124,7 @@ static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
   ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
   server->ScanRemoteObject(t);
 }
-void ServerCollector::ScanRemoteObject(const mirror::Object* obj) {
+void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   bool exist_in_alloc_Space =
       !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
   LOG(ERROR) << (exist_in_alloc_Space ? "alloc_space: " : "zygote_space: ")
