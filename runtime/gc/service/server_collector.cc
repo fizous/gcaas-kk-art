@@ -149,7 +149,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     if(printName) {
       //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
       LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
-          << " mapped: " << mapped_obj << ", class:"
+          << " mapped: " << mapped_obj << ", classZ:"
           << /*(printName ?*/ clazz->GetName();// : reinterpret_cast<void*>(clazz));
     }
 //    else {
