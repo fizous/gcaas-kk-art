@@ -143,7 +143,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
         reinterpret_cast<uintptr_t>(obj) -
           reinterpret_cast<uintptr_t>(heap_data_->zygote_end_) +
           mapped_alloc_space_);
-    mirror::Class* clazz = reinterpret_cast<void*>(mapped_obj->GetClass());
+    mirror::Class* clazz = mapped_obj->GetClass();
     bool printName = (reinterpret_cast<byte*>(clazz) < heap_data_->zygote_end_);
 
     //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
