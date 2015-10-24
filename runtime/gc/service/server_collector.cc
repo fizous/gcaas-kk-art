@@ -147,7 +147,8 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     bool printName = ((reinterpret_cast<byte*>(clazz)) < heap_data_->zygote_end_);
 
     if(printName) {
-      bool _clzz_verified = Runtime::Current()->GetHeap()->VerifyObjectImpl(clazz);
+      bool _clzz_verified = true;
+      Runtime::Current()->GetHeap()->VerifyObjectImpl(clazz);
 
       //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
       if(_clzz_verified) {
