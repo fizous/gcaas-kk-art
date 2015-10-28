@@ -549,6 +549,10 @@ class Heap {
 
   // Swap the allocation stack with the live stack.
   void SwapStacks();
+
+  // No thread saftey analysis since we call this everywhere and it is impossible to find a proper
+  // lock ordering for it.
+  void VerifyObjectBody(const mirror::Object *obj) NO_THREAD_SAFETY_ANALYSIS;
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -619,9 +623,7 @@ class Heap {
   void AddDiscontinuousSpace(space::DiscontinuousSpace* space)
       LOCKS_EXCLUDED(Locks::heap_bitmap_lock_);
 
-  // No thread saftey analysis since we call this everywhere and it is impossible to find a proper
-  // lock ordering for it.
-  void VerifyObjectBody(const mirror::Object *obj) NO_THREAD_SAFETY_ANALYSIS;
+
 
   static void VerificationCallback(mirror::Object* obj, void* arg)
       SHARED_LOCKS_REQUIRED(GlobalSychronization::heap_bitmap_lock_);
