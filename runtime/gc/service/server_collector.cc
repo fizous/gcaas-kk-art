@@ -144,7 +144,8 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
           reinterpret_cast<uintptr_t>(heap_data_->zygote_end_) +
           mapped_alloc_space_);
     mirror::Class* clazz = mapped_obj->GetClass();
-    bool printName = ((reinterpret_cast<byte*>(clazz)) < heap_data_->zygote_end_);
+    bool printName =
+        (clazz != NULL) && ((reinterpret_cast<byte*>(clazz)) < heap_data_->zygote_end_);
 
     if(printName) {
       bool _clzz_verified = true;
