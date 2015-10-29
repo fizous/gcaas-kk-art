@@ -379,13 +379,14 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
 //    return NULL;
 //  }
 
-  MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon").c_str(), NULL,
+  MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
       Size(), GetProtect(), true, NULL);
   byte* _begin = Begin();
   memcpy(_map_temp->Begin(), Begin(), Size());
-  UnMapAtEnd(Begin());
-  return CreateStructedMemMap(std::string("remapped-annon").c_str(), _begin,
-      Size(), GetProtect(), true, meta_address);
+  return this;
+//  UnMapAtEnd(Begin());
+//  return CreateStructedMemMap(std::string("remapped-annon1").c_str(), _begin,
+//      Size(), GetProtect(), true, meta_address);
 
 }
 
