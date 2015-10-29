@@ -380,7 +380,7 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
 //  }
 
   MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
-      Size(), GetProtect(), true, meta_address);
+      Size(), GetProtect(), false, NULL);
   if(_map_temp == NULL)
     return NULL;
   //byte* _begin = Begin();
