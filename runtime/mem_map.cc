@@ -372,11 +372,9 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
-  StructuredMemMap* _allocated_structured_map =
-      CreateStructedMemMap(std::string("remapped").c_str(), Begin(),
+  return CreateStructedMemMap(std::string("remapped").c_str(), Begin(),
       Size(), GetProtect(), true, meta_address);
 
-  return reinterpret_cast<MemBaseMap*>(_allocated_structured_map);
 }
 
 void MemMap::SetSize(size_t new_size) {
