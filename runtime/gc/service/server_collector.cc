@@ -122,7 +122,7 @@ int ServerCollector::WaitForRequest(void) {
 
 static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
   ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
-    server->ScanRemoteObject(t);
+  server->ScanRemoteObject(t);
 }
 
 mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr) {
@@ -145,6 +145,8 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
           mapped_alloc_space_);
     mirror::Class* clazz = mapped_obj->GetClass();
     byte* clzz_address = reinterpret_cast<byte*>(clazz);
+    LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
+        << " mapped: " << mapped_obj << ", classZOrig: " << clazz;
 
     bool printName =
         (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
