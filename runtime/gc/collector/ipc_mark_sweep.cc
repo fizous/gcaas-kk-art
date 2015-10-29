@@ -585,7 +585,8 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        meta_->concurrent_start_bytes_ = std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
+        meta_->concurrent_start_bytes_ =
+            std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
       }
 //      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
 //      DCHECK_LE(max_allowed_footprint_, growth_limit_);

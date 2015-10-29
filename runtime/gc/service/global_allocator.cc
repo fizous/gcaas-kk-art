@@ -18,7 +18,6 @@
 #include "locks.h"
 #include "os.h"
 #include "runtime.h"
-#include "mem_map.h"
 
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_client.h"

@@ -133,6 +133,7 @@ class MemBaseMap {
 
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
+  MemBaseMap* ReshareMap(AShmemMap* meta_address);
 
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot,

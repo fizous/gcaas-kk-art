@@ -151,7 +151,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
       bool _clzz_verified = true;
       //Runtime::Current()->GetHeap()->VerifyObjectBody(clazz);
 
-      if(1) {
+      if(0) {
         //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
         if(_clzz_verified) {
           LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)

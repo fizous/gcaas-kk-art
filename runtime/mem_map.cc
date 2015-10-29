@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <string>
+#include <cutils/ashmem.h>
 #include "mem_map.h"
 
 #include <corkscrew/map_info.h>
@@ -99,7 +100,7 @@ StructuredMemMap::~StructuredMemMap(){
 
 
 MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr,
-    size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map ) {
+    size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map) {
 
   if(ashmem_mem_map == NULL) {
     ashmem_mem_map =
@@ -369,6 +370,14 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
   SetSize(Size()-unmap_size);
 }
 
+
+MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
+  StructuredMemMap* _allocated_structured_map =
+      CreateStructedMemMap(std::string("remapped").c_str(), Begin(),
+      Size(), GetProtect(), true, meta_address);
+
+  return _allocated_structured_map;
+}
 
 void MemMap::SetSize(size_t new_size) {
   size_ = new_size;

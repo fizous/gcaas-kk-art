@@ -378,6 +378,14 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   Trim();
   // Trim our mem-map to free unused pages.
   GetMemMap()->UnMapAtEnd(End());
+
+  if(shareMem) {
+    LOG(ERROR) << " <<<<<<<<<< RESHARING ZYGORE MSPACE >>>>>>>>>>>>>";
+    UniquePtr<MEM_MAP> zygote_mem_map(GetMemMap()->ReshareMap(&sharable_dlmalloc_space->heap_meta_.zygote_space_));
+    ReSetMemMap(zygote_mem_map.get());
+    LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
+  }
+
   // TODO: Not hardcode these in?
   const size_t starting_size = kPageSize;
   const size_t initial_size = 2 * MB;
