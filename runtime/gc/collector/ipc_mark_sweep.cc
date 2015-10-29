@@ -168,8 +168,8 @@ void IPCHeap::CreateCollectors(void) {
         "ipcMS")));
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCPartialMarkSweep(this, _conc_flag,
         "partialIPC")));
-//    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCStickyMarkSweep(this, _conc_flag,
-//        "stickyIPC")));
+    local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCStickyMarkSweep(this, _conc_flag,
+        "stickyIPC")));
 
   }
 }
