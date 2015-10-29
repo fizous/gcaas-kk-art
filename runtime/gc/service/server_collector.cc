@@ -137,10 +137,10 @@ mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr
 
 void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   byte* object_address = reinterpret_cast<byte*>(obj);
-  bool exist_in_alloc_Space = !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
+  bool exist_in_alloc_Space = !(object_address < heap_data_->zygote_end_);
   if(exist_in_alloc_Space) {
     mirror::Object* mapped_obj = reinterpret_cast<mirror::Object*>(
-        reinterpret_cast<uintptr_t>(obj) -
+        reinterpret_cast<uintptr_t>(object_address) -
           reinterpret_cast<uintptr_t>(heap_data_->zygote_end_) +
           mapped_alloc_space_);
     mirror::Class* clazz = mapped_obj->GetClass();
