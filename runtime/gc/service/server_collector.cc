@@ -122,7 +122,8 @@ int ServerCollector::WaitForRequest(void) {
 
 static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
   ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
-  server->ScanRemoteObject(t);
+  if(0)
+    server->ScanRemoteObject(t);
 }
 
 mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr) {
