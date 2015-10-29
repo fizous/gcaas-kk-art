@@ -394,14 +394,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
              << "Capacity " << Capacity();
   SetGrowthLimit(RoundUp(size, kPageSize));
   SetFootprintLimit(RoundUp(size, kPageSize));
-  if(true && shareMem) {
-    LOG(ERROR) << " <<<<<<<<<< --------RESHARING ZYGORE MSPACE--------- >>>>>>>>>>>>>";
-    MEM_MAP* zygote_mem_map = GetMemMap()->ReshareMap(&(sharable_dlmalloc_space->heap_meta_.zygote_space_));
-    if(zygote_mem_map == NULL) {
-      LOG(ERROR) << "zygote_mem_map was null";
-    }
-    LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
-  }
+
   // FIXME: Do we need reference counted pointers here?
   // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
   VLOG(heap) << "Creating new AllocSpace: ";
@@ -415,6 +408,25 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   if(_struct_alloc_space == NULL) {
     _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
   }
+
+
+  if(true && shareMem) {
+    LOG(ERROR) << " <<<<<<<<<< --------RESHARING ZYGORE MSPACE--------- >>>>>>>>>>>>>";
+    MEM_MAP* zygote_mem_map = GetMemMap()->ReshareMap(&(_struct_alloc_space->heap_meta_.zygote_space_));
+    if(zygote_mem_map == NULL) {
+      LOG(ERROR) << "zygote_mem_map was null";
+    }
+    byte* original_begin = Begin();
+    ReSetMemMap(NULL);
+    MEM_MAP* _space_mem_map = MEM_MAP::CreateStructedMemMap("zygote-remapped1", original_begin,
+        zygote_mem_map->Size(), PROT_READ | PROT_WRITE, true,
+        &(_struct_alloc_space->heap_meta_.zygote_space_));
+    memcpy(_space_mem_map->Begin(), zygote_mem_map->Begin(), zygote_mem_map->Size());
+
+    ReSetMemMap(_space_mem_map);
+    LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
+  }
+
   _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
             capacity, PROT_READ | PROT_WRITE, shareMem,
             &(_struct_alloc_space->dlmalloc_space_data_.memory_));
