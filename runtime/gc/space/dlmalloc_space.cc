@@ -418,7 +418,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     }
     byte* original_begin = Begin();
     ReSetMemMap(NULL);
-    MEM_MAP* _space_mem_map = MEM_MAP::CreateStructedMemMap("zygote-remapped1", original_begin,
+    MEM_MAP* _space_mem_map = MEM_MAP::CreateStructedMemMap("zygote-remapped1",
+        original_begin,
         zygote_mem_map->Size(), PROT_READ | PROT_WRITE, true,
         &(_struct_alloc_space->heap_meta_.zygote_space_));
     memcpy(_space_mem_map->Begin(), zygote_mem_map->Begin(), zygote_mem_map->Size());
