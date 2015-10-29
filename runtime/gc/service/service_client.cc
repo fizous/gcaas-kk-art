@@ -28,7 +28,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     ipcHeap_ = new gc::collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
         Runtime::Current()->GetHeap());
 
-    //ipcHeap_->CreateCollectors();
+    ipcHeap_->CreateCollectors();
 
 
 //    collector_ =
