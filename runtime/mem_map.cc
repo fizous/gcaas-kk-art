@@ -372,12 +372,12 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
-  int flags = MAP_SHARED | MAP_FIXED;
-  int _fd = ashmem_create_region("reshared", Size());
-  if (_fd == -1) {
-    PLOG(ERROR) << "ashmem_create_region failed (" << "reshared" << ")";
-    return NULL;
-  }
+  //int flags = MAP_SHARED | MAP_FIXED;
+//  int _fd = ashmem_create_region("reshared", Size());
+//  if (_fd == -1) {
+//    PLOG(ERROR) << "ashmem_create_region failed (" << "reshared" << ")";
+//    return NULL;
+//  }
 
   MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon").c_str(), NULL,
       Size(), GetProtect(), true, NULL);
