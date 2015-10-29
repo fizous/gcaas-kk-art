@@ -137,7 +137,8 @@ mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr
 
 void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   byte* object_address = reinterpret_cast<byte*>(obj);
-  bool exist_in_alloc_Space = !(object_address < heap_data_->zygote_end_);
+  bool exist_in_alloc_Space = !(object_address < heap_data_->zygote_end_ &&
+      object_address > heap_data_->image_space_begin_);
   if(exist_in_alloc_Space) {
     mirror::Object* mapped_obj = reinterpret_cast<mirror::Object*>(
         reinterpret_cast<uintptr_t>(object_address) -
@@ -145,8 +146,17 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
           mapped_alloc_space_);
     mirror::Class* clazz = mapped_obj->GetClass();
     byte* clzz_address = reinterpret_cast<byte*>(clazz);
-    LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-        << " mapped: " << mapped_obj << ", classZOrig: " << clazz;
+
+
+    bool clzz_in_image = (clazz != NULL) && (clzz_address < heap_data_->image_space_end_) &&
+        (clzz_address > heap_data_->image_space_begin_);
+
+    if(clzz_in_image) {
+      LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
+          << " mapped: " << mapped_obj << ", classimage: " << clazz
+          << ", name:" << clazz->GetName();
+      return;
+    }
 
     bool printName =
         (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
