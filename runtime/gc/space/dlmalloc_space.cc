@@ -379,14 +379,6 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   // Trim our mem-map to free unused pages.
   GetMemMap()->UnMapAtEnd(End());
 
-  if(true && shareMem) {
-    LOG(ERROR) << " <<<<<<<<<< RESHARING ZYGORE MSPACE >>>>>>>>>>>>>";
-    UniquePtr<MEM_MAP> zygote_mem_map(GetMemMap()->ReshareMap(&sharable_dlmalloc_space->heap_meta_.zygote_space_));
-    if(zygote_mem_map.get() == NULL) {
-      LOG(ERROR) << "zygote_mem_map was null";
-    }
-    LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
-  }
 
   // TODO: Not hardcode these in?
   const size_t starting_size = kPageSize;
@@ -402,6 +394,14 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
              << "Capacity " << Capacity();
   SetGrowthLimit(RoundUp(size, kPageSize));
   SetFootprintLimit(RoundUp(size, kPageSize));
+  if(true && shareMem) {
+    LOG(ERROR) << " <<<<<<<<<< --------RESHARING ZYGORE MSPACE--------- >>>>>>>>>>>>>";
+    UniquePtr<MEM_MAP> zygote_mem_map(GetMemMap()->ReshareMap(&(sharable_dlmalloc_space->heap_meta_.zygote_space_)));
+    if(zygote_mem_map.get() == NULL) {
+      LOG(ERROR) << "zygote_mem_map was null";
+    }
+    LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
+  }
   // FIXME: Do we need reference counted pointers here?
   // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
   VLOG(heap) << "Creating new AllocSpace: ";
