@@ -180,7 +180,7 @@ bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCau
 }
 
 bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
-  if(true || service_client_ == NULL) {
+  if(service_client_ == NULL) {
     return false;
   }
   Thread* self = Thread::Current();
