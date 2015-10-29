@@ -128,7 +128,7 @@ static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
 
 mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr) {
   android::IPCAShmemMap* mappedAddr =
-      &(client_rec_->pair_mapps_->second->mem_maps_[0]);
+      &(client_rec_->pair_mapps_->second->mem_maps_[1]);
   byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
   uintptr_t address_offset = reinterpret_cast<uintptr_t>(remote_addr) -
       reinterpret_cast<uintptr_t>(heap_data_->zygote_end_);
@@ -232,12 +232,12 @@ class ServerMarkReachableTask : public WorkStealingTask {
               server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
       android::IPCAShmemMap* mappedAddr =
-          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[4]);
+          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
       accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
           accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
       //android::IPCAShmemMap* mappedAddr =
       server_instant_->mapped_alloc_space_ =
-          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
+          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
 //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
       LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
           reinterpret_cast<void*>(mappedAddr->begin_);
