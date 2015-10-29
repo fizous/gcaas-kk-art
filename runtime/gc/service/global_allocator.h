@@ -251,6 +251,7 @@ class ServerCollector {
 
   volatile int cycles_count_;
   byte* mapped_alloc_space_;
+  byte* mapped_zygote_space_;
 };//class ServerCollector
 
 

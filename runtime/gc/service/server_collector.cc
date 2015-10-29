@@ -122,7 +122,6 @@ int ServerCollector::WaitForRequest(void) {
 
 static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
   ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
-  if(0)
     server->ScanRemoteObject(t);
 }
 
@@ -137,26 +136,34 @@ mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr
 }
 
 void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
-  bool exist_in_alloc_Space =
-      !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
+  byte* object_address = reinterpret_cast<byte*>(obj);
+  bool exist_in_alloc_Space = !(reinterpret_cast<byte*>(obj) < heap_data_->zygote_end_);
   if(exist_in_alloc_Space) {
     mirror::Object* mapped_obj = reinterpret_cast<mirror::Object*>(
         reinterpret_cast<uintptr_t>(obj) -
           reinterpret_cast<uintptr_t>(heap_data_->zygote_end_) +
           mapped_alloc_space_);
     mirror::Class* clazz = mapped_obj->GetClass();
+    byte* clzz_address = reinterpret_cast<byte*>(clazz);
+
     bool printName =
-        (clazz != NULL) && ((reinterpret_cast<byte*>(clazz)) < heap_data_->zygote_end_);
+        (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
+        (clzz_address > heap_data_->zygote_begin_);
 
     if(printName) {
+      mirror::Class* mapped_clazz = reinterpret_cast<mirror::Class*>(
+          reinterpret_cast<uintptr_t>(clzz_address) -
+            reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +
+            mapped_zygote_space_);
       bool _clzz_verified = true;
       //Runtime::Current()->GetHeap()->VerifyObjectBody(clazz);
 
-      if(0) {
+      if(1) {
         //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
         if(_clzz_verified) {
           LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-              << " mapped: " << mapped_obj << ", classN: " << clazz->GetName();
+              << " mapped: " << mapped_obj << ", mapped_class = " <<
+              reinterpret_cast<void*>(mapped_clazz) << ", classN: " << mapped_clazz->GetName();
         } else {
           LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
               << " mapped: " << mapped_obj << ", classZ: " << clazz;
@@ -236,6 +243,8 @@ class ServerMarkReachableTask : public WorkStealingTask {
       accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
           accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
       //android::IPCAShmemMap* mappedAddr =
+      server_instant_->mapped_zygote_space_ =
+          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
       server_instant_->mapped_alloc_space_ =
           reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
 //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
