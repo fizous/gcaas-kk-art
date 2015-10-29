@@ -2424,7 +2424,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
   SetConcurrentStartBytes(std::numeric_limits<size_t>::max());
 
 #if (true || ART_GC_SERVICE)
-  if(!art::gcservice::GCServiceClient::RequestConcGC()) {
+  if(true || !art::gcservice::GCServiceClient::RequestConcGC()) {
     JNIEnv* env = self->GetJniEnv();
     DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
     DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
