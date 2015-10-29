@@ -396,8 +396,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   SetFootprintLimit(RoundUp(size, kPageSize));
   if(true && shareMem) {
     LOG(ERROR) << " <<<<<<<<<< --------RESHARING ZYGORE MSPACE--------- >>>>>>>>>>>>>";
-    UniquePtr<MEM_MAP> zygote_mem_map(GetMemMap()->ReshareMap(&(sharable_dlmalloc_space->heap_meta_.zygote_space_)));
-    if(zygote_mem_map.get() == NULL) {
+    MEM_MAP* zygote_mem_map = GetMemMap()->ReshareMap(&(sharable_dlmalloc_space->heap_meta_.zygote_space_));
+    if(zygote_mem_map == NULL) {
       LOG(ERROR) << "zygote_mem_map was null";
     }
     LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
