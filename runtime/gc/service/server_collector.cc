@@ -135,6 +135,11 @@ mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr
 
 }
 
+
+void ServerCollector::DumpClass(mirror::Class* clazz, std::ostream& os, int flags) {
+  clazz->DumpClass(os, flags);
+}
+
 void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
   byte* object_address = reinterpret_cast<byte*>(obj);
   bool exist_in_alloc_Space = !(object_address < heap_data_->zygote_end_ &&

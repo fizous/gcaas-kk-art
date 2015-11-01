@@ -240,7 +240,8 @@ class ServerCollector {
   static ServerCollector* CreateServerCollector(void* args);
 
   void ScanRemoteObject(mirror::Object* obj);
-
+  void DumpClass(mirror::Class* clazz, std::ostream& os, int flags)
+  SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   ThreadPool* gc_workers_pool_;
   /*********** task queues ************/
