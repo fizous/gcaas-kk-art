@@ -154,7 +154,8 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     if(clzz_in_image) {
       LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
           << " mapped: " << mapped_obj << ", classimage: " << clazz
-          << ", name:" << clazz->GetName();
+          << ", name:";
+      clazz->DumpClass(LOG(ERROR), 7);
       return;
     }
 
