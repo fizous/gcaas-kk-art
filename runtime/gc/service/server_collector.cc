@@ -156,6 +156,34 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     bool clzz_in_image = (clazz != NULL) && (clzz_address < heap_data_->image_space_end_) &&
         (clzz_address > heap_data_->image_space_begin_);
 
+
+    bool clzz_in_zygote = (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
+        (clzz_address > heap_data_->zygote_begin_);
+
+
+    mirror::Class* mapped_clazz = NULL;
+
+
+    if(clzz_in_zygote) {
+      mapped_clazz = reinterpret_cast<mirror::Class*>(
+        reinterpret_cast<uintptr_t>(clzz_address) -
+          reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +
+          mapped_zygote_space_);
+
+
+      LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
+          << " mapped: " << mapped_obj << ", Zimage: " << clazz
+          << ", mapped_class = " << mapped_clazz << ", name:";
+
+      if(!Locks::mutator_lock_->IsSharedHeld(Thread::Current())) {
+        Locks::mutator_lock_->SharedLock(Thread::Current());
+        {
+          DumpClass(clazz, LOG(ERROR), 0 /*mirror::Class::kDumpClassFullDetail*/);
+        }
+        Locks::mutator_lock_->SharedUnlock(Thread::Current());
+      }
+      return;
+    }
     if(clzz_in_image) {
       LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
           << " mapped: " << mapped_obj << ", classimage: " << clazz
@@ -167,10 +195,9 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
         }
         Locks::mutator_lock_->SharedUnlock(Thread::Current());
       }
-
-
       return;
     }
+
 
     bool printName =
         (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
