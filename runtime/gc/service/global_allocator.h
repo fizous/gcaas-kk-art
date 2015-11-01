@@ -239,7 +239,7 @@ class ServerCollector {
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);
 
-  void ScanRemoteObject(mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  void ScanRemoteObject(mirror::Object* obj);
 
 
   ThreadPool* gc_workers_pool_;
