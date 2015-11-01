@@ -167,7 +167,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
         }
         Locks::mutator_lock_->SharedUnlock(Thread::Current());
       } else {
-        clazz->DumpClass(LOG(ERROR), 7);
+        DumpClass(clazz, LOG(ERROR), 7);
       }
 
 
