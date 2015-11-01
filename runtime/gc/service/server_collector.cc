@@ -163,7 +163,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
       if(!Locks::mutator_lock_->IsSharedHeld(Thread::Current())) {
         Locks::mutator_lock_->SharedLock(Thread::Current());
         {
-          DumpClass(clazz, LOG(ERROR), mirror::Class::kDumpClassFullDetail);
+          DumpClass(clazz, LOG(ERROR), 0 /*mirror::Class::kDumpClassFullDetail*/);
         }
         Locks::mutator_lock_->SharedUnlock(Thread::Current());
       }
