@@ -256,7 +256,7 @@ class ServerCollector {
 };//class ServerCollector
 
 
-class collector::IPCServerMarkerSweep;
+class gc::collector::IPCServerMarkerSweep;
 
 class GCSrvceAgent {
  public:
