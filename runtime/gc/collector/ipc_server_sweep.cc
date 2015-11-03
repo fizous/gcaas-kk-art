@@ -72,7 +72,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
 bool IPCServerMarkerSweep::ClientSpaceContains(mirror::Object* obj,
     GCSrverCollectorSpace* server_space) {
   byte* byte_ptr = reinterpret_cast<byte*>(obj);
-  return byte_ptr < server_space->client_end_ && byte_ptr >= server_space->client_base_;
+  return (byte_ptr < server_space->client_end_) && (byte_ptr >= server_space->client_base_);
 }
 
 mirror::Object* IPCServerMarkerSweep::MapObjectAddress(mirror::Object* obj) {
