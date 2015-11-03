@@ -41,9 +41,9 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
 
 
   spaces_[KGCSpaceServerZygoteInd_].client_base_ =
-      client_rec_->pair_mapps_->first->mem_maps_[0].begin_;
+      reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[0].begin_);
   spaces_[KGCSpaceServerZygoteInd_].client_end_ =
-      client_rec_->pair_mapps_->first->mem_maps_[0].begin_ +
+      reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[0].begin_) +
       client_rec_->pair_mapps_->first->mem_maps_[0].size_;
   spaces_[KGCSpaceServerZygoteInd_].base_ =
       client_rec_->pair_mapps_->second->mem_maps_[0].begin_;
@@ -51,12 +51,12 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
       spaces_[KGCSpaceServerZygoteInd_].base_ + offset_;
 
   spaces_[KGCSpaceServerAllocInd_].client_base_ =
-      client_rec_->pair_mapps_->first->mem_maps_[1].begin_;
+      reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[1].begin_);
   spaces_[KGCSpaceServerAllocInd_].client_end_ =
-      client_rec_->pair_mapps_->first->mem_maps_[1].begin_ +
+      reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[1].begin_) +
       client_rec_->pair_mapps_->first->mem_maps_[1].size_;
   spaces_[KGCSpaceServerAllocInd_].base_ =
-      client_rec_->pair_mapps_->second->mem_maps_[1].begin_;
+      reinterpret_cast<byte*>(client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
   spaces_[KGCSpaceServerAllocInd_].base_offset_ =
       spaces_[KGCSpaceServerAllocInd_].base_ + offset_;
 
