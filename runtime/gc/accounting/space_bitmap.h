@@ -229,7 +229,8 @@ class SharedSpaceBitmap : public BaseBitmap {
               SharedSpaceBitmap::Callback* callback, mirror::Object* obj,
                                 void* arg);
 
-  static void SweepWalk(const SharedSpaceBitmap& live, const SharedSpaceBitmap& mark, uintptr_t base,
+  static void SweepWalk(const SharedSpaceBitmap& live,
+                        const SharedSpaceBitmap& mark, uintptr_t base,
                         uintptr_t max, SweepCallback* thunk, void* arg);
 
   static void SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
@@ -241,7 +242,8 @@ class SharedSpaceBitmap : public BaseBitmap {
 
   // Starting address of our internal storage.
   word* Begin() const {
-    return bitmap_data_->bitmap_begin_;
+    return reinterpret_cast<word*>(
+        reinterpret_cast<byte*>(bitmap_data_->bitmap_begin_ + heap_offset_));
   }
 
   // Size of our internal storage
@@ -255,7 +257,9 @@ class SharedSpaceBitmap : public BaseBitmap {
   }
 
   uintptr_t HeapBegin() const {
-    return bitmap_data_->heap_begin_;
+    return
+        reinterpret_cast<uintptr_t>(reinterpret_cast<byte*>(bitmap_data_->heap_begin_)
+            + heap_offset_);
   }
 
   // Set the max address which can covered by the bitmap.
@@ -271,12 +275,12 @@ class SharedSpaceBitmap : public BaseBitmap {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
 
-  SharedSpaceBitmap(GCSrvceBitmap*);
-
+  SharedSpaceBitmap(GCSrvceBitmap*, unsigned int heap_offset = 0);
 
   ~SharedSpaceBitmap();
 
   GCSrvceBitmap* bitmap_data_;
+  unsigned int heap_offset_;
  private:
 
 };

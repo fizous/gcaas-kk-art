@@ -312,13 +312,16 @@ BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
   return new SharedSpaceBitmap(*hb);
 }
 
-SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
-    bitmap_data_(data_p) {
+SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p,
+    unsigned int heap_offset) :
+    bitmap_data_(data_p),
+    heap_offset_(heap_offset) {
   if(data_p == NULL) {
     LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
     return;
   }
 }
+
 
 // Clean up any resources associated with the bitmap.
 SharedSpaceBitmap::~SharedSpaceBitmap() {}

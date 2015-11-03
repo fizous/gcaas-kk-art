@@ -39,6 +39,7 @@ namespace art {
 typedef struct AShmemMap_S {
   char name_[64];
   byte* /*const*/ begin_;  // Start of data.
+  byte* /*const*/ mapped_begin_;  // Start of data in the GCService.
   size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
