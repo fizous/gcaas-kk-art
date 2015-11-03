@@ -233,7 +233,8 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-  LOG(ERROR) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
+  LOG(ERROR) << "Import Address ------ " <<
+      reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   LOG(ERROR) << "going to wait for the shutdown signals";

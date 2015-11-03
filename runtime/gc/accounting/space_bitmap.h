@@ -243,7 +243,7 @@ class SharedSpaceBitmap : public BaseBitmap {
   // Starting address of our internal storage.
   word* Begin() const {
     return reinterpret_cast<word*>(
-        reinterpret_cast<byte*>(bitmap_data_->bitmap_begin_ + heap_offset_));
+        reinterpret_cast<byte*>(bitmap_data_->bitmap_begin_) + heap_offset_);
   }
 
   // Size of our internal storage

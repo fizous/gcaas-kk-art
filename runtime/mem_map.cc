@@ -43,6 +43,9 @@ static std::ostream& operator<<(std::ostream& os, map_info_t* rhs) {
   return os;
 }
 
+
+
+
 static void CheckMapRequest(byte* addr, size_t byte_count) {
   if (addr == NULL) {
     return;
@@ -98,6 +101,19 @@ StructuredMemMap::~StructuredMemMap(){
   }
 }
 
+byte* MemBaseMap::GetHighestMemMap(void) {
+
+  uint32_t _highest_address = 0;
+
+
+  map_info_t* map_info_list = load_map_info_list(getpid());
+  for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
+    _highest_address = std::max(_highest_address, m->end);
+  }
+  free_map_info_list(map_info_list);
+  _highest_address = RoundUp(_highest_address + 1, kPageSize);
+  return reinterpret_cast<byte*>(_highest_address);
+}
 
 MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr,
     size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map) {
