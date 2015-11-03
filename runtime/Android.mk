@@ -146,6 +146,7 @@ LIBART_COMMON_SRC_FILES += \
 	gc/accounting/card_base_table.cc \
 	gc/service/gcservice_daemon.cc \
 	gc/service/service_client.cc \
+	gc/collector/ipc_server_sweep.cc \
 	gc/collector/ipc_mark_sweep.cc \
 	gc/service/server_collector.cc
 
