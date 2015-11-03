@@ -194,7 +194,7 @@ class StructuredAtomicStack {
   }
 
   T* RelativeBegin(void) const {
-    return const_cast<T*>(base_address_ + remap_offset_);
+    return const_cast<T*>(reinterpret_cast<T*>(base_address_ + remap_offset_));
   }
 
   T* Begin() const {
