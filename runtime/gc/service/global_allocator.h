@@ -16,7 +16,7 @@
 #include "runtime.h"
 #include "thread_pool.h"
 #include "gc/space/space.h"
-#include "gc/collector/ipc_server_sweep.h"
+//#include "gc/collector/ipc_server_sweep.h"
 
 #define GC_SERVICE_BUFFER_REQ_CAP   64
 
@@ -255,6 +255,8 @@ class ServerCollector {
   byte* mapped_zygote_space_;
 };//class ServerCollector
 
+
+class collector::IPCServerMarkerSweep;
 
 class GCSrvceAgent {
  public:

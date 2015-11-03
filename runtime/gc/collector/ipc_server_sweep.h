@@ -37,7 +37,7 @@ class IPCServerMarkerSweep {
   static const int KGCSpaceServerZygoteInd_ = 1;
   static const int KGCSpaceServerAllocInd_  = 2;
 
-  gc::gcservice::GCServiceClientRecord* const client_rec_;
+  gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
   const uintptr_t offset_;
 
@@ -48,7 +48,7 @@ class IPCServerMarkerSweep {
   accounting::SharedSpaceBitmap* current_mark_bitmap_;
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
-  IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord* client_record);
+  IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
 
   mirror::Object* MapObjectAddress(mirror::Object* obj);
   bool ClientSpaceContains(mirror::Object* obj, GCSrverCollectorSpace* server_space);
