@@ -48,7 +48,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
   spaces_[KGCSpaceServerZygoteInd_].base_ =
       reinterpret_cast<byte*>(client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
   spaces_[KGCSpaceServerZygoteInd_].base_offset_ =
-      spaces_[KGCSpaceServerZygoteInd_].base_ + offset_;
+      reinterpret_cast<unsigned int>(spaces_[KGCSpaceServerZygoteInd_].base_) + offset_;
 
   spaces_[KGCSpaceServerAllocInd_].client_base_ =
       reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[1].begin_);

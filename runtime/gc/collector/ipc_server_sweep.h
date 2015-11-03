@@ -39,7 +39,7 @@ class IPCServerMarkerSweep {
 
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
-  const uintptr_t offset_;
+  const unsigned int offset_;
 
   GCSrverCollectorSpace spaces_[KGCSpaceCount];
   space::GCSrvSharableCollectorData* curr_collector_ptr_;
