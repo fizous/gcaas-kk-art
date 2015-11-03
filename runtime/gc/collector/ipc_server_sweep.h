@@ -25,7 +25,7 @@ namespace collector {
 typedef struct GCSrverCollectorSpace_S {
   // Immune range, every object inside the immune range is assumed to be marked.
   byte* base_;
-  byte* base_offset_;
+  unsigned int base_offset_;
   byte* client_base_;
   byte* client_end_;
 } __attribute__((aligned(8))) GCSrverCollectorSpace;
