@@ -99,7 +99,7 @@ class StructuredAtomicStack {
   }
 
   static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data,
-      uintptr_t remap_offset = 0) {
+      unsigned int remap_offset = 0) {
     return new StructuredAtomicStack(memory_data, remap_offset);
   }
 
@@ -194,7 +194,7 @@ class StructuredAtomicStack {
   }
 
   T* RelativeBegin(void) const {
-    return const_cast<T*>(reinterpret_cast<T*>(base_address_ + remap_offset_));
+    return reinterpret_cast<const T*>(reinterpret_cast<byte*>(stack_data_->begin_) + remap_offset_);
   }
 
   T* Begin() const {
@@ -351,7 +351,6 @@ class StructuredAtomicStack {
     stack_data_->debug_is_sorted_ = true;
     stack_data_->begin_ = reinterpret_cast<T*>(addr);
     stack_data_->is_shared_ = shareMem;
-    base_address_ = addr;
     Reset();
   }
 
@@ -375,7 +374,7 @@ class StructuredAtomicStack {
     mem_map_.reset(NULL);
   }
   StructuredObjectStackData* stack_data_;
-  byte* base_address_;
+  //byte* base_address_;
   unsigned int remap_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
