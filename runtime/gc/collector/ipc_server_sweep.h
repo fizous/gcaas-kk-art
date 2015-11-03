@@ -13,6 +13,7 @@
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
+#include "gc/service/global_allocator.h"
 #include "gc/space/space.h"
 #include "gc/heap.h"
 
