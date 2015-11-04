@@ -197,7 +197,9 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
-
+  static byte* AshmemServerBegin(AShmemMap* addr)  {
+    return /*const_cast<const byte*>*/(addr->mapped_begin_);
+  }
 
   static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;
