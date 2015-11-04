@@ -297,7 +297,7 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
 
   void SetMappedHeapOffset(void);
 
-  SharedServerSpaceBitmap(GCSrvceBitmap*, int);
+  SharedServerSpaceBitmap(accounting::GCSrvceBitmap*, int);
   ~SharedServerSpaceBitmap();
 
  private:
