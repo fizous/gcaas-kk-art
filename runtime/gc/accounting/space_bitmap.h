@@ -252,8 +252,7 @@ class SharedSpaceBitmap : public BaseBitmap {
   }
 
   uintptr_t HeapBegin() const {
-    return
-        reinterpret_cast<uintptr_t>(bitmap_data_->heap_begin_);
+    return bitmap_data_->heap_begin_;
   }
 
   // Set the max address which can covered by the bitmap.
