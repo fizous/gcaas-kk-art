@@ -17,6 +17,7 @@
 #include "mirror/object_array-inl.h"
 #include "object_utils.h"
 #include "gc/accounting/space_bitmap-inl.h"
+#include "gc/accounting/space_bitmap.h"
 #include "UniquePtr.h"
 #include "utils.h"
 

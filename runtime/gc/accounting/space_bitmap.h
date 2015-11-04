@@ -295,8 +295,7 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
 
   void SetMappedHeapOffset(void);
 
-  SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
-      int heap_offset);
+  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, int heap_offset);
   ~SharedServerSpaceBitmap(void);
 
  private:
@@ -304,7 +303,7 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
   word* mapped_bitmap_begin_;
 };//class SharedSpaceBitmap
 
-
+std::ostream& operator << (std::ostream& stream, const SharedServerSpaceBitmap& bitmap);
 
 
 class SpaceBitmap : public BaseBitmap {
