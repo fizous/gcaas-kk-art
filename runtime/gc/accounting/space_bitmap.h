@@ -237,26 +237,26 @@ class SharedSpaceBitmap : public BaseBitmap {
 
 
   // Starting address of our internal storage.
-  word* Begin() const {
+  virtual word* Begin() const {
     return reinterpret_cast<word*>(bitmap_data_->bitmap_begin_);
   }
 
   // Size of our internal storage
-  size_t Size() const {
+  virtual size_t Size() const {
     return bitmap_data_->bitmap_size_;
   }
 
   // Size in bytes of the memory that the bitmaps spans.
-  size_t HeapSize() const {
+  virtual size_t HeapSize() const {
     return IndexToOffset(Size() / kWordSize);
   }
 
-  uintptr_t HeapBegin() const {
+  virtual uintptr_t HeapBegin() const {
     return bitmap_data_->heap_begin_;
   }
 
   // Set the max address which can covered by the bitmap.
-  void SetHeapLimit(uintptr_t new_end);
+  virtual void SetHeapLimit(uintptr_t new_end);
 
   std::string GetName() const;
   void Clear();
@@ -270,7 +270,7 @@ class SharedSpaceBitmap : public BaseBitmap {
 
   SharedSpaceBitmap(GCSrvceBitmap*);
 
-  ~SharedSpaceBitmap();
+  virtual ~SharedSpaceBitmap();
 
   GCSrvceBitmap* bitmap_data_;
 };
