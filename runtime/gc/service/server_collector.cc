@@ -304,11 +304,13 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
           reinterpret_cast<void*>(mappedAddr->begin_);
       //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
-//      atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
-//          DumpObjectsInMarkStack, server_instant_);
-//      gc::accounting::SharedSpaceBitmap* client_mark_BM =
-//          new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
-//      LOG(ERROR) << client_mark_BM;
+      if(false) {
+        atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
+            DumpObjectsInMarkStack, server_instant_);
+        gc::accounting::SharedSpaceBitmap* client_mark_BM =
+            new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
+        LOG(ERROR) << client_mark_BM;
+      }
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
