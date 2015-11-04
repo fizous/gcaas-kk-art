@@ -358,15 +358,15 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
 
 
 SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
-    int heap_offset): SharedSpaceBitmap(data_p) {
-//        ,
-//        heap_offset_(heap_offset) {
-//  if(data_p == NULL) {
-//    LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
-//    return;
-//  }
-//
-//  SetMappedHeapOffset();
+    int heap_offset):
+        SharedSpaceBitmap(data_p),
+        heap_offset_(heap_offset) {
+  if(data_p == NULL) {
+    LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
+    return;
+  }
+
+  SetMappedHeapOffset();
 }
 
 void SharedServerSpaceBitmap::SetMappedHeapOffset(void) {
