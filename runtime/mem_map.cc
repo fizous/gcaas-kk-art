@@ -302,9 +302,9 @@ MemMap::~MemMap(){
 
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-               size_t base_size, int prot) :
-       name_(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
-      prot_(prot) {
+               size_t base_size, int prot, int fd) :
+       name_(name), begin_(begin), size_(size), base_begin_(base_begin),
+       base_size_(base_size), prot_(prot), fd_(fd) {
   if (size_ == 0) {
     CHECK(begin_ == NULL);
     CHECK(base_begin_ == NULL);
