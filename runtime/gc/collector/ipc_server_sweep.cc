@@ -128,7 +128,7 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
       &(pair_memory->second->mem_maps_[entry_ind]);
 
 
-  uintptr_t _stack_offset = _server_address->begin_ - _client_address->begin_;
+  //uintptr_t _stack_offset = _server_address->begin_ - _client_address->begin_;
   accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
       accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(stack_meta_address);
 
