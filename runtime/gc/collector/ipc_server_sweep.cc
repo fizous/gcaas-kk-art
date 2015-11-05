@@ -122,10 +122,10 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
     int entry_ind,
     StructuredObjectStackData* stack_meta_address) {
 
-  android::IPCAShmemMap* _client_address =
-      &(pair_memory->first->mem_maps_[entry_ind]);
-  android::IPCAShmemMap* _server_address =
-      &(pair_memory->second->mem_maps_[entry_ind]);
+//  android::IPCAShmemMap* _client_address =
+//      &(pair_memory->first->mem_maps_[entry_ind]);
+//  android::IPCAShmemMap* _server_address =
+//      &(pair_memory->second->mem_maps_[entry_ind]);
 
 
   //uintptr_t _stack_offset = _server_address->begin_ - _client_address->begin_;
