@@ -194,8 +194,9 @@ class StructuredAtomicStack {
   }
 
   T* RelativeBegin(void) const {
-    return const_cast<T*>(reinterpret_cast<T*>(
-        reinterpret_cast<byte*>(stack_data_->begin_) + remap_offset_));
+    return const_cast<T*>(stack_data_->begin_);
+//    return const_cast<T*>(reinterpret_cast<T*>(
+//        reinterpret_cast<byte*>(stack_data_->begin_) + remap_offset_));
   }
 
   T* Begin() const {
@@ -355,14 +356,14 @@ class StructuredAtomicStack {
     Reset();
   }
 
-  StructuredAtomicStack(StructuredObjectStackData* stack_data, uintptr_t remap_offset = 0) :
-    stack_data_(stack_data),
-    remap_offset_(remap_offset) {}
+  StructuredAtomicStack(StructuredObjectStackData* stack_data/*, uintptr_t remap_offset = 0*/) :
+    stack_data_(stack_data){}//,
+    //remap_offset_(remap_offset) {}
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
       bool shareMem, StructuredObjectStackData* stack_data, uintptr_t remap_offset = 0) :
-        stack_data_(stack_data),
-        remap_offset_(remap_offset) {
+        stack_data_(stack_data){ //,
+        //remap_offset_(remap_offset) {
     if(stack_data_ == NULL) {
       stack_data_ =
           reinterpret_cast<StructuredObjectStackData*>(calloc(1,
@@ -375,8 +376,8 @@ class StructuredAtomicStack {
     mem_map_.reset(NULL);
   }
   StructuredObjectStackData* stack_data_;
-  //byte* base_address_;
-  unsigned int remap_offset_;
+//  //byte* base_address_;
+//  unsigned int remap_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
 };
