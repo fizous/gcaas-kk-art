@@ -340,6 +340,14 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count,
         page_aligned_byte_count);
     actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot,
         flags, created_fd, 0));
+    if (actual == MAP_FAILED) {
+      std::string maps;
+      ReadFileToString("/proc/self/maps", &maps);
+      PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
+                  << ", " << prot << ", " << flags << ", " << created_fd << ", 0) failed for " << name
+                  << "\n" << maps;
+      return NULL;
+    }
   } else {
     ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
     if (fd.get() == -1) {
@@ -347,20 +355,21 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count,
       return NULL;
     }
     actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
+    if (actual == MAP_FAILED) {
+      std::string maps;
+      ReadFileToString("/proc/self/maps", &maps);
+      PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
+                  << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
+                  << "\n" << maps;
+      return NULL;
+    }
   }
 #else
   ScopedFd fd(-1);
   int flags = MAP_PRIVATE | MAP_ANONYMOUS;
 #endif
 
-  if (actual == MAP_FAILED) {
-    std::string maps;
-    ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
-                << "\n" << maps;
-    return NULL;
-  }
+
   max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   if(shareMem) {
     int result = madvise((void*)actual, page_aligned_byte_count, MADV_DONTFORK);
