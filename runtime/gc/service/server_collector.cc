@@ -290,21 +290,21 @@ class ServerMarkReachableTask : public WorkStealingTask {
           << ", Size = " <<
           (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
               server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
-
-      android::IPCAShmemMap* mappedAddr =
-          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
-      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
-          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
-      //android::IPCAShmemMap* mappedAddr =
-      server_instant_->mapped_zygote_space_ =
-          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
-      server_instant_->mapped_alloc_space_ =
-          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
-//      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
-      LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
-          reinterpret_cast<void*>(mappedAddr->begin_);
-      //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
       if(false) {
+        android::IPCAShmemMap* mappedAddr =
+            &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
+        accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
+            accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
+        //android::IPCAShmemMap* mappedAddr =
+        server_instant_->mapped_zygote_space_ =
+            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
+        server_instant_->mapped_alloc_space_ =
+            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
+  //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
+        LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
+            reinterpret_cast<void*>(mappedAddr->begin_);
+        //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+
         atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
             DumpObjectsInMarkStack, server_instant_);
         gc::accounting::SharedSpaceBitmap* client_mark_BM =
