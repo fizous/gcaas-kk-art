@@ -98,9 +98,8 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
-  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data,
-      unsigned int remap_offset = 0) {
-    return new StructuredAtomicStack(memory_data, remap_offset);
+  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data) {
+    return new StructuredAtomicStack(memory_data);
   }
 
 
