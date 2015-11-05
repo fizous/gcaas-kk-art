@@ -18,7 +18,7 @@
 #include "gc/space/space.h"
 //#include "gc/collector/ipc_server_sweep.h"
 
-#define GC_SERVICE_BUFFER_REQ_CAP   64
+#define GC_SERVICE_BUFFER_REQ_CAP   128
 
 namespace art {
 namespace gc {
