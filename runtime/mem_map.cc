@@ -407,7 +407,22 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
+  int _fd = GetFD();
+  LOG(ERROR) << "file descriptor is: " << _fd;
 
+  byte* actual = reinterpret_cast<byte*>(mmap(Begin(), BaseSize(),
+      GetProtect(), MAP_SHARED | MAP_FIXED, _fd, 0));
+
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(Begin()) << ", "
+                << BaseSize()
+                << ", " << GetProtect() << ", " << MAP_SHARED | MAP_FIXED
+                << ", " << _fd << ", 0) failed for " << "remapped-annon0"
+                << "\n" << maps;
+    return NULL;
+  }
 
   //if(false) {
     //int flags = MAP_SHARED | MAP_FIXED;
@@ -417,13 +432,18 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
   //    return NULL;
   //  }
 
-    MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
-        Size(), GetProtect(), false, NULL);
-    if(_map_temp == NULL)
-      return NULL;
-    //byte* _begin = Begin();
-    memcpy(_map_temp->Begin(), Begin(), Size());
-    return _map_temp;
+  MemBaseMap::AShmemFillData(meta_address, std::string("remapped-annon0").c_str(), actual,
+      BaseSize(), actual, BaseSize(), GetProtect(), MAP_SHARED | MAP_FIXED, _fd);
+
+
+  return new StructuredMemMap(meta_address);
+//    MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
+//        Size(), GetProtect(), false, NULL);
+//    if(_map_temp == NULL)
+//      return NULL;
+//    //byte* _begin = Begin();
+//    memcpy(_map_temp->Begin(), Begin(), Size());
+//    return _map_temp;
   //  UnMapAtEnd(Begin());
   //  return CreateStructedMemMap(std::string("remapped-annon1").c_str(), _begin,
   //      Size(), GetProtect(), true, meta_address);
