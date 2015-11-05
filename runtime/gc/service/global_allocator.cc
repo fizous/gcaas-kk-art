@@ -537,7 +537,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         //_mapping_addr = _result->begin_;
 
         byte* actual =
-            reinterpret_cast<byte*>(mmap((void*)(_mapping_addr),
+            reinterpret_cast<byte*>(mmap(NULL/*(void*)(_mapping_addr)*/,
                 _result->size_, _result->prot_, _result->flags_,
                 _result->fd_, 0));
 
