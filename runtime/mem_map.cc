@@ -418,8 +418,8 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(Begin()) << ", "
                 << BaseSize()
-                << ", " << GetProtect() << ", " << MAP_SHARED | MAP_FIXED
-                << ", " << _fd << ", 0) failed for " << "remapped-annon0"
+                << ", " << GetProtect() << ", " << (MAP_SHARED | MAP_FIXED)
+                << ", " << _fd << ", 0) failed for remapped-annon0"
                 << "\n" << maps;
     return NULL;
   }
