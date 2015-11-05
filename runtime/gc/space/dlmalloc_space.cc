@@ -260,8 +260,9 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
-                                                 PROT_READ | PROT_WRITE, shareMem));
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin,
+                        capacity, PROT_READ | PROT_WRITE, shareMem,
+                        Runtime::Current()->IsZygote()));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
@@ -287,7 +288,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
                                       growth_limit, initial_size);
   } else {
-    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
+    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(),
+        end, growth_limit, shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
