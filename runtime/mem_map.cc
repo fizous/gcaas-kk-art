@@ -408,9 +408,12 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
   int _fd = GetFD();
-  LOG(ERROR) << "file descriptor is: " << _fd;
+  size_t _mapping_size = std::max(BaseSize(), Size());
+  LOG(ERROR) << "file descriptor is: " << _fd << ", size=" << _mapping_size <<
+      ", size=" << Size() << ", BaseSize=" << BaseSize();
 
-  byte* actual = reinterpret_cast<byte*>(mmap(Begin(), BaseSize(),
+
+  byte* actual = reinterpret_cast<byte*>(mmap(Begin(), _mapping_size ,
       GetProtect(), MAP_SHARED | MAP_FIXED, _fd, 0));
 
   if (actual == MAP_FAILED) {
@@ -433,7 +436,7 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
   //  }
 
   MemBaseMap::AShmemFillData(meta_address, std::string("remapped-annon0").c_str(), actual,
-      BaseSize(), actual, BaseSize(), GetProtect(), MAP_SHARED | MAP_FIXED, _fd);
+      _mapping_size, actual, _mapping_size, GetProtect(), MAP_SHARED | MAP_FIXED, _fd);
 
 
   return new StructuredMemMap(meta_address);
