@@ -408,7 +408,7 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
   int _fd = GetFD();
-  size_t _mapping_size = std::max(BaseSize(), Size());
+  size_t _mapping_size = std::min(BaseSize(), Size());
   LOG(ERROR) << "file descriptor is: " << _fd << ", size=" << _mapping_size <<
       ", size=" << Size() << ", BaseSize=" << BaseSize();
 
@@ -420,7 +420,7 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(Begin()) << ", "
-                << BaseSize()
+                << _mapping_size()
                 << ", " << GetProtect() << ", " << (MAP_SHARED | MAP_FIXED)
                 << ", " << _fd << ", 0) failed for remapped-annon0"
                 << "\n" << maps;
