@@ -136,6 +136,7 @@ class MemBaseMap {
 
   virtual int GetFD(void) {return -1;}
   MemBaseMap* ReshareMap(AShmemMap* meta_address);
+  void ConstructReshareMap(AShmemMap* meta_address, byte* address);
 
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot,
