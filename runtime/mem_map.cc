@@ -420,7 +420,7 @@ MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(Begin()) << ", "
-                << _mapping_size()
+                << _mapping_size
                 << ", " << GetProtect() << ", " << (MAP_SHARED | MAP_FIXED)
                 << ", " << _fd << ", 0) failed for remapped-annon0"
                 << "\n" << maps;
