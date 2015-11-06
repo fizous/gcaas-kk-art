@@ -407,7 +407,7 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
 
 void MemBaseMap::ConstructReshareMap(AShmemMap* meta_address, byte* address) {
   byte* actual = reinterpret_cast<byte*>(mmap(address, Size() ,
-      GetProtect(), MAP_SHARED | MAP_FIXED, GetFD(), 0));
+      GetProtect(),  MAP_PRIVATE /*MAP_SHARED | MAP_FIXED*/, GetFD(), 0));
   memcpy(actual, Begin(), Size());
   munmap(Begin(), Size());
   meta_address->begin_ = address;
