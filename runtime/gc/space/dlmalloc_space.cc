@@ -418,7 +418,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     byte* original_begin = Begin();
     MEM_MAP* zygote_mem_map = GetMemMap()->ReshareMap(&(_struct_alloc_space->heap_meta_.zygote_space_));
     //mem_map_.release();
-    ReSetMemMap(NULL);
+    //ReSetMemMap(NULL);
     if(zygote_mem_map == NULL) {
       LOG(ERROR) << "zygote_mem_map was null";
     }
