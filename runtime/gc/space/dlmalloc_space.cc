@@ -261,8 +261,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   capacity = RoundUp(capacity, kPageSize);
 
   UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin,
-                        capacity, PROT_READ | PROT_WRITE, shareMem,
-                        Runtime::Current()->IsZygote()));
+                        capacity, PROT_READ | PROT_WRITE, shareMem/*,
+                        Runtime::Current()->IsZygote()*/));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
