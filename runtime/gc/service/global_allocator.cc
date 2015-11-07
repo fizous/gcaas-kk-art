@@ -47,6 +47,13 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
       _inst->AllocateSharableSpace(index_p));
 }
 
+bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
+  if(allocator_instant_ == NULL) {
+    return false;
+  }
+  allocator_instant_->ResetSemaphore(true);
+  return true;
+}
 
 bool GCServiceGlobalAllocator::ShouldForkService() {
   if(allocator_instant_ == NULL) {
@@ -58,6 +65,7 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
     if(allocator_instant_->region_header_->service_header_.status_ ==
         GCSERVICE_STATUS_NONE)
       return true;
+    allocator_instant_->RaiseSemaphore(true);
   }
   return false;
 }
@@ -88,10 +96,38 @@ void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
 
 }
 
+
+void GCServiceGlobalAllocator::RaiseSemaphore(bool atomic_op) {
+  if(atomic_op) {
+    int _expected_flag_value, _new_raised_flag;
+    do {
+      _expected_flag_value = 0;
+      _new_raised_flag = 1;
+    } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag,
+        &region_header_->service_header_.semaphore_) != 0);
+  } else {
+    region_header_->service_header_.semaphore_ = 1;
+  }
+}
+
+void GCServiceGlobalAllocator::ResetSemaphore(bool atomic_op) {
+  if(atomic_op) {
+    int _expected_flag_value, _new_raised_flag;
+    do {
+      _expected_flag_value = 1;
+      _new_raised_flag = 0;
+    } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag,
+        &region_header_->service_header_.semaphore_) != 0);
+  } else {
+    region_header_->service_header_.semaphore_ = 0;
+  }
+}
+
 void GCServiceGlobalAllocator::initServiceHeader(void) {
   GCServiceHeader* _header_addr = &region_header_->service_header_;
   _header_addr->service_pid_ = -1;
   _header_addr->status_ = GCSERVICE_STATUS_NONE;
+
   _header_addr->counter_ = 0;
   _header_addr->service_status_ = GCSERVICE_STATUS_NONE;
   SharedFutexData* _futexAddress = &_header_addr->lock_.futex_head_;
@@ -102,7 +138,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
 
-
+  ResetSemaphore(false);
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 
