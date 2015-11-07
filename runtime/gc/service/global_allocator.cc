@@ -55,7 +55,7 @@ bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self,
       *allocator_instant_->region_header_->service_header_.mu_);
-  allocator_instant_->ResetSemaphore(true);
+  allocator_instant_->ResetSemaphore();
   allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
   LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
   return true;
@@ -75,7 +75,7 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
     Thread* self = Thread::Current();
     IPMutexLock interProcMu(self,
         *allocator_instant_->region_header_->service_header_.mu_);
-    allocator_instant_->RaiseSemaphore(true);
+    allocator_instant_->RaiseSemaphore();
     allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
     LOG(ERROR) << "XXXXXX Leaving GCServiceGlobalAllocator::ShouldForkService XXXXXX";
   }
@@ -129,30 +129,13 @@ void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
 }
 
 
-void GCServiceGlobalAllocator::RaiseSemaphore(bool atomic_op) {
-  if(atomic_op) {
-    int _expected_flag_value, _new_raised_flag;
-    do {
-      _expected_flag_value = 0;
-      _new_raised_flag = 1;
-    } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag,
-        &region_header_->service_header_.semaphore_) != 0);
-  } else {
-    region_header_->service_header_.semaphore_ = 1;
-  }
+void GCServiceGlobalAllocator::RaiseSemaphore() {
+  region_header_->service_header_.semaphore_ = 1;
 }
 
-void GCServiceGlobalAllocator::ResetSemaphore(bool atomic_op) {
-  if(atomic_op) {
-    int _expected_flag_value, _new_raised_flag;
-    do {
-      _expected_flag_value = 1;
-      _new_raised_flag = 0;
-    } while  (android_atomic_cas(_expected_flag_value, _new_raised_flag,
-        &region_header_->service_header_.semaphore_) != 0);
-  } else {
-    region_header_->service_header_.semaphore_ = 0;
-  }
+void GCServiceGlobalAllocator::ResetSemaphore() {
+  region_header_->service_header_.semaphore_ = 0;
+
 }
 
 void GCServiceGlobalAllocator::initServiceHeader(void) {
@@ -170,7 +153,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
 
-  ResetSemaphore(false);
+  ResetSemaphore();
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 

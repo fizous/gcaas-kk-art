@@ -179,8 +179,8 @@ class GCServiceGlobalAllocator {
   // constructor
   GCServiceGlobalAllocator(int pages);
   byte* AllocateSharableSpace(int* index_p);
-  void RaiseSemaphore(bool atomic_op);
-  void ResetSemaphore(bool atomic_op);
+  void RaiseSemaphore();
+  void ResetSemaphore();
 
   void initServiceHeader(void);
 
