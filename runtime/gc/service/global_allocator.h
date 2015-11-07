@@ -161,6 +161,7 @@ class GCServiceGlobalAllocator {
   static bool ShouldForkService(void);
   static bool ShouldNotifyForZygoteForkRelease(void);
   static void BlockOnGCProcessCreation(pid_t);
+  static void BlockOnGCZygoteCreation(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
@@ -180,6 +181,7 @@ class GCServiceGlobalAllocator {
   byte* AllocateSharableSpace(int* index_p);
   void RaiseSemaphore(bool atomic_op);
   void ResetSemaphore(bool atomic_op);
+
   void initServiceHeader(void);
 
   byte* allocate(size_t num_bytes) {

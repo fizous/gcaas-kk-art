@@ -101,6 +101,7 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
 
 
 void GCServiceClient::FinalizeInitClient() {
+  gc::gcservice::GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
   if(service_client_ == NULL)
     return;
   service_client_->FinalizeHeapAfterInit();

@@ -51,7 +51,13 @@ bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
   if(allocator_instant_ == NULL) {
     return false;
   }
+  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self,
+      *allocator_instant_->region_header_->service_header_.mu_);
   allocator_instant_->ResetSemaphore(true);
+  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
   return true;
 }
 
@@ -65,7 +71,13 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
     if(allocator_instant_->region_header_->service_header_.status_ ==
         GCSERVICE_STATUS_NONE)
       return true;
+    LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldForkService XXXXXX";
+    Thread* self = Thread::Current();
+    IPMutexLock interProcMu(self,
+        *allocator_instant_->region_header_->service_header_.mu_);
     allocator_instant_->RaiseSemaphore(true);
+    allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+    LOG(ERROR) << "XXXXXX Leaving GCServiceGlobalAllocator::ShouldForkService XXXXXX";
   }
   return false;
 }
@@ -88,6 +100,26 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   LOG(ERROR) << ">>>> Leaving blocked status GCServiceGlobalAllocator::BlockOnGCProcessCreation";
 
 }
+
+
+void GCServiceGlobalAllocator::BlockOnGCZygoteCreation(void) {
+  if(allocator_instant_ == NULL) {
+    return;
+  }
+  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self,
+      *allocator_instant_->region_header_->service_header_.mu_);
+
+  while(allocator_instant_->region_header_->service_header_.semaphore_ == 1) {
+    allocator_instant_->region_header_->service_header_.cond_->Wait(self);
+  }
+  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+
+  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
+}
+
+
 
 void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
   region_header_->service_header_.status_ =

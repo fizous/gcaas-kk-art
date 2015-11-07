@@ -260,7 +260,7 @@ bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
       shared_space && (gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps >=0 );
   heap_->PostZygoteForkWithSpaceFork(should_share);
 
-  gc::gcservice::GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
+
   LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
   return true;
 }

@@ -580,6 +580,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
     runtime->DidForkFromZygote();
   } else if (pid > 0) {
     // the parent process
+    gc::gcservice::GCServiceGlobalAllocator::BlockOnGCZygoteCreation();
   }
   return pid;
 }
