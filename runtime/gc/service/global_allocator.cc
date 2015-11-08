@@ -51,12 +51,10 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
 bool GCServiceGlobalAllocator::ShouldForkService() {
   if(allocator_instant_ == NULL) {
     CreateServiceAllocator();
-    allocator_instant_->region_header_->service_header_.status_ =
-        GCSERVICE_STATUS_NONE;
+    allocator_instant_->region_header_->service_header_.status_ = GCSERVICE_STATUS_NONE;
     return true;
   } else {
-    if(allocator_instant_->region_header_->service_header_.status_ ==
-        GCSERVICE_STATUS_NONE)
+    if(allocator_instant_->region_header_->service_header_.status_ == GCSERVICE_STATUS_NONE)
       return true;
   }
   return false;
@@ -159,11 +157,7 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   region_header_->service_header_.cond_->Broadcast(self);
 
   LOG(ERROR) << "printing counter in GCService: " << _counter;
-  LOG(ERROR) << "printing counter in GCService: " <<
-      reinterpret_cast<void*>(region_header_->current_addr_) <<
-      ", end is: " <<
-      reinterpret_cast<void*>(region_header_->ashmem_meta_.begin_ +
-          region_header_->ashmem_meta_.size_);
+  LOG(ERROR) << "printing counter in GCService: " << reinterpret_cast<void*>(region_header_->current_addr_) << ", end is: " << reinterpret_cast<void*>(region_header_->ashmem_meta_.begin_ + region_header_->ashmem_meta_.size_);
   *index_p = _counter;
   return _addr;
 }
@@ -186,8 +180,7 @@ void GCSrvcClientHandShake::Init() {
   SharedFutexData* _futexAddress = &gcservice_data_->lock_.futex_head_;
   SharedConditionVarData* _condAddress = &gcservice_data_->lock_.cond_var_;
 
-  gcservice_data_->mu_   =
-      new InterProcessMutex("HandShake Mutex", _futexAddress);
+  gcservice_data_->mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
   gcservice_data_->cond_ = new InterProcessConditionVariable("HandShake CondVar",
       *gcservice_data_->mu_, _condAddress);
 
@@ -394,8 +387,7 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 
   _entry->req_type_ = GC_SERVICE_TASK_REG;
 
-  LOG(ERROR) << "ReqRegistration: entry address: " <<
-      reinterpret_cast<void*>(_entry);
+  LOG(ERROR) << "ReqRegistration: entry address: " << reinterpret_cast<void*>(_entry);
 
   gc::space::GCSrvSharableDlMallocSpace* _shared_space =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
@@ -416,7 +408,7 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
   bool _svcRes =
     android::FileMapperService::MapFds(_rec);
   if(_svcRes) {
-    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord: succeeded; " <<
+    LOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded; " <<
         _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_
         <<", "<< _rec->mem_maps_[0].fd_;
 
@@ -466,18 +458,18 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   LOG(ERROR) << "ProcessGCRequest: tail=" << gcservice_data_->tail_ << ", " <<
       "address: " <<  reinterpret_cast<void*>(_entry);
-  gcservice_data_->tail_ =
-      ((gcservice_data_->tail_ + 1) % KGCRequestBufferCapacity);
+  gcservice_data_->tail_ = ((gcservice_data_->tail_ + 1) % KGCRequestBufferCapacity);
   gcservice_data_->available_ = gcservice_data_->available_ + 1;
   gcservice_data_->queued_ = gcservice_data_->queued_ - 1;
+
+
 
 
   GC_SERVICE_TASK _req_type =
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
 
 
-  LOG(ERROR) << " ~~~~ Request type: " << _req_type << " ~~~~~ " <<
-      _entry->req_type_;
+  LOG(ERROR) << " ~~~~ Request type: " << _req_type << " ~~~~~ " << _entry->req_type_;
 
   if(_req_type == GC_SERVICE_TASK_REG) {
     GCServiceDaemon* _daemon = reinterpret_cast<GCServiceDaemon*>(args);
@@ -521,7 +513,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      byte* _mapping_addr = MemBaseMap::GetHighestMemMap();
+      byte* _mapping_addr = GCServiceProcess::process_->import_address_;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
 
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
@@ -536,10 +528,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         //_mapping_addr = _result->begin_;
 
-        byte* actual =
-            reinterpret_cast<byte*>(mmap((void*)(_mapping_addr),
-                _result->size_, _result->prot_, _result->flags_,
-                _result->fd_, 0));
+        byte* actual = reinterpret_cast<byte*>(mmap((void*)(NULL/*_mapping_addr*/), _result->size_,
+            _result->prot_, _result->flags_ , _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
           LOG(ERROR) << "MMap failed in creating file descriptor..."
@@ -558,14 +548,12 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
           _result->begin_ = reinterpret_cast<unsigned int>(actual);
           _mapping_addr += RoundUp(_result->size_, kPageSize);
-          LOG(ERROR) << "_mapping_addr = " <<
-              reinterpret_cast<void*>(_mapping_addr);
-          //          int _munmap_result = munmap(actual, _result->size_);
+//          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-
+          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(_mapping_addr);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";
@@ -619,10 +607,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
 
 
-                byte* test_remap_address =
-                    reinterpret_cast<byte*>(mmap((void*)(_recSecond->mem_maps_[i+1].begin_),
-                        _result->size_, _result->prot_,
-                        _result->flags_ & MAP_SHARED, _result->fd_, 0));
+                byte* test_remap_address = reinterpret_cast<byte*>(mmap((void*)(_recSecond->mem_maps_[i+1].begin_), _result->size_,
+                    _result->prot_, _result->flags_ & MAP_SHARED, _result->fd_, 0));
 
 
 
@@ -630,20 +616,17 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   //                  _result->prot_, _result->flags_ | MAP_FIXED, _result->fd_, 0));
                 if(test_remap_address == MAP_FAILED) {
                   PLOG(FATAL);
-                  LOG(ERROR) << "ReMMap failed in creating file descriptor..." <<
-                      _result->fd_ << ", size: " << PrettySize(_result->size_) <<
-                      ", flags: " << _result->flags_ << ", prot: " <<
-                      _result->prot_ << ", address: " <<
-                      reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
+                  LOG(ERROR) << "ReMMap failed in creating file descriptor..." << _result->fd_
+                      << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+                      << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_recSecond->mem_maps_[i+1].begin_);
                 } else {
                   LOG(ERROR) << "ReMMap succeeded in creating file descriptor..." <<
                       _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
                           _result->fd_, reinterpret_cast<void*>(test_remap_address),
                           *(reinterpret_cast<unsigned int*>(test_remap_address)))
-                          << ", size: " << PrettySize(_result->size_) <<
-                          ", flags: " << _result->flags_ << ", prot: " <<
-                          _result->prot_ << ", _result->begin_:" <<
-                          reinterpret_cast<void*>(_result->begin_);
+                          << ", size: " << PrettySize(_result->size_) << ", flags: " <<
+                          _result->flags_ << ", prot: " << _result->prot_ <<
+                          ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
   //                int _remap_fd = remap_file_pages(test_remap_address, _result->size_, 0, 0, 0);
   //                LOG(ERROR) << "_remap_fd = " << _remap_fd;
@@ -664,8 +647,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   } else if (_req_type == GC_SERVICE_TASK_CONC) {
     LOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_ <<
-        (GCServiceProcess::process_ == NULL ?
-            "process is null" : "process is not null");
+        (GCServiceProcess::process_ == NULL ? "process is null" : "process is not null");
     GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
     if(_dmon == NULL) {
       LOG(ERROR) << "_dmon is null: " << _entry->pid_;

@@ -16,17 +16,12 @@
 #include "runtime.h"
 #include "thread_pool.h"
 #include "gc/space/space.h"
-//#include "gc/collector/ipc_server_sweep.h"
+
 
 #define GC_SERVICE_BUFFER_REQ_CAP   64
 
 namespace art {
 namespace gc {
-
-namespace collector {
-class IPCServerMarkerSweep;
-}
-
 namespace gcservice{
 
 typedef enum {
@@ -261,12 +256,10 @@ class ServerCollector {
 };//class ServerCollector
 
 
-
 class GCSrvceAgent {
  public:
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
-  collector::IPCServerMarkerSweep* ipc_server_collector_;
   GCServiceClientRecord binding_;
  private:
 

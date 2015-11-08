@@ -320,7 +320,6 @@ SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
   }
 }
 
-
 // Clean up any resources associated with the bitmap.
 SharedSpaceBitmap::~SharedSpaceBitmap() {}
 
@@ -353,29 +352,6 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
 }
-
-
-
-SharedServerSpaceBitmap::SharedServerSpaceBitmap(
-    accounting::GCSrvceBitmap* data_p, int heap_offset) :
-        SharedSpaceBitmap(data_p),
-        heap_offset_(heap_offset) {
-  if(data_p == NULL) {
-    LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
-    return;
-  }
-
-  SetMappedHeapOffset();
-}
-
-void SharedServerSpaceBitmap::SetMappedHeapOffset(void) {
-  mapped_heap_begin_ = reinterpret_cast<uintptr_t>(
-      reinterpret_cast<byte*>(bitmap_data_->heap_begin_) + heap_offset_);
-  mapped_bitmap_begin_ =
-      reinterpret_cast<word*>(
-          MEM_MAP::AshmemServerBegin(&bitmap_data_->mem_map_));
-}
-
 
 }  // namespace accounting
 }  // namespace gc

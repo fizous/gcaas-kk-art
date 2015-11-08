@@ -7,7 +7,6 @@
 #include <string>
 #include <cutils/ashmem.h>
 #include "gc/service/global_allocator.h"
-#include "gc/collector/ipc_server_sweep.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
@@ -163,7 +162,6 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
   collector_ = ServerCollector::CreateServerCollector(&binding_);
-  ipc_server_collector_ = new collector::IPCServerMarkerSweep(&binding_);
 }
 
 
@@ -233,8 +231,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-  LOG(ERROR) << "Import Address ------ " <<
-      reinterpret_cast<void*>(import_address_);
+  LOG(ERROR) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   LOG(ERROR) << "going to wait for the shutdown signals";

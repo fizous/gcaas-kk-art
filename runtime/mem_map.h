@@ -39,7 +39,6 @@ namespace art {
 typedef struct AShmemMap_S {
   char name_[64];
   byte* /*const*/ begin_;  // Start of data.
-  byte* /*const*/ mapped_begin_;  // Start of data in the GCService.
   size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
@@ -148,10 +147,7 @@ class MemBaseMap {
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 
-  static byte* GetHighestMemMap(void);
   static byte* max_covered_address;
-
-
   // Releases the memory mapping
   virtual ~MemBaseMap();
 
@@ -197,9 +193,7 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
-  static byte* AshmemServerBegin(AShmemMap* addr)  {
-    return /*const_cast<const byte*>*/(addr->mapped_begin_);
-  }
+
 
   static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;

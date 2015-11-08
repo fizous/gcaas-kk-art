@@ -50,6 +50,10 @@ namespace accounting {
 #if (true || ART_GC_SERVICE)
 
 
+
+
+
+
 typedef struct GCSrvceBitmap_S {
   // Backing storage for bitmap.
   AShmemMap mem_map_;
@@ -225,8 +229,7 @@ class SharedSpaceBitmap : public BaseBitmap {
               SharedSpaceBitmap::Callback* callback, mirror::Object* obj,
                                 void* arg);
 
-  static void SweepWalk(const SharedSpaceBitmap& live,
-                        const SharedSpaceBitmap& mark, uintptr_t base,
+  static void SweepWalk(const SharedSpaceBitmap& live, const SharedSpaceBitmap& mark, uintptr_t base,
                         uintptr_t max, SweepCallback* thunk, void* arg);
 
   static void SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
@@ -238,7 +241,7 @@ class SharedSpaceBitmap : public BaseBitmap {
 
   // Starting address of our internal storage.
   word* Begin() const {
-    return reinterpret_cast<word*>(bitmap_data_->bitmap_begin_);
+    return bitmap_data_->bitmap_begin_;
   }
 
   // Size of our internal storage
@@ -270,6 +273,7 @@ class SharedSpaceBitmap : public BaseBitmap {
 
   SharedSpaceBitmap(GCSrvceBitmap*);
 
+
   ~SharedSpaceBitmap();
 
   GCSrvceBitmap* bitmap_data_;
@@ -278,34 +282,6 @@ class SharedSpaceBitmap : public BaseBitmap {
 };
 
 std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap);
-
-
-class SharedServerSpaceBitmap : public SharedSpaceBitmap {
- public:
-  int heap_offset_;
-
-
-  uintptr_t HeapBegin() const {
-    return mapped_heap_begin_;
-  }
-
-
-  // Starting address of our internal storage.
-  word* Begin() const {
-    return mapped_bitmap_begin_;
-  }
-
-  void SetMappedHeapOffset(void);
-
-  SharedServerSpaceBitmap(GCSrvceBitmap*, int);
-  ~SharedServerSpaceBitmap();
-
- private:
-  uintptr_t mapped_heap_begin_;
-  word* mapped_bitmap_begin_;
-};//class SharedSpaceBitmap
-
-
 
 
 class SpaceBitmap : public BaseBitmap {
