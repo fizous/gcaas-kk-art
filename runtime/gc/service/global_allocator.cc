@@ -537,7 +537,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         //_mapping_addr = _result->begin_;
 
         byte* actual =
-            reinterpret_cast<byte*>(mmap((void*)(NULL/*_mapping_addr*/),
+            reinterpret_cast<byte*>(mmap((void*)(_mapping_addr),
                 _result->size_, _result->prot_, _result->flags_,
                 _result->fd_, 0));
 
@@ -558,13 +558,14 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
           _result->begin_ = reinterpret_cast<unsigned int>(actual);
           _mapping_addr += RoundUp(_result->size_, kPageSize);
-//          int _munmap_result = munmap(actual, _result->size_);
+          LOG(ERROR) << "_mapping_addr = " <<
+              reinterpret_cast<void*>(_mapping_addr);
+          //          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-          LOG(ERROR) << "_mapping_addr = " <<
-              reinterpret_cast<void*>(_mapping_addr);
+
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";
