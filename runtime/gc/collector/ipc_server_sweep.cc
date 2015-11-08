@@ -91,34 +91,28 @@ mirror::Object* IPCServerMarkerSweep::MapObjectAddress(mirror::Object* obj) {
 
 
 
-accounting::SharedSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(android::MappedPairProcessFD* pair_memory,
+accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(android::MappedPairProcessFD* pair_memory,
     int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr) {
 //  android::IPCAShmemMap* _client_address =
 //      &(pair_memory->first->mem_maps_[entry_ind]);
   android::IPCAShmemMap* _server_address =
       &(pair_memory->second->mem_maps_[entry_ind]);
   AShmemMap* _bitmap_mem_map = &(bitmap_meta_addr->mem_map_);
-  _bitmap_mem_map->begin_ = reinterpret_cast<byte*>(_server_address->begin_);
-  bitmap_meta_addr->heap_begin_ =
-      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
-  bitmap_meta_addr->bitmap_begin_ = reinterpret_cast<word*>(_bitmap_mem_map->begin_);
+  _bitmap_mem_map->mapped_begin_ =
+      reinterpret_cast<byte*>(_server_address->begin_);
 
+  int _offset =
+      reinterpret_cast<unsigned int>(spaces_[KGCSpaceServerAllocInd_].client_base_)
+      - reinterpret_cast<unsigned int>(spaces_[KGCSpaceServerAllocInd_].base_);
 
-  return new accounting::SharedSpaceBitmap(bitmap_meta_addr);
-
+  LOG(ERROR) << "IPCServerMarkerSweep::GetMappedBitmap....offset = " << _offset;
+  return new accounting::SharedServerSpaceBitmap(bitmap_meta_addr, _offset);
 }
 
 void IPCServerMarkerSweep::FindDefaultMarkBitmap(void) {
-
-  accounting::GCSrvceBitmap* _bitmap_space =
-      curr_collector_ptr_->current_mark_bitmap_;
-
-  memcpy(&mark_bitmap_,  _bitmap_space,
-      SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-
   current_mark_bitmap_ =
-      GetMappedBitmap(client_rec_->pair_mapps_, 4, &mark_bitmap_);
-
+      GetMappedBitmap(client_rec_->pair_mapps_, 4,
+          curr_collector_ptr_->current_mark_bitmap_);
 }
 
 
