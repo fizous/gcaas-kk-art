@@ -60,18 +60,17 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
 }
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
-  int _index = 0;
-//  FillAshMemMapData(&rec->mem_maps_[_index++],
-//      &(sharable_space_->sharable_space_data_->heap_meta_.zygote_space_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[0],
+      &(sharable_space_->sharable_space_data_->heap_meta_.zygote_space_));
+  FillAshMemMapData(&rec->mem_maps_[1],
       &(sharable_space_->sharable_space_data_->dlmalloc_space_data_.memory_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[2],
       &(sharable_space_->sharable_space_data_->live_stack_data_.memory_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[3],
       &(sharable_space_->sharable_space_data_->live_bitmap_.mem_map_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[4],
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[5],
       &(sharable_space_->sharable_space_data_->mark_stack_data_.memory_));
 
 
@@ -101,7 +100,6 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
 
 
 void GCServiceClient::FinalizeInitClient() {
-  gc::gcservice::GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
   if(service_client_ == NULL)
     return;
   service_client_->FinalizeHeapAfterInit();

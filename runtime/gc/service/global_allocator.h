@@ -18,7 +18,7 @@
 #include "gc/space/space.h"
 //#include "gc/collector/ipc_server_sweep.h"
 
-#define GC_SERVICE_BUFFER_REQ_CAP   128
+#define GC_SERVICE_BUFFER_REQ_CAP   64
 
 namespace art {
 namespace gc {
@@ -107,7 +107,6 @@ typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
   volatile int counter_;
   volatile int status_;
-  volatile int semaphore_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
   pid_t service_pid_;
@@ -159,9 +158,7 @@ class GCServiceGlobalAllocator {
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
-  static bool ShouldNotifyForZygoteForkRelease(void);
   static void BlockOnGCProcessCreation(pid_t);
-  static void BlockOnGCZygoteCreation(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
@@ -171,7 +168,7 @@ class GCServiceGlobalAllocator {
   GCSrvcClientHandShake* handShake_;
   static GCServiceGlobalAllocator* allocator_instant_;
  private:
-  static const int   kGCServicePageCapacity = 64;
+  static const int   kGCServicePageCapacity = 48;
 
   GCSrvcGlobalRegionHeader* region_header_;
 
@@ -179,9 +176,6 @@ class GCServiceGlobalAllocator {
   // constructor
   GCServiceGlobalAllocator(int pages);
   byte* AllocateSharableSpace(int* index_p);
-  void RaiseSemaphore();
-  void ResetSemaphore();
-
   void initServiceHeader(void);
 
   byte* allocate(size_t num_bytes) {

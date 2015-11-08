@@ -44,8 +44,8 @@ class IPCServerMarkerSweep {
   GCSrverCollectorSpace spaces_[KGCSpaceCount];
   space::GCSrvSharableCollectorData* curr_collector_ptr_;
 
- // accounting::GCSrvceBitmap mark_bitmap_;
-  accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
+  accounting::GCSrvceBitmap mark_bitmap_;
+  accounting::SharedSpaceBitmap* current_mark_bitmap_;
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
@@ -57,7 +57,7 @@ class IPCServerMarkerSweep {
   void FindDefaultMarkBitmap(void);
 
 
-  accounting::SharedServerSpaceBitmap*  GetMappedBitmap(android::MappedPairProcessFD* pair_memory,
+  accounting::SharedSpaceBitmap*  GetMappedBitmap(android::MappedPairProcessFD* pair_memory,
       int entr_ind,
       accounting::GCSrvceBitmap* bitmap_meta_addr);
 

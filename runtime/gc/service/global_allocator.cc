@@ -47,19 +47,6 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
       _inst->AllocateSharableSpace(index_p));
 }
 
-bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
-  if(allocator_instant_ == NULL) {
-    return false;
-  }
-  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
-  Thread* self = Thread::Current();
-  IPMutexLock interProcMu(self,
-      *allocator_instant_->region_header_->service_header_.mu_);
-  allocator_instant_->ResetSemaphore();
-  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
-  return true;
-}
 
 bool GCServiceGlobalAllocator::ShouldForkService() {
   if(allocator_instant_ == NULL) {
@@ -71,13 +58,6 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
     if(allocator_instant_->region_header_->service_header_.status_ ==
         GCSERVICE_STATUS_NONE)
       return true;
-    LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldForkService XXXXXX";
-    Thread* self = Thread::Current();
-    IPMutexLock interProcMu(self,
-        *allocator_instant_->region_header_->service_header_.mu_);
-    allocator_instant_->RaiseSemaphore();
-    allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-    LOG(ERROR) << "XXXXXX Leaving GCServiceGlobalAllocator::ShouldForkService XXXXXX";
   }
   return false;
 }
@@ -101,26 +81,6 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
 
 }
 
-
-void GCServiceGlobalAllocator::BlockOnGCZygoteCreation(void) {
-  if(allocator_instant_ == NULL) {
-    return;
-  }
-  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
-  Thread* self = Thread::Current();
-  IPMutexLock interProcMu(self,
-      *allocator_instant_->region_header_->service_header_.mu_);
-
-  while(allocator_instant_->region_header_->service_header_.semaphore_ == 1) {
-    allocator_instant_->region_header_->service_header_.cond_->Wait(self);
-  }
-  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-
-  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
-}
-
-
-
 void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
   region_header_->service_header_.status_ =
         GCSERVICE_STATUS_WAITINGSERVER;
@@ -128,21 +88,10 @@ void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
 
 }
 
-
-void GCServiceGlobalAllocator::RaiseSemaphore() {
-  region_header_->service_header_.semaphore_ = 1;
-}
-
-void GCServiceGlobalAllocator::ResetSemaphore() {
-  region_header_->service_header_.semaphore_ = 0;
-
-}
-
 void GCServiceGlobalAllocator::initServiceHeader(void) {
   GCServiceHeader* _header_addr = &region_header_->service_header_;
   _header_addr->service_pid_ = -1;
   _header_addr->status_ = GCSERVICE_STATUS_NONE;
-
   _header_addr->counter_ = 0;
   _header_addr->service_status_ = GCSERVICE_STATUS_NONE;
   SharedFutexData* _futexAddress = &_header_addr->lock_.futex_head_;
@@ -153,7 +102,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
 
-  ResetSemaphore();
+
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 
@@ -588,7 +537,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         //_mapping_addr = _result->begin_;
 
         byte* actual =
-            reinterpret_cast<byte*>(mmap(NULL/*(void*)(_mapping_addr)*/,
+            reinterpret_cast<byte*>(mmap((void*)(NULL/*_mapping_addr*/),
                 _result->size_, _result->prot_, _result->flags_,
                 _result->fd_, 0));
 
@@ -609,14 +558,13 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
           _result->begin_ = reinterpret_cast<unsigned int>(actual);
           _mapping_addr += RoundUp(_result->size_, kPageSize);
-          LOG(ERROR) << "_mapping_addr = " <<
-              reinterpret_cast<void*>(_mapping_addr);
-          //          int _munmap_result = munmap(actual, _result->size_);
+//          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-
+          LOG(ERROR) << "_mapping_addr = " <<
+              reinterpret_cast<void*>(_mapping_addr);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";

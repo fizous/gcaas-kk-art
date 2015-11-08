@@ -17,7 +17,6 @@
 #include "mirror/object_array-inl.h"
 #include "object_utils.h"
 #include "gc/accounting/space_bitmap-inl.h"
-#include "gc/accounting/space_bitmap.h"
 #include "UniquePtr.h"
 #include "utils.h"
 
@@ -313,8 +312,10 @@ BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
   return new SharedSpaceBitmap(*hb);
 }
 
-SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
-    bitmap_data_(data_p) {
+SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p,
+    unsigned int heap_offset) :
+    bitmap_data_(data_p),
+    heap_offset_(heap_offset) {
   if(data_p == NULL) {
     LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
     return;
@@ -354,29 +355,6 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
 }
-
-
-
-SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
-    int heap_offset):
-        SharedSpaceBitmap(data_p),
-        heap_offset_(heap_offset) {
-  if(data_p == NULL) {
-    LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
-    return;
-  }
-
-  SetMappedHeapOffset();
-}
-
-void SharedServerSpaceBitmap::SetMappedHeapOffset(void) {
-  mapped_heap_begin_ = reinterpret_cast<uintptr_t>(
-      reinterpret_cast<byte*>(bitmap_data_->heap_begin_) + heap_offset_);
-  mapped_bitmap_begin_ =
-      reinterpret_cast<word*>(
-          MEM_MAP::AshmemServerBegin(&bitmap_data_->mem_map_));
-}
-
 
 }  // namespace accounting
 }  // namespace gc

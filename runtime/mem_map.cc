@@ -302,9 +302,9 @@ MemMap::~MemMap(){
 
 
 MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_begin,
-               size_t base_size, int prot, int fd) :
-       name_(name), begin_(begin), size_(size), base_begin_(base_begin),
-       base_size_(base_size), prot_(prot), fd_(fd) {
+               size_t base_size, int prot) :
+       name_(name), begin_(begin), size_(size), base_begin_(base_begin), base_size_(base_size),
+      prot_(prot) {
   if (size_ == 0) {
     CHECK(begin_ == NULL);
     CHECK(base_begin_ == NULL);
@@ -318,58 +318,40 @@ MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_beg
 
 
 
-MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count,
-    int prot, bool shareMem, bool keepFD) {
+MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot, bool shareMem) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
   }
   size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
   CheckMapRequest(addr, page_aligned_byte_count);
-  int created_fd = -1;
-  byte* actual = NULL;
+
 #ifdef USE_ASHMEM
   // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
   // prefixed "dalvik-".
   std::string debug_friendly_name("dalvik-");
   debug_friendly_name += name;
+  ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
   int flags = MAP_PRIVATE;
   if(shareMem)
     flags = MAP_SHARED;
-  if(keepFD) {
-    created_fd = ashmem_create_region(debug_friendly_name.c_str(),
-        page_aligned_byte_count);
-    actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot,
-        flags, created_fd, 0));
-    if (actual == MAP_FAILED) {
-      std::string maps;
-      ReadFileToString("/proc/self/maps", &maps);
-      PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                  << ", " << prot << ", " << flags << ", " << created_fd << ", 0) failed for " << name
-                  << "\n" << maps;
-      return NULL;
-    }
-  } else {
-    ScopedFd fd(ashmem_create_region(debug_friendly_name.c_str(), page_aligned_byte_count));
-    if (fd.get() == -1) {
-      PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
-      return NULL;
-    }
-    actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
-    if (actual == MAP_FAILED) {
-      std::string maps;
-      ReadFileToString("/proc/self/maps", &maps);
-      PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
-                  << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
-                  << "\n" << maps;
-      return NULL;
-    }
+  if (fd.get() == -1) {
+    PLOG(ERROR) << "ashmem_create_region failed (" << name << ")";
+    return NULL;
   }
 #else
   ScopedFd fd(-1);
   int flags = MAP_PRIVATE | MAP_ANONYMOUS;
 #endif
 
-
+  byte* actual = reinterpret_cast<byte*>(mmap(addr, page_aligned_byte_count, prot, flags, fd.get(), 0));
+  if (actual == MAP_FAILED) {
+    std::string maps;
+    ReadFileToString("/proc/self/maps", &maps);
+    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(addr) << ", " << page_aligned_byte_count
+                << ", " << prot << ", " << flags << ", " << fd.get() << ", 0) failed for " << name
+                << "\n" << maps;
+    return NULL;
+  }
   max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   if(shareMem) {
     int result = madvise((void*)actual, page_aligned_byte_count, MADV_DONTFORK);
@@ -377,8 +359,7 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count,
       PLOG(WARNING) << "madvise failed";
     }
   }
-  return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count,
-      prot, created_fd);
+  return new MemMap(name, actual, byte_count, actual, page_aligned_byte_count, prot);
 }
 
 bool MemBaseMap::Protect(int prot) {
@@ -405,61 +386,26 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
   SetSize(Size()-unmap_size);
 }
 
-void MemBaseMap::ConstructReshareMap(AShmemMap* meta_address, byte* address) {
-  byte* actual = reinterpret_cast<byte*>(mmap(address, Size() ,
-      GetProtect(),  MAP_PRIVATE /*MAP_SHARED | MAP_FIXED*/, GetFD(), 0));
-  memcpy(actual, Begin(), Size());
-  munmap(Begin(), Size());
-  meta_address->begin_ = address;
-  meta_address->base_begin_ = address;
-}
 
 MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
-  int _fd = GetFD();
-  size_t _mapping_size = std::min(BaseSize(), Size());
-  LOG(ERROR) << "file descriptor is: " << _fd << ", size=" << _mapping_size <<
-      ", size=" << Size() << ", BaseSize=" << BaseSize();
+  //int flags = MAP_SHARED | MAP_FIXED;
+//  int _fd = ashmem_create_region("reshared", Size());
+//  if (_fd == -1) {
+//    PLOG(ERROR) << "ashmem_create_region failed (" << "reshared" << ")";
+//    return NULL;
+//  }
 
-
-  byte* actual = reinterpret_cast<byte*>(mmap(NULL/*Begin()*/, _mapping_size ,
-      GetProtect(), MAP_SHARED /*| MAP_FIXED*/, _fd, 0));
-
-  if (actual == MAP_FAILED) {
-    std::string maps;
-    ReadFileToString("/proc/self/maps", &maps);
-    PLOG(ERROR) << "mmap(" << reinterpret_cast<void*>(Begin()) << ", "
-                << _mapping_size
-                << ", " << GetProtect() << ", " << (MAP_SHARED | MAP_FIXED)
-                << ", " << _fd << ", 0) failed for remapped-annon0"
-                << "\n" << maps;
+  MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
+      Size(), GetProtect(), false, NULL);
+  if(_map_temp == NULL)
     return NULL;
-  }
+  //byte* _begin = Begin();
+  memcpy(_map_temp->Begin(), Begin(), Size());
+  return _map_temp;
+//  UnMapAtEnd(Begin());
+//  return CreateStructedMemMap(std::string("remapped-annon1").c_str(), _begin,
+//      Size(), GetProtect(), true, meta_address);
 
-  //if(false) {
-    //int flags = MAP_SHARED | MAP_FIXED;
-  //  int _fd = ashmem_create_region("reshared", Size());
-  //  if (_fd == -1) {
-  //    PLOG(ERROR) << "ashmem_create_region failed (" << "reshared" << ")";
-  //    return NULL;
-  //  }
-
-  MemBaseMap::AShmemFillData(meta_address, std::string("remapped-annon0").c_str(), actual,
-      _mapping_size, actual, _mapping_size, GetProtect(), MAP_SHARED /*| MAP_FIXED*/, _fd);
-
-  memcpy(actual, Begin(), _mapping_size);
-
-  return new StructuredMemMap(meta_address);
-//    MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
-//        Size(), GetProtect(), false, NULL);
-//    if(_map_temp == NULL)
-//      return NULL;
-//    //byte* _begin = Begin();
-//    memcpy(_map_temp->Begin(), Begin(), Size());
-//    return _map_temp;
-  //  UnMapAtEnd(Begin());
-  //  return CreateStructedMemMap(std::string("remapped-annon1").c_str(), _begin,
-  //      Size(), GetProtect(), true, meta_address);
-  //}
 }
 
 void MemMap::SetSize(size_t new_size) {

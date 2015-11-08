@@ -260,9 +260,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin,
-                        capacity, PROT_READ | PROT_WRITE, shareMem/*,
-                        Runtime::Current()->IsZygote()*/));
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
+                                                 PROT_READ | PROT_WRITE, shareMem));
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
@@ -288,8 +287,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
     space = new ValgrindDlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end,
                                       growth_limit, initial_size);
   } else {
-    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(),
-        end, growth_limit, shareMem);
+    space = new DlMallocSpace(name, mem_map_ptr, mspace, mem_map_ptr->Begin(), end, growth_limit, shareMem);
   }
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Space::CreateAllocSpace exiting (" << PrettyDuration(NanoTime() - start_time)
@@ -412,28 +410,21 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   }
 
 
-  if(false && shareMem) {
+  if(true && shareMem) {
     LOG(ERROR) << " <<<<<<<<<< --------RESHARING ZYGORE MSPACE--------- >>>>>>>>>>>>>";
-    ReSetMemMap(NULL);
-    byte* original_begin = Begin();
     MEM_MAP* zygote_mem_map = GetMemMap()->ReshareMap(&(_struct_alloc_space->heap_meta_.zygote_space_));
-    //mem_map_.release();
-    //ReSetMemMap(NULL);
     if(zygote_mem_map == NULL) {
       LOG(ERROR) << "zygote_mem_map was null";
     }
-    zygote_mem_map->ConstructReshareMap(&(_struct_alloc_space->heap_meta_.zygote_space_),
-        original_begin);
-    ReSetMemMap(zygote_mem_map);
-    //byte* original_begin = Begin();
-    //ReSetMemMap(zygote_mem_map);
-//    MEM_MAP* _space_mem_map = MEM_MAP::CreateStructedMemMap("zygote-remapped1",
-//        original_begin,
-//        zygote_mem_map->Size(), PROT_READ | PROT_WRITE, true,
-//        &(_struct_alloc_space->heap_meta_.zygote_space_));
-//    memcpy(_space_mem_map->Begin(), zygote_mem_map->Begin(), zygote_mem_map->Size());
-//
-//    ReSetMemMap(_space_mem_map);
+    byte* original_begin = Begin();
+    ReSetMemMap(NULL);
+    MEM_MAP* _space_mem_map = MEM_MAP::CreateStructedMemMap("zygote-remapped1",
+        original_begin,
+        zygote_mem_map->Size(), PROT_READ | PROT_WRITE, true,
+        &(_struct_alloc_space->heap_meta_.zygote_space_));
+    memcpy(_space_mem_map->Begin(), zygote_mem_map->Begin(), zygote_mem_map->Size());
+
+    ReSetMemMap(_space_mem_map);
     LOG(ERROR) << " >>>>>>>>>>>>> RESHARING ZYGORE MSPACE <<<<<<<<<< ";
   }
 

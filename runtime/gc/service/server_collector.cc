@@ -280,37 +280,35 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
       LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
           << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
-      if(false) {
-        StructuredObjectStackData* _mark_struct =
-            &(server_instant_->alloc_space_data_->mark_stack_data_);
-        LOG(ERROR) << "server: stack_struct_addr: "
-            << reinterpret_cast<void*>(_mark_struct)
-            << "... stack_mmap_addr = "
-            << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
-            << ", Size = " <<
-            (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
-                server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
-        android::IPCAShmemMap* mappedAddr =
-            &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
-        accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
-            accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
-        //android::IPCAShmemMap* mappedAddr =
-        server_instant_->mapped_zygote_space_ =
-            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
-        server_instant_->mapped_alloc_space_ =
-            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
-  //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
-        LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
-            reinterpret_cast<void*>(mappedAddr->begin_);
-        //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      StructuredObjectStackData* _mark_struct =
+          &(server_instant_->alloc_space_data_->mark_stack_data_);
+      LOG(ERROR) << "server: stack_struct_addr: "
+          << reinterpret_cast<void*>(_mark_struct)
+          << "... stack_mmap_addr = "
+          << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
+          << ", Size = " <<
+          (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
+              server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
-        atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
-            DumpObjectsInMarkStack, server_instant_);
-        gc::accounting::SharedSpaceBitmap* client_mark_BM =
-            new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
-        LOG(ERROR) << client_mark_BM;
-      }
+      android::IPCAShmemMap* mappedAddr =
+          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
+      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
+          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
+      //android::IPCAShmemMap* mappedAddr =
+      server_instant_->mapped_zygote_space_ =
+          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
+      server_instant_->mapped_alloc_space_ =
+          reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
+//      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
+      LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
+          reinterpret_cast<void*>(mappedAddr->begin_);
+      //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
+          DumpObjectsInMarkStack, server_instant_);
+      gc::accounting::SharedSpaceBitmap* client_mark_BM =
+          new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
+      LOG(ERROR) << client_mark_BM;
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
