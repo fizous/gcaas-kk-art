@@ -212,6 +212,7 @@ class StructuredAtomicStack {
   // Will clear the stack.
   void Resize(size_t new_capacity) {
     stack_data_->capacity_ = new_capacity;
+    LOG(ERROR) << "XXXXXXXXXXXXXX resizing the Atomic Stack XXXXXXXXXXXXXX";
     Init(stack_data_->is_shared_);
   }
 

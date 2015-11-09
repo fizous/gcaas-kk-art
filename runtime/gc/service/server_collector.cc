@@ -164,7 +164,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
     mirror::Class* mapped_clazz = NULL;
 
 
-    if(clzz_in_zygote) {
+    if(false && clzz_in_zygote) {
       mapped_clazz = reinterpret_cast<mirror::Class*>(
         reinterpret_cast<uintptr_t>(clzz_address) -
           reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +
@@ -184,7 +184,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
       }
       return;
     }
-    if(clzz_in_image) {
+    if(false && clzz_in_image) {
       LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
           << " mapped: " << mapped_obj << ", classimage: " << clazz
           << ", name:";
@@ -203,7 +203,7 @@ void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
         (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
         (clzz_address > heap_data_->zygote_begin_);
 
-    if(printName) {
+    if(false && printName) {
       mirror::Class* mapped_clazz = reinterpret_cast<mirror::Class*>(
           reinterpret_cast<uintptr_t>(clzz_address) -
             reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +

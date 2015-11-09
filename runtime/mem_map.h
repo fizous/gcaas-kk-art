@@ -39,6 +39,7 @@ namespace art {
 typedef struct AShmemMap_S {
   char name_[64];
   byte* /*const*/ begin_;  // Start of data.
+  byte* /*const*/ server_begin_;  // Start of data on the server side.
   size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
@@ -50,7 +51,7 @@ typedef struct AShmemMap_S {
   AShmemMap_S(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot,
       int flags, int fd) :
-        begin_(begin), size_(size),
+        begin_(begin), server_begin_(NULL), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
     memcpy(name_, name.c_str(), name.size());
@@ -193,8 +194,14 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
+  static byte* AshmemServerBegin(AShmemMap* addr)  {
+    return /*const_cast<const byte*>*/(addr->server_begin_);
+  }
 
 
+  static void AshmemSetServerBegin(AShmemMap* addr, byte* begin)  {
+    addr->server_begin_ = begin;
+  }
   static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;
   }
