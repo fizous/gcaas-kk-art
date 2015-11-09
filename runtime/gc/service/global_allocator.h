@@ -105,12 +105,13 @@ typedef struct GCServiceRequestsBuffer_S {
 
 typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
-  volatile int counter_;
-  volatile int status_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
   pid_t service_pid_;
   GC_SERVICE_STATUS service_status_;
+  volatile int counter_;
+  volatile int status_;
+  volatile int serving_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
 
@@ -159,8 +160,12 @@ class GCServiceGlobalAllocator {
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
   static void BlockOnGCProcessCreation(pid_t);
+  static bool BlockOnZygoteCreation(void);
+  static bool NotifyZygoteCreation(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
+  void LockZygoteCreation(void);
+  void ReleaseZygoteCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
   static int GCPAllowSharedMemMaps;

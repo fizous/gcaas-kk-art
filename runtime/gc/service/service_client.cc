@@ -100,9 +100,9 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
 
 
 void GCServiceClient::FinalizeInitClient() {
-  if(service_client_ == NULL)
-    return;
-  service_client_->FinalizeHeapAfterInit();
+  if(service_client_ != NULL)
+    service_client_->FinalizeHeapAfterInit();
+  gc::gcservice::GCServiceGlobalAllocator::NotifyZygoteCreation();
 }
 
 bool GCServiceClient::SetNextGCType(gc::collector::GcType gc_type) {
