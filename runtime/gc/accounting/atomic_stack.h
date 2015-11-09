@@ -98,12 +98,14 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
-  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data) {
-    return new StructuredAtomicStack(memory_data);
+  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data,
+      uintptr_t remap_offset = 0) {
+    return new StructuredAtomicStack(memory_data, remap_offset);
   }
 
 
-  static void SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
+  static void SwapStacks(StructuredAtomicStack* stackA,
+      StructuredAtomicStack* stackB) {
     StructuredObjectStackData _temp_data;
     memcpy(&_temp_data, stackA->stack_data_,
         SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
@@ -129,21 +131,21 @@ class StructuredAtomicStack {
       }
     } while (android_atomic_cas(index, index + 1, &stack_data_->back_index_) != 0);
 
-    stack_data_->begin_[index] = value;
+    RelativeBegin()[index] = value;
     return true;
   }
 
   void Reset() {
     DCHECK(mem_map_.get() != NULL);
-    DCHECK(stack_data_->begin_ != NULL);
+    DCHECK(RelativeBegin() != NULL);
     stack_data_->front_index_ = 0;
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
-      memset(stack_data_->begin_, 0, _mem_length);
+      memset(RelativeBegin(), 0, _mem_length);
     } else {
-      int result = madvise(stack_data_->begin_,
+      int result = madvise(RelativeBegin(),
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
         PLOG(WARNING) << "madvise failed";
@@ -158,14 +160,14 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
     stack_data_->back_index_ = index + 1;
-    stack_data_->begin_[index] = value;
+    RelativeBegin()[index] = value;
   }
 
   T PopBack() {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
     stack_data_->back_index_ = stack_data_->back_index_ - 1;
-    return stack_data_->begin_[stack_data_->back_index_];
+    return RelativeBegin()[stack_data_->back_index_];
   }
 
   // Take an item from the front of the stack.
@@ -173,7 +175,7 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
     stack_data_->front_index_ = stack_data_->front_index_ + 1;
-    return stack_data_->begin_[index];
+    return RelativeBegin()[index];
   }
 
   // Pop a number of elements.
@@ -191,12 +193,16 @@ class StructuredAtomicStack {
     return stack_data_->back_index_ - stack_data_->front_index_;
   }
 
+  T* RelativeBegin(void) const {
+    return const_cast<T*>(stack_data_->begin_ + remap_offset_);
+  }
+
   T* Begin() const {
-    return const_cast<T*>(stack_data_->begin_ + stack_data_->front_index_);
+    return const_cast<T*>(RelativeBegin() + stack_data_->front_index_);
   }
 
   T* End() const {
-    return const_cast<T*>(stack_data_->begin_ + stack_data_->back_index_);
+    return const_cast<T*>(RelativeBegin() + stack_data_->back_index_);
   }
 
   size_t Capacity() const {
@@ -244,7 +250,7 @@ class StructuredAtomicStack {
   typedef void Callback(T obj, void* arg);
 
   void DumpDataEntries(T* start_pos, Callback* visitor, void* args){
-    T* temp = stack_data_->begin_;
+    T* temp = RelativeBegin();
     stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
@@ -273,7 +279,7 @@ class StructuredAtomicStack {
     stack_data_->begin_ = temp;
   }
   void DumpDataEntries(T* start_pos){
-    T* temp = stack_data_->begin_;
+    T* temp = RelativeBegin();
     stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
@@ -321,6 +327,8 @@ class StructuredAtomicStack {
     LOG(ERROR) << "___________________________________________________________________";
   }
  private:
+
+
   // Size in number of elements.
   void Init(bool shareMem) {
 
@@ -346,12 +354,14 @@ class StructuredAtomicStack {
     Reset();
   }
 
-  StructuredAtomicStack(StructuredObjectStackData* stack_data) :
-    stack_data_(stack_data) {}
+  StructuredAtomicStack(StructuredObjectStackData* stack_data, uintptr_t remap_offset = 0) :
+    stack_data_(stack_data),
+    remap_offset_(remap_offset) {}
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
-      bool shareMem, StructuredObjectStackData* stack_data) :
-        stack_data_(stack_data){
+      bool shareMem, StructuredObjectStackData* stack_data, uintptr_t remap_offset = 0) :
+        stack_data_(stack_data),
+        remap_offset_(remap_offset) {
     if(stack_data_ == NULL) {
       stack_data_ =
           reinterpret_cast<StructuredObjectStackData*>(calloc(1,
@@ -364,6 +374,7 @@ class StructuredAtomicStack {
     mem_map_.reset(NULL);
   }
   StructuredObjectStackData* stack_data_;
+  uintptr_t remap_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
 };
