@@ -311,11 +311,10 @@ class ServerMarkReachableTask : public WorkStealingTask {
         gc::accounting::SharedSpaceBitmap* client_mark_BM =
             new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
         LOG(ERROR) << client_mark_BM;
-        curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
-        LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
-            << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
-
       }
+      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
+      LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
+          << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
       performed_cycle_index_ = server_instant_->cycles_count_;
       server_instant_->phase_cond_->Broadcast(self);
     }
