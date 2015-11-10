@@ -80,7 +80,7 @@ class StructuredAtomicStack {
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
-    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem, NULL));
+    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem/*, NULL*/));
     mark_stack->Init(shareMem);
     return mark_stack.release();
   }
@@ -360,7 +360,7 @@ class StructuredAtomicStack {
     remap_offset_(remap_offset)*/ {}
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
-      bool shareMem, StructuredObjectStackData* stack_data, uintptr_t remap_offset = 0) :
+      bool shareMem, StructuredObjectStackData* stack_data/*, uintptr_t remap_offset = 0*/) :
         stack_data_(stack_data)/*,
         remap_offset_(remap_offset)*/ {
     if(stack_data_ == NULL) {
