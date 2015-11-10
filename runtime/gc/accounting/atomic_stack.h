@@ -80,7 +80,7 @@ class StructuredAtomicStack {
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
-    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem/*, NULL*/));
+    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem, NULL));
     mark_stack->Init(shareMem);
     return mark_stack.release();
   }
@@ -344,8 +344,8 @@ class StructuredAtomicStack {
           stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
-        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem/*,
-        &(stack_data_->memory_)*/));
+        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem,
+        &(stack_data_->memory_)));
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
