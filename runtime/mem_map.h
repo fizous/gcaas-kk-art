@@ -39,7 +39,7 @@ namespace art {
 typedef struct AShmemMap_S {
   char name_[64];
   byte* /*const*/ begin_;  // Start of data.
-  byte* /*const*/ server_begin_;  // Start of data on the server side.
+  //byte* server_begin_;  // Start of data on the server side.
   size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
@@ -51,13 +51,13 @@ typedef struct AShmemMap_S {
   AShmemMap_S(const std::string& name, byte* begin, byte* server_begin,
       size_t size, void* base_begin, size_t base_size, int prot,
       int flags, int fd) :
-        begin_(begin), server_begin_(server_begin), size_(size),
+        begin_(begin)/*, server_begin_(server_begin)*/, size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
     memcpy(name_, name.c_str(), name.size());
     name_[name.size()] = '\0';
   };
-  AShmemMap_S():begin_(NULL), server_begin_(NULL), size_(0), base_begin_(NULL),
+  AShmemMap_S():begin_(NULL)/*, server_begin_(NULL)*/, size_(0), base_begin_(NULL),
       base_size_(0), prot_(0), flags_(0), fd_(-1){
     name_[0] = '\0';
   }
@@ -145,7 +145,7 @@ class MemBaseMap {
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
-    AShmemMap _data = {"\0", begin, NULL, size, base_begin, base_size, prot, flags, fd};
+    AShmemMap _data = {"\0", begin/*, NULL*/, size, base_begin, base_size, prot, flags, fd};
     memcpy(_data.name_, name.c_str(), name.size());
     _data.name_[name.size()] = '\0';
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
