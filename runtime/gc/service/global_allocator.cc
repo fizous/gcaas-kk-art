@@ -601,7 +601,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(_mapping_addr);
+          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(actual/*_mapping_addr*/);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";
