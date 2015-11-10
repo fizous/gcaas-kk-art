@@ -344,8 +344,8 @@ class StructuredAtomicStack {
           stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
-        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem,
-        &(stack_data_->memory_)));
+        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem/*,
+        &(stack_data_->memory_)*/));
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
