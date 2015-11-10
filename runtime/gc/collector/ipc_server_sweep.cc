@@ -144,9 +144,11 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 
 void IPCServerMarkerSweep::MarkRemoteObject(space::GCSrvSharableCollectorData* collector_meta) {
   curr_collector_ptr_ = collector_meta;
-  mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_, 5,
-      &(client_rec_->sharable_space_->mark_stack_data_));
-  FindDefaultMarkBitmap();
+  if(false) {
+    mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_, 5,
+        &(client_rec_->sharable_space_->mark_stack_data_));
+    FindDefaultMarkBitmap();
+  }
 }
 
 
