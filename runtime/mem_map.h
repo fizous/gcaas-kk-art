@@ -48,16 +48,19 @@ typedef struct AShmemMap_S {
   int flags_;
   /*integer to hold the file descriptor of the memory mapped region */
   int fd_;
-  AShmemMap_S(const std::string& name, byte* begin,
+  AShmemMap_S(const std::string& name, byte* begin, byte* server_begin,
       size_t size, void* base_begin, size_t base_size, int prot,
       int flags, int fd) :
-        begin_(begin), server_begin_(NULL), size_(size),
+        begin_(begin), server_begin_(server_begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
     memcpy(name_, name.c_str(), name.size());
     name_[name.size()] = '\0';
   };
-  AShmemMap_S(){}
+  AShmemMap_S():begin_(NULL), server_begin_(NULL), size_(0), base_begin_(NULL),
+      base_size_(0), prot_(0), flags_(0), fd_(-1){
+    name_[0] = '\0';
+  }
 } __attribute__((aligned(8))) AShmemMap;
 
 
@@ -142,7 +145,7 @@ class MemBaseMap {
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
-    AShmemMap _data = {"g\0", begin, size, base_begin, base_size, prot, flags, fd};
+    AShmemMap _data = {"\0", begin, NULL, size, base_begin, base_size, prot, flags, fd};
     memcpy(_data.name_, name.c_str(), name.size());
     _data.name_[name.size()] = '\0';
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
