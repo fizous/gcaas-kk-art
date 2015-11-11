@@ -276,14 +276,14 @@ class ServerMarkReachableTask : public WorkStealingTask {
         }
         server_instant_->phase_cond_->Wait(self);
       }
-      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
-          << " phase=" << curr_collector_addr_->gc_phase_;
 
-      LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
-          << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
 
       if(false) {
+        LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
+            << " phase=" << curr_collector_addr_->gc_phase_;
 
+        LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
+            << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
         StructuredObjectStackData* _mark_struct =
             &(server_instant_->alloc_space_data_->mark_stack_data_);
         LOG(ERROR) << "server: stack_struct_addr: "
