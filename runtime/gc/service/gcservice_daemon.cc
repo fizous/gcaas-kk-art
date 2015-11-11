@@ -161,7 +161,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-  collector_ = ServerCollector::CreateServerCollector(&binding_);
+  collector_ = ServerCollector::CreateServerCollector(&binding_.sharable_space_->heap_meta_);
 }
 
 

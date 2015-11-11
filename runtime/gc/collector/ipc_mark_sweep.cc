@@ -254,7 +254,7 @@ bool IPCHeap::CheckTrimming() {
 //    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
 //                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
 //    CHECK(!env->ExceptionCheck());
-//    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
+    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
     return true;
   }
   return false;
@@ -289,8 +289,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         meta_->total_wait_time_ += wait_time;
       }
       if (wait_time > local_heap_->long_pause_log_threshold_) {
-        LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for "
-            << PrettyDuration(wait_time);
+        LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
   }
@@ -372,9 +371,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> "
-      << gc_cause_and_type_strings[gc_cause][gc_type]
-      << " from thread ID:" << self->GetTid();
+  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
@@ -498,8 +495,7 @@ bool IPCHeap::RunCollectorDaemon() {
 //   // meta_->is_gc_complete_ = 0;
 //    conc_req_cond_->Broadcast(self);
 //  }
-  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: "
-      << self->GetTid() << " <<<<<<<<<<<<<<<";
+  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   if(meta_->gc_type_ == 1) {
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
@@ -807,8 +803,6 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
   current_mark_bitmap_ = SetMarkBitmap();
   meta_data_->current_mark_bitmap_ =
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
-  LOG(ERROR) << "IPCMarkSweep::FindDefaultMarkBitmap--- MarkBitmaps address: "
-      << reinterpret_cast<void*>(meta_data_->current_mark_bitmap_);
 }
 
 void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
@@ -843,7 +837,6 @@ void IPCMarkSweep::MarkConcurrentRoots() {
 void IPCMarkSweep::PostMarkingPhase(void){
   Thread* currThread = Thread::Current();
   ThreadList* thread_list = Runtime::Current()->GetThreadList();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_POST_MARK);
   LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
       "threads: " << currThread->GetTid();
   thread_list->SuspendAll();
@@ -894,15 +887,7 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   MarkConcurrentRoots();
 
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
-  // Mark everything allocated since the last as GC live so that we can sweep concurrently,
-  // knowing that new allocations won't be marked as live.
-  timings_.StartSplit("MarkStackAsLive");
-  accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
-  space::LargeObjectSpace* _LOS = heap_->GetLargeObjectsSpace();
-  heap_->MarkAllocStack(heap_->GetAllocSpace()->GetLiveBitmap(),
-      _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
-  live_stack->Reset();
-  timings_.EndSplit();
+
   //MarkReachableObjects();
 }
 
@@ -919,10 +904,10 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
   LOG(ERROR) << "SSSSSSSSSSS Suspended app threads to handshake with service process SSSSSSSSSSSSSSS";
-  BlockForGCPhase(currThread, space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES);
+  BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
 }
 
@@ -935,7 +920,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
     RequestAppSuspension();
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
-    UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+    UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   }
 
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
@@ -944,24 +929,18 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
-      currThread->GetTid() << " .. stack_struct_addr: "
-      << mark_stack_->GetStackStructAddr()<< "... stack_mmap_addr = "
-      << mark_stack_->Begin() <<", Size=" << mark_stack_->Size();
+      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
   MarkSweep::ProcessMarkStack(paused);
 }
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ "
-      << currThread->GetTid() << "; phase:" << meta_data_->gc_phase_
-      << "... MarkStackSize=" << mark_stack_->Size();
-
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
+  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
-  if(0)
-    mark_stack_->DumpDataEntries();
-  MarkSweep::RecursiveMark();
+  MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
-      currThread->GetTid();
+      currThread->GetTid() ;
 }
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
@@ -1028,7 +1007,7 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.

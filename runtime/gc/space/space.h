@@ -151,10 +151,10 @@ typedef enum {
   IPC_GC_PHASE_INIT,
   IPC_GC_PHASE_ROOT_MARK,
   IPC_GC_PHASE_ROOT_CONC_MARK,
-  IPC_GC_PHASE_ROOT_POST_MARK, //the phase when we scan the roots to alloc space mark the  live stack
-  IPC_GC_PHASE_SERVER_MARK_REACHABLES,
-  IPC_GC_PHASE_CLIENT_MARK_REACHABLES,
+  IPC_GC_PHASE_MARK_REACHABLES,
   IPC_GC_PHASE_MARK_RECURSIVE,
+  IPC_GC_PHASE_PRE_CONC_ROOT_MARK,
+  IPC_GC_PHASE_CONC_MARK,
   IPC_GC_PHASE_RECLAIM,
   IPC_GC_PHASE_FINISH,
   IPC_GC_PHASE_POST_FINISH,
@@ -167,7 +167,7 @@ typedef struct GCSrvSharableCollectorData_S {
   mirror::Object* immune_end_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
-  accounting::GCSrvceBitmap* volatile current_mark_bitmap_;
+  volatile accounting::GCSrvceBitmap*  current_mark_bitmap_;
 
   int is_concurrent_;
 } __attribute__((aligned(8))) GCSrvSharableCollectorData;

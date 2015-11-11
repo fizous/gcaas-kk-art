@@ -524,21 +524,18 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                 _result->fd_, _result->flags_, _result->prot_,
                 PrettySize(_result->size_).c_str());
 
-        _result->flags_ &= MAP_SHARED;
+        //_result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
 
-        //_mapping_addr = _result->begin_;
 
-        byte* actual = reinterpret_cast<byte*>(mmap((void*)(NULL/*_mapping_addr*/), _result->size_,
+
+        byte* actual = reinterpret_cast<byte*>(mmap((void*)(_mapping_addr), _result->size_,
             _result->prot_, _result->flags_ , _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
-          LOG(ERROR) << "MMap failed in creating file descriptor..."
-              << _result->fd_
-              << ", size: " << PrettySize(_result->size_) << ", flags: "
-              << _result->flags_
-              << ", prot: " << _result->prot_ << ", address: "
-              << reinterpret_cast<void*>(_mapping_addr);
+          LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
+              << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
+              << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_mapping_addr);
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
               _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
@@ -547,7 +544,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   << ", size: " << PrettySize(_result->size_) << ", flags: " <<
                   _result->flags_ << ", prot: " << _result->prot_ <<
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
-          _result->begin_ = reinterpret_cast<unsigned int>(actual);
+
           _mapping_addr += RoundUp(_result->size_, kPageSize);
 //          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {

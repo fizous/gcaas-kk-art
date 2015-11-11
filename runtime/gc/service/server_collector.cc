@@ -7,18 +7,14 @@
 #include "thread.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
-#include "gc/accounting/atomic_stack.h"
 
 
 namespace art {
 namespace gc {
 namespace gcservice {
 
-ServerCollector::ServerCollector(GCServiceClientRecord* client_record,
-    space::GCSrvSharableDlMallocSpace* meta_alloc) :
-    client_rec_(client_record),
-    alloc_space_data_(meta_alloc),
-    heap_data_(&alloc_space_data_->heap_meta_),
+ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
+    heap_data_(meta_alloc),
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
     thread_(NULL),
@@ -154,43 +150,15 @@ class ServerMarkReachableTask : public WorkStealingTask {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
       while(true) {
         if(curr_collector_addr_ != NULL) {
-          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_SERVER_MARK_REACHABLES) {
+          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_MARK_REACHABLES) {
             break;
           }
         }
         server_instant_->phase_cond_->Wait(self);
       }
-
-      if(0) {
-        LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
-            << " phase=" << curr_collector_addr_->gc_phase_;
-
-        LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
-            << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
-
-        StructuredObjectStackData* _mark_struct =
-            &(server_instant_->alloc_space_data_->mark_stack_data_);
-        LOG(ERROR) << "server: stack_struct_addr: "
-            << reinterpret_cast<void*>(_mark_struct)
-            << "... stack_mmap_addr = "
-            << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
-            << ", Size = " <<
-            (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
-                server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
-
-        android::IPCAShmemMap* mappedAddr =
-            &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[4]);
-        accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
-            accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
-
-        LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
-            reinterpret_cast<void*>(mappedAddr->begin_);
-        atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
-        gc::accounting::SharedSpaceBitmap* client_mark_BM =
-            new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
-        LOG(ERROR) << client_mark_BM;
-      }
-      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
+      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
+          << " phase=" << curr_collector_addr_->gc_phase_;
+      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
       performed_cycle_index_ = server_instant_->cycles_count_;
@@ -455,10 +423,9 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 
 
 ServerCollector* ServerCollector::CreateServerCollector(void* args) {
-  GCServiceClientRecord* _client_binding = (GCServiceClientRecord*) args;
-  space::GCSrvSharableDlMallocSpace* _meta_alloc =
-      (space::GCSrvSharableDlMallocSpace*) _client_binding->sharable_space_;
-  return new ServerCollector(_client_binding, _meta_alloc);
+  space::GCSrvSharableHeapData* _meta_alloc =
+      (space::GCSrvSharableHeapData*) args;
+  return new ServerCollector(_meta_alloc);
 }
 
 
