@@ -585,8 +585,7 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        meta_->concurrent_start_bytes_ =
-            std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
+        meta_->concurrent_start_bytes_ = std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
       }
 //      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
 //      DCHECK_LE(max_allowed_footprint_, growth_limit_);
@@ -845,13 +844,12 @@ void IPCMarkSweep::PostMarkingPhase(void){
   Thread* currThread = Thread::Current();
   ThreadList* thread_list = Runtime::Current()->GetThreadList();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_POST_MARK);
-  if(0) {
-    LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
-        "threads: " << currThread->GetTid();
-    thread_list->SuspendAll();
-    LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
-    thread_list->ResumeAll();
-  }
+  LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
+      "threads: " << currThread->GetTid();
+  thread_list->SuspendAll();
+  LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+  thread_list->ResumeAll();
+
   {
     ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
     WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
@@ -956,10 +954,9 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ "
       << currThread->GetTid() << "; phase:" << meta_data_->gc_phase_
       << "... MarkStackSize=" << mark_stack_->Size();
-
+  mark_stack_->DumpDataEntries();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
-  //mark_stack_->DumpDataEntries();
   MarkSweep::RecursiveMark();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid();
@@ -974,8 +971,7 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
-    : IPCMarkSweep(ipcHeap, is_concurrent,
-        name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
+    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
   cumulative_timings_.SetName(GetName());
 }
 
@@ -1724,3 +1720,13 @@ void IPCMarkSweep::MarkingPhase(void) {
 }
 }
 }
+
+
+//
+//
+//
+
+
+
+
+

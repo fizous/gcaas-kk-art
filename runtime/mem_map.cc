@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <string>
-#include <cutils/ashmem.h>
+
 #include "mem_map.h"
 
 #include <corkscrew/map_info.h>
@@ -100,7 +99,7 @@ StructuredMemMap::~StructuredMemMap(){
 
 
 MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr,
-    size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map) {
+    size_t byte_count, int prot, bool shareMem, AShmemMap* ashmem_mem_map ) {
 
   if(ashmem_mem_map == NULL) {
     ashmem_mem_map =
@@ -370,27 +369,6 @@ void MemBaseMap::UnMapAtEnd(byte* new_end) {
   SetSize(Size()-unmap_size);
 }
 
-
-MemBaseMap* MemBaseMap::ReshareMap(AShmemMap* meta_address) {
-  //int flags = MAP_SHARED | MAP_FIXED;
-//  int _fd = ashmem_create_region("reshared", Size());
-//  if (_fd == -1) {
-//    PLOG(ERROR) << "ashmem_create_region failed (" << "reshared" << ")";
-//    return NULL;
-//  }
-
-  MemBaseMap* _map_temp = CreateStructedMemMap(std::string("remapped-annon0").c_str(), NULL,
-      Size(), GetProtect(), false, NULL);
-  if(_map_temp == NULL)
-    return NULL;
-  //byte* _begin = Begin();
-  memcpy(_map_temp->Begin(), Begin(), Size());
-  return _map_temp;
-//  UnMapAtEnd(Begin());
-//  return CreateStructedMemMap(std::string("remapped-annon1").c_str(), _begin,
-//      Size(), GetProtect(), true, meta_address);
-
-}
 
 void MemMap::SetSize(size_t new_size) {
   size_ = new_size;

@@ -55,26 +55,19 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
   recP->size_ = shmem_map->size_;
 
   LOG(ERROR) << "FillAshMemMapData: " <<
-      StringPrintf("address: %p,  fd: %d, flags:%d, prot:%d, size:%d",
-      reinterpret_cast<void*>(recP->begin_), recP->fd_, recP->flags_, recP->prot_, recP->size_);
+      StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
+      recP->fd_, recP->flags_, recP->prot_, recP->size_);
 }
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
-  int _index = 0;
-//  FillAshMemMapData(&rec->mem_maps_[0],
-//      &(sharable_space_->sharable_space_data_->heap_meta_.zygote_space_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[0],
       &(sharable_space_->sharable_space_data_->dlmalloc_space_data_.memory_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[1],
       &(sharable_space_->sharable_space_data_->live_stack_data_.memory_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[2],
       &(sharable_space_->sharable_space_data_->live_bitmap_.mem_map_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
+  FillAshMemMapData(&rec->mem_maps_[3],
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
-  FillAshMemMapData(&rec->mem_maps_[_index++],
-      &(sharable_space_->sharable_space_data_->mark_stack_data_.memory_));
-
-
 //  FillAshMemMapData(&rec->mem_maps_[3],
 //      &(sharable_space_->sharable_space_data_->test_memory_));
 //  FillAshMemMapData(&rec->mem_maps_[2],
@@ -101,9 +94,9 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
 
 
 void GCServiceClient::FinalizeInitClient() {
-  if(service_client_ != NULL)
-    service_client_->FinalizeHeapAfterInit();
-  gc::gcservice::GCServiceGlobalAllocator::NotifyZygoteCreation();
+  if(service_client_ == NULL)
+    return;
+  service_client_->FinalizeHeapAfterInit();
 }
 
 bool GCServiceClient::SetNextGCType(gc::collector::GcType gc_type) {

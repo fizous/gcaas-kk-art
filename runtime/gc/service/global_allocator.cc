@@ -18,6 +18,7 @@
 #include "locks.h"
 #include "os.h"
 #include "runtime.h"
+#include "mem_map.h"
 
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_client.h"
@@ -48,47 +49,6 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
 }
 
 
-
-bool GCServiceGlobalAllocator::NotifyZygoteCreation(void) {
-  if(allocator_instant_ == NULL) {
-    return false;
-  }
-  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
-  Thread* self = Thread::Current();
-  IPMutexLock interProcMu(self,
-      *allocator_instant_->region_header_->service_header_.mu_);
-  allocator_instant_->ReleaseZygoteCreation();
-  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
-  return true;
-}
-
-bool GCServiceGlobalAllocator::BlockOnZygoteCreation(void) {
-  if(allocator_instant_ == NULL) {
-    return false;
-  }
-  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
-  Thread* self = Thread::Current();
-  IPMutexLock interProcMu(self,
-      *allocator_instant_->region_header_->service_header_.mu_);
-
-  while(allocator_instant_->region_header_->service_header_.serving_ == 1) {
-    allocator_instant_->region_header_->service_header_.cond_->Wait(self);
-  }
-  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-
-  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
-  return true;
-}
-
-
-void GCServiceGlobalAllocator::LockZygoteCreation(void) {
-  region_header_->service_header_.serving_ = 1;
-}
-void GCServiceGlobalAllocator::ReleaseZygoteCreation(void) {
-  region_header_->service_header_.serving_ = 0;
-}
-
 bool GCServiceGlobalAllocator::ShouldForkService() {
   if(allocator_instant_ == NULL) {
     CreateServiceAllocator();
@@ -97,13 +57,6 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
   } else {
     if(allocator_instant_->region_header_->service_header_.status_ == GCSERVICE_STATUS_NONE)
       return true;
-    LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldForkService XXXXXX";
-    Thread* self = Thread::Current();
-    IPMutexLock interProcMu(self,
-        *allocator_instant_->region_header_->service_header_.mu_);
-    allocator_instant_->LockZygoteCreation();
-    allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-    LOG(ERROR) << "XXXXXX Leaving GCServiceGlobalAllocator::ShouldForkService XXXXXX";
   }
   return false;
 }
@@ -148,7 +101,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
 
-  ReleaseZygoteCreation();
+
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 
@@ -571,12 +524,12 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                 _result->fd_, _result->flags_, _result->prot_,
                 PrettySize(_result->size_).c_str());
 
-        _result->flags_ &= MAP_SHARED;
+        //_result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
 
-        //_mapping_addr = _result->begin_;
 
-        byte* actual = reinterpret_cast<byte*>(mmap((void*)(NULL/*_mapping_addr*/), _result->size_,
+
+        byte* actual = reinterpret_cast<byte*>(mmap((void*)(_mapping_addr), _result->size_,
             _result->prot_, _result->flags_ , _result->fd_, 0));
 
         if(actual == MAP_FAILED) {
@@ -601,7 +554,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(actual/*_mapping_addr*/);
+          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(_mapping_addr);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";

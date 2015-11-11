@@ -7,7 +7,6 @@
 #include <string>
 #include <cutils/ashmem.h>
 #include "gc/service/global_allocator.h"
-#include "gc/collector/ipc_server_sweep.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
@@ -163,8 +162,6 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
   collector_ = ServerCollector::CreateServerCollector(&binding_);
-  if(false)
-    ipc_server_collector_ = new collector::IPCServerMarkerSweep(&binding_);
 }
 
 
@@ -226,8 +223,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
     service_meta_->cond_->Broadcast(thread_);
   }
   srvcReady_ = initSvcFD();
-  LOG(ERROR) << "Service----- = ";
-  Runtime::Current()->GetHeap()->DumpSpaces();
+
   import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
       MemBaseMap::max_covered_address);
 

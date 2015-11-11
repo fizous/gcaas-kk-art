@@ -47,19 +47,16 @@ typedef struct AShmemMap_S {
   int flags_;
   /*integer to hold the file descriptor of the memory mapped region */
   int fd_;
-  AShmemMap_S(const std::string& name, byte* begin,/*, byte* server_begin,*/
+  AShmemMap_S(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot,
       int flags, int fd) :
-        begin_(begin)/*, server_begin_(server_begin)*/, size_(size),
+        begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
     memcpy(name_, name.c_str(), name.size());
     name_[name.size()] = '\0';
   };
-  AShmemMap_S():begin_(NULL), size_(0), base_begin_(NULL),
-      base_size_(0), prot_(0), flags_(0), fd_(-1){
-    name_[0] = '\0';
-  }
+  AShmemMap_S(){}
 } __attribute__((aligned(8))) AShmemMap;
 
 
@@ -136,7 +133,6 @@ class MemBaseMap {
 
   // Trim by unmapping pages at the end of the map.
   void UnMapAtEnd(byte* new_end);
-  MemBaseMap* ReshareMap(AShmemMap* meta_address);
 
   static AShmemMap* CreateAShmemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot,
@@ -144,7 +140,7 @@ class MemBaseMap {
 
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
-    AShmemMap _data = {"\0", begin, size, base_begin, base_size, prot, flags, fd};
+    AShmemMap _data = {"g\0", begin, size, base_begin, base_size, prot, flags, fd};
     memcpy(_data.name_, name.c_str(), name.size());
     _data.name_[name.size()] = '\0';
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
@@ -196,14 +192,8 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
-//  static byte* AshmemServerBegin(AShmemMap* addr)  {
-//    return /*const_cast<const byte*>*/(addr->server_begin_);
-//  }
-//
-//
-//  static void AshmemSetServerBegin(AShmemMap* addr, byte* begin)  {
-//    addr->server_begin_ = begin;
-//  }
+
+
   static size_t AshmemSize(AShmemMap* addr)  {
     return addr->size_;
   }

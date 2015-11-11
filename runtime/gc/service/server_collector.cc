@@ -8,7 +8,7 @@
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
 #include "gc/accounting/atomic_stack.h"
-#include "mirror/object-inl.h"
+
 
 namespace art {
 namespace gc {
@@ -117,124 +117,8 @@ int ServerCollector::WaitForRequest(void) {
     }
   }
   return _result;
-}
 
 
-static void DumpObjectsInMarkStack(mirror::Object* t, void* args) {
-  ServerCollector*  server = reinterpret_cast<ServerCollector*>(args);
-  if(false)
-    server->ScanRemoteObject(t);
-}
-
-mirror::Object* ServerCollector::MapRemoteObjAddress(mirror::Object* remote_addr) {
-  android::IPCAShmemMap* mappedAddr =
-      &(client_rec_->pair_mapps_->second->mem_maps_[1]);
-  byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
-  uintptr_t address_offset = reinterpret_cast<uintptr_t>(remote_addr) -
-      reinterpret_cast<uintptr_t>(heap_data_->zygote_end_);
-  return reinterpret_cast<mirror::Object*>(address_offset + _mapped_space);
-
-}
-
-
-void ServerCollector::DumpClass(mirror::Class* clazz, std::ostream& os, int flags) {
-  clazz->DumpClass(os, flags);
-}
-
-void ServerCollector::ScanRemoteObject(mirror::Object* obj) {
-  byte* object_address = reinterpret_cast<byte*>(obj);
-  bool exist_in_alloc_Space = !(object_address < heap_data_->zygote_end_ &&
-      object_address > heap_data_->image_space_begin_);
-  if(exist_in_alloc_Space) {
-    mirror::Object* mapped_obj = reinterpret_cast<mirror::Object*>(
-        reinterpret_cast<uintptr_t>(object_address) -
-          reinterpret_cast<uintptr_t>(heap_data_->zygote_end_) +
-          mapped_alloc_space_);
-    mirror::Class* clazz = mapped_obj->GetClass();
-    byte* clzz_address = reinterpret_cast<byte*>(clazz);
-
-
-    bool clzz_in_image = (clazz != NULL) && (clzz_address < heap_data_->image_space_end_) &&
-        (clzz_address > heap_data_->image_space_begin_);
-
-
-    bool clzz_in_zygote = (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
-        (clzz_address > heap_data_->zygote_begin_);
-
-
-    mirror::Class* mapped_clazz = NULL;
-
-
-    if(false && clzz_in_zygote) {
-      mapped_clazz = reinterpret_cast<mirror::Class*>(
-        reinterpret_cast<uintptr_t>(clzz_address) -
-          reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +
-          mapped_zygote_space_);
-
-
-      LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-          << " mapped: " << mapped_obj << ", Zimage: " << clazz
-          << ", mapped_class = " << mapped_clazz << ", name:";
-
-      if(!Locks::mutator_lock_->IsSharedHeld(Thread::Current())) {
-        Locks::mutator_lock_->SharedLock(Thread::Current());
-        {
-          DumpClass(clazz, LOG(ERROR), 0 /*mirror::Class::kDumpClassFullDetail*/);
-        }
-        Locks::mutator_lock_->SharedUnlock(Thread::Current());
-      }
-      return;
-    }
-    if(false && clzz_in_image) {
-      LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-          << " mapped: " << mapped_obj << ", classimage: " << clazz
-          << ", name:";
-      if(!Locks::mutator_lock_->IsSharedHeld(Thread::Current())) {
-        Locks::mutator_lock_->SharedLock(Thread::Current());
-        {
-          DumpClass(clazz, LOG(ERROR), 0 /*mirror::Class::kDumpClassFullDetail*/);
-        }
-        Locks::mutator_lock_->SharedUnlock(Thread::Current());
-      }
-      return;
-    }
-
-
-    bool printName =
-        (clazz != NULL) && (clzz_address < heap_data_->zygote_end_) &&
-        (clzz_address > heap_data_->zygote_begin_);
-
-    if(false && printName) {
-      mirror::Class* mapped_clazz = reinterpret_cast<mirror::Class*>(
-          reinterpret_cast<uintptr_t>(clzz_address) -
-            reinterpret_cast<uintptr_t>(heap_data_->zygote_begin_) +
-            mapped_zygote_space_);
-      bool _clzz_verified = true;
-      //Runtime::Current()->GetHeap()->VerifyObjectBody(clazz);
-
-      if(1) {
-        //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
-        if(_clzz_verified) {
-          LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-              << " mapped: " << mapped_obj << ", mapped_class = " <<
-              reinterpret_cast<void*>(mapped_clazz) << ", classN: " << mapped_clazz->GetName();
-        } else {
-          LOG(ERROR) << "space: " << reinterpret_cast<void*>(obj)
-              << " mapped: " << mapped_obj << ", classZ: " << clazz;
-        }
-
-          //<< /*(printName ?*/ // : reinterpret_cast<void*>(clazz));
-      }
-    }
-//    else {
-//    //mirror::Object* mapped_obj = MapRemoteObjAddress(obj);
-//    LOG(ERROR) << "alloc_space: " << reinterpret_cast<void*>(obj)
-//        << " mapped: " << mapped_obj << ", class:"
-//        << (printName ? clazz->GetName() : reinterpret_cast<void*>(clazz));
-//    }
-  } else {
-    LOG(ERROR) << "zygote_space: " << reinterpret_cast<void*>(obj);
-  }
 }
 
 
@@ -276,44 +160,33 @@ class ServerMarkReachableTask : public WorkStealingTask {
         }
         server_instant_->phase_cond_->Wait(self);
       }
+      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
+          << " phase=" << curr_collector_addr_->gc_phase_;
 
+      LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
+          << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
 
-      if(false) {
-        LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
-            << " phase=" << curr_collector_addr_->gc_phase_;
+      StructuredObjectStackData* _mark_struct =
+          &(server_instant_->alloc_space_data_->mark_stack_data_);
+      LOG(ERROR) << "server: stack_struct_addr: "
+          << reinterpret_cast<void*>(_mark_struct)
+          << "... stack_mmap_addr = "
+          << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
+          << ", Size = " <<
+          (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
+              server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
 
-        LOG(ERROR) << "server: ServerMarkReachableTask--- MarkBitmaps address: "
-            << reinterpret_cast<void*>(curr_collector_addr_->current_mark_bitmap_);
-        StructuredObjectStackData* _mark_struct =
-            &(server_instant_->alloc_space_data_->mark_stack_data_);
-        LOG(ERROR) << "server: stack_struct_addr: "
-            << reinterpret_cast<void*>(_mark_struct)
-            << "... stack_mmap_addr = "
-            << reinterpret_cast<void*>(server_instant_->alloc_space_data_->mark_stack_data_.memory_.begin_)
-            << ", Size = " <<
-            (server_instant_->alloc_space_data_->mark_stack_data_.back_index_ -
-                server_instant_->alloc_space_data_->mark_stack_data_.front_index_);
+      android::IPCAShmemMap* mappedAddr =
+          &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[3]);
+      accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
+          accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
 
-
-        android::IPCAShmemMap* mappedAddr =
-            &(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[5]);
-        accounting::ATOMIC_OBJ_STACK_T* atomic_stack_dup =
-            accounting::ATOMIC_OBJ_STACK_T::CreateAtomicStack(_mark_struct);
-        //android::IPCAShmemMap* mappedAddr =
-        server_instant_->mapped_zygote_space_ =
-            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
-        server_instant_->mapped_alloc_space_ =
-            reinterpret_cast<byte*>(server_instant_->client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
-  //      byte* _mapped_space = reinterpret_cast<byte*>(mappedAddr->begin_);
-        LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
-            reinterpret_cast<void*>(mappedAddr->begin_);
-        //atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
-        atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_),
-            DumpObjectsInMarkStack, server_instant_);
-        gc::accounting::SharedSpaceBitmap* client_mark_BM =
-            new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
-        LOG(ERROR) << client_mark_BM;
-      }
+      LOG(ERROR) << "server: stack_struct_addr memory mapped: " <<
+          reinterpret_cast<void*>(mappedAddr->begin_);
+      atomic_stack_dup->DumpDataEntries((art::mirror::Object**)(mappedAddr->begin_));
+      gc::accounting::SharedSpaceBitmap* client_mark_BM =
+          new gc::accounting::SharedSpaceBitmap(curr_collector_addr_->current_mark_bitmap_);
+      LOG(ERROR) << client_mark_BM;
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_CLIENT_MARK_REACHABLES;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
@@ -448,16 +321,15 @@ class ServerIPCListenerTask : public WorkStealingTask {
       }
 
     }
+
+
+
   }
   virtual void Finalize() {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ Finalize ServerIPCListenerTask @@@@@@@@@@@@";
     delete this;
   }
 };
-
-
-
-
 volatile int ServerIPCListenerTask::performed_cycle_index_ = -1;
 
 void ServerCollector::UpdateCollectorAddress(Thread* self,
@@ -487,7 +359,6 @@ void ServerCollector::FinalizeGC(Thread* self) {
     conc_req_cond_->Broadcast(self);
   }
 }
-
 
 void ServerCollector::ExecuteGC(int gc_type) {
   Thread* self = Thread::Current();

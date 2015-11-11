@@ -186,9 +186,6 @@ typedef struct GCSrvSharableHeapData_S {
   // completes.
   SynchronizedLockHead gc_complete_lock_;
 
-  /* allocated space memory for zygote*/
-  AShmemMap zygote_space_;
-
   byte* const image_space_begin_;
   byte* const image_space_end_;
   byte* const zygote_begin_;
@@ -461,10 +458,6 @@ class MemMapSpace : public ContinuousSpace {
 
   const MEM_MAP* GetMemMap() const {
     return mem_map_.get();
-  }
-
-  void ReSetMemMap(MEM_MAP* map) {
-    return mem_map_.reset(map);
   }
 
  private:

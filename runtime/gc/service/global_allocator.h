@@ -16,17 +16,12 @@
 #include "runtime.h"
 #include "thread_pool.h"
 #include "gc/space/space.h"
-//#include "gc/collector/ipc_server_sweep.h"
+
 
 #define GC_SERVICE_BUFFER_REQ_CAP   64
 
 namespace art {
 namespace gc {
-
-namespace collector {
-class IPCServerMarkerSweep;
-}
-
 namespace gcservice{
 
 typedef enum {
@@ -105,13 +100,12 @@ typedef struct GCServiceRequestsBuffer_S {
 
 typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
+  volatile int counter_;
+  volatile int status_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
   pid_t service_pid_;
   GC_SERVICE_STATUS service_status_;
-  volatile int counter_;
-  volatile int status_;
-  volatile int serving_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
 
@@ -160,12 +154,8 @@ class GCServiceGlobalAllocator {
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
   static void BlockOnGCProcessCreation(pid_t);
-  static bool BlockOnZygoteCreation(void);
-  static bool NotifyZygoteCreation(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
-  void LockZygoteCreation(void);
-  void ReleaseZygoteCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
   static int GCPAllowSharedMemMaps;
@@ -173,7 +163,7 @@ class GCServiceGlobalAllocator {
   GCSrvcClientHandShake* handShake_;
   static GCServiceGlobalAllocator* allocator_instant_;
  private:
-  static const int   kGCServicePageCapacity = 128;
+  static const int   kGCServicePageCapacity = 32;
 
   GCSrvcGlobalRegionHeader* region_header_;
 
@@ -243,15 +233,9 @@ class ServerCollector {
   void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);
   void PostFinishPhaseGC(void);
-  mirror::Object* MapRemoteObjAddress(mirror::Object*);
-
 
   static void* RunCollectorDaemon(void*);
   static ServerCollector* CreateServerCollector(void* args);
-
-  void ScanRemoteObject(mirror::Object* obj);
-  void DumpClass(mirror::Class* clazz, std::ostream& os, int flags)
-  SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   ThreadPool* gc_workers_pool_;
   /*********** task queues ************/
@@ -261,17 +245,14 @@ class ServerCollector {
 
 
   volatile int cycles_count_;
-  byte* mapped_alloc_space_;
-  byte* mapped_zygote_space_;
-};//class ServerCollector
 
+};//class ServerCollector
 
 
 class GCSrvceAgent {
  public:
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
-  collector::IPCServerMarkerSweep* ipc_server_collector_;
   GCServiceClientRecord binding_;
  private:
 

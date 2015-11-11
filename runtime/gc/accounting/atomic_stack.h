@@ -98,14 +98,12 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
-  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data/*,
-      uintptr_t remap_offset = 0*/) {
-    return new StructuredAtomicStack(memory_data/*, remap_offset*/);
+  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data) {
+    return new StructuredAtomicStack(memory_data);
   }
 
 
-  static void SwapStacks(StructuredAtomicStack* stackA,
-      StructuredAtomicStack* stackB) {
+  static void SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
     StructuredObjectStackData _temp_data;
     memcpy(&_temp_data, stackA->stack_data_,
         SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
@@ -142,11 +140,9 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
-      LOG(ERROR) << "XXXXXresetting shared_atomic_stackXXXXX";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       memset(stack_data_->begin_, 0, _mem_length);
     } else {
-      LOG(ERROR) << "XXXXXresetting non shared shared_atomic_stackXXXXX";
       int result = madvise(stack_data_->begin_,
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
@@ -195,10 +191,6 @@ class StructuredAtomicStack {
     return stack_data_->back_index_ - stack_data_->front_index_;
   }
 
-//  T* RelativeBegin(void) const {
-//    return const_cast<T*>(stack_data_->begin_/* + remap_offset_*/);
-//  }
-
   T* Begin() const {
     return const_cast<T*>(stack_data_->begin_ + stack_data_->front_index_);
   }
@@ -214,7 +206,6 @@ class StructuredAtomicStack {
   // Will clear the stack.
   void Resize(size_t new_capacity) {
     stack_data_->capacity_ = new_capacity;
-    LOG(ERROR) << "XXXXXXXXXXXXXX resizing the Atomic Stack XXXXXXXXXXXXXX";
     Init(stack_data_->is_shared_);
   }
 
@@ -250,66 +241,25 @@ class StructuredAtomicStack {
     return stack_data_;
   }
 
-  typedef void Callback(T obj, void* arg);
-
-  void DumpDataEntries(T* start_pos, Callback* visitor, void* args){
-    T* temp = stack_data_->begin_;
-    stack_data_->begin_ = start_pos;
-    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
-    if(Size() > 0) {
-      //int _index = 0;
-      T* limit = End();
-      for (T* it = Begin(); it != limit; ++it) {
-        T obj = *it;
-        visitor(obj, args);
-      }
-//      int _index = 0;
-//      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
-//      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
-//      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
-//          "limit= " << reinterpret_cast<void*>(limit);
-//      for (T* it = startIter; it != limit  ; ++it) {
-//        T obj = *it;
-//        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
-//            reinterpret_cast<void*>(obj);
-//      }
-    }
-//    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
-//      LOG(ERROR) << " = entry = " << i << "addr= " <<
-//          reinterpret_cast<void*>(stack_data_->begin_[i]);
-//    }
-    LOG(ERROR) << "___________________________________________________________________";
-    stack_data_->begin_ = temp;
-  }
   void DumpDataEntries(T* start_pos){
-    T* temp = stack_data_->begin_;
-    stack_data_->begin_ = start_pos;
     LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~";
     if(Size() > 0) {
       int _index = 0;
-      T* limit = End();
-      for (T* it = Begin(); it != limit; ++it) {
+      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
+      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
+      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
+          "limit= " << reinterpret_cast<void*>(limit);
+      for (T* it = startIter; it != limit  ; ++it) {
         T obj = *it;
         LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
             reinterpret_cast<void*>(obj);
       }
-//      int _index = 0;
-//      T* limit = const_cast<T*>(start_pos + (stack_data_->back_index_ - stack_data_->front_index_));
-//      T* startIter = const_cast<T*>(start_pos + (stack_data_->front_index_));
-//      LOG(ERROR) << "startPos = " << reinterpret_cast<void*>(startIter) <<
-//          "limit= " << reinterpret_cast<void*>(limit);
-//      for (T* it = startIter; it != limit  ; ++it) {
-//        T obj = *it;
-//        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
-//            reinterpret_cast<void*>(obj);
-//      }
     }
 //    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
 //      LOG(ERROR) << " = entry = " << i << "addr= " <<
 //          reinterpret_cast<void*>(stack_data_->begin_[i]);
 //    }
     LOG(ERROR) << "___________________________________________________________________";
-    stack_data_->begin_ = temp;
   }
 
   void DumpDataEntries(){
@@ -330,8 +280,6 @@ class StructuredAtomicStack {
     LOG(ERROR) << "___________________________________________________________________";
   }
  private:
-
-
   // Size in number of elements.
   void Init(bool shareMem) {
 
@@ -357,14 +305,12 @@ class StructuredAtomicStack {
     Reset();
   }
 
-  StructuredAtomicStack(StructuredObjectStackData* stack_data/*, uintptr_t remap_offset = 0*/) :
-    stack_data_(stack_data)/*,
-    remap_offset_(remap_offset)*/ {}
+  StructuredAtomicStack(StructuredObjectStackData* stack_data) :
+    stack_data_(stack_data) {}
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
-      bool shareMem, StructuredObjectStackData* stack_data/*, uintptr_t remap_offset = 0*/) :
-        stack_data_(stack_data)/*,
-        remap_offset_(remap_offset)*/ {
+      bool shareMem, StructuredObjectStackData* stack_data) :
+        stack_data_(stack_data){
     if(stack_data_ == NULL) {
       stack_data_ =
           reinterpret_cast<StructuredObjectStackData*>(calloc(1,
@@ -377,7 +323,6 @@ class StructuredAtomicStack {
     mem_map_.reset(NULL);
   }
   StructuredObjectStackData* stack_data_;
-//  uintptr_t remap_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
 };
