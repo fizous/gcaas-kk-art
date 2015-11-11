@@ -142,8 +142,8 @@ class StructuredAtomicStack {
       if(mem_map_.get()!=NULL) {
         LOG(ERROR) << "...AAA";
         LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
-            _mem_length << ", end:" << (stack_data_->begin_ + _mem_length)
-            << ", calcEnd:" << mem_map_->End();
+            _mem_length << ", end:" << (stack_data_->begin_ + _mem_length);
+        LOG(ERROR) << ", calcEnd:" << mem_map_->End();
       }
       LOG(ERROR) << "...BBB";
       memset(stack_data_->begin_, 0, _mem_length);
