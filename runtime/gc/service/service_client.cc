@@ -55,8 +55,8 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
   recP->size_ = shmem_map->size_;
 
   LOG(ERROR) << "FillAshMemMapData: " <<
-      StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
-      recP->fd_, recP->flags_, recP->prot_, recP->size_);
+      StringPrintf("address: %p,  fd: %d, flags:%d, prot:%d, size:%d",
+      reinterpret_cast<void*>(recP->begin_), recP->fd_, recP->flags_, recP->prot_, recP->size_);
 }
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
@@ -68,6 +68,12 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
       &(sharable_space_->sharable_space_data_->live_bitmap_.mem_map_));
   FillAshMemMapData(&rec->mem_maps_[3],
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
+  FillAshMemMapData(&rec->mem_maps_[4],
+      &(sharable_space_->sharable_space_data_->mark_stack_data_.memory_));
+
+  StructuredObjectStackData live_stack_data_;
+  StructuredObjectStackData mark_stack_data_;
+  StructuredObjectStackData alloc_stack_data_;
 //  FillAshMemMapData(&rec->mem_maps_[3],
 //      &(sharable_space_->sharable_space_data_->test_memory_));
 //  FillAshMemMapData(&rec->mem_maps_[2],

@@ -846,11 +846,10 @@ void IPCMarkSweep::PostMarkingPhase(void){
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_POST_MARK);
   LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
       "threads: " << currThread->GetTid();
-  if(0) {
-    thread_list->SuspendAll();
-    LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
-    thread_list->ResumeAll();
-  }
+  thread_list->SuspendAll();
+  LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+  thread_list->ResumeAll();
+
   {
     ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
     WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
@@ -955,10 +954,10 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ "
       << currThread->GetTid() << "; phase:" << meta_data_->gc_phase_
       << "... MarkStackSize=" << mark_stack_->Size();
-  if(false)
-    mark_stack_->DumpDataEntries();
+
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_SERVER_MARK_REACHABLES);
   HandshakeIPCSweepMarkingPhase();
+  mark_stack_->DumpDataEntries();
   MarkSweep::RecursiveMark();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid();
