@@ -135,9 +135,11 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
+      LOG(ERROR) << ".......Resetting Shared atomic stack.......";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       memset(stack_data_->begin_, 0, _mem_length);
     } else {
+      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
       int result = madvise(stack_data_->begin_,
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
@@ -201,7 +203,9 @@ class StructuredAtomicStack {
   // Will clear the stack.
   void Resize(size_t new_capacity) {
     stack_data_->capacity_ = new_capacity;
-    Init(stack_data_->is_shared_);
+    LOG(ERROR) << ".......Resizing atomic stack.......";
+    Reset();
+    //Init(stack_data_->is_shared_);
   }
 
   void Sort() {
@@ -226,11 +230,11 @@ class StructuredAtomicStack {
   // Memory mapping of the atomic stack.
   UniquePtr<MEM_MAP> mem_map_;
 
-  void ReShareAllocStack(bool shareFlag) {
-    if(shareFlag) {
-      Init(shareFlag);
-    }
-  }
+//  void ReShareAllocStack(bool shareFlag) {
+//    if(shareFlag) {
+//      Init(shareFlag);
+//    }
+//  }
  private:
   // Size in number of elements.
   void Init(bool shareMem) {
@@ -265,8 +269,17 @@ class StructuredAtomicStack {
     memcpy(stack_data_->name_, name.c_str(), name.size());
     stack_data_->name_[name.size()] = '\0';
     stack_data_->capacity_ = capacity;
+    stack_data_->is_shared_ = shareMem;
     mem_map_.reset(NULL);
   }
+
+
+  StructuredAtomicStack(StructuredObjectStackData* data_addr) :
+          stack_data_(data_addr) {
+    mem_map_.reset(NULL);
+  }
+
+
   StructuredObjectStackData* stack_data_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
