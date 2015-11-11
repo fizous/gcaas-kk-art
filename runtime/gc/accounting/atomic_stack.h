@@ -135,8 +135,10 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
-      LOG(ERROR) << ".......Resetting Shared atomic stack.......";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
+      LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
+          _mem_length << ", end:" << (stack_data_->begin_ + _mem_length)
+          << ", calcEnd:" << mem_map_->End();
       memset(stack_data_->begin_, 0, _mem_length);
     } else {
       LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
@@ -202,8 +204,10 @@ class StructuredAtomicStack {
 
   // Will clear the stack.
   void Resize(size_t new_capacity) {
+    LOG(ERROR) << ".......Resizing atomic stack.......: " <<
+        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
     stack_data_->capacity_ = new_capacity;
-    LOG(ERROR) << ".......Resizing atomic stack.......";
+
     Reset();
     //Init(stack_data_->is_shared_);
   }
