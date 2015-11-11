@@ -846,10 +846,11 @@ void IPCMarkSweep::PostMarkingPhase(void){
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_POST_MARK);
   LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
       "threads: " << currThread->GetTid();
-  thread_list->SuspendAll();
-  LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
-  thread_list->ResumeAll();
-
+  if(0) {
+    thread_list->SuspendAll();
+    LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+    thread_list->ResumeAll();
+  }
   {
     ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
     WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
