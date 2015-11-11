@@ -80,7 +80,7 @@ class StructuredAtomicStack {
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
-    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, shareMem));
+    UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, NULL, shareMem));
     mark_stack->Init(shareMem);
     return mark_stack.release();
   }
@@ -90,9 +90,10 @@ class StructuredAtomicStack {
       StructuredObjectStackData* memory_data, bool shareMem) {
     UniquePtr<StructuredAtomicStack> mark_stack(
         new StructuredAtomicStack(std::string(original->stack_data_->name_),
-            original->stack_data_->capacity_, shareMem));
+            original->stack_data_->capacity_, memory_data, shareMem));
     mark_stack->Init(shareMem);
     if(!original->stack_data_->is_shared_) {
+      LOG(ERROR) << "....Original stack was not shared....";
       free(original->stack_data_);
     }
     return mark_stack.release();
@@ -268,10 +269,13 @@ class StructuredAtomicStack {
   }
 
   StructuredAtomicStack(const std::string& name, const size_t capacity,
-      bool shareMem) {
-    stack_data_ =
-        reinterpret_cast<StructuredObjectStackData*>(calloc(1,
-            SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
+      StructuredObjectStackData* atomic_stack_addr, bool shareMem) :
+        stack_data_(atomic_stack_addr) {
+    if(stack_data_ == NULL) {
+      stack_data_ =
+          reinterpret_cast<StructuredObjectStackData*>(calloc(1,
+              SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
+    }
     memcpy(stack_data_->name_, name.c_str(), name.size());
     stack_data_->name_[name.size()] = '\0';
     stack_data_->capacity_ = capacity;
