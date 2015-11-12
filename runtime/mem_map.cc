@@ -206,10 +206,14 @@ void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
     return;
 
 
+  int result = munmap(AshmemBegin(addr), addr->base_size_);
+  if (result == -1) {
+    PLOG(FATAL) << "munmap failed";
+  }
 
-  byte* remapped_address =
-      reinterpret_cast<byte*>(mremap(addr->begin_, _original_size,
-          new_size, MAP_SHARED));
+  byte* remapped_address = reinterpret_cast<byte*>(mmap(NULL,
+      new_size, addr->prot_, addr->flags_,
+      addr->fd_, 0));
 
 
   if (remapped_address == MAP_FAILED) {
