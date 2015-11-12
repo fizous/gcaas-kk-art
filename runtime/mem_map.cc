@@ -214,7 +214,8 @@ void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
     return;
   }
   LOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
-      " succeeded and new address is " << reinterpret_cast<void*>(remapped_address);
+      " succeeded and new address is " << reinterpret_cast<void*>(remapped_address) <<
+      ", with new size = " << new_size;
   addr->base_begin_ = remapped_address;
   addr->begin_ = remapped_address;
   addr->base_size_ = new_size;
