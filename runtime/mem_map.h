@@ -154,9 +154,14 @@ class MemBaseMap {
   static void AShmemFillData(AShmemMap* addr, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags,
       int fd, const std::string& name) {
-    AShmemMap _data = {begin, size, base_begin, base_size, prot, flags, fd, "\0"};
-    COPY_NAME_TO_STRUCT(_data.name_, name);
-    memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+    addr->begin_ = begin;
+    addr->size_ = size;
+    addr->base_begin_ = base_begin;
+    addr->base_size_ = base_size;
+    addr->prot_ = prot;
+    addr->flags_ = flags ;
+    addr->fd_ = fd;
+    COPY_NAME_TO_STRUCT(addr->name_, name);
   }
 
   static byte* max_covered_address;

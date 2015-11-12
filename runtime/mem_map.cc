@@ -250,14 +250,14 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     return NULL;
   }
 
-  byte* trmp_pointer = reinterpret_cast<byte*>(mmap(NULL,
+  byte* temp_pointer = reinterpret_cast<byte*>(mmap(NULL,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, MAP_SHARED,
       source_ashmem_mem_map->fd_, 0));
 
-  LOG(ERROR) << "temp_pointer: " << reinterpret_cast<void*>(trmp_pointer) <<
+  LOG(ERROR) << "temp_pointer: " << reinterpret_cast<void*>(temp_pointer) <<
       ", size:" << source_ashmem_mem_map->size_;
 
-  memcpy(trmp_pointer, source_ashmem_mem_map->begin_,
+  memcpy(temp_pointer, source_ashmem_mem_map->begin_,
       source_ashmem_mem_map->size_);
 
   munmap(source_ashmem_mem_map->begin_, source_ashmem_mem_map->size_);
@@ -287,12 +287,12 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
 
   LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
       << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
-      ", begin = " << LOG(ERROR) << dest_ashmem_mem_map->begin_;
+      ", begin = " << dest_ashmem_mem_map->begin_;
 
 
-  memcpy(dest_ashmem_mem_map->begin_, trmp_pointer, dest_ashmem_mem_map->size_);
+  memcpy(dest_ashmem_mem_map->begin_, temp_pointer, dest_ashmem_mem_map->size_);
 
-  munmap(trmp_pointer, dest_ashmem_mem_map->size_);
+  munmap(temp_pointer, dest_ashmem_mem_map->size_);
 //  memcpy(dest_ashmem_mem_map->begin_,source_ashmem_mem_map->begin_
 //      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
 
