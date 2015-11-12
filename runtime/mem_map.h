@@ -17,6 +17,7 @@
 #ifndef ART_RUNTIME_MEM_MAP_H_
 #define ART_RUNTIME_MEM_MAP_H_
 
+#include <algorithm>
 #include <string>
 #include "ipcfs/ipcfs.h"
 #include <stddef.h>
