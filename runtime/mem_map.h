@@ -39,7 +39,7 @@
 
 
 #define COPY_NAME_TO_STRUCT(name_addr, cstr_name) \
-  size_t _name_length = std::min(MEM_MAP_NAME_LENGTH, name.size());\
+  size_t _name_length = std::min((size_t)MEM_MAP_NAME_LENGTH, name.size());\
   memcpy(name_addr, cstr_name.c_str(), _name_length); \
   name_addr[(_name_length >= MEM_MAP_NAME_LENGTH) ? (MEM_MAP_NAME_LENGTH-1) : _name_length] = '\0';
 
