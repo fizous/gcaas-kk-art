@@ -249,6 +249,21 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     PLOG(ERROR) << "ashmem_create_region failed (" << source_ashmem_mem_map->name_ << ")";
     return NULL;
   }
+
+  byte* trmp_pointer = reinterpret_cast<byte*>(mmap(NULL,
+      source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, MAP_SHARED,
+      source_ashmem_mem_map->fd_, 0));
+
+  LOG(ERROR) << "temp_pointer: " << reinterpret_cast<void*>(trmp_pointer) <<
+      ", size:" << source_ashmem_mem_map->size_;
+
+  memcpy(trmp_pointer, source_ashmem_mem_map->begin_,
+      source_ashmem_mem_map->size_);
+
+  munmap(source_ashmem_mem_map->begin_, source_ashmem_mem_map->size_);
+
+
+
   byte* actual = reinterpret_cast<byte*>(mmap(source_ashmem_mem_map->begin_,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags,
       _fd, 0));
@@ -263,6 +278,7 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
                 << "\n" << maps;
     return NULL;
   }
+  LOG(ERROR) << "...the actual allocated = " << reinterpret_cast<void*>(actual);
   std::string _name_string(source_ashmem_mem_map->name_);
   MemBaseMap::AShmemFillData(dest_ashmem_mem_map, actual,
       source_ashmem_mem_map->size_, actual,
