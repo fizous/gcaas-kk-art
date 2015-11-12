@@ -138,7 +138,7 @@ class StructuredAtomicStack {
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = true;
     if(stack_data_->is_shared_) {
-      LOG(ERROR) << ".......Resetting Shared atomic stack......., before the memset call";
+      LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       if(mem_map_.get()!=NULL) {
         byte* _calc_end = mem_map_->End();
@@ -146,7 +146,7 @@ class StructuredAtomicStack {
         if(_calc_end <= _end) {
           LOG(ERROR) << "...Need to resize the stack located at " <<
               reinterpret_cast<void*>(stack_data_->begin_);
-          MemBaseMap::AshmemResize(&stack_data_->memory_, stack_data_->capacity_);
+          MemBaseMap::AshmemResize(&stack_data_->memory_, _mem_length);
           stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
           LOG(ERROR) << "...Done with to resize the stack located at " <<
               reinterpret_cast<void*>(stack_data_->begin_);
