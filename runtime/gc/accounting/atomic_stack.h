@@ -143,7 +143,7 @@ class StructuredAtomicStack {
       if(mem_map_.get()!=NULL) {
         byte* _calc_end = mem_map_->End();
         byte* _end = reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length;
-        if(_calc_end <= _end) {
+        if(_calc_end < _end) {
           LOG(ERROR) << "...Need to resize the stack located at " <<
               reinterpret_cast<void*>(stack_data_->begin_) <<
               ", mem_end = " << reinterpret_cast<void*>(_calc_end) <<
@@ -158,7 +158,7 @@ class StructuredAtomicStack {
             reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
         LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
       }
-      memset(stack_data_->begin_, 0, _mem_length);
+      memset(reinterpret_cast<void*>(stack_data_->begin_), 0, _mem_length);
     } else {
       LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
       int result = madvise(stack_data_->begin_,
