@@ -140,12 +140,11 @@ class StructuredAtomicStack {
       LOG(ERROR) << ".......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       if(mem_map_.get()!=NULL) {
-        LOG(ERROR) << "...AAA";
         LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
-            _mem_length << ", end:" << reinterpret_cast<void*>(stack_data_->begin_ + _mem_length);
+            _mem_length << ", end:" <<
+            reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
         LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
       }
-      LOG(ERROR) << "...BBB";
       memset(stack_data_->begin_, 0, _mem_length);
     } else {
       LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
