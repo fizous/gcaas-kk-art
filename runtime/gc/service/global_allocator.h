@@ -83,18 +83,21 @@ typedef struct GCServiceConcReq_S {
 
 typedef struct GCServiceRequestsBuffer_S {
   SynchronizedLockHead lock_;
+  GCServiceReq entries_[GC_SERVICE_BUFFER_REQ_CAP];
+  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
+
   volatile int head_;
   volatile int tail_;
   volatile int queued_;
   volatile int available_;
-  GCServiceReq entries_[GC_SERVICE_BUFFER_REQ_CAP];
+
 
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
 
   volatile int mapper_head_;
   volatile int mapper_tail_;
-  android::FileMapperParameters process_mappers_[IPC_PROCESS_MAPPER_CAPACITY];
+
 } __attribute__((aligned(8))) GCServiceRequestsBuffer;
 
 
@@ -114,8 +117,8 @@ typedef struct GCSrvcGlobalRegionHeader_S {
   // This bitmap itself, word sized for efficiency in scanning.
   AShmemMap ashmem_meta_;
   GCServiceRequestsBuffer gc_handshake_;
-  byte* current_addr_;
   GCServiceHeader service_header_;
+  byte* current_addr_;
 }  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
 
 
