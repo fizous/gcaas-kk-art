@@ -1463,7 +1463,7 @@ void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetM
     } else {
       if(GC_HEAP_SRVCE_NO_LOS){
         LOG(FATAL) << "ERROR Heap::MarkAllocStack: " <<
-            reinterpret_cast<void*>(obj);
+            const_cast<void*>(obj);
       } else {
         large_objects->Set(obj);
       }
