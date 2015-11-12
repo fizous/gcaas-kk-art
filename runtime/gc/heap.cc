@@ -1353,13 +1353,14 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
       }
       allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
-          &(_struct_alloc_space->alloc_stack_data_), true));
+          &(_struct_alloc_space->alloc_stack_data_), true, max_allocation_stack_size_));
 
       live_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(live_stack_.release(),
-          &(_struct_alloc_space->live_stack_data_), true));
+          &(_struct_alloc_space->live_stack_data_), true, max_allocation_stack_size_));
 
+      static const size_t default_mark_stack_size = 64 * KB;
       mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
-          &(_struct_alloc_space->mark_stack_data_), true));
+          &(_struct_alloc_space->mark_stack_data_), true, default_mark_stack_size));
 
     }
     alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",

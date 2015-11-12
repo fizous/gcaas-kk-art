@@ -87,11 +87,11 @@ class StructuredAtomicStack {
 
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* ShareStack(StructuredAtomicStack* original,
-      StructuredObjectStackData* memory_data, bool shareMem) {
+      StructuredObjectStackData* memory_data, bool shareMem, size_t high_capacity) {
     LOG(ERROR) << "....Calling ShareStack...." << memory_data;
     UniquePtr<StructuredAtomicStack> mark_stack(
         new StructuredAtomicStack(std::string(original->stack_data_->name_),
-            original->stack_data_->capacity_, memory_data, shareMem));
+            high_capacity, memory_data, shareMem));
     mark_stack->Init(shareMem);
     if(!original->stack_data_->is_shared_) {
       LOG(ERROR) << "....Original stack was not shared....";
