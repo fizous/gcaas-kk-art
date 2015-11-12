@@ -228,8 +228,8 @@ class StructuredAtomicStack {
 
     stack_data_->capacity_ = new_capacity;
 
-    Reset();
-    //Init(stack_data_->is_shared_);
+    //Reset();
+    Init(stack_data_->is_shared_);
   }
 
   void Sort() {
