@@ -218,11 +218,11 @@ void GCServiceClient::RequestHeapTrim(void) {
 
 void GCServiceClient::FinalizeHeapAfterInit(void) {
 
-if(0) {
-  int* _test_fd = &(sharable_space_->sharable_space_data_->test_memory_.fd_);
-  LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
-      *_test_fd;
-}
+//if(0) {
+//  int* _test_fd = &(sharable_space_->sharable_space_data_->test_memory_.fd_);
+//  LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
+//      *_test_fd;
+//}
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   ipcHeap_->StartCollectorDaemon();
