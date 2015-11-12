@@ -287,7 +287,7 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
 
   LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
       << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
-      ", begin = " << dest_ashmem_mem_map->begin_;
+      ", begin = " << reinterpret_cast<void*>(dest_ashmem_mem_map->begin_);
 
 
   memcpy(dest_ashmem_mem_map->begin_, temp_pointer, dest_ashmem_mem_map->size_);

@@ -428,6 +428,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
         ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
         ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
         ", size:" << _new_ptr->size_ << ", old_size:" << _ptr->size_;
+    free(_ptr);
   }
 
   _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
