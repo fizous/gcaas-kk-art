@@ -192,6 +192,7 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
+  static void AshmemResize(AShmemMap* addr, size_t new_size);
 
 
   static size_t AshmemSize(AShmemMap* addr)  {

@@ -88,7 +88,8 @@ class StructuredAtomicStack {
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* ShareStack(StructuredAtomicStack* original,
       StructuredObjectStackData* memory_data, bool shareMem, size_t high_capacity) {
-    LOG(ERROR) << "....Calling ShareStack...." << memory_data;
+    LOG(ERROR) << "....Calling ShareStack...." << memory_data <<
+        ", with high capacity " << high_capacity;
     UniquePtr<StructuredAtomicStack> mark_stack(
         new StructuredAtomicStack(std::string(original->stack_data_->name_),
             high_capacity, memory_data, shareMem));
@@ -140,6 +141,16 @@ class StructuredAtomicStack {
       LOG(ERROR) << ".......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       if(mem_map_.get()!=NULL) {
+        byte* _calc_end = mem_map_->End();
+        byte* _end = reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length;
+        if(_calc_end <= _end) {
+          LOG(ERROR) << "...Need to resize the stack located at " <<
+              reinterpret_cast<void*>(stack_data_->begin_);
+          MemBaseMap::AshmemResize(&stack_data_->memory_, stack_data_->capacity_);
+          stack_data_->begin_ = stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
+          LOG(ERROR) << "...Done with to resize the stack located at " <<
+              reinterpret_cast<void*>(stack_data_->begin_);
+        }
         LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
             _mem_length << ", end:" <<
             reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
@@ -212,6 +223,7 @@ class StructuredAtomicStack {
   void Resize(size_t new_capacity) {
     LOG(ERROR) << ".......Resizing atomic stack.......: " <<
         stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
+
     stack_data_->capacity_ = new_capacity;
 
     Reset();

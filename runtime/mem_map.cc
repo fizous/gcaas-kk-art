@@ -199,7 +199,26 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
   return ashmem_mem_map;
 }
 
+void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
+  if(new_size <= addr->base_size_)
+    return;
 
+  byte* remapped_address =
+      reinterpret_cast<byte*>(mremap(addr->base_begin_, addr->base_size_,
+          new_size, MAP_SHARED));
+
+  if (remapped_address == MAP_FAILED) {
+    PLOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
+        ") of ahmem failed";
+    return;
+  }
+  LOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
+      " succeeded and new address is " << reinterpret_cast<void*>(remapped_address);
+  addr->base_begin_ = remapped_address;
+  addr->begin_ = remapped_address;
+  addr->base_size_ = new_size;
+  addr->size_ = new_size;
+}
 
 AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     AShmemMap* dest_ashmem_mem_map) {
