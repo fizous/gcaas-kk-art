@@ -201,12 +201,16 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
 
 void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
   new_size = RoundUp(new_size, kPageSize);
-  if(new_size <= addr->base_size_)
+  size_t _original_size = std::max(addr->base_size_, addr->size_);
+  if(new_size <= _original_size)
     return;
 
+
+
   byte* remapped_address =
-      reinterpret_cast<byte*>(mremap(addr->base_begin_, addr->base_size_,
+      reinterpret_cast<byte*>(mremap(addr->begin_, _original_size,
           new_size, MAP_SHARED));
+
 
   if (remapped_address == MAP_FAILED) {
     PLOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
@@ -215,7 +219,7 @@ void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
   }
   LOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
       " succeeded and new address is " << reinterpret_cast<void*>(remapped_address) <<
-      ", with new size = " << new_size;
+      ", with new size = " << new_size << ", old_sizes = " << _original_size;
   addr->base_begin_ = remapped_address;
   addr->begin_ = remapped_address;
   addr->base_size_ = new_size;
