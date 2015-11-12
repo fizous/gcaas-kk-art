@@ -200,6 +200,7 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
 }
 
 void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
+  new_size = RoundUp(new_size, kPageSize);
   if(new_size <= addr->base_size_)
     return;
 
