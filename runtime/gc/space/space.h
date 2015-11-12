@@ -114,6 +114,10 @@ typedef struct GCSrvceContinuousSpace_S {
 
 typedef struct GCSrvDlMallocSpace_S {
   GCSrvceContinuousSpace cont_space_data_;
+  /* allocated space memory */
+  AShmemMap memory_;
+  std::pair<const mirror::Object*, mirror::Class*>
+                    recent_freed_objects_[kRecentFreeCount];
   size_t recent_free_pos_;
   // Approximate number of bytes which have been allocated into the space.
   size_t num_bytes_allocated_;
@@ -122,8 +126,7 @@ typedef struct GCSrvDlMallocSpace_S {
   size_t total_objects_allocated_;
 
   static size_t bitmap_index_;
-  /* allocated space memory */
-  AShmemMap memory_;
+
   // Underlying malloc space
   void* mspace_;
 
@@ -140,8 +143,7 @@ typedef struct GCSrvDlMallocSpace_S {
   // Used to ensure mutual exclusion when the allocation spaces data structures are being modified.
   BaseMutex* lock_ ;//DEFAULT_MUTEX_ACQUIRED_AFTER;
 
-  std::pair<const mirror::Object*, mirror::Class*>
-                    recent_freed_objects_[kRecentFreeCount];
+
 }__attribute__((aligned(8))) GCSrvDlMallocSpace;
 
 
@@ -186,6 +188,8 @@ typedef struct GCSrvSharableHeapData_S {
   // completes.
   SynchronizedLockHead gc_complete_lock_;
 
+  GCSrvSharableCollectorData collectors_[6];
+
   byte* const image_space_begin_;
   byte* const image_space_end_;
   byte* const zygote_begin_;
@@ -193,7 +197,7 @@ typedef struct GCSrvSharableHeapData_S {
 
 
   /************ collectors array ******/
-  GCSrvSharableCollectorData collectors_[6];
+//  GCSrvSharableCollectorData collectors_[6];
   volatile int collect_index_;
   GCSrvSharableCollectorData* volatile current_collector_;
   /****** variables from original Marksweep members *****/
@@ -261,8 +265,6 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   SynchronizedLockHead ip_lock_;
 
-  InterProcessConditionVariable* cond_;
-
   accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
   accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;
 
@@ -276,15 +278,18 @@ typedef struct GCSrvSharableDlMallocSpace_S {
   StructuredObjectStackData mark_stack_data_;
   StructuredObjectStackData alloc_stack_data_;
 
+  /* heap data */
+  GCSrvSharableHeapData heap_meta_;
+
+  InterProcessConditionVariable* cond_;
+
   volatile int register_gc_;
 
   volatile int space_index_;
   /* allocated space memory */
-  AShmemMap test_memory_;
+//  AShmemMap test_memory_;
 
 
-  /* heap data */
-  GCSrvSharableHeapData heap_meta_;
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
 

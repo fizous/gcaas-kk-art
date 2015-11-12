@@ -50,7 +50,11 @@ typedef struct GCSrvceDlMallocSpace_S {
 
   /* allocated space memory */
   AShmemMap memory_;
-
+  accounting::GCSrvceBitmap live_bitmap_;
+  accounting::GCSrvceBitmap mark_bitmap_;
+  SynchronizedLockHead lock_;
+  std::pair<const mirror::Object*, mirror::Class*>
+                    recent_freed_objects_[kRecentFreeCountService];
   // Underlying malloc space
   void* /*const*/ mspace_;
 
@@ -63,8 +67,7 @@ typedef struct GCSrvceDlMallocSpace_S {
   // one time by a call to ClearGrowthLimit.
   size_t growth_limit_;
 
-  std::pair<const mirror::Object*, mirror::Class*>
-                    recent_freed_objects_[kRecentFreeCountService];
+
   size_t recent_free_pos_;
 
   // Approximate number of bytes which have been allocated into the space.
@@ -73,16 +76,8 @@ typedef struct GCSrvceDlMallocSpace_S {
   size_t total_bytes_allocated_;
   size_t total_objects_allocated_;
 
-
-  accounting::GCSrvceBitmap live_bitmap_;
-  accounting::GCSrvceBitmap mark_bitmap_;
-
-
-
   static size_t bitmap_index_;
 
-
-  SynchronizedLockHead lock_;
 }  __attribute__((aligned(8))) GCSrvceDlMallocSpace;
 
 
