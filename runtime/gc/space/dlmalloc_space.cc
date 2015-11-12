@@ -417,10 +417,12 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   }
 
   if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace && shareMem) { // share the zygote space
-    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......";
+    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
+        ", begin:" << GetMemMap()->Begin() <<", end:" << GetMemMap()->End();
     GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(GetMemMap()->GetAshmemMapAddress(),
         &(_struct_alloc_space->heap_meta_.zygote_space_)));
-    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......";
+    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
+        ", begin:" << GetMemMap()->Begin() <<", end:" << GetMemMap()->End();
   }
 
   _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
