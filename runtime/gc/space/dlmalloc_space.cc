@@ -25,6 +25,7 @@
 #include <valgrind.h>
 #include <../memcheck/memcheck.h>
 #include "gc/service/service_space.h"
+#include "gc/service/global_allocator.h"
 #include "gc/accounting/space_bitmap-inl.h"
 #include "gc/accounting/heap_bitmap.h"
 #include "gc/accounting/space_bitmap.h"
@@ -414,6 +415,14 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   if(_struct_alloc_space == NULL) {
     _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
   }
+
+  if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace && shareMem) { // share the zygote space
+    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......";
+    GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(GetMemMap()->GetAshmemMapAddress(),
+        &(_struct_alloc_space->heap_meta_.zygote_space_)));
+    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......";
+  }
+
   _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
             capacity, PROT_READ | PROT_WRITE, shareMem,
             &(_struct_alloc_space->dlmalloc_space_data_.memory_));

@@ -240,16 +240,6 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     LOG(ERROR) << "the destination sharedAshmemmap is not allocated";
     return NULL;
   }
-  //make sure we copy to the destination before unmapping the region
-  memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
-      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
-  if(source_ashmem_mem_map->fd_ != -1) { //unmap the old memory mapped pages
-    close(source_ashmem_mem_map->fd_);
-    source_ashmem_mem_map->fd_ = -1;
-    if (!(source_ashmem_mem_map->begin_ == NULL && source_ashmem_mem_map->base_size_ == 0)) {
-      AshmemUnMapAtEnd(source_ashmem_mem_map, source_ashmem_mem_map->begin_);
-    }
-  }
 
   int flags = MAP_SHARED | MAP_FIXED;
   int _fd = ashmem_create_region(source_ashmem_mem_map->name_,
@@ -272,9 +262,32 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
                 << "\n" << maps;
     return NULL;
   }
-  max_covered_address = std::max(max_covered_address, actual + source_ashmem_mem_map->base_size_);
-  dest_ashmem_mem_map->flags_ = flags;
-  dest_ashmem_mem_map->fd_ = _fd;
+  std::string _name_string(source_ashmem_mem_map->name_);
+  MemBaseMap::AShmemFillData(dest_ashmem_mem_map,
+      _name_string, actual,
+      source_ashmem_mem_map->base_size_, actual,
+      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->prot_, flags, _fd);
+
+//  memcpy(dest_ashmem_mem_map->begin_,source_ashmem_mem_map->begin_
+//      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+
+
+  //make sure we copy to the destination before unmapping the region
+//  memcpy(dest_ashmem_mem_map, source_ashmem_mem_map,
+//      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
+  if(source_ashmem_mem_map->fd_ != -1) { //unmap the old memory mapped pages
+    close(source_ashmem_mem_map->fd_);
+    source_ashmem_mem_map->fd_ = -1;
+//    if (!(source_ashmem_mem_map->begin_ == NULL && source_ashmem_mem_map->base_size_ == 0)) {
+//      AshmemUnMapAtEnd(source_ashmem_mem_map, source_ashmem_mem_map->begin_);
+//    }
+  }
+
+
+
+  //max_covered_address = std::max(max_covered_address, actual + source_ashmem_mem_map->base_size_);
+//  dest_ashmem_mem_map->flags_ = flags;
+//  dest_ashmem_mem_map->fd_ = _fd;
   //todo: change the file descriptor here
   return dest_ashmem_mem_map;
 }

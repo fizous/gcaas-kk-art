@@ -188,6 +188,9 @@ typedef struct GCSrvSharableHeapData_S {
   // completes.
   SynchronizedLockHead gc_complete_lock_;
 
+  /* allocated space memory for zygote*/
+  AShmemMap zygote_space_;
+
   GCSrvSharableCollectorData collectors_[6];
 
   byte* const image_space_begin_;

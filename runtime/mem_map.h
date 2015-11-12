@@ -130,6 +130,9 @@ class MemBaseMap {
 
   virtual int GetFD() {return -1;}
 
+//  MemBaseMap* ReshareMap(AShmemMap* meta_address);
+//  void ConstructReshareMap(AShmemMap* meta_address, byte* address);
+
   byte* End() const {
     return Begin() + Size();
   }
@@ -159,6 +162,10 @@ class MemBaseMap {
   // Releases the memory mapping
   virtual ~MemBaseMap();
 
+
+
+  virtual AShmemMap* GetAshmemMapAddress(void) {return NULL;}
+  virtual void SetAshmemAddress(AShmemMap*) {}
   MemBaseMap(){}
 
   // Map part of a file, taking care of non-page aligned offsets.  The
@@ -342,8 +349,9 @@ class StructuredMemMap: public MemBaseMap {
   int GetFD() {
     return ashmem_->fd_;
   }
-
+  AShmemMap* GetAshmemMapAddress(void) {return ashmem_;}
   void SetSize(size_t new_size);
+  void SetAshmemAddress(AShmemMap* new_val) {ashmem_ = new_val;}
   AShmemMap* ashmem_;
 };
 
