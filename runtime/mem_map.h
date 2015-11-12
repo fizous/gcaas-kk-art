@@ -99,9 +99,9 @@ struct AtomicStackData {
   volatile size_t capacity_;
 
   // Whether or not the stack is sorted, only updated in debug mode to avoid performance overhead.
-  bool debug_is_sorted_;
+  int debug_is_sorted_;
 
-  bool is_shared_;
+  int is_shared_;
 }__attribute__((aligned(8)));
 
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
