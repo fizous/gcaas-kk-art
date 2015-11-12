@@ -116,7 +116,7 @@ class StructuredAtomicStack {
   // Returns false if we overflowed the stack.
   bool AtomicPushBack(const T& value) {
     if (kIsDebugBuild) {
-      stack_data_->debug_is_sorted_ = false;
+      stack_data_->debug_is_sorted_ = 0;
     }
     int32_t index;
     do {
@@ -136,8 +136,8 @@ class StructuredAtomicStack {
     DCHECK(stack_data_->begin_ != NULL);
     stack_data_->front_index_ = 0;
     stack_data_->back_index_ = 0;
-    stack_data_->debug_is_sorted_ = true;
-    if(stack_data_->is_shared_) {
+    stack_data_->debug_is_sorted_ = 1;
+    if(stack_data_->is_shared_ == 1) {
       LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       if(mem_map_.get()!=NULL) {
@@ -171,7 +171,7 @@ class StructuredAtomicStack {
 
   void PushBack(const T& value) {
     if (kIsDebugBuild) {
-      stack_data_->debug_is_sorted_ = false;
+      stack_data_->debug_is_sorted_ = 0;
     }
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
@@ -239,12 +239,12 @@ class StructuredAtomicStack {
     CHECK_EQ(start_back_index, stack_data_->back_index_);
     CHECK_EQ(start_front_index, stack_data_->front_index_);
     if (kIsDebugBuild) {
-      stack_data_->debug_is_sorted_ = true;
+      stack_data_->debug_is_sorted_ = 1;
     }
   }
 
   bool ContainsSorted(const T& value) const {
-    DCHECK(stack_data_->debug_is_sorted_);
+    DCHECK(stack_data_->debug_is_sorted_ == 1);
     return std::binary_search(Begin(), End(), value);
   }
 
@@ -261,7 +261,7 @@ class StructuredAtomicStack {
 //  }
  private:
   // Size in number of elements.
-  void Init(bool shareMem) {
+  void Init(int shareMem) {
 
     if(mem_map_.get() != NULL) { // we should unmap first?
       LOG(ERROR) << "Reinitializing allocation stack to size: " <<
@@ -274,13 +274,13 @@ class StructuredAtomicStack {
           stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
-        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE, shareMem,
-        &(stack_data_->memory_)));
+        stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE,
+        (shareMem == 1), &(stack_data_->memory_)));
     LOG(ERROR) << "..........Created mem_map of the atomic stack.....";
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
-    stack_data_->debug_is_sorted_ = true;
+    stack_data_->debug_is_sorted_ = 1;
     stack_data_->begin_ = reinterpret_cast<T*>(addr);
     stack_data_->is_shared_ = shareMem;
     Reset();
@@ -296,7 +296,7 @@ class StructuredAtomicStack {
     }
     COPY_NAME_TO_STRUCT(stack_data_->name_, name);
     stack_data_->capacity_ = capacity;
-    stack_data_->is_shared_ = shareMem;
+    stack_data_->is_shared_ = shareMem ? 1 : 0;
     mem_map_.reset(NULL);
   }
 
