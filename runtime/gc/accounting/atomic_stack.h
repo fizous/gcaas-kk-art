@@ -294,8 +294,7 @@ class StructuredAtomicStack {
           reinterpret_cast<StructuredObjectStackData*>(calloc(1,
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
     }
-    memcpy(stack_data_->name_, name.c_str(), name.size());
-    stack_data_->name_[name.size()] = '\0';
+    COPY_NAME_TO_STRUCT(stack_data_->name_, name);
     stack_data_->capacity_ = capacity;
     stack_data_->is_shared_ = shareMem;
     mem_map_.reset(NULL);

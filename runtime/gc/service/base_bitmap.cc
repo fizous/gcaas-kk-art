@@ -286,8 +286,9 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
   hb_p->bitmap_begin_ = reinterpret_cast<word*>(MEM_MAP::AshmemBegin(&hb_p->mem_map_));
   hb_p->bitmap_size_  = bitmap_size;
   hb_p->heap_begin_   = reinterpret_cast<uintptr_t>(heap_begin);
-  memcpy(hb_p->name_, name.c_str(), name.size());
-  hb_p->name_[name.size()] = '\0';
+
+  COPY_NAME_TO_STRUCT(hb_p->name_, name);
+
   LOG(ERROR) << "---DOne creating Shared Space Bitmap---";
 }
 
@@ -324,8 +325,7 @@ SharedSpaceBitmap::SharedSpaceBitmap(accounting::GCSrvceBitmap* data_p) :
 SharedSpaceBitmap::~SharedSpaceBitmap() {}
 
 void SharedSpaceBitmap::SetName(const std::string& name) {
-  memcpy(bitmap_data_->name_, name.c_str(), name.size());
-  bitmap_data_->name_[name.size()] = '\0';
+  COPY_NAME_TO_STRUCT(bitmap_data_->name_, name);
 }
 
 

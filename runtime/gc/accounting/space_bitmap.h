@@ -68,7 +68,7 @@ typedef struct GCSrvceBitmap_S {
   // bitmap.
   /*const*/ uintptr_t heap_begin_;
 
-  char name_[64];
+  char name_[MEM_MAP_NAME_LENGTH];
 } __attribute__((aligned(8)))  GCSrvceBitmap;
 
 class BaseBitmap {

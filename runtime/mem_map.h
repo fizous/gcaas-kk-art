@@ -33,13 +33,21 @@
 #endif
 
 
+#define MEM_MAP_NAME_LENGTH   64
+
+
+
+#define COPY_NAME_TO_STRUCT(name_addr, cstr_name) \
+  size_t _name_length = std::min(MEM_MAP_NAME_LENGTH, name.size());\
+  memcpy(name_addr, cstr_name.c_str(), _name_length); \
+  name_addr[(_name_length >= MEM_MAP_NAME_LENGTH) ? (MEM_MAP_NAME_LENGTH-1) : _name_length] = '\0';
 
 namespace art {
 
 typedef struct AShmemMap_S {
-  char name_[64];
-  byte* /*const*/ begin_;  // Start of data.
-  size_t size_;  // Length of data.
+  char name_[MEM_MAP_NAME_LENGTH];
+  volatile byte* /*const*/ begin_;  // Start of data.
+  volatile size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
   int prot_;  // Protection of the map.
@@ -53,8 +61,7 @@ typedef struct AShmemMap_S {
         begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
-    memcpy(name_, name.c_str(), name.size());
-    name_[name.size()] = '\0';
+    COPY_NAME_TO_STRUCT(name_, name);
   };
   AShmemMap_S(){}
 } __attribute__((aligned(8))) AShmemMap;
@@ -73,7 +80,7 @@ typedef struct CardBaseTableFields_S {
 
 template <class T>
 struct AtomicStackData {
-  char name_[64];
+  char name_[MEM_MAP_NAME_LENGTH];
 
   // Memory mapping of the atomic stack.
   AShmemMap memory_;
@@ -141,8 +148,7 @@ class MemBaseMap {
   static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
     AShmemMap _data = {"g\0", begin, size, base_begin, base_size, prot, flags, fd};
-    memcpy(_data.name_, name.c_str(), name.size());
-    _data.name_[name.size()] = '\0';
+    COPY_NAME_TO_STRUCT(_data.name_, name);
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }
 
