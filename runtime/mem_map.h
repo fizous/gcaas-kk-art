@@ -56,9 +56,9 @@ typedef struct AShmemMap_S {
   /*integer to hold the file descriptor of the memory mapped region */
   int fd_;
   char name_[MEM_MAP_NAME_LENGTH];
-  AShmemMap_S(const std::string& name, byte* begin,
+  AShmemMap_S(byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot,
-      int flags, int fd) :
+      int flags, int fd, const std::string& name) :
         begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
         prot_(prot), flags_(flags), fd_(fd) {
@@ -151,9 +151,10 @@ class MemBaseMap {
       const char* ashmem_name, byte* addr, size_t byte_count, int prot,
       bool shareMem = false);
 
-  static void AShmemFillData(AShmemMap* addr, const std::string& name, byte* begin,
-      size_t size, void* base_begin, size_t base_size, int prot, int flags, int fd) {
-    AShmemMap _data = {"g\0", begin, size, base_begin, base_size, prot, flags, fd};
+  static void AShmemFillData(AShmemMap* addr, byte* begin,
+      size_t size, void* base_begin, size_t base_size, int prot, int flags,
+      int fd, const std::string& name) {
+    AShmemMap _data = {begin, size, base_begin, base_size, prot, flags, fd, "\0"};
     COPY_NAME_TO_STRUCT(_data.name_, name);
     memcpy(addr, &_data, SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
   }

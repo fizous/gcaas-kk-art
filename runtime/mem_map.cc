@@ -193,8 +193,9 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
 
   max_covered_address = std::max(max_covered_address, addr + page_aligned_byte_count);
 
-  MemBaseMap::AShmemFillData(ashmem_mem_map, debug_friendly_name, actual,
-      byte_count, actual, page_aligned_byte_count, prot, flags, _fd);
+  MemBaseMap::AShmemFillData(ashmem_mem_map, actual,
+      byte_count, actual, page_aligned_byte_count, prot, flags, _fd,
+      debug_friendly_name);
 
   return ashmem_mem_map;
 }
@@ -243,30 +244,33 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
 
   int flags = MAP_SHARED | MAP_FIXED;
   int _fd = ashmem_create_region(source_ashmem_mem_map->name_,
-      source_ashmem_mem_map->base_size_);
+      source_ashmem_mem_map->size_);
   if (_fd == -1) {
     PLOG(ERROR) << "ashmem_create_region failed (" << source_ashmem_mem_map->name_ << ")";
     return NULL;
   }
   byte* actual = reinterpret_cast<byte*>(mmap(source_ashmem_mem_map->begin_,
-      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->prot_, flags,
+      source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags,
       _fd, 0));
   if (actual == MAP_FAILED) {
     std::string maps;
     ReadFileToString("/proc/self/maps", &maps);
     PLOG(ERROR) << "mremap(" <<
                 reinterpret_cast<void*>(source_ashmem_mem_map->begin_) <<
-                ", " << source_ashmem_mem_map->base_size_ <<
+                ", " << source_ashmem_mem_map->size_ <<
                 ", " << source_ashmem_mem_map->prot_ << ", " << flags <<
                 ", " << _fd << ", 0) failed for " << source_ashmem_mem_map->name_
                 << "\n" << maps;
     return NULL;
   }
   std::string _name_string(source_ashmem_mem_map->name_);
-  MemBaseMap::AShmemFillData(dest_ashmem_mem_map,
-      _name_string, actual,
-      source_ashmem_mem_map->base_size_, actual,
-      source_ashmem_mem_map->base_size_, source_ashmem_mem_map->prot_, flags, _fd);
+  MemBaseMap::AShmemFillData(dest_ashmem_mem_map, actual,
+      source_ashmem_mem_map->size_, actual,
+      source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags, _fd,
+      _name_string);
+
+  LOG(ERROR) << "dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
+      ", begin = " << LOG(ERROR) << dest_ashmem_mem_map->begin_;
 
 //  memcpy(dest_ashmem_mem_map->begin_,source_ashmem_mem_map->begin_
 //      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
