@@ -88,7 +88,7 @@ struct AtomicStackData {
   T* begin_;
 
   // Maximum number of elements.
-  size_t capacity_;
+  volatile size_t capacity_;
 
   // Whether or not the stack is sorted, only updated in debug mode to avoid performance overhead.
   bool debug_is_sorted_;

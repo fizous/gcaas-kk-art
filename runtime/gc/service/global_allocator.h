@@ -18,7 +18,7 @@
 #include "gc/space/space.h"
 
 
-#define GC_SERVICE_BUFFER_REQ_CAP   64
+#define GC_SERVICE_BUFFER_REQ_CAP   128
 
 namespace art {
 namespace gc {
@@ -163,7 +163,7 @@ class GCServiceGlobalAllocator {
   GCSrvcClientHandShake* handShake_;
   static GCServiceGlobalAllocator* allocator_instant_;
  private:
-  static const int   kGCServicePageCapacity = 32;
+  static const int   kGCServicePageCapacity = 48;
 
   GCSrvcGlobalRegionHeader* region_header_;
 
