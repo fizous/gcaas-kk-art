@@ -92,7 +92,7 @@ class StructuredAtomicStack {
         ", with high capacity " << high_capacity;
     UniquePtr<StructuredAtomicStack> mark_stack(
         new StructuredAtomicStack(std::string(original->stack_data_->name_),
-            high_capacity, NULL, shareMem));
+            high_capacity, memory_data, shareMem));
     mark_stack->Init(shareMem);
     if(!original->stack_data_->is_shared_) {
       LOG(ERROR) << "....Original stack was not shared....";
