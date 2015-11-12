@@ -128,6 +128,8 @@ class MemBaseMap {
 
   virtual size_t BaseSize()  const = 0;
 
+  virtual int GetFD() {return -1;}
+
   byte* End() const {
     return Begin() + Size();
   }
@@ -178,6 +180,7 @@ class MemBaseMap {
   // On success, returns returns a MemMap instance.  On failure, returns a NULL;
   static MemBaseMap* MapAnonymous(const char* ashmem_name, byte* addr,
       size_t byte_count, int prot, bool shareMem = false);
+
 
   static MemBaseMap* CreateStructedMemMap(const char* ashmem_name, byte* addr,
       size_t byte_count, int prot, bool shareMem = false,
@@ -334,6 +337,10 @@ class StructuredMemMap: public MemBaseMap {
 
   void SetProt(int newProt) {
     ashmem_->prot_ = newProt;
+  }
+
+  int GetFD() {
+    return ashmem_->fd_;
   }
 
   void SetSize(size_t new_size);

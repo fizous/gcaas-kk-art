@@ -260,8 +260,17 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
-                                                 PROT_READ | PROT_WRITE, shareMem));
+  LOG(ERROR) << "CREATING ZYGOTE SPACE ...... Runtime::Current()->IsZygote(): "
+      << Runtime::Current()->IsZygote();
+  UniquePtr<MEM_MAP> mem_map(
+      (Runtime::Current()->IsZygote() ?
+          MEM_MAP::CreateStructedMemMap(name.c_str(), requested_begin, capacity,
+                    PROT_READ | PROT_WRITE, shareMem) :
+          MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
+                    PROT_READ | PROT_WRITE, shareMem)));
+  if(Runtime::Current()->IsZygote()) {
+    LOG(ERROR) << "RuntimeIsZygote...with FD = " << mem_map->GetFD();
+  }
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);
