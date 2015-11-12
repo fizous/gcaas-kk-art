@@ -147,7 +147,7 @@ class StructuredAtomicStack {
           LOG(ERROR) << "...Need to resize the stack located at " <<
               reinterpret_cast<void*>(stack_data_->begin_);
           MemBaseMap::AshmemResize(&stack_data_->memory_, stack_data_->capacity_);
-          stack_data_->begin_ = stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
+          stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
           LOG(ERROR) << "...Done with to resize the stack located at " <<
               reinterpret_cast<void*>(stack_data_->begin_);
         }
