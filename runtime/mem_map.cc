@@ -269,7 +269,8 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags, _fd,
       _name_string);
 
-  LOG(ERROR) << "dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
+  LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
+      << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
       ", begin = " << LOG(ERROR) << dest_ashmem_mem_map->begin_;
 
 //  memcpy(dest_ashmem_mem_map->begin_,source_ashmem_mem_map->begin_
