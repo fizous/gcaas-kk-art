@@ -46,7 +46,6 @@
 namespace art {
 
 typedef struct AShmemMap_S {
-  char name_[MEM_MAP_NAME_LENGTH];
   byte* /*const*/ begin_;  // Start of data.
   volatile size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
@@ -56,6 +55,7 @@ typedef struct AShmemMap_S {
   int flags_;
   /*integer to hold the file descriptor of the memory mapped region */
   int fd_;
+  char name_[MEM_MAP_NAME_LENGTH];
   AShmemMap_S(const std::string& name, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot,
       int flags, int fd) :
@@ -81,8 +81,6 @@ typedef struct CardBaseTableFields_S {
 
 template <class T>
 struct AtomicStackData {
-  char name_[MEM_MAP_NAME_LENGTH];
-
   // Memory mapping of the atomic stack.
   AShmemMap memory_;
 
@@ -102,6 +100,8 @@ struct AtomicStackData {
   int debug_is_sorted_;
 
   int is_shared_;
+
+  char name_[MEM_MAP_NAME_LENGTH];
 }__attribute__((aligned(8)));
 
 typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
