@@ -835,19 +835,20 @@ void IPCMarkSweep::MarkConcurrentRoots() {
  *   4-
  */
 void IPCMarkSweep::PostMarkingPhase(void){
-  Thread* currThread = Thread::Current();
-  ThreadList* thread_list = Runtime::Current()->GetThreadList();
-  LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
-      "threads: " << currThread->GetTid();
-  thread_list->SuspendAll();
-  LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
-  thread_list->ResumeAll();
-
-  {
-    ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
-    WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
-    MarkReachableObjects();
-  }
+//  Thread* currThread = Thread::Current();
+//  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+//  LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
+//      "threads: " << currThread->GetTid();
+//  if(false) {
+//    thread_list->SuspendAll();
+//    LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+//    thread_list->ResumeAll();
+//  }
+//  {
+//    ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
+//    WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
+//    MarkReachableObjects();
+//  }
 
 }
 
@@ -888,6 +889,7 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
 
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
 
+  MarkReachableObjects();
   //MarkReachableObjects();
 }
 
