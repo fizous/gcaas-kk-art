@@ -289,6 +289,10 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
       << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
       ", begin = " << LOG(ERROR) << dest_ashmem_mem_map->begin_;
 
+
+  memcpy(dest_ashmem_mem_map->begin_, trmp_pointer, dest_ashmem_mem_map->size_);
+
+  munmap(trmp_pointer, dest_ashmem_mem_map->size_);
 //  memcpy(dest_ashmem_mem_map->begin_,source_ashmem_mem_map->begin_
 //      SERVICE_ALLOC_ALIGN_BYTE(AShmemMap));
 
