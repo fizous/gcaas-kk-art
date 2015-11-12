@@ -47,7 +47,7 @@ namespace art {
 
 typedef struct AShmemMap_S {
   char name_[MEM_MAP_NAME_LENGTH];
-  volatile byte* /*const*/ begin_;  // Start of data.
+  byte* /*const*/ begin_;  // Start of data.
   volatile size_t size_;  // Length of data.
   void* /*const*/ base_begin_;  // Page-aligned base address.
   /*const*/ size_t base_size_;  // Length of mapping.
