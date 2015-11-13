@@ -217,7 +217,7 @@ class MemBaseMap {
     return /*const_cast<const byte*>*/(addr->begin_);
   }
 
-  static byte* GetHighestMemMap(uintptr_t);
+  static std::uintptr_t GetHighestMemMap(uintptr_t);
 
   static void AshmemResize(AShmemMap* addr, size_t new_size);
 

@@ -80,7 +80,7 @@ void StructuredMemMap::SetSize(size_t new_size) {
   ashmem_->size_ = new_size;
 }
 
-byte* MemBaseMap::GetHighestMemMap(std::uintptr_t start_address) {
+std::uintptr_t MemBaseMap::GetHighestMemMap(std::uintptr_t start_address) {
 
   std::uintptr_t _highest_address = 0;
 
@@ -95,7 +95,7 @@ byte* MemBaseMap::GetHighestMemMap(std::uintptr_t start_address) {
   }
   free_map_info_list(map_info_list);
   //_highest_address = RoundUp(_highest_address + 1, kPageSize);
-  return reinterpret_cast<byte*>(_highest_address);
+  return _highest_address;
 }
 
 
