@@ -514,15 +514,15 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      byte* _mapping_addr = MemBaseMap::GetHighestMemMap();/*GCServiceProcess::process_->import_address_*/;
+      /*GCServiceProcess::process_->import_address_*/;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
-
+        byte* _mapping_addr = MemBaseMap::GetHighestMemMap();
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
         //_result->size_ = 4096;
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
-            StringPrintf("fd: %d, flags:%d, prot:%d, size:%s",
+            StringPrintf("fd: %d, flags:%d, prot:%d, size:%s.. will try at addr:%p",
                 _result->fd_, _result->flags_, _result->prot_,
-                PrettySize(_result->size_).c_str());
+                PrettySize(_result->size_).c_str(), _mapping_addr);
 
         //_result->flags_ &= MAP_SHARED;
         //_result->prot_ = PROT_READ | PROT_WRITE;
@@ -545,7 +545,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
                   _result->flags_ << ", prot: " << _result->prot_ <<
                   ", _result->begin_:" << reinterpret_cast<void*>(_result->begin_);
 
-          _mapping_addr += RoundUp(_result->size_, kPageSize);
+          _result->begin_ = reinterpret_cast<unsigned int>(actual);
+          //_mapping_addr += RoundUp(_result->size_, kPageSize);
 //          int _munmap_result = munmap(actual, _result->size_);
 //                    if (_munmap_result == -1) {
 //                      LOG(ERROR) << "munmap failed";
