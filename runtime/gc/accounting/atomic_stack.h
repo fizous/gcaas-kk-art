@@ -91,7 +91,7 @@ class StructuredAtomicStack {
 
   static StructuredAtomicStack* CreateServerAtomicStack(
       StructuredObjectStackData* memory_data, byte* server_begin) {
-    return new ServerStructuredObjectStack(memory_data, server_begin);
+    return new ServerStructuredAtomicStack<T>(memory_data, server_begin);
   }
 
   // Capacity is how many elements we can store in the stack.
