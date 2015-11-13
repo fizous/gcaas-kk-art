@@ -166,7 +166,7 @@ class MemBaseMap {
     COPY_NAME_TO_STRUCT(addr->name_, name);
   }
 
-  static byte* max_covered_address;
+  //static byte* max_covered_address;
   // Releases the memory mapping
   virtual ~MemBaseMap();
 

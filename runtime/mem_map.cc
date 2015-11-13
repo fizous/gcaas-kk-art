@@ -205,7 +205,7 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
     return NULL;
   }
 
-  max_covered_address = std::max(max_covered_address, addr + page_aligned_byte_count);
+  //max_covered_address = std::max(max_covered_address, addr + page_aligned_byte_count);
 
   MemBaseMap::AShmemFillData(ashmem_mem_map, actual,
       byte_count, actual, page_aligned_byte_count, prot, flags, _fd,
@@ -416,7 +416,7 @@ MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count, 
                 << "\n" << maps;
     return NULL;
   }
-  max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
+  //max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   if(shareMem) {
     int result = madvise((void*)actual, page_aligned_byte_count, MADV_DONTFORK);
     if (result == -1) {
@@ -495,7 +495,7 @@ MEM_MAP* MemBaseMap::MapFileAtAddress(byte* addr, size_t byte_count,
                 << ") failed\n" << maps;
     return NULL;
   }
-  max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
+  //max_covered_address = std::max(max_covered_address, actual + page_aligned_byte_count);
   return new MemMap("file", actual + page_offset, byte_count, actual, page_aligned_byte_count,
                     prot);
 }
