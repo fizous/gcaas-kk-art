@@ -513,16 +513,16 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     }
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
-    byte* _mapping_addr = 0;
+    std::uintptr_t _mapping_addr = std::uintptr_t(0);
     if(_svcRes) {
       /*GCServiceProcess::process_->import_address_*/;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
         _mapping_addr =
-            MemBaseMap::GetHighestMemMap(reinterpret_cast<uintptr_t>(_mapping_addr));
+            MemBaseMap::GetHighestMemMap(_mapping_addr);
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
         //_result->size_ = 4096;
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
-            StringPrintf("fd: %d, flags:%d, prot:%d, size:%s.. will try at addr:%p",
+            StringPrintf("fd: %d, flags:%d, prot:%d, size:%s.. will try at addr:0x%016",
                 _result->fd_, _result->flags_, _result->prot_,
                 PrettySize(_result->size_).c_str(), _mapping_addr);
 
@@ -537,7 +537,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
         if(actual == MAP_FAILED) {
           LOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
               << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
-              << ", prot: " << _result->prot_ << ", address: " << reinterpret_cast<void*>(_mapping_addr);
+              << ", prot: " << _result->prot_ << ", address: "
+              << StringPrintf("0x%016",_mapping_addr);
         } else {
           LOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
               _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
@@ -555,7 +556,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //                    }
 
           LOG(ERROR) << "............ >>> _mapping_addr = " <<
-              reinterpret_cast<void*>(_mapping_addr);
+              StringPrintf("0x%016",_mapping_addr) << ", actual = " <<
+              reinterpret_cast<void*>(actual);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";
