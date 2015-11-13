@@ -195,7 +195,7 @@ AShmemMap* MemBaseMap::CreateAShmemMap(AShmemMap* ashmem_mem_map,
 
   MemBaseMap::AShmemFillData(ashmem_mem_map, actual,
       byte_count, actual, page_aligned_byte_count, prot, flags, _fd,
-      debug_friendly_name);
+      debug_friendly_name, NULL);
 
   return ashmem_mem_map;
 }
@@ -283,7 +283,7 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
   MemBaseMap::AShmemFillData(dest_ashmem_mem_map, actual,
       source_ashmem_mem_map->size_, actual,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags, _fd,
-      _name_string);
+      _name_string, NULL);
 
   LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
       << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
