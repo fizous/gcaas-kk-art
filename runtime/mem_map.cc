@@ -87,6 +87,8 @@ byte* MemBaseMap::GetHighestMemMap(void) {
 
   map_info_t* map_info_list = load_map_info_list(getpid());
   for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
+    if(m->start < 0x40000000)
+      continue;
     if(m->start >= 0xb0000000) //we skip if we reach kernel addresses
       break;
     _highest_address = std::max(_highest_address, m->end);
