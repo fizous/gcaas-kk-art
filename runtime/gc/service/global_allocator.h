@@ -22,6 +22,11 @@
 
 namespace art {
 namespace gc {
+
+namespace collector {
+ class IPCServerMarkerSweep;
+}
+
 namespace gcservice{
 
 typedef enum {
