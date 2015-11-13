@@ -27,9 +27,10 @@ typedef struct GCSrverCollectorSpace_S {
 class IPCServerMarkerSweep {
  public:
   static const int KGCSpaceCount = 3;
-  static const int KGCSpaceServerImageInd_  = 0;
-  static const int KGCSpaceServerZygoteInd_ = 1;
-  static const int KGCSpaceServerAllocInd_  = 2;
+  static const int KGCSpaceServerImageInd_    = 0;
+  static const int KGCSpaceServerZygoteInd_   = 1;
+  static const int KGCSpaceServerAllocInd_    = 2;
+
 
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
@@ -58,6 +59,8 @@ class IPCServerMarkerSweep {
   accounting::ATOMIC_OBJ_STACK_T*  GetMappedMarkStack(android::MappedPairProcessFD* pair_memory,
       int entr_ind,
       StructuredObjectStackData* stack_meta_address);
+
+  void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 };//class IPCServerMarkerSweep
 
 }

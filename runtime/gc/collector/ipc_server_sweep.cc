@@ -76,6 +76,16 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
 }
 
 
+void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr) {
+  Thread* _self = Thread::Current();
+  LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
+      << _self->GetTid() << "; address " << reinterpret_cast<void*>(collector_addr);
+
+  mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_, 2,
+      &(client_rec_->sharable_space_->mark_stack_data_));
+
+}
+
 accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
     android::MappedPairProcessFD* pair_memory,
     int entry_ind,
