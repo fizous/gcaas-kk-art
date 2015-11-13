@@ -326,8 +326,7 @@ typedef StructuredAtomicStack<android::MappedPairProcessFD*> StructuredMappedPai
 class ServerStructuredObjectStack : public StructuredObjectStack {
  public:
   ServerStructuredObjectStack(StructuredObjectStackData* data_addr,
-      byte* serv_begin) :
-    stack_data_(data_addr) {
+      byte* serv_begin) : StructuredObjectStack(data_addr) {
     stack_data_->memory_.server_begin_ = serv_begin;
     mem_map_.reset(NULL);
   }
