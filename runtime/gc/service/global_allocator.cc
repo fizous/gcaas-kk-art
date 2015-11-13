@@ -128,7 +128,7 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
 
   //fill the data of the global header
   MEM_MAP::AShmemFillData(&region_header_->ashmem_meta_, begin,
-      memory_size, begin, memory_size, prot, flags, fileDescript, memoryName);
+      memory_size, begin, memory_size, prot, flags, fileDescript, memoryName, NULL);
   region_header_->current_addr_ =
       begin + SERVICE_ALLOC_ALIGN_BYTE(GCSrvcGlobalRegionHeader);
 
