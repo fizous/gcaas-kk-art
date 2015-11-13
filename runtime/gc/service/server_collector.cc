@@ -7,13 +7,14 @@
 #include "thread.h"
 #include "mem_map.h"
 #include "gc/service/global_allocator.h"
-
+#include "gc/collector/ipc_server_sweep.h"
 
 namespace art {
 namespace gc {
 namespace gcservice {
 
-ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
+ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
+                                space::GCSrvSharableHeapData* meta_alloc) :
     heap_data_(meta_alloc),
     run_mu_("ServerLock"),
     run_cond_("ServerLock::cond_", run_mu_),
@@ -59,7 +60,10 @@ ServerCollector::ServerCollector(space::GCSrvSharableHeapData* meta_alloc) :
     while (thread_ == NULL) {
       run_cond_.Wait(self);
     }
+
+    ipc_msweep_ = new collector::IPCServerMarkerSweep(client_rec);
   }
+
 }
 
 
@@ -423,9 +427,11 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 
 
 ServerCollector* ServerCollector::CreateServerCollector(void* args) {
-  space::GCSrvSharableHeapData* _meta_alloc =
-      (space::GCSrvSharableHeapData*) args;
-  return new ServerCollector(_meta_alloc);
+  gcservice::GCServiceClientRecord* _client_rec =
+      (gcservice::GCServiceClientRecord*) args;
+
+  return new ServerCollector(_client_rec,
+      &(_client_rec->sharable_space_->heap_meta_));
 }
 
 

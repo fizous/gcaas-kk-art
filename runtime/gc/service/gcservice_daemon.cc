@@ -7,6 +7,7 @@
 #include <string>
 #include <cutils/ashmem.h>
 #include "gc/service/global_allocator.h"
+#include "gc/collector/ipc_server_sweep.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
@@ -161,7 +162,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-  collector_ = ServerCollector::CreateServerCollector(&binding_.sharable_space_->heap_meta_);
+  collector_ = ServerCollector::CreateServerCollector(&binding_);
 }
 
 

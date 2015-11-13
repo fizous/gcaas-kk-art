@@ -199,7 +199,8 @@ typedef struct GCServiceClientRecord_S {
 
 class ServerCollector {
  public:
-  ServerCollector(space::GCSrvSharableHeapData* meta_alloc);
+  ServerCollector(GCServiceClientRecord* client_rec,
+      space::GCSrvSharableHeapData* meta_alloc);
 
   void Run(void);
   space::GCSrvSharableHeapData* heap_data_;
@@ -245,6 +246,9 @@ class ServerCollector {
 
 
   volatile int cycles_count_;
+
+  collector::IPCServerMarkerSweep* ipc_msweep_;
+
 
 };//class ServerCollector
 
