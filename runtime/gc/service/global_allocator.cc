@@ -513,10 +513,12 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     }
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
+    byte* _mapping_addr = 0;
     if(_svcRes) {
       /*GCServiceProcess::process_->import_address_*/;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
-        byte* _mapping_addr = MemBaseMap::GetHighestMemMap();
+        _mapping_addr =
+            MemBaseMap::GetHighestMemMap(reinterpret_cast<uintptr_t>(_mapping_addr));
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
         //_result->size_ = 4096;
         LOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
