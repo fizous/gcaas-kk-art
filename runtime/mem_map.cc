@@ -87,6 +87,8 @@ byte* MemBaseMap::GetHighestMemMap(void) {
 
   map_info_t* map_info_list = load_map_info_list(getpid());
   for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
+    if(strcmp(m->name, "[stack]") == 0)
+      break;
     _highest_address = std::max(_highest_address, m->end);
   }
   free_map_info_list(map_info_list);
