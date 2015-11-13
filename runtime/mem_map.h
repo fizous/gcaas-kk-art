@@ -120,6 +120,8 @@ class MemBaseMap {
 
   virtual byte* Begin() const = 0;
 
+  virtual byte* ServerBegin(){return NULL;}
+
   virtual void* BaseBegin()  const = 0;
 
   virtual size_t Size()  const = 0;
@@ -201,6 +203,8 @@ class MemBaseMap {
   static MemBaseMap* CreateStructedMemMap(const char* ashmem_name, byte* addr,
       size_t byte_count, int prot, bool shareMem = false,
       AShmemMap* ashmem_mem_map = NULL);
+
+  static MemBaseMap* CreateStructedMemMap(AShmemMap* ashmem_mem_map);
 
   // Map part of a file, taking care of non-page aligned offsets.  The
   // "start" offset is absolute, not relative.
@@ -331,6 +335,10 @@ class StructuredMemMap: public MemBaseMap {
 
   byte* Begin() const {
     return ashmem_->begin_;
+  }
+
+  byte* ServerBegin() {
+    return ashmem_->server_begin_;
   }
 
   size_t Size() const {

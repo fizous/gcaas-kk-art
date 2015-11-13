@@ -138,6 +138,11 @@ MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr
   return _allocated_structured_map;
 }
 
+
+MemBaseMap* MemBaseMap::CreateStructedMemMap(AShmemMap* ashmem_mem_map) {
+  return new StructuredMemMap(ashmem_mem_map);
+}
+
 StructuredMemMap* StructuredMemMap::CreateStructuredMemMap(AShmemMap* ashmem_mem_map,
       const char* ashmem_name, byte* addr, size_t byte_count, int prot,
       bool shareMem) {

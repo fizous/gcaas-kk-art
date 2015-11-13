@@ -336,7 +336,70 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     stack_data_->memory_.server_begin_ = serv_begin;
     mem_map_.reset(NULL);
   }
+
+  // Will clear the stack.
+  void Resize(size_t new_capacity) {
+    LOG(ERROR) << "ServerStructuredAtomicStack::.......Resizing atomic stack.......: " <<
+        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
+
+    stack_data_->capacity_ = new_capacity;
+
+    Reset();
+    //Init(stack_data_->is_shared_);
+  }
+
+  // Size in number of elements.
+  void Init(int shareMem) {
+
+    if(mem_map_.get() != NULL) { // we should unmap first?
+      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
+          stack_data_->capacity_;
+      mem_map_.reset(NULL);
+      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
+          stack_data_->capacity_;
+    } else {
+      LOG(ERROR) << "ServerStructuredAtomicStack::Rinitializing allocation stack to initial size: " <<
+          stack_data_->capacity_;
+    }
+    mem_map_.reset(MEM_MAP::CreateStructedMemMap(&(stack_data_->memory_)));
+    LOG(ERROR) << "ServerStructuredAtomicStack::..........Created mem_map of the atomic stack.....";
+    CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
+    byte* addr = mem_map_->ServerBegin();
+    CHECK(addr != NULL);
+    stack_data_->debug_is_sorted_ = 1;
+    stack_data_->begin_ = reinterpret_cast<T*>(addr);
+    stack_data_->is_shared_ = shareMem;
+    LOG(ERROR) << "ServerStructuredAtomicStack::.........begin of the stack_data....." <<
+        reinterpret_cast<void*>(stack_data_->begin_);
+    //Reset();
+  }
+
+
+  void Reset() {
+    DCHECK(mem_map_.get() != NULL);
+    DCHECK(stack_data_->begin_ != NULL);
+    stack_data_->front_index_ = 0;
+    stack_data_->back_index_ = 0;
+    stack_data_->debug_is_sorted_ = 1;
+    if(stack_data_->is_shared_ == 1) {
+      LOG(ERROR) << "ServerStructuredAtomicStack::.......Resetting Shared atomic stack......., before the memset call";
+      size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
+
+        LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
+            _mem_length << ", end:" <<
+            reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
+
+      memset(reinterpret_cast<void*>(stack_data_->begin_), 0, _mem_length);
+    } else {
+      PLOG(ERROR) << "shared atomic stack has to be shared failed";
+    }
+  }
+
+
   DISALLOW_COPY_AND_ASSIGN(ServerStructuredAtomicStack);
+
+
+
 };
 typedef ServerStructuredAtomicStack<mirror::Object*> ServerStructuredObjectStack;
 
