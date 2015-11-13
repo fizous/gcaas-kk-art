@@ -74,7 +74,8 @@ namespace accounting {
 //
 //typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
-class ServerStructuredObjectStack;
+template <typename T>
+class ServerStructuredAtomicStack;
 
 template <typename T>
 class StructuredAtomicStack {
@@ -90,7 +91,7 @@ class StructuredAtomicStack {
 
   static StructuredAtomicStack* CreateServerAtomicStack(
       StructuredObjectStackData* memory_data, byte* server_begin) {
-    return new ServerStructuredObjectStack(memory_data, server_begin);
+    return new ServerStructuredAtomicStack(memory_data, server_begin);
   }
 
   // Capacity is how many elements we can store in the stack.
@@ -327,15 +328,17 @@ class StructuredAtomicStack {
 typedef StructuredAtomicStack<mirror::Object*> StructuredObjectStack;
 typedef StructuredAtomicStack<android::MappedPairProcessFD*> StructuredMappedPairStack;
 
-class ServerStructuredObjectStack : public StructuredObjectStack {
+template <typename T>
+class ServerStructuredAtomicStack : public StructuredObjectStack {
  public:
-  ServerStructuredObjectStack(StructuredObjectStackData* data_addr,
+  ServerStructuredAtomicStack(StructuredObjectStackData* data_addr,
       byte* serv_begin) : StructuredObjectStack(data_addr) {
     stack_data_->memory_.server_begin_ = serv_begin;
     mem_map_.reset(NULL);
   }
-  DISALLOW_COPY_AND_ASSIGN(ServerStructuredObjectStack);
+  DISALLOW_COPY_AND_ASSIGN(ServerStructuredAtomicStack);
 };
+typedef ServerStructuredAtomicStack<mirror::Object*> ServerStructuredObjectStack;
 
 #else
 
