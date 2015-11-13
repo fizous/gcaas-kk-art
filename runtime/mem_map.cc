@@ -82,7 +82,7 @@ void StructuredMemMap::SetSize(size_t new_size) {
 
 byte* MemBaseMap::GetHighestMemMap(void) {
 
-  uint32_t _highest_address = 0;
+  uintptr_t _highest_address = 0;
 
 
   map_info_t* map_info_list = load_map_info_list(getpid());
