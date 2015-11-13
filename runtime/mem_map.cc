@@ -19,7 +19,7 @@
 #include "mem_map.h"
 #include <stdint.h>
 #include <corkscrew/map_info.h>
-
+#include <unistd.h>
 #include "base/stringprintf.h"
 #include "ScopedFd.h"
 #include "utils.h"

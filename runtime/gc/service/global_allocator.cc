@@ -513,7 +513,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     }
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
-    std::uintptr_t _mapping_addr = std::uintptr_t(0);
+    uintptr_t _mapping_addr = (uintptr_t) 0x00000000;
     if(_svcRes) {
       /*GCServiceProcess::process_->import_address_*/;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
