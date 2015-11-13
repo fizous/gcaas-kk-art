@@ -85,6 +85,11 @@ class StructuredAtomicStack {
     return mark_stack.release();
   }
 
+
+  static StructuredAtomicStack* CreateAtomicStack(StructuredObjectStackData* memory_data) {
+    return new StructuredAtomicStack(memory_data);
+  }
+
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* ShareStack(StructuredAtomicStack* original,
       StructuredObjectStackData* memory_data, bool shareMem, size_t high_capacity) {

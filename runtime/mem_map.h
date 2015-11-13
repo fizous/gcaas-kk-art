@@ -56,12 +56,13 @@ typedef struct AShmemMap_S {
   /*integer to hold the file descriptor of the memory mapped region */
   int fd_;
   char name_[MEM_MAP_NAME_LENGTH];
+  byte* /*const*/ server_begin_;  // Start of data on the server data.
   AShmemMap_S(byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot,
-      int flags, int fd, const std::string& name) :
+      int flags, int fd, const std::string& name, byte* server_begin) :
         begin_(begin), size_(size),
         base_begin_(base_begin), base_size_(base_size),
-        prot_(prot), flags_(flags), fd_(fd) {
+        prot_(prot), flags_(flags), fd_(fd), server_begin_(server_begin) {
     COPY_NAME_TO_STRUCT(name_, name);
   };
   AShmemMap_S(){}
@@ -153,7 +154,7 @@ class MemBaseMap {
 
   static void AShmemFillData(AShmemMap* addr, byte* begin,
       size_t size, void* base_begin, size_t base_size, int prot, int flags,
-      int fd, const std::string& name) {
+      int fd, const std::string& name, byte* server_begin) {
     addr->begin_ = begin;
     addr->size_ = size;
     addr->base_begin_ = base_begin;
@@ -161,6 +162,7 @@ class MemBaseMap {
     addr->prot_ = prot;
     addr->flags_ = flags ;
     addr->fd_ = fd;
+    addr->server_begin_ = server_begin;
     COPY_NAME_TO_STRUCT(addr->name_, name);
   }
 
