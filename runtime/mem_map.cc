@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+#include <string>
 #include "mem_map.h"
 
 #include <corkscrew/map_info.h>
@@ -71,14 +73,26 @@ static void CheckMapRequest(byte*, size_t) { }
 
 #if (true || ART_GC_SERVICE)
 
-byte* MemBaseMap::max_covered_address = NULL;
+//byte* MemBaseMap::max_covered_address = NULL;
 
 
 void StructuredMemMap::SetSize(size_t new_size) {
   ashmem_->size_ = new_size;
 }
 
+byte* MemBaseMap::GetHighestMemMap(void) {
 
+  uint32_t _highest_address = 0;
+
+
+  map_info_t* map_info_list = load_map_info_list(getpid());
+  for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
+    _highest_address = std::max(_highest_address, m->end);
+  }
+  free_map_info_list(map_info_list);
+  _highest_address = RoundUp(_highest_address + 1, kPageSize);
+  return reinterpret_cast<byte*>(_highest_address);
+}
 
 
 StructuredMemMap::StructuredMemMap(AShmemMap* ashmem, const std::string& name,

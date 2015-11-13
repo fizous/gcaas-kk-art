@@ -514,7 +514,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     bool _svcRes =
         android::FileMapperService::GetMapFds(_recSecond);
     if(_svcRes) {
-      byte* _mapping_addr = GCServiceProcess::process_->import_address_;
+      byte* _mapping_addr = MemBaseMap::GetHighestMemMap();/*GCServiceProcess::process_->import_address_*/;
       for(int i = 0; i < _recSecond->fd_count_; i++) {
 
         android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
@@ -551,7 +551,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //                      LOG(ERROR) << "munmap failed";
 //                    }
 
-          LOG(ERROR) << "_mapping_addr = " << reinterpret_cast<void*>(_mapping_addr);
+          LOG(ERROR) << "............ >>> _mapping_addr = " <<
+              reinterpret_cast<void*>(_mapping_addr);
 /*          int _munmap_result = munmap(actual, _result->size_);
           if (_munmap_result == -1) {
             LOG(ERROR) << "munmap failed";

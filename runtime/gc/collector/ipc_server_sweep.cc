@@ -69,6 +69,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
   spaces_[KGCSpaceServerImageInd_].base_ =
       spaces_[KGCSpaceServerImageInd_].client_base_;
   spaces_[KGCSpaceServerImageInd_].base_offset_ = 0;
+
+  LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_;
 }
 
 
