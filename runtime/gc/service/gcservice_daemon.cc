@@ -225,8 +225,8 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
   }
   srvcReady_ = initSvcFD();
 
-  import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
-      MemBaseMap::max_covered_address);
+//  import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
+//      MemBaseMap::max_covered_address);
 
 }
 
