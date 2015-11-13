@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <sys/mman.h>  // For the PROT_* and MAP_* constants.
 #include <sys/types.h>
-
+#include <stdint.h>
 #include "globals.h"
 #include "utils.h"
 

@@ -17,7 +17,7 @@
 
 #include <string>
 #include "mem_map.h"
-
+#include <stdint.h>
 #include <corkscrew/map_info.h>
 
 #include "base/stringprintf.h"
