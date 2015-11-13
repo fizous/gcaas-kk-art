@@ -267,6 +267,16 @@ class StructuredAtomicStack {
 //      Init(shareFlag);
 //    }
 //  }
+
+
+  StructuredAtomicStack(StructuredObjectStackData* data_addr) :
+          stack_data_(data_addr) {
+    mem_map_.reset(NULL);
+  }
+
+
+  StructuredObjectStackData* stack_data_;
+
  private:
   // Size in number of elements.
   void Init(int shareMem) {
@@ -309,13 +319,7 @@ class StructuredAtomicStack {
   }
 
 
-  StructuredAtomicStack(StructuredObjectStackData* data_addr) :
-          stack_data_(data_addr) {
-    mem_map_.reset(NULL);
-  }
 
-
-  StructuredObjectStackData* stack_data_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredAtomicStack);
 };
