@@ -80,16 +80,16 @@ void StructuredMemMap::SetSize(size_t new_size) {
   ashmem_->size_ = new_size;
 }
 
-std::uintptr_t MemBaseMap::GetHighestMemMap(std::uintptr_t start_address) {
+uintptr_t MemBaseMap::GetHighestMemMap(uintptr_t start_address) {
 
-  std::uintptr_t _highest_address = 0;
+  uintptr_t _highest_address = 0;
 
 
   map_info_t* map_info_list = load_map_info_list(getpid());
   for (map_info_t* m = map_info_list; m != NULL; m = m->next) {
     if(m->start < start_address)
       continue;
-    if(m->start > std::uintptr_t(0xb0000000)) //we skip if we reach kernel addresses
+    if(m->start > (uintptr_t)(0xb0000000)) //we skip if we reach kernel addresses
       break;
     _highest_address = std::max<uintptr_t>(_highest_address, m->end);
   }
