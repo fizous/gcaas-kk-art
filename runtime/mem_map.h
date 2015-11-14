@@ -85,19 +85,18 @@ template <class T>
 struct AtomicStackData {
   // Memory mapping of the atomic stack.
   AShmemMap memory_;
-
+  // Base of the atomic stack.
+  T* begin_;
+  // Base of the atomic stack.
+  T* server_begin_;
   // Back index (index after the last element pushed).
   volatile int back_index_;
 
   // Front index, used for implementing PopFront.
   volatile int front_index_;
 
-  // Base of the atomic stack.
-  T* begin_;
-  // Base of the atomic stack.
-  T* server_begin_;
   // Maximum number of elements.
-  volatile size_t capacity_;
+  size_t capacity_;
 
   // Whether or not the stack is sorted, only updated in debug mode to avoid performance overhead.
   int debug_is_sorted_;

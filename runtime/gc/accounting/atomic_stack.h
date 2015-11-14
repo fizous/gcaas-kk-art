@@ -160,13 +160,13 @@ class StructuredAtomicStack {
     int32_t old_front;
     do {
       old_front = stack_data_->front_index_;
-    } while (android_atomic_cas(old_front, 0, &stack_data_->front_index_) != 0);
-    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&stack_data_->front_index_);
+    } while (android_atomic_cas(old_front, 0, &(stack_data_->front_index_)) != 0);
+    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&(stack_data_->front_index_));
     int32_t old_back;
     do {
       old_back = stack_data_->back_index_;
-    } while (android_atomic_cas(old_back, 0, &stack_data_->back_index_) != 0);
-    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&stack_data_->back_index_);
+    } while (android_atomic_cas(old_back, 0, &(stack_data_->back_index_)) != 0);
+    LOG(ERROR) << "back_index address = " << reinterpret_cast<volatile void*>(&(stack_data_->back_index_));
 
 
 //    stack_data_->front_index_ = 0;
@@ -271,12 +271,8 @@ class StructuredAtomicStack {
   virtual void Resize(size_t new_capacity) {
     LOG(ERROR) << ".......Resizing atomic stack.......: " <<
         stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
-    int32_t old_capacity;
-    do {
-      old_capacity = static_cast<int32_t>(stack_data_->capacity_);
-    } while (android_atomic_cas(old_capacity, static_cast<int32_t>(new_capacity),
-        reinterpret_cast<volatile int32_t*>(&stack_data_->capacity_)) != 0);
-//    stack_data_->capacity_ = new_capacity;
+    stack_data_->capacity_ = new_capacity;
+
     LOG(ERROR) << "...Resizing atomic stack: the capacity now is " << stack_data_->capacity_;
     //Reset();
     Init(stack_data_->is_shared_);
