@@ -161,12 +161,12 @@ class StructuredAtomicStack {
     do {
       old_front = stack_data_->front_index_;
     } while (android_atomic_cas(old_front, 0, &(stack_data_->front_index_)) != 0);
-    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&(stack_data_->front_index_));
+    LOG(ERROR) << "front_index address = " << StringPrintf("0x%08x", &(stack_data_->front_index_));
     int32_t old_back;
     do {
       old_back = stack_data_->back_index_;
     } while (android_atomic_cas(old_back, 0, &(stack_data_->back_index_)) != 0);
-    LOG(ERROR) << "back_index address = " << reinterpret_cast<volatile void*>(&(stack_data_->back_index_));
+    LOG(ERROR) << "back_index address = " << StringPrintf("0x%08x", &(stack_data_->back_index_));
 
 
 //    stack_data_->front_index_ = 0;
@@ -338,7 +338,7 @@ class StructuredAtomicStack {
 
   // Size in number of elements.
   virtual void Init(int shareMem) {
-
+    LOG(ERROR) << "Calling Init ";
     if(mem_map_.get() != NULL) { // we should unmap first?
       LOG(ERROR) << "Reinitializing allocation stack to size: " <<
           stack_data_->capacity_;
@@ -352,7 +352,7 @@ class StructuredAtomicStack {
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
         stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE,
         (shareMem == 1), &(stack_data_->memory_)));
-    LOG(ERROR) << "..........Created mem_map of the atomic stack.....";
+    LOG(ERROR) << "..........Created mem_map of the atomic stack..... with capacity = " << stack_data_->capacity_;
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
@@ -375,6 +375,7 @@ class StructuredAtomicStack {
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
     }
     COPY_NAME_TO_STRUCT(stack_data_->name_, name);
+    LOG(ERROR) << "initial capacity = " <<  stack_data_->capacity_;
     stack_data_->capacity_ = capacity;
     stack_data_->is_shared_ = shareMem ? 1 : 0;
     mem_map_.reset(NULL);

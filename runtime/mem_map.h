@@ -90,10 +90,10 @@ struct AtomicStackData {
   // Base of the atomic stack.
   T* server_begin_;
   // Back index (index after the last element pushed).
-  volatile int back_index_;
+  volatile int32_t back_index_;
 
   // Front index, used for implementing PopFront.
-  volatile int front_index_;
+  volatile int32_t front_index_;
 
   // Maximum number of elements.
   size_t capacity_;
