@@ -94,7 +94,8 @@ struct AtomicStackData {
 
   // Base of the atomic stack.
   T* begin_;
-
+  // Base of the atomic stack.
+  T* server_begin_;
   // Maximum number of elements.
   volatile size_t capacity_;
 

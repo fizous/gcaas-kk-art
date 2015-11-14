@@ -122,6 +122,20 @@ class StructuredAtomicStack {
 
   ~StructuredAtomicStack() {}
 
+  void SetEntryIndex(int32_t ind, const T& value) {
+    stack_data_->begin_[ind]= value;
+  }
+
+
+  T GetEntryIndex(int32_t ind) {
+    return stack_data_->begin_[ind];
+  }
+
+  T* GetBaseAddress(void) const {
+    return stack_data_->begin_;
+  }
+
+
   // Returns false if we overflowed the stack.
   bool AtomicPushBack(const T& value) {
     if (kIsDebugBuild) {
@@ -136,7 +150,7 @@ class StructuredAtomicStack {
       }
     } while (android_atomic_cas(index, index + 1, &stack_data_->back_index_) != 0);
 
-    stack_data_->begin_[index] = value;
+    SetEntryIndex(index, value);
     return true;
   }
 
@@ -178,6 +192,9 @@ class StructuredAtomicStack {
     }
   }
 
+
+
+
   void PushBack(const T& value) {
     if (kIsDebugBuild) {
       stack_data_->debug_is_sorted_ = 0;
@@ -185,14 +202,14 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
     stack_data_->back_index_ = index + 1;
-    stack_data_->begin_[index] = value;
+    SetEntryIndex(index, value);
   }
 
   T PopBack() {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
     stack_data_->back_index_ = stack_data_->back_index_ - 1;
-    return stack_data_->begin_[stack_data_->back_index_];
+    return GetEntryIndex(stack_data_->back_index_);
   }
 
   // Take an item from the front of the stack.
@@ -200,7 +217,7 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
     stack_data_->front_index_ = stack_data_->front_index_ + 1;
-    return stack_data_->begin_[index];
+    return GetEntryIndex(index);
   }
 
   // Pop a number of elements.
@@ -218,12 +235,14 @@ class StructuredAtomicStack {
     return stack_data_->back_index_ - stack_data_->front_index_;
   }
 
+
+
   T* Begin() const {
-    return const_cast<T*>(stack_data_->begin_ + stack_data_->front_index_);
+    return const_cast<T*>(GetBaseAddress() + stack_data_->front_index_);
   }
 
   T* End() const {
-    return const_cast<T*>(stack_data_->begin_ + stack_data_->back_index_);
+    return const_cast<T*>(GetBaseAddress() + stack_data_->back_index_);
   }
 
   size_t Capacity() const {
@@ -276,7 +295,30 @@ class StructuredAtomicStack {
   }
 
 
+  void DumpDataEntries(){
+    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~"
+        << ", data_address: " << reinterpret_cast<void*>(stack_data_)
+        << ", begin: " << GetBaseAddress() ;
+//    if(Size() > 0) {
+//      int _index = 0;
+//      T* limit = End();
+//      for (T* it = Begin(); it != limit; ++it) {
+//        T obj = *it;
+//        LOG(ERROR) << " = entry = " << _index++ << "; addr= " <<
+//            reinterpret_cast<void*>(obj);
+//      }
+//    }
+//    for(int i = stack_data_->front_index_; i < stack_data_->back_index_; i++) {
+//      LOG(ERROR) << " = entry = " << i << "addr= " <<
+//          reinterpret_cast<void*>(stack_data_->begin_[i]);
+//    }
+    LOG(ERROR) << "___________________________________________________________________";
+  }
+
+
   StructuredObjectStackData* stack_data_;
+
+
 
  private:
   // Size in number of elements.
@@ -348,6 +390,12 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     //Init(stack_data_->is_shared_);
   }
 
+  T* BaseAddress() {
+    return stack_data_->server_begin_;
+  }
+
+
+
   // Size in number of elements.
   void Init(int shareMem) {
 
@@ -367,7 +415,7 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     byte* addr = mem_map_->ServerBegin();
     CHECK(addr != NULL);
     stack_data_->debug_is_sorted_ = 1;
-    stack_data_->begin_ = reinterpret_cast<T*>(addr);
+    stack_data_->server_begin_ = reinterpret_cast<T*>(addr);
     stack_data_->is_shared_ = shareMem;
     LOG(ERROR) << "ServerStructuredAtomicStack::.........begin of the stack_data....." <<
         reinterpret_cast<void*>(stack_data_->begin_);
