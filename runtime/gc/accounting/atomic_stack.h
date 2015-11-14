@@ -161,11 +161,12 @@ class StructuredAtomicStack {
     do {
       old_front = stack_data_->front_index_;
     } while (android_atomic_cas(old_front, 0, &stack_data_->front_index_) != 0);
+    LOG(ERROR) << "front_index address = " << reinterpret_cast<void*>(&stack_data_->front_index_);
     int32_t old_back;
     do {
       old_back = stack_data_->back_index_;
     } while (android_atomic_cas(old_back, 0, &stack_data_->back_index_) != 0);
-
+    LOG(ERROR) << "front_index address = " << reinterpret_cast<void*>(&stack_data_->back_index_);
 
 
 //    stack_data_->front_index_ = 0;
@@ -194,7 +195,9 @@ class StructuredAtomicStack {
       }
       memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
-      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
+      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......base_address = " <<
+          reinterpret_cast<void*>(GetBaseAddress());
+      LOG(ERROR) << "Capacity = " << stack_data_->capacity_;
       int result = madvise(GetBaseAddress(),
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
