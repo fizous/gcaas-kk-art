@@ -271,8 +271,8 @@ class StructuredAtomicStack {
     int32_t old_capacity;
     do {
       old_capacity = stack_data_->capacity_;
-    } while (android_atomic_cas(old_capacity, const_cast<int32_t>(new_capacity),
-        const_cast<volatile int*>(&stack_data_->capacity_)) != 0);
+    } while (android_atomic_cas(old_capacity, static_cast<int32_t>(new_capacity),
+        static_cast<volatile int*>(&stack_data_->capacity_)) != 0);
 //    stack_data_->capacity_ = new_capacity;
     LOG(ERROR) << "...Resizing atomic stack: the capacity now is " << stack_data_->capacity_;
     //Reset();
