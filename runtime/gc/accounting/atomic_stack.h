@@ -156,7 +156,7 @@ class StructuredAtomicStack {
 
   void Reset() {
     DCHECK(mem_map_.get() != NULL);
-    DCHECK(stack_data_->begin_ != NULL);
+    DCHECK(GetBaseAddress() != NULL);
     stack_data_->front_index_ = 0;
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
@@ -174,17 +174,17 @@ class StructuredAtomicStack {
           MemBaseMap::AshmemResize(&stack_data_->memory_, _mem_length);
           stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
           LOG(ERROR) << "...Done with to resize the stack located at " <<
-              reinterpret_cast<void*>(stack_data_->begin_);
+              reinterpret_cast<void*>(GetBaseAddress());
         }
         LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
             _mem_length << ", end:" <<
-            reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
+            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
         LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
       }
-      memset(reinterpret_cast<void*>(stack_data_->begin_), 0, _mem_length);
+      memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
       LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
-      int result = madvise(stack_data_->begin_,
+      int result = madvise(GetBaseAddress(),
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
         PLOG(WARNING) << "madvise failed";
@@ -390,7 +390,16 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     //Init(stack_data_->is_shared_);
   }
 
-  T* BaseAddress() {
+  void SetEntryIndex(int32_t ind, const T& value) {
+    stack_data_->server_begin_[ind]= value;
+  }
+
+
+  T GetEntryIndex(int32_t ind) {
+    return stack_data_->server_begin_[ind];
+  }
+
+  T* GetBaseAddress(void) const {
     return stack_data_->server_begin_;
   }
 
@@ -418,14 +427,14 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     stack_data_->server_begin_ = reinterpret_cast<T*>(addr);
     stack_data_->is_shared_ = shareMem;
     LOG(ERROR) << "ServerStructuredAtomicStack::.........begin of the stack_data....." <<
-        reinterpret_cast<void*>(stack_data_->begin_);
+        reinterpret_cast<void*>(GetBaseAddress());
     //Reset();
   }
 
 
   void Reset() {
     DCHECK(mem_map_.get() != NULL);
-    DCHECK(stack_data_->begin_ != NULL);
+    DCHECK(GetBaseAddress() != NULL);
     stack_data_->front_index_ = 0;
     stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
@@ -435,9 +444,9 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
 
         LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
             _mem_length << ", end:" <<
-            reinterpret_cast<void*>((reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length));
+            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
 
-      memset(reinterpret_cast<void*>(stack_data_->begin_), 0, _mem_length);
+      memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
       PLOG(ERROR) << "shared atomic stack has to be shared failed";
     }
