@@ -85,6 +85,9 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_, 2,
       &(client_rec_->sharable_space_->mark_stack_data_));
 
+  mark_stack_->DumpDataEntries();
+
+
 }
 
 accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
