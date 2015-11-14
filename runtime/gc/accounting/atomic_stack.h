@@ -157,8 +157,19 @@ class StructuredAtomicStack {
   virtual void Reset() {
     DCHECK(mem_map_.get() != NULL);
     DCHECK(GetBaseAddress() != NULL);
-    stack_data_->front_index_ = 0;
-    stack_data_->back_index_ = 0;
+    int32_t old_front;
+    do {
+      old_front = stack_data_->front_index_;
+    } while (android_atomic_cas(old_front, 0, &stack_data_->front_index_) != 0);
+    int32_t old_back;
+    do {
+      old_back = stack_data_->back_index_;
+    } while (android_atomic_cas(old_back, 0, &stack_data_->back_index_) != 0);
+
+
+
+//    stack_data_->front_index_ = 0;
+//    stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
     if(stack_data_->is_shared_ == 1) {
       LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
@@ -201,14 +212,16 @@ class StructuredAtomicStack {
     }
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
-    stack_data_->back_index_ = index + 1;
+    //stack_data_->back_index_ = index + 1;
+    android_atomic_add(1, &stack_data_->front_index_);
     SetEntryIndex(index, value);
   }
 
   T PopBack() {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
-    stack_data_->back_index_ = stack_data_->back_index_ - 1;
+    //stack_data_->back_index_ = stack_data_->back_index_ - 1;
+    android_atomic_add(-1, &stack_data_->back_index_);
     return GetEntryIndex(stack_data_->back_index_);
   }
 
@@ -216,7 +229,9 @@ class StructuredAtomicStack {
   T PopFront() {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
-    stack_data_->front_index_ = stack_data_->front_index_ + 1;
+   // stack_data_->front_index_ = stack_data_->front_index_ + 1;
+    android_atomic_add(1, &stack_data_->front_index_);
+    //android_atomic_inc(&value_) + 1;
     return GetEntryIndex(index);
   }
 
@@ -253,8 +268,12 @@ class StructuredAtomicStack {
   virtual void Resize(size_t new_capacity) {
     LOG(ERROR) << ".......Resizing atomic stack.......: " <<
         stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
-
-    stack_data_->capacity_ = new_capacity;
+    int32_t old_capacity;
+    do {
+      old_capacity = stack_data_->capacity_;
+    } while (android_atomic_cas(old_capacity, (int32_t)new_capacity,
+        (volatile int*)&stack_data_->capacity_) != 0);
+//    stack_data_->capacity_ = new_capacity;
 
     //Reset();
     Init(stack_data_->is_shared_);
