@@ -154,7 +154,7 @@ class StructuredAtomicStack {
     return true;
   }
 
-  void Reset() {
+  virtual void Reset() {
     DCHECK(mem_map_.get() != NULL);
     DCHECK(GetBaseAddress() != NULL);
     stack_data_->front_index_ = 0;
@@ -377,8 +377,9 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
   ServerStructuredAtomicStack(StructuredObjectStackData* data_addr,
       byte* serv_begin) : StructuredObjectStack(data_addr) {
     stack_data_->memory_.server_begin_ = serv_begin;
-    LOG(ERROR) << "server..begin = " << reinterpret_cast<void*>(stack_data_->memory_.server_begin_);
-    mem_map_.reset(NULL);
+    LOG(ERROR) << "server..begin = " <<
+        reinterpret_cast<void*>(stack_data_->memory_.server_begin_);
+    Init(1);
   }
 
   // Will clear the stack.
