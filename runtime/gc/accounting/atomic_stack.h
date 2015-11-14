@@ -161,12 +161,12 @@ class StructuredAtomicStack {
     do {
       old_front = stack_data_->front_index_;
     } while (android_atomic_cas(old_front, 0, &(stack_data_->front_index_)) != 0);
-    LOG(ERROR) << "front_index address = " << StringPrintf("0x%08x", &(stack_data_->front_index_));
+    LOG(ERROR) << "front_index address = " << StringPrintf("0x%08x", static_cast<uint32_t>(&(stack_data_->front_index_)));
     int32_t old_back;
     do {
       old_back = stack_data_->back_index_;
     } while (android_atomic_cas(old_back, 0, &(stack_data_->back_index_)) != 0);
-    LOG(ERROR) << "back_index address = " << StringPrintf("0x%08x", &(stack_data_->back_index_));
+    LOG(ERROR) << "back_index address = " << StringPrintf("0x%08x", static_cast<uint32_t>(&(stack_data_->back_index_)));
 
 
 //    stack_data_->front_index_ = 0;
