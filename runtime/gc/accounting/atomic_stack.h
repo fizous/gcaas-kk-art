@@ -84,7 +84,7 @@ class StructuredAtomicStack {
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
     UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, NULL, shareMem));
-    mark_stack->Init(shareMem);
+    mark_stack->Init(shareMem? 1 : 0);
     return mark_stack.release();
   }
 
@@ -161,12 +161,12 @@ class StructuredAtomicStack {
     do {
       old_front = stack_data_->front_index_;
     } while (android_atomic_cas(old_front, 0, &stack_data_->front_index_) != 0);
-    LOG(ERROR) << "front_index address = " << reinterpret_cast<void*>(&stack_data_->front_index_);
+    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&stack_data_->front_index_);
     int32_t old_back;
     do {
       old_back = stack_data_->back_index_;
     } while (android_atomic_cas(old_back, 0, &stack_data_->back_index_) != 0);
-    LOG(ERROR) << "front_index address = " << reinterpret_cast<void*>(&stack_data_->back_index_);
+    LOG(ERROR) << "front_index address = " << reinterpret_cast<volatile void*>(&stack_data_->back_index_);
 
 
 //    stack_data_->front_index_ = 0;
