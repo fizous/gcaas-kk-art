@@ -216,7 +216,7 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
     //stack_data_->back_index_ = index + 1;
-    android_atomic_add(1, &stack_data_->front_index_);
+    android_atomic_add(1, &(stack_data_->front_index_));
     SetEntryIndex(index, value);
   }
 
@@ -224,7 +224,7 @@ class StructuredAtomicStack {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
     //stack_data_->back_index_ = stack_data_->back_index_ - 1;
-    android_atomic_add(-1, &stack_data_->back_index_);
+    android_atomic_add(-1, &(stack_data_->back_index_));
     return GetEntryIndex(stack_data_->back_index_);
   }
 
@@ -233,7 +233,7 @@ class StructuredAtomicStack {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
    // stack_data_->front_index_ = stack_data_->front_index_ + 1;
-    android_atomic_add(1, &stack_data_->front_index_);
+    android_atomic_add(1, &(stack_data_->front_index_));
     //android_atomic_inc(&value_) + 1;
     return GetEntryIndex(index);
   }
