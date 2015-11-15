@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "cutils/atomic.h"
 #include "atomic_integer.h"
 #include "base/logging.h"
 #include "base/macros.h"
@@ -201,7 +202,9 @@ class StructuredAtomicStack {
     }
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
-    stack_data_->back_index_ = index + 1;
+    //stack_data_->back_index_ = index + 1;
+
+    android_atomic_add(1, &(stack_data_->back_index_));
     SetEntryIndex(index, value);
   }
 
@@ -216,7 +219,8 @@ class StructuredAtomicStack {
   T PopFront() {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
-    stack_data_->front_index_ = stack_data_->front_index_ + 1;
+    //stack_data_->front_index_ = stack_data_->front_index_ + 1;
+    android_atomic_add(1, &(stack_data_->front_index_));
     return GetEntryIndex(index);
   }
 
