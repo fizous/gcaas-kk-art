@@ -90,7 +90,7 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
         KGCSpaceServerMarkStackInd_,
       &(client_rec_->sharable_space_->mark_stack_data_));
 
-  mark_stack_->DumpDataEntries();
+  mark_stack_->DumpDataEntries(true);
 
 
 }
