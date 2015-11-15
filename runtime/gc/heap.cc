@@ -1961,7 +1961,9 @@ bool Heap::VerifyMissingCardMarks() {
 
 void Heap::SwapStacks() {
 #if (true || ART_GC_SERVICE)
-  accounting::ATOMIC_OBJ_STACK_T::SwapStacks(allocation_stack_.get(), live_stack_.get());
+  if(!accounting::ATOMIC_OBJ_STACK_T::SwapStacks(allocation_stack_.get(), live_stack_.get())) {
+    allocation_stack_.swap(live_stack_);
+  }
 #else
   allocation_stack_.swap(live_stack_);
 #endif
