@@ -114,7 +114,7 @@ class StructuredAtomicStack {
 
   static bool SwapStacks(StructuredAtomicStack* stackA, StructuredAtomicStack* stackB) {
     if(stackA->stack_data_->is_shared_ && stackA->stack_data_->is_shared_) {
-      LOG(ERROR) << "Swapping shared Allocation stacksssss"
+      LOG(ERROR) << "Swapping shared Allocation stacksssss";
           StructuredObjectStackData _temp_data;
           memcpy(&_temp_data, stackA->stack_data_,
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
@@ -122,7 +122,7 @@ class StructuredAtomicStack {
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
           memcpy(stackB->stack_data_, &_temp_data,
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData));
-          return true
+          return true;
     }
     return false;
 
