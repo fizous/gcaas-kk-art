@@ -1342,16 +1342,18 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         LOG(ERROR) << "Locking heapbitmap lock";
 
         WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-        LOG(ERROR) << "Resharing live_heap_bitmap_data_";
-        live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
-          reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
-          &_struct_alloc_space->live_heap_bitmap_data_));
-        LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
-        mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
-          reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
-          &_struct_alloc_space->mark_heap_bitmap_data_));
-        LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
 
+        if(false) {
+          LOG(ERROR) << "Resharing live_heap_bitmap_data_";
+          live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
+            reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
+            &_struct_alloc_space->live_heap_bitmap_data_));
+          LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
+          mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
+            reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
+            &_struct_alloc_space->mark_heap_bitmap_data_));
+          LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
+        }
         allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
             &(_struct_alloc_space->alloc_stack_data_), true, max_allocation_stack_size_));
 
