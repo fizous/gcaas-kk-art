@@ -80,6 +80,33 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
 
 }
 
+
+bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
+  if(allocator_instant_ == NULL) {
+    return false;
+  }
+  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self,
+      *allocator_instant_->region_header_->service_header_.mu_);
+  allocator_instant_->ResetSemaphore();
+  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
+  return true;
+}
+
+
+void GCServiceGlobalAllocator::RaiseSemaphore() {
+  android_atomic_acquire_store(1,
+      &(region_header_->service_header_.zygote_creation_busy_));
+}
+
+void GCServiceGlobalAllocator::ResetSemaphore() {
+  android_atomic_acquire_store(0,
+      &(region_header_->service_header_.zygote_creation_busy_));
+
+}
+
 void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
   region_header_->service_header_.status_ =
         GCSERVICE_STATUS_WAITINGSERVER;
@@ -92,6 +119,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->service_pid_ = -1;
   _header_addr->status_ = GCSERVICE_STATUS_NONE;
   _header_addr->counter_ = 0;
+
   _header_addr->service_status_ = GCSERVICE_STATUS_NONE;
   SharedFutexData* _futexAddress = &_header_addr->lock_.futex_head_;
   SharedConditionVarData* _condAddress = &_header_addr->lock_.cond_var_;
@@ -101,6 +129,8 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->cond_ = new InterProcessConditionVariable("GCServiceD CondVar",
       *_header_addr->mu_, _condAddress);
 
+  android_atomic_acquire_store(0,
+      &(_header_addr->zygote_creation_busy_));
 
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }

@@ -110,6 +110,7 @@ typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
   volatile int counter_;
   volatile int status_;
+  volatile int zygote_creation_busy_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
   pid_t service_pid_;
@@ -163,6 +164,8 @@ class GCServiceGlobalAllocator {
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
   static void BlockOnGCProcessCreation(pid_t);
+  static void BlockOnGCZygoteCreation(void);
+  static bool ShouldNotifyForZygoteForkRelease(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
   static GCServiceHeader* GetServiceHeader(void);
@@ -181,7 +184,8 @@ class GCServiceGlobalAllocator {
   GCServiceGlobalAllocator(int pages);
   byte* AllocateSharableSpace(int* index_p);
   void initServiceHeader(void);
-
+  void RaiseSemaphore();
+  void ResetSemaphore();
   byte* allocate(size_t num_bytes) {
     byte* _addr = region_header_->current_addr_;
     size_t allocated_bytes = RoundUp(num_bytes, kObjectAlignment);
