@@ -61,7 +61,8 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
       run_cond_.Wait(self);
     }
 
-    ipc_msweep_ = new collector::IPCServerMarkerSweep(client_rec);
+    if(false)
+      ipc_msweep_ = new collector::IPCServerMarkerSweep(client_rec);
   }
 
 }
