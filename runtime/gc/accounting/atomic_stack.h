@@ -375,8 +375,10 @@ class StructuredAtomicStack {
               SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData)));
     }
     COPY_NAME_TO_STRUCT(stack_data_->name_, name);
-    LOG(ERROR) << "initial capacity = " <<  stack_data_->capacity_;
     stack_data_->capacity_ = capacity;
+    LOG(ERROR) << "initial capacity = " <<  stack_data_->capacity_ <<
+        ", param = " << capacity << ", printed name = " << stack_data_->name_ <<
+        ", calloc_size = " << SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData);
     stack_data_->is_shared_ = shareMem ? 1 : 0;
     mem_map_.reset(NULL);
   }
