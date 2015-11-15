@@ -32,6 +32,9 @@ class IPCServerMarkerSweep {
   static const int KGCSpaceServerAllocInd_    = 2;
 
 
+  static const int KGCSpaceServerMarkStackInd_   = 1;
+
+
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
   const uint32_t offset_;
