@@ -1474,7 +1474,8 @@ void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetM
             ", begin: " << reinterpret_cast<const void*>(stack->Begin()) <<
             ", end: " << reinterpret_cast<const void*>(stack->End()) <<
             ", bitmap_heap_begin: " << StringPrintf("0x%08x", bitmap->HeapBegin()) <<
-            ", bitmap_heap_limit: " << StringPrintf("0x%08x", bitmap->HeapLimit());
+            ", bitmap_heap_limit: " << StringPrintf("0x%08x", bitmap->HeapLimit()) <<
+            ", stack_capacity=" << stack->Capacity() << ", stack_size=" << stack->Size();
 
       } else {
         large_objects->Set(obj);
