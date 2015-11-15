@@ -85,7 +85,7 @@ class StructuredAtomicStack {
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
     UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, NULL, shareMem));
-    mark_stack->Init(shareMem);
+    mark_stack->Init(shareMem ? 1 : 0);
     return mark_stack.release();
   }
 
@@ -158,8 +158,10 @@ class StructuredAtomicStack {
   virtual void Reset() {
     DCHECK(mem_map_.get() != NULL);
     DCHECK(GetBaseAddress() != NULL);
-    stack_data_->front_index_ = 0;
-    stack_data_->back_index_ = 0;
+    android_atomic_acquire_store(0, &(stack_data_->front_index_));
+    android_atomic_acquire_store(0, &(stack_data_->back_index_));
+//    stack_data_->front_index_ = 0;
+//    stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
     if(stack_data_->is_shared_ == 1) {
       LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
@@ -211,7 +213,8 @@ class StructuredAtomicStack {
   T PopBack() {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
-    stack_data_->back_index_ = stack_data_->back_index_ - 1;
+    //stack_data_->back_index_ = stack_data_->back_index_ - 1;
+    android_atomic_add(-1, &(stack_data_->back_index_));
     return GetEntryIndex(stack_data_->back_index_);
   }
 
