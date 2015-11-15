@@ -107,6 +107,23 @@ void GCServiceGlobalAllocator::ResetSemaphore() {
 
 }
 
+void GCServiceGlobalAllocator::BlockOnGCZygoteCreation(void) {
+  if(allocator_instant_ == NULL) {
+    return;
+  }
+  LOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self,
+      *allocator_instant_->region_header_->service_header_.mu_);
+
+  while(allocator_instant_->region_header_->service_header_.zygote_creation_busy_ == 1) {
+    allocator_instant_->region_header_->service_header_.cond_->Wait(self);
+  }
+  allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
+
+  LOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
+}
+
 void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
   region_header_->service_header_.status_ =
         GCSERVICE_STATUS_WAITINGSERVER;
