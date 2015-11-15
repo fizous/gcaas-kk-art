@@ -84,7 +84,7 @@ class StructuredAtomicStack {
   static StructuredAtomicStack* Create(const std::string& name,
       size_t capacity, bool shareMem) {
     UniquePtr<StructuredAtomicStack> mark_stack(new StructuredAtomicStack(name, capacity, NULL, shareMem));
-    mark_stack->Init(shareMem? 1 : 0);
+    mark_stack->Init(shareMem);
     return mark_stack.release();
   }
 
@@ -157,20 +157,8 @@ class StructuredAtomicStack {
   virtual void Reset() {
     DCHECK(mem_map_.get() != NULL);
     DCHECK(GetBaseAddress() != NULL);
-    int32_t old_front;
-    do {
-      old_front = stack_data_->front_index_;
-    } while (android_atomic_cas(old_front, 0, &(stack_data_->front_index_)) != 0);
-    LOG(ERROR) << "front_index address = " << StringPrintf("%p", &(stack_data_->front_index_));
-    int32_t old_back;
-    do {
-      old_back = stack_data_->back_index_;
-    } while (android_atomic_cas(old_back, 0, &(stack_data_->back_index_)) != 0);
-    LOG(ERROR) << "back_index address = " << StringPrintf("%p", &(stack_data_->back_index_));
-
-
-//    stack_data_->front_index_ = 0;
-//    stack_data_->back_index_ = 0;
+    stack_data_->front_index_ = 0;
+    stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
     if(stack_data_->is_shared_ == 1) {
       LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
@@ -195,9 +183,7 @@ class StructuredAtomicStack {
       }
       memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
-      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......base_address = " <<
-          reinterpret_cast<void*>(GetBaseAddress());
-      LOG(ERROR) << "Capacity = " << stack_data_->capacity_;
+      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
       int result = madvise(GetBaseAddress(),
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
@@ -215,16 +201,14 @@ class StructuredAtomicStack {
     }
     int32_t index = stack_data_->back_index_;
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
-    //stack_data_->back_index_ = index + 1;
-    android_atomic_add(1, &(stack_data_->front_index_));
+    stack_data_->back_index_ = index + 1;
     SetEntryIndex(index, value);
   }
 
   T PopBack() {
     DCHECK_GT(stack_data_->back_index_, stack_data_->front_index_);
     // Decrement the back index non atomically.
-    //stack_data_->back_index_ = stack_data_->back_index_ - 1;
-    android_atomic_add(-1, &(stack_data_->back_index_));
+    stack_data_->back_index_ = stack_data_->back_index_ - 1;
     return GetEntryIndex(stack_data_->back_index_);
   }
 
@@ -232,9 +216,7 @@ class StructuredAtomicStack {
   T PopFront() {
     int32_t index = stack_data_->front_index_;
     DCHECK_LT(index, stack_data_->back_index_);
-   // stack_data_->front_index_ = stack_data_->front_index_ + 1;
-    android_atomic_add(1, &(stack_data_->front_index_));
-    //android_atomic_inc(&value_) + 1;
+    stack_data_->front_index_ = stack_data_->front_index_ + 1;
     return GetEntryIndex(index);
   }
 
@@ -271,9 +253,9 @@ class StructuredAtomicStack {
   virtual void Resize(size_t new_capacity) {
     LOG(ERROR) << ".......Resizing atomic stack.......: " <<
         stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
+
     stack_data_->capacity_ = new_capacity;
 
-    LOG(ERROR) << "...Resizing atomic stack: the capacity now is " << stack_data_->capacity_;
     //Reset();
     Init(stack_data_->is_shared_);
   }
@@ -338,7 +320,7 @@ class StructuredAtomicStack {
 
   // Size in number of elements.
   virtual void Init(int shareMem) {
-    LOG(ERROR) << "Calling Init ";
+
     if(mem_map_.get() != NULL) { // we should unmap first?
       LOG(ERROR) << "Reinitializing allocation stack to size: " <<
           stack_data_->capacity_;
@@ -352,7 +334,7 @@ class StructuredAtomicStack {
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
         stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE,
         (shareMem == 1), &(stack_data_->memory_)));
-    LOG(ERROR) << "..........Created mem_map of the atomic stack..... with capacity = " << stack_data_->capacity_;
+    LOG(ERROR) << "..........Created mem_map of the atomic stack.....";
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
@@ -376,9 +358,6 @@ class StructuredAtomicStack {
     }
     COPY_NAME_TO_STRUCT(stack_data_->name_, name);
     stack_data_->capacity_ = capacity;
-    LOG(ERROR) << "initial capacity = " <<  stack_data_->capacity_ <<
-        ", param = " << capacity << ", printed name = " << stack_data_->name_ <<
-        ", calloc_size = " << SERVICE_ALLOC_ALIGN_BYTE(StructuredObjectStackData);
     stack_data_->is_shared_ = shareMem ? 1 : 0;
     mem_map_.reset(NULL);
   }
