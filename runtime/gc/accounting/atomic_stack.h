@@ -202,7 +202,7 @@ class StructuredAtomicStack {
     if (kIsDebugBuild) {
       stack_data_->debug_is_sorted_ = 0;
     }
-    int32_t index = stack_data_->back_index_;
+    int32_t index = android_atomic_release_load(&(stack_data_->back_index_));
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
     //stack_data_->back_index_ = index + 1;
 
@@ -220,7 +220,7 @@ class StructuredAtomicStack {
 
   // Take an item from the front of the stack.
   T PopFront() {
-    int32_t index = stack_data_->front_index_;
+    int32_t index = android_atomic_release_load(&(stack_data_->front_index_));
     DCHECK_LT(index, stack_data_->back_index_);
     //stack_data_->front_index_ = stack_data_->front_index_ + 1;
     android_atomic_add(1, &(stack_data_->front_index_));
