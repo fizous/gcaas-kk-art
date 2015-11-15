@@ -793,7 +793,8 @@ void IPCMarkSweep::InitializePhase(void) {
   FindDefaultMarkBitmap();
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->local_heap_->PreGcVerification(this);
+  if(false)
+    ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
 void IPCMarkSweep::ApplyTrimming(void) {
