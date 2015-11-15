@@ -1365,13 +1365,14 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         static const size_t default_mark_stack_size = 128 * KB;
         mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
             &(_struct_alloc_space->mark_stack_data_), true, default_mark_stack_size));
+        alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
+            _struct_alloc_space, shared_space);
+        alloc_space_->SetHeapMeta(zygote_space, GetImageSpace()->cont_space_data_);
       }
 
 
     }
-    alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
-        _struct_alloc_space, shared_space);
-    alloc_space_->SetHeapMeta(zygote_space, GetImageSpace()->cont_space_data_);
+
   } else {
     alloc_space_ = zygote_space->CreateZygoteSpace("alloc space", shared_space);
   }
