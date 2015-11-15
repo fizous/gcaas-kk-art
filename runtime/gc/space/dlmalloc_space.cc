@@ -919,7 +919,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
       (strcmp(se_name_c_str, "purdue.dacapo") == 0))) {
     LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
-    sharable_space_data_->register_gc_ = 1;
+    android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
 //    if(false){
 //      AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
 //          "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,

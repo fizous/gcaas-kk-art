@@ -72,6 +72,10 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord*
       spaces_[KGCSpaceServerImageInd_].client_base_;
   spaces_[KGCSpaceServerImageInd_].base_offset_ = 0;
 
+
+  //set the sharable space to be shared
+  android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
+
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_;
 }
 

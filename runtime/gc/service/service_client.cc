@@ -236,6 +236,9 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   ipcHeap_->StartCollectorDaemon();
   _alloc->handShake_->ReqRegistration(sharable_space_->sharable_space_data_);
+  ipcHeap_->BlockForServerInitialization(&sharable_space_->sharable_space_data_->register_gc_);
+
+
   //_alloc->handShake_->GetMapperRecord(sharable_space_->sharable_space_data_);
 
 

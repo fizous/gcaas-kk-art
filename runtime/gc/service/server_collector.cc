@@ -61,8 +61,15 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
       run_cond_.Wait(self);
     }
 
-    if(false)
+    if(true) {
       ipc_msweep_ = new collector::IPCServerMarkerSweep(client_rec);
+      ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+      {
+        IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
+        conc_req_cond_->Broadcast(self);
+        //Signaled the client that we are done with all necessary initialization
+      }
+    }
   }
 
 }

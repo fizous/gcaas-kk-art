@@ -69,6 +69,18 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
 }
 
 
+
+void IPCHeap::BlockForServerInitialization(volatile int32_t* addr_val) {
+  Thread* self = Thread::Current();
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    while(android_atomic_release_load(addr_val) != 2)
+      conc_req_cond_->Wait(self);
+    conc_req_cond_->Broadcast(self);
+  }
+}
+
 void IPCHeap::SetCollectorDaemon(Thread* thread) {
   MutexLock mu(thread, ms_lock_);
   collector_daemon_ = thread;

@@ -107,7 +107,7 @@ class IPCHeap {
   pthread_t collector_pthread_ GUARDED_BY(ms_lock_);
 
   void SetCollectorDaemon(Thread* thread);
-
+  void BlockForServerInitialization(volatile int32_t* addr_val);
   static void* RunDaemon(void* arg);
   bool StartCollectorDaemon(void);
   bool RunCollectorDaemon(void);
