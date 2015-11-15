@@ -1470,7 +1470,8 @@ void Heap::MarkAllocStack(accounting::SpaceBitmap* bitmap, accounting::SpaceSetM
     } else {
       if(GC_HEAP_SRVCE_NO_LOS){
         LOG(FATAL) << "ERROR Heap::MarkAllocStack: " <<
-            StringPrintf("object address = %p", obj) << ", it=" << StringPrintf("%p", it) <<", limit:" <<
+            StringPrintf("object address = %p", obj) <<
+            ", it= " << StringPrintf("%p", it) <<
             ", begin: " << reinterpret_cast<const void*>(stack->Begin()) <<
             ", end: " << reinterpret_cast<const void*>(stack->End()) <<
             ", bitmap_heap_begin: " << StringPrintf("0x%08x", bitmap->HeapBegin()) <<

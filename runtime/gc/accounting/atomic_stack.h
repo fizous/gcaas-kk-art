@@ -240,17 +240,20 @@ class StructuredAtomicStack {
 
   size_t Size() const {
     DCHECK_LE(stack_data_->front_index_, stack_data_->back_index_);
-    return stack_data_->back_index_ - stack_data_->front_index_;
+    return android_atomic_release_load(&(stack_data_->back_index_)) -
+        android_atomic_release_load(&(stack_data_->front_index_));
   }
 
 
 
   T* Begin() const {
-    return const_cast<T*>(GetBaseAddress() + stack_data_->front_index_);
+    return const_cast<T*>(GetBaseAddress() +
+        android_atomic_release_load(&(stack_data_->front_index_)));
   }
 
   T* End() const {
-    return const_cast<T*>(GetBaseAddress() + stack_data_->back_index_);
+    return const_cast<T*>(GetBaseAddress() +
+        android_atomic_release_load(&(stack_data_->back_index_)));
   }
 
   size_t Capacity() const {
@@ -269,8 +272,8 @@ class StructuredAtomicStack {
   }
 
   void Sort() {
-    int32_t start_back_index = stack_data_->back_index_;
-    int32_t start_front_index = stack_data_->front_index_;
+    int32_t start_back_index = android_atomic_release_load(&(stack_data_->back_index_));
+    int32_t start_front_index = android_atomic_release_load(&(stack_data_->front_index_));
     std::sort(Begin(), End());
     CHECK_EQ(start_back_index, stack_data_->back_index_);
     CHECK_EQ(start_front_index, stack_data_->front_index_);
