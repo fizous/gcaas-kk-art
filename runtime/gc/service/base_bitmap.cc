@@ -373,7 +373,7 @@ SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
                                                           mapping_heap_offset_);
 
   LOG(ERROR) << StringPrintf("SharedServerSpaceBitmap:: server_bitmap_begin = %p with size=%zd, and mapped_heap_begin = %p",
-      server_bitmap_begin_, Size(), mapped_heap_begin_);
+      server_bitmap_begin_, Size(), reinterpret_cast<const void*>(mapped_heap_begin_));
 //  SetMappedHeapOffset();
 }
 
