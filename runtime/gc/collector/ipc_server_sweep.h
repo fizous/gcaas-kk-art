@@ -55,7 +55,7 @@ class IPCServerMarkerSweep {
   void FindDefaultMarkBitmap(void);
 
 
-  accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
+  accounting::SharedServerSpaceBitmap* GetMappedBitmap(
       android::MappedPairProcessFD* pair_memory,
       int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr);
 
