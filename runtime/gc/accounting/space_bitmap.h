@@ -285,8 +285,9 @@ std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap
 
 class SharedServerSpaceBitmap : public SharedSpaceBitmap {
  public:
-  uint32_t heap_offset_;
-
+  uint32_t mapping_heap_offset_;
+  word* server_bitmap_begin_;
+  uintptr_t mapped_heap_begin_;
 
   uintptr_t HeapBegin() const {
     return mapped_heap_begin_;
@@ -295,17 +296,14 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
 
   // Starting address of our internal storage.
   word* Begin() const {
-    return mapped_bitmap_begin_;
+    return server_bitmap_begin_;
   }
 
   //void SetMappedHeapOffset(void);
 
-  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, uint32_t heap_offset);
+  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, uint32_t mapping_heap_offset);
   ~SharedServerSpaceBitmap(void){}
 
- private:
-  uintptr_t mapped_heap_begin_;
-  word* mapped_bitmap_begin_;
 };//class SharedSpaceBitmap
 
 std::ostream& operator << (std::ostream& stream, const SharedServerSpaceBitmap& bitmap);

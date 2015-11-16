@@ -357,14 +357,22 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
 
 
 SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
-    uint32_t heap_offset):
+    uint32_t mapping_heap_offset):
         SharedSpaceBitmap(data_p),
-        heap_offset_(heap_offset) {
+        mapping_heap_offset_(mapping_heap_offset) {
   if(data_p == NULL) {
     LOG(FATAL) << "SharedSpaceBitmap::SharedSpaceBitmap: bitmap_data_ is null";
     return;
   }
 
+  server_bitmap_begin_ =
+      reinterpret_cast<word*>(bitmap_data_->mem_map_.server_begin_);
+  mapped_heap_begin_ =
+      reinterpret_cast<uintptr_t>(reinterpret_cast<byte*>(bitmap_data_->heap_begin_) +
+                                                          mapping_heap_offset_);
+
+  LOG(ERROR) << StringPrintf("SharedServerSpaceBitmap:: server_bitmap_begin = %p with size=%zd, and mapped_heap_begin = %zd",
+      server_bitmap_begin_, Size(), mapped_heap_begin_);
 //  SetMappedHeapOffset();
 }
 
