@@ -159,7 +159,7 @@ class GCSrvcClientHandShake {
 class GCServiceGlobalAllocator {
  public:
   static const int kGCServiceFWDAllocationGC = GC_SERVICE_HANDLE_ALLOC_DAEMON;
-  static const bool KGCServiceShareZygoteSpace = false;
+  static const bool KGCServiceShareZygoteSpace = true;
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
