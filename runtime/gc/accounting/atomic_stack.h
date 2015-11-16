@@ -370,11 +370,21 @@ class StructuredAtomicStack {
 
       }
     }
-
-
     LOG(ERROR) << "___________________________________________________________________";
   }
 
+  typedef void Callback(T obj, void* arg);
+
+
+  void OperateOnStack(Callback* visitor, void* args) {
+    int _index = 0;
+    T* limit = End();
+    for (T* it = Begin(); it != limit; ++it) {
+      T obj = *it;
+      //uintptr_t obj_t = reinterpret_cast<uintptr_t>(obj);
+      visitor(obj, args);
+    }
+  }
 
   StructuredObjectStackData* stack_data_;
 

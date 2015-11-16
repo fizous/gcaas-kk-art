@@ -26,6 +26,10 @@
 #include "gc/collector/ipc_server_sweep.h"
 #include "base/bounded_fifo.h"
 #include "mirror/object-inl.h"
+#include "gc/collector/mark_sweep.h"
+#include "mirror/class.h"
+#include "mirror/object_array.h"
+#include "mirror/art_field.h"
 
 #define SERVER_SWEEP_CALC_OFFSET(x, y) (x > y) ? (x - y) : (y - x)
 
@@ -156,8 +160,32 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
   return current_mark_bitmap_;
 }
 
-void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj) {
+void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj,
+    uint32_t calculated_offset) {
+  mirror::Class* klass = obj->GetClass();
+  for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
+    if(klass >= spaces_[i].client_base_) {
+      klass = (klass + calculated_offset);
+      break;
+    }
+  }
+  CHECK(klass != NULL);
+  if (UNLIKELY(klass->IsArrayClass())) {
+    if (klass->IsObjectArrayClass()) {
 
+    }
+  } else if (UNLIKELY(klass == NULL)) {
+
+//    VisitClassReferences(klass, obj, visitor);
+  } else {
+
+  }
+}
+
+void IPCServerMarkerSweep::ExternalScanObjectVisit(mirror::Object* obj,
+    void* calculated_offset) {
+  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
+  ScanObjectVisit(obj, *calc_offset);
 }
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
@@ -165,20 +193,24 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   if(mark_stack_->IsEmpty()) {
     return;
   }
-  static const size_t kFifoSize = 4;
-  BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
+//  static const size_t kFifoSize = 4;
+//  BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
   if(false)
     mark_stack_->Sort();
   //mark_stack_->DumpDataEntries(true);
-  mark_stack_->VerifyDataEntries(true, reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_base_),
-      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_end_),
-          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
-              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
+//  mark_stack_->VerifyDataEntries(true, reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_base_),
+//      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_end_),
+//          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
+//              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
+  uint32_t calculated_offset = offset_(sizeof(Object*));
+  mark_stack_->OperateOnStack(ExternalScanObjectVisit,
+      reinterpret_cast<void*>(&calculated_offset));
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
 //      while (!mark_stack_->IsEmpty() && prefetch_fifo.size() < kFifoSize) {
-//        const Object* obj = mark_stack_->PopBack();
+//        const Object* obj = (mark_stack_->PopBack() + calculated_offset);
+//
 //        DCHECK(obj != NULL);
 //        __builtin_prefetch(obj);
 //        prefetch_fifo.push_back(obj);
@@ -192,10 +224,10 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //      if (mark_stack_->IsEmpty()) {
 //        break;
 //      }
-//      obj = mark_stack_->PopBack();
+//      obj = (mark_stack_->PopBack() + calculated_offset);
 //    }
 //    DCHECK(obj != NULL);
-//    ScanObjectVisit(obj);
+//    ScanObjectVisit(obj, calculated_offset);
 //  }
 }
 
