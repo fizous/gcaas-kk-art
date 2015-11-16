@@ -115,6 +115,26 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 }
 
 
+
+accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
+    android::MappedPairProcessFD* pair_memory,
+    int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr) {
+//  android::IPCAShmemMap* _client_address =
+//      &(pair_memory->first->mem_maps_[entry_ind]);
+  android::IPCAShmemMap* _server_address =
+      &(pair_memory->second->mem_maps_[entry_ind]);
+  AShmemMap* _bitmap_mem_map = &(bitmap_meta_addr->mem_map_);
+  _bitmap_mem_map->mapped_begin_ =
+      reinterpret_cast<byte*>(_server_address->begin_);
+
+  int _offset =
+      reinterpret_cast<unsigned int>(spaces_[KGCSpaceServerAllocInd_].client_base_)
+      - reinterpret_cast<unsigned int>(spaces_[KGCSpaceServerAllocInd_].base_);
+
+  LOG(ERROR) << "IPCServerMarkerSweep::GetMappedBitmap....offset = " << _offset;
+  return new accounting::SharedServerSpaceBitmap(bitmap_meta_addr, _offset);
+}
+
 }
 }
 }

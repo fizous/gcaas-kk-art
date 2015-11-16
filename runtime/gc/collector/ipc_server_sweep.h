@@ -55,13 +55,15 @@ class IPCServerMarkerSweep {
   void FindDefaultMarkBitmap(void);
 
 
-  accounting::SharedSpaceBitmap*  GetMappedBitmap(android::MappedPairProcessFD* pair_memory,
-      int entr_ind,
-      accounting::GCSrvceBitmap* bitmap_meta_addr);
+  accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
+      android::MappedPairProcessFD* pair_memory,
+      int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr);
 
   accounting::ATOMIC_OBJ_STACK_T*  GetMappedMarkStack(android::MappedPairProcessFD* pair_memory,
       int entr_ind,
       StructuredObjectStackData* stack_meta_address);
+
+
 
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 };//class IPCServerMarkerSweep

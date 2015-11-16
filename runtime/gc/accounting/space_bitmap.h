@@ -274,7 +274,7 @@ class SharedSpaceBitmap : public BaseBitmap {
   SharedSpaceBitmap(GCSrvceBitmap*);
 
 
-  ~SharedSpaceBitmap();
+  virtual ~SharedSpaceBitmap();
 
   GCSrvceBitmap* bitmap_data_;
  private:
@@ -283,7 +283,32 @@ class SharedSpaceBitmap : public BaseBitmap {
 
 std::ostream& operator << (std::ostream& stream, const SharedSpaceBitmap& bitmap);
 
+class SharedServerSpaceBitmap : public SharedSpaceBitmap {
+ public:
+  uint32_t heap_offset_;
 
+
+  uintptr_t HeapBegin() const {
+    return mapped_heap_begin_;
+  }
+
+
+  // Starting address of our internal storage.
+  word* Begin() const {
+    return mapped_bitmap_begin_;
+  }
+
+  void SetMappedHeapOffset(void);
+
+  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, uint32_t heap_offset);
+  ~SharedServerSpaceBitmap(void){}
+
+ private:
+  uintptr_t mapped_heap_begin_;
+  word* mapped_bitmap_begin_;
+};//class SharedSpaceBitmap
+
+std::ostream& operator << (std::ostream& stream, const SharedServerSpaceBitmap& bitmap);
 class SpaceBitmap : public BaseBitmap {
  public:
   // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
