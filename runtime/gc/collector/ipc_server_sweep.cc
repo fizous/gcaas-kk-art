@@ -202,7 +202,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_end_),
 //          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
 //              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
-  uint32_t calculated_offset = offset_(sizeof(Object*));
+  uint32_t calculated_offset = offset_ / (sizeof(Object*));
+  LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       reinterpret_cast<void*>(&calculated_offset));
 //  for (;;) {
