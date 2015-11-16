@@ -85,6 +85,8 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
   LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
       << _self->GetTid() << "; address " << reinterpret_cast<void*>(collector_addr);
 
+  curr_collector_ptr_ = collector_addr;
+
   if(mark_stack_ == NULL)
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
