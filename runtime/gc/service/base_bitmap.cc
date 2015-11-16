@@ -365,16 +365,16 @@ SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
     return;
   }
 
-  SetMappedHeapOffset();
+//  SetMappedHeapOffset();
 }
 
-void SharedServerSpaceBitmap::SetMappedHeapOffset(void) {
-  mapped_heap_begin_ = reinterpret_cast<uintptr_t>(
-      reinterpret_cast<byte*>(bitmap_data_->heap_begin_) + heap_offset_);
-  mapped_bitmap_begin_ =
-      reinterpret_cast<word*>(
-          MEM_MAP::AshmemServerBegin(&bitmap_data_->mem_map_));
-}
+//void SharedServerSpaceBitmap::SetMappedHeapOffset(void) {
+//  mapped_heap_begin_ = reinterpret_cast<uintptr_t>(
+//      reinterpret_cast<byte*>(bitmap_data_->heap_begin_) + heap_offset_);
+//  mapped_bitmap_begin_ =
+//      reinterpret_cast<word*>(
+//          MEM_MAP::AshmemServerBegin(&bitmap_data_->mem_map_));
+//}
 
 
 }  // namespace accounting
