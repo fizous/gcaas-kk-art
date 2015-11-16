@@ -10,6 +10,7 @@
 #include "mem_map.h"
 #include "ipcfs/ipcfs.h"
 #include "sticky_mark_sweep.h"
+#include "base/bounded_fifo.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
