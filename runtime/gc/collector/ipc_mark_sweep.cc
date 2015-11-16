@@ -1020,10 +1020,25 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
-      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ << "... MarkStackSize=" << mark_stack_->Size();
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ <<
+      "... MarkStackSize=" << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+
+
+  // Mark everything allocated since the last as GC live so that we can sweep concurrently,
+  // knowing that new allocations won't be marked as live.
+  timings_.StartSplit("MarkStackAsLive");
+  accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
+  space::LargeObjectSpace* _LOS = heap_->large_object_space_;
+  heap_->MarkAllocStack(heap_->alloc_space_->GetLiveBitmap(),
+      _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
+  live_stack->Reset();
+  timings_.EndSplit();
   HandshakeIPCSweepMarkingPhase();
-  MarkSweep::MarkReachableObjects();
+  // Recursively mark all the non-image bits set in the mark bitmap.
+  RecursiveMark();
+
+  //MarkSweep::MarkReachableObjects();
   LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
@@ -1093,11 +1108,11 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
-  HandshakeIPCSweepMarkingPhase();
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
   // TODO: Not put these objects in the mark stack in the first place.
   mark_stack_->Reset();
+  HandshakeIPCSweepMarkingPhase();
   RecursiveMarkDirtyObjects(false, accounting::ConstantsCardTable::kCardDirty - 1);
 }
 

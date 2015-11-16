@@ -65,8 +65,13 @@ class IPCServerMarkerSweep {
       StructuredObjectStackData* stack_meta_address);
 
 
+  void ProcessMarckStack(void);
+  void ScanObjectVisit(const mirror::Object* obj);
 
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
+
+
+
 };//class IPCServerMarkerSweep
 
 }

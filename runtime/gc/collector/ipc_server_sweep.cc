@@ -24,9 +24,13 @@
 #include "gc/space/space.h"
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_server_sweep.h"
-
+#include "base/bounded_fifo.h"
+#include "mirror/object-inl.h"
 
 #define SERVER_SWEEP_CALC_OFFSET(x, y) (x > y) ? (x - y) : (y - x)
+
+using ::art::mirror::Class;
+using ::art::mirror::Object;
 
 namespace art {
 namespace gc {
@@ -97,7 +101,7 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
           (curr_collector_ptr_->current_mark_bitmap_));
   }
 
-  mark_stack_->DumpDataEntries(false);
+  ProcessMarckStack();
 
 
 }
@@ -151,6 +155,45 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
   }
   return current_mark_bitmap_;
 }
+
+void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj) {
+
+}
+
+void IPCServerMarkerSweep::ProcessMarckStack() {
+  LOG(ERROR) << "IPCServerMarkerSweep::ProcessMarckStack....size:" << mark_stack_->Size();
+  if(mark_stack_->IsEmpty()) {
+    return;
+  }
+  static const size_t kFifoSize = 4;
+  BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
+  mark_stack_->Sort();
+  mark_stack_->DumpDataEntries(true);
+//  for (;;) {
+//    const Object* obj = NULL;
+//    if (kUseMarkStackPrefetch) {
+//      while (!mark_stack_->IsEmpty() && prefetch_fifo.size() < kFifoSize) {
+//        const Object* obj = mark_stack_->PopBack();
+//        DCHECK(obj != NULL);
+//        __builtin_prefetch(obj);
+//        prefetch_fifo.push_back(obj);
+//      }
+//      if (prefetch_fifo.empty()) {
+//        break;
+//      }
+//      obj = prefetch_fifo.front();
+//      prefetch_fifo.pop_front();
+//    } else {
+//      if (mark_stack_->IsEmpty()) {
+//        break;
+//      }
+//      obj = mark_stack_->PopBack();
+//    }
+//    DCHECK(obj != NULL);
+//    ScanObjectVisit(obj);
+//  }
+}
+
 
 }
 }
