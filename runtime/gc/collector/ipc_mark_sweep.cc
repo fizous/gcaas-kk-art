@@ -36,6 +36,32 @@ static constexpr size_t kMinConcurrentRemainingBytes = 128 * KB;
 namespace collector {
 
 
+// Performance options.
+constexpr bool kUseRecursiveMark = false;
+constexpr bool kUseMarkStackPrefetch = true;
+constexpr size_t kSweepArrayChunkFreeSize = 1024;
+
+// Parallelism options.
+constexpr bool kParallelCardScan = true;
+constexpr bool kParallelRecursiveMark = true;
+// Don't attempt to parallelize mark stack processing unless the mark stack is at least n
+// elements. This is temporary until we reduce the overhead caused by allocating tasks, etc.. Not
+// having this can add overhead in ProcessReferences since we may end up doing many calls of
+// ProcessMarkStack with very small mark stacks.
+constexpr size_t kMinimumParallelMarkStackSize = 128;
+constexpr bool kParallelProcessMarkStack = true;
+
+// Profiling and information flags.
+constexpr bool kCountClassesMarked = false;
+constexpr bool kProfileLargeObjects = false;
+constexpr bool kMeasureOverhead = false;
+constexpr bool kCountTasks = false;
+constexpr bool kCountJavaLangRefs = false;
+
+// Turn off kCheckLocks when profiling the GC since it slows the GC down by up to 40%.
+constexpr bool kCheckLocks = kDebugLocking;
+
+
 IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     ms_lock_("heap-ipc lock"),
     ms_cond_("heap-ipcs::cond_", ms_lock_),
