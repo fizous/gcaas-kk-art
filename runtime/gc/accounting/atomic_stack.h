@@ -359,7 +359,7 @@ class StructuredAtomicStack {
       T* limit = End();
       for (T* it = Begin(); it != limit; ++it) {
         T obj = *it;
-        uintptr_t obj_t = static_cast<uintptr_t>(obj);
+        uintptr_t obj_t = reinterpret_cast<uintptr_t>(obj);
 
         if(!(obj_t < endA && obj_t >= startA)) {
           if(!(obj_t < endB && obj_t >= startB)) {
