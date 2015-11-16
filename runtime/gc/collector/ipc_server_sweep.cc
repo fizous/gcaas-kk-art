@@ -95,7 +95,7 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
           (curr_collector_ptr_->current_mark_bitmap_));
   }
 
-  mark_stack_->DumpDataEntries(true);
+  mark_stack_->DumpDataEntries(false);
 
 
 }

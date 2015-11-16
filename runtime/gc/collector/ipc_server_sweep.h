@@ -59,7 +59,8 @@ class IPCServerMarkerSweep {
       android::MappedPairProcessFD* pair_memory,
       int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr);
 
-  accounting::ATOMIC_OBJ_STACK_T*  GetMappedMarkStack(android::MappedPairProcessFD* pair_memory,
+  accounting::ATOMIC_OBJ_STACK_T* GetMappedMarkStack(
+      android::MappedPairProcessFD* pair_memory,
       int entr_ind,
       StructuredObjectStackData* stack_meta_address);
 
