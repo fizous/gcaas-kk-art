@@ -301,7 +301,8 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
 
   //void SetMappedHeapOffset(void);
 
-  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, uint32_t mapping_heap_offset);
+  SharedServerSpaceBitmap(GCSrvceBitmap* data_p, byte* server_begin,
+      uint32_t mapping_heap_offset);
   ~SharedServerSpaceBitmap(void){}
 
 };//class SharedSpaceBitmap

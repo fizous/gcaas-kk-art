@@ -169,7 +169,7 @@ typedef struct GCSrvSharableCollectorData_S {
   mirror::Object* immune_end_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
-  volatile accounting::GCSrvceBitmap*  current_mark_bitmap_;
+  accounting::GCSrvceBitmap* volatile current_mark_bitmap_;
 
   int is_concurrent_;
 } __attribute__((aligned(8))) GCSrvSharableCollectorData;
