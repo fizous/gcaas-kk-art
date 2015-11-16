@@ -941,12 +941,55 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
 
+//void IPCMarkSweep::ProcessMarkStack(bool paused) {
+//  Thread* currThread = Thread::Current();
+//  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
+//      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
+//  MarkSweep::ProcessMarkStack(paused);
+//}
+
+// Scan anything that's on the mark stack.
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
       currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
-  MarkSweep::ProcessMarkStack(paused);
+  timings_.StartSplit("ProcessMarkStack");
+  size_t thread_count = GetThreadCount(paused);
+  if (kParallelProcessMarkStack && thread_count > 1 &&
+      mark_stack_->Size() >= kMinimumParallelMarkStackSize) {
+    ProcessMarkStackParallel(thread_count);
+  } else {
+    // TODO: Tune this.
+    static const size_t kFifoSize = 4;
+    BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
+    for (;;) {
+      const Object* obj = NULL;
+      if (kUseMarkStackPrefetch) {
+        while (!mark_stack_->IsEmpty() && prefetch_fifo.size() < kFifoSize) {
+          const Object* obj = mark_stack_->PopBack();
+          DCHECK(obj != NULL);
+          __builtin_prefetch(obj);
+          prefetch_fifo.push_back(obj);
+        }
+        if (prefetch_fifo.empty()) {
+          break;
+        }
+        obj = prefetch_fifo.front();
+        prefetch_fifo.pop_front();
+      } else {
+        if (mark_stack_->IsEmpty()) {
+          break;
+        }
+        obj = mark_stack_->PopBack();
+      }
+      DCHECK(obj != NULL);
+      ScanObject(obj);
+    }
+  }
+  timings_.EndSplit();
 }
+
+
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
