@@ -329,6 +329,8 @@ class StructuredAtomicStack {
     }
 
 
+
+
 //    if(Size() > 0) {
 //      int _index = 0;
 //      T* limit = End();
@@ -342,6 +344,34 @@ class StructuredAtomicStack {
 //      LOG(ERROR) << " = entry = " << i << "addr= " <<
 //          reinterpret_cast<void*>(stack_data_->begin_[i]);
 //    }
+    LOG(ERROR) << "___________________________________________________________________";
+  }
+
+
+  void VerifyDataEntries(bool dumpEntries, uintptr_t startA, uintptr_t endA,
+      uintptr_t startB, uintptr_t endB){
+    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~"
+        << ", data_address: " << reinterpret_cast<void*>(stack_data_)
+        << ", begin: " << GetBaseAddress() ;
+
+    if(dumpEntries && !IsEmpty()) {
+      int _index = 0;
+      T* limit = End();
+      for (T* it = Begin(); it != limit; ++it) {
+        T obj = *it;
+        uintptr_t obj_t = static_cast<uintptr_t>(T);
+
+        if(!(obj_t < endA && obj_t >= startA)) {
+          if(!(obj_t < endB && obj_t >= startB)) {
+            LOG(ERROR) << " not in any space = entry = " << _index++ << "; addr= " <<
+                      reinterpret_cast<void*>(obj);
+          }
+        }
+
+      }
+    }
+
+
     LOG(ERROR) << "___________________________________________________________________";
   }
 

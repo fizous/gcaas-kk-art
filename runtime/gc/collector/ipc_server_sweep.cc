@@ -169,7 +169,11 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
   if(false)
     mark_stack_->Sort();
-  mark_stack_->DumpDataEntries(true);
+  //mark_stack_->DumpDataEntries(true);
+  mark_stack_->VerifyDataEntries(true, reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_base_),
+      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_end_),
+          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
+              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
