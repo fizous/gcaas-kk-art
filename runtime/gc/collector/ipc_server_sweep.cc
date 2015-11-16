@@ -167,7 +167,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   }
   static const size_t kFifoSize = 4;
   BoundedFifoPowerOfTwo<const Object*, kFifoSize> prefetch_fifo;
-  mark_stack_->Sort();
+  if(false)
+    mark_stack_->Sort();
   mark_stack_->DumpDataEntries(true);
 //  for (;;) {
 //    const Object* obj = NULL;
