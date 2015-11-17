@@ -67,7 +67,7 @@ class IPCServerMarkerSweep {
 
   void ProcessMarckStack(void);
   void ScanObjectVisit(const mirror::Object* obj, uint32_t calculated_offset);
-  void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
+  //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
 

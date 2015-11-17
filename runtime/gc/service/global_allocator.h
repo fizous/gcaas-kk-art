@@ -134,7 +134,7 @@ typedef struct GCSrvcGlobalRegionHeader_S {
 class GCSrvcClientHandShake {
  public:
   static const int KGCRequestBufferCapacity = GC_SERVICE_BUFFER_REQ_CAP;
-  static const int KProcessMapperCapacity = IPC_PROCESS_MAPPER_CAPACITY;
+  static const int KProcessMapperCapacity   = IPC_PROCESS_MAPPER_CAPACITY;
   GCSrvcClientHandShake(GCServiceRequestsBuffer*);
   android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
@@ -186,6 +186,7 @@ class GCServiceGlobalAllocator {
   void initServiceHeader(void);
   void RaiseSemaphore();
   void ResetSemaphore();
+
   byte* allocate(size_t num_bytes) {
     byte* _addr = region_header_->current_addr_;
     size_t allocated_bytes = RoundUp(num_bytes, kObjectAlignment);

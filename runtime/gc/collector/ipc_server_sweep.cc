@@ -182,10 +182,13 @@ void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj,
   }
 }
 
-void IPCServerMarkerSweep::ExternalScanObjectVisit(mirror::Object* obj,
-    void* calculated_offset) {
-  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
-  ScanObjectVisit(obj, *calc_offset);
+static void ExternalScanObjectVisit(mirror::Object* obj,
+    void* args) {
+  IPCServerMarkerSweep* param =
+      reinterpret_cast<IPCServerMarkerSweep*>(args);
+  uint32_t calc_offset = (param->offset_ / sizeof(Object*));
+//  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
+  param->ScanObjectVisit(obj, calc_offset);
 }
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
