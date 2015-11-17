@@ -187,8 +187,8 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
   }
 
   if(!found) {
-    LOG(ERROR) << StringPrintf("-------ScanObjectVisit: %p-%p",
-              reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
+//    LOG(ERROR) << StringPrintf("-------ScanObjectVisit: %p-%p",
+//              reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
   }
 
 //  CHECK(klass != NULL);
