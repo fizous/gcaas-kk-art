@@ -160,7 +160,7 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
   return current_mark_bitmap_;
 }
 
-void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj,
+void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
   mirror::Class* klass = obj->GetClass();
   for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
@@ -182,7 +182,7 @@ void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj,
   }
 }
 
-static void ExternalScanObjectVisit(const mirror::Object* obj,
+static void ExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
   IPCServerMarkerSweep* param =
       reinterpret_cast<IPCServerMarkerSweep*>(args);
