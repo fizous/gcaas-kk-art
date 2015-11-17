@@ -163,13 +163,7 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
 void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
   //obj = (obj + calculated_offset);
-  if(!(reinterpret_cast<byte*>(obj) >=
-      spaces_[KGCSpaceServerZygoteInd_].client_base_
-      && reinterpret_cast<byte*>(obj) <=
-      spaces_[KGCSpaceServerAllocInd_].client_end_)) {
-    LOG(ERROR) << "XXXX Object is not in correct range : " <<
-        reinterpret_cast<void*>(obj);
-  }
+
   mirror::Class* klass = obj->GetClass();
   if(klass == NULL) {
     LOG(ERROR) << "XXXX Class is Null....objAddr: " <<
@@ -214,8 +208,17 @@ static void ExternalScanObjectVisit(mirror::Object* obj,
   //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
+  byte* casted_object = reinterpret_cast<byte*>(obj);
+  if(!(casted_object >=
+      param->spaces_[param->KGCSpaceServerZygoteInd_].client_base_
+      && casted_object <=
+      param->spaces_[param->KGCSpaceServerAllocInd_].client_end_)) {
+    LOG(ERROR) << "XXXX Object is not in correct range : " <<
+        reinterpret_cast<void*>(obj);
+  }
+
   param->ScanObjectVisit(
-      reinterpret_cast<mirror::Object*>(reinterpret_cast<byte*>(obj) +
+      reinterpret_cast<mirror::Object*>(casted_object +
           param->offset_), param->offset_);
 }
 
