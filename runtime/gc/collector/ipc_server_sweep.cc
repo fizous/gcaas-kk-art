@@ -174,7 +174,8 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
       klass = reinterpret_cast<mirror::Class*>((reinterpret_cast<byte*>(
           klass) + calculated_offset));
-      LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
+      if(false)
+        LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
           reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
       found = true;
       break;
