@@ -162,36 +162,48 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
 
 void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
-  obj = (obj + calculated_offset);
+  //obj = (obj + calculated_offset);
   mirror::Class* klass = obj->GetClass();
+  bool found = false;
   for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
     if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
-      klass = (klass + calculated_offset);
-      LOG(ERROR) << StringPrintf("ScanObjectVisit; %p-%p",
+      klass = reinterpret_cast<mirror::Class*>((reinterpret_cast<byte*>(
+          klass) + calculated_offset));
+      LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
           reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
+      found = true;
       break;
     }
   }
-  CHECK(klass != NULL);
-  if (UNLIKELY(klass->IsArrayClass())) {
-    if (klass->IsObjectArrayClass()) {
 
-    }
-  } else if (UNLIKELY(klass == NULL)) {
-
-//    VisitClassReferences(klass, obj, visitor);
-  } else {
-
+  if(!found) {
+    LOG(ERROR) << StringPrintf("-------ScanObjectVisit: %p-%p",
+              reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
   }
+
+//  CHECK(klass != NULL);
+//  if (UNLIKELY(klass->IsArrayClass())) {
+//    if (klass->IsObjectArrayClass()) {
+//
+//    }
+//  } else if (UNLIKELY(klass == NULL)) {
+//
+////    VisitClassReferences(klass, obj, visitor);
+//  } else {
+//
+//  }
 }
 
 static void ExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
   IPCServerMarkerSweep* param =
       reinterpret_cast<IPCServerMarkerSweep*>(args);
-  uint32_t calc_offset = (param->offset_ / sizeof(Object*));
+  //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
-  param->ScanObjectVisit(obj, calc_offset);
+
+  param->ScanObjectVisit(
+      reinterpret_cast<mirror::Object*>(reinterpret_cast<byte*>(obj) +
+          param->offset_), param->offset_);
 }
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
