@@ -42,14 +42,16 @@ namespace collector {
 
 
 
-IPCServerMarkerSweep::IPCServerMarkerSweep(gc::gcservice::GCServiceClientRecord* client_record) :
-    client_rec_(client_record),
-    heap_meta_(&(client_rec_->sharable_space_->heap_meta_)),
-    offset_(SERVER_SWEEP_CALC_OFFSET(client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
+IPCServerMarkerSweep::IPCServerMarkerSweep(
+    gc::gcservice::GCServiceClientRecord* client_record) :
+        client_rec_(client_record),
+        heap_meta_(&(client_rec_->sharable_space_->heap_meta_)),
+        offset_(SERVER_SWEEP_CALC_OFFSET(client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
         client_rec_->pair_mapps_->second->mem_maps_[0].begin_)),
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
-        mark_stack_(NULL) {
+        mark_stack_(NULL),
+        java_lang_Class_client_(client_record->java_lang_Class_cached_) {
 
 
   spaces_[KGCSpaceServerZygoteInd_].client_base_ =
@@ -187,7 +189,16 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
 //    LOG(ERROR) << StringPrintf("-------ScanObjectVisit: %p-%p",
 //              reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
   }
+  if (UNLIKELY(klass->IsArrayClass())) {
 
+  } else if (UNLIKELY(klass == java_lang_Class_client_)) {
+
+  } else {
+    //VisitOtherReferences(klass, obj, visitor);
+    if (UNLIKELY(klass->IsReferenceClass())) {
+    //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
+    }
+  }
 //  CHECK(klass != NULL);
 //  if (UNLIKELY(klass->IsArrayClass())) {
 //    if (klass->IsObjectArrayClass()) {

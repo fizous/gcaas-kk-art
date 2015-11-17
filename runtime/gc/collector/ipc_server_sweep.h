@@ -46,6 +46,10 @@ class IPCServerMarkerSweep {
   accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
+
+  // Cache java.lang.Class for optimization.
+  mirror::Class* java_lang_Class_client_;
+
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
 
   mirror::Object* MapObjectAddress(mirror::Object* obj);

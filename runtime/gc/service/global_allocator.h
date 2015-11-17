@@ -203,6 +203,7 @@ class GCServiceProcess;
 typedef struct GCServiceClientRecord_S {
   gc::space::GCSrvSharableDlMallocSpace* sharable_space_;
   android::MappedPairProcessFD* pair_mapps_;
+  mirror::Class* java_lang_Class_cached_;
 }  __attribute__((aligned(8))) GCServiceClientRecord;
 
 
