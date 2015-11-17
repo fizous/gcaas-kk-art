@@ -163,10 +163,13 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
 void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
   //obj = (obj + calculated_offset);
-  CHECK(!(reinterpret_cast<byte*>(obj) >=
+  if(!(reinterpret_cast<byte*>(obj) >=
       spaces_[KGCSpaceServerZygoteInd_].client_base_
       && reinterpret_cast<byte*>(obj) <=
-      spaces_[KGCSpaceServerAllocInd_].client_end_));
+      spaces_[KGCSpaceServerAllocInd_].client_end_)) {
+    LOG(ERROR) << "XXXX Object is not in correct range : " <<
+        reinterpret_cast<void*>(obj);
+  }
   mirror::Class* klass = obj->GetClass();
   if(klass == NULL) {
     LOG(ERROR) << "XXXX Class is Null....objAddr: " <<
