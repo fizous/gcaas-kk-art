@@ -167,7 +167,8 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
   for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
     if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
       klass = (klass + calculated_offset);
-      LOG(ERROR) << StringPrintf("ScanObjectVisit; %p-%p", klass, obj);
+      LOG(ERROR) << StringPrintf("ScanObjectVisit; %p-%p",
+          reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
       break;
     }
   }
