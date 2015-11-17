@@ -162,10 +162,12 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
 
 void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
+  obj = (obj + calculated_offset);
   mirror::Class* klass = obj->GetClass();
   for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
     if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
       klass = (klass + calculated_offset);
+      LOG(ERROR) << StringPrintf("ScanObjectVisit; %p-%p", klass, obj);
       break;
     }
   }
