@@ -182,7 +182,7 @@ void IPCServerMarkerSweep::ScanObjectVisit(const mirror::Object* obj,
   }
 }
 
-static void ExternalScanObjectVisit(mirror::Object* obj,
+static void ExternalScanObjectVisit(const mirror::Object* obj,
     void* args) {
   IPCServerMarkerSweep* param =
       reinterpret_cast<IPCServerMarkerSweep*>(args);

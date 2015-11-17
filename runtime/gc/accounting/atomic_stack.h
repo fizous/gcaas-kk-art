@@ -373,7 +373,7 @@ class StructuredAtomicStack {
     LOG(ERROR) << "___________________________________________________________________";
   }
 
-  typedef void Callback(T obj, void* arg);
+  typedef void Callback(const T obj, void* arg);
 
 
   void OperateOnStack(Callback* visitor, void* args) {
