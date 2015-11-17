@@ -376,8 +376,8 @@ class StructuredAtomicStack {
   typedef void Callback(const T obj, void* arg);
 
 
-  void OperateOnStack(Callback* visitor, void* args) {
-    int _index = 0;
+  void OperateOnStack(Callback visitor, void* args) {
+
     T* limit = End();
     for (T* it = Begin(); it != limit; ++it) {
       T obj = *it;
