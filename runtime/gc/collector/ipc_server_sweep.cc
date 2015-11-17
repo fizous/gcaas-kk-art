@@ -164,6 +164,11 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
     uint32_t calculated_offset) {
   //obj = (obj + calculated_offset);
   mirror::Class* klass = obj->GetClass();
+  if(klass == NULL) {
+    LOG(ERROR) << "XXXX Class is Null....objAddr: " <<
+        reinterpret_cast<void*>(obj) << " XXXXXXXXX";
+    return;
+  }
   bool found = false;
   for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
     if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
