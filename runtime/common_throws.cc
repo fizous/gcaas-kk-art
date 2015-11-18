@@ -70,7 +70,7 @@ static void ThrowExceptionNoLock(const ThrowLocation* throw_location, const char
   AddReferrerLocationNoLock(msg, referrer);
   Thread* self = Thread::Current();
   if (throw_location == NULL) {
-    ThrowLocation computed_throw_location = self->GetCurrentLocationForThrow();
+    ThrowLocation computed_throw_location = self->GetCurrentLocationForThrowNoLock();
     self->ThrowNewExceptionNoLock(computed_throw_location, exception_descriptor, msg.str().c_str());
   } else {
     self->ThrowNewExceptionNoLock(*throw_location, exception_descriptor, msg.str().c_str());
