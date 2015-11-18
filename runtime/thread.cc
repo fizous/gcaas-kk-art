@@ -1996,13 +1996,13 @@ mirror::ArtMethod* Thread::GetCurrentMethod(uint32_t* dex_pc) const {
   return visitor.method_;
 }
 
-ThrowLocation Thread::GetCurrentLocationForThrowNoLock() {
-  Context* context = GetLongJumpContext();
-  CurrentMethodVisitor visitor(this, context);
-  visitor.WalkStack(false);
-  ReleaseLongJumpContext(context);
-  return ThrowLocation(visitor.this_object_, visitor.method_, visitor.dex_pc_);
-}
+//ThrowLocation Thread::GetCurrentLocationForThrowNoLock() {
+//  Context* context = GetLongJumpContext();
+//  CurrentMethodVisitor visitor(this, context);
+//  visitor.WalkStack(false);
+//  ReleaseLongJumpContext(context);
+//  return ThrowLocation(visitor.this_object_, visitor.method_, visitor.dex_pc_);
+//}
 
 ThrowLocation Thread::GetCurrentLocationForThrow() {
   Context* context = GetLongJumpContext();

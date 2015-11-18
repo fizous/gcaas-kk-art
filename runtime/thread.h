@@ -331,7 +331,7 @@ class PACKED(4) Thread {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   ThrowLocation GetCurrentLocationForThrow() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-  ThrowLocation GetCurrentLocationForThrowNoLock();
+  //ThrowLocation GetCurrentLocationForThrowNoLock();
   void SetTopOfStack(void* stack, uintptr_t pc) {
     mirror::ArtMethod** top_method = reinterpret_cast<mirror::ArtMethod**>(stack);
     managed_stack_.SetTopQuickFrame(top_method);
