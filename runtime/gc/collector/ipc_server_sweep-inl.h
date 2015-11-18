@@ -211,10 +211,6 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-//    if(element == NULL || offset.Uint32Value() == 0) {
-//      LOG(ERROR) << StringPrintf("IPCServerMarkerSweep::ServerVisitObjectArrayReference..%p", array);
-//    }
-
     visitor(array, element, offset, false);
   }
 }
