@@ -52,10 +52,10 @@ class ServerMarkObjectVisitor {
   void operator()(const Object* /* obj */, const Object* ref, const MemberOffset& /* offset */,
                   bool /* is_static */) const ALWAYS_INLINE
       NO_THREAD_SAFETY_ANALYSIS {
-    if (kCheckLocks) {
-      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
-      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
-    }
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
     mark_sweep_->MarkObject(ref);
   }
 
@@ -181,7 +181,7 @@ void IPCServerMarkerSweep::ServerScanObject(mirror::Object* obj,
   //obj = (obj + calculated_offset);
 
 
-  mirror::Object* mapped_obj = MapClientReference(obj);
+ // mirror::Object* mapped_obj = MapClientReference(obj);
 
   ServerMarkObjectVisitor visitor(this);
   ServerScanObjectVisit(obj, visitor);

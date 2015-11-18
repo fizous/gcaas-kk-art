@@ -70,7 +70,7 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
 }
 
 
-inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
+inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
   DCHECK(obj != NULL);
 
   if (IsImmune(obj)) {
@@ -110,17 +110,19 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
 // objects.  Any newly-marked objects whose addresses are lower than
 // the finger won't be visited by the bitmap scan, so those objects
 // need to be added to the mark stack.
-inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
+inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
     MarkObjectNonNull(obj);
   }
 }
 
 template <typename MarkVisitor>
-inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
+inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     const MarkVisitor& visitor) {
+  mirror::Object* mapped_obj = MapClientReference(obj);
+
   mirror::Class* klass =
-      GetClientClassFromObject(const_cast<mirror::Object*>(obj));
+      GetClientClassFromObject(mapped_obj);
 
   if(klass == NULL) {
     LOG(FATAL) << StringPrintf("XXXX Class is Null....objAddr: %p XXXXXXXXX" <<
