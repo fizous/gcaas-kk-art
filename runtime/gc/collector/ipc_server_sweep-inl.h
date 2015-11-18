@@ -161,7 +161,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
 template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitClassReferences(
-                        const mirror::Class* klass, const mirror::Object* obj,
+                        mirror::Class* klass, mirror::Object* obj,
                                             const Visitor& visitor)  {
 //  VisitInstanceFieldsReferences(klass, obj, visitor);
 //  VisitStaticFieldsReferences(obj->AsClass(), visitor);
