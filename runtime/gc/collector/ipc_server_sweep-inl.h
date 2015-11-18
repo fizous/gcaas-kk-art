@@ -181,7 +181,8 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   const size_t length = static_cast<size_t>(array->GetLength());
   for (size_t i = 0; i < length; ++i) {
     mirror::Object* element =
-        const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
+        MapClientReference(const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i))));
+
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
     visitor(array, element, offset, false);
@@ -208,7 +209,7 @@ inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Cl
 
 inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
   mirror::Class* super_klass =
-      klass->GetFieldObject<mirror::Class*>(OFFSET_OF_OBJECT_MEMBER(Class, super_class_), false);
+      klass->GetFieldObject<mirror::Class*>(OFFSET_OF_OBJECT_MEMBER(mirror::Class, super_class_), false);
   super_klass = ServerMapHeapReference(super_klass);
   return super_klass;
 }
