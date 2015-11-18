@@ -31,16 +31,17 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   if(casted_param > spaces_[KGCSpaceServerImageInd_].client_end_) {
     bool _found = false;
     for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_param < spaces_[i].client_end_) {
-        casted_param = casted_param + offset_;
+      if(casted_param < spaces_[i].client_end_ &&
+          casted_param >= spaces_[i].client_base_) {
         _found = true;
+        casted_param = casted_param + offset_;
         break;
       }
     }
     if(!_found) {
-      LOG(FATAL) << "--------Could not map Object: " <<
+      LOG(ERROR) << "--------Could not map Object: " <<
           reinterpret_cast<void*>(casted_param);
-      return NULL;
+      return ptr_param;
     }
   } else {
     return ptr_param;
