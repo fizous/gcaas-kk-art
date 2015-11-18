@@ -182,7 +182,23 @@ template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
                                         mirror::Object* obj, uint32_t ref_offsets,
                                              bool is_static, const Visitor& visitor) {
+  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
+#ifndef MOVING_COLLECTOR
+    // Clear the class bit since we mark the class as part of marking the classlinker roots.
+    DCHECK_EQ(mirror::Object::ClassOffset().Uint32Value(), 0U);
+    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
+#endif
+    while (ref_offsets != 0) {
+      size_t right_shift = CLZ(ref_offsets);
+      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
+      const mirror::Object* ref =
+          obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+      visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
+    }
+  } else {
 
+  }
 }
 }
 }
