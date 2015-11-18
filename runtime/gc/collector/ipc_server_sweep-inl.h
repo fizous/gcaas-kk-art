@@ -260,13 +260,16 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
       size_t num_reference_fields = (is_static
                                      ? klass->NumReferenceStaticFields()
                                      : klass->NumReferenceInstanceFields());
-      for (size_t i = 0; i < num_reference_fields; ++i) {
-        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
-                                   : ServerClassGetInstanceField(klass,i));
-        MemberOffset field_offset = field->GetOffset();
-        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+      if(false) {
+        LOG(ERROR) << "static fields " << num_reference_fields;
       }
+//      for (size_t i = 0; i < num_reference_fields; ++i) {
+//        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+//                                   : ServerClassGetInstanceField(klass,i));
+//        MemberOffset field_offset = field->GetOffset();
+//        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+//        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+//      }
     }
   }
 }
