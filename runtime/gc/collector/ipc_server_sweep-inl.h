@@ -206,7 +206,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
             const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
             //);
     if(element == NULL ) {
-      LOG(ERROR) << StringPrintf("IPCServerMarkerSweep::ServerVisitObjectArrayReference..%p", array);
+     // LOG(ERROR) << StringPrintf("IPCServerMarkerSweep::ServerVisitObjectArrayReference..%p", array);
     }
 //    size_t width = sizeof(mirror::Object*);
 //    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
