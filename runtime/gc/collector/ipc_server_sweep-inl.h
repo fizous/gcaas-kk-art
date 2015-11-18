@@ -24,6 +24,21 @@ namespace collector {
 
 
 template <typename TypeRef>
+inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
+  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
+  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
+    return false;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < spaces_[i].client_end_) &&
+        (casted_param >= spaces_[i].client_base_)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
   if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
@@ -165,6 +180,10 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 // need to be added to the mark stack.
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
+    if(BelongsToOldHeap(obj)) {
+      LOG(ERROR) << StringPrintf("XXX ERROR - 0x%08x", reinterpret_cast<uintptr_t>(obj));
+    }
+
     MarkObjectNonNull(obj);
   }
 }
