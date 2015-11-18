@@ -81,7 +81,7 @@ class MANAGED Array : public Object {
 
   bool IsValidIndexNoLock(int32_t index) const  {
     if (UNLIKELY(static_cast<uint32_t>(index) >= static_cast<uint32_t>(GetLength()))) {
-      ThrowArrayIndexOutOfBoundsException(index);
+      ThrowArrayIndexOutOfBoundsExceptionNoLock(index);
       return false;
     }
     return true;
@@ -90,6 +90,7 @@ class MANAGED Array : public Object {
  protected:
   void ThrowArrayIndexOutOfBoundsException(int32_t index) const
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  void ThrowArrayIndexOutOfBoundsExceptionNoLock(int32_t index) const;
   void ThrowArrayStoreException(Object* object) const
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

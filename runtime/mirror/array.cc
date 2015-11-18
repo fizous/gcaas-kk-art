@@ -138,6 +138,10 @@ void Array::ThrowArrayIndexOutOfBoundsException(int32_t index) const {
   art::ThrowArrayIndexOutOfBoundsException(index, GetLength());
 }
 
+void Array::ThrowArrayIndexOutOfBoundsExceptionNoLock(int32_t index) const {
+  art::ThrowArrayIndexOutOfBoundsExceptionNoLock(index, GetLength());
+}
+
 void Array::ThrowArrayStoreException(Object* object) const {
   art::ThrowArrayStoreException(object->GetClass(), this->GetClass());
 }

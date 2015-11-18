@@ -41,6 +41,8 @@ void ThrowArithmeticExceptionDivideByZero() SHARED_LOCKS_REQUIRED(Locks::mutator
 
 // ArrayIndexOutOfBoundsException
 
+void ThrowArrayIndexOutOfBoundsExceptionNoLock(int index, int length);
+
 void ThrowArrayIndexOutOfBoundsException(int index, int length)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

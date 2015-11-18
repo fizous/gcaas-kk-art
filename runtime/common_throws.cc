@@ -45,6 +45,26 @@ static void AddReferrerLocation(std::ostream& os, const mirror::Class* referrer)
   }
 }
 
+static void ThrowExceptionNoLock(const ThrowLocation* throw_location, const char* exception_descriptor,
+                           const mirror::Class* referrer, const char* fmt, va_list* args = NULL) {
+  std::ostringstream msg;
+  if (args != NULL) {
+    std::string vmsg;
+    StringAppendV(&vmsg, fmt, *args);
+    msg << vmsg;
+  } else {
+    msg << fmt;
+  }
+  AddReferrerLocation(msg, referrer);
+  Thread* self = Thread::Current();
+  if (throw_location == NULL) {
+    ThrowLocation computed_throw_location = self->GetCurrentLocationForThrow();
+    self->ThrowNewException(computed_throw_location, exception_descriptor, msg.str().c_str());
+  } else {
+    self->ThrowNewException(*throw_location, exception_descriptor, msg.str().c_str());
+  }
+}
+
 static void ThrowException(const ThrowLocation* throw_location, const char* exception_descriptor,
                            const mirror::Class* referrer, const char* fmt, va_list* args = NULL)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
@@ -87,6 +107,10 @@ void ThrowArrayIndexOutOfBoundsException(int index, int length) {
                  StringPrintf("length=%d; index=%d", length, index).c_str());
 }
 
+void ThrowArrayIndexOutOfBoundsExceptionNoLock(int index, int length) {
+  ThrowExceptionNoLock(NULL, "Ljava/lang/ArrayIndexOutOfBoundsException;", NULL,
+                 StringPrintf("length=%d; index=%d", length, index).c_str());
+}
 // ArrayStoreException
 
 void ThrowArrayStoreException(const mirror::Class* element_class,
