@@ -38,6 +38,16 @@ inline ObjectArray<T>* ObjectArray<T>::Alloc(Thread* self, Class* object_array_c
   }
 }
 
+
+template<class T>
+inline T* ObjectArray<T>::GetNoLock(int32_t i) const {
+  if (UNLIKELY(!IsValidIndex(i))) {
+    return NULL;
+  }
+  MemberOffset data_offset(DataOffset(sizeof(Object*)).Int32Value() + i * sizeof(Object*));
+  return GetFieldObject<T*>(data_offset, false);
+}
+
 template<class T>
 inline T* ObjectArray<T>::Get(int32_t i) const {
   if (UNLIKELY(!IsValidIndex(i))) {

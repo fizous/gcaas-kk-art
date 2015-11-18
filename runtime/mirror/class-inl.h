@@ -307,7 +307,7 @@ inline size_t Class::NumStaticFields() const {
 }
 
 inline ArtField* Class::GetStaticFieldNoLock(uint32_t i) const {
-  return GetSFields()->Get(i);
+  return GetSFields()->GetNoLock(i);
 }
 
 inline ArtField* Class::GetStaticField(uint32_t i) const  // TODO: uint16_t
@@ -329,7 +329,7 @@ inline size_t Class::NumInstanceFields() const {
 inline ArtField* Class::GetInstanceFieldNoLock(uint32_t i) const  // TODO: uint16_t
    {
   DCHECK_NE(NumInstanceFields(), 0U);
-  return GetIFields()->Get(i);
+  return GetIFields()->GetNoLock(i);
 }
 
 inline ArtField* Class::GetInstanceField(uint32_t i) const  // TODO: uint16_t
