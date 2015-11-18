@@ -131,7 +131,9 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
   }
 
   if (UNLIKELY(klass->IsArrayClass())) {
-
+    if (klass->IsObjectArrayClass()) {
+      VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+    }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
 
   } else {
@@ -141,6 +143,21 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     }
   }
 }
+
+
+template <typename Visitor>
+inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
+                                    mirror::ObjectArray<mirror::Object>* array,
+                                                  const Visitor& visitor) {
+  const size_t length = static_cast<size_t>(array->GetLength());
+  for (size_t i = 0; i < length; ++i) {
+    const mirror::Object* element = array->GetWithoutChecks(static_cast<int32_t>(i));
+    const size_t width = sizeof(mirror::Object*);
+    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+    visitor(array, element, offset, false);
+  }
+}
+
 }
 }
 }

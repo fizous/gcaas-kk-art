@@ -56,7 +56,7 @@ class ServerMarkObjectVisitor {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
-    mark_sweep_->MarkObject(ref);
+   // mark_sweep_->MarkObject(ref);
   }
 
  private:
@@ -117,7 +117,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr) {
   Thread* _self = Thread::Current();
   LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
-      << _self->GetTid() << "; address " << reinterpret_cast<void*>(collector_addr);
+      << _self->GetTid() << "; address " <<
+      reinterpret_cast<void*>(collector_addr);
 
   InitMarkingPhase(collector_addr);
 
