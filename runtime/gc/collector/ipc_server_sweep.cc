@@ -49,7 +49,7 @@ class ServerMarkObjectVisitor {
           ALWAYS_INLINE : mark_sweep_(server_mark_sweep) {}
 
   // TODO: Fixme when anotatalysis works with visitors.
-  void operator()(const Object* /* obj */, const Object* ref, const MemberOffset& /* offset */,
+  void operator()(Object* /* obj */, Object* ref, const MemberOffset& /* offset */,
                   bool /* is_static */) const ALWAYS_INLINE
       NO_THREAD_SAFETY_ANALYSIS {
 //    if (kCheckLocks) {
