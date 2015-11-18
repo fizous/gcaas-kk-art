@@ -56,7 +56,7 @@ class ServerMarkObjectVisitor {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
-    mark_sweep_->MarkObject(ref);
+    mark_sweep_->MarkObject(mark_sweep_->ServerMapHeapReference(ref));
   }
 
  private:
