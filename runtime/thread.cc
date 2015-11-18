@@ -1484,6 +1484,12 @@ void Thread::ThrowNewExceptionV(const ThrowLocation& throw_location,
   ThrowNewException(throw_location, exception_class_descriptor, msg.c_str());
 }
 
+void Thread::ThrowNewExceptionNoLock(const ThrowLocation& throw_location, const char* exception_class_descriptor,
+                               const char* msg) {
+  AssertNoPendingException();  // Callers should either clear or call ThrowNewWrappedException.
+  ThrowNewWrappedException(throw_location, exception_class_descriptor, msg);
+}
+
 void Thread::ThrowNewException(const ThrowLocation& throw_location, const char* exception_class_descriptor,
                                const char* msg) {
   AssertNoPendingException();  // Callers should either clear or call ThrowNewWrappedException.
@@ -1988,6 +1994,14 @@ mirror::ArtMethod* Thread::GetCurrentMethod(uint32_t* dex_pc) const {
     *dex_pc = visitor.dex_pc_;
   }
   return visitor.method_;
+}
+
+ThrowLocation Thread::GetCurrentLocationForThrowNoLock() {
+  Context* context = GetLongJumpContext();
+  CurrentMethodVisitor visitor(this, context);
+  visitor.WalkStack(false);
+  ReleaseLongJumpContext(context);
+  return ThrowLocation(visitor.this_object_, visitor.method_, visitor.dex_pc_);
 }
 
 ThrowLocation Thread::GetCurrentLocationForThrow() {

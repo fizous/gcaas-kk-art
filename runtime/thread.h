@@ -331,7 +331,7 @@ class PACKED(4) Thread {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   ThrowLocation GetCurrentLocationForThrow() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-
+  ThrowLocation GetCurrentLocationForThrowNoLock();
   void SetTopOfStack(void* stack, uintptr_t pc) {
     mirror::ArtMethod** top_method = reinterpret_cast<mirror::ArtMethod**>(stack);
     managed_stack_.SetTopQuickFrame(top_method);
@@ -345,6 +345,9 @@ class PACKED(4) Thread {
   bool HasManagedStack() const {
     return managed_stack_.GetTopQuickFrame() != NULL || managed_stack_.GetTopShadowFrame() != NULL;
   }
+  // If 'msg' is NULL, no detail message is set.
+  void ThrowNewExceptionNoLock(const ThrowLocation& throw_location,
+                         const char* exception_class_descriptor, const char* msg);
 
   // If 'msg' is NULL, no detail message is set.
   void ThrowNewException(const ThrowLocation& throw_location,

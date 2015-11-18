@@ -33,6 +33,17 @@
 
 namespace art {
 
+static void AddReferrerLocationNoLock(std::ostream& os, const mirror::Class* referrer)  {
+  if (referrer != NULL) {
+    ClassHelper kh(referrer);
+    std::string location(kh.GetLocation());
+    if (!location.empty()) {
+      os << " (declaration of '" << PrettyDescriptor(referrer)
+            << "' appears in " << location << ")";
+    }
+  }
+}
+
 static void AddReferrerLocation(std::ostream& os, const mirror::Class* referrer)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (referrer != NULL) {
@@ -55,13 +66,13 @@ static void ThrowExceptionNoLock(const ThrowLocation* throw_location, const char
   } else {
     msg << fmt;
   }
-  AddReferrerLocation(msg, referrer);
+  AddReferrerLocationNoLock(msg, referrer);
   Thread* self = Thread::Current();
   if (throw_location == NULL) {
     ThrowLocation computed_throw_location = self->GetCurrentLocationForThrow();
-    self->ThrowNewException(computed_throw_location, exception_descriptor, msg.str().c_str());
+    self->ThrowNewExceptionNoLock(computed_throw_location, exception_descriptor, msg.str().c_str());
   } else {
-    self->ThrowNewException(*throw_location, exception_descriptor, msg.str().c_str());
+    self->ThrowNewExceptionNoLock(*throw_location, exception_descriptor, msg.str().c_str());
   }
 }
 
