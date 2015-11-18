@@ -205,12 +205,14 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
        // MapClientReference(
             const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
             //);
-
-    size_t width = sizeof(mirror::Object*);
-    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-    if(element == NULL || offset.Uint32Value() == 0) {
+    if(element == NULL ) {
       LOG(ERROR) << StringPrintf("IPCServerMarkerSweep::ServerVisitObjectArrayReference..%p", array);
     }
+//    size_t width = sizeof(mirror::Object*);
+//    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+//    if(element == NULL || offset.Uint32Value() == 0) {
+//      LOG(ERROR) << StringPrintf("IPCServerMarkerSweep::ServerVisitObjectArrayReference..%p", array);
+//    }
 
     //visitor(array, element, offset, false);
   }
