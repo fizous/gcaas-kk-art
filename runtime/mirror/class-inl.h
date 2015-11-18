@@ -306,6 +306,10 @@ inline size_t Class::NumStaticFields() const {
   return (GetSFields() != NULL) ? GetSFields()->GetLength() : 0;
 }
 
+inline ArtField* Class::GetStaticFieldNoLock(uint32_t i) const {
+  return GetSFields()->Get(i);
+}
+
 inline ArtField* Class::GetStaticField(uint32_t i) const  // TODO: uint16_t
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   return GetSFields()->Get(i);

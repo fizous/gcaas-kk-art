@@ -676,7 +676,7 @@ class MANAGED Class : public StaticStorageBase {
   void SetSFields(ObjectArray<ArtField>* new_sfields) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   size_t NumStaticFields() const;
-
+  inline ArtField* GetStaticFieldNoLock(uint32_t i) const;
   ArtField* GetStaticField(uint32_t i) const;  // TODO: uint16_t
 
   void SetStaticField(uint32_t i, ArtField* f);  // TODO: uint16_t
