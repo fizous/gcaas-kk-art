@@ -86,7 +86,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   //set the sharable space to be shared
   android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
 
-  LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_;
+  LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
+      ", java_lang_class = " << reinterpret_cast<void*>(java_lang_Class_client_);
 }
 
 
