@@ -208,8 +208,7 @@ inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Cl
 }
 
 inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
-  mirror::Class* super_klass =
-      klass->GetFieldObject<mirror::Class*>(OFFSET_OF_OBJECT_MEMBER(mirror::Class, super_class_), false);
+  mirror::Class* super_klass = klass->GetSuperClass();
   super_klass = ServerMapHeapReference(super_klass);
   return super_klass;
 }
