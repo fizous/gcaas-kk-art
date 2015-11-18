@@ -89,7 +89,7 @@ class IPCServerMarkerSweep {
                                                     const Visitor& visitor);
 
   template <typename Visitor>
-  void ServerVisitClassReferences(const mirror::Class* klass, const mirror::Object* obj,
+  void ServerVisitClassReferences(mirror::Class* klass, const mirror::Object* obj,
                                               const Visitor& visitor);
 
   void InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
