@@ -254,23 +254,23 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
     // walk up the class inheritance hierarchy and find reference
     // offsets the hard way. In the static case, just consider this
     // class.
-    for (mirror::Class* klass = is_static ? obj->AsClass() : GetClientClassFromObject(obj);
-         klass != NULL;
-         klass = is_static ? NULL : ServerClassGetSuperClass(klass)) {
-      size_t num_reference_fields = (is_static
-                                     ? klass->NumReferenceStaticFields()
-                                     : klass->NumReferenceInstanceFields());
-      if(false) {
-        LOG(ERROR) << "static fields " << num_reference_fields;
-      }
-//      for (size_t i = 0; i < num_reference_fields; ++i) {
-//        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
-//                                   : ServerClassGetInstanceField(klass,i));
-//        MemberOffset field_offset = field->GetOffset();
-//        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-//        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+//    for (mirror::Class* klass = is_static ? obj->AsClass() : GetClientClassFromObject(obj);
+//         klass != NULL;
+//         klass = is_static ? NULL : ServerClassGetSuperClass(klass)) {
+//      size_t num_reference_fields = (is_static
+//                                     ? klass->NumReferenceStaticFields()
+//                                     : klass->NumReferenceInstanceFields());
+//      if(false) {
+//        LOG(ERROR) << "static fields " << num_reference_fields;
 //      }
-    }
+////      for (size_t i = 0; i < num_reference_fields; ++i) {
+////        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+////                                   : ServerClassGetInstanceField(klass,i));
+////        MemberOffset field_offset = field->GetOffset();
+////        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+////        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+////      }
+//    }
   }
 }
 }
