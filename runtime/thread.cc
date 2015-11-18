@@ -1487,7 +1487,7 @@ void Thread::ThrowNewExceptionV(const ThrowLocation& throw_location,
 void Thread::ThrowNewExceptionNoLock(const ThrowLocation& throw_location, const char* exception_class_descriptor,
                                const char* msg) {
   AssertNoPendingException();  // Callers should either clear or call ThrowNewWrappedException.
-  ThrowNewWrappedExceptionNoLock(throw_location, exception_class_descriptor, msg);
+  //ThrowNewWrappedExceptionNoLock(throw_location, exception_class_descriptor, msg);
 }
 
 void Thread::ThrowNewException(const ThrowLocation& throw_location, const char* exception_class_descriptor,
