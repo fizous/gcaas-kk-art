@@ -222,7 +222,7 @@ inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(mirror:
 }
 
 inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(mirror::Class* klass, uint32_t i) {
-  mirror::ArtField* mapped_field = klass->GetIFields()->Get(i);
+  mirror::ArtField* mapped_field = klass->GetInstanceFieldNoLock(i);
   mapped_field = ServerMapHeapReference(mapped_field);
 
   return mapped_field;

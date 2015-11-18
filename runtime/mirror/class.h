@@ -615,6 +615,7 @@ class MANAGED Class : public StaticStorageBase {
 
   size_t NumInstanceFields() const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  ArtField* GetInstanceFieldNoLock(uint32_t i) const;
   ArtField* GetInstanceField(uint32_t i) const  // TODO: uint16_t
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

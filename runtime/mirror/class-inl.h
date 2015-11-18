@@ -326,6 +326,12 @@ inline size_t Class::NumInstanceFields() const {
   return (GetIFields() != NULL) ? GetIFields()->GetLength() : 0;
 }
 
+inline ArtField* Class::GetInstanceFieldNoLock(uint32_t i) const  // TODO: uint16_t
+   {
+  DCHECK_NE(NumInstanceFields(), 0U);
+  return GetIFields()->Get(i);
+}
+
 inline ArtField* Class::GetInstanceField(uint32_t i) const  // TODO: uint16_t
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   DCHECK_NE(NumInstanceFields(), 0U);
