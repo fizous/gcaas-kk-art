@@ -35,12 +35,13 @@ namespace art {
 
 static void AddReferrerLocationNoLock(std::ostream& os, const mirror::Class* referrer)  {
   if (referrer != NULL) {
-    ClassHelper kh(referrer);
-    std::string location(kh.GetLocation());
-    if (!location.empty()) {
-      os << " (declaration of '" << PrettyDescriptor(referrer)
-            << "' appears in " << location << ")";
-    }
+    LOG(FATAL) << StringPrintf("AddReferrerLocationNoLock....%p",  referrer);
+//    ClassHelper kh(referrer);
+//    std::string location(kh.GetLocation());
+//    if (!location.empty()) {
+//      os << " (declaration of '" << PrettyDescriptor(referrer)
+//            << "' appears in " << location << ")";
+//    }
   }
 }
 
