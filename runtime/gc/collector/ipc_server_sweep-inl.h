@@ -20,6 +20,30 @@ namespace gc {
 namespace collector {
 
 
+template <typename TypeRef>
+inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
+  if(ptr_param == NULL)
+    return ptr_param;
+  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
+  if(casted_param > spaces_[KGCSpaceServerImageInd_].client_end_) {
+    bool _found = false;
+    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+      if(casted_param < spaces_[i].client_end_) {
+        casted_param = casted_param + offset_;
+        _found = true;
+        break;
+      }
+    }
+    if(!_found) {
+      LOG(FATAL) << "--------Could not map Object: " <<
+          reinterpret_cast<void*>(casted_param);
+      return NULL;
+    }
+  } else {
+    return casted_param;
+  }
+}
+
 inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
   if(obj == NULL)
     return obj;
@@ -177,6 +201,27 @@ inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Cl
   ServerVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
 }
 
+inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
+  mirror::Class* super_klass =
+      klass->GetFieldObject<Class*>(OFFSET_OF_OBJECT_MEMBER(Class, super_class_), false);
+  super_klass = ServerMapHeapReference(super_klass);
+  return super_klass;
+}
+
+inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(mirror::Class* klass,
+    uint32_t i) {
+  mirror::ArtField* mapped_field = klass->GetSFields()->Get(i);
+  mapped_field = ServerMapHeapReference(mapped_field);
+
+  return mapped_field;
+}
+
+inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(mirror::Class* klass, uint32_t i) {
+  mirror::ArtField* mapped_field = klass->GetIFields()->Get(i);
+  mapped_field = ServerMapHeapReference(mapped_field);
+
+  return mapped_field;
+}
 
 template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
@@ -197,7 +242,24 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
       ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
     }
   } else {
-
+    // There is no reference offset bitmap.  In the non-static case,
+    // walk up the class inheritance hierarchy and find reference
+    // offsets the hard way. In the static case, just consider this
+    // class.
+    for (mirror::Class* klass = is_static ? obj->AsClass() : GetClientClassFromObject(obj);
+         klass != NULL;
+         klass = is_static ? NULL : ServerClassGetSuperClass(klass)) {
+      size_t num_reference_fields = (is_static
+                                     ? klass->NumReferenceStaticFields()
+                                     : klass->NumReferenceInstanceFields());
+      for (size_t i = 0; i < num_reference_fields; ++i) {
+        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+                                   : ServerClassGetInstanceField(klass,i));
+        MemberOffset field_offset = field->GetOffset();
+        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+      }
+    }
   }
 }
 }

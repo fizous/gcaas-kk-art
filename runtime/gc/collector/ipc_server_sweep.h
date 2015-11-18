@@ -80,6 +80,10 @@ class IPCServerMarkerSweep {
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
   mirror::Object* MapClientReference(mirror::Object* obj);
+
+  template <typename TypeRef>
+  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
+
   mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(mirror::Object* obj);
   void MarkObjectNonNull(mirror::Object* obj);
@@ -114,6 +118,10 @@ class IPCServerMarkerSweep {
   mirror::Object* GetImmuneEnd() const {
     return current_immune_end_;
   }
+
+  mirror::ArtField* ServerClassGetStaticField(mirror::Class* klass, uint32_t i);
+  mirror::ArtField* ServerClassGetInstanceField(mirror::Class* klass, uint32_t i);
+  mirror::Class* ServerClassGetSuperClass(mirror::Class* klass);
 };//class IPCServerMarkerSweep
 
 }
