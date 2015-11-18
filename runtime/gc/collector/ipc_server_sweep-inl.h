@@ -16,6 +16,7 @@
 #include "mirror/object_array.h"
 #include "mirror/art_field.h"
 
+#include "mirror/art_field-inl.h"
 
 namespace art {
 namespace gc {
