@@ -84,8 +84,9 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
       client_rec_->pair_mapps_->first->mem_maps_[0].size_;
   spaces_[KGCSpaceServerZygoteInd_].base_ =
       reinterpret_cast<byte*>(client_rec_->pair_mapps_->second->mem_maps_[0].begin_);
-  spaces_[KGCSpaceServerZygoteInd_].base_offset_ =
-      spaces_[KGCSpaceServerZygoteInd_].base_ + offset_;
+  spaces_[KGCSpaceServerZygoteInd_].base_end_ =
+      spaces_[KGCSpaceServerZygoteInd_].base_ +
+      client_rec_->pair_mapps_->second->mem_maps_[0].size_;
 
   spaces_[KGCSpaceServerAllocInd_].client_base_ =
       reinterpret_cast<byte*>(client_rec_->pair_mapps_->first->mem_maps_[1].begin_);
@@ -94,8 +95,9 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
       client_rec_->pair_mapps_->first->mem_maps_[1].size_;
   spaces_[KGCSpaceServerAllocInd_].base_ =
       reinterpret_cast<byte*>(client_rec_->pair_mapps_->second->mem_maps_[1].begin_);
-  spaces_[KGCSpaceServerAllocInd_].base_offset_ =
-      spaces_[KGCSpaceServerAllocInd_].base_ + offset_;
+  spaces_[KGCSpaceServerAllocInd_].base_end_ =
+      spaces_[KGCSpaceServerAllocInd_].base_ +
+      client_rec_->pair_mapps_->second->mem_maps_[1].size_;
 
   spaces_[KGCSpaceServerImageInd_].client_base_ =
       heap_meta_->image_space_begin_;
@@ -103,7 +105,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
       heap_meta_->image_space_end_;
   spaces_[KGCSpaceServerImageInd_].base_ =
       spaces_[KGCSpaceServerImageInd_].client_base_;
-  spaces_[KGCSpaceServerImageInd_].base_offset_ = 0;
+  spaces_[KGCSpaceServerImageInd_].base_end_ = heap_meta_->image_space_end_;
 
 
   //set the sharable space to be shared

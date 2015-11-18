@@ -18,7 +18,7 @@ namespace collector {
 typedef struct GCSrverCollectorSpace_S {
   // Immune range, every object inside the immune range is assumed to be marked.
   byte* base_;
-  byte* base_offset_;
+  byte* base_end_;
   byte* client_base_;
   byte* client_end_;
 } __attribute__((aligned(8))) GCSrverCollectorSpace;
@@ -84,6 +84,9 @@ class IPCServerMarkerSweep {
   template <typename TypeRef>
   TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
+  template <typename TypeRef>
+  bool IsMappedObjectToServer(TypeRef* obj);
+
   mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(mirror::Object* obj);
   void MarkObjectNonNull(mirror::Object* obj);
@@ -118,6 +121,7 @@ class IPCServerMarkerSweep {
   mirror::Object* GetImmuneEnd() const {
     return current_immune_end_;
   }
+
 
   mirror::ArtField* ServerClassGetStaticField(mirror::Class* klass, uint32_t i);
   mirror::ArtField* ServerClassGetInstanceField(mirror::Class* klass, uint32_t i);
