@@ -135,7 +135,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
       ServerVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
-    //ServerVisitClassReferences(klass, obj, visitor);
+    ServerVisitClassReferences(klass, obj, visitor);
   } else {
     //VisitOtherReferences(klass, obj, visitor);
     if (UNLIKELY(klass->IsReferenceClass())) {
@@ -164,10 +164,26 @@ template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitClassReferences(
                         mirror::Class* klass, mirror::Object* obj,
                                             const Visitor& visitor)  {
-//  VisitInstanceFieldsReferences(klass, obj, visitor);
+  ServerVisitInstanceFieldsReferences(klass, obj, visitor);
 //  VisitStaticFieldsReferences(obj->AsClass(), visitor);
 }
 
+template <typename Visitor>
+inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Class* klass,
+                                                     mirror::Object* obj,
+                                                     const Visitor& visitor) {
+  DCHECK(obj != NULL);
+  DCHECK(klass != NULL);
+  ServerVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
+}
+
+
+template <typename Visitor>
+inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
+                                        mirror::Object* obj, uint32_t ref_offsets,
+                                             bool is_static, const Visitor& visitor) {
+
+}
 }
 }
 }
