@@ -181,7 +181,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
     if(BelongsToOldHeap(obj)) {
-      LOG(ERROR) << StringPrintf("XXX ERROR - 0x%08x", reinterpret_cast<uintptr_t>(obj));
+      LOG(ERROR) << StringPrintf("XXX ERROR - %p", static_cast<void*>(obj));
     }
 
     MarkObjectNonNull(obj);
@@ -197,8 +197,8 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
       GetClientClassFromObject(mapped_obj);
 
   if(klass == NULL) {
-    LOG(FATAL) << StringPrintf("XXXX Class is Null....objAddr: %p XXXXXXXXX:",
-        obj);
+//    LOG(FATAL) << StringPrintf("XXXX Class is Null....objAddr: %p XXXXXXXXX:",
+//        obj);
     return;
   }
 
