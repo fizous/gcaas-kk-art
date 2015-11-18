@@ -53,6 +53,13 @@ inline Class* Class::GetSuperClass() const {
   DCHECK(IsLoaded() || !Runtime::Current()->IsStarted()) << IsLoaded();
   return GetFieldObject<Class*>(OFFSET_OF_OBJECT_MEMBER(Class, super_class_), false);
 }
+inline Class* Class::GetSuperClassNoLock() const {
+  // Can only get super class for loaded classes (hack for when runtime is
+  // initializing)
+  DCHECK(IsLoaded() || !Runtime::Current()->IsStarted()) << IsLoaded();
+  return GetFieldObject<Class*>(OFFSET_OF_OBJECT_MEMBER(Class, super_class_), false);
+}
+
 
 inline ClassLoader* Class::GetClassLoader() const {
   return GetFieldObject<ClassLoader*>(OFFSET_OF_OBJECT_MEMBER(Class, class_loader_), false);

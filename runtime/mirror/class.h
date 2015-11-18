@@ -471,6 +471,8 @@ class MANAGED Class : public StaticStorageBase {
   }
 
   Class* GetSuperClass() const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  Class* GetSuperClassNoLock() const;
+
 
   void SetSuperClass(Class *new_super_class) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
     // super class is assigned once, except during class linker initialization
