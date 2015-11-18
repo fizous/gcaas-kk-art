@@ -119,8 +119,8 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
       GetClientClassFromObject(const_cast<mirror::Object*>(obj));
 
   if(klass == NULL) {
-    LOG(FATAL) << "XXXX Class is Null....objAddr: " <<
-        reinterpret_cast<void*>(obj) << " XXXXXXXXX";
+    LOG(FATAL) << StringPrintf("XXXX Class is Null....objAddr: %p XXXXXXXXX" <<
+        obj);
     return;
   }
 

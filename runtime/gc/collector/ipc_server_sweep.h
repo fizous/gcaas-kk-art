@@ -90,11 +90,11 @@ class IPCServerMarkerSweep {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
 
-  virtual mirror::Object* GetImmuneBegin() const{
+  mirror::Object* GetImmuneBegin() const{
     return current_immune_begin_;
   }
 
-  virtual  mirror::Object* GetImmuneEnd() const {
+  mirror::Object* GetImmuneEnd() const {
     return current_immune_end_;
   }
 };//class IPCServerMarkerSweep
