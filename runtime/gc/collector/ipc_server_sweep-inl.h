@@ -26,7 +26,10 @@ namespace collector {
 template <typename TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
-  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
+    return true;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < spaces_[i].base_end_) &&
         (casted_param >= spaces_[i].base_)) {
       return true;
