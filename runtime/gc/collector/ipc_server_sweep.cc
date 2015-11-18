@@ -173,23 +173,26 @@ void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
         reinterpret_cast<void*>(obj) << " XXXXXXXXX";
     return;
   }
-  bool found = false;
-  for(int i = KGCSpaceServerAllocInd_; i > KGCSpaceServerImageInd_; i--) {
-    if(reinterpret_cast<byte*>(klass) >= spaces_[i].client_base_) {
-      klass = reinterpret_cast<mirror::Class*>((reinterpret_cast<byte*>(
-          klass) + calculated_offset));
-      if(false)
-        LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
-          reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
-      found = true;
-      break;
+
+  byte* casted_klass = reinterpret_cast<byte*>(klass);
+  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
+    bool found = false;
+    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+      if(casted_klass < spaces_[i].client_end_) {
+        klass = reinterpret_cast<mirror::Class*>(casted_klass + calculated_offset);
+        if(false)
+          LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
+            reinterpret_cast<void*>(casted_klass), reinterpret_cast<void*>(obj));
+        found = true;
+        break;
+      }
+    }
+    if(!found) {
+      LOG(ERROR) << StringPrintf("Not Found Klass-------ScanObjectVisit: %p-%p",
+                reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
     }
   }
 
-  if(!found) {
-//    LOG(ERROR) << StringPrintf("-------ScanObjectVisit: %p-%p",
-//              reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
-  }
   if (UNLIKELY(klass->IsArrayClass())) {
 
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
