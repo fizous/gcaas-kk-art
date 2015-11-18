@@ -151,8 +151,9 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                                                   const Visitor& visitor) {
   const size_t length = static_cast<size_t>(array->GetLength());
   for (size_t i = 0; i < length; ++i) {
-    const mirror::Object* element = array->GetWithoutChecks(static_cast<int32_t>(i));
-    const size_t width = sizeof(mirror::Object*);
+    mirror::Object* element =
+        const_cast<mirror::Object*>(array->GetWithoutChecks(static_cast<int32_t>(i)));
+    size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
     visitor(array, element, offset, false);
   }
