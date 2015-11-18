@@ -40,57 +40,62 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
       return NULL;
     }
   } else {
-    return casted_param;
+    return ptr_param;
   }
+  return reinterpret_cast<TypeRef*>(casted_param);
+
 }
 
 inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
-  if(obj == NULL)
-    return obj;
-  byte* casted_object = reinterpret_cast<byte*>(obj);
-  if(casted_object > spaces_[KGCSpaceServerImageInd_].client_end_) {
-    bool _found = false;
-    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_object < spaces_[i].client_end_) {
-        casted_object = casted_object + offset_;
-        _found = true;
-        break;
-      }
-    }
-    if(!_found) {
-      LOG(FATAL) << "--------Could not map Object: " <<
-          reinterpret_cast<void*>(casted_object);
-      return NULL;
-    }
-  } else {
-    return obj;
-  }
-  return reinterpret_cast<mirror::Object*>(casted_object);
+  return ServerMapHeapReference(obj);
+
+//  if(obj == NULL)
+//    return obj;
+//  byte* casted_object = reinterpret_cast<byte*>(obj);
+//  if(casted_object > spaces_[KGCSpaceServerImageInd_].client_end_) {
+//    bool _found = false;
+//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//      if(casted_object < spaces_[i].client_end_) {
+//        casted_object = casted_object + offset_;
+//        _found = true;
+//        break;
+//      }
+//    }
+//    if(!_found) {
+//      LOG(FATAL) << "--------Could not map Object: " <<
+//          reinterpret_cast<void*>(casted_object);
+//      return NULL;
+//    }
+//  } else {
+//    return obj;
+//  }
+//  return reinterpret_cast<mirror::Object*>(casted_object);
 }
 
 /* it assumes that the class is already mapped */
 inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
   mirror::Class* klass = obj->GetClass();
-  byte* casted_klass = reinterpret_cast<byte*>(klass);
-  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
-    bool _found = false;
-    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_klass < spaces_[i].client_end_) {
-        casted_klass = casted_klass + offset_;
-        _found = true;
-        break;
-      }
-    }
-    if(!_found) {
-      LOG(FATAL) << "--------Could not Get Class from Object: " <<
-          reinterpret_cast<void*>(obj) << ", klass:" << reinterpret_cast<void*>(klass) <<
-          ", mapped_class: " << reinterpret_cast<void*>(casted_klass);
-      return NULL;
-    }
-  } else {
-    return klass;
-  }
-  return reinterpret_cast<mirror::Class*>(casted_klass);
+  return ServerMapHeapReference(klass);
+//  byte* casted_klass = reinterpret_cast<byte*>(klass);
+//  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
+//    bool _found = false;
+//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//      if(casted_klass < spaces_[i].client_end_) {
+//        casted_klass = casted_klass + offset_;
+//        _found = true;
+//        break;
+//      }
+//    }
+//    if(!_found) {
+//      LOG(FATAL) << "--------Could not Get Class from Object: " <<
+//          reinterpret_cast<void*>(obj) << ", klass:" << reinterpret_cast<void*>(klass) <<
+//          ", mapped_class: " << reinterpret_cast<void*>(casted_klass);
+//      return NULL;
+//    }
+//  } else {
+//    return klass;
+//  }
+//  return reinterpret_cast<mirror::Class*>(casted_klass);
 }
 
 
