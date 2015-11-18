@@ -89,6 +89,12 @@ inline T* ObjectArray<T>::GetWithoutChecks(int32_t i) const {
   MemberOffset data_offset(DataOffset(sizeof(Object*)).Int32Value() + i * sizeof(Object*));
   return GetFieldObject<T*>(data_offset, false);
 }
+template<class T>
+inline T* ObjectArray<T>::GetWithoutChecksNoLocks(int32_t i) const {
+  DCHECK(IsValidIndex(i));
+  MemberOffset data_offset(DataOffset(sizeof(Object*)).Int32Value() + i * sizeof(Object*));
+  return GetFieldObject<T*>(data_offset, false);
+}
 
 template<class T>
 inline void ObjectArray<T>::Copy(const ObjectArray<T>* src, int src_pos,

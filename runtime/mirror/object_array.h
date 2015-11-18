@@ -46,6 +46,8 @@ class MANAGED ObjectArray : public Array {
 
   T* GetWithoutChecks(int32_t i) const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  T* GetWithoutChecksNoLocks(int32_t i) const;
+
   static void Copy(const ObjectArray<T>* src, int src_pos,
                    ObjectArray<T>* dst, int dst_pos,
                    size_t length)
