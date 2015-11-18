@@ -21,7 +21,7 @@ namespace collector {
 
 
 inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
-  if(obj == NULL || (obj > spaces_[KGCSpaceServerImageInd_].client_end_))
+  if(obj == NULL)
     return obj;
   byte* casted_object = reinterpret_cast<byte*>(obj);
   if(casted_object > spaces_[KGCSpaceServerImageInd_].client_end_) {
@@ -38,6 +38,8 @@ inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* 
           reinterpret_cast<void*>(casted_object);
       return NULL;
     }
+  } else {
+    return obj;
   }
   return reinterpret_cast<mirror::Object*>(casted_object);
 }
@@ -61,6 +63,8 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
           ", mapped_class: " << reinterpret_cast<void*>(casted_klass);
       return NULL;
     }
+  } else {
+    return klass;
   }
   return reinterpret_cast<mirror::Class*>(casted_klass);
 }
