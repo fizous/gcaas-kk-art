@@ -50,6 +50,9 @@ class IPCServerMarkerSweep {
   // Cache java.lang.Class for optimization.
   mirror::Class* java_lang_Class_client_;
 
+  mirror::Object* current_immune_begin_;
+  mirror::Object* current_immune_end_;
+
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
 
   mirror::Object* MapObjectAddress(mirror::Object* obj);
@@ -70,12 +73,30 @@ class IPCServerMarkerSweep {
 
 
   void ProcessMarckStack(void);
-  void ScanObjectVisit(mirror::Object* obj, uint32_t calculated_offset);
+  void ServerScanObject(mirror::Object* obj, uint32_t calculated_offset);
+  template <typename MarkVisitor>
+  void ServerScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
+  mirror::Object* MapClientReference(mirror::Object* obj);
+  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
+  void MarkObject(const mirror::Object* obj);
+  void MarkObjectNonNull(const mirror::Object* obj);
 
+  void InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
+  // Returns true if an object is inside of the immune region (assumed to be marked).
+  bool IsImmune(const mirror::Object* obj) const {
+    return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
+  }
 
+  virtual mirror::Object* GetImmuneBegin() const{
+    return current_immune_begin_;
+  }
+
+  virtual  mirror::Object* GetImmuneEnd() const {
+    return current_immune_end_;
+  }
 };//class IPCServerMarkerSweep
 
 }

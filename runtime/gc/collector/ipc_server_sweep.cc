@@ -24,6 +24,7 @@
 #include "gc/space/space.h"
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_server_sweep.h"
+#include "gc/collector/ipc_server_sweep-inl.h"
 #include "base/bounded_fifo.h"
 #include "mirror/object-inl.h"
 #include "gc/collector/mark_sweep.h"
@@ -42,6 +43,26 @@ namespace collector {
 
 
 
+class ServerMarkObjectVisitor {
+ public:
+  explicit ServerMarkObjectVisitor(IPCServerMarkerSweep* const server_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(server_mark_sweep) {}
+
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const Object* /* obj */, const Object* ref, const MemberOffset& /* offset */,
+                  bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+    if (kCheckLocks) {
+      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+    }
+    mark_sweep_->MarkObject(ref);
+  }
+
+ private:
+  IPCServerMarkerSweep* const mark_sweep_;
+};
+
 IPCServerMarkerSweep::IPCServerMarkerSweep(
     gc::gcservice::GCServiceClientRecord* client_record) :
         client_rec_(client_record),
@@ -51,7 +72,9 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
         mark_stack_(NULL),
-        java_lang_Class_client_(client_record->java_lang_Class_cached_) {
+        java_lang_Class_client_(client_record->java_lang_Class_cached_),
+        current_immune_begin_(NULL),
+        current_immune_end_(NULL) {
 
 
   spaces_[KGCSpaceServerZygoteInd_].client_base_ =
@@ -96,17 +119,7 @@ void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorDat
   LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
       << _self->GetTid() << "; address " << reinterpret_cast<void*>(collector_addr);
 
-  curr_collector_ptr_ = collector_addr;
-
-  if(mark_stack_ == NULL)
-    mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
-        KGCSpaceServerMarkStackInd_,
-      &(client_rec_->sharable_space_->mark_stack_data_));
-  if(current_mark_bitmap_ == NULL) {
-    current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
-        KGCSpaceServerMarkBitmapInd_,
-          (curr_collector_ptr_->current_mark_bitmap_));
-  }
+  InitMarkingPhase(collector_addr);
 
   ProcessMarckStack();
 
@@ -163,46 +176,17 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
   return current_mark_bitmap_;
 }
 
-void IPCServerMarkerSweep::ScanObjectVisit(mirror::Object* obj,
+void IPCServerMarkerSweep::ServerScanObject(mirror::Object* obj,
     uint32_t calculated_offset) {
   //obj = (obj + calculated_offset);
 
-  mirror::Class* klass = obj->GetClass();
-  if(klass == NULL) {
-    LOG(ERROR) << "XXXX Class is Null....objAddr: " <<
-        reinterpret_cast<void*>(obj) << " XXXXXXXXX";
-    return;
-  }
 
-  byte* casted_klass = reinterpret_cast<byte*>(klass);
-  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
-    bool found = false;
-    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_klass < spaces_[i].client_end_) {
-        klass = reinterpret_cast<mirror::Class*>(casted_klass + calculated_offset);
-        if(false)
-          LOG(ERROR) << StringPrintf("--ScanObjectVisit: %p-%p",
-            reinterpret_cast<void*>(casted_klass), reinterpret_cast<void*>(obj));
-        found = true;
-        break;
-      }
-    }
-    if(!found) {
-      LOG(ERROR) << StringPrintf("Not Found Klass-------ScanObjectVisit: %p-%p",
-                reinterpret_cast<void*>(klass), reinterpret_cast<void*>(obj));
-    }
-  }
+  mirror::Object* mapped_obj = MapClientReference(obj);
 
-  if (UNLIKELY(klass->IsArrayClass())) {
+  ServerMarkObjectVisitor visitor(this);
+  ServerScanObjectVisit(obj, visitor);
 
-  } else if (UNLIKELY(klass == java_lang_Class_client_)) {
 
-  } else {
-    //VisitOtherReferences(klass, obj, visitor);
-    if (UNLIKELY(klass->IsReferenceClass())) {
-    //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
-    }
-  }
 //  CHECK(klass != NULL);
 //  if (UNLIKELY(klass->IsArrayClass())) {
 //    if (klass->IsObjectArrayClass()) {
@@ -223,18 +207,9 @@ static void ExternalScanObjectVisit(mirror::Object* obj,
   //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
-  byte* casted_object = reinterpret_cast<byte*>(obj);
-  if(!(casted_object >=
-      param->spaces_[param->KGCSpaceServerZygoteInd_].client_base_
-      && casted_object <=
-      param->spaces_[param->KGCSpaceServerAllocInd_].client_end_)) {
-    LOG(ERROR) << "XXXX Object is not in correct range : " <<
-        reinterpret_cast<void*>(obj);
-  }
 
-  param->ScanObjectVisit(
-      reinterpret_cast<mirror::Object*>(casted_object +
-          param->offset_), param->offset_);
+
+  param->ServerScanObject(obj, param->offset_);
 }
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
@@ -281,6 +256,25 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //  }
 }
 
+
+void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
+  curr_collector_ptr_ = collector_addr;
+
+  if(mark_stack_ == NULL)
+    mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
+        KGCSpaceServerMarkStackInd_,
+      &(client_rec_->sharable_space_->mark_stack_data_));
+  if(current_mark_bitmap_ == NULL) {
+    current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
+        KGCSpaceServerMarkBitmapInd_,
+          (curr_collector_ptr_->current_mark_bitmap_));
+  }
+
+  current_immune_begin_ =
+      MapClientReference(curr_collector_ptr_->immune_begin_);
+  current_immune_end_ =
+      MapClientReference(curr_collector_ptr_->immune_end_);
+}
 
 }
 }
