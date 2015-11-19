@@ -203,7 +203,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      //ServerVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -234,7 +234,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     if(BelongsToOldHeap(element)) {
       LOG(ERROR) << "XXX ERROR - ServerVisitObjectArrayReferences";//  << static_cast<void*>(obj);
     }
-    visitor(array, element, offset, false);
+    //visitor(array, element, offset, false);
   }
 }
 
