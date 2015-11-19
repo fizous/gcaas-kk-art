@@ -129,7 +129,7 @@ inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* 
 inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
   byte* raw_addr = reinterpret_cast<byte*>(obj) +
         mirror::Object::ClassOffset().Int32Value();
-  mirror::Class* klass = *reinterpret_cast<mirror::Class*>(raw_addr);
+  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
   if(!BelongsToOldHeap(klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX Original KLASS does not belong to Original Heap NULL XXXXXXXXX";
   }
