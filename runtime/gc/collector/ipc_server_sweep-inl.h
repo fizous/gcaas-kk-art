@@ -133,26 +133,6 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
   }
 
   return mapped_klass;
-//  byte* casted_klass = reinterpret_cast<byte*>(klass);
-//  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
-//    bool _found = false;
-//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-//      if(casted_klass < spaces_[i].client_end_) {
-//        casted_klass = casted_klass + offset_;
-//        _found = true;
-//        break;
-//      }
-//    }
-//    if(!_found) {
-//      LOG(FATAL) << "--------Could not Get Class from Object: " <<
-//          reinterpret_cast<void*>(obj) << ", klass:" << reinterpret_cast<void*>(klass) <<
-//          ", mapped_class: " << reinterpret_cast<void*>(casted_klass);
-//      return NULL;
-//    }
-//  } else {
-//    return klass;
-//  }
-//  return reinterpret_cast<mirror::Class*>(casted_klass);
 }
 
 
@@ -226,7 +206,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      //ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -237,9 +217,9 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     }
   }
 
-  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
-    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
-  }
+//  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
+//    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
+//  }
 }
 
 
@@ -251,7 +231,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     mirror::Object* element =
             const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
-    if(!(IsValidObjectForServer(element))) {
+    if(!(BelongsToOldHeap(element))) {
       LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
     }
 
