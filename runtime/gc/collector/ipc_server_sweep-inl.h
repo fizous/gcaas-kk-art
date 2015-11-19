@@ -239,15 +239,27 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   const size_t length = static_cast<size_t>(array->GetLength());
   if(length == 0)
     return;
+
+//  byte* raw_addr = reinterpret_cast<byte*>(obj) +
+//        mirror::Object::ClassOffset().Int32Value();
+//  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
+
+  byte* raw_object_addr = reinterpret_cast<byte*>(array);
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
+  byte* _raw_data_element = NULL;
+
+
+  //int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    mirror::Object* element =
-            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
+    _raw_data_element = raw_object_addr + _data_offset + i * width;
+    int32_t* element_32 = reinterpret_cast<int32_t*>(_raw_data_element);
+    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
+//            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
     mirror::Object* mapped_element = MapClientReference(element);
-    if(!(IsMappedObjectToServer(mapped_element))) {
-      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
-    }
+//    if(!(IsMappedObjectToServer(mapped_element))) {
+//      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
+//    }
     MemberOffset offset(i * width + _data_offset);
     if(false)
       visitor(array, mapped_element, offset, false);
