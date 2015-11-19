@@ -24,6 +24,12 @@ namespace collector {
 
 
 template <typename TypeRef>
+bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
+  return (BelongsToOldHeap(ptr_param) || IsMappedObjectToServer(ptr_param));
+
+}
+
+template <typename TypeRef>
 inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
   if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
@@ -203,7 +209,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      //ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -212,6 +218,10 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     if (UNLIKELY(klass->IsReferenceClass())) {
     //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
     }
+  }
+
+  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
+    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
   }
 }
 
