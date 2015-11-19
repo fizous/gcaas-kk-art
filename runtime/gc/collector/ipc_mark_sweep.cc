@@ -1105,13 +1105,13 @@ void IPCStickyMarkSweep::BindBitmaps() {
 
 void IPCStickyMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
+  mark_stack_->Reset();
   LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
   // TODO: Not put these objects in the mark stack in the first place.
-  mark_stack_->Reset();
   HandshakeIPCSweepMarkingPhase();
   RecursiveMarkDirtyObjects(false, accounting::ConstantsCardTable::kCardDirty - 1);
 }
