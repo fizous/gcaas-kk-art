@@ -181,7 +181,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
     if(BelongsToOldHeap(obj)) {
-      LOG(ERROR) << "XXX ERROR - "  << static_cast<void*>(obj);
+      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
     }
 
     MarkObjectNonNull(obj);
@@ -197,14 +197,13 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
       GetClientClassFromObject(mapped_obj);
 
   if(klass == NULL) {
-//    LOG(FATAL) << StringPrintf("XXXX Class is Null....objAddr: %p XXXXXXXXX:",
-//        obj);
+    LOG(ERROR) << "XXXXXXX Klass NULL XXXXXXXXX";
     return;
   }
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      //ServerVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -230,7 +229,12 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-    visitor(array, ServerMapHeapReference(element), offset, false);
+
+    element = ServerMapHeapReference(element);
+    if(BelongsToOldHeap(element)) {
+      LOG(ERROR) << "XXX ERROR - ServerVisitObjectArrayReferences";//  << static_cast<void*>(obj);
+    }
+    visitor(array, element, offset, false);
   }
 }
 
