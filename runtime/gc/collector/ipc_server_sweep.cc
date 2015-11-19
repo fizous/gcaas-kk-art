@@ -231,8 +231,10 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
   uint32_t calculated_offset = offset_ / (sizeof(Object*));
   LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
+  LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
+  LOG(ERROR) << "+++++++++++++++++++++++";
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
