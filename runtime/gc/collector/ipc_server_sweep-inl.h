@@ -257,9 +257,9 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
 //            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
     mirror::Object* mapped_element = MapClientReference(element);
-//    if(!(IsMappedObjectToServer(mapped_element))) {
-//      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
-//    }
+    if(!(IsMappedObjectToServer(mapped_element))) {
+      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
+    }
     MemberOffset offset(i * width + _data_offset);
     if(false)
       visitor(array, mapped_element, offset, false);
