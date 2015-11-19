@@ -957,7 +957,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   if(server_synchronize_ == 1) {
     RequestAppSuspension();
   } else {
@@ -1022,7 +1022,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ <<
       "... MarkStackSize=" << mark_stack_->Size();
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+//  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
 
 
   // Mark everything allocated since the last as GC live so that we can sweep concurrently,
@@ -1108,7 +1108,6 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
   mark_stack_->Reset();
   LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
   // TODO: Not put these objects in the mark stack in the first place.
