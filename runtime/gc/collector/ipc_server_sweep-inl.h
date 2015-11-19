@@ -33,6 +33,8 @@ template <typename TypeRef>
 inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return true;
+  if(!IsAligned<kObjectAlignment>(ptr_param))
+    return false;
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
   if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
     return true;
@@ -50,6 +52,8 @@ template <typename TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return true;
+  if(!IsAligned<kObjectAlignment>(ptr_param))
+    return false;
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
   if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
     return true;
@@ -123,10 +127,15 @@ inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* 
 
 /* it assumes that the class is already mapped */
 inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
-  mirror::Class* klass = obj->GetClass();
+  byte* raw_addr = reinterpret_cast<byte*>(obj) +
+        mirror::Object::ClassOffset().Int32Value();
+  mirror::Class* klass = *reinterpret_cast<mirror::Class*>(raw_addr);
   if(!BelongsToOldHeap(klass)) {
-    LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to Original Heap NULL XXXXXXXXX";
+    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Original KLASS does not belong to Original Heap NULL XXXXXXXXX";
   }
+
+//  mirror::Class* klass = obj->GetClass();
+
   mirror::Class* mapped_klass = ServerMapHeapReference(klass);
   if(!IsMappedObjectToServer(mapped_klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
@@ -178,9 +187,9 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 // need to be added to the mark stack.
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
-    if(BelongsToOldHeap(obj)) {
-      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
-    }
+//    if(BelongsToOldHeap(obj)) {
+//      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
+//    }
 
     MarkObjectNonNull(obj);
   }
@@ -206,7 +215,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      //ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
