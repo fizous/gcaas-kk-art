@@ -209,7 +209,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      //ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -234,21 +234,10 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     mirror::Object* element =
             const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
-
-    size_t width = sizeof(mirror::Object*);
-    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-
-    if(BelongsToOldHeap(element)) {
-      element = ServerMapHeapReference(element);
-      LOG(ERROR) << "XXX ERROR";
+    if(!(IsValidObjectForServer(element))) {
+      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
     }
-    if(false)
-      visitor(array, element, offset, false);
-//
-//    if(BelongsToOldHeap(element)) {
-//      LOG(ERROR) << "XXX ERROR - ServerVisitObjectArrayReferences";//  << static_cast<void*>(obj);
-//    }
-    //
+
   }
 }
 
