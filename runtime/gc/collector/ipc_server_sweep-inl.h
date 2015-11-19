@@ -222,10 +222,10 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                                                   const Visitor& visitor) {
   const size_t length = static_cast<size_t>(array->GetLength());
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    mirror::Object* element =
-       // MapClientReference(
-            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
-            //);
+//    mirror::Object* element =
+//       // MapClientReference(
+//            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
+//            //);
 
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
