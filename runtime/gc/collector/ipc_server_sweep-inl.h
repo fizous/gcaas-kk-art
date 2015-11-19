@@ -181,7 +181,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
     if(BelongsToOldHeap(obj)) {
-      LOG(ERROR) << StringPrintf("XXX ERROR - %p", static_cast<void*>(obj));
+      LOG(ERROR) << "XXX ERROR - "  << static_cast<void*>(obj);
     }
 
     MarkObjectNonNull(obj);
