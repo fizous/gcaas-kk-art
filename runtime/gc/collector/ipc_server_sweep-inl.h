@@ -227,7 +227,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-    //element = ServerMapHeapReference(element);
+    element = ServerMapHeapReference(element);
     if(BelongsToOldHeap(element)) {
       LOG(ERROR) << "XXX ERROR";
     }
