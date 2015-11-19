@@ -224,8 +224,10 @@ static void ExternalScanObjectVisit(mirror::Object* obj,
 }
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
+  LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
   LOG(ERROR) << "IPCServerMarkerSweep::ProcessMarckStack....size:" << mark_stack_->Size();
   if(mark_stack_->IsEmpty()) {
+    LOG(ERROR) << "+++++++++++++++++++++++";
     return;
   }
 //  static const size_t kFifoSize = 4;
@@ -239,7 +241,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
   uint32_t calculated_offset = offset_ / (sizeof(Object*));
   LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
-  LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
+
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
   LOG(ERROR) << "+++++++++++++++++++++++";

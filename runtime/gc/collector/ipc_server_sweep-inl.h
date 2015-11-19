@@ -232,7 +232,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      //ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
@@ -282,12 +282,13 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
 //    mirror::Object* object = reinterpret_cast<mirror::Object*>(_data_read);
 
-    if(!(WithinServerHeapAddresses<int32_t>(word_addr))) {
-      LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " <<
-          static_cast<void*>(word_addr) << ", array length = " << length <<
-          " array_address = " << static_cast<void*>(raw_object_addr);
+    if(false) {
+      if(!(WithinServerHeapAddresses<int32_t>(word_addr))) {
+        LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " <<
+            static_cast<void*>(word_addr) << ", array length = " << length <<
+            " array_address = " << static_cast<void*>(raw_object_addr);
+      }
     }
-
 //    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
 //            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
  //   mirror::Object* mapped_element = MapClientReference(element);
