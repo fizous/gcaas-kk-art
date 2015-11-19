@@ -180,9 +180,9 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 // need to be added to the mark stack.
 inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
   if (obj != NULL) {
-//    if(BelongsToOldHeap(obj)) {
-//      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
-//    }
+    if(BelongsToOldHeap(obj)) {
+      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
+    }
 
     MarkObjectNonNull(obj);
   }
@@ -227,8 +227,9 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
     size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-    element = ServerMapHeapReference(element);
+
     if(BelongsToOldHeap(element)) {
+      element = ServerMapHeapReference(element);
       LOG(ERROR) << "XXX ERROR";
     }
     if(false)
