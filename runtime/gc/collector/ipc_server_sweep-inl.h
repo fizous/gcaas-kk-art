@@ -49,6 +49,23 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
 }
 
 template <class TypeRef>
+inline bool IPCServerMarkerSweep::WithinServerHeapAddresses(TypeRef* ptr_param) {
+  if(ptr_param == NULL)
+    return true;
+  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
+  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
+    return true;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < spaces_[i].base_end_) &&
+        (casted_param >= spaces_[i].base_)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <class TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return true;
@@ -245,6 +262,12 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
 
   byte* raw_object_addr = reinterpret_cast<byte*>(array);
+
+  if(!(IsMappedObjectToServer(raw_object_addr))) {
+    LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
+        static_cast<void*>(raw_object_addr);
+  }
+
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
   byte* _raw_data_element = NULL;
@@ -259,7 +282,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
 //    mirror::Object* object = reinterpret_cast<mirror::Object*>(_data_read);
 
-    if(!(IsMappedObjectToServer(word_addr))) {
+    if(!(WithinServerHeapAddresses<int32_t>(word_addr))) {
       LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " <<
           static_cast<void*>(word_addr) << ", array length = " << length <<
           " array_address = " << static_cast<void*>(raw_object_addr);

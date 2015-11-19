@@ -94,6 +94,10 @@ class IPCServerMarkerSweep {
   template <class TypeRef>
   bool IsMappedObjectToServer(TypeRef* ptr_param);
 
+  template <class TypeRef>
+  bool WithinServerHeapAddresses(TypeRef* ptr_param);
+
+
   mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(mirror::Object* obj);
   void MarkObjectNonNull(mirror::Object* obj);
