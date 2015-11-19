@@ -81,18 +81,18 @@ class IPCServerMarkerSweep {
 
   mirror::Object* MapClientReference(mirror::Object* obj);
 
-  template <typename TypeRef>
+  template <class TypeRef>
   TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
 
-  template <typename TypeRef>
+  template <class TypeRef>
   bool IsValidObjectForServer(TypeRef* ptr_param);
 
-  template <typename TypeRef>
+  template <class TypeRef>
   bool BelongsToOldHeap(TypeRef* ptr_param);
 
-  template <typename TypeRef>
-  bool IsMappedObjectToServer(TypeRef* obj);
+  template <class TypeRef>
+  bool IsMappedObjectToServer(TypeRef* ptr_param);
 
   mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(mirror::Object* obj);

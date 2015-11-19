@@ -23,13 +23,13 @@ namespace gc {
 namespace collector {
 
 
-template <typename TypeRef>
-bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
+template <class TypeRef>
+inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
   return (BelongsToOldHeap(ptr_param) || IsMappedObjectToServer(ptr_param));
 
 }
 
-template <typename TypeRef>
+template <class TypeRef>
 inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return true;
@@ -48,7 +48,7 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
   return false;
 }
 
-template <typename TypeRef>
+template <class TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return true;
@@ -68,7 +68,7 @@ inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
 }
 
 
-template <typename TypeRef>
+template <class TypeRef>
 inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return ptr_param;
@@ -95,12 +95,12 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   } else {
     return ptr_param;
   }
-  return reinterpret_cast<TypeRef*>(casted_param);
+  return reinterpret_cast<TypeRef>(casted_param);
 
 }
 
 inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
-  return ServerMapHeapReference(obj);
+  return ServerMapHeapReference<mirror::Object>(obj);
 
 //  if(obj == NULL)
 //    return obj;
@@ -136,7 +136,7 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
 
 //  mirror::Class* klass = obj->GetClass();
 
-  mirror::Class* mapped_klass = ServerMapHeapReference(klass);
+  mirror::Class* mapped_klass = ServerMapHeapReference<mirror::Class>(klass);
   if(!IsMappedObjectToServer(mapped_klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
   }
@@ -275,21 +275,21 @@ inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Cl
 
 inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
   mirror::Class* super_klass = klass->GetSuperClassNoLock();
-  super_klass = ServerMapHeapReference(super_klass);
+  super_klass = ServerMapHeapReference<mirror::Class>(super_klass);
   return super_klass;
 }
 
 inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(mirror::Class* klass,
     uint32_t i) {
   mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
-  mapped_field = ServerMapHeapReference(mapped_field);
+  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
 
   return mapped_field;
 }
 
 inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(mirror::Class* klass, uint32_t i) {
   mirror::ArtField* mapped_field = klass->GetInstanceFieldNoLock(i);
-  mapped_field = ServerMapHeapReference(mapped_field);
+  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
 
   return mapped_field;
 }
