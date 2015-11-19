@@ -124,7 +124,7 @@ inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* 
 /* it assumes that the class is already mapped */
 inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
   mirror::Class* klass = obj->GetClass();
-  if(!BelongsToOldHeap(obj)) {
+  if(!BelongsToOldHeap(klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to Original Heap NULL XXXXXXXXX";
   }
   klass = ServerMapHeapReference(klass);
@@ -213,7 +213,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to Original Heap NULL XXXXXXXXX";
   }
   mirror::Object* mapped_obj = MapClientReference(obj);
-  if(!IsMappedObjectToServer(obj)) {
+  if(!IsMappedObjectToServer(mapped_obj)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
   }
   mirror::Class* klass =
