@@ -252,7 +252,8 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
   //int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    _raw_data_element = raw_object_addr + _data_offset + i * width;
+    MemberOffset offset(_data_offset + i * width);
+    _raw_data_element = raw_object_addr + offset.Int32Value();
     int32_t* element_32 = reinterpret_cast<int32_t*>(_raw_data_element);
     mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
 //            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
@@ -260,7 +261,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     if(!(IsMappedObjectToServer(mapped_element))) {
       LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
     }
-    MemberOffset offset(i * width + _data_offset);
+
     if(false)
       visitor(array, mapped_element, offset, false);
 
