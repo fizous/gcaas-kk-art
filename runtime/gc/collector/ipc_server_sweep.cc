@@ -113,6 +113,14 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
       ", java_lang_class = " << reinterpret_cast<void*>(java_lang_Class_client_);
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    LOG(ERROR) << StringPrintf("...space[%d]  --> client-start=%p, client-end=%p", i,
+        spaces_[i].client_base_, spaces_[i].client_end_);
+  }
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    LOG(ERROR) << StringPrintf("...space[%d]  --> server-start=%p, server-end=%p", i,
+        spaces_[i].base_, spaces_[i].base_end_);
+  }
 }
 
 
