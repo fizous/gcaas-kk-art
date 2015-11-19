@@ -95,7 +95,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   } else {
     return ptr_param;
   }
-  return reinterpret_cast<TypeRef>(casted_param);
+  return reinterpret_cast<TypeRef*>(casted_param);
 
 }
 
