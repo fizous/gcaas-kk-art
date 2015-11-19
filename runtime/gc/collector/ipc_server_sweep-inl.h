@@ -231,7 +231,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   if(length == 0)
     return;
   const size_t width = sizeof(mirror::Object*);
-  MemberOffset _data_offset = mirror::Array::DataOffset(width).Int32Value();
+  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     mirror::Object* element =
             const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
