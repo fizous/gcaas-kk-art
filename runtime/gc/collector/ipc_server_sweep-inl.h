@@ -255,15 +255,19 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     MemberOffset offset(_data_offset + i * width);
     _raw_data_element = raw_object_addr + offset.Int32Value();
     int32_t* element_32 = reinterpret_cast<int32_t*>(_raw_data_element);
-    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
-//            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
-    mirror::Object* mapped_element = MapClientReference(element);
-    if(!(IsMappedObjectToServer(mapped_element))) {
-      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
+    if(!(IsMappedObjectToServer(element_32))) {
+      LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX ";
     }
 
-    if(false)
-      visitor(array, mapped_element, offset, false);
+//    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
+//            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
+ //   mirror::Object* mapped_element = MapClientReference(element);
+//    if(!(IsMappedObjectToServer(mapped_element))) {
+//      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
+//    }
+
+//    if(false)
+//      visitor(array, mapped_element, offset, false);
 
   }
 }
