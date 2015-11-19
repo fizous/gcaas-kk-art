@@ -127,12 +127,12 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
   if(!BelongsToOldHeap(klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to Original Heap NULL XXXXXXXXX";
   }
-  klass = ServerMapHeapReference(klass);
-  if(!IsMappedObjectToServer(klass)) {
+  mirror::Class* mapped_klass = ServerMapHeapReference(klass);
+  if(!IsMappedObjectToServer(mapped_klass)) {
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
   }
 
-  return klass;
+  return mapped_klass;
 //  byte* casted_klass = reinterpret_cast<byte*>(klass);
 //  if(casted_klass > spaces_[KGCSpaceServerImageInd_].client_end_) {
 //    bool _found = false;
