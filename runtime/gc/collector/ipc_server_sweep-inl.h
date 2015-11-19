@@ -256,7 +256,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     _raw_data_element = raw_object_addr + offset.Int32Value();
     int32_t* element_32 = reinterpret_cast<int32_t*>(_raw_data_element);
     if(!(IsMappedObjectToServer(element_32))) {
-      LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX ";
+      LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " << const_cast<void*>(element_32);
     }
 
 //    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
