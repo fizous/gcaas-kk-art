@@ -1326,6 +1326,9 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   // of the remaining available heap memory.
   if(shared_space) {
 
+    LOG(ERROR) << "...........VERIFY BEFORE RESHARING................";
+    DumpSpaces();
+
     int _space_index = 0;
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
         gc::gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(&_space_index);
@@ -1387,6 +1390,8 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();
   }
+  LOG(ERROR) << "...........BEfore RTURTNING FROM POST ZYGOTE................";
+  DumpSpaces();
   return;
  // } else {
     // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
