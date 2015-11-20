@@ -100,7 +100,7 @@ class IPCServerMarkerSweep {
   bool BelongsToOldHeap(const referenceKlass* ptr_param) const;
 
   template <class TypeRef>
-  bool IsMappedObjectToServer(TypeRef* ptr_param);
+  bool IsMappedObjectToServer(const TypeRef* ptr_param)const;
 
   template <class TypeRef>
   bool WithinServerHeapAddresses(TypeRef* ptr_param);
@@ -113,6 +113,8 @@ class IPCServerMarkerSweep {
 
   byte* GetClientSpaceEnd(int index) const;
   byte* GetClientSpaceBegin(int index) const;
+  byte* GetServerSpaceEnd(int index) const;
+  byte* GetServerSpaceBegin(int index) const;
 //  template <typename Visitor>
 //  void ServerVisitObjectArrayReferences(mirror::ObjectArray<mirror::Object>* array,
 //                                                    const Visitor& visitor);

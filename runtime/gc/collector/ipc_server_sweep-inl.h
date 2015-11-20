@@ -22,6 +22,13 @@ namespace art {
 namespace gc {
 namespace collector {
 
+byte* IPCServerMarkerSweep::GetServerSpaceEnd(int index) const {
+  return spaces_[index].base_end_;
+}
+byte* IPCServerMarkerSweep::GetServerSpaceBegin(int index) const {
+  return spaces_[index].base_;
+}
+
 
 byte* IPCServerMarkerSweep::GetClientSpaceEnd(int index) const {
   return spaces_[index].client_end_;
@@ -75,6 +82,24 @@ const mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Obj
   return obj_parm;
 }
 
+template <class TypeRef>
+inline bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* ptr_param) const {
+  if(ptr_param == NULL)
+    return true;
+  if(!IsAligned<kObjectAlignment>(ptr_param))
+    return false;
+  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
+  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
+    return true;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      return true;
+    }
+  }
+  return false;
+}
 
 template <class referenceKlass>
 bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* ptr_param) const {
@@ -116,6 +141,11 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
 
 
 int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
+
+  if(!IsMappedObjectToServer<mirror::Class>(klass)) {
+    LOG(FATAL) << "ERROR005...GetMappedClassType";
+  }
+
   if(klass == java_lang_Class_client_)
     return 0;
   const byte* raw_addr = reinterpret_cast<const byte*>(klass) +
@@ -245,24 +275,7 @@ inline bool IPCServerMarkerSweep::WithinServerHeapAddresses(TypeRef* ptr_param) 
   return false;
 }
 
-template <class TypeRef>
-inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
-  if(ptr_param == NULL)
-    return true;
-  if(!IsAligned<kObjectAlignment>(ptr_param))
-    return false;
-  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
-  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < spaces_[i].base_end_) &&
-        (casted_param >= spaces_[i].base_)) {
-      return true;
-    }
-  }
-  return false;
-}
+
 
 
 
@@ -370,11 +383,19 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
   const mirror::Object* mapped_object = MapReferenceToServer<mirror::Object>(obj);
+
+  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
+    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
+  }
   if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR1";
+      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
   }
 
   const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
+
+  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
+    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
+  }
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if(false) {
