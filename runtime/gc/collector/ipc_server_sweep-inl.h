@@ -215,7 +215,7 @@ inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
 template <typename MarkVisitor>
 inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     const MarkVisitor& visitor) {
-  if(!BelongsToOldHeap(obj)) {
+  if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX Object does not belong to Original Heap NULL XXXXXXXXX";
   }
   if(false) {
