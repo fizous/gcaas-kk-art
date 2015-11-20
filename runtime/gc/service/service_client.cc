@@ -106,6 +106,7 @@ void GCServiceClient::FinalizeInitClient() {
     service_client_->FinalizeHeapAfterInit();
   }
   gc::gcservice::GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
+  Runtime::Current()->GetHeap()->DumpSpaces();
 
 }
 
