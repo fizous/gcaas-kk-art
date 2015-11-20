@@ -53,33 +53,53 @@ template <class TypeRef>
 inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return ptr_param;
-  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
 
-  if(BelongsToOldHeap<byte>(casted_param)) {
+  TypeRef* copiedValue = ptr_param;
+  byte* casted_param = reinterpret_cast<byte*>(copiedValue);
 
-    if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
-      return ptr_param;
-    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_param < spaces_[i].client_end_
-          && casted_param >= spaces_[i].client_base_) {
-        return reinterpret_cast<TypeRef*>(casted_param + offset_);
-        break;
-      }
-    }
 
-    //at this point there should be an error
-    LOG(ERROR) << "--------Could not map Object: " <<
+  bool xored_value  = 0;
+  xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
+      (BelongsToOldHeap<mirror::Object>(ptr_param));
+
+  if(xored_value == 0) {
+    LOG(ERROR) << "--------Checking inside the mapper return inconsistent things: " <<
         reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-        static_cast<void*>(ptr_param);
-
-    LOG(FATAL) << "Terminate execution on service side";
+        static_cast<void*>(ptr_param) << ", belong? " <<
+        BelongsToOldHeap<mirror::Object>(ptr_param);
+    LOG(FATAL) << "XXXX Terminate execution on service side";
   }
-  LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
-      reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-      static_cast<void*>(ptr_param) << ", belong? " <<
-      BelongsToOldHeap<mirror::Object>(ptr_param);
-  LOG(FATAL) << "XXXX Terminate execution on service side";
+
   return NULL;
+
+//  if((BelongsToOldHeap<byte>(casted_param)) != )
+//
+//
+//  if(BelongsToOldHeap<byte>(casted_param)) {
+//
+//    if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
+//      return ptr_param;
+//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//      if(casted_param < spaces_[i].client_end_
+//          && casted_param >= spaces_[i].client_base_) {
+//        return reinterpret_cast<TypeRef*>(casted_param + offset_);
+//        break;
+//      }
+//    }
+//
+//    //at this point there should be an error
+//    LOG(ERROR) << "--------Could not map Object: " <<
+//        reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+//        static_cast<void*>(ptr_param);
+//
+//    LOG(FATAL) << "Terminate execution on service side";
+//  }
+//  LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
+//      reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+//      static_cast<void*>(ptr_param) << ", belong? " <<
+//      BelongsToOldHeap<mirror::Object>(ptr_param);
+//  LOG(FATAL) << "XXXX Terminate execution on service side";
+//  return NULL;
 }
 
 
