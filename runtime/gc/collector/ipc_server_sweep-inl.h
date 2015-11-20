@@ -62,7 +62,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
       (BelongsToOldHeap<mirror::Object>(ptr_param));
 
-  if(xored_value == 0) {
+  if(xored_value == 1) {
     LOG(ERROR) << "--------Checking inside the mapper return inconsistent things: " <<
         reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
         static_cast<void*>(ptr_param) << ", belong_orig? " <<
