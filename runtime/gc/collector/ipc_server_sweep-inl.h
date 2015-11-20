@@ -153,12 +153,12 @@ inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Obj
 
 //  mirror::Class* klass = obj->GetClass();
 
-  mirror::Class* mapped_klass = ServerMapHeapReference<mirror::Class>(klass);
-  if(!IsMappedObjectToServer(mapped_klass)) {
-    LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
-  }
+//  mirror::Class* mapped_klass = ServerMapHeapReference<mirror::Class>(klass);
+//  if(!IsMappedObjectToServer(mapped_klass)) {
+//    LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
+//  }
 
-  return mapped_klass;
+  return klass;
 }
 
 
@@ -219,9 +219,11 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to Original Heap NULL XXXXXXXXX";
   }
   mirror::Object* mapped_obj = MapClientReference(obj);
-  if(!IsMappedObjectToServer(mapped_obj)) {
-    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
-  }
+//  if(!IsMappedObjectToServer(mapped_obj)) {
+//    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
+//  }
+
+  if(false) {
   mirror::Class* klass =
       GetClientClassFromObject(mapped_obj);
 
@@ -229,23 +231,30 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
     LOG(ERROR) << "XXXXXXX Klass NULL XXXXXXXXX";
     return;
   }
+  if (UNLIKELY(klass == java_lang_Class_client_)) {
 
-  if (UNLIKELY(klass->IsArrayClass())) {
-    if (klass->IsObjectArrayClass()) {
-     // ServerVisitObjectArrayReferences(down_cast<mirror::ObjectArray<mirror::Object>*>(mapped_obj), visitor);
-    }
-  } else if (UNLIKELY(klass == java_lang_Class_client_)) {
-    //ServerVisitClassReferences(klass, obj, visitor);
-  } else {
-    //VisitOtherReferences(klass, obj, visitor);
-    if (UNLIKELY(klass->IsReferenceClass())) {
-    //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
-    }
+  } if (UNLIKELY(klass->IsArrayClass())) {
+
+  }
   }
 
-//  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
-//    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
+//
+//  if (UNLIKELY(klass->IsArrayClass())) {
+//    if (klass->IsObjectArrayClass()) {
+//     // ServerVisitObjectArrayReferences(down_cast<mirror::ObjectArray<mirror::Object>*>(mapped_obj), visitor);
+//    }
+//  } else if (UNLIKELY(klass == java_lang_Class_client_)) {
+//    //ServerVisitClassReferences(klass, obj, visitor);
+//  } else {
+//    //VisitOtherReferences(klass, obj, visitor);
+//    if (UNLIKELY(klass->IsReferenceClass())) {
+//    //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
+//    }
 //  }
+//
+////  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
+////    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
+////  }
 }
 
 
