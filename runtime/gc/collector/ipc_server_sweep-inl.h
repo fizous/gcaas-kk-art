@@ -56,14 +56,14 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
 
   TypeRef* copiedValue = ptr_param;
   byte* casted_param = reinterpret_cast<byte*>(copiedValue);
-
+  byte* calculated_param = casted_param;
 
   bool xored_value  = 0;
   xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
       (BelongsToOldHeap<mirror::Object>(ptr_param));
 
   if(xored_value == 1) {
-    LOG(ERROR) << "--------Checking inside the mapper return inconsistent things: " <<
+    LOG(ERROR) << "1--------Checking inside the mapper return inconsistent things: " <<
         reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
         static_cast<void*>(ptr_param) << ", belong_orig? " <<
         BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
@@ -71,6 +71,32 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
         BelongsToOldHeap<mirror::Object>(copiedValue);
     //LOG(FATAL) << "XXXX Terminate execution on service side";
   }
+  bool _found = false;
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < spaces_[i].client_end_)
+        && (casted_param >= spaces_[i].client_base_)) {
+      calculated_param = (casted_param + offset_);
+      _found = true;
+      break;
+    }
+  }
+
+  if(!_found) {
+    xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
+        (BelongsToOldHeap<mirror::Object>(ptr_param));
+
+    if(xored_value == 1) {
+      LOG(ERROR) << "2--------Checking inside was not found:" <<
+          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+          static_cast<void*>(ptr_param) << ", belong_orig? " <<
+          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
+          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
+          BelongsToOldHeap<mirror::Object>(copiedValue);
+    }
+
+  }
+
+
 
   return ptr_param;
 
