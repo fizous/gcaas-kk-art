@@ -186,51 +186,51 @@ inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
 
 
 
-inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
-  return ServerMapHeapReference<mirror::Object>(obj);
+//inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
+//  return ServerMapHeapReference<mirror::Object>(obj);
+//
+////  if(obj == NULL)
+////    return obj;
+////  byte* casted_object = reinterpret_cast<byte*>(obj);
+////  if(casted_object > spaces_[KGCSpaceServerImageInd_].client_end_) {
+////    bool _found = false;
+////    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+////      if(casted_object < spaces_[i].client_end_) {
+////        casted_object = casted_object + offset_;
+////        _found = true;
+////        break;
+////      }
+////    }
+////    if(!_found) {
+////      LOG(FATAL) << "--------Could not map Object: " <<
+////          reinterpret_cast<void*>(casted_object);
+////      return NULL;
+////    }
+////  } else {
+////    return obj;
+////  }
+////  return reinterpret_cast<mirror::Object*>(casted_object);
+//}
 
-//  if(obj == NULL)
-//    return obj;
-//  byte* casted_object = reinterpret_cast<byte*>(obj);
-//  if(casted_object > spaces_[KGCSpaceServerImageInd_].client_end_) {
-//    bool _found = false;
-//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-//      if(casted_object < spaces_[i].client_end_) {
-//        casted_object = casted_object + offset_;
-//        _found = true;
-//        break;
-//      }
-//    }
-//    if(!_found) {
-//      LOG(FATAL) << "--------Could not map Object: " <<
-//          reinterpret_cast<void*>(casted_object);
-//      return NULL;
-//    }
-//  } else {
-//    return obj;
+///* it assumes that the class is already mapped */
+//inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
+//  byte* raw_addr = reinterpret_cast<byte*>(obj) +
+//        mirror::Object::ClassOffset().Int32Value();
+//  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
+//  if(!BelongsToOldHeap(klass)) {
+//    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Original KLASS does not belong to Original Heap NULL XXXXXXXXX";
 //  }
-//  return reinterpret_cast<mirror::Object*>(casted_object);
-}
-
-/* it assumes that the class is already mapped */
-inline mirror::Class* IPCServerMarkerSweep::GetClientClassFromObject(mirror::Object* obj) {
-  byte* raw_addr = reinterpret_cast<byte*>(obj) +
-        mirror::Object::ClassOffset().Int32Value();
-  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
-  if(!BelongsToOldHeap(klass)) {
-    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Original KLASS does not belong to Original Heap NULL XXXXXXXXX";
-  }
-
-//  mirror::Class* klass = obj->GetClass();
-
-//  mirror::Class* mapped_klass = ServerMapHeapReference<mirror::Class>(klass);
-//  if(!IsMappedObjectToServer(mapped_klass)) {
-//    LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
-//  }
-
-  return klass;
-}
-
+//
+////  mirror::Class* klass = obj->GetClass();
+//
+////  mirror::Class* mapped_klass = ServerMapHeapReference<mirror::Class>(klass);
+////  if(!IsMappedObjectToServer(mapped_klass)) {
+////    LOG(ERROR) << "MAPPINGERROR: XXXXXXX KLASS does not belong to new heap XXXXXXXXX";
+////  }
+//
+//  return klass;
+//}
+//
 
 inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
   DCHECK(obj != NULL);
@@ -288,191 +288,154 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
   if(!BelongsToOldHeap(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
-  if(false) {
-  mirror::Object* mapped_obj = ServerMapHeapReference<mirror::Object>(const_cast<mirror::Object*>(obj));
-
-  //  mirror::Object* mapped_obj = MapClientReference(obj);
-//  if(!IsMappedObjectToServer(mapped_obj)) {
-//    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
-//  }
 
 
-  mirror::Class* klass =
-      GetClientClassFromObject(mapped_obj);
 
-  if(klass == NULL) {
-    LOG(ERROR) << "XXXXXXX Klass NULL XXXXXXXXX";
-    return;
-  }
-  if (UNLIKELY(klass == java_lang_Class_client_)) {
+}
 
-  } if (UNLIKELY(klass->IsArrayClass())) {
 
-  }
-  }
-
+//template <typename Visitor>
+//inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
+//                                    mirror::ObjectArray<mirror::Object>* array,
+//                                                  const Visitor& visitor) {
+//  byte* raw_object_addr = reinterpret_cast<byte*>(array);
 //
-//  if (UNLIKELY(klass->IsArrayClass())) {
-//    if (klass->IsObjectArrayClass()) {
-//     // ServerVisitObjectArrayReferences(down_cast<mirror::ObjectArray<mirror::Object>*>(mapped_obj), visitor);
-//    }
-//  } else if (UNLIKELY(klass == java_lang_Class_client_)) {
-//    //ServerVisitClassReferences(klass, obj, visitor);
-//  } else {
-//    //VisitOtherReferences(klass, obj, visitor);
-//    if (UNLIKELY(klass->IsReferenceClass())) {
-//    //  DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
-//    }
+//  if(!(IsMappedObjectToServer(raw_object_addr))) {
+//    LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
+//        static_cast<void*>(raw_object_addr);
 //  }
 //
-////  if(!(IsValidObjectForServer(obj) && IsValidObjectForServer(klass))) {
-////    LOG(ERROR) << "XXXXX Invalid MAPPING for Object and Class XXXXXX ";
-////  }
-}
-
-
-template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
-                                    mirror::ObjectArray<mirror::Object>* array,
-                                                  const Visitor& visitor) {
-  byte* raw_object_addr = reinterpret_cast<byte*>(array);
-
-  if(!(IsMappedObjectToServer(raw_object_addr))) {
-    LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
-        static_cast<void*>(raw_object_addr);
-  }
-
-  byte* raw_addr_length_address = raw_object_addr +
-             mirror::Array::LengthOffset().Int32Value();
-  const size_t length =
-      static_cast<size_t>(*reinterpret_cast<int32_t*>(raw_addr_length_address));
-
-  if(length == 0)
-    return;
-
-//  byte* raw_addr = reinterpret_cast<byte*>(obj) +
-//        mirror::Object::ClassOffset().Int32Value();
-//  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
-
-  if(false) {
-
-  const size_t width = sizeof(mirror::Object*);
-  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
-  byte* _raw_data_element = NULL;
-
-
-  //int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
-  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    if(false) {
-      MemberOffset offset(_data_offset + i * width);
-      _raw_data_element = raw_object_addr + offset.Int32Value();
-      int32_t* word_addr = reinterpret_cast<int32_t*>(_raw_data_element);
- //   uint32_t _data_read = *word_addr;
-
-//    mirror::Object* object = reinterpret_cast<mirror::Object*>(_data_read);
-
-
-      if(!(WithinServerHeapAddresses<int32_t>(word_addr))) {
-        LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " <<
-            static_cast<void*>(word_addr) << ", array length = " << length <<
-            " array_address = " << static_cast<void*>(raw_object_addr);
-      }
-    }
-//    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
-//            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
- //   mirror::Object* mapped_element = MapClientReference(element);
-//    if(!(IsMappedObjectToServer(mapped_element))) {
-//      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
-//    }
-
-//    if(false)
-//      visitor(array, mapped_element, offset, false);
-
-  }
-}
-}
-
-
-template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitClassReferences(
-                        mirror::Class* klass, mirror::Object* obj,
-                                            const Visitor& visitor)  {
-  ServerVisitInstanceFieldsReferences(klass, obj, visitor);
-//  VisitStaticFieldsReferences(obj->AsClass(), visitor);
-}
-
-template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Class* klass,
-                                                     mirror::Object* obj,
-                                                     const Visitor& visitor) {
-  DCHECK(obj != NULL);
-  DCHECK(klass != NULL);
-  ServerVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
-}
-
-inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
-  mirror::Class* super_klass = klass->GetSuperClassNoLock();
-  super_klass = ServerMapHeapReference<mirror::Class>(super_klass);
-  return super_klass;
-}
-
-inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(mirror::Class* klass,
-    uint32_t i) {
-  mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
-  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
-
-  return mapped_field;
-}
-
-inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(mirror::Class* klass, uint32_t i) {
-  mirror::ArtField* mapped_field = klass->GetInstanceFieldNoLock(i);
-  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
-
-  return mapped_field;
-}
-
-template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
-                                        mirror::Object* obj, uint32_t ref_offsets,
-                                             bool is_static, const Visitor& visitor) {
-  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
-#ifndef MOVING_COLLECTOR
-    // Clear the class bit since we mark the class as part of marking the classlinker roots.
-    DCHECK_EQ(mirror::Object::ClassOffset().Uint32Value(), 0U);
-    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
-#endif
-    while (ref_offsets != 0) {
-      size_t right_shift = CLZ(ref_offsets);
-      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
-      const mirror::Object* ref =
-          obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-      visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
-      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
-    }
-  } else {
-    // There is no reference offset bitmap.  In the non-static case,
-    // walk up the class inheritance hierarchy and find reference
-    // offsets the hard way. In the static case, just consider this
-    // class.
-//    for (mirror::Class* klass = is_static ? obj->AsClass() : GetClientClassFromObject(obj);
-//         klass != NULL;
-//         klass = is_static ? NULL : ServerClassGetSuperClass(klass)) {
-//      size_t num_reference_fields = (is_static
-//                                     ? klass->NumReferenceStaticFields()
-//                                     : klass->NumReferenceInstanceFields());
-//      if(false) {
-//        LOG(ERROR) << "static fields " << num_reference_fields;
+//  byte* raw_addr_length_address = raw_object_addr +
+//             mirror::Array::LengthOffset().Int32Value();
+//  const size_t length =
+//      static_cast<size_t>(*reinterpret_cast<int32_t*>(raw_addr_length_address));
+//
+//  if(length == 0)
+//    return;
+//
+////  byte* raw_addr = reinterpret_cast<byte*>(obj) +
+////        mirror::Object::ClassOffset().Int32Value();
+////  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
+//
+//  if(false) {
+//
+//  const size_t width = sizeof(mirror::Object*);
+//  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
+//  byte* _raw_data_element = NULL;
+//
+//
+//  //int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
+//  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
+//    if(false) {
+//      MemberOffset offset(_data_offset + i * width);
+//      _raw_data_element = raw_object_addr + offset.Int32Value();
+//      int32_t* word_addr = reinterpret_cast<int32_t*>(_raw_data_element);
+// //   uint32_t _data_read = *word_addr;
+//
+////    mirror::Object* object = reinterpret_cast<mirror::Object*>(_data_read);
+//
+//
+//      if(!(WithinServerHeapAddresses<int32_t>(word_addr))) {
+//        LOG(ERROR) << "XXXXX Invalid MAPPING for element array int 32 XXXXXX " <<
+//            static_cast<void*>(word_addr) << ", array length = " << length <<
+//            " array_address = " << static_cast<void*>(raw_object_addr);
 //      }
-////      for (size_t i = 0; i < num_reference_fields; ++i) {
-////        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
-////                                   : ServerClassGetInstanceField(klass,i));
-////        MemberOffset field_offset = field->GetOffset();
-////        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-////        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
-////      }
 //    }
-  }
-}
+////    mirror::Object* element = *reinterpret_cast<mirror::Object**>(element_32);
+////            const_cast<mirror::Object*>(array->GetWithoutChecksNoLocks(static_cast<int32_t>(i)));
+// //   mirror::Object* mapped_element = MapClientReference(element);
+////    if(!(IsMappedObjectToServer(mapped_element))) {
+////      LOG(ERROR) << "XXXXX Invalid MAPPING for element array XXXXXX ";
+////    }
+//
+////    if(false)
+////      visitor(array, mapped_element, offset, false);
+//
+//  }
+//}
+//}
+
+
+//template <typename Visitor>
+//inline void IPCServerMarkerSweep::ServerVisitClassReferences(
+//                        mirror::Class* klass, mirror::Object* obj,
+//                                            const Visitor& visitor)  {
+//  ServerVisitInstanceFieldsReferences(klass, obj, visitor);
+////  VisitStaticFieldsReferences(obj->AsClass(), visitor);
+//}
+//
+//template <typename Visitor>
+//inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Class* klass,
+//                                                     mirror::Object* obj,
+//                                                     const Visitor& visitor) {
+//  DCHECK(obj != NULL);
+//  DCHECK(klass != NULL);
+//  ServerVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
+//}
+//
+//inline mirror::Class* IPCServerMarkerSweep::ServerClassGetSuperClass(mirror::Class* klass) {
+//  mirror::Class* super_klass = klass->GetSuperClassNoLock();
+//  super_klass = ServerMapHeapReference<mirror::Class>(super_klass);
+//  return super_klass;
+//}
+//
+//inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(mirror::Class* klass,
+//    uint32_t i) {
+//  mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
+//  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
+//
+//  return mapped_field;
+//}
+//
+//inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(mirror::Class* klass, uint32_t i) {
+//  mirror::ArtField* mapped_field = klass->GetInstanceFieldNoLock(i);
+//  mapped_field = ServerMapHeapReference<mirror::ArtField>(mapped_field);
+//
+//  return mapped_field;
+//}
+//
+//template <typename Visitor>
+//inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
+//                                        mirror::Object* obj, uint32_t ref_offsets,
+//                                             bool is_static, const Visitor& visitor) {
+//  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
+//#ifndef MOVING_COLLECTOR
+//    // Clear the class bit since we mark the class as part of marking the classlinker roots.
+//    DCHECK_EQ(mirror::Object::ClassOffset().Uint32Value(), 0U);
+//    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
+//#endif
+//    while (ref_offsets != 0) {
+//      size_t right_shift = CLZ(ref_offsets);
+//      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
+//      const mirror::Object* ref =
+//          obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+//      visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+//      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
+//    }
+//  } else {
+//    // There is no reference offset bitmap.  In the non-static case,
+//    // walk up the class inheritance hierarchy and find reference
+//    // offsets the hard way. In the static case, just consider this
+//    // class.
+////    for (mirror::Class* klass = is_static ? obj->AsClass() : GetClientClassFromObject(obj);
+////         klass != NULL;
+////         klass = is_static ? NULL : ServerClassGetSuperClass(klass)) {
+////      size_t num_reference_fields = (is_static
+////                                     ? klass->NumReferenceStaticFields()
+////                                     : klass->NumReferenceInstanceFields());
+////      if(false) {
+////        LOG(ERROR) << "static fields " << num_reference_fields;
+////      }
+//////      for (size_t i = 0; i < num_reference_fields; ++i) {
+//////        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+//////                                   : ServerClassGetInstanceField(klass,i));
+//////        MemberOffset field_offset = field->GetOffset();
+//////        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+//////        visitor(obj, const_cast<mirror::Object*>(ref), field_offset, is_static);
+//////      }
+////    }
+//  }
+//}
 }
 }
 }

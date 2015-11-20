@@ -97,25 +97,25 @@ class IPCServerMarkerSweep {
   bool WithinServerHeapAddresses(TypeRef* ptr_param);
 
 
-  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
+//  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(mirror::Object* obj);
   void MarkObjectNonNull(mirror::Object* obj);
 
-  template <typename Visitor>
-  void ServerVisitObjectArrayReferences(mirror::ObjectArray<mirror::Object>* array,
-                                                    const Visitor& visitor);
-
-  template <typename Visitor>
-  void ServerVisitClassReferences(mirror::Class* klass, mirror::Object* obj,
-                                              const Visitor& visitor);
-
-  template <typename Visitor>
-  void ServerVisitInstanceFieldsReferences(mirror::Class* klass, mirror::Object* obj,
-                                            const Visitor& visitor);
-
-  template <typename Visitor>
-  void ServerVisitFieldsReferences(mirror::Object* obj, uint32_t ref_offsets, bool is_static,
-                                    const Visitor& visitor);
+//  template <typename Visitor>
+//  void ServerVisitObjectArrayReferences(mirror::ObjectArray<mirror::Object>* array,
+//                                                    const Visitor& visitor);
+//
+//  template <typename Visitor>
+//  void ServerVisitClassReferences(mirror::Class* klass, mirror::Object* obj,
+//                                              const Visitor& visitor);
+//
+//  template <typename Visitor>
+//  void ServerVisitInstanceFieldsReferences(mirror::Class* klass, mirror::Object* obj,
+//                                            const Visitor& visitor);
+//
+//  template <typename Visitor>
+//  void ServerVisitFieldsReferences(mirror::Object* obj, uint32_t ref_offsets, bool is_static,
+//                                    const Visitor& visitor);
 
 
   void InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
