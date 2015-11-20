@@ -923,6 +923,7 @@ bool Runtime::InitZygote() {
 
 void Runtime::DidForkFromZygote(bool initialize) {
   is_zygote_ = false;
+  heap_->DumpSpaces();
   GCPServiceFinalizeInit();
   GCMMP_VLOG(INFO) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
   // Create the thread pool.
