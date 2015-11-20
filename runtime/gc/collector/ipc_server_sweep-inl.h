@@ -89,12 +89,12 @@ template <class TypeRef>
 inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
   if(ptr_param == NULL)
     return ptr_param;
-  if(IsMappedObjectToServer(ptr_param)) {
-    return ptr_param;
-  }
+//  if(IsMappedObjectToServer(ptr_param)) {
+//    return ptr_param;
+//  }
 
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
-  if(casted_param > spaces_[KGCSpaceServerImageInd_].client_end_) {
+  if(casted_param >= spaces_[KGCSpaceServerImageInd_].client_end_) {
     bool _found = false;
     for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
       if(casted_param < spaces_[i].client_end_ &&
@@ -105,8 +105,8 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
       }
     }
     if(!_found) {
-//      LOG(ERROR) << "--------Could not map Object: " <<
-//          reinterpret_cast<void*>(casted_param);
+      LOG(ERROR) << "--------Could not map Object: " <<
+          reinterpret_cast<void*>(casted_param);
       return ptr_param;
     }
   } else {
