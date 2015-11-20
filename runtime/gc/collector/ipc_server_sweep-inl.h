@@ -106,7 +106,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
     }
     if(!_found) {
       LOG(ERROR) << "--------Could not map Object: " <<
-          reinterpret_cast<void*>(casted_param);
+          reinterpret_cast<void*>(casted_param) << ", original parametter: " << static_void<void*>(ptr_param);
       return ptr_param;
     }
   } else {
