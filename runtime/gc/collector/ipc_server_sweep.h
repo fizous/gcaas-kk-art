@@ -90,6 +90,9 @@ class IPCServerMarkerSweep {
 //  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
 
+
+  int GetMappedClassType(const mirror::Class* klass) const;
+
   template <class TypeRef>
   bool IsValidObjectForServer(TypeRef* ptr_param);
 

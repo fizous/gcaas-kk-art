@@ -49,7 +49,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
   for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetClientSpaceEnd(i)) &&
         (casted_param >= GetClientSpaceBegin(i))) {
-      return reinterpret_cast<const mirror::Object*>(casted_param + offset_);
+      return reinterpret_cast<const referenceKlass*>(casted_param + offset_);
     }
   }
 
@@ -112,6 +112,11 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
   const mirror::Class* mapped_class_address =
       MapReferenceToServer<mirror::Class>(class_address);
   return mapped_class_address;
+}
+
+
+int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
+
 }
 
 //
