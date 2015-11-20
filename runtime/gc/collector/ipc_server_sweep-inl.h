@@ -47,104 +47,104 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_par
   return false;
 }
 
-
-template <class TypeRef>
-inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
-  if(ptr_param == NULL)
-    return ptr_param;
-
-  if(!BelongsToOldHeap<TypeRef>(ptr_param)) {
-    LOG(ERROR) << "0--------Checking inside the mapper return inconsistent things: " <<
-        static_cast<void*>(ptr_param) << ", " << StringPrintf("string %p", ptr_param);
-
-  }
-
-  TypeRef* copiedValue = ptr_param;
-  byte* casted_param = reinterpret_cast<byte*>(copiedValue);
-  byte* calculated_param = casted_param;
-
-  bool xored_value  = 0;
-  xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
-      (BelongsToOldHeap<mirror::Object>(ptr_param));
-
-  if(xored_value == 1) {
-    LOG(ERROR) << "1--------Checking inside the mapper return inconsistent things: " <<
-        reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-        static_cast<void*>(ptr_param) << ", belong_orig? " <<
-        BelongsToOldHeap<TypeRef>(ptr_param) << ", belong_char? " <<
-        BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
-        BelongsToOldHeap<TypeRef>(copiedValue);
-    //LOG(FATAL) << "XXXX Terminate execution on service side";
-  }
-  bool _found = false;
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < spaces_[i].client_end_)
-        && (casted_param >= spaces_[i].client_base_)) {
-      calculated_param = (casted_param + offset_);
-      _found = true;
-      break;
-    }
-  }
-
-  if(!_found) {
-    xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
-        (BelongsToOldHeap<mirror::Object>(ptr_param));
-
-    if(xored_value == 1) {
-      LOG(ERROR) << "2--------Checking inside was not found:" <<
-          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-          static_cast<void*>(ptr_param) << ", belong_orig? " <<
-          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
-          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
-          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
-          BelongsToOldHeap<byte>(calculated_param);
-    }
-
-    if(!BelongsToOldHeap<byte>(casted_param)) {
-      LOG(ERROR) << "3--------Checking inside was not found:" <<
-          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-          static_cast<void*>(ptr_param) << ", belong_orig? " <<
-          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
-          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
-          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
-          BelongsToOldHeap<byte>(calculated_param);
-    }
-
-  }
-
-
-
-  return ptr_param;
-
-//  if((BelongsToOldHeap<byte>(casted_param)) != )
 //
+//template <class TypeRef>
+//inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
+//  if(ptr_param == NULL)
+//    return ptr_param;
 //
-//  if(BelongsToOldHeap<byte>(casted_param)) {
+//  if(!BelongsToOldHeap<TypeRef>(ptr_param)) {
+//    LOG(ERROR) << "0--------Checking inside the mapper return inconsistent things: " <<
+//        static_cast<void*>(ptr_param) << ", " << StringPrintf("string %p", ptr_param);
 //
-//    if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
-//      return ptr_param;
-//    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-//      if(casted_param < spaces_[i].client_end_
-//          && casted_param >= spaces_[i].client_base_) {
-//        return reinterpret_cast<TypeRef*>(casted_param + offset_);
-//        break;
-//      }
+//  }
+//
+//  TypeRef* copiedValue = ptr_param;
+//  byte* casted_param = reinterpret_cast<byte*>(copiedValue);
+//  byte* calculated_param = casted_param;
+//
+//  bool xored_value  = 0;
+//  xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
+//      (BelongsToOldHeap<mirror::Object>(ptr_param));
+//
+//  if(xored_value == 1) {
+//    LOG(ERROR) << "1--------Checking inside the mapper return inconsistent things: " <<
+//        reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+//        static_cast<void*>(ptr_param) << ", belong_orig? " <<
+//        BelongsToOldHeap<TypeRef>(ptr_param) << ", belong_char? " <<
+//        BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
+//        BelongsToOldHeap<TypeRef>(copiedValue);
+//    //LOG(FATAL) << "XXXX Terminate execution on service side";
+//  }
+//  bool _found = false;
+//  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//    if((casted_param < spaces_[i].client_end_)
+//        && (casted_param >= spaces_[i].client_base_)) {
+//      calculated_param = (casted_param + offset_);
+//      _found = true;
+//      break;
+//    }
+//  }
+//
+//  if(!_found) {
+//    xored_value = (BelongsToOldHeap<byte>(casted_param)) ^
+//        (BelongsToOldHeap<mirror::Object>(ptr_param));
+//
+//    if(xored_value == 1) {
+//      LOG(ERROR) << "2--------Checking inside was not found:" <<
+//          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+//          static_cast<void*>(ptr_param) << ", belong_orig? " <<
+//          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
+//          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
+//          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
+//          BelongsToOldHeap<byte>(calculated_param);
 //    }
 //
-//    //at this point there should be an error
-//    LOG(ERROR) << "--------Could not map Object: " <<
-//        reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-//        static_cast<void*>(ptr_param);
+//    if(!BelongsToOldHeap<byte>(casted_param)) {
+//      LOG(ERROR) << "3--------Checking inside was not found:" <<
+//          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+//          static_cast<void*>(ptr_param) << ", belong_orig? " <<
+//          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
+//          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
+//          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
+//          BelongsToOldHeap<byte>(calculated_param);
+//    }
 //
-//    LOG(FATAL) << "Terminate execution on service side";
 //  }
-//  LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
-//      reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-//      static_cast<void*>(ptr_param) << ", belong? " <<
-//      BelongsToOldHeap<mirror::Object>(ptr_param);
-//  LOG(FATAL) << "XXXX Terminate execution on service side";
-//  return NULL;
-}
+//
+//
+//
+//  return ptr_param;
+//
+////  if((BelongsToOldHeap<byte>(casted_param)) != )
+////
+////
+////  if(BelongsToOldHeap<byte>(casted_param)) {
+////
+////    if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
+////      return ptr_param;
+////    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+////      if(casted_param < spaces_[i].client_end_
+////          && casted_param >= spaces_[i].client_base_) {
+////        return reinterpret_cast<TypeRef*>(casted_param + offset_);
+////        break;
+////      }
+////    }
+////
+////    //at this point there should be an error
+////    LOG(ERROR) << "--------Could not map Object: " <<
+////        reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+////        static_cast<void*>(ptr_param);
+////
+////    LOG(FATAL) << "Terminate execution on service side";
+////  }
+////  LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
+////      reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+////      static_cast<void*>(ptr_param) << ", belong? " <<
+////      BelongsToOldHeap<mirror::Object>(ptr_param);
+////  LOG(FATAL) << "XXXX Terminate execution on service side";
+////  return NULL;
+//}
 
 
 template <class TypeRef>

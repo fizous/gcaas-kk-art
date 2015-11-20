@@ -81,8 +81,8 @@ class IPCServerMarkerSweep {
 
   mirror::Object* MapClientReference(mirror::Object* obj);
 
-  template <class TypeRef>
-  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
+//  template <class TypeRef>
+//  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
 
   template <class TypeRef>
