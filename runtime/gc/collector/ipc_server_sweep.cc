@@ -284,10 +284,10 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
           (curr_collector_ptr_->current_mark_bitmap_));
   }
 
-  current_immune_begin_ =
-      MapClientReference(curr_collector_ptr_->immune_begin_);
-  current_immune_end_ =
-      MapClientReference(curr_collector_ptr_->immune_end_);
+//  current_immune_begin_ =
+//      MapClientReference(curr_collector_ptr_->immune_begin_);
+//  current_immune_end_ =
+//      MapClientReference(curr_collector_ptr_->immune_end_);
 }
 
 }
