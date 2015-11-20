@@ -23,6 +23,14 @@ namespace gc {
 namespace collector {
 
 
+byte* IPCServerMarkerSweep::GetClientSpaceEnd(int index) const {
+  return spaces_[index].client_end_;
+}
+byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
+  return spaces_[index].client_base_;
+}
+
+
 template <class TypeRef>
 inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
   return (BelongsToOldHeap(ptr_param) || IsMappedObjectToServer(ptr_param));
@@ -35,12 +43,12 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_par
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
-  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
+  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
     return true;
   }
   for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < spaces_[i].client_end_) &&
-        (casted_param >= spaces_[i].client_base_)) {
+    if((casted_param < GetClientSpaceEnd(i)) &&
+        (casted_param >= GetClientSpaceBegin(i))) {
       return true;
     }
   }

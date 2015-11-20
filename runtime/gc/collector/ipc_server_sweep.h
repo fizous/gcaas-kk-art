@@ -101,6 +101,9 @@ class IPCServerMarkerSweep {
   void MarkObject(mirror::Object* obj);
   void MarkObjectNonNull(mirror::Object* obj);
 
+
+  byte* GetClientSpaceEnd(int index) const;
+  byte* GetClientSpaceBegin(int index) const;
 //  template <typename Visitor>
 //  void ServerVisitObjectArrayReferences(mirror::ObjectArray<mirror::Object>* array,
 //                                                    const Visitor& visitor);
