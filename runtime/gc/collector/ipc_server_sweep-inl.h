@@ -253,7 +253,12 @@ template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                                     mirror::ObjectArray<mirror::Object>* array,
                                                   const Visitor& visitor) {
-  const size_t length = static_cast<size_t>(array->GetLength());
+  byte* raw_object_addr = reinterpret_cast<byte*>(array);
+  byte* raw_addr_length_address = raw_object_addr +
+             mirror::Array::LengthOffset().Int32Value();
+  const size_t length =
+      static_cast<size_t>(*reinterpret_cast<int32_t*>(raw_addr_length_address));
+
   if(length == 0)
     return;
 
@@ -261,7 +266,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //        mirror::Object::ClassOffset().Int32Value();
 //  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
 
-  byte* raw_object_addr = reinterpret_cast<byte*>(array);
+if(false) {
 
   if(!(IsMappedObjectToServer(raw_object_addr))) {
     LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
@@ -301,6 +306,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //      visitor(array, mapped_element, offset, false);
 
   }
+}
 }
 
 
