@@ -38,7 +38,7 @@ inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
 }
 
 
-mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Object* obj_parm) const{
+const mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Object* obj_parm) {
   if(obj_parm == NULL)
     return obj_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(obj_parm);
@@ -48,7 +48,7 @@ mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Object* o
   for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetClientSpaceEnd(i)) &&
         (casted_param >= GetClientSpaceBegin(i))) {
-      return reinterpret_cast<mirror::Object*>(casted_param + offset_);
+      return reinterpret_cast<const mirror::Object*>(casted_param + offset_);
     }
   }
 
