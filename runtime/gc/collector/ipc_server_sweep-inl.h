@@ -48,6 +48,32 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
   return false;
 }
 
+
+template <class TypeRef>
+inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
+  if(ptr_param == NULL)
+    return ptr_param;
+  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
+  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
+    return ptr_param;
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if(casted_param < spaces_[i].client_end_
+        && casted_param >= spaces_[i].client_base_) {
+      return reinterpret_cast<TypeRef*>(casted_param + offset_);
+      break;
+    }
+  }
+  //at this point there should be an error
+  LOG(ERROR) << "--------Could not map Object: " <<
+      reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+      static_cast<void*>(ptr_param);
+
+  LOG(FATAL) << "Terminate execution on service side";
+
+  return NULL;
+}
+
+
 template <class TypeRef>
 inline bool IPCServerMarkerSweep::WithinServerHeapAddresses(TypeRef* ptr_param) {
   if(ptr_param == NULL)
@@ -85,36 +111,7 @@ inline bool IPCServerMarkerSweep::IsMappedObjectToServer(TypeRef* ptr_param) {
 }
 
 
-template <class TypeRef>
-inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
-  if(ptr_param == NULL)
-    return ptr_param;
-//  if(IsMappedObjectToServer(ptr_param)) {
-//    return ptr_param;
-//  }
 
-  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
-  if(casted_param >= spaces_[KGCSpaceServerImageInd_].client_end_) {
-    bool _found = false;
-    for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-      if(casted_param < spaces_[i].client_end_ &&
-          casted_param >= spaces_[i].client_base_) {
-        _found = true;
-        casted_param = casted_param + offset_;
-        break;
-      }
-    }
-    if(!_found) {
-      LOG(ERROR) << "--------Could not map Object: " <<
-          reinterpret_cast<void*>(casted_param) << ", original parametter: " << static_cast<void*>(ptr_param);
-      return ptr_param;
-    }
-  } else {
-    return ptr_param;
-  }
-  return reinterpret_cast<TypeRef*>(casted_param);
-
-}
 
 inline mirror::Object* IPCServerMarkerSweep::MapClientReference(mirror::Object* obj) {
   return ServerMapHeapReference<mirror::Object>(obj);
@@ -218,8 +215,10 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
   if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX Object does not belong to Original Heap NULL XXXXXXXXX";
   }
+
+  mirror::Object* mapped_obj = ServerMapHeapReference<mirror::Object>(obj);
   if(false) {
-    mirror::Object* mapped_obj = MapClientReference(obj);
+  //  mirror::Object* mapped_obj = MapClientReference(obj);
 //  if(!IsMappedObjectToServer(mapped_obj)) {
 //    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
 //  }
