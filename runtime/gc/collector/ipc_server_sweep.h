@@ -80,7 +80,7 @@ class IPCServerMarkerSweep {
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
   const mirror::Object* MapClientReference(const mirror::Object* obj_parm);
-
+  const mirror::Class* GetMappedObjectKlass(const mirror::Object* mapped_obj_parm);
 //  template <class TypeRef>
 //  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
@@ -89,7 +89,7 @@ class IPCServerMarkerSweep {
   bool IsValidObjectForServer(TypeRef* ptr_param);
 
   bool BelongsToOldHeap(const mirror::Object* ptr_param) const;
-
+  bool BelongsToOldHeap(const mirror::Class* ptr_param) const;
   template <class TypeRef>
   bool IsMappedObjectToServer(TypeRef* ptr_param);
 

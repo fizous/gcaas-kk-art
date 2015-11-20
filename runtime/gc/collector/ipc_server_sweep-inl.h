@@ -74,6 +74,40 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_par
   return false;
 }
 
+inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Class* ptr_param) const{
+  if(ptr_param == NULL)
+    return true;
+  if(!IsAligned<kObjectAlignment>(ptr_param))
+    return false;
+  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
+  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
+    return true;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetClientSpaceEnd(i)) &&
+        (casted_param >= GetClientSpaceBegin(i))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Object* mapped_obj_parm) {
+  const byte* raw_addr_class = reinterpret_cast<const byte*>(mapped_obj_parm) +
+      mirror::Object::ClassOffset().Int32Value();
+  const mirror::Class* class_address = *reinterpret_cast<mirror::Class* const *>(raw_addr_class);
+  if (UNLIKELY(class_address == NULL)) {
+    LOG(FATAL) << "ERROR2....Null class in object: " << mapped_obj_parm;
+  } else if (UNLIKELY(!IsAligned<kObjectAlignment>(class_address))) {
+    LOG(FATAL) << "ERROR3.....Class isn't aligned: " << class_address <<
+        " in object: " << mapped_obj_parm;
+  } else if(!BelongsToOldHeap(class_address)) {
+    LOG(FATAL) << "ERROR4.....Class isn't aligned: " << class_address <<
+        " in object: " << mapped_obj_parm;
+  }
+  return class_address;
+}
+
 //
 //template <class TypeRef>
 //inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param) {
@@ -320,6 +354,10 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
       LOG(ERROR) << "..... ServerScanObjectVisit: ERROR1";
   }
 
+  const mirror::Class* original_klass = GetMappedObjectKlass(mapped_object);
+  if(!BelongsToOldHeap(original_klass)) {
+    LOG(ERROR) << "..... ServerScanObjectVisit: ERROR5";
+  }
 
 }
 
