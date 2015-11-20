@@ -52,7 +52,7 @@ mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Object* o
     }
   }
 
-  LOG(ERROR) << "XXXXX MapClientReference";
+  LOG(ERROR) << "..... MapClientReference: ERROR0";
   return obj_parm;
 }
 
@@ -315,7 +315,10 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
   if(!BelongsToOldHeap(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
-
+  const mirror::Object* mapped_object = MapClientReference(obj);
+  if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+      LOG(ERROR) << "..... ServerScanObjectVisit: ERROR1";
+  }
 
 
 }
