@@ -75,25 +75,9 @@ const mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Obj
   return obj_parm;
 }
 
-inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_param) const{
-  if(ptr_param == NULL)
-    return true;
-  if(!IsAligned<kObjectAlignment>(ptr_param))
-    return false;
-  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
-  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < GetClientSpaceEnd(i)) &&
-        (casted_param >= GetClientSpaceBegin(i))) {
-      return true;
-    }
-  }
-  return false;
-}
 
-inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Class* ptr_param) const{
+template <class referenceKlass>
+bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* ptr_param) const {
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
@@ -120,7 +104,7 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
   } else if (UNLIKELY(!IsAligned<kObjectAlignment>(class_address))) {
     LOG(FATAL) << "ERROR3.....Class isn't aligned: " << class_address <<
         " in object: " << mapped_obj_parm;
-  } else if(!BelongsToOldHeap(class_address)) {
+  } else if(!BelongsToOldHeap<mirror::Class>(class_address)) {
     LOG(FATAL) << "ERROR4.....Class isn't aligned: " << class_address <<
         " in object: " << mapped_obj_parm;
   }
@@ -365,7 +349,7 @@ inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
 template <typename MarkVisitor>
 inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
-  if(!BelongsToOldHeap(obj)) {
+  if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
   const mirror::Object* mapped_object = MapReferenceToServer<mirror::Object>(obj);
@@ -374,7 +358,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
   }
 
   const mirror::Class* original_klass = GetMappedObjectKlass(mapped_object);
-  if(!BelongsToOldHeap(original_klass)) {
+  if(!BelongsToOldHeap<mirror::Class>(original_klass)) {
     LOG(ERROR) << "..... ServerScanObjectVisit: ERROR5";
   }
 
