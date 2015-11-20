@@ -95,6 +95,16 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
           BelongsToOldHeap<byte>(calculated_param);
     }
 
+    if(!BelongsToOldHeap<byte>(casted_param)) {
+      LOG(ERROR) << "3--------Checking inside was not found:" <<
+          reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
+          static_cast<void*>(ptr_param) << ", belong_orig? " <<
+          BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
+          BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
+          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
+          BelongsToOldHeap<byte>(calculated_param);
+    }
+
   }
 
 
