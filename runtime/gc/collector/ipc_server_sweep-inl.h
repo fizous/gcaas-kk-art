@@ -116,7 +116,7 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
 
 
 int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
-
+  return 0;
 }
 
 //
