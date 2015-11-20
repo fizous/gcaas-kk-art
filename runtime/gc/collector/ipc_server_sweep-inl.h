@@ -55,7 +55,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
     return ptr_param;
   byte* casted_param = reinterpret_cast<byte*>(ptr_param);
 
-  if(BelongsToOldHeap(casted_param)) {
+  if(BelongsToOldHeap<byte>(casted_param)) {
 
     if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_)
       return ptr_param;
@@ -76,7 +76,8 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   }
   LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
       reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-      static_cast<void*>(ptr_param) << ", belong? " << BelongsToOldHeap(ptr_param);
+      static_cast<void*>(ptr_param) << ", belong? " <<
+      BelongsToOldHeap<mirror::Object>(ptr_param);
   LOG(FATAL) << "XXXX Terminate execution on service side";
   return NULL;
 }
