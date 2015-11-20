@@ -34,7 +34,7 @@ inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_par
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
-  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
+  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
   if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
     return true;
   }
