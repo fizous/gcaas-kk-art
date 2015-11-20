@@ -91,7 +91,8 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
           static_cast<void*>(ptr_param) << ", belong_orig? " <<
           BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
           BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
-          BelongsToOldHeap<mirror::Object>(copiedValue);
+          BelongsToOldHeap<mirror::Object>(copiedValue) << ", calculated_param: " <<
+          BelongsToOldHeap<byte>(calculated_param);
     }
 
   }
