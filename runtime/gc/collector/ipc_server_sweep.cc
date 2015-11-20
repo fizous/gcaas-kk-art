@@ -186,7 +186,7 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
   return current_mark_bitmap_;
 }
 
-void IPCServerMarkerSweep::ServerScanObject(mirror::Object* obj,
+void IPCServerMarkerSweep::ServerScanObject(const mirror::Object* obj,
     uint32_t calculated_offset) {
   //obj = (obj + calculated_offset);
 

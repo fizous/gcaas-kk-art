@@ -73,9 +73,9 @@ class IPCServerMarkerSweep {
 
 
   void ProcessMarckStack(void);
-  void ServerScanObject(mirror::Object* obj, uint32_t calculated_offset);
+  void ServerScanObject(const mirror::Object* obj, uint32_t calculated_offset);
   template <typename MarkVisitor>
-  void ServerScanObjectVisit(mirror::Object* obj, const MarkVisitor& visitor);
+  void ServerScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
@@ -88,8 +88,7 @@ class IPCServerMarkerSweep {
   template <class TypeRef>
   bool IsValidObjectForServer(TypeRef* ptr_param);
 
-  template <class TypeRef>
-  bool BelongsToOldHeap(TypeRef* ptr_param);
+  bool BelongsToOldHeap(const mirror::Object* ptr_param) const;
 
   template <class TypeRef>
   bool IsMappedObjectToServer(TypeRef* ptr_param);

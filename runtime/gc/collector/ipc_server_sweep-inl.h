@@ -29,8 +29,7 @@ inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
 
 }
 
-template <class TypeRef>
-inline bool IPCServerMarkerSweep::BelongsToOldHeap(TypeRef* ptr_param) {
+inline bool IPCServerMarkerSweep::BelongsToOldHeap(const mirror::Object* ptr_param) const{
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
@@ -57,6 +56,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   if(!BelongsToOldHeap<TypeRef>(ptr_param)) {
     LOG(ERROR) << "0--------Checking inside the mapper return inconsistent things: " <<
         static_cast<void*>(ptr_param) << ", " << StringPrintf("string %p", ptr_param);
+
   }
 
   TypeRef* copiedValue = ptr_param;
@@ -283,14 +283,14 @@ inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
 }
 
 template <typename MarkVisitor>
-inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
+inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
-  if(!BelongsToOldHeap<mirror::Object>(obj)) {
-    LOG(FATAL) << "MAPPINGERROR: XXXXXXX Object does not belong to Original Heap NULL XXXXXXXXX";
+  if(!BelongsToOldHeap(obj)) {
+    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
-
-  mirror::Object* mapped_obj = ServerMapHeapReference<mirror::Object>(obj);
   if(false) {
+  mirror::Object* mapped_obj = ServerMapHeapReference<mirror::Object>(const_cast<mirror::Object*>(obj));
+
   //  mirror::Object* mapped_obj = MapClientReference(obj);
 //  if(!IsMappedObjectToServer(mapped_obj)) {
 //    LOG(ERROR) << "MAPPINGERROR: XXXXXXX Object does not belong to new heap XXXXXXXXX";
