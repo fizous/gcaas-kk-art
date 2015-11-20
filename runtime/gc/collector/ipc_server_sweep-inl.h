@@ -232,7 +232,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(mirror::Object* obj,
 
   if (UNLIKELY(klass->IsArrayClass())) {
     if (klass->IsObjectArrayClass()) {
-      ServerVisitObjectArrayReferences(mapped_obj->AsObjectArray<mirror::Object>(), visitor);
+      ServerVisitObjectArrayReferences(down_cast<mirror::ObjectArray<mirror::Object>*>(mapped_obj), visitor);
     }
   } else if (UNLIKELY(klass == java_lang_Class_client_)) {
     //ServerVisitClassReferences(klass, obj, visitor);
