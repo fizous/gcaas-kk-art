@@ -116,7 +116,16 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
 
 
 int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
-  return 0;
+  if(klass == java_lang_Class_client_)
+    return 0;
+  const byte* raw_addr = reinterpret_cast<const byte*>(klass) +
+      mirror::Class::ComponentTypeOffset().Int32Value();
+  const mirror::Class* component_type_address =
+      *reinterpret_cast<mirror::Class* const *>(raw_addr);
+  if(component_type_address != NULL) { //this is an array
+    return 1;
+  }
+  return 2;
 }
 
 //
@@ -365,10 +374,12 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR1";
   }
 
-  const mirror::Class* original_klass = GetMappedObjectKlass(mapped_object);
+  const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
+
+  int mapped_class_type = GetMappedClassType(mapped_klass);
   if(false) {
-    if(!BelongsToOldHeap<mirror::Class>(original_klass)) {
-      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR5";
+    if(!BelongsToOldHeap<mirror::Class>(mapped_klass)) {
+      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR5, " << mapped_class_type;
     }
   }
 }
