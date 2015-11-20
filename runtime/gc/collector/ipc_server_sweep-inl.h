@@ -76,7 +76,7 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   }
   LOG(ERROR) << "--------Checking inside the mapper return nothing: " <<
       reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
-      static_cast<void*>(ptr_param);
+      static_cast<void*>(ptr_param) << ", belong? " << BelongsToOldHeap(ptr_param);
   LOG(FATAL) << "XXXX Terminate execution on service side";
   return NULL;
 }
