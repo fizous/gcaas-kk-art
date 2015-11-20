@@ -54,6 +54,11 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
   if(ptr_param == NULL)
     return ptr_param;
 
+  if(!BelongsToOldHeap<TypeRef>(ptr_param)) {
+    LOG(ERROR) << "0--------Checking inside the mapper return inconsistent things: " <<
+        static_cast<void*>(ptr_param) << ", " << StringPrintf("string %p", ptr_param);
+  }
+
   TypeRef* copiedValue = ptr_param;
   byte* casted_param = reinterpret_cast<byte*>(copiedValue);
   byte* calculated_param = casted_param;
@@ -66,9 +71,9 @@ inline TypeRef* IPCServerMarkerSweep::ServerMapHeapReference(TypeRef* ptr_param)
     LOG(ERROR) << "1--------Checking inside the mapper return inconsistent things: " <<
         reinterpret_cast<void*>(casted_param) << ", original parametter: " <<
         static_cast<void*>(ptr_param) << ", belong_orig? " <<
-        BelongsToOldHeap<mirror::Object>(ptr_param) << ", belong_char? " <<
+        BelongsToOldHeap<TypeRef>(ptr_param) << ", belong_char? " <<
         BelongsToOldHeap<byte>(casted_param) << ", belong_copied? " <<
-        BelongsToOldHeap<mirror::Object>(copiedValue);
+        BelongsToOldHeap<TypeRef>(copiedValue);
     //LOG(FATAL) << "XXXX Terminate execution on service side";
   }
   bool _found = false;
