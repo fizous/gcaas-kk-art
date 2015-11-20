@@ -254,6 +254,12 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                                     mirror::ObjectArray<mirror::Object>* array,
                                                   const Visitor& visitor) {
   byte* raw_object_addr = reinterpret_cast<byte*>(array);
+
+  if(!(IsMappedObjectToServer(raw_object_addr))) {
+    LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
+        static_cast<void*>(raw_object_addr);
+  }
+
   byte* raw_addr_length_address = raw_object_addr +
              mirror::Array::LengthOffset().Int32Value();
   const size_t length =
@@ -266,12 +272,7 @@ inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //        mirror::Object::ClassOffset().Int32Value();
 //  mirror::Class* klass = *reinterpret_cast<mirror::Class**>(raw_addr);
 
-if(false) {
-
-  if(!(IsMappedObjectToServer(raw_object_addr))) {
-    LOG(ERROR) << "XXXXX Invalid MAPPING Of array Object XXXXXX " <<
-        static_cast<void*>(raw_object_addr);
-  }
+  if(false) {
 
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
