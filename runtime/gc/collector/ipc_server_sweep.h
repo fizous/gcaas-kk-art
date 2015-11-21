@@ -112,7 +112,7 @@ class IPCServerMarkerSweep {
                                               const Visitor& visitor);
 
   template <typename Visitor>
-  void IPCServerMarkerSweep::VisitInstanceFieldsReferences(const mirror::Class* klass,
+  void VisitInstanceFieldsReferences(const mirror::Class* klass,
                                                        const mirror::Object* obj,
                                                        const Visitor& visitor);
 
