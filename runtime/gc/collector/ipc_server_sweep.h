@@ -94,8 +94,6 @@ class IPCServerMarkerSweep {
   template <class referenceKlass>
   const referenceKlass* MapReferenceToServer(const referenceKlass* ref_parm);
 
-
-  const mirror::Object* MapClientReference(const mirror::Object* obj_parm);
   const mirror::Class* GetMappedObjectKlass(const mirror::Object* mapped_obj_parm);
 //  template <class TypeRef>
 //  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
@@ -108,8 +106,20 @@ class IPCServerMarkerSweep {
   void ServerVisitObjectArrayReferences(
                               const mirror::ObjectArray<mirror::Object>* array,
                                                       const Visitor& visitor);
+  template <typename Visitor>
+  void IPCServerMarkerSweep::ServerVisitClassReferences(
+                          const mirror::Class* klass, const mirror::Object* obj,
+                                              const Visitor& visitor);
 
+  template <typename Visitor>
+  void IPCServerMarkerSweep::VisitInstanceFieldsReferences(const mirror::Class* klass,
+                                                       const mirror::Object* obj,
+                                                       const Visitor& visitor);
 
+  template <typename Visitor>
+  void VisitFieldsReferences(const mirror::Object* obj,
+                              uint32_t ref_offsets, bool is_static,
+                              const Visitor& visitor);
   template <class TypeRef>
   bool IsValidObjectForServer(TypeRef* ptr_param);
 

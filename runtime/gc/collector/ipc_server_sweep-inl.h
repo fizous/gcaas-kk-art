@@ -77,26 +77,8 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
     }
   }
 
-  LOG(FATAL) << "..... MapClientReference: ERROR0";
-  return ref_parm;
-}
-
-const mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Object* obj_parm) {
-  if(obj_parm == NULL)
-    return obj_parm;
-  const byte* casted_param = reinterpret_cast<const byte*>(obj_parm);
-  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
-    return obj_parm;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < GetClientSpaceEnd(i)) &&
-        (casted_param >= GetClientSpaceBegin(i))) {
-      return reinterpret_cast<const mirror::Object*>(casted_param + offset_);
-    }
-  }
-
-  LOG(ERROR) << "..... MapClientReference: ERROR0";
-  return obj_parm;
+  LOG(FATAL) << "..... MapReferenceToServer: ERROR0.." << ref_parm;
+  return NULL;
 }
 
 template <class TypeRef>
@@ -171,6 +153,10 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
 
   const mirror::Class* mapped_class_address =
       MapReferenceToServer<mirror::Class>(class_address);
+  if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
+    LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
+            " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
+  }
   return mapped_class_address;
 }
 
@@ -183,6 +169,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
 
   if(klass == java_lang_Class_client_)
     return 0;
+
   const byte* raw_addr = reinterpret_cast<const byte*>(klass) +
       mirror::Class::ComponentTypeOffset().Int32Value();
   const mirror::Class* component_type_address =
@@ -501,6 +488,29 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 }
 
 
+template <typename Visitor>
+inline void IPCServerMarkerSweep::VisitInstanceFieldsReferences(const mirror::Class* klass,
+                                                     const mirror::Object* obj,
+                                                     const Visitor& visitor) {
+
+}
+
+template <typename Visitor>
+inline void IPCServerMarkerSweep::ServerVisitClassReferences(
+                        const mirror::Class* klass, const mirror::Object* obj,
+                                            const Visitor& visitor)  {
+  ServerVisitInstanceFieldsReferences(klass, obj, visitor);
+
+}
+
+template <typename Visitor>
+inline void IPCServerMarkerSweep::VisitFieldsReferences(const mirror::Object* obj, uint32_t ref_offsets,
+                                             bool is_static, const Visitor& visitor) {
+
+}
+
+
+
 //template <typename Visitor>
 //inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //                                    mirror::ObjectArray<mirror::Object>* array,
@@ -563,13 +573,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //}
 
 
-//template <typename Visitor>
-//inline void IPCServerMarkerSweep::ServerVisitClassReferences(
-//                        mirror::Class* klass, mirror::Object* obj,
-//                                            const Visitor& visitor)  {
-//  ServerVisitInstanceFieldsReferences(klass, obj, visitor);
-////  VisitStaticFieldsReferences(obj->AsClass(), visitor);
-//}
+
 //
 //template <typename Visitor>
 //inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(mirror::Class* klass,
