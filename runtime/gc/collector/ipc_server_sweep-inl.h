@@ -421,6 +421,38 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
 }
 
 
+template <typename Visitor>
+void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
+                          const mirror::ObjectArray<mirror::Object>* mapped_arr,
+                                                  const Visitor& visitor) {
+  if(!(IsMappedObjectToServer<mirror::ObjectArray<mirror::Object>>(mapped_arr))) {
+    LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0000";
+  }
+  const byte* raw_object_addr = reinterpret_cast<const byte*>(mapped_arr);
+  const byte* raw_addr_length_address = raw_object_addr +
+               mirror::Array::LengthOffset().Int32Value();
+  const size_t length =
+        static_cast<size_t>(*reinterpret_cast<int32_t*>(raw_addr_length_address));
+
+  if(length == 0)
+    return;
+
+  const size_t width = sizeof(mirror::Object*);
+  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
+  byte* _raw_data_element = NULL;
+
+  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
+    MemberOffset offset(_data_offset + i * width);
+    _raw_data_element = raw_object_addr + offset.Int32Value();
+
+    if(!(IsMappedObjectToServer<byte>(_raw_data_element))) {
+      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0001";
+    }
+  }
+
+}
+
+
 //template <typename Visitor>
 //inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //                                    mirror::ObjectArray<mirror::Object>* array,

@@ -64,6 +64,7 @@ class IPCServerMarkerSweep {
 
 
   void ResetStats(void);
+
   mirror::Object* MapObjectAddress(mirror::Object* obj);
   bool ClientSpaceContains(mirror::Object* obj, GCSrverCollectorSpace* server_space);
 
@@ -102,6 +103,12 @@ class IPCServerMarkerSweep {
 
   int GetMappedClassType(const mirror::Class* klass) const;
 
+  template <typename Visitor>
+  void ServerVisitObjectArrayReferences(
+                              const mirror::ObjectArray<mirror::Object>* array,
+                                                      const Visitor& visitor);
+
+
   template <class TypeRef>
   bool IsValidObjectForServer(TypeRef* ptr_param);
 
@@ -124,9 +131,7 @@ class IPCServerMarkerSweep {
   byte* GetClientSpaceBegin(int index) const;
   byte* GetServerSpaceEnd(int index) const;
   byte* GetServerSpaceBegin(int index) const;
-//  template <typename Visitor>
-//  void ServerVisitObjectArrayReferences(mirror::ObjectArray<mirror::Object>* array,
-//                                                    const Visitor& visitor);
+
 //
 //  template <typename Visitor>
 //  void ServerVisitClassReferences(mirror::Class* klass, mirror::Object* obj,
