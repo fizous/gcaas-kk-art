@@ -44,6 +44,23 @@ inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
 
 }
 
+template <class referenceKlass>
+const referenceKlass* IPCServerMarkerSweep::MapValueToServer(uint32_t raw_address_value) {
+  const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
+  if(_raw_address < GetClientSpaceEnd(0)) {
+    return reinterpret_cast<const referenceKlass*>(_raw_address);
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((_raw_address < GetClientSpaceEnd(i)) &&
+        (_raw_address >= GetClientSpaceBegin(i))) {
+      return reinterpret_cast<const referenceKlass*>(_raw_address + offset_);
+    }
+  }
+
+  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000";
+  return NULL;
+}
+
 
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* ref_parm) {
@@ -81,6 +98,24 @@ const mirror::Object* IPCServerMarkerSweep::MapClientReference(const mirror::Obj
   LOG(ERROR) << "..... MapClientReference: ERROR0";
   return obj_parm;
 }
+
+template <class TypeRef>
+inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* ptr_param) const {
+  if(ptr_param == NULL)
+    return true;
+  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
+  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
+    return true;
+  }
+  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 template <class TypeRef>
 inline bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* ptr_param) const {
@@ -409,6 +444,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
     android_atomic_add(1, &(class_count_));
   } else if (UNLIKELY(mapped_class_type == 1)) {
     android_atomic_add(1, &(array_count_));
+    ServerVisitObjectArrayReferences(down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
   } else if (UNLIKELY(mapped_class_type != -1)){
     android_atomic_add(1, &(other_count_));
   }
@@ -439,14 +475,22 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
-  byte* _raw_data_element = NULL;
+  const byte* _raw_data_element = NULL;
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     MemberOffset offset(_data_offset + i * width);
     _raw_data_element = raw_object_addr + offset.Int32Value();
 
-    if(!(IsMappedObjectToServer<byte>(_raw_data_element))) {
+    if(!(BelongsToServerHeap<byte>(_raw_data_element))) {
       LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0001";
+    }
+    const int32_t* word_addr = reinterpret_cast<const int32_t*>(_raw_data_element);
+    uint32_t _data_read = *word_addr;
+    const mirror::Object* element_content =
+        MapValueToServer<mirror::Object>(_data_read);
+    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
+      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
+
     }
   }
 
