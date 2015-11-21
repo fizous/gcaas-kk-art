@@ -80,7 +80,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
     }
   }
 
-  LOG(FATAL) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
+  LOG(ERROR) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
   return NULL;
 }
 
@@ -154,8 +154,16 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
         " in object: " << mapped_obj_parm;
   }
 
+  if(class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
+  }
   const mirror::Class* mapped_class_address =
       MapReferenceToServer<mirror::Class>(class_address);
+  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
+  }
+
+
   if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
     LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
             " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
