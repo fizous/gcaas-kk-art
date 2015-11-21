@@ -126,8 +126,8 @@ class IPCServerMarkerSweep {
 
 
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
-  void MarkObject(mirror::Object* obj);
-  void MarkObjectNonNull(mirror::Object* obj);
+  void MarkObject(const mirror::Object* obj);
+  void MarkObjectNonNull(const mirror::Object* obj);
 
 
   byte* GetClientSpaceEnd(int index) const;
@@ -151,7 +151,7 @@ class IPCServerMarkerSweep {
 
   void InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
   // Returns true if an object is inside of the immune region (assumed to be marked).
-  bool IsImmune(mirror::Object* obj) const {
+  bool IsImmune(const mirror::Object* obj) const {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
 

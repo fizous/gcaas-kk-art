@@ -368,11 +368,13 @@ inline bool IPCServerMarkerSweep::WithinServerHeapAddresses(TypeRef* ptr_param) 
 //}
 //
 
-inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
+inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   DCHECK(obj != NULL);
 
+  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
+    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
+  }
   if (IsImmune(obj)) {
-//    DCHECK(IsMarked(obj));
     return;
   }
 
@@ -408,7 +410,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(mirror::Object* obj) {
 // objects.  Any newly-marked objects whose addresses are lower than
 // the finger won't be visited by the bitmap scan, so those objects
 // need to be added to the mark stack.
-inline void IPCServerMarkerSweep::MarkObject(mirror::Object* obj) {
+inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
   if (obj != NULL) {
 //    if(BelongsToOldHeap(obj)) {
 //      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
@@ -446,6 +448,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
     android_atomic_add(1, &(array_count_));
     ServerVisitObjectArrayReferences(
         down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
+
   } else if (UNLIKELY(mapped_class_type != -1)){
     android_atomic_add(1, &(other_count_));
   }
@@ -491,8 +494,8 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
         MapValueToServer<mirror::Object>(_data_read);
     if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
       LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
-
     }
+    visitor(mapped_arr, element_content, offset, false);
   }
 
 }

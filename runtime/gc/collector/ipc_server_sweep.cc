@@ -250,7 +250,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
-  LOG(ERROR) << "+++++++++++++++++++++++";
+  LOG(ERROR) << "+++++++++++++++++++++++ " << array_count_;
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
@@ -293,10 +293,10 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   ResetStats();
 
-//  current_immune_begin_ =
-//      MapClientReference(curr_collector_ptr_->immune_begin_);
-//  current_immune_end_ =
-//      MapClientReference(curr_collector_ptr_->immune_end_);
+  current_immune_begin_ =
+      MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_begin_);
+  current_immune_end_ =
+      MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_end_);
 }
 
 }
