@@ -153,7 +153,14 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
   const mirror::Class* component_type_address =
       *reinterpret_cast<mirror::Class* const *>(raw_addr);
   if(component_type_address != NULL) { //this is an array
-    return 1;
+    raw_addr = reinterpret_cast<const byte*>(klass) +
+          mirror::Class::PrimitiveTypeOffset().Int32Value();
+    const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+    uint32_t value_read = *word_addr;
+    Primitive::Type primitive_type = static_cast<Primitive::Type>(value_read);
+    if(primitive_type != Primitive::kPrimNot)
+      return 1;
+    return -1;
   }
   return 2;
 }
@@ -398,6 +405,14 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
   }
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
+  if(UNLIKELY(mapped_class_type == 0)) {
+    android_atomic_add(1, &(class_count_));
+  } else if (UNLIKELY(mapped_class_type == 1)) {
+    android_atomic_add(1, &(array_count_));
+  } else if (UNLIKELY(mapped_class_type != -1)){
+    android_atomic_add(1, &(other_count_));
+  }
+
   if(false) {
     if(!BelongsToOldHeap<mirror::Class>(mapped_klass)) {
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR5, " << mapped_class_type;

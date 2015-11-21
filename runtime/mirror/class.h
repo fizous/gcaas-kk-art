@@ -503,6 +503,11 @@ class MANAGED Class : public StaticStorageBase {
     return MemberOffset(OFFSET_OF_OBJECT_MEMBER(Class, component_type_));
   }
 
+  static MemberOffset PrimitiveTypeOffset() {
+    return MemberOffset(OFFSET_OF_OBJECT_MEMBER(Class, primitive_type_));
+  }
+
+
   enum {
     kDumpClassFullDetail = 1,
     kDumpClassClassLoader = (1 << 1),

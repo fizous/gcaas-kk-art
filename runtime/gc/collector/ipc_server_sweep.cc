@@ -63,6 +63,13 @@ class ServerMarkObjectVisitor {
   IPCServerMarkerSweep* const mark_sweep_;
 };
 
+
+void IPCServerMarkerSweep::ResetStats(void) {
+  android_atomic_acquire_store(0, &(array_count_));
+  android_atomic_acquire_store(0, &(class_count_));
+  android_atomic_acquire_store(0, &(other_count_));
+}
+
 IPCServerMarkerSweep::IPCServerMarkerSweep(
     gc::gcservice::GCServiceClientRecord* client_record) :
         client_rec_(client_record),
@@ -283,6 +290,8 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
         KGCSpaceServerMarkBitmapInd_,
           (curr_collector_ptr_->current_mark_bitmap_));
   }
+
+  ResetStats();
 
 //  current_immune_begin_ =
 //      MapClientReference(curr_collector_ptr_->immune_begin_);

@@ -53,8 +53,17 @@ class IPCServerMarkerSweep {
   mirror::Object* current_immune_begin_;
   mirror::Object* current_immune_end_;
 
+
+  //statistics
+
+  volatile int32_t array_count_;
+  volatile int32_t class_count_;
+  volatile int32_t other_count_;
+
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
 
+
+  void ResetStats(void);
   mirror::Object* MapObjectAddress(mirror::Object* obj);
   bool ClientSpaceContains(mirror::Object* obj, GCSrverCollectorSpace* server_space);
 
