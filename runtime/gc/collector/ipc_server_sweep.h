@@ -107,7 +107,7 @@ class IPCServerMarkerSweep {
                               const mirror::ObjectArray<mirror::Object>* array,
                                                       const Visitor& visitor);
   template <typename Visitor>
-  void :ServerVisitClassReferences(
+  void ServerVisitClassReferences(
                           const mirror::Class* klass, const mirror::Object* obj,
                                               const Visitor& visitor);
 
