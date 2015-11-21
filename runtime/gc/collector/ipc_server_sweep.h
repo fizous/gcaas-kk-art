@@ -120,8 +120,8 @@ class IPCServerMarkerSweep {
   void VisitFieldsReferences(const mirror::Object* obj,
                               uint32_t ref_offsets, bool is_static,
                               const Visitor& visitor);
-  template <class TypeRef>
-  bool IsValidObjectForServer(TypeRef* ptr_param);
+//  template <class TypeRef>
+//  bool IsValidObjectForServer(TypeRef* ptr_param);
 
   template <class referenceKlass>
   bool BelongsToOldHeap(const referenceKlass* ptr_param) const;

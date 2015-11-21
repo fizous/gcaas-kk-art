@@ -38,11 +38,11 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 }
 
 
-template <class TypeRef>
-inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
-  return (BelongsToOldHeap(ptr_param) || IsMappedObjectToServer(ptr_param));
-
-}
+//template <class TypeRef>
+//inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
+//  return (BelongsToOldHeap(ptr_param) || IsMappedObjectToServer(ptr_param));
+//
+//}
 
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) {
@@ -50,9 +50,11 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
   if(_raw_address < GetClientSpaceEnd(0)) {
     return reinterpret_cast<const referenceKlass*>(_raw_address);
   }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetClientSpaceEnd(i)) &&
         (_raw_address >= GetClientSpaceBegin(i))) {
+      if(i == KGCSpaceServerImageInd_)
+        return reinterpret_cast<const referenceKlass*>(_raw_address);
       return reinterpret_cast<const referenceKlass*>(_raw_address + offset_);
     }
   }
@@ -70,12 +72,14 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
   if(ref_parm == NULL)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
-  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
-    return ref_parm;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return ref_parm;
+//  }
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetClientSpaceEnd(i)) &&
         (casted_param >= GetClientSpaceBegin(i))) {
+      if(i == KGCSpaceServerImageInd_)
+        return ref_parm;
       return reinterpret_cast<const referenceKlass*>(casted_param + offset_);
     }
   }
@@ -89,10 +93,10 @@ inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* ptr_param) 
   if(ptr_param == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
-  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return true;
+//  }
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetServerSpaceEnd(i)) &&
         (casted_param >= GetServerSpaceBegin(i))) {
       return true;
@@ -109,10 +113,10 @@ inline bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* ptr_para
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
-  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return true;
+//  }
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetServerSpaceEnd(i)) &&
         (casted_param >= GetServerSpaceBegin(i))) {
       return true;
@@ -128,10 +132,10 @@ bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* ptr_param) con
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
-  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return true;
+//  }
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetClientSpaceEnd(i)) &&
         (casted_param >= GetClientSpaceBegin(i))) {
       return true;
@@ -154,14 +158,14 @@ inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mir
         " in object: " << mapped_obj_parm;
   }
 
-  if(class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
-  }
+//  if(class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+//      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
+//  }
   const mirror::Class* mapped_class_address =
       MapReferenceToServer<mirror::Class>(class_address);
-  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
-  }
+//  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+//      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
+//  }
 
 
   if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
