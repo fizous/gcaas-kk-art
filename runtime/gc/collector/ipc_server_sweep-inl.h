@@ -444,7 +444,8 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
     android_atomic_add(1, &(class_count_));
   } else if (UNLIKELY(mapped_class_type == 1)) {
     android_atomic_add(1, &(array_count_));
-    ServerVisitObjectArrayReferences(down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
+    ServerVisitObjectArrayReferences(
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
   } else if (UNLIKELY(mapped_class_type != -1)){
     android_atomic_add(1, &(other_count_));
   }
@@ -468,7 +469,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   const byte* raw_addr_length_address = raw_object_addr +
                mirror::Array::LengthOffset().Int32Value();
   const size_t length =
-        static_cast<size_t>(*reinterpret_cast<int32_t*>(raw_addr_length_address));
+        static_cast<size_t>(*reinterpret_cast<const int32_t*>(raw_addr_length_address));
 
   if(length == 0)
     return;
