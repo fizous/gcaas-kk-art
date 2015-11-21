@@ -45,7 +45,7 @@ inline bool IPCServerMarkerSweep::IsValidObjectForServer(TypeRef* ptr_param) {
 }
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapValueToServer(uint32_t raw_address_value) {
+const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) {
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   if(_raw_address < GetClientSpaceEnd(0)) {
     return reinterpret_cast<const referenceKlass*>(_raw_address);
@@ -64,6 +64,9 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(uint32_t raw_addres
 
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* ref_parm) {
+  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
+    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
+  }
   if(ref_parm == NULL)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
@@ -77,7 +80,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
     }
   }
 
-  LOG(FATAL) << "..... MapReferenceToServer: ERROR0.." << ref_parm;
+  LOG(FATAL) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
   return NULL;
 }
 
