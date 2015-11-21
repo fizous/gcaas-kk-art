@@ -250,7 +250,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
-  LOG(ERROR) << "+++++++++++++++++++++++ " << array_count_;
+  LOG(ERROR) << "+++++++++++++++++++++++ array_count = " << array_count_ <<
+      ", class_count = " << class_count_ << ", class_count = " << other_count_;
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
