@@ -666,6 +666,9 @@ class MANAGED Class : public StaticStorageBase {
     return OFFSET_OF_OBJECT_MEMBER(Class, fields_);
   }
 
+  static MemberOffset GetStaticFieldsOffset() {
+    return OFFSET_OF_OBJECT_MEMBER(Class, sfields_);
+  }
 
   static MemberOffset ReferenceStaticFieldsOffset()  {
     return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_static_fields_);
