@@ -560,10 +560,27 @@ const mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* ma
 
 inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
     const mirror::Class* klass, uint32_t i) {
-  const mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
-  mapped_field = MapReferenceToServerChecks<mirror::ArtField>(mapped_field);
+  int32_t static_fields_offset =
+      mirror::Class::GetStaticFieldsOffset().Int32Value();
+  const byte* raw_addr =
+      reinterpret_cast<const byte*>(klass) + static_fields_offset;
+  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+  uint32_t value_read = *word_addr;
+  const mirror::ObjectArray<mirror::ArtField>* static_fields =
+      reinterpret_cast<const mirror::ObjectArray<mirror::ArtField>*>(value_read);
+  MemberOffset data_offset(mirror::Array::DataOffset(sizeof(Object*)).Int32Value()
+      + i * sizeof(mirror::Object*));
+  const byte* element_raw_addr = reinterpret_cast<const byte*>(static_fields) +
+      data_offset.Int32Value();
+  const int32_t* element_word_addr =
+      reinterpret_cast<const int32_t*>(element_raw_addr);
 
-  return mapped_field;
+  const mirror::ArtField* art_field =
+      reinterpret_cast<const mirror::ArtField*>(*element_word_addr);
+  const mirror::ArtField* mapped_art_field =
+      MapReferenceToServerChecks<mirror::ArtField>(art_field);
+
+  return mapped_art_field;
 }
 
 template <typename Visitor>
