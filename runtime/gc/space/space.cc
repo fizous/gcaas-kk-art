@@ -29,10 +29,12 @@ Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
 
   if(0)
     LOG(ERROR) << "Space::Space --> memory_alloc ? " << (memory_alloc != NULL ? "true" : "False");
-  memcpy(space_data_->name_, name.c_str(), name.size());
+
+  COPY_NAME_TO_STRUCT(space_data_->name_, name);
+
+
   if(0)
     LOG(ERROR) << "Done Copying..." << space_data_->name_;
-  space_data_->name_[name.size()] = '\0';
   space_data_->gc_retention_policy_ = gc_retention_policy;
   if(0)
     LOG(ERROR) << "Leaving Space Constructor";
@@ -64,8 +66,8 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
     if(0)
       LOG(ERROR) << "XXXX Continuous space was not null XXXXX" ;
   }
-  LOG(ERROR) << "XXXX Continuous space was not null XXXXX " << name <<
-      ", begin=" << begin << ", end = " << end;
+//  LOG(ERROR) << "XXXX Continuous space was not null XXXXX " << name <<
+//      ", begin=" << begin << ", end = " << end;
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
 }

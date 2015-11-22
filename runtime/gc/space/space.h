@@ -93,7 +93,7 @@ std::ostream& operator<<(std::ostream& os, const SpaceType& space_type);
 
 
 typedef struct GCSrvceSpace_S {
-  char name_[64];
+  char name_[MEM_MAP_NAME_LENGTH];
   // When should objects within this space be reclaimed? Not constant as we vary it in the case
   // of Zygote forking.
   GcRetentionPolicy gc_retention_policy_;
