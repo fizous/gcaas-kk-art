@@ -126,6 +126,13 @@ class IPCServerMarkerSweep {
   void ServerVisitFieldsReferences(const mirror::Object* obj,
                               uint32_t ref_offsets, bool is_static,
                               const Visitor& visitor);
+
+
+  mirror::ArtField* ServerClassGetStaticField(const mirror::Class* klass,
+      uint32_t i);
+  mirror::Class* GetSuperClass(const mirror::Class* mapped_klass);
+  size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
+  size_t GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const;
 //  template <class TypeRef>
 //  bool IsValidObjectForServer(TypeRef* ptr_param);
 

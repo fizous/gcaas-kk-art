@@ -666,6 +666,15 @@ class MANAGED Class : public StaticStorageBase {
     return OFFSET_OF_OBJECT_MEMBER(Class, fields_);
   }
 
+
+  static MemberOffset ReferenceStaticFieldsOffset() const {
+    return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_static_fields_);
+  }
+
+  static MemberOffset ReferenceInstanceFieldsOffset() const {
+    return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_instance_fields_);
+  }
+
   // Returns the number of static fields containing reference types.
   size_t NumReferenceStaticFields() const {
     DCHECK(IsResolved() || IsErroneous());
