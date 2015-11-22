@@ -560,7 +560,7 @@ const mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* ma
 
 inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
     const mirror::Class* klass, uint32_t i) {
-  mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
+  const mirror::ArtField* mapped_field = klass->GetStaticFieldNoLock(i);
   mapped_field = MapReferenceToServerChecks<mirror::ArtField>(mapped_field);
 
   return mapped_field;
