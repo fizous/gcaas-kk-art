@@ -640,7 +640,7 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
                                      ? GetNumReferenceStaticFields(klass)
                                      : GetNumReferenceInstanceFields(klass));
       for (size_t i = 0; i < num_reference_fields; ++i) {
-        mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+        const mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
                                    : ServerClassGetInstanceField(klass, i));
         MemberOffset field_offset = mirror::ArtField::OffsetOffset();
         const byte* field_raw_addr = reinterpret_cast<const byte*>(field) + field_offset.Int32Value();
