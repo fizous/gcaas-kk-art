@@ -294,12 +294,14 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   ResetStats();
 
+  LOG(ERROR) << "----------------------RESTARTING-----------------------";
   current_immune_begin_ =
       const_cast<mirror::Object*>(
-          MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_begin_));
+          MapReferenceToServerA<mirror::Object>(curr_collector_ptr_->immune_begin_));
   current_immune_end_ =
       const_cast<mirror::Object*>(
-          MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_end_));
+          MapReferenceToServerB<mirror::Object>(curr_collector_ptr_->immune_end_));
+  LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
 }
 
 }
