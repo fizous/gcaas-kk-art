@@ -124,7 +124,7 @@ class IPCServerMarkerSweep {
 //  bool IsValidObjectForServer(TypeRef* ptr_param);
 
   template <class referenceKlass>
-  bool BelongsToOldHeap(const referenceKlass* ptr_param) const;
+  bool BelongsToOldHeap(const referenceKlass* const ptr_param) const;
 
   template <class TypeRef>
   bool IsMappedObjectToServer(const TypeRef* ptr_param)const;
