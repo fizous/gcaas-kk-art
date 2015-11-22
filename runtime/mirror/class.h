@@ -667,11 +667,11 @@ class MANAGED Class : public StaticStorageBase {
   }
 
 
-  static MemberOffset ReferenceStaticFieldsOffset() const {
+  static MemberOffset ReferenceStaticFieldsOffset()  {
     return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_static_fields_);
   }
 
-  static MemberOffset ReferenceInstanceFieldsOffset() const {
+  static MemberOffset ReferenceInstanceFieldsOffset()  {
     return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_instance_fields_);
   }
 
