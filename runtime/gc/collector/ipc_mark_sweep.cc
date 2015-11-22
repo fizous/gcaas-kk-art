@@ -796,7 +796,7 @@ inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
         obj->AsObjectArray<mirror::Object>();
     const size_t length = static_cast<size_t>(array->GetLength());
     for (size_t i = 0; i < length; ++i) {
-      const mirror::Object* element = array->GetWithoutChecks(static_cast<int32_t>(i));
+      const mirror::Object* element = array->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
       const size_t width = sizeof(mirror::Object*);
       MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
       if(element == NULL)
