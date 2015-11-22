@@ -691,7 +691,9 @@ void AbstractIPCMarkSweep::DumpValues(void){
       << "\n     image_begin: " << reinterpret_cast<void*>(heap_meta_->image_space_begin_)
       << "\n     image_end: " << reinterpret_cast<void*>(heap_meta_->image_space_end_)
   << "\n     alloc_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->Begin())
-  << "\n     alloc_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->End());
+  << "\n     alloc_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->End())
+  << "\n     image_heap_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->Begin())
+  << "\n     image_heap_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->End());
 }
 
 
