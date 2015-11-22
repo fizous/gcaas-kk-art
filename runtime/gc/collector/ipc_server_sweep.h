@@ -130,7 +130,7 @@ class IPCServerMarkerSweep {
 
   mirror::ArtField* ServerClassGetStaticField(const mirror::Class* klass,
       uint32_t i);
-  mirror::Class* GetSuperClass(const mirror::Class* mapped_klass);
+  const mirror::Class* GetSuperClass(const mirror::Class* mapped_klass);
   size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
   size_t GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const;
 //  template <class TypeRef>

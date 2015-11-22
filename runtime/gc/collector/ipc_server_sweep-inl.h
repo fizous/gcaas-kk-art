@@ -550,7 +550,7 @@ size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(const mirror::Class* 
   return value;
 }
 
-mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* mapped_klass) {
+const mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* mapped_klass) {
   int32_t super_klass_offset = mirror::Class::SuperClassOffset().Int32Value();
   const byte* raw_addr = reinterpret_cast<const byte*>(mapped_klass) +
       super_klass_offset;
