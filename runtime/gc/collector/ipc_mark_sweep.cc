@@ -689,7 +689,9 @@ void AbstractIPCMarkSweep::DumpValues(void){
       << reinterpret_cast<void*>(heap_meta_->zygote_begin_)
       << "\n     zygote_end: " << reinterpret_cast<void*>(heap_meta_->zygote_end_)
       << "\n     image_begin: " << reinterpret_cast<void*>(heap_meta_->image_space_begin_)
-      << "\n     image_end: " << reinterpret_cast<void*>(heap_meta_->image_space_end_);
+      << "\n     image_end: " << reinterpret_cast<void*>(heap_meta_->image_space_end_)
+  << "\n     alloc_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->Begin())
+  << "\n     alloc_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->End());
 }
 
 
@@ -785,7 +787,38 @@ inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
       casted_obj < ipc_heap_->local_heap_->GetAllocSpace()->End())) {
     return;
   }
-  LOG(FATAL) << "IPCMarkSweep::ServerScanObjectVisit...error." << obj;
+  LOG(FATAL) << "A- IPCMarkSweep::ServerScanObjectVisit...error." << obj;
+
+
+  mirror::Class* klass = obj->GetClass();
+  if (klass->IsObjectArrayClass()) {
+    const mirror::ObjectArray<mirror::Object>* array =
+        obj->AsObjectArray<mirror::Object>();
+    const size_t length = static_cast<size_t>(array->GetLength());
+    for (size_t i = 0; i < length; ++i) {
+      const mirror::Object* element = array->GetWithoutChecks(static_cast<int32_t>(i));
+      const size_t width = sizeof(mirror::Object*);
+      MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+      if(element == NULL)
+        continue;
+      if(false)
+        visitor(array, element, offset, false);
+      casted_obj = reinterpret_cast<const byte*>(element);
+      if((casted_obj >= heap_meta_->image_space_begin_ &&
+          casted_obj < heap_meta_->image_space_end_))
+        continue;
+      if((casted_obj >= heap_meta_->zygote_begin_ &&
+          casted_obj < heap_meta_->zygote_end_))
+        continue;
+      if((casted_obj >= ipc_heap_->local_heap_->GetAllocSpace()->Begin() &&
+          casted_obj < ipc_heap_->local_heap_->GetAllocSpace()->End())) {
+        continue;
+      }
+      LOG(FATAL) << "B- IPCMarkSweep::ServerScanObjectVisit...error. array = " <<
+          array << "object = " << element << ", index = " << i;
+    }
+
+  }
 
 }
 
