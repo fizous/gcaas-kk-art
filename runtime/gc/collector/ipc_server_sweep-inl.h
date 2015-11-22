@@ -60,10 +60,10 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
   return NULL;
 }
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerA(const referenceKlass* const ref_parm) {
-//  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
-//    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
-//  }
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(const referenceKlass* const ref_parm) {
+  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
+    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
+  }
   if(ref_parm == NULL)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
@@ -79,23 +79,21 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerA(const referenc
     }
   }
 
-  LOG(ERROR) << "..... MapReferenceToServerA: ERROR001.." << ref_parm;
+  LOG(FATAL) << "..... MapReferenceToServerChecks: ERROR001.." << ref_parm <<
+      ", casted_param  = " << casted_param;
+
   return NULL;
 }
 
 
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerB(const referenceKlass* const ref_parm) {
-//  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
-//    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
-//  }
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* const ref_parm) {
+
   if(ref_parm == NULL)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
-//  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
-//    return ref_parm;
-//  }
+
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((casted_param < GetClientSpaceEnd(i)) &&
         (casted_param >= GetClientSpaceBegin(i))) {
@@ -105,8 +103,8 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerB(const referenc
     }
   }
 
-  LOG(ERROR) << "..... MapReferenceToServerB: ERROR001.." << ref_parm;
-  return NULL;
+  LOG(ERROR) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
+  return ref_parm;
 }
 
 template <class TypeRef>
@@ -183,7 +181,7 @@ const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Ob
 //      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
 //  }
   const mirror::Class* mapped_class_address =
-      MapReferenceToServerB<mirror::Class>(class_address);
+      MapReferenceToServerChecks<mirror::Class>(class_address);
 //  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
 //      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
 //  }
@@ -434,7 +432,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
-  const mirror::Object* mapped_object = MapReferenceToServerA<mirror::Object>(obj);
+  const mirror::Object* mapped_object = MapReferenceToServerChecks<mirror::Object>(obj);
 
   if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
     LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
@@ -452,6 +450,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if(UNLIKELY(mapped_class_type == 0)) {
     android_atomic_add(1, &(class_count_));
+    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
   } else if (UNLIKELY(mapped_class_type == 1)) {
     android_atomic_add(1, &(array_count_));
     ServerVisitObjectArrayReferences(
@@ -504,10 +503,15 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
 
 template <typename Visitor>
-inline void IPCServerMarkerSweep::VisitInstanceFieldsReferences(const mirror::Class* klass,
+inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(const mirror::Class* klass,
                                                      const mirror::Object* obj,
                                                      const Visitor& visitor) {
-
+  const int32_t reference_offsets =
+      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
+  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
+  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+  uint32_t reference_instance_offsets_val = *word_addr;
+  ServerVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
 }
 
 template <typename Visitor>
@@ -519,8 +523,8 @@ inline void IPCServerMarkerSweep::ServerVisitClassReferences(
 }
 
 template <typename Visitor>
-inline void IPCServerMarkerSweep::VisitFieldsReferences(const mirror::Object* obj, uint32_t ref_offsets,
-                                             bool is_static, const Visitor& visitor) {
+inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Object* obj,
+            uint32_t ref_offsets, bool is_static, const Visitor& visitor) {
 
 }
 

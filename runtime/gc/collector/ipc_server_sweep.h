@@ -92,9 +92,9 @@ class IPCServerMarkerSweep {
   template <class referenceKlass>
   const referenceKlass* MapValueToServer(uint32_t raw_address_value);
   template <class referenceKlass>
-  const referenceKlass* MapReferenceToServerA(const referenceKlass* const ref_parm);
+  const referenceKlass* MapReferenceToServerChecks(const referenceKlass* const ref_parm);
   template <class referenceKlass>
-  const referenceKlass* MapReferenceToServerB(const referenceKlass* const ref_parm);
+  const referenceKlass* MapReferenceToServer(const referenceKlass* const ref_parm);
 
   const mirror::Class* GetMappedObjectKlass(const mirror::Object* mapped_obj_parm);
 //  template <class TypeRef>
@@ -114,12 +114,12 @@ class IPCServerMarkerSweep {
                                               const Visitor& visitor);
 
   template <typename Visitor>
-  void VisitInstanceFieldsReferences(const mirror::Class* klass,
+  void ServerVisitInstanceFieldsReferences(const mirror::Class* klass,
                                                        const mirror::Object* obj,
                                                        const Visitor& visitor);
 
   template <typename Visitor>
-  void VisitFieldsReferences(const mirror::Object* obj,
+  void ServerVisitFieldsReferences(const mirror::Object* obj,
                               uint32_t ref_offsets, bool is_static,
                               const Visitor& visitor);
 //  template <class TypeRef>

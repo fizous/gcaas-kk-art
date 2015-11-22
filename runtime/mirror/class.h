@@ -654,6 +654,10 @@ class MANAGED Class : public StaticStorageBase {
     return GetField32(OFFSET_OF_OBJECT_MEMBER(Class, reference_instance_offsets_), false);
   }
 
+  static MemberOffset GetReferenceInstanceOffsetsOffset()  {
+    return OFFSET_OF_OBJECT_MEMBER(Class, reference_instance_offsets_);
+  }
+
   void SetReferenceInstanceOffsets(uint32_t new_reference_offsets)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
