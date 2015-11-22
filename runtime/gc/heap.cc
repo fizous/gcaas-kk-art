@@ -199,6 +199,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
   AddContinuousSpace(alloc_space_);
 
+  DumpSpaces();
   // Allocate the large object space.
   if(!GC_HEAP_SRVCE_NO_LOS) {
     const bool kUseFreeListSpaceForLOS = false;

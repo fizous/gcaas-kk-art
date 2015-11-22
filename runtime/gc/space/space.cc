@@ -64,6 +64,8 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
     if(0)
       LOG(ERROR) << "XXXX Continuous space was not null XXXXX" ;
   }
+  LOG(ERROR) << "XXXX Continuous space was not null XXXXX " << name <<
+      ", begin=" << begin << ", end = " << end;
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
 }

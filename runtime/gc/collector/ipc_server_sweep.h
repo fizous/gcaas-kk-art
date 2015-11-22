@@ -131,9 +131,6 @@ class IPCServerMarkerSweep {
   template <class TypeRef>
   inline bool BelongsToServerHeap(const TypeRef* ptr_param) const;
 
-  template <class TypeRef>
-  bool WithinServerHeapAddresses(TypeRef* ptr_param);
-
 
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(const mirror::Object* obj);

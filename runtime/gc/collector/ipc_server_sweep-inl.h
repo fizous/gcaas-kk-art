@@ -302,22 +302,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
 //}
 
 
-template <class TypeRef>
-inline bool IPCServerMarkerSweep::WithinServerHeapAddresses(TypeRef* ptr_param) {
-  if(ptr_param == NULL)
-    return true;
-  byte* casted_param = reinterpret_cast<byte*>(ptr_param);
-  if(casted_param < spaces_[KGCSpaceServerImageInd_].client_end_) {
-    return true;
-  }
-  for(int i = KGCSpaceServerZygoteInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < spaces_[i].base_end_) &&
-        (casted_param >= spaces_[i].base_)) {
-      return true;
-    }
-  }
-  return false;
-}
+
 
 
 
