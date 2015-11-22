@@ -173,6 +173,10 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   bool IsInterprocess() const {
     return true;
   }
+  template <typename MarkVisitor>
+  inline void ClientScanObjectVisit(const mirror::Object* obj,
+      const MarkVisitor& visitor);
+  void ClientVerifyObject(const mirror::Object* obj);
   virtual void FinishPhase();
   virtual void InitializePhase(void);
   // Everything inside the immune range is assumed to be marked.

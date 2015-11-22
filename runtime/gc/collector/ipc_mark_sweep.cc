@@ -748,7 +748,71 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
 }
 
 
+class ClientMarkObjectVisitor {
+ public:
+  explicit ClientMarkObjectVisitor(IPCMarkSweep* const client_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(client_mark_sweep) {}
 
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const Object* /* obj */, const Object* ref, MemberOffset& /* offset */,
+                  bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
+    if(false)
+      mark_sweep_->MarkObject(ref);
+  }
+
+ private:
+  IPCMarkSweep* const mark_sweep_;
+};
+
+template <typename MarkVisitor>
+inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
+    const MarkVisitor& visitor) {
+  if(obj == NULL)
+    return;
+  const byte* casted_obj = reinterpret_cast<const byte*>(obj);
+  if((casted_obj >= heap_meta_->image_space_begin_ &&
+      casted_obj < heap_meta_->image_space_end_))
+    return;
+  if((casted_obj >= heap_meta_->zygote_begin_ &&
+      casted_obj < heap_meta_->zygote_end_))
+    return;
+  if((casted_obj >= ipc_heap_->local_heap_->GetAllocSpace()->Begin() &&
+      casted_obj < ipc_heap_->local_heap_->GetAllocSpace()->End())) {
+    return;
+  }
+  LOG(FATAL) << "IPCMarkSweep::ServerScanObjectVisit...error." << obj;
+
+}
+
+void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
+  //obj = (obj + calculated_offset);
+
+  ClientMarkObjectVisitor visitor(this);
+  ClientScanObjectVisit(obj, visitor);
+ // mirror::Object* mapped_obj = MapClientReference(obj);
+
+}
+
+
+
+
+
+static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
+    void* args) {
+  IPCMarkSweep* param =
+      reinterpret_cast<IPCMarkSweep*>(args);
+  //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
+//  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
+
+
+
+  param->ClientVerifyObject(obj);
+}
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
@@ -945,8 +1009,11 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
-  LOG(ERROR) << "SSSSSSSSSSS Suspended app threads to handshake with service process SSSSSSSSSSSSSSS";
+  LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+  LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
