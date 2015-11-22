@@ -37,7 +37,7 @@ class IPCServerMarkerSweep {
 
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
-  const uint32_t offset_;
+  const int32_t offset_;
 
   GCSrverCollectorSpace spaces_[KGCSpaceCount];
   space::GCSrvSharableCollectorData* curr_collector_ptr_;
@@ -127,7 +127,7 @@ class IPCServerMarkerSweep {
   bool BelongsToOldHeap(const referenceKlass* const ptr_param) const;
 
   template <class TypeRef>
-  bool IsMappedObjectToServer(const TypeRef* ptr_param)const;
+  bool IsMappedObjectToServer(const TypeRef* const ptr_param) const;
   template <class TypeRef>
   inline bool BelongsToServerHeap(const TypeRef* ptr_param) const;
 

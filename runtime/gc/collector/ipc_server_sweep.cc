@@ -74,8 +74,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
     gc::gcservice::GCServiceClientRecord* client_record) :
         client_rec_(client_record),
         heap_meta_(&(client_rec_->sharable_space_->heap_meta_)),
-        offset_(SERVER_SWEEP_CALC_OFFSET(client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
-        client_rec_->pair_mapps_->second->mem_maps_[0].begin_)),
+        offset_(static_cast<int32_t>(SERVER_SWEEP_CALC_OFFSET(client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
+                                  client_rec_->pair_mapps_->second->mem_maps_[0].begin_))),
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
         mark_stack_(NULL),

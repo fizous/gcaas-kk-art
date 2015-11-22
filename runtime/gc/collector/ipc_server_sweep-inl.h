@@ -47,9 +47,6 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) {
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
-  if(_raw_address < GetClientSpaceEnd(0)) {
-    return reinterpret_cast<const referenceKlass*>(_raw_address);
-  }
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetClientSpaceEnd(i)) &&
         (_raw_address >= GetClientSpaceBegin(i))) {
@@ -65,7 +62,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
 
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* ref_parm) {
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* const ref_parm) {
 //  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
 //    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
 //  }
@@ -89,7 +86,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
 }
 
 template <class TypeRef>
-inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* ptr_param) const {
+inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);

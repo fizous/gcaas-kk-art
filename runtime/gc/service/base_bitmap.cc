@@ -358,7 +358,7 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
 
 SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
     byte* server_begin,
-    uint32_t mapping_heap_offset):
+    int32_t mapping_heap_offset):
         SharedSpaceBitmap(data_p),
         mapping_heap_offset_(mapping_heap_offset) {
   if(data_p == NULL) {
