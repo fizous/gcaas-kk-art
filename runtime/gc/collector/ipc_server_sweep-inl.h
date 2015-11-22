@@ -601,7 +601,7 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
       const mirror::Object* field_object =
           *reinterpret_cast<mirror::Object* const *>(word_addr);
       const mirror::Object* mapped_field_object =
-          MapReferenceToServerChecks<mirror::Object>(mapped_field_object);
+          MapReferenceToServerChecks<mirror::Object>(field_object);
       visitor(obj, mapped_field_object, field_offset, is_static);
       ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
     }
