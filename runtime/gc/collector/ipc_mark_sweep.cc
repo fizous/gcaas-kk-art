@@ -778,18 +778,21 @@ inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
   if(obj == NULL)
     return;
+
+  bool found = false;
   const byte* casted_obj = reinterpret_cast<const byte*>(obj);
   if((casted_obj >= heap_meta_->image_space_begin_ &&
       casted_obj < heap_meta_->image_space_end_))
-    return;
+    found = true;
   if((casted_obj >= heap_meta_->zygote_begin_ &&
       casted_obj < heap_meta_->zygote_end_))
-    return;
+    found = true;
   if((casted_obj >= ipc_heap_->local_heap_->GetAllocSpace()->Begin() &&
       casted_obj < ipc_heap_->local_heap_->GetAllocSpace()->End())) {
-    return;
+    found = true;
   }
-  LOG(FATAL) << "A- IPCMarkSweep::ServerScanObjectVisit...error." << obj;
+  if(!found)
+    LOG(FATAL) << "A- IPCMarkSweep::ServerScanObjectVisit...error." << obj;
 
 
   mirror::Class* klass = obj->GetClass();
