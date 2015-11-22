@@ -66,9 +66,9 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
 
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* ref_parm) {
-  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
-    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
-  }
+//  if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
+//    LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
+//  }
   if(ref_parm == NULL)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
@@ -453,12 +453,6 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
 
   } else if (UNLIKELY(mapped_class_type != -1)){
     android_atomic_add(1, &(other_count_));
-  }
-
-  if(false) {
-    if(!BelongsToOldHeap<mirror::Class>(mapped_klass)) {
-      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR5, " << mapped_class_type;
-    }
   }
 }
 
