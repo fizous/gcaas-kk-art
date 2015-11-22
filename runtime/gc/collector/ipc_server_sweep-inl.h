@@ -126,7 +126,7 @@ inline bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* ptr_para
 }
 
 template <class referenceKlass>
-bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* ptr_param) const {
+bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
