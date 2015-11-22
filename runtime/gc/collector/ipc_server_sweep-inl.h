@@ -558,7 +558,7 @@ const mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* ma
   return c;
 }
 
-inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
+inline const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
     const mirror::Class* klass, uint32_t i) {
   int32_t static_fields_offset =
       mirror::Class::GetStaticFieldsOffset().Int32Value();
@@ -568,7 +568,7 @@ inline mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
   uint32_t value_read = *word_addr;
   const mirror::ObjectArray<mirror::ArtField>* static_fields =
       reinterpret_cast<const mirror::ObjectArray<mirror::ArtField>*>(value_read);
-  MemberOffset data_offset(mirror::Array::DataOffset(sizeof(Object*)).Int32Value()
+  MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
       + i * sizeof(mirror::Object*));
   const byte* element_raw_addr = reinterpret_cast<const byte*>(static_fields) +
       data_offset.Int32Value();
