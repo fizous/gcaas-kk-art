@@ -86,7 +86,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
 }
 
 template <class TypeRef>
-inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_param) const {
+bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
@@ -104,7 +104,7 @@ inline bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_p
 
 
 template <class TypeRef>
-inline bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* ptr_param) const {
+bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
@@ -141,7 +141,7 @@ bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* const ptr_para
   return false;
 }
 
-inline const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Object* mapped_obj_parm) {
+const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Object* mapped_obj_parm) {
   const byte* raw_addr_class = reinterpret_cast<const byte*>(mapped_obj_parm) +
       mirror::Object::ClassOffset().Int32Value();
   const mirror::Class* class_address = *reinterpret_cast<mirror::Class* const *>(raw_addr_class);
@@ -405,7 +405,7 @@ inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
 }
 
 template <typename MarkVisitor>
-inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
+void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
   if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
