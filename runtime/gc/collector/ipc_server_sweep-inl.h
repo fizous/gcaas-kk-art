@@ -62,6 +62,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
       << raw_address_value << ", pointer:" << _raw_address;
   return NULL;
 }
+
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(const referenceKlass* const ref_parm) {
   if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
@@ -260,17 +261,16 @@ bool IPCServerMarkerSweep::IsPhantomReferenceMappedClass(const mirror::Class* kl
 }
 
 
-mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedKlass(const mirror::Class* klass) const {
-  return NULL;
-//  uint32_t component_raw_value =
-//      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-//          mirror::Class::ComponentTypeOffset());
-//  const mirror::Class* c = MapValueToServer<mirror::Class>(component_raw_value);
-//  return const_cast<mirror::Class*>(c);
+const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(const mirror::Class* mapped_klass) {
+  uint32_t component_raw_value =
+        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
+            mirror::Class::ComponentTypeOffset());
+  const mirror::Class* c = MapValueToServer<mirror::Class>(component_raw_value);
+  return c;
 }
 
 bool IPCServerMarkerSweep::IsObjectArrayMappedKlass(const mirror::Class* klass) const {
-  const mirror::Class* component_type = GetComponentTypeMappedKlass(klass);
+  const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
   if(component_type != NULL) {
     return(!IsPrimitiveMappedKlass(component_type));
   }
@@ -297,7 +297,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
     return 1;
 
 
-  if(GetComponentTypeMappedKlass(klass) != NULL) {
+  if(GetComponentTypeMappedClass(klass) != NULL) {
     if(IsObjectArrayMappedKlass(klass))
       return 0;
     return -1;
@@ -452,7 +452,7 @@ size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(const mirror::Class* 
   return mapped_value;
 }
 
-const mirror::Class* IPCServerMarkerSweep::GetSuperClass(const mirror::Class* mapped_klass) {
+const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(const mirror::Class* mapped_klass) {
   int32_t raw_super_klass = mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
       mirror::Class::SuperClassOffset());
   const mirror::Class* c = MapValueToServer<mirror::Class>(raw_super_klass);
@@ -533,7 +533,7 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
     // class.
     for (const mirror::Class* klass = is_static ? down_cast<const mirror::Class*>(obj) : GetMappedObjectKlass(obj);
          klass != NULL;
-         klass = is_static ? NULL : GetSuperClass(klass)) {
+         klass = is_static ? NULL : GetSuperMappedClass(klass)) {
       size_t num_reference_fields = (is_static
                                      ? GetNumReferenceStaticFields(klass)
                                      : GetNumReferenceInstanceFields(klass));

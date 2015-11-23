@@ -103,7 +103,7 @@ class IPCServerMarkerSweep {
 
   uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
   int GetMappedClassType(const mirror::Class* klass) const;
-  mirror::Class* GetComponentTypeMappedKlass(const mirror::Class* klass)const;
+  const mirror::Class* GetComponentTypeMappedClass(const mirror::Class* mapped_klass);
   bool IsObjectArrayMappedKlass(const mirror::Class* klass) const;
   bool IsPrimitiveMappedKlass(const mirror::Class* klass) const;
   bool IsInterfaceMappedClass(const mirror::Class* klass) const;
@@ -156,7 +156,7 @@ class IPCServerMarkerSweep {
   const mirror::ArtField* ServerClassGetInstanceField(const mirror::Class* klass,
       uint32_t i);
 
-  const mirror::Class* GetSuperClass(const mirror::Class* mapped_klass);
+  const mirror::Class* GetSuperMappedClass(const mirror::Class* mapped_klass);
   size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
   size_t GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const;
 //  template <class TypeRef>
