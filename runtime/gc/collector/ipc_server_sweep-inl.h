@@ -265,7 +265,7 @@ bool IPCServerMarkerSweep::IsPhantomReferenceMappedClass(const mirror::Class* kl
 }
 
 
-const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(const mirror::Class* mapped_klass) {
+const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(const mirror::Class* mapped_klass) const {
   uint32_t component_raw_value =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
             mirror::Class::ComponentTypeOffset());
