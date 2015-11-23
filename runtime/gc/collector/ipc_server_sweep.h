@@ -103,10 +103,12 @@ class IPCServerMarkerSweep {
 
   uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
   int GetMappedClassType(const mirror::Class* klass) const;
+  bool IsInterfaceMappedClass(const mirror::Class* klass) const;
+  bool IsFinalMappedClass(const mirror::Class* klass) const;
+  bool IsFinalizableMappedClass(const mirror::Class* klass) const;
   bool IsReferenceMappedClass(const mirror::Class* klass) const;
   // Returns true if the class is abstract.
-  bool IsAbstractMappedClass(const mirror::Class* klass);
-
+  bool IsAbstractMappedClass(const mirror::Class* klass)const;
   // Returns true if the class is an annotation.
   bool IsAnnotationMappedClass(const mirror::Class* klass) const;
   // Returns true if the class is synthetic.
@@ -114,7 +116,7 @@ class IPCServerMarkerSweep {
   bool IsWeakReferenceMappedClass(const mirror::Class* klass) const;
   bool IsFinalizerReferenceMappedClass(const mirror::Class* klass);
   bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
-  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass);
+  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
   bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
 
 

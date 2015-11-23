@@ -205,8 +205,18 @@ inline uint32_t IPCServerMarkerSweep::GetClassAccessFlags(const mirror::Class* k
   return raw_access_flag_value;
 }
 
-bool IPCServerMarkerSweep::IsReferenceMappedClass(const mirror::Class* klass) const {
-  return (GetClassAccessFlags(klass) & kAccClassIsReference) != 0;
+// Returns true if the class is an interface.
+bool IPCServerMarkerSweep::IsInterfaceMappedClass(const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccInterface) != 0;
+}
+
+// Returns true if the class is declared final.
+bool IPCServerMarkerSweep::IsFinalMappedClass(const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccFinal) != 0;
+}
+
+bool IPCServerMarkerSweep::IsFinalizableMappedClass(const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsFinalizable) != 0;
 }
 
 // Returns true if the class is abstract.
@@ -224,18 +234,19 @@ bool IPCServerMarkerSweep::IsSyntheticMappedClass(const mirror::Class* klass) co
   return (GetClassAccessFlags(klass) & kAccSynthetic) != 0;
 }
 
-bool IPCServerMarkerSweep::IsWeakReferenceMappedClass(const mirror::Class* klass) const {
-  return (GetClassAccessFlags(klass)) & kAccClassIsWeakReference) != 0;
+bool IPCServerMarkerSweep::IsReferenceMappedClass(const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsReference) != 0;
 }
 
-bool IPCServerMarkerSweep::IsFinalizerReferenceMappedClass(const mirror::Class* klass) const {
-  return (GetClassAccessFlags(klass) & kAccClassIsFinalizerReference) != 0;
+
+bool IPCServerMarkerSweep::IsWeakReferenceMappedClass(const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsWeakReference) != 0;
 }
+
 
 bool IPCServerMarkerSweep::IsSoftReferenceMappedClass(const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccReferenceFlagsMask) == kAccClassIsReference;
 }
-
 
 bool IPCServerMarkerSweep::IsFinalizerReferenceMappedClass(const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsFinalizerReference) != 0;
