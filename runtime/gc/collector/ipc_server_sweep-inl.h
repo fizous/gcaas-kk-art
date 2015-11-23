@@ -365,10 +365,10 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
 //    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
   } else if (UNLIKELY(mapped_class_type == 3)) {
     android_atomic_add(1, &(other_count_));
-//    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
-//    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-//
-//    }
+    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
+    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+
+    }
   }
 }
 
