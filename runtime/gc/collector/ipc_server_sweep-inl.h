@@ -46,6 +46,8 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) {
+  if(raw_address_value == (uint32_t)0)
+    return NULL;
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetClientSpaceEnd(i)) &&
@@ -56,7 +58,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
     }
   }
 
-  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000";
+  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:" << raw_address_value;
   return NULL;
 }
 template <class referenceKlass>
