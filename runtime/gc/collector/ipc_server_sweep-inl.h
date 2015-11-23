@@ -298,12 +298,12 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
   }
 
   if(UNLIKELY(klass == java_lang_Class_client_))
-    return 1;
+    return 2;
 
   if(GetComponentTypeMappedClass(klass) != NULL) {
     if(IsObjectArrayMappedKlass(klass))
       return 0;
-    return -1;
+    return 1;
   }
 //  const byte* raw_addr = reinterpret_cast<const byte*>(klass) +
 //      mirror::Class::ComponentTypeOffset().Int32Value();
@@ -319,7 +319,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
 //      return 0;
 //    return -1;
 //  }
-  return 2;
+  return 3;
 }
 
 inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
@@ -354,14 +354,16 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   }
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
-  if (UNLIKELY(mapped_class_type == 1)) {
+  if (UNLIKELY(mapped_class_type < 2)) {
     android_atomic_add(1, &(array_count_));
-    ServerVisitObjectArrayReferences(
+    if(mapped_class_type == 0) {
+      ServerVisitObjectArrayReferences(
         down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
-  } else if (UNLIKELY(mapped_class_type == 0)) {
+    }
+  } else if (UNLIKELY(mapped_class_type == 2)) {
     android_atomic_add(1, &(class_count_));
 //    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-  } else if (UNLIKELY(mapped_class_type == 2)) {
+  } else if (UNLIKELY(mapped_class_type == 3)) {
     android_atomic_add(1, &(other_count_));
 //    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
 //    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
