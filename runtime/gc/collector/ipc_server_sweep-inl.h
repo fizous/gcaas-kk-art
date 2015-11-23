@@ -362,7 +362,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     }
   } else if (UNLIKELY(mapped_class_type == 2)) {
     android_atomic_add(1, &(class_count_));
-//    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
+    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
   } else if (UNLIKELY(mapped_class_type == 3)) {
     android_atomic_add(1, &(other_count_));
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
