@@ -294,7 +294,7 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   ResetStats();
 
-  LOG(ERROR) << "----------------------RESTARTING-----------------------";
+  LOG(ERROR) << "-------------------------RESTARTING-------------------------";
   current_immune_begin_ =
       const_cast<mirror::Object*>(
           MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_begin_));
@@ -302,6 +302,15 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
       const_cast<mirror::Object*>(
           MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_end_));
   LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
+}
+
+
+// Process the "referent" field in a java.lang.ref.Reference.  If the
+// referent has not yet been marked, put it on the appropriate list in
+// the heap for later processing.
+void IPCServerMarkerSweep::ServerDelayReferenceReferent(mirror::Class* klass,
+    mirror::Object* obj) {
+
 }
 
 }

@@ -168,6 +168,9 @@ class IPCServerMarkerSweep {
   inline bool BelongsToServerHeap(const TypeRef* const ptr_param) const;
 
 
+
+  void ServerDelayReferenceReferent(mirror::Class* klass, mirror::Object* obj);
+
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(const mirror::Object* obj);
   void MarkObjectNonNull(const mirror::Object* obj);
