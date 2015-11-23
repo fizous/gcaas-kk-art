@@ -31,7 +31,7 @@
 #include "mirror/object_array.h"
 #include "mirror/art_field.h"
 #include "gc/collector/ipc_server_sweep.h"
-#include "gc/collector/ipc_server_sweep-inl.h"
+//#include "gc/collector/ipc_server_sweep-inl.h"
 
 #define SERVER_SWEEP_CALC_OFFSET(x, y) (x > y) ? (x - y) : (y - x)
 
