@@ -35,9 +35,6 @@
 
 #define SERVER_SWEEP_CALC_OFFSET(x, y) (x > y) ? (x - y) : (y - x)
 
-using ::art::mirror::Class;
-using ::art::mirror::Object;
-
 namespace art {
 namespace gc {
 namespace collector {
@@ -50,8 +47,8 @@ class ServerMarkObjectVisitor {
           ALWAYS_INLINE : mark_sweep_(server_mark_sweep) {}
 
   // TODO: Fixme when anotatalysis works with visitors.
-  void operator()(const Object* /* obj */, const Object* ref, MemberOffset& /* offset */,
-                  bool /* is_static */) const ALWAYS_INLINE
+  void operator()(const mirror::Object* /* obj */, const mirror::Object* ref,
+                  MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
       NO_THREAD_SAFETY_ANALYSIS {
 //    if (kCheckLocks) {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
@@ -246,7 +243,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerZygoteInd_].client_end_),
 //          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
 //              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
-  uint32_t calculated_offset = offset_ / (sizeof(Object*));
+  uint32_t calculated_offset = offset_ / (sizeof(mirror::Object*));
   LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
 
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,

@@ -15,10 +15,14 @@
 #include "mirror/art_field-inl.h"
 #include "gc/collector/ipc_server_sweep.h"
 
-using ::art::mirror::Class;
-using ::art::mirror::Object;
 
 namespace art {
+namespace mirror {
+  class Class;
+  class Object;
+  template<class T> class ObjectArray;
+}  // namespace mirror
+
 namespace gc {
 namespace collector {
 
