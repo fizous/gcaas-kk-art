@@ -389,7 +389,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
-  const byte* _raw_data_element = NULL;
+  //const byte* _raw_data_element = NULL;
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     MemberOffset offset(_data_offset + i * width);
