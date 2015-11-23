@@ -63,7 +63,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
   }
 
   LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
-      << raw_address_value << ", pointer:" << _raw_address;
+      << raw_address_value;
   return NULL;
 }
 
@@ -356,8 +356,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if (UNLIKELY(mapped_class_type == 1)) {
     android_atomic_add(1, &(array_count_));
-//    ServerVisitObjectArrayReferences(
-//        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
+    ServerVisitObjectArrayReferences(
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
   } else if (UNLIKELY(mapped_class_type == 0)) {
     android_atomic_add(1, &(class_count_));
 //    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
