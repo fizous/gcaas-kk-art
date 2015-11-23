@@ -101,8 +101,23 @@ class IPCServerMarkerSweep {
 //  TypeRef* ServerMapHeapReference(TypeRef* ptr_param);
 
 
-
+  uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
   int GetMappedClassType(const mirror::Class* klass) const;
+  bool IsReferenceMappedClass(const mirror::Class* klass) const;
+  // Returns true if the class is abstract.
+  bool IsAbstractMappedClass(const mirror::Class* klass);
+
+  // Returns true if the class is an annotation.
+  bool IsAnnotationMappedClass(const mirror::Class* klass) const;
+  // Returns true if the class is synthetic.
+  bool IsSyntheticMappedClass(const mirror::Class* klass) const;
+  bool IsWeakReferenceMappedClass(const mirror::Class* klass) const;
+  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass);
+  bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
+  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass);
+  bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
+
+
 
   template <typename Visitor>
   void ServerVisitObjectArrayReferences(
@@ -127,7 +142,10 @@ class IPCServerMarkerSweep {
                               uint32_t ref_offsets, bool is_static,
                               const Visitor& visitor);
 
-
+  // Visits the header and field references of a data object.
+  template <typename Visitor>
+  void ServerVisitOtherReferences(const mirror::Class* klass, const mirror::Object* obj,
+                                   const Visitor& visitor);
   const mirror::ArtField* ServerClassGetStaticField(const mirror::Class* klass,
       uint32_t i);
   const mirror::ArtField* ServerClassGetInstanceField(const mirror::Class* klass,

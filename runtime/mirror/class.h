@@ -507,6 +507,9 @@ class MANAGED Class : public StaticStorageBase {
     return MemberOffset(OFFSET_OF_OBJECT_MEMBER(Class, primitive_type_));
   }
 
+  static MemberOffset AcessFlagsOffset() {
+    return MemberOffset(OFFSET_OF_OBJECT_MEMBER(Class, access_flags_));
+  }
 
   enum {
     kDumpClassFullDetail = 1,
@@ -680,6 +683,10 @@ class MANAGED Class : public StaticStorageBase {
 
   static MemberOffset ReferenceInstanceFieldsOffset()  {
     return OFFSET_OF_OBJECT_MEMBER(Class, num_reference_instance_fields_);
+  }
+
+  static MemberOffset ReferenceStaticOffset () {
+    return OFFSET_OF_OBJECT_MEMBER(Class, reference_static_offsets_);
   }
 
   // Returns the number of static fields containing reference types.
