@@ -103,7 +103,7 @@ class IPCServerMarkerSweep {
 
   uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
   int GetMappedClassType(const mirror::Class* klass) const;
-  void GetComponentTypeMappedKlass(const mirror::Class* klass);
+  const mirror::Class* GetComponentTypeMappedKlass(const mirror::Class* klass);
   bool IsObjectArrayMappedKlass(const mirror::Class* klass) const;
   bool IsPrimitiveMappedKlass(const mirror::Class* klass) const;
   bool IsInterfaceMappedClass(const mirror::Class* klass) const;
