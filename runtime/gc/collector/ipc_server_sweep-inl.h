@@ -514,7 +514,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if(UNLIKELY(mapped_class_type == 0)) {
     android_atomic_add(1, &(class_count_));
-    //ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
+    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
   } else if (UNLIKELY(mapped_class_type == 1)) {
     android_atomic_add(1, &(array_count_));
     ServerVisitObjectArrayReferences(
@@ -588,7 +588,7 @@ inline void IPCServerMarkerSweep::ServerVisitClassReferences(
                         const mirror::Class* klass, const mirror::Object* obj,
                                             const Visitor& visitor)  {
   ServerVisitInstanceFieldsReferences(klass, obj, visitor);
-  ServerVisitStaticFieldsReferences(down_cast<const mirror::Class*>(obj), visitor);
+  //ServerVisitStaticFieldsReferences(down_cast<const mirror::Class*>(obj), visitor);
 
 }
 template <typename Visitor>
