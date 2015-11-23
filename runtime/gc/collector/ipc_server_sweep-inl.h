@@ -300,7 +300,6 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
   if(UNLIKELY(klass == java_lang_Class_client_))
     return 1;
 
-
   if(GetComponentTypeMappedClass(klass) != NULL) {
     if(IsObjectArrayMappedKlass(klass))
       return 0;
