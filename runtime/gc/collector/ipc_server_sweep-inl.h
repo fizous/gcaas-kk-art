@@ -543,7 +543,7 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
       visitor(obj, mapped_field_object, field_offset, is_static);
       ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
     }
-  } else if(false) {
+  } else {
     // There is no reference offset bitmap.  In the non-static case,
     // walk up the class inheritance hierarchy and find reference
     // offsets the hard way. In the static case, just consider this
