@@ -49,7 +49,7 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 //}
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) {
+const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) const {
   if(raw_address_value == (uint32_t)0)
     return NULL;
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
