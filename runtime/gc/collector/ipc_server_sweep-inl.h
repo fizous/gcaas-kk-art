@@ -8,15 +8,15 @@
 #ifndef ART_RUNTIME_GC_COLLECTOR_IPC_SERVER_SWEEP_INL_H_
 #define ART_RUNTIME_GC_COLLECTOR_IPC_SERVER_SWEEP_INL_H_
 
-#include "gc/collector/ipc_server_sweep.h"
-
 #include "gc/heap.h"
-#include "mirror/art_field.h"
 #include "mirror/class.h"
 #include "mirror/object_array.h"
 #include "mirror/art_field.h"
-
 #include "mirror/art_field-inl.h"
+#include "gc/collector/ipc_server_sweep.h"
+
+using ::art::mirror::Class;
+using ::art::mirror::Object;
 
 namespace art {
 namespace gc {

@@ -10,6 +10,9 @@
 #include "gc/space/space.h"
 #include "gc/heap.h"
 
+using ::art::mirror::Class;
+using ::art::mirror::Object;
+
 namespace art {
 namespace gc {
 namespace collector {
