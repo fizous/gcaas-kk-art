@@ -445,8 +445,11 @@ inline void IPCServerMarkerSweep::ServerVisitClassReferences(
 template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitStaticFieldsReferences(const mirror::Class* klass,
                                                    const Visitor& visitor) {
-  ServerVisitFieldsReferences(klass,
-      mirror::Class::ReferenceStaticOffset().Uint32Value(), true, visitor);
+  MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
+  uint32_t _raw_value_offsets =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+          reference_static_offset);
+  ServerVisitFieldsReferences(klass, _raw_value_offsets, true, visitor);
 }
 
 
