@@ -58,7 +58,8 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
     }
   }
 
-  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:" << raw_address_value;
+  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
+      << raw_address_value << ", pointer:" << _raw_address;
   return NULL;
 }
 template <class referenceKlass>
