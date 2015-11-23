@@ -393,18 +393,27 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     MemberOffset offset(_data_offset + i * width);
-    _raw_data_element = raw_object_addr + offset.Int32Value();
-
-    if(!(BelongsToServerHeap<byte>(_raw_data_element))) {
-      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0001";
-    }
-    const int32_t* word_addr = reinterpret_cast<const int32_t*>(_raw_data_element);
-    uint32_t _data_read = *word_addr;
+    uint32_t _data_read =
+        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+            offset);
     const mirror::Object* element_content =
         MapValueToServer<mirror::Object>(_data_read);
     if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
       LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
     }
+
+//    _raw_data_element = raw_object_addr + offset.Int32Value();
+//
+//    if(!(BelongsToServerHeap<byte>(_raw_data_element))) {
+//      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0001";
+//    }
+//    const int32_t* word_addr = reinterpret_cast<const int32_t*>(_raw_data_element);
+//    uint32_t _data_read = *word_addr;
+//    const mirror::Object* element_content =
+//        MapValueToServer<mirror::Object>(_data_read);
+//    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
+//      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
+//    }
     visitor(mapped_arr, element_content, offset, false);
   }
 
