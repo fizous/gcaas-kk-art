@@ -55,6 +55,16 @@ class IPCServerMarkerSweep {
   accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
+  // offset of java.lang.ref.Reference.referent
+  MemberOffset ref_referent_off_client_;
+  // offset of java.lang.ref.Reference.queue
+  MemberOffset ref_queue_off_client_;
+  // offset of java.lang.ref.Reference.queueNext
+  MemberOffset ref_queueNext_off_client_;
+  // offset of java.lang.ref.Reference.pendingNext
+  MemberOffset ref_pendingNext_off_client_;
+  // offset of java.lang.ref.FinalizerReference.zombie
+  MemberOffset ref_reference_zombie_off_client_;
 
   // Cache java.lang.Class for optimization.
 //  mirror::Class* java_lang_Class_client_;
@@ -70,16 +80,7 @@ class IPCServerMarkerSweep {
 
   space::GCSrvceCashedReferences cashed_references_client_;
   space::GCSrvceCashedStatsCounters cashed_stats_client_;
-  // offset of java.lang.ref.Reference.referent
-  MemberOffset ref_referent_off_client_;
-  // offset of java.lang.ref.Reference.queue
-  MemberOffset ref_queue_off_client_;
-  // offset of java.lang.ref.Reference.queueNext
-  MemberOffset ref_queueNext_off_client_;
-  // offset of java.lang.ref.Reference.pendingNext
-  MemberOffset ref_pendingNext_off_client_;
-  // offset of java.lang.ref.FinalizerReference.zombie
-  MemberOffset ref_reference_zombie_off_client_;
+
 
 
   //statistics

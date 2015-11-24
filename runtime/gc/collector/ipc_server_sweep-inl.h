@@ -399,7 +399,7 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(mirror::Class* klass,
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != NULL /*&& !IsMarked(referent)*/) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
-    Thread* self = Thread::Current();
+    //Thread* self = Thread::Current();
 
     if(IsSoftReferenceMappedClass(klass)) {
       if(!IsMappedReferentEnqueued(reference)) {
