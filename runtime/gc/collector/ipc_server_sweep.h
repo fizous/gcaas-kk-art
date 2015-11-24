@@ -68,7 +68,7 @@ class IPCServerMarkerSweep {
 //  mirror::Object* phantom_reference_list_client_;
 //  mirror::Object* cleared_reference_list_client_;
 
-  GCSrvceCashedReferences cashed_references_client_;
+  space::GCSrvceCashedReferences cashed_references_client_;
 
   //statistics
 
@@ -77,8 +77,8 @@ class IPCServerMarkerSweep {
   volatile int32_t other_count_;
 
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
-  void SetCachedReferencesPointers(GCSrvceCashedReferences* dest,
-      GCSrvceCashedReferences* src);
+  void SetCachedReferencesPointers(space::GCSrvceCashedReferences* dest,
+      space::GCSrvceCashedReferences* src);
 
   void ResetStats(void);
 

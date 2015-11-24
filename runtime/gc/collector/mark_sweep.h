@@ -25,7 +25,7 @@
 #include "offsets.h"
 #include "root_visitor.h"
 #include "UniquePtr.h"
-
+#include "gc/space/space.h"
 
 
 #ifndef ATOMIC_STACK_KLASS
@@ -86,8 +86,8 @@ namespace collector {
 class MarkSweep : public GarbageCollector {
  public:
   explicit MarkSweep(Heap* heap, bool is_concurrent,
-      GCSrvceCashedReferences* cashed_reference_record =
-          calloc(1, sizeof(GCSrvceCashedReferences)),
+      space::GCSrvceCashedReferences* cashed_reference_record =
+          calloc(1, sizeof(space::GCSrvceCashedReferences)),
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
@@ -450,7 +450,7 @@ class MarkSweep : public GarbageCollector {
   // Immune range, every object inside the immune range is assumed to be marked.
 
 
-  GCSrvceCashedReferences* cashed_references_record_;
+  space::GCSrvceCashedReferences* cashed_references_record_;
 
 
 

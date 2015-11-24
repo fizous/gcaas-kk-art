@@ -75,21 +75,6 @@ const bool kIsTargetBuild = false;
 
 
 
-typedef struct GCSrvceCashedReferences_S {
-  // Immune range, every object inside the immune range is assumed to be marked.
-  mirror::Object* immune_begin_;
-  mirror::Object* immune_end_;
-
-
-  mirror::Object* soft_reference_list_;
-  mirror::Object* weak_reference_list_;
-  mirror::Object* finalizer_reference_list_;
-  mirror::Object* phantom_reference_list_;
-  mirror::Object* cleared_reference_list_;
-
-  // Cache java.lang.Class for optimization.
-  mirror::Class* java_lang_Class_;
-} __attribute__((aligned(8))) GCSrvceCashedReferences;
 
 
 }  // namespace art
