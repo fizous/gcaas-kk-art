@@ -30,7 +30,10 @@ class PartialMarkSweep : public MarkSweep {
     return kGcTypePartial;
   }
 
-  explicit PartialMarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
+  explicit PartialMarkSweep(Heap* heap, bool is_concurrent,
+      space::GCSrvceCashedReferences* cashed_reference_record =
+          (space::GCSrvceCashedReferences*)calloc(1, sizeof(space::GCSrvceCashedReferences)),
+          const std::string& name_prefix = "");
   ~PartialMarkSweep() {}
 
  protected:
