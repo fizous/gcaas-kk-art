@@ -1858,7 +1858,7 @@ void MarkSweep::ClearMarkHolders(void) {
 void MarkSweep::FinishPhase() {
   base::TimingLogger::ScopedSplit split("FinishPhase", &timings_);
   // Can't enqueue references if we hold the mutator lock.
-  Object* cleared_references = GetClearedReferenceList();
+  Object* cleared_references = *(GetClearedReferenceList());
   Heap* heap = GetHeap();
   timings_.NewSplit("EnqueueClearedReferences");
   heap->EnqueueClearedReferences(&cleared_references);
