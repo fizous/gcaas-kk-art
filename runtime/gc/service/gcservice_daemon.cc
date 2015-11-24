@@ -162,8 +162,8 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-  binding_.java_lang_Class_cached_ =
-      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
+//  binding_.java_lang_Class_cached_ =
+//      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
   collector_ = ServerCollector::CreateServerCollector(&binding_);
 }
 

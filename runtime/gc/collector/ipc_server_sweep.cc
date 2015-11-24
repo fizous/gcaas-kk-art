@@ -113,9 +113,9 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   memset(&cashed_references_client_, 0, sizeof(cashed_references_client_));
 
 
-  cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
+  //cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
-      ", java_lang_class = " << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);
+      ", java_lang_class = ";//; << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     LOG(ERROR) << StringPrintf("...space[%d]  --> client-start=%p, client-end=%p", i,
         spaces_[i].client_base_, spaces_[i].client_end_);
@@ -247,10 +247,18 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
+
+
+  UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
+      &cashed_references_client_);
+
   LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
       cashed_stats_client_.array_count_ <<
       ", class_count = " << cashed_stats_client_.class_count_ <<
       ", other_count = " << cashed_stats_client_.other_count_;
+
+
+
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
@@ -277,6 +285,33 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //  }
 }
 
+
+void IPCServerMarkerSweep::UpdateClientCachedReferences(
+    space::GCSrvceCashedReferences* dest, space::GCSrvceCashedReferences* src) {
+  dest->immune_begin_ = const_cast<mirror::Object*>(
+      MapReferenceToClient<mirror::Object>(src->immune_begin_));
+  dest->immune_end_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClient<mirror::Object>(src->immune_end_));
+
+  dest->soft_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClientChecks<mirror::Object>(src->soft_reference_list_));
+  dest->weak_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClientChecks<mirror::Object>(src->weak_reference_list_));
+  dest->finalizer_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClientChecks<mirror::Object>(src->finalizer_reference_list_));
+  dest->phantom_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClientChecks<mirror::Object>(src->phantom_reference_list_));
+  dest->cleared_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToClientChecks<mirror::Object>(src->cleared_reference_list_));
+
+
+}
 
 void IPCServerMarkerSweep::SetCachedReferencesPointers(
     space::GCSrvceCashedReferences* dest, space::GCSrvceCashedReferences* src) {

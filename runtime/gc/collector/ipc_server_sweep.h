@@ -75,7 +75,8 @@ class IPCServerMarkerSweep {
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
   void SetCachedReferencesPointers(space::GCSrvceCashedReferences* dest,
       space::GCSrvceCashedReferences* src);
-
+  void UpdateClientCachedReferences(space::GCSrvceCashedReferences* dest,
+      space::GCSrvceCashedReferences* src);
   void ResetStats(void);
 
   mirror::Object* MapObjectAddress(mirror::Object* obj);
@@ -103,7 +104,14 @@ class IPCServerMarkerSweep {
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
   template <class referenceKlass>
-  const referenceKlass* MapValueToServer(uint32_t raw_address_value)const;
+  const referenceKlass* MapValueToServer(uint32_t raw_address_value) const;
+  template <class referenceKlass>
+  const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
+                                        const referenceKlass* const ref_parm);
+  template <class referenceKlass>
+  const referenceKlass* MapReferenceToClientChecks(
+                                        const referenceKlass* const ref_parm);
+
   template <class referenceKlass>
   const referenceKlass* MapReferenceToServerChecks(const referenceKlass* const ref_parm);
   template <class referenceKlass>

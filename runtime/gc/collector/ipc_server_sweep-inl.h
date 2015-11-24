@@ -67,8 +67,45 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
   return NULL;
 }
 
+
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(const referenceKlass* const ref_parm) {
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
+                                      const referenceKlass* const ref_parm) {
+  if(ref_parm == nullptr)
+    return nullptr;
+  const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      if(i == KGCSpaceServerImageInd_)
+        return ref_parm;
+      return reinterpret_cast<const referenceKlass*>(casted_param - offset_);
+    }
+  }
+}
+
+template <class referenceKlass>
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
+                                      const referenceKlass* const ref_parm) {
+  if(ref_parm == nullptr)
+    return nullptr;
+  const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      if(i == KGCSpaceServerImageInd_)
+        return ref_parm;
+      return reinterpret_cast<const referenceKlass*>(casted_param - offset_);
+    }
+  }
+  LOG(FATAL) << "..... MapReferenceToClientChecks: .." << ref_parm;
+
+}
+
+
+template <class referenceKlass>
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(
+                                      const referenceKlass* const ref_parm) {
   if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
     LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
   }
