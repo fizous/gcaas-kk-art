@@ -400,12 +400,31 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(mirror::Class* klass,
   if (mapped_referent != NULL /*&& !IsMarked(referent)*/) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
-
+    bool is_enqueued_object = IsMappedReferentEnqueued(reference);
     if(IsSoftReferenceMappedClass(klass)) {
-      if(!IsMappedReferentEnqueued(reference)) {
+      if(!is_enqueued_object) {
         ServerEnqPendingReference(reference,
             &(curr_collector_ptr_->cashed_references_.soft_reference_list_));
       }
+    } else if(IsWeakReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        ServerEnqPendingReference(reference,
+            &(curr_collector_ptr_->cashed_references_.weak_reference_list_));
+      }
+    } else if(IsFinalizerReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        ServerEnqPendingReference(reference,
+            &(curr_collector_ptr_->cashed_references_.finalizer_reference_list_));
+      }
+    } else if(IsPhantomReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        ServerEnqPendingReference(reference,
+            &(curr_collector_ptr_->cashed_references_.phantom_reference_list_));
+      }
+    } else {
+      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
+                  << ", klass: " << klass
+                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
     }
   }
 }

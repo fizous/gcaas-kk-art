@@ -258,7 +258,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
       cashed_stats_client_.array_count_ <<
       ", class_count = " << cashed_stats_client_.class_count_ <<
-      ", other_count = " << cashed_stats_client_.other_count_;
+      ", other_count = " << cashed_stats_client_.other_count_ <<
+      ", reference_count = " << cashed_stats_client_.reference_count_;
 
 
 
