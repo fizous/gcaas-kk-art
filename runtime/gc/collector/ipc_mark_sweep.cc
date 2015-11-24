@@ -904,6 +904,7 @@ void IPCMarkSweep::InitializePhase(void) {
   SetFinalizerReferenceList(nullptr);
   SetPhantomReferenceList(nullptr);
   SetClearedReferenceList(nullptr);
+  SetCachedJavaLangClass(Class::GetJavaLangClass());
   freed_bytes_ = 0;
   freed_large_object_bytes_ = 0;
   freed_objects_ = 0;
@@ -918,7 +919,6 @@ void IPCMarkSweep::InitializePhase(void) {
   work_chunks_created_ = 0;
   work_chunks_deleted_ = 0;
   reference_count_ = 0;
-  java_lang_Class_ = Class::GetJavaLangClass();
 
   FindDefaultMarkBitmap();
   LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<

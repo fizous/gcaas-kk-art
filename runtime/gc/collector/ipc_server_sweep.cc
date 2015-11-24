@@ -63,9 +63,7 @@ class ServerMarkObjectVisitor {
 
 
 void IPCServerMarkerSweep::ResetStats(void) {
-  android_atomic_acquire_store(0, &(array_count_));
-  android_atomic_acquire_store(0, &(class_count_));
-  android_atomic_acquire_store(0, &(other_count_));
+  memset(&cashed_stats_client_, 0, sizeof(space::GCSrvceCashedStatsCounters));
 }
 
 IPCServerMarkerSweep::IPCServerMarkerSweep(
@@ -249,8 +247,10 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
   mark_stack_->OperateOnStack(ExternalScanObjectVisit,
       this);
-  LOG(ERROR) << "+++++++++++++++++++++++ array_count = " << array_count_ <<
-      ", class_count = " << class_count_ << ", class_count = " << other_count_;
+  LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
+      cashed_stats_client_.array_count_ <<
+      ", class_count = " << cashed_stats_client_.class_count_ <<
+      ", other_count = " << cashed_stats_client_.other_count_;
 //  for (;;) {
 //    const Object* obj = NULL;
 //    if (kUseMarkStackPrefetch) {
@@ -327,6 +327,8 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   SetCachedReferencesPointers(&cashed_references_client_,
       &curr_collector_ptr_->cashed_references_);
+
+
 
 
   LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";

@@ -237,6 +237,62 @@ class MarkSweep : public GarbageCollector {
     return cashed_references_record_->immune_end_;
   }
 
+  // Immune range, every object inside the immune range is assumed to be marked.
+
+
+
+  mirror::Object** GetSoftReferenceList() {
+    return &cashed_references_record_->soft_reference_list_;
+  }
+
+  mirror::Object** GetWeakReferenceList() {
+    return &cashed_references_record_->weak_reference_list_;
+  }
+
+  mirror::Object** GetFinalizerReferenceList() {
+    return &cashed_references_record_->finalizer_reference_list_;
+  }
+
+
+  mirror::Object** GetPhantomReferenceList() {
+    return &cashed_references_record_->phantom_reference_list_;
+  }
+
+
+  mirror::Object** GetClearedReferenceList() {
+    return &cashed_references_record_->cleared_reference_list_;
+  }
+
+  mirror::Class* GetCachedJavaLangClass(void) {
+    return cashed_references_record_->java_lang_Class_;
+  }
+
+  void SetSoftReferenceList(mirror::Object* obj) {
+    cashed_references_record_->soft_reference_list_ = obj;
+  }
+
+  void SetWeakReferenceList(mirror::Object* obj) {
+    cashed_references_record_->weak_reference_list_ = obj;
+  }
+
+  void SetFinalizerReferenceList(mirror::Object* obj) {
+    cashed_references_record_->finalizer_reference_list_ = obj;
+  }
+
+
+  void SetPhantomReferenceList(mirror::Object* obj) {
+    cashed_references_record_->phantom_reference_list_ = obj;
+  }
+
+
+  void SetClearedReferenceList(mirror::Object* obj) {
+    cashed_references_record_->cleared_reference_list_ = obj;
+  }
+
+  void SetCachedJavaLangClass(mirror::Class* address) {
+    cashed_references_record_->java_lang_Class_ = address;
+  }
+
   // Everything inside the immune range is assumed to be marked.
   virtual void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
 
@@ -280,6 +336,7 @@ class MarkSweep : public GarbageCollector {
   void SetClearSoftReferences(bool val) {
     clear_soft_references_ = val;
   }
+
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarked(const mirror::Object* object) const;
@@ -446,67 +503,6 @@ class MarkSweep : public GarbageCollector {
   //mirror::Class* java_lang_Class_;
 
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
-
-  // Immune range, every object inside the immune range is assumed to be marked.
-
-
-
-
-
-
-  mirror::Object** GetSoftReferenceList() {
-    return &cashed_references_record_->soft_reference_list_;
-  }
-
-  mirror::Object** GetWeakReferenceList() {
-    return &cashed_references_record_->weak_reference_list_;
-  }
-
-  mirror::Object** GetFinalizerReferenceList() {
-    return &cashed_references_record_->finalizer_reference_list_;
-  }
-
-
-  mirror::Object** GetPhantomReferenceList() {
-    return &cashed_references_record_->phantom_reference_list_;
-  }
-
-
-  mirror::Object** GetClearedReferenceList() {
-    return &cashed_references_record_->cleared_reference_list_;
-  }
-
-  mirror::Class* GetCachedJavaLangClass(void) {
-    return cashed_references_record_->java_lang_Class_;
-  }
-
-  void SetSoftReferenceList(mirror::Object* obj) {
-    cashed_references_record_->soft_reference_list_ = obj;
-  }
-
-  void SetWeakReferenceList(mirror::Object* obj) {
-    cashed_references_record_->weak_reference_list_ = obj;
-  }
-
-  void SetFinalizerReferenceList(mirror::Object* obj) {
-    cashed_references_record_->finalizer_reference_list_ = obj;
-  }
-
-
-  void SetPhantomReferenceList(mirror::Object* obj) {
-    cashed_references_record_->phantom_reference_list_ = obj;
-  }
-
-
-  void SetClearedReferenceList(mirror::Object* obj) {
-    cashed_references_record_->cleared_reference_list_ = obj;
-  }
-
-  void SetCachedJavaLangClass(mirror::Class* address) {
-    cashed_references_record_->java_lang_Class_ = address;
-  }
-
-
 
 
   // Parallel finger.
