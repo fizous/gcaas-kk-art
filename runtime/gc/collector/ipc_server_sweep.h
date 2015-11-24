@@ -160,7 +160,6 @@ class IPCServerMarkerSweep {
   bool IsWeakReferenceMappedClass(const mirror::Class* klass) const;
   bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
   bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
-  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
   bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
 
 
