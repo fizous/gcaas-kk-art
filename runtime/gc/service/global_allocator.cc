@@ -453,7 +453,7 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
   _rec->space_index_ = _shared_space->space_index_;
   _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
   _rec->shared_space_addr_ = _shared_space;
-  _rec->java_lang_Class_cached_ = Class::GetJavaLangClass();
+  //_rec->java_lang_Class_cached_ = Class::GetJavaLangClass();
 
   _entry->data_addr_ = reinterpret_cast<uintptr_t>(_rec);
 

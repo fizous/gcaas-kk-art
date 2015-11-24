@@ -106,7 +106,7 @@ class IPCServerMarkerSweep {
   template <class referenceKlass>
   const referenceKlass* MapValueToServer(uint32_t raw_address_value) const;
   template <class referenceKlass>
-  const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
+  const referenceKlass* MapReferenceToClient(
                                         const referenceKlass* const ref_parm);
   template <class referenceKlass>
   const referenceKlass* MapReferenceToClientChecks(
