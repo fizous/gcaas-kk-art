@@ -27,6 +27,7 @@
 #include "UniquePtr.h"
 
 
+
 #ifndef ATOMIC_STACK_KLASS
   #if (true || ART_GC_SERVICE)
     #define ATOMIC_STACK_KLASS    StructuredAtomicStack
@@ -85,8 +86,8 @@ namespace collector {
 class MarkSweep : public GarbageCollector {
  public:
   explicit MarkSweep(Heap* heap, bool is_concurrent,
-      space::GCSrvceCashedReferences* cashed_reference_record =
-          calloc(1, sizeof(space::GCSrvceCashedReferences)),
+      GCSrvceCashedReferences* cashed_reference_record =
+          calloc(1, sizeof(GCSrvceCashedReferences)),
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
@@ -449,7 +450,7 @@ class MarkSweep : public GarbageCollector {
   // Immune range, every object inside the immune range is assumed to be marked.
 
 
-  space::GCSrvceCashedReferences* cashed_references_record_;
+  GCSrvceCashedReferences* cashed_references_record_;
 
 
 

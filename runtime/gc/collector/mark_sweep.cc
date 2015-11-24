@@ -133,7 +133,7 @@ void MarkSweep::BindBitmaps() {
 }
 
 MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
-    space::GCSrvceCashedReferences* cashed_reference_record,
+    GCSrvceCashedReferences* cashed_reference_record,
     const std::string& name_prefix) :
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
@@ -146,7 +146,7 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
       clear_soft_references_(false) {
-  memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
+  memset(cashed_references_record_, 0, sizeof(GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 
 }

@@ -279,7 +279,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
 void IPCServerMarkerSweep::SetCachedReferencesPointers(
-    space::GCSrvceCashedReferences* dest, space::GCSrvceCashedReferences* src) {
+    GCSrvceCashedReferences* dest, GCSrvceCashedReferences* src) {
   dest->immune_begin_ = const_cast<mirror::Object*>(
           MapReferenceToServer<mirror::Object>(src->immune_begin_));
   dest->immune_end_ =
