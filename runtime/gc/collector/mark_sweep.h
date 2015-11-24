@@ -87,7 +87,7 @@ class MarkSweep : public GarbageCollector {
  public:
   explicit MarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
-          calloc(1, sizeof(space::GCSrvceCashedReferences)),
+          (space::GCSrvceCashedReferences*)calloc(1, sizeof(space::GCSrvceCashedReferences)),
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
