@@ -76,10 +76,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
                                   client_rec_->pair_mapps_->second->mem_maps_[0].begin_))),
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
-        mark_stack_(NULL),
-        java_lang_Class_client_(client_record->java_lang_Class_cached_),
-        current_immune_begin_(NULL),
-        current_immune_end_(NULL) {
+        mark_stack_(NULL) {
 
 
   spaces_[KGCSpaceServerZygoteInd_].client_base_ =
@@ -115,8 +112,12 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   //set the sharable space to be shared
   android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
 
+  memset(&cashed_references_client_, 0, sizeof(cashed_references_client_));
+
+
+  cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
-      ", java_lang_class = " << reinterpret_cast<void*>(java_lang_Class_client_);
+      ", java_lang_class = " << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     LOG(ERROR) << StringPrintf("...space[%d]  --> client-start=%p, client-end=%p", i,
         spaces_[i].client_base_, spaces_[i].client_end_);
@@ -277,6 +278,36 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 }
 
 
+void IPCServerMarkerSweep::SetCachedReferencesPointers(
+    space::GCSrvceCashedReferences* dest, space::GCSrvceCashedReferences* src) {
+  dest->immune_begin_ = const_cast<mirror::Object*>(
+          MapReferenceToServer<mirror::Object>(src->immune_begin_));
+  dest->immune_end_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServer<mirror::Object>(src->immune_end_));
+
+  dest->soft_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->soft_reference_list_));
+  dest->weak_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->weak_reference_list_));
+  dest->finalizer_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->finalizer_reference_list_));
+  dest->phantom_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->phantom_reference_list_));
+  dest->cleared_reference_list_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->cleared_reference_list_));
+
+  dest->java_lang_Class_ =
+      const_cast<mirror::Object*>(
+          MapReferenceToServerChecks<mirror::Object>(src->java_lang_Class_));
+
+}
+
 void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
   curr_collector_ptr_ = collector_addr;
 
@@ -293,12 +324,10 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
   ResetStats();
 
   LOG(ERROR) << "-------------------------RESTARTING-------------------------";
-  current_immune_begin_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_begin_));
-  current_immune_end_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToServer<mirror::Object>(curr_collector_ptr_->immune_end_));
+
+  SetCachedReferencesPointers(&cashed_references_client_,
+      &curr_collector_ptr_->cashed_references_);
+
   LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
 }
 

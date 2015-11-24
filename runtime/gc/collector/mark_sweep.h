@@ -84,7 +84,10 @@ namespace collector {
 
 class MarkSweep : public GarbageCollector {
  public:
-  explicit MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
+  explicit MarkSweep(Heap* heap, bool is_concurrent,
+      space::GCSrvceCashedReferences* cashed_reference_record =
+          calloc(1, sizeof(space::GCSrvceCashedReferences)),
+      const std::string& name_prefix = "");
 
   ~MarkSweep() {}
 
@@ -176,9 +179,7 @@ class MarkSweep : public GarbageCollector {
   void SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocation_stack_, bool swap_bitmaps)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  mirror::Object* GetClearedReferences() {
-    return cleared_reference_list_;
-  }
+
 
   // Proxy for external access to ScanObject.
   void ScanRoot(const mirror::Object* obj)
@@ -228,11 +229,11 @@ class MarkSweep : public GarbageCollector {
   }
 
   virtual mirror::Object* GetImmuneBegin() const{
-    return immune_begin_;
+    return cashed_references_record_->immune_begin_;
   }
 
   virtual  mirror::Object* GetImmuneEnd() const {
-    return immune_end_;
+    return cashed_references_record_->immune_end_;
   }
 
   // Everything inside the immune range is assumed to be marked.
@@ -441,19 +442,70 @@ class MarkSweep : public GarbageCollector {
   accounting::SPACE_BITMAP* current_mark_bitmap_;
 
   // Cache java.lang.Class for optimization.
-  mirror::Class* java_lang_Class_;
+  //mirror::Class* java_lang_Class_;
 
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
   // Immune range, every object inside the immune range is assumed to be marked.
-  mirror::Object* immune_begin_;
-  mirror::Object* immune_end_;
 
-  mirror::Object* soft_reference_list_;
-  mirror::Object* weak_reference_list_;
-  mirror::Object* finalizer_reference_list_;
-  mirror::Object* phantom_reference_list_;
-  mirror::Object* cleared_reference_list_;
+
+  space::GCSrvceCashedReferences* cashed_references_record_;
+
+
+
+  mirror::Object** GetSoftReferenceList() {
+    return &cashed_references_record_->soft_reference_list_;
+  }
+
+  mirror::Object** GetWeakReferenceList() {
+    return &cashed_references_record_->weak_reference_list_;
+  }
+
+  mirror::Object** GetFinalizerReferenceList() {
+    return &cashed_references_record_->finalizer_reference_list_;
+  }
+
+
+  mirror::Object** GetPhantomReferenceList() {
+    return &cashed_references_record_->phantom_reference_list_;
+  }
+
+
+  mirror::Object** GetClearedReferenceList() {
+    return &cashed_references_record_->cleared_reference_list_;
+  }
+
+
+  void SetSoftReferenceList(mirror::Object* obj) {
+    cashed_references_record_->soft_reference_list_ = obj;
+  }
+
+  void SetWeakReferenceList(mirror::Object* obj) {
+    cashed_references_record_->weak_reference_list_ = obj;
+  }
+
+  void SetFinalizerReferenceList(mirror::Object* obj) {
+    cashed_references_record_->finalizer_reference_list_ = obj;
+  }
+
+
+  void SetPhantomReferenceList(mirror::Object* obj) {
+    cashed_references_record_->phantom_reference_list_ = obj;
+  }
+
+
+  void SetClearedReferenceList(mirror::Object* obj) {
+    cashed_references_record_->cleared_reference_list_ = obj;
+  }
+
+  void SetCachedJavaLangClass(mirror::Class* address) {
+    cashed_references_record_->java_lang_Class_ = address;
+  }
+
+  mirror::Class* GetCachedJavaLangClass(void) {
+    return cashed_references_record_->java_lang_Class_;
+  }
+
 
   // Parallel finger.
   AtomicInteger atomic_finger_;

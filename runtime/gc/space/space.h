@@ -163,10 +163,25 @@ typedef enum {
   IPC_GC_PHASE_MAX
 } IPC_GC_PHASE_ENUM;
 
-typedef struct GCSrvSharableCollectorData_S {
+
+typedef struct GCSrvceCashedReferences_S {
   // Immune range, every object inside the immune range is assumed to be marked.
   mirror::Object* immune_begin_;
   mirror::Object* immune_end_;
+
+
+  mirror::Object* soft_reference_list_;
+  mirror::Object* weak_reference_list_;
+  mirror::Object* finalizer_reference_list_;
+  mirror::Object* phantom_reference_list_;
+  mirror::Object* cleared_reference_list_;
+
+  // Cache java.lang.Class for optimization.
+  mirror::Class* java_lang_Class_;
+} __attribute__((aligned(8))) GCSrvceCashedReferences;
+
+typedef struct GCSrvSharableCollectorData_S {
+  GCSrvceCashedReferences cashed_references_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
   accounting::GCSrvceBitmap* volatile current_mark_bitmap_;

@@ -678,8 +678,8 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
 
 
   /////////
-  meta_data_->immune_begin_ = NULL;
-  meta_data_->immune_end_ = NULL;
+  meta_data_->cashed_references_.immune_begin_ = nullptr;
+  meta_data_->cashed_references_.immune_end_ = nullptr;
   meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   meta_data_->current_mark_bitmap_ = NULL;
 }
@@ -856,6 +856,7 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
+        &meta_data_->cashed_references_,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
   LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
       << GetGcType() << "; conc:" << IsConcurrent() <<" ###########";
@@ -898,11 +899,11 @@ void IPCMarkSweep::InitializePhase(void) {
 
   mark_stack_ = ipc_heap_->local_heap_->GetHeapMarkStack();
   SetImmuneRange(nullptr, nullptr);
-  soft_reference_list_ = nullptr;
-  weak_reference_list_ = nullptr;
-  finalizer_reference_list_ = nullptr;
-  phantom_reference_list_ = nullptr;
-  cleared_reference_list_ = nullptr;
+  SetSoftReferenceList(nullptr);
+  SetWeakReferenceList(nullptr);
+  SetFinalizerReferenceList(nullptr);
+  SetPhantomReferenceList(nullptr);
+  SetClearedReferenceList(nullptr);
   freed_bytes_ = 0;
   freed_large_object_bytes_ = 0;
   freed_objects_ = 0;
@@ -948,8 +949,8 @@ void IPCMarkSweep::FindDefaultMarkBitmap(void) {
 }
 
 void IPCMarkSweep::SetImmuneRange(mirror::Object* begin, mirror::Object* end) {
-  meta_data_->immune_begin_ = begin;
-  meta_data_->immune_end_ = end;
+  meta_data_->cashed_references_.immune_begin_ = begin;
+  meta_data_->cashed_references_.immune_end_ = end;
 }
 
 

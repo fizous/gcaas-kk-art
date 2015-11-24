@@ -209,11 +209,11 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
 
 
   mirror::Object* GetImmuneBegin() const {
-    return meta_data_->immune_begin_;
+    return meta_data_->cashed_references_.immune_begin_;
   }
 
   mirror::Object* GetImmuneEnd() const {
-    return meta_data_->immune_end_;
+    return meta_data_->cashed_references_.immune_end_;
   }
 
   // Find the default mark bitmap.

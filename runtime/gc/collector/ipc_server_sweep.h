@@ -57,11 +57,18 @@ class IPCServerMarkerSweep {
 
 
   // Cache java.lang.Class for optimization.
-  mirror::Class* java_lang_Class_client_;
+//  mirror::Class* java_lang_Class_client_;
 
-  mirror::Object* current_immune_begin_;
-  mirror::Object* current_immune_end_;
+//  mirror::Object* current_immune_begin_;
+//  mirror::Object* current_immune_end_;
+//
+//  mirror::Object* soft_reference_list_client_;
+//  mirror::Object* weak_reference_list_client_;
+//  mirror::Object* finalizer_reference_list_client_;
+//  mirror::Object* phantom_reference_list_client_;
+//  mirror::Object* cleared_reference_list_client_;
 
+  space::GCSrvceCashedReferences cashed_references_client_;
 
   //statistics
 
@@ -70,7 +77,8 @@ class IPCServerMarkerSweep {
   volatile int32_t other_count_;
 
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
-
+  void SetCachedReferencesPointers(space::GCSrvceCashedReferences* dest,
+      space::GCSrvceCashedReferences* src);
 
   void ResetStats(void);
 
@@ -214,11 +222,11 @@ class IPCServerMarkerSweep {
   }
 
   mirror::Object* GetImmuneBegin() const{
-    return current_immune_begin_;
+    return cashed_references_client_.immune_begin_;
   }
 
   mirror::Object* GetImmuneEnd() const {
-    return current_immune_end_;
+    return cashed_references_client_.immune_end_;
   }
 
 

@@ -297,7 +297,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
     LOG(FATAL) << "ERROR005...GetMappedClassType";
   }
 
-  if(UNLIKELY(klass == java_lang_Class_client_))
+  if(UNLIKELY(klass == cashed_references_client_.java_lang_Class_))
     return 2;
 
   if(GetComponentTypeMappedClass(klass) != NULL) {

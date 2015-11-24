@@ -29,7 +29,8 @@ namespace gc {
 namespace collector {
 
 template <typename MarkVisitor>
-inline void MarkSweep::ScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor) {
+inline void MarkSweep::ScanObjectVisit(const mirror::Object* obj,
+    const MarkVisitor& visitor) {
   DCHECK(obj != NULL);
   if (kIsDebugBuild && !IsMarked(obj)) {
     heap_->DumpSpaces();
@@ -62,7 +63,8 @@ inline void MarkSweep::ScanObjectVisit(const mirror::Object* obj, const MarkVisi
 }
 
 template <typename Visitor>
-inline void MarkSweep::VisitObjectReferences(const mirror::Object* obj, const Visitor& visitor)
+inline void MarkSweep::VisitObjectReferences(const mirror::Object* obj,
+                                              const Visitor& visitor)
     SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_,
                           Locks::mutator_lock_) {
   DCHECK(obj != NULL);

@@ -132,25 +132,23 @@ void MarkSweep::BindBitmaps() {
   timings_.EndSplit();
 }
 
-MarkSweep::MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix)
-    : GarbageCollector(heap,
-                       name_prefix + (name_prefix.empty() ? "" : " ") +
-                       (is_concurrent ? "concurrent mark sweep": "mark sweep")),
+MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
+    space::GCSrvceCashedReferences* cashed_reference_record,
+    const std::string& name_prefix) :
+        GarbageCollector(heap,
+               name_prefix + (name_prefix.empty() ? "" : " ") +
+               (is_concurrent ? "concurrent mark sweep": "mark sweep")),
+      cashed_references_record_(cashed_reference_record),
       current_mark_bitmap_(NULL),
-      java_lang_Class_(NULL),
       mark_stack_(NULL),
-      immune_begin_(NULL),
-      immune_end_(NULL),
-      soft_reference_list_(NULL),
-      weak_reference_list_(NULL),
-      finalizer_reference_list_(NULL),
-      phantom_reference_list_(NULL),
-      cleared_reference_list_(NULL),
       gc_barrier_(new Barrier(0)),
       large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
       clear_soft_references_(false) {
+  memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
+  SetCachedJavaLangClass(Class::GetJavaLangClass());
+
 }
 
 void MarkSweep::InitializePhase() {
@@ -159,11 +157,11 @@ void MarkSweep::InitializePhase() {
   mark_stack_ = heap_->mark_stack_.get();
   DCHECK(mark_stack_ != nullptr);
   SetImmuneRange(nullptr, nullptr);
-  soft_reference_list_ = nullptr;
-  weak_reference_list_ = nullptr;
-  finalizer_reference_list_ = nullptr;
-  phantom_reference_list_ = nullptr;
-  cleared_reference_list_ = nullptr;
+  SetSoftReferenceList(nullptr);
+  SetWeakReferenceList(nullptr);
+  SetFinalizerReferenceList(nullptr);
+  SetPhantomReferenceList(nullptr);
+  SetClearedReferenceList(nullptr);
   freed_bytes_ = 0;
   freed_large_object_bytes_ = 0;
   freed_objects_ = 0;
@@ -178,8 +176,8 @@ void MarkSweep::InitializePhase() {
   work_chunks_created_ = 0;
   work_chunks_deleted_ = 0;
   reference_count_ = 0;
-  java_lang_Class_ = Class::GetJavaLangClass();
-  CHECK(java_lang_Class_ != nullptr);
+  SetCachedJavaLangClass(Class::GetJavaLangClass());
+  CHECK(GetCachedJavaLangClass != nullptr);
 
   FindDefaultMarkBitmap();
 
@@ -191,8 +189,8 @@ void MarkSweep::InitializePhase() {
 void MarkSweep::ProcessReferences(Thread* self) {
   base::TimingLogger::ScopedSplit split("ProcessReferences", &timings_);
   WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-  ProcessReferences(&soft_reference_list_, clear_soft_references_, &weak_reference_list_,
-                    &finalizer_reference_list_, &phantom_reference_list_);
+  ProcessReferences(GetSoftReferenceList(), clear_soft_references_, GetWeakReferenceList(),
+                    GetFinalizerReferenceList(), GetPhantomReferenceList());
 }
 
 bool MarkSweep::HandleDirtyObjectsPhase() {
@@ -356,8 +354,8 @@ void MarkSweep::ReclaimPhase() {
 }
 
 void MarkSweep::SetImmuneRange(Object* begin, Object* end) {
-  immune_begin_ = begin;
-  immune_end_ = end;
+  cashed_references_record_->immune_begin_ = begin;
+  cashed_references_record_->immune_end_ = end;
 }
 
 void MarkSweep::FindDefaultMarkBitmap() {
@@ -1117,11 +1115,11 @@ void MarkSweep::RecursiveMark() {
   base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
   // RecursiveMark will build the lists of known instances of the Reference classes.
   // See DelayReferenceReferent for details.
-  CHECK(soft_reference_list_ == NULL);
-  CHECK(weak_reference_list_ == NULL);
-  CHECK(finalizer_reference_list_ == NULL);
-  CHECK(phantom_reference_list_ == NULL);
-  CHECK(cleared_reference_list_ == NULL);
+  CHECK(*(GetSoftReferenceList()) == NULL);
+  CHECK(*(GetWeakReferenceList()) == NULL);
+  CHECK(*(GetFinalizerReferenceList()) == NULL);
+  CHECK(*(GetPhantomReferenceList()) == NULL);
+  CHECK(*(GetClearedReferenceList()) == NULL);
 
   if (kUseRecursiveMark) { // so far it is false
     const bool partial = GetGcType() == kGcTypePartial;
@@ -1558,22 +1556,22 @@ void MarkSweep::DelayReferenceReferent(mirror::Class* klass, Object* obj) {
     if (klass->IsSoftReferenceClass()) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!heap_->IsEnqueued(obj)) {
-        heap_->EnqueuePendingReference(obj, &soft_reference_list_);
+        heap_->EnqueuePendingReference(obj, GetSoftReferenceList());
       }
     } else if (klass->IsWeakReferenceClass()) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!heap_->IsEnqueued(obj)) {
-        heap_->EnqueuePendingReference(obj, &weak_reference_list_);
+        heap_->EnqueuePendingReference(obj, GetWeakReferenceList());
       }
     } else if (klass->IsFinalizerReferenceClass()) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!heap_->IsEnqueued(obj)) {
-        heap_->EnqueuePendingReference(obj, &finalizer_reference_list_);
+        heap_->EnqueuePendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (klass->IsPhantomReferenceClass()) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!heap_->IsEnqueued(obj)) {
-        heap_->EnqueuePendingReference(obj, &phantom_reference_list_);
+        heap_->EnqueuePendingReference(obj, GetPhantomReferenceList());
       }
     } else {
       LOG(FATAL) << "Invalid reference type " << PrettyClass(klass)
@@ -1732,7 +1730,7 @@ void MarkSweep::ClearWhiteReferences(Object** list) {
       // Referent is white, clear it.
       heap_->ClearReferenceReferent(ref);
       if (heap_->IsEnqueuable(ref)) {
-        heap_->EnqueueReference(ref, &cleared_reference_list_);
+        heap_->EnqueueReference(ref, GetClearedReferenceList());
       }
     }
   }
@@ -1756,7 +1754,7 @@ void MarkSweep::EnqueueFinalizerReferences(Object** list) {
       DCHECK(heap_->IsEnqueuable(ref));
       ref->SetFieldObject(zombie_offset, referent, false);
       heap_->ClearReferenceReferent(ref);
-      heap_->EnqueueReference(ref, &cleared_reference_list_);
+      heap_->EnqueueReference(ref, GetClearedReferenceList());
       has_enqueued = true;
     }
   }
@@ -1860,7 +1858,7 @@ void MarkSweep::ClearMarkHolders(void) {
 void MarkSweep::FinishPhase() {
   base::TimingLogger::ScopedSplit split("FinishPhase", &timings_);
   // Can't enqueue references if we hold the mutator lock.
-  Object* cleared_references = GetClearedReferences();
+  Object* cleared_references = GetClearedReferenceList();
   Heap* heap = GetHeap();
   timings_.NewSplit("EnqueueClearedReferences");
   heap->EnqueueClearedReferences(&cleared_references);
