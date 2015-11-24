@@ -158,7 +158,7 @@ class IPCServerMarkerSweep {
   // Returns true if the class is synthetic.
   bool IsSyntheticMappedClass(const mirror::Class* klass) const;
   bool IsWeakReferenceMappedClass(const mirror::Class* klass) const;
-  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass);
+  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
   bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
   bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
   bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
