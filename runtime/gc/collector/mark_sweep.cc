@@ -138,13 +138,13 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
                (is_concurrent ? "concurrent mark sweep": "mark sweep")),
-      cashed_references_record_(cashed_reference_record),
       current_mark_bitmap_(NULL),
       mark_stack_(NULL),
       gc_barrier_(new Barrier(0)),
       large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
+      cashed_references_record_(cashed_reference_record),
       clear_soft_references_(false) {
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());

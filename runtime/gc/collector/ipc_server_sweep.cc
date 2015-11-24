@@ -303,8 +303,8 @@ void IPCServerMarkerSweep::SetCachedReferencesPointers(
           MapReferenceToServerChecks<mirror::Object>(src->cleared_reference_list_));
 
   dest->java_lang_Class_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToServerChecks<mirror::Object>(src->java_lang_Class_));
+      const_cast<mirror::Class*>(
+          MapReferenceToServerChecks<mirror::Class>(src->java_lang_Class_));
 
 }
 
