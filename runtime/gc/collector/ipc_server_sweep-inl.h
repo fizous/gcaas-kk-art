@@ -82,6 +82,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
       return reinterpret_cast<const referenceKlass*>(casted_param - offset_);
     }
   }
+  return ref_parm;
 }
 
 template <class referenceKlass>
@@ -99,7 +100,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
     }
   }
   LOG(FATAL) << "..... MapReferenceToClientChecks: .." << ref_parm;
-
+  return ref_parm;
 }
 
 
