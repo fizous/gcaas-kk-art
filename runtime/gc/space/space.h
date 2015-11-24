@@ -188,6 +188,13 @@ typedef struct GCSrvceCashedStatsCounters_S {
   volatile int32_t reference_count_;
 }__attribute__((aligned(8))) GCSrvceCashedStatsCounters;
 
+typedef struct GCSrvceCashedReferenceOffsets_S {
+  size_t reference_referent_offset_;
+  size_t reference_queue_offset_;
+  size_t reference_queueNext_offset_;
+  size_t reference_pendingNext_offset_;
+  size_t finalizer_reference_zombie_offset_;
+}__attribute__((aligned(8))) GCSrvceCashedReferenceOffsets;
 
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
@@ -217,6 +224,8 @@ typedef struct GCSrvSharableHeapData_S {
   AShmemMap zygote_space_;
 
   GCSrvSharableCollectorData collectors_[6];
+
+  GCSrvceCashedReferenceOffsets reference_offsets_;
 
   byte* const image_space_begin_;
   byte* const image_space_end_;

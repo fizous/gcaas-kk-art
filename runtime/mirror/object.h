@@ -208,6 +208,13 @@ class MANAGED Object {
     const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
     return *word_addr;
   }
+  static uint32_t GetVolatileRawValueFromObject(const Object* object,
+      MemberOffset field_offset) {
+    const byte* raw_addr =
+        reinterpret_cast<const byte*>(object) + field_offset.Int32Value();
+    const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+    return android_atomic_acquire_load(word_addr);
+  }
 
   void SetField32(MemberOffset field_offset, uint32_t new_value, bool is_volatile,
                   bool this_is_valid = true) {

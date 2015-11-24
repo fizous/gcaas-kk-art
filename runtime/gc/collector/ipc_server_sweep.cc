@@ -113,6 +113,13 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   memset(&cashed_references_client_, 0, sizeof(cashed_references_client_));
 
 
+  //initialize reference offsets
+  ref_referent_off_client_(heap_meta_->reference_offsets_.reference_referent_offset_);
+  ref_queue_off_client_(heap_meta_->reference_offsets_.reference_queue_offset_);
+  ref_queueNext_off_client_(heap_meta_->reference_offsets_.reference_queueNext_offset_);
+  ref_pendingNext_off_client_(heap_meta_->reference_offsets_.reference_pendingNext_offset_);
+  ref_reference_zombie_off_client_(heap_meta_->reference_offsets_.finalizer_reference_zombie_offset_);
+
   //cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
       ", java_lang_class = ";//; << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);

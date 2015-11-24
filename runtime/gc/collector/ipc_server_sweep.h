@@ -70,6 +70,18 @@ class IPCServerMarkerSweep {
 
   space::GCSrvceCashedReferences cashed_references_client_;
   space::GCSrvceCashedStatsCounters cashed_stats_client_;
+  // offset of java.lang.ref.Reference.referent
+  MemberOffset ref_referent_off_client_;
+  // offset of java.lang.ref.Reference.queue
+  MemberOffset ref_queue_off_client_;
+  // offset of java.lang.ref.Reference.queueNext
+  MemberOffset ref_queueNext_off_client_;
+  // offset of java.lang.ref.Reference.pendingNext
+  MemberOffset ref_pendingNext_off_client_;
+  // offset of java.lang.ref.FinalizerReference.zombie
+  MemberOffset ref_reference_zombie_off_client_;
+
+
   //statistics
 
   IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
@@ -98,6 +110,12 @@ class IPCServerMarkerSweep {
 
   void ProcessMarckStack(void);
   void ServerScanObject(const mirror::Object* obj, uint32_t calculated_offset);
+
+  bool IsMappedReferentEnqueued(mirror::Object* mapped_ref) const;
+  // Schedules an unmarked object for reference processing.
+  void ServerDelayReferenceReferent(mirror::Class* klass, mirror::Object* reference);
+  void ServerEnqPendingReference(mirror::Object* ref,
+      mirror::Object** list);
   template <typename MarkVisitor>
   void ServerScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
@@ -190,10 +208,6 @@ class IPCServerMarkerSweep {
   bool IsMappedObjectToServer(const TypeRef* const ptr_param) const;
   template <class TypeRef>
   inline bool BelongsToServerHeap(const TypeRef* const ptr_param) const;
-
-
-
-  void ServerDelayReferenceReferent(mirror::Class* klass, mirror::Object* obj);
 
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(const mirror::Object* obj);

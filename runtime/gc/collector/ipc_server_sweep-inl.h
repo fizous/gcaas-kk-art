@@ -370,6 +370,46 @@ inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
   }
 }
 
+
+bool IPCServerMarkerSweep::IsMappedReferentEnqueued(mirror::Object* mapped_ref) const {
+  int32_t pending_next_raw_value =
+      mirror::Object::GetRawValueFromObject(
+          reinterpret_cast<const mirror::Object*>(mapped_ref),
+          ref_pendingNext_off_client_);
+  const mirror::Object* mapped_pending_next =
+      MapValueToServer<mirror::Object>(pending_next_raw_value);
+
+  return (mapped_pending_next != nullptr);
+}
+
+void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
+    mirror::Object** list) {
+
+}
+
+// Process the "referent" field in a java.lang.ref.Reference.  If the
+// referent has not yet been marked, put it on the appropriate list in
+// the heap for later processing.
+void IPCServerMarkerSweep::ServerDelayReferenceReferent(mirror::Class* klass,
+    mirror::Object* reference) {
+  int32_t referent_raw_value =
+      mirror::Object::GetVolatileRawValueFromObject(
+          reinterpret_cast<const mirror::Object*>(klass), ref_referent_off_client_);
+  const mirror::Object* mapped_referent =
+      MapValueToServer<mirror::Object>(referent_raw_value);
+  if (mapped_referent != NULL /*&& !IsMarked(referent)*/) {//TODO: Implement ismarked
+    cashed_stats_client_.reference_count_ += 1;
+    Thread* self = Thread::Current();
+
+    if(IsSoftReferenceMappedClass(klass)) {
+      if(!IsMappedReferentEnqueued(reference)) {
+        ServerEnqPendingReference(reference,
+            &(curr_collector_ptr_->cashed_references_.soft_reference_list_));
+      }
+    }
+  }
+}
+
 template <typename MarkVisitor>
 void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
@@ -406,7 +446,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-
+      ServerDelayReferenceReferent(const_cast<mirror::Class*>(mapped_klass),
+          const_cast<mirror::Object*>(mapped_object));
     }
   }
 }
