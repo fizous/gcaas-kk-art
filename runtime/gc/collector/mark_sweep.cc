@@ -177,7 +177,7 @@ void MarkSweep::InitializePhase() {
   work_chunks_deleted_ = 0;
   reference_count_ = 0;
   SetCachedJavaLangClass(Class::GetJavaLangClass());
-  CHECK(GetCachedJavaLangClass != nullptr);
+  CHECK(GetCachedJavaLangClass() != nullptr);
 
   FindDefaultMarkBitmap();
 

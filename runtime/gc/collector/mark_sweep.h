@@ -476,6 +476,9 @@ class MarkSweep : public GarbageCollector {
     return &cashed_references_record_->cleared_reference_list_;
   }
 
+  mirror::Class* GetCachedJavaLangClass(void) {
+    return cashed_references_record_->java_lang_Class_;
+  }
 
   void SetSoftReferenceList(mirror::Object* obj) {
     cashed_references_record_->soft_reference_list_ = obj;
@@ -503,9 +506,7 @@ class MarkSweep : public GarbageCollector {
     cashed_references_record_->java_lang_Class_ = address;
   }
 
-  mirror::Class* GetCachedJavaLangClass(void) {
-    return cashed_references_record_->java_lang_Class_;
-  }
+
 
 
   // Parallel finger.
