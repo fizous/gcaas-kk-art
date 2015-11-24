@@ -112,9 +112,10 @@ class IPCServerMarkerSweep {
   void ProcessMarckStack(void);
   void ServerScanObject(const mirror::Object* obj, uint32_t calculated_offset);
 
-  bool IsMappedReferentEnqueued(mirror::Object* mapped_ref) const;
+  bool IsMappedReferentEnqueued(const mirror::Object* mapped_ref) const;
   // Schedules an unmarked object for reference processing.
-  void ServerDelayReferenceReferent(mirror::Class* klass, mirror::Object* reference);
+  void ServerDelayReferenceReferent(const mirror::Class* klass,
+      const mirror::Object* reference);
   void ServerEnqPendingReference(mirror::Object* ref,
       mirror::Object** list);
   template <typename MarkVisitor>
