@@ -420,7 +420,7 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
   if(mapped_head == NULL) {
     // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
     SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-    *list = MapReferenceToValueClient(ref);
+    *head_pp = MapReferenceToValueClient(ref);
   } else {
     int32_t pending_next_raw_value =
         mirror::Object::GetRawValueFromObject(
