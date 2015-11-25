@@ -41,6 +41,8 @@ namespace collector {
 
 
 
+
+int IPCServerMarkerSweep::passed_bitmap_tests_ = 0;
 class ServerMarkObjectVisitor {
  public:
   explicit ServerMarkObjectVisitor(IPCServerMarkerSweep* const server_mark_sweep)
@@ -181,10 +183,14 @@ bool IPCServerMarkerSweep::TestMappedBitmap(const mirror::Object* mapped_object)
   }
   if(matching_index == KGCSpaceServerAllocInd_) {
     if(!current_mark_bitmap_->HasAddress(mapped_object)) {
-      LOG(FATAL) << "Object does not belong to bitmap.." << mapped_object <<
+      LOG(FATAL) << "success = " << passed_bitmap_tests_ <<
+          ", Object does not belong to bitmap.." << mapped_object <<
           ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
+          ", bitmap_size = " << current_mark_bitmap_->Size() <<
+          ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
           ", heap_begin = " << current_mark_bitmap_->HeapBegin();
     } else {
+      passed_bitmap_tests_ += 1;
       return true;
     }
   }

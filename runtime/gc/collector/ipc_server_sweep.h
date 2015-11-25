@@ -44,9 +44,14 @@ class IPCServerMarkerSweep {
   static const int KGCSpaceServerMarkStackInd_    = 2;
   static const int KGCSpaceServerMarkBitmapInd_   = 3;
 
+  static int passed_bitmap_tests_;
+
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
   const int32_t offset_;
+
+
+
 
   GCSrverCollectorSpace spaces_[KGCSpaceCount];
   space::GCSrvSharableCollectorData* curr_collector_ptr_;
