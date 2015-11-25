@@ -216,6 +216,8 @@ std::ostream& operator << (std::ostream& stream, const BaseBitmap& bitmap);
 
 
 
+
+
 class SharedSpaceBitmap : public BaseBitmap {
  public:
   typedef void Callback(mirror::Object* obj, void* arg);

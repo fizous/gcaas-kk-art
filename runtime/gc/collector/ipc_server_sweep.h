@@ -66,17 +66,6 @@ class IPCServerMarkerSweep {
   // offset of java.lang.ref.FinalizerReference.zombie
   MemberOffset ref_reference_zombie_off_client_;
 
-  // Cache java.lang.Class for optimization.
-//  mirror::Class* java_lang_Class_client_;
-
-//  mirror::Object* current_immune_begin_;
-//  mirror::Object* current_immune_end_;
-//
-//  mirror::Object* soft_reference_list_client_;
-//  mirror::Object* weak_reference_list_client_;
-//  mirror::Object* finalizer_reference_list_client_;
-//  mirror::Object* phantom_reference_list_client_;
-//  mirror::Object* cleared_reference_list_client_;
 
   space::GCSrvceCashedReferences cashed_references_client_;
   space::GCSrvceCashedStatsCounters cashed_stats_client_;
@@ -218,30 +207,16 @@ class IPCServerMarkerSweep {
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(const mirror::Object* obj);
   void MarkObjectNonNull(const mirror::Object* obj);
-
+  bool IsMappedObjectMarked(const mirror::Object* object) const;
 
   byte* GetClientSpaceEnd(int index) const;
   byte* GetClientSpaceBegin(int index) const;
   byte* GetServerSpaceEnd(int index) const;
   byte* GetServerSpaceBegin(int index) const;
 
-//
-//  template <typename Visitor>
-//  void ServerVisitClassReferences(mirror::Class* klass, mirror::Object* obj,
-//                                              const Visitor& visitor);
-//
-//  template <typename Visitor>
-//  void ServerVisitInstanceFieldsReferences(mirror::Class* klass, mirror::Object* obj,
-//                                            const Visitor& visitor);
-//
-//  template <typename Visitor>
-//  void ServerVisitFieldsReferences(mirror::Object* obj, uint32_t ref_offsets, bool is_static,
-//                                    const Visitor& visitor);
-
-
   bool InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
   // Returns true if an object is inside of the immune region (assumed to be marked).
-  bool IsImmune(const mirror::Object* obj) const {
+  bool IsMappedObjectImmuned(const mirror::Object* obj) const {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
 

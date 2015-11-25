@@ -484,11 +484,18 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   }
   const mirror::Object* mapped_object = MapReferenceToServerChecks<mirror::Object>(obj);
 
+
+
   if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
     LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
   }
   if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
+  }
+
+  if(!IsMappedObjectMarked(mapped_object)) {
+    LOG(ERROR) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
+        " XXXXX ~~~~~~~~~~~~~~ ";
   }
 
   const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
@@ -716,13 +723,25 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
   }
 }
 
+inline bool IPCServerMarkerSweep::IsMappedObjectMarked(const mirror::Object* object) const {
+  if (IsMappedObjectImmuned(object)) {
+    return true;
+  }
+
+  if (current_mark_bitmap_->HasAddress(object)) {
+    return current_mark_bitmap_->Test(object);
+  }
+  //todo handle the case when we need to share heapbitmap
+  return true;
+}
+
 inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   DCHECK(obj != NULL);
 
   if(!IsMappedObjectToServer<mirror::Object>(obj)) {
     LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
   }
-  if (IsImmune(obj)) {
+  if (IsMappedObjectImmuned(obj)) {
     return;
   }
 
