@@ -132,13 +132,14 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 
 void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr) {
   Thread* _self = Thread::Current();
-  LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
-      << _self->GetTid() << "; address " <<
-      reinterpret_cast<void*>(collector_addr);
 
-  InitMarkingPhase(collector_addr);
 
-  ProcessMarckStack();
+  if(InitMarkingPhase(collector_addr)) {
+    LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
+        << _self->GetTid() << "; address " <<
+        reinterpret_cast<void*>(collector_addr);
+    ProcessMarckStack();
+  }
 
 
 }
@@ -347,7 +348,7 @@ void IPCServerMarkerSweep::SetCachedReferencesPointers(
 
 }
 
-void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
+bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
   curr_collector_ptr_ = collector_addr;
 
   if(mark_stack_ == NULL)
@@ -360,6 +361,9 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
           (curr_collector_ptr_->current_mark_bitmap_));
   }
 
+  if(mark_stack_->IsEmpty())
+    return false;
+
   ResetStats();
 
   LOG(ERROR) << "-------------------------RESTARTING-------------------------";
@@ -371,6 +375,7 @@ void IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
 
   LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
+  return true;
 }
 
 
