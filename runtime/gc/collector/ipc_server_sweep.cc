@@ -72,7 +72,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
     gc::gcservice::GCServiceClientRecord* client_record) :
         client_rec_(client_record),
         heap_meta_(&(client_rec_->sharable_space_->heap_meta_)),
-        offset_(static_cast<int32_t>(SERVER_SWEEP_CALC_OFFSET(client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
+        offset_(static_cast<int32_t>(SERVER_SWEEP_CALC_OFFSET(
+                            client_rec_->pair_mapps_->first->mem_maps_[0].begin_,
                                   client_rec_->pair_mapps_->second->mem_maps_[0].begin_))),
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
@@ -132,7 +133,8 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 }
 
 
-void IPCServerMarkerSweep::MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr) {
+void IPCServerMarkerSweep::MarkReachableObjects(
+                            space::GCSrvSharableCollectorData* collector_addr) {
   Thread* _self = Thread::Current();
 
 
@@ -167,7 +169,8 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 
 
 
-bool IPCServerMarkerSweep::TestMappedBitmap(const mirror::Object* mapped_object) const {
+bool IPCServerMarkerSweep::TestMappedBitmap(
+                                    const mirror::Object* mapped_object) const {
   if(mapped_object == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(mapped_object);
@@ -183,13 +186,14 @@ bool IPCServerMarkerSweep::TestMappedBitmap(const mirror::Object* mapped_object)
   }
   if(matching_index == KGCSpaceServerAllocInd_) {
     if(!current_mark_bitmap_->HasAddress(mapped_object)) {
-      LOG(FATAL) << "success = " << passed_bitmap_tests_ <<
+      LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
           ", Object does not belong to bitmap.." << mapped_object <<
           ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
           ", bitmap_size = " << current_mark_bitmap_->Size() <<
           ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
           ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
           ", kBitsPerWord = " << kBitsPerWord;
+      LOG(FATAL) << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
     } else {
       passed_bitmap_tests_ += 1;
       return true;
