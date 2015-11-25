@@ -298,21 +298,21 @@ void IPCServerMarkerSweep::UpdateClientCachedReferences(
       const_cast<mirror::Object*>(
           MapReferenceToClient<mirror::Object>(src->immune_end_));
 
-  dest->soft_reference_list_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToClientChecks<mirror::Object>(src->soft_reference_list_));
-  dest->weak_reference_list_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToClientChecks<mirror::Object>(src->weak_reference_list_));
-  dest->finalizer_reference_list_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToClientChecks<mirror::Object>(src->finalizer_reference_list_));
-  dest->phantom_reference_list_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToClientChecks<mirror::Object>(src->phantom_reference_list_));
-  dest->cleared_reference_list_ =
-      const_cast<mirror::Object*>(
-          MapReferenceToClientChecks<mirror::Object>(src->cleared_reference_list_));
+//  dest->soft_reference_list_ =
+//      const_cast<mirror::Object*>(
+//          MapReferenceToClientChecks<mirror::Object>(src->soft_reference_list_));
+//  dest->weak_reference_list_ =
+//      const_cast<mirror::Object*>(
+//          MapReferenceToClientChecks<mirror::Object>(src->weak_reference_list_));
+//  dest->finalizer_reference_list_ =
+//      const_cast<mirror::Object*>(
+//          MapReferenceToClientChecks<mirror::Object>(src->finalizer_reference_list_));
+//  dest->phantom_reference_list_ =
+//      const_cast<mirror::Object*>(
+//          MapReferenceToClientChecks<mirror::Object>(src->phantom_reference_list_));
+//  dest->cleared_reference_list_ =
+//      const_cast<mirror::Object*>(
+//          MapReferenceToClientChecks<mirror::Object>(src->cleared_reference_list_));
 
 
 }

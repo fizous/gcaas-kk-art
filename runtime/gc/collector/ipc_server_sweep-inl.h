@@ -109,9 +109,10 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
 
 void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_object,
     MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
-  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
+//  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
   byte* raw_addr =
-      reinterpret_cast<const byte*>(mapped_object) + field_offset.Int32Value();
+      const_cast<byte*>(reinterpret_cast<const byte*>(mapped_object)) +
+      field_offset.Int32Value();
   uint32_t* word_addr = reinterpret_cast<uint32_t*>(raw_addr);
   uint32_t eq_client_value = MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
   *word_addr = eq_client_value;
