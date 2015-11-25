@@ -88,6 +88,11 @@ class IPCServerMarkerSweep {
   void FindDefaultMarkBitmap(void);
 
 
+
+  // the object passed to this function is supposed to be marked by the
+  // client markbitmap. return false if the object is not mapped correctly to
+  // the bitmap.
+  bool TestMappedBitmap(const mirror::Object* mapped_object) const;
   accounting::SharedServerSpaceBitmap* GetMappedBitmap(
       android::MappedPairProcessFD* pair_memory,
       int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr);

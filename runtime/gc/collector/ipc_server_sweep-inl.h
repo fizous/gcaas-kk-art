@@ -50,7 +50,8 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 //}
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_address_value) const {
+const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
+                                      const uint32_t raw_address_value) const {
   if(raw_address_value == (uint32_t)0)
     return NULL;
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
@@ -71,7 +72,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
 
 template <class referenceKlass>
 uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
-    const referenceKlass* mapped_reference) const {
+                                const referenceKlass* mapped_reference) const {
   if(mapped_reference == nullptr)
     return (uint32_t)0;
   const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
@@ -109,13 +110,14 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
 
 
 void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_object,
-    MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
+          MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
 //  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
   byte* raw_addr =
       const_cast<byte*>(reinterpret_cast<const byte*>(mapped_object)) +
       field_offset.Int32Value();
   uint32_t* word_addr = reinterpret_cast<uint32_t*>(raw_addr);
-  uint32_t eq_client_value = MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
+  uint32_t eq_client_value =
+                    MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
   *word_addr = eq_client_value;
 }
 template <class referenceKlass>
@@ -167,7 +169,8 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(
 
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const referenceKlass* const ref_parm) {
+const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(
+                                        const referenceKlass* const ref_parm) {
 
   if(ref_parm == NULL)
     return ref_parm;
@@ -187,7 +190,8 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(const reference
 }
 
 template <class TypeRef>
-bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_param) const {
+bool IPCServerMarkerSweep::BelongsToServerHeap(
+                                        const TypeRef* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
@@ -205,7 +209,8 @@ bool IPCServerMarkerSweep::BelongsToServerHeap(const TypeRef* const ptr_param) c
 
 
 template <class TypeRef>
-bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* const ptr_param) const {
+bool IPCServerMarkerSweep::IsMappedObjectToServer(
+                                        const TypeRef* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
@@ -224,7 +229,8 @@ bool IPCServerMarkerSweep::IsMappedObjectToServer(const TypeRef* const ptr_param
 }
 
 template <class referenceKlass>
-bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* const ptr_param) const {
+bool IPCServerMarkerSweep::BelongsToOldHeap(
+                                  const referenceKlass* const ptr_param) const {
   if(ptr_param == NULL)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
@@ -242,7 +248,8 @@ bool IPCServerMarkerSweep::BelongsToOldHeap(const referenceKlass* const ptr_para
   return false;
 }
 
-const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Object* mapped_obj_parm) {
+const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(
+                                      const mirror::Object* mapped_obj_parm) {
   const byte* raw_addr_class = reinterpret_cast<const byte*>(mapped_obj_parm) +
       mirror::Object::ClassOffset().Int32Value();
   const mirror::Class* class_address =
@@ -275,7 +282,8 @@ const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(const mirror::Ob
 }
 
 
-inline uint32_t IPCServerMarkerSweep::GetClassAccessFlags(const mirror::Class* klass) const {
+inline uint32_t IPCServerMarkerSweep::GetClassAccessFlags(
+                                            const mirror::Class* klass) const {
   // Check class is loaded or this is java.lang.String that has a
   // circularity issue during loading the names of its members
   uint32_t raw_access_flag_value =
@@ -285,58 +293,70 @@ inline uint32_t IPCServerMarkerSweep::GetClassAccessFlags(const mirror::Class* k
 }
 
 // Returns true if the class is an interface.
-bool IPCServerMarkerSweep::IsInterfaceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsInterfaceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccInterface) != 0;
 }
 
 // Returns true if the class is declared final.
-bool IPCServerMarkerSweep::IsFinalMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsFinalMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccFinal) != 0;
 }
 
-bool IPCServerMarkerSweep::IsFinalizableMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsFinalizableMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsFinalizable) != 0;
 }
 
 // Returns true if the class is abstract.
-bool IPCServerMarkerSweep::IsAbstractMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsAbstractMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccAbstract) != 0;
 }
 
 // Returns true if the class is an annotation.
-bool IPCServerMarkerSweep::IsAnnotationMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsAnnotationMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccAnnotation) != 0;
 }
 
 // Returns true if the class is synthetic.
-bool IPCServerMarkerSweep::IsSyntheticMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsSyntheticMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccSynthetic) != 0;
 }
 
-bool IPCServerMarkerSweep::IsReferenceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsReferenceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsReference) != 0;
 }
 
 
-bool IPCServerMarkerSweep::IsWeakReferenceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsWeakReferenceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsWeakReference) != 0;
 }
 
 
-bool IPCServerMarkerSweep::IsSoftReferenceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsSoftReferenceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccReferenceFlagsMask) == kAccClassIsReference;
 }
 
-bool IPCServerMarkerSweep::IsFinalizerReferenceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsFinalizerReferenceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsFinalizerReference) != 0;
 }
 
-bool IPCServerMarkerSweep::IsPhantomReferenceMappedClass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsPhantomReferenceMappedClass(
+                                            const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsPhantomReference) != 0;
 }
 
 
-const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(const mirror::Class* mapped_klass) const {
+const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(
+                                      const mirror::Class* mapped_klass) const {
   uint32_t component_raw_value =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
             mirror::Class::ComponentTypeOffset());
@@ -344,7 +364,8 @@ const mirror::Class* IPCServerMarkerSweep::GetComponentTypeMappedClass(const mir
   return c;
 }
 
-bool IPCServerMarkerSweep::IsObjectArrayMappedKlass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsObjectArrayMappedKlass(
+                                            const mirror::Class* klass) const {
   const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
   if(component_type != NULL) {
     return(!IsPrimitiveMappedKlass(component_type));
@@ -353,7 +374,8 @@ bool IPCServerMarkerSweep::IsObjectArrayMappedKlass(const mirror::Class* klass) 
 }
 
 
-bool IPCServerMarkerSweep::IsPrimitiveMappedKlass(const mirror::Class* klass) const {
+bool IPCServerMarkerSweep::IsPrimitiveMappedKlass(
+                                            const mirror::Class* klass) const {
   int32_t type_raw_value =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
           mirror::Class::PrimitiveTypeOffset());
@@ -404,7 +426,8 @@ inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
 }
 
 
-bool IPCServerMarkerSweep::IsMappedReferentEnqueued(const mirror::Object* mapped_ref) const {
+bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
+                                      const mirror::Object* mapped_ref) const {
   int32_t pending_next_raw_value =
       mirror::Object::GetRawValueFromObject(
           reinterpret_cast<const mirror::Object*>(mapped_ref),
@@ -438,11 +461,13 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
 // Process the "referent" field in a java.lang.ref.Reference.  If the
 // referent has not yet been marked, put it on the appropriate list in
 // the heap for later processing.
-void IPCServerMarkerSweep::ServerDelayReferenceReferent(const mirror::Class* klass,
-    const mirror::Object* reference) {
+void IPCServerMarkerSweep::ServerDelayReferenceReferent(
+                                                    const mirror::Class* klass,
+                                              const mirror::Object* reference) {
   int32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
-          reinterpret_cast<const mirror::Object*>(klass), ref_referent_off_client_);
+                                  reinterpret_cast<const mirror::Object*>(klass),
+                                                      ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != NULL /*&& !IsMarked(referent)*/) {//TODO: Implement ismarked
@@ -483,7 +508,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   if(!BelongsToOldHeap<mirror::Object>(obj)) {
     LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
   }
-  const mirror::Object* mapped_object = MapReferenceToServerChecks<mirror::Object>(obj);
+  const mirror::Object* mapped_object =
+                                MapReferenceToServerChecks<mirror::Object>(obj);
 
 
 
@@ -493,6 +519,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
   }
+
+  TestMappedBitmap(mapped_object);
 
   if(!IsMappedObjectMarked(mapped_object)) {
     LOG(ERROR) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
@@ -511,7 +539,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     //android_atomic_add(1, &(array_count_));
     if(mapped_class_type == 0) {
       ServerVisitObjectArrayReferences(
-        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object), visitor);
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
+                                                                    visitor);
     }
   } else if (UNLIKELY(mapped_class_type == 2)) {
     cashed_stats_client_.class_count_ += 1;
@@ -551,7 +580,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     MemberOffset offset(_data_offset + i * width);
     uint32_t _data_read =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
-            offset);
+                                                                        offset);
     const mirror::Object* element_content =
         MapValueToServer<mirror::Object>(_data_read);
     if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
@@ -577,7 +606,8 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
 
 template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(const mirror::Class* klass,
+inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(
+                                                    const mirror::Class* klass,
                                                      const mirror::Object* obj,
                                                      const Visitor& visitor) {
   const int32_t reference_offsets =
@@ -597,8 +627,9 @@ inline void IPCServerMarkerSweep::ServerVisitClassReferences(
 
 }
 template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitStaticFieldsReferences(const mirror::Class* klass,
-                                                   const Visitor& visitor) {
+inline void IPCServerMarkerSweep::ServerVisitStaticFieldsReferences(
+                                                      const mirror::Class* klass,
+                                                      const Visitor& visitor) {
   MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
   uint32_t _raw_value_offsets =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
@@ -607,7 +638,8 @@ inline void IPCServerMarkerSweep::ServerVisitStaticFieldsReferences(const mirror
 }
 
 
-size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(const mirror::Class* klass_ref) const {
+size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(
+                                        const mirror::Class* klass_ref) const {
   uint32_t raw_static_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
       mirror::Class::ReferenceStaticFieldsOffset());
@@ -615,7 +647,8 @@ size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(const mirror::Class* kl
   return mapped_value;
 }
 
-size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const {
+size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(
+                                        const mirror::Class* klass_ref) const {
   uint32_t raw_instance_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
       mirror::Class::ReferenceInstanceFieldsOffset());
@@ -623,34 +656,38 @@ size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(const mirror::Class* 
   return mapped_value;
 }
 
-const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(const mirror::Class* mapped_klass) {
-  int32_t raw_super_klass = mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
-      mirror::Class::SuperClassOffset());
+const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(
+                                            const mirror::Class* mapped_klass) {
+  int32_t raw_super_klass =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
+                                              mirror::Class::SuperClassOffset());
   const mirror::Class* c = MapValueToServer<mirror::Class>(raw_super_klass);
   return c;
 }
 
 
-const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(const mirror::Class* klass, uint32_t i) {
+const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(
+                                      const mirror::Class* klass, uint32_t i) {
   uint32_t instance_fields_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
       mirror::Class::GetInstanceFieldsOffset());
   const mirror::ObjectArray<mirror::ArtField>* instance_fields =
       MapValueToServer<mirror::ObjectArray<mirror::ArtField>>(instance_fields_raw);
   MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
-      + i * sizeof(mirror::Object*));
+                                  + i * sizeof(mirror::Object*));
   uint32_t instance_field_raw =
-      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(instance_fields),
-          data_offset);
+      mirror::Object::GetRawValueFromObject(
+                      reinterpret_cast<const mirror::Object*>(instance_fields),
+                                                                  data_offset);
   const mirror::ArtField* mapped_art_field =
-      MapValueToServer<mirror::ArtField>(instance_field_raw);
+                        MapValueToServer<mirror::ArtField>(instance_field_raw);
 
   return mapped_art_field;
 }
 
 
 inline const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
-    const mirror::Class* klass, uint32_t i) {
+                                      const mirror::Class* klass, uint32_t i) {
   uint32_t static_fields_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
       mirror::Class::GetStaticFieldsOffset());
@@ -672,15 +709,19 @@ inline const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetStaticField(
 }
 
 template <typename Visitor>
-void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass, const mirror::Object* obj,
-                                 const Visitor& visitor) {
+void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass,
+                                                      const mirror::Object* obj,
+                                                      const Visitor& visitor) {
   ServerVisitInstanceFieldsReferences(klass, obj, visitor);
 }
 
 
 template <typename Visitor>
-inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Object* obj,
-            uint32_t ref_offsets, bool is_static, const Visitor& visitor) {
+inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
+                                                      const mirror::Object* obj,
+                                                      uint32_t ref_offsets,
+                                                      bool is_static,
+                                                      const Visitor& visitor) {
   if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
     // Found a reference offset bitmap.  Mark the specified offsets.
 #ifndef MOVING_COLLECTOR
@@ -712,7 +753,8 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
         const mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
                                    : ServerClassGetInstanceField(klass, i));
         uint32_t field_word_value =
-            mirror::Object::GetRawValueFromObject(field, mirror::ArtField::OffsetOffset());
+            mirror::Object::GetRawValueFromObject(field,
+                                              mirror::ArtField::OffsetOffset());
         MemberOffset field_offset(field_word_value);
         uint32_t raw_field_value =
             mirror::Object::GetRawValueFromObject(obj, field_offset);
@@ -724,7 +766,8 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(const mirror::Obje
   }
 }
 
-inline bool IPCServerMarkerSweep::IsMappedObjectMarked(const mirror::Object* object) const {
+inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
+                                           const mirror::Object* object) const {
   if (IsMappedObjectImmuned(object)) {
     return true;
   }

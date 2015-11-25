@@ -165,6 +165,34 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 
 
 
+bool IPCServerMarkerSweep::TestMappedBitmap(const mirror::Object* mapped_object) const {
+  if(mapped_object == NULL)
+    return true;
+  const byte* casted_param = reinterpret_cast<const byte*>(mapped_object);
+//  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return ref_parm;
+//  }
+  int matching_index = -1;
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetClientSpaceEnd(i)) &&
+        (casted_param >= GetClientSpaceBegin(i))) {
+      matching_index = i;
+    }
+  }
+  if(matching_index == KGCSpaceServerAllocInd_) {
+    if(!current_mark_bitmap_->HasAddress(mapped_object)) {
+      LOG(FATAL) << "Object does not belong to bitmap.." << mapped_object <<
+          ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
+          ", heap_begin = " << current_mark_bitmap_->HeapBegin();
+    } else {
+      return true;
+    }
+  }
+  if(matching_index == -1)
+    LOG(FATAL) << "TestMappedBitmap..." << mapped_object;
+  return true;
+}
+
 accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
     android::MappedPairProcessFD* pair_memory,
     int entry_ind, accounting::GCSrvceBitmap* bitmap_meta_addr) {
