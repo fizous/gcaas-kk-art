@@ -13,6 +13,7 @@
 #include "mirror/object_array.h"
 #include "mirror/art_field.h"
 #include "mirror/art_field-inl.h"
+#include "gc/accounting/space_bitmap-inl.h"
 #include "gc/collector/ipc_server_sweep.h"
 
 
