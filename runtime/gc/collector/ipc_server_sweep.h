@@ -239,7 +239,7 @@ class IPCServerMarkerSweep {
 //                                    const Visitor& visitor);
 
 
-  void InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
+  bool InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
   // Returns true if an object is inside of the immune region (assumed to be marked).
   bool IsImmune(const mirror::Object* obj) const {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
