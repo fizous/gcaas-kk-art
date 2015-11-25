@@ -159,9 +159,9 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     live_bitmap_.reset(new accounting::HeapBitmap(this));
     mark_bitmap_.reset(new accounting::HeapBitmap(this));
   } else {
-    live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+    live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(/*this,*/
         (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
-    mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(this,
+    mark_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(/*this,*/
         (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
   }
 
@@ -1352,11 +1352,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
 
         WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
         LOG(ERROR) << "Resharing live_heap_bitmap_data_";
-        live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
+        live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
             &_struct_alloc_space->live_heap_bitmap_data_));
         LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
-        mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
+        mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
             &_struct_alloc_space->mark_heap_bitmap_data_));
         LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";

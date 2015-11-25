@@ -27,18 +27,18 @@ namespace accounting {
 
 int SharedHeapBitmap::MaxHeapBitmapIndex;
 
-BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(Heap* heap, bool sharable) {
+BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(/*Heap* heap,*/ bool sharable) {
   if(!sharable) {
-    return new HeapBitmap(heap);
+    return new HeapBitmap(/*heap*/);
   }
-  return new SharedHeapBitmap(heap);
+  return new SharedHeapBitmap(/*heap*/);
 }
 
-BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(Heap* heap,
+BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(/*Heap* heap,*/
          SharedHeapBitmap* originalBMap, GCSrvceSharedHeapBitmap* header_addr) {
   memcpy(header_addr, originalBMap->header_,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
-  return new SharedHeapBitmap(heap, header_addr);
+  return new SharedHeapBitmap(/*heap,*/ header_addr);
 }
 
 

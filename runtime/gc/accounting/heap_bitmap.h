@@ -44,8 +44,8 @@ class SharedHeapBitmap;
 class BaseHeapBitmap {
  public:
 
-  static BaseHeapBitmap* CreateHeapBitmap(Heap* heap, bool sharable = false);
-  static BaseHeapBitmap* ReShareHeapBitmap(Heap* heap, SharedHeapBitmap* originalBMap,
+  static BaseHeapBitmap* CreateHeapBitmap(/*Heap* heap,*/ bool sharable = false);
+  static BaseHeapBitmap* ReShareHeapBitmap(/*Heap* heap,*/ SharedHeapBitmap* originalBMap,
       GCSrvceSharedHeapBitmap* header_addr);
 
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
@@ -77,7 +77,7 @@ class BaseHeapBitmap {
   virtual void ReplaceObjectSet(SpaceSetMap*, SpaceSetMap*)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_){}
 
-  explicit BaseHeapBitmap(Heap*) {}
+  explicit BaseHeapBitmap(/*Heap*  */) {}
   virtual ~BaseHeapBitmap(){}
 
   virtual void AddContinuousSpaceBitmap(SPACE_BITMAP*) = 0;
@@ -98,7 +98,7 @@ class BaseHeapBitmap {
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
   static int MaxHeapBitmapIndex;
-  SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
+  SharedHeapBitmap(/*Heap* heap, */GCSrvceSharedHeapBitmap* header_addr = NULL);
   ~SharedHeapBitmap(){}
   void AddContinuousSpaceBitmap(SPACE_BITMAP* bitmap);
   void Walk(SPACE_BITMAP::Callback* callback, void* arg)
@@ -176,7 +176,7 @@ class HeapBitmap : public BaseHeapBitmap {
   void ReplaceObjectSet(SpaceSetMap* old_set, SpaceSetMap* new_set)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
-  explicit HeapBitmap(Heap* heap) : BaseHeapBitmap(heap), heap_(heap) {}
+  explicit HeapBitmap(/*Heap* heap*/) : BaseHeapBitmap(/*heap*/){}//, heap_(heap) {}
 
   void AddContinuousSpaceBitmap(SPACE_BITMAP* bitmap);
   void AddDiscontinuousObjectSet(SpaceSetMap* set);
@@ -199,7 +199,7 @@ class HeapBitmap : public BaseHeapBitmap {
   SpaceSetMap* GetDiscContBitmapFromIndex(int index) {
     return discontinuous_space_sets_[index];
   }
-  const Heap* const heap_;
+  //const Heap* const heap_;
  private:
 
 

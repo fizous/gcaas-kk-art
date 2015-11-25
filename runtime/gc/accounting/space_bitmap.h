@@ -384,11 +384,12 @@ class SpaceBitmap : public BaseBitmap {
 
 typedef struct GCSrvceSharedHeapBitmap_S {
   // pointer to the heap
-  const Heap* const heap_;
-  // The index of the bitmap array
-  volatile int index_;
+  //const Heap* const heap_;
   //bitmaps array
   SPACE_BITMAP* bitmaps_[HEAP_BITMAPS_ARR_CAPACITY];
+  // The index of the bitmap array
+  volatile int index_;
+
 }  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 #else
