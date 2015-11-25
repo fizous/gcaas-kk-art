@@ -179,8 +179,8 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
 //  }
   int matching_index = -1;
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    if((casted_param < GetClientSpaceEnd(i)) &&
-        (casted_param >= GetClientSpaceBegin(i))) {
+    if((casted_param <  GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
       matching_index = i;
     }
   }
