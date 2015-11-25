@@ -188,7 +188,8 @@ bool IPCServerMarkerSweep::TestMappedBitmap(const mirror::Object* mapped_object)
           ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
           ", bitmap_size = " << current_mark_bitmap_->Size() <<
           ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
-          ", heap_begin = " << current_mark_bitmap_->HeapBegin();
+          ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
+          ", kBitsPerWord = " << kBitsPerWord;
     } else {
       passed_bitmap_tests_ += 1;
       return true;
