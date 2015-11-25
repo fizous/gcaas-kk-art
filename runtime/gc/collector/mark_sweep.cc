@@ -189,8 +189,9 @@ void MarkSweep::InitializePhase() {
 void MarkSweep::ProcessReferences(Thread* self) {
   base::TimingLogger::ScopedSplit split("ProcessReferences", &timings_);
   WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-  ProcessReferences(GetSoftReferenceList(), clear_soft_references_, GetWeakReferenceList(),
-                    GetFinalizerReferenceList(), GetPhantomReferenceList());
+  ProcessReferences(GetSoftReferenceList(), clear_soft_references_,
+                    GetWeakReferenceList(), GetFinalizerReferenceList(),
+                                                      GetPhantomReferenceList());
 }
 
 bool MarkSweep::HandleDirtyObjectsPhase() {
@@ -408,7 +409,8 @@ inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   // the hard way.
   accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SPACE_BITMAP* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SPACE_BITMAP* new_bitmap =
+                        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (LIKELY(new_bitmap != NULL)) {
       object_bitmap = new_bitmap;
     } else {
@@ -468,7 +470,8 @@ inline bool MarkSweep::MarkObjectParallel(const Object* obj) {
   // the hard way.
   accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::SPACE_BITMAP* new_bitmap = heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
+    accounting::SPACE_BITMAP* new_bitmap =
+                          heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
     if (new_bitmap != NULL) {
       object_bitmap = new_bitmap;
     } else {

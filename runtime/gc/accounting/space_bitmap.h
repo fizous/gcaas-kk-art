@@ -30,6 +30,8 @@
 #include <vector>
 
 
+#define HEAP_BITMAPS_ARR_CAPACITY 6
+
 #if (true || ART_GC_SERVICE)
 #define SPACE_BITMAP  BaseBitmap
 #else
@@ -386,7 +388,7 @@ typedef struct GCSrvceSharedHeapBitmap_S {
   // The index of the bitmap array
   volatile int index_;
   //bitmaps array
-  SPACE_BITMAP* bitmaps_[8];
+  SPACE_BITMAP* bitmaps_[HEAP_BITMAPS_ARR_CAPACITY];
 }  __attribute__((aligned(8))) GCSrvceSharedHeapBitmap;
 
 #else

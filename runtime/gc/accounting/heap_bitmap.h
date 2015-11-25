@@ -97,6 +97,7 @@ class BaseHeapBitmap {
 
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
+  static int MaxHeapBitmapIndex;
   SharedHeapBitmap(Heap* heap, GCSrvceSharedHeapBitmap* header_addr = NULL);
   ~SharedHeapBitmap(){}
   void AddContinuousSpaceBitmap(SPACE_BITMAP* bitmap);
