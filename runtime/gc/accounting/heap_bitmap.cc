@@ -76,14 +76,14 @@ void BaseHeapBitmap::Set(const mirror::Object* obj)  {
 
 
 
-SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
-    GCSrvceSharedHeapBitmap* header_addr) : BaseHeapBitmap(heap) {
+SharedHeapBitmap::SharedHeapBitmap(/*Heap* heap,*/
+    GCSrvceSharedHeapBitmap* header_addr) : BaseHeapBitmap(/*heap*/) {
   if(header_addr == NULL) {
     header_addr =
         reinterpret_cast<GCSrvceSharedHeapBitmap*>(calloc(1,
             SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap)));
     header_ = header_addr;
-    *(const_cast<const Heap*>(header_->heap_)) = heap;
+//    *(const_cast<const Heap*>(header_->heap_)) = heap;
     header_->index_ = 0;
     for(int i = 0; i < HEAP_BITMAPS_ARR_CAPACITY; i++) {
       header_->bitmaps_[i] = NULL;
