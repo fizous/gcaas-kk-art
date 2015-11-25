@@ -85,7 +85,7 @@ uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
 
   LOG(FATAL) << "IPCServerMarkerSweep::MapReferenceToValueClient....0000--raw_Address_value:"
       << mapped_reference;
-  return NULL;
+  return (uint32_t) 0;
 }
 
 
