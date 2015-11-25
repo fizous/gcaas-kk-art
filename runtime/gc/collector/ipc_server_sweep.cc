@@ -185,14 +185,18 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
     }
   }
   if(matching_index == KGCSpaceServerAllocInd_) {
-    if(!current_mark_bitmap_->HasAddress(mapped_object)) {
+    bool _resultHasAddress = current_mark_bitmap_->HasAddress(mapped_object);
+    bool _resultTestFlag = current_mark_bitmap_->Test(mapped_object);
+    if(!(_resultHasAddress && _resultHasAddress)) {
       LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
           ", Object does not belong to bitmap.." << mapped_object <<
           ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
           ", bitmap_size = " << current_mark_bitmap_->Size() <<
           ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
           ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
-          ", kBitsPerWord = " << kBitsPerWord;
+          ", kBitsPerWord = " << kBitsPerWord <<
+          ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
+          ", (HasAddress): " << _resultHasAddress;
       LOG(FATAL) << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
     } else {
       passed_bitmap_tests_ += 1;
@@ -299,7 +303,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       cashed_stats_client_.array_count_ <<
       ", class_count = " << cashed_stats_client_.class_count_ <<
       ", other_count = " << cashed_stats_client_.other_count_ <<
-      ", reference_count = " << cashed_stats_client_.reference_count_;
+      ", reference_count = " << cashed_stats_client_.reference_count_ <<
+      ", success_bitmaps = " << passed_bitmap_tests_;
 
 
 

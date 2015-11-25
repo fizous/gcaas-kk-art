@@ -772,9 +772,9 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
     return true;
   }
 
-  if (current_mark_bitmap_->HasAddress(object)) {
-    return current_mark_bitmap_->Test(object);
-  }
+//  if (current_mark_bitmap_->HasAddress(object)) {
+//    return current_mark_bitmap_->Test(object);
+//  }
   //todo handle the case when we need to share heapbitmap
   return true;
 }
