@@ -30,7 +30,7 @@
 #include <vector>
 
 
-#define HEAP_BITMAPS_ARR_CAPACITY 6
+#define HEAP_BITMAPS_ARR_CAPACITY 3
 
 #if (true || ART_GC_SERVICE)
 #define SPACE_BITMAP  BaseBitmap
