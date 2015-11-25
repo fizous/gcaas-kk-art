@@ -302,7 +302,8 @@ void Heap::DeleteThreadPool() {
   thread_pool_.reset(nullptr);
 }
 
-static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name, int* out_value) {
+static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
+                                                              int* out_value) {
   CHECK(out_value != NULL);
   jfieldID field = env->GetStaticFieldID(clz, name, "I");
   if (field == NULL) {
@@ -465,7 +466,8 @@ void Heap::AddContinuousSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
 
   // Ensure that spaces remain sorted in increasing order of start address (required for CMS finger)
   std::sort(continuous_spaces_.begin(), continuous_spaces_.end(),
-            [](const space::ABSTRACT_CONTINUOUS_SPACE_T* a, const space::ABSTRACT_CONTINUOUS_SPACE_T* b) {
+            [](const space::ABSTRACT_CONTINUOUS_SPACE_T* a,
+                            const space::ABSTRACT_CONTINUOUS_SPACE_T* b) {
               return a->Begin() < b->Begin();
             });
 
@@ -828,7 +830,8 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
   for (const auto& cur_collector : mark_sweep_collectors_) {
-    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() << ", type: " << cur_collector->GetGcType();
+    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() << ", type: " <<
+        cur_collector->GetGcType();
   }
 
 
@@ -871,7 +874,8 @@ void Heap::VerifyObjectBody(const mirror::Object* obj) {
   // Check obj.getClass().getClass() == obj.getClass().getClass().getClass()
   // Note: we don't use the accessors here as they have internal sanity checks
   // that we don't want to run
-  raw_addr = reinterpret_cast<const byte*>(c) + mirror::Object::ClassOffset().Int32Value();
+  raw_addr = reinterpret_cast<const byte*>(c) +
+                                  mirror::Object::ClassOffset().Int32Value();
   const mirror::Class* c_c = *reinterpret_cast<mirror::Class* const *>(raw_addr);
   raw_addr = reinterpret_cast<const byte*>(c_c) + mirror::Object::ClassOffset().Int32Value();
   const mirror::Class* c_c_c = *reinterpret_cast<mirror::Class* const *>(raw_addr);
@@ -961,7 +965,8 @@ inline bool Heap::IsOutOfMemoryOnAllocation(size_t alloc_size, bool grow) {
   return false;
 }
 
-inline mirror::Object* Heap::TryToAllocate(Thread* self, space::AllocSpace* space, size_t alloc_size,
+inline mirror::Object* Heap::TryToAllocate(Thread* self,
+                                    space::AllocSpace* space, size_t alloc_size,
                                            bool grow, size_t* bytes_allocated) {
   if (UNLIKELY(IsOutOfMemoryOnAllocation(alloc_size, grow))) {
     return NULL;
@@ -1347,7 +1352,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
 
         WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
 
-        if(false) {
+
           LOG(ERROR) << "Resharing live_heap_bitmap_data_";
           live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(this,
             reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
@@ -1357,7 +1362,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
             reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
             &_struct_alloc_space->mark_heap_bitmap_data_));
           LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
-
+        if(false) {
           allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
               &(_struct_alloc_space->alloc_stack_data_), true, max_allocation_stack_size_));
 
