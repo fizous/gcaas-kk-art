@@ -32,8 +32,8 @@ BaseHeapBitmap* BaseHeapBitmap::CreateHeapBitmap(Heap* heap, bool sharable) {
   return new SharedHeapBitmap(heap);
 }
 
-BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(Heap* heap, SharedHeapBitmap* originalBMap,
-    GCSrvceSharedHeapBitmap* header_addr) {
+BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(Heap* heap,
+         SharedHeapBitmap* originalBMap, GCSrvceSharedHeapBitmap* header_addr) {
   memcpy(header_addr, originalBMap->header_,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
   return new SharedHeapBitmap(heap, header_addr);
@@ -89,16 +89,14 @@ SharedHeapBitmap::SharedHeapBitmap(Heap* heap,
     LOG(ERROR) << "done creating heap bitmap";
   } else {
     header_ = header_addr;
-    LOG(ERROR) << "done re-sharing heap bitmap";
+    LOG(ERROR) << "done re-sharing heap bitmap with index = "
+        << header_->index_ << ", rounded_size="
+        << SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap)
+        << ", sizeof_size = " << sizeof(GCSrvceSharedHeapBitmap);
   }
 
 
 }
-
-
-
-
-
 
 
 
