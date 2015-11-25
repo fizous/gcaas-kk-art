@@ -416,7 +416,7 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(const mirror::Object* mapped
 
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-  const uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
   const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
   if(mapped_head == NULL) {
     // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
@@ -427,8 +427,8 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
         mirror::Object::GetRawValueFromObject(
             reinterpret_cast<const mirror::Object*>(mapped_head),
             ref_pendingNext_off_client_);
-    const mirror::Object* mapped_pending_next =
-        MapValueToServer<mirror::Object>(pending_next_raw_value);
+    mirror::Object* mapped_pending_next =
+        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
     SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
     SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
   }
