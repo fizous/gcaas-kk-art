@@ -69,6 +69,27 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(const uint32_t raw_
 
 
 template <class referenceKlass>
+uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
+    const referenceKlass* mapped_reference) const {
+  if(mapped_reference == nullptr)
+    return (uint32_t)0;
+  const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((_raw_address < GetServerSpaceEnd(i)) &&
+        (_raw_address >= GetServerSpaceBegin(i))) {
+      if(i == KGCSpaceServerImageInd_)
+        return reinterpret_cast<uint32_t>(_raw_address);
+      return reinterpret_cast<uint32_t>(_raw_address - offset_);
+    }
+  }
+
+  LOG(FATAL) << "IPCServerMarkerSweep::MapReferenceToValueClient....0000--raw_Address_value:"
+      << mapped_reference;
+  return NULL;
+}
+
+
+template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
                                       const referenceKlass* const ref_parm) {
   if(ref_parm == nullptr)
@@ -85,6 +106,16 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToClient(
   return ref_parm;
 }
 
+
+void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_object,
+    MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
+  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
+  byte* raw_addr =
+      reinterpret_cast<const byte*>(mapped_object) + field_offset.Int32Value();
+  uint32_t* word_addr = reinterpret_cast<uint32_t*>(raw_addr);
+  uint32_t eq_client_value = MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
+  *word_addr = eq_client_value;
+}
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
                                       const referenceKlass* const ref_parm) {
@@ -384,7 +415,22 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(const mirror::Object* mapped
 
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-
+  const uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+  if(mapped_head == NULL) {
+    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
+    *list = MapReferenceToValueClient(ref);
+  } else {
+    int32_t pending_next_raw_value =
+        mirror::Object::GetRawValueFromObject(
+            reinterpret_cast<const mirror::Object*>(mapped_head),
+            ref_pendingNext_off_client_);
+    const mirror::Object* mapped_pending_next =
+        MapValueToServer<mirror::Object>(pending_next_raw_value);
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
+    SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
+  }
 }
 
 // Process the "referent" field in a java.lang.ref.Reference.  If the

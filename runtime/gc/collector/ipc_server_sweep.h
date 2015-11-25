@@ -124,10 +124,15 @@ class IPCServerMarkerSweep {
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
 
   template <class referenceKlass>
+  uint32_t MapReferenceToValueClient(const referenceKlass* mapped_reference) const;
+  template <class referenceKlass>
   const referenceKlass* MapValueToServer(uint32_t raw_address_value) const;
   template <class referenceKlass>
   const referenceKlass* MapReferenceToClient(
                                         const referenceKlass* const ref_parm);
+
+  void SetClientFieldValue(const mirror::Object* mapped_object,
+      MemberOffset field_offset, const mirror::Object* mapped_ref_value);
   template <class referenceKlass>
   const referenceKlass* MapReferenceToClientChecks(
                                         const referenceKlass* const ref_parm);
