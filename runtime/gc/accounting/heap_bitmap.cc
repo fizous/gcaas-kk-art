@@ -123,8 +123,8 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap
   for(int i = 0; i < header_->index_; i++) {
     _temp = header_->bitmaps_[i];
     CHECK(!(
-        bitmap->HeapBegin() < _temp->HeapLimit() &&
-                                      bitmap->HeapLimit() > _temp->HeapBegin()))
+        (bitmap->HeapBegin() < _temp->HeapLimit())
+          && (bitmap->HeapLimit() > _temp->HeapBegin())))
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
         << _temp->Dump();
   }
@@ -171,8 +171,8 @@ void HeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap, SPACE_BITMAP* new_bitmap)
       return;
     }
   }
-  LOG(FATAL) << "HeapBitmap::ReplaceBitmap; bitmap " <<
-                          static_cast<const void*>(old_bitmap) << " not found";
+  LOG(FATAL) << "HeapBitmap::ReplaceBitmap; bitmap "
+             << static_cast<const void*>(old_bitmap) << " not found";
 }
 
 void HeapBitmap::ReplaceObjectSet(SpaceSetMap* old_set, SpaceSetMap* new_set) {
@@ -192,8 +192,8 @@ void HeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap) {
   // Check for interval overlap.
   for (const auto& cur_bitmap : continuous_space_bitmaps_) {
     CHECK(!(
-        bitmap->HeapBegin() < cur_bitmap->HeapLimit() &&
-        bitmap->HeapLimit() > cur_bitmap->HeapBegin()))
+        (bitmap->HeapBegin() < cur_bitmap->HeapLimit())
+          && (bitmap->HeapLimit() > cur_bitmap->HeapBegin())))
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
         << cur_bitmap->Dump();
   }

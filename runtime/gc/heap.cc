@@ -156,8 +156,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     LOG(ERROR) << "Zygote: Done initializing with global allocator";
   }
   if(Runtime::Current()->IsCompiler()) {
-    live_bitmap_.reset(new accounting::HeapBitmap(this));
-    mark_bitmap_.reset(new accounting::HeapBitmap(this));
+    live_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
+    mark_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
   } else {
     live_bitmap_.reset(accounting::BaseHeapBitmap::CreateHeapBitmap(/*this,*/
         (!Runtime::Current()->IsCompiler()) && GC_SERVICE_SHARABLE_HEAP_BITMAP));
@@ -166,8 +166,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   }
 
 #else
-  live_bitmap_.reset(new accounting::HeapBitmap(this));
-  mark_bitmap_.reset(new accounting::HeapBitmap(this));
+  live_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
+  mark_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
 #endif
   // Requested begin for the alloc space, to follow the mapped image and oat files
   byte* requested_alloc_space_begin = NULL;
@@ -1970,7 +1970,8 @@ bool Heap::VerifyMissingCardMarks() {
 
 void Heap::SwapStacks() {
 #if (true || ART_GC_SERVICE)
-  if(!accounting::ATOMIC_OBJ_STACK_T::SwapStacks(allocation_stack_.get(), live_stack_.get())) {
+  if(!accounting::ATOMIC_OBJ_STACK_T::SwapStacks(allocation_stack_.get(),
+                                                          live_stack_.get())) {
     allocation_stack_.swap(live_stack_);
   }
 #else
@@ -1991,7 +1992,8 @@ void Heap::ProcessCards(base::TimingLogger& timings) {
       base::TimingLogger::ScopedSplit split("AllocSpaceClearCards", &timings);
       // No mod union table for the AllocSpace. Age the cards so that the GC knows that these cards
       // were dirty before the GC started.
-      card_table_->ModifyCardsAtomic(space->Begin(), space->End(), AgeCardVisitor(), VoidFunctor());
+      card_table_->ModifyCardsAtomic(space->Begin(), space->End(),
+                                              AgeCardVisitor(), VoidFunctor());
     }
   }
 }
@@ -2077,7 +2079,8 @@ void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
 			for (size_t i = elementPos; i < length; ++i) {
 //				 const mirror::Object* element =
 //						 array->GetWithoutChecks(static_cast<int32_t>(i));
-				mirror::Object* object = array->GetFieldObject<mirror::Object*>(dst_offset, false);
+				mirror::Object* object =
+				              array->GetFieldObject<mirror::Object*>(dst_offset, false);
 				if(object == NULL)
 					 continue;
 				 //size_t width = sizeof(mirror::Object*);
