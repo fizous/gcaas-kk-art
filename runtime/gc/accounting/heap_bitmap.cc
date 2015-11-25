@@ -128,7 +128,8 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
         << _temp->Dump();
   }
-  MaxHeapBitmapIndex = std::max(MaxHeapBitmapIndex, header_->index_);
+  MaxHeapBitmapIndex = (MaxHeapBitmapIndex < header_->index_) ?
+      header_->index_ : MaxHeapBitmapIndex;
   if(header_->index_ >= HEAP_BITMAPS_ARR_CAPACITY) {
     LOG(FATAL) << "AddContinuousSpaceBitmap ..exceeded Arr capacity.." <<
         header_->index_;
@@ -136,7 +137,7 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap
   header_->bitmaps_[header_->index_++] = bitmap;
 
   LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop " <<
-      header_->index_;
+      header_->index_ << ", max bitmap index = " << MaxHeapBitmapIndex;
 }
 
 void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
