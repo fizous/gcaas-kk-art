@@ -225,6 +225,9 @@ typedef struct GCSrvSharableHeapData_S {
   /* allocated space memory for zygote*/
   AShmemMap zygote_space_;
 
+  accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
+  accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;
+
   GCSrvSharableCollectorData collectors_[MARKSWEEP_COLLECTORS_ARRAY_CAPACITY];
 
   GCSrvceCashedReferenceOffsets reference_offsets_;
@@ -304,8 +307,7 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   SynchronizedLockHead ip_lock_;
 
-  accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
-  accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;
+
 
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
