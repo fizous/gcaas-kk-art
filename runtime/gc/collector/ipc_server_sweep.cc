@@ -211,7 +211,7 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
     return false;
   }
 
-  marked_spaces_count_prof_[matching_index] += 1;
+  marked_spaces_count_prof_[matching_index]++;
 
 
   return true;
@@ -313,7 +313,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       ", class_count = " << cashed_stats_client_.class_count_ <<
       ", other_count = " << cashed_stats_client_.other_count_ <<
       ", reference_count = " << cashed_stats_client_.reference_count_ <<
-      ", success_bitmaps = " << passed_bitmap_tests_;
+      ", success_bitmaps = " << passed_bitmap_tests_ <<
       "\n marked_bitmap_cnt: " <<
       StringPrintf("[%d] : %d \n[%d] : %d\n[%d] : %d",
           KGCSpaceServerImageInd_, marked_spaces_count_prof_[KGCSpaceServerImageInd_],
