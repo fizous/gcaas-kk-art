@@ -422,7 +422,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
         ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
         ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
         ", size:" << _ptr->size_;
-    AShmemMap* _new_ptr = &(_struct_alloc_space->heap_meta_.reshared_zygote_.zygote_space_);
+    AShmemMap* _new_ptr =
+        &(_struct_alloc_space->heap_meta_.reshared_zygote_.zygote_space_);
     GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(_ptr,_new_ptr));
     LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
         ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
@@ -433,13 +434,26 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
 
     if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
       //share the bitmaps too
+      accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
+      accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
+
+      if(!_mark_bitmap_->IsStructuredBitmap()) {
+        accounting::SpaceBitmap* _mark_bmap_ =
+            dynamic_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
+        AShmemMap* _ptr_ashmem = _mark_bmap_->GetMemMap()->GetAshmemMapAddress();
+        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
+            ", begin:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->Begin()) <<
+            ", end:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->End()) <<
+            ", size:" << _ptr_ashmem->size_;
+      }
+
 
     }
   }
 
   _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
-            capacity, PROT_READ | PROT_WRITE, shareMem,
-            &(_struct_alloc_space->dlmalloc_space_data_.memory_));
+                                    capacity, PROT_READ | PROT_WRITE, shareMem,
+                          &(_struct_alloc_space->dlmalloc_space_data_.memory_));
   UniquePtr<MEM_MAP> mem_map(_space_mem_map);
   void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
   // Protect memory beyond the initial size.

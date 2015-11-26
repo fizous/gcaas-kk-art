@@ -134,6 +134,9 @@ public:
     return HeapBegin() + static_cast<uintptr_t>(HeapSize());
   }
 
+  virtual bool IsStructuredBitmap(void) {
+    return false;
+  }
   // Set the max address which can covered by the bitmap.
   virtual void SetHeapLimit(uintptr_t new_end) = 0;
   virtual std::string GetName() const = 0;
@@ -262,6 +265,10 @@ class SharedSpaceBitmap : public BaseBitmap {
     return bitmap_data_->heap_begin_;
   }
 
+  bool IsStructuredBitmap(void) {
+    return true;
+  }
+
   // Set the max address which can covered by the bitmap.
   void SetHeapLimit(uintptr_t new_end);
 
@@ -355,6 +362,9 @@ class SpaceBitmap : public BaseBitmap {
   void SetName(const std::string& name);
   std::string Dump() const;
 
+  MEM_MAP* GetMemMap(void) {
+    return mem_map_.get();
+  }
  private:
   // TODO: heap_end_ is initialized so that the heap bitmap is empty, this doesn't require the -1,
   // however, we document that this is expected on heap_end_
