@@ -175,7 +175,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (!image_file_name.empty()) {
     space::ImageSpace* image_space = space::ImageSpace::Create(image_file_name);
     CHECK(image_space != NULL) << "Failed to create space for " << image_file_name;
-    GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " <<   image_file_name;
+    GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " << image_file_name;
     AddContinuousSpace(image_space);
     // Oat files referenced by image files immediately follow them in memory, ensure alloc space
     // isn't going to get in the middle
@@ -1362,16 +1362,16 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
         if(false) {
           allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
-              &(_struct_alloc_space->alloc_stack_data_), true, max_allocation_stack_size_));
+              &(_struct_alloc_space->heap_meta_.alloc_stack_data_), true, max_allocation_stack_size_));
 
           live_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(live_stack_.release(),
-              &(_struct_alloc_space->live_stack_data_), true, max_allocation_stack_size_));
+              &(_struct_alloc_space->heap_meta_.live_stack_data_), true, max_allocation_stack_size_));
         }
 
 
         static const size_t default_mark_stack_size = 128 * KB;
         mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
-            &(_struct_alloc_space->mark_stack_data_), true, default_mark_stack_size));
+            &(_struct_alloc_space->heap_meta_.mark_stack_data_), true, default_mark_stack_size));
         alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
             _struct_alloc_space, shared_space);
         alloc_space_->SetHeapMeta(zygote_space, GetImageSpace()->cont_space_data_);

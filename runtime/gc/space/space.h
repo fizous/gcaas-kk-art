@@ -228,6 +228,10 @@ typedef struct GCSrvSharableHeapData_S {
   accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
   accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;
 
+  StructuredObjectStackData live_stack_data_;
+  StructuredObjectStackData mark_stack_data_;
+  StructuredObjectStackData alloc_stack_data_;
+
   GCSrvSharableCollectorData collectors_[MARKSWEEP_COLLECTORS_ARRAY_CAPACITY];
 
   GCSrvceCashedReferenceOffsets reference_offsets_;
@@ -307,17 +311,13 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
   SynchronizedLockHead ip_lock_;
 
-
-
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
   accounting::GCSrvceBitmap temp_bitmap_;
 
   CardBaseTableFields card_table_data_;
 
-  StructuredObjectStackData live_stack_data_;
-  StructuredObjectStackData mark_stack_data_;
-  StructuredObjectStackData alloc_stack_data_;
+
 
   /* heap data */
   GCSrvSharableHeapData heap_meta_;

@@ -412,7 +412,7 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
   if(mark_stack_ == NULL)
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
-      &(client_rec_->sharable_space_->mark_stack_data_));
+      &(client_rec_->sharable_space_->heap_meta_.mark_stack_data_));
   if(current_mark_bitmap_ == NULL) {
     current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
         KGCSpaceServerMarkBitmapInd_,

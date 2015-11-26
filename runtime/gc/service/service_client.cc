@@ -69,7 +69,7 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   FillAshMemMapData(&rec->mem_maps_[_index++],
       &(sharable_space_->sharable_space_data_->dlmalloc_space_data_.memory_));
   FillAshMemMapData(&rec->mem_maps_[_index++],
-      &(sharable_space_->sharable_space_data_->mark_stack_data_.memory_));
+      &(sharable_space_->sharable_space_data_->heap_meta_.mark_stack_data_.memory_));
   FillAshMemMapData(&rec->mem_maps_[_index++],
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
   if(false) {
