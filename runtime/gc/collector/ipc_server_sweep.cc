@@ -174,7 +174,7 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 
 
 bool IPCServerMarkerSweep::TestMappedBitmap(
-                                    const mirror::Object* mapped_object) const {
+                                    const mirror::Object* mapped_object) {
   if(mapped_object == NULL)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(mapped_object);
@@ -211,7 +211,7 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
     return false;
   }
 
-  marked_spaces_count_prof_[matching_index]++;
+  marked_spaces_count_prof_[matching_index] += 1;
 
 
   return true;
