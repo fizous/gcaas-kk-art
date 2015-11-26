@@ -208,6 +208,15 @@ typedef struct GCSrvSharableCollectorData_S {
   int is_concurrent_;
 } __attribute__((aligned(8))) GCSrvSharableCollectorData;
 
+// this struct is used to capture metadata of the zygote space
+// during the sharing process.
+typedef struct GCSrvcZygoteResharingRec_S{
+  /* allocated space memory for zygote*/
+  AShmemMap zygote_space_;
+  accounting::GCSrvceBitmap live_bitmap_;
+  accounting::GCSrvceBitmap mark_bitmap_;
+} __attribute__((aligned(8))) GCSrvcZygoteResharingRec;
+
 
 typedef struct GCSrvSharableHeapData_S {
   /* gc barrier */
@@ -223,7 +232,8 @@ typedef struct GCSrvSharableHeapData_S {
   SynchronizedLockHead gc_complete_lock_;
 
   /* allocated space memory for zygote*/
-  AShmemMap zygote_space_;
+  GCSrvcZygoteResharingRec reshared_zygote_;
+ // AShmemMap zygote_space_;
 
   accounting::GCSrvceSharedHeapBitmap live_heap_bitmap_data_;
   accounting::GCSrvceSharedHeapBitmap mark_heap_bitmap_data_;

@@ -64,7 +64,7 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   int _index = 0;
   if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
-        &(sharable_space_->sharable_space_data_->heap_meta_.zygote_space_));
+        &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.zygote_space_));
   }
   FillAshMemMapData(&rec->mem_maps_[_index++],
       &(sharable_space_->sharable_space_data_->dlmalloc_space_data_.memory_));
