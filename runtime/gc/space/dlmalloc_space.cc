@@ -434,7 +434,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
 
     if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
       //share the bitmaps too
-      accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
+      //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
       accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
 
       if(!_mark_bitmap_->IsStructuredBitmap()) {
