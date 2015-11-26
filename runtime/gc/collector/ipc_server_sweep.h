@@ -54,6 +54,7 @@ class IPCServerMarkerSweep {
 
 
   GCSrverCollectorSpace spaces_[KGCSpaceCount];
+  int marked_spaces_count_prof_[KGCSpaceCount];
   space::GCSrvSharableCollectorData* curr_collector_ptr_;
 
   accounting::GCSrvceBitmap mark_bitmap_;

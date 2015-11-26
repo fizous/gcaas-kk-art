@@ -52,7 +52,7 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
                                       const uint32_t raw_address_value) const {
-  if(raw_address_value == (uint32_t)0)
+  if(raw_address_value == 0U)
     return NULL;
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
@@ -74,7 +74,7 @@ template <class referenceKlass>
 uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
                                 const referenceKlass* mapped_reference) const {
   if(mapped_reference == nullptr)
-    return (uint32_t)0;
+    return 0U;
   const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetServerSpaceEnd(i)) &&
@@ -87,7 +87,7 @@ uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
 
   LOG(FATAL) << "IPCServerMarkerSweep::MapReferenceToValueClient....0000--raw_Address_value:"
       << mapped_reference;
-  return (uint32_t) 0;
+  return 0U;
 }
 
 
@@ -550,7 +550,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
       ServerDelayReferenceReferent(mapped_klass,
-          mapped_object);
+                                  mapped_object);
     }
   }
 }

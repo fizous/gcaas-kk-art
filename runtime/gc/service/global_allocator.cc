@@ -56,7 +56,8 @@ space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateShara
 bool GCServiceGlobalAllocator::ShouldForkService() {
   if(allocator_instant_ == NULL) {
     CreateServiceAllocator();
-    allocator_instant_->region_header_->service_header_.status_ = GCSERVICE_STATUS_NONE;
+    allocator_instant_->region_header_->service_header_.status_ =
+                                                          GCSERVICE_STATUS_NONE;
     return true;
   } else {
     if(allocator_instant_->region_header_->service_header_.status_ == GCSERVICE_STATUS_NONE)
@@ -209,7 +210,9 @@ byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   region_header_->service_header_.cond_->Broadcast(self);
 
   LOG(ERROR) << "printing counter in GCService: " << _counter;
-  LOG(ERROR) << "printing counter in GCService: " << reinterpret_cast<void*>(region_header_->current_addr_) << ", end is: " << reinterpret_cast<void*>(region_header_->ashmem_meta_.begin_ + region_header_->ashmem_meta_.size_);
+  LOG(ERROR) << "printing counter in GCService: "
+      << reinterpret_cast<void*>(region_header_->current_addr_) << ", end is: "
+      << reinterpret_cast<void*>(region_header_->ashmem_meta_.begin_ + region_header_->ashmem_meta_.size_);
   *index_p = _counter;
   return _addr;
 }

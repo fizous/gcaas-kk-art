@@ -1354,11 +1354,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         LOG(ERROR) << "Resharing live_heap_bitmap_data_";
         live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
-            &_struct_alloc_space->live_heap_bitmap_data_));
+                                  &_struct_alloc_space->live_heap_bitmap_data_));
         LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
         mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
-            &_struct_alloc_space->mark_heap_bitmap_data_));
+                                  &_struct_alloc_space->mark_heap_bitmap_data_));
         LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
         if(false) {
           allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
@@ -2169,8 +2169,9 @@ size_t Heap::GetMaxAllowedFootPrint() {
 
 void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
   if (max_allowed_footprint > GetMaxMemory()) {
-    VLOG(gc) << "Clamp target GC heap from " << PrettySize(max_allowed_footprint) << " to "
-             << PrettySize(GetMaxMemory());
+    VLOG(gc)  << "Clamp target GC heap from "
+              << PrettySize(max_allowed_footprint) << " to "
+              << PrettySize(GetMaxMemory());
     max_allowed_footprint = GetMaxMemory();
   }
   max_allowed_footprint_ = max_allowed_footprint;

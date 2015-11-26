@@ -114,6 +114,10 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   spaces_[KGCSpaceServerImageInd_].base_end_ = heap_meta_->image_space_end_;
 
 
+
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    marked_spaces_count_prof_[i] = 0;
+  }
   //set the sharable space to be shared
   android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
 
@@ -200,11 +204,16 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
       LOG(FATAL) << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
     } else {
       passed_bitmap_tests_ += 1;
-      return true;
     }
   }
-  if(matching_index == -1)
+  if(matching_index == -1) {
     LOG(FATAL) << "TestMappedBitmap..." << mapped_object;
+    return false;
+  }
+
+  marked_spaces_count_prof_[matching_index] += 1;
+
+
   return true;
 }
 
@@ -305,6 +314,11 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       ", other_count = " << cashed_stats_client_.other_count_ <<
       ", reference_count = " << cashed_stats_client_.reference_count_ <<
       ", success_bitmaps = " << passed_bitmap_tests_;
+      "\n marked_bitmap_cnt: " <<
+      StringPrintf("[%d] : %d \n[%d] : %d\n[%d] : %d",
+          KGCSpaceServerImageInd_, marked_spaces_count_prof_[KGCSpaceServerImageInd_],
+          KGCSpaceServerZygoteInd_, marked_spaces_count_prof_[KGCSpaceServerZygoteInd_],
+          KGCSpaceServerAllocInd_, marked_spaces_count_prof_[KGCSpaceServerAllocInd_]);
 
 
 

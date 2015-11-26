@@ -29,6 +29,9 @@
 #include "mem_map.h"
 
 
+#define MARKSWEEP_COLLECTORS_ARRAY_CAPACITY   6
+
+
 #if (true || ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
 #ifndef DLMALLOC_SPACE_T
@@ -54,7 +57,6 @@ namespace gc {
 
 namespace accounting {
   class BaseBitmap;
-  class SpaceBitmap;
   class SpaceBitmap;
 }  // namespace accounting
 
@@ -223,7 +225,7 @@ typedef struct GCSrvSharableHeapData_S {
   /* allocated space memory for zygote*/
   AShmemMap zygote_space_;
 
-  GCSrvSharableCollectorData collectors_[6];
+  GCSrvSharableCollectorData collectors_[MARKSWEEP_COLLECTORS_ARRAY_CAPACITY];
 
   GCSrvceCashedReferenceOffsets reference_offsets_;
 

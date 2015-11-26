@@ -98,7 +98,8 @@ inline void MarkSweep::VisitInstanceFieldsReferences(const mirror::Class* klass,
 }
 
 template <typename Visitor>
-inline void MarkSweep::VisitClassReferences(const mirror::Class* klass, const mirror::Object* obj,
+inline void MarkSweep::VisitClassReferences(const mirror::Class* klass,
+                                            const mirror::Object* obj,
                                             const Visitor& visitor)
     SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_) {
   VisitInstanceFieldsReferences(klass, obj, visitor);
@@ -114,8 +115,10 @@ inline void MarkSweep::VisitStaticFieldsReferences(const mirror::Class* klass,
 }
 
 template <typename Visitor>
-inline void MarkSweep::VisitFieldsReferences(const mirror::Object* obj, uint32_t ref_offsets,
-                                             bool is_static, const Visitor& visitor) {
+inline void MarkSweep::VisitFieldsReferences(const mirror::Object* obj,
+                                             uint32_t ref_offsets,
+                                             bool is_static,
+                                             const Visitor& visitor) {
   if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
     // Found a reference offset bitmap.  Mark the specified offsets.
 #ifndef MOVING_COLLECTOR
@@ -145,7 +148,8 @@ inline void MarkSweep::VisitFieldsReferences(const mirror::Object* obj, uint32_t
         mirror::ArtField* field = (is_static ? klass->GetStaticField(i)
                                    : klass->GetInstanceField(i));
         MemberOffset field_offset = field->GetOffset();
-        const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+        const mirror::Object* ref =
+            obj->GetFieldObject<const mirror::Object*>(field_offset, false);
         visitor(obj, ref, field_offset, is_static);
       }
     }
