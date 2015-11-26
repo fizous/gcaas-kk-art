@@ -439,7 +439,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
 
       if(!_mark_bitmap_->IsStructuredBitmap()) {
         accounting::SpaceBitmap* _mark_bmap_ =
-            dynamic_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
+            reinterpret_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
         AShmemMap* _ptr_ashmem = _mark_bmap_->GetMemMap()->GetAshmemMapAddress();
         LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
             ", begin:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->Begin()) <<
