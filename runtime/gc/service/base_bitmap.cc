@@ -372,7 +372,7 @@ void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
           ", heap_begin=" << _mark_bmap_->HeapBegin() ;
       //LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
       memcpy(new_mem_address, _mark_bmap_->bitmap_data_,
-          SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+                            SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
       AShmemMap* _new_ashmem_p = &(new_mem_address->mem_map_);
       MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
       _mark_bmap_->bitmap_data_ = new_mem_address;

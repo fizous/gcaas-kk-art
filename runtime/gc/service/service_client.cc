@@ -62,7 +62,7 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   int _index = 0;
-  if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace) {
+  if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
         &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.zygote_space_));
   }
@@ -72,6 +72,12 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
       &(sharable_space_->sharable_space_data_->heap_meta_.mark_stack_data_.memory_));
   FillAshMemMapData(&rec->mem_maps_[_index++],
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
+  if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+    FillAshMemMapData(&rec->mem_maps_[_index++],
+        &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.mark_bitmap_.mem_map_));
+    FillAshMemMapData(&rec->mem_maps_[_index++],
+        &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.live_bitmap_.mem_map_));
+  }
   if(false) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
         &(sharable_space_->sharable_space_data_->live_bitmap_.mem_map_));
