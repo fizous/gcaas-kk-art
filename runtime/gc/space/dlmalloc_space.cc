@@ -437,8 +437,35 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
       //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
       accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
 
-      if(!_mark_bitmap_->IsStructuredBitmap()) {
+      if(_mark_bitmap_->IsStructuredBitmap()) {
         LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
+        accounting::SharedSpaceBitmap* _mark_bmap_ =
+                      reinterpret_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
+
+        AShmemMap* _ashmem_p = &(_mark_bmap_->bitmap_data_->mem_map_);
+        if(!MemBaseMap::IsAShmemShared(_ashmem_p)) {
+          LOG(ERROR) << "IsAShmem...the bitmap was not originally shared";
+          LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
+              ", begin:" <<
+                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+              ", size:" << MEM_MAP::AshmemSize(_ashmem_p);
+          memcpy(&(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_),
+              &(_mark_bmap_->bitmap_data_),
+              SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+          AShmemMap* _new_ashmem_p =
+              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_.mem_map_);
+          MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
+          _mark_bmap_->bitmap_data_ =
+              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_);
+          LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
+              ", begin:" <<
+                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+              ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p);
+        }
+
+//        if(_mark_bmap_->bitmap_data_->mem_map_.flags_ == )
 //        accounting::SpaceBitmap* _mark_bmap_ =
 //            reinterpret_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
 //        AShmemMap* _ptr_ashmem = _mark_bmap_->GetMemMap()->GetAshmemMapAddress();

@@ -242,6 +242,9 @@ class MemBaseMap {
     addr->size_ -= unmap_size;
   }
 
+  static bool IsAShmemShared(AShmemMap* ashmem_mem_map) const {
+    return ((ashmem_mem_map->flags_ & MAP_SHARED) > 0);
+  }
   static AShmemMap* ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
       AShmemMap* dest_ashmem_mem_map = NULL);
 
