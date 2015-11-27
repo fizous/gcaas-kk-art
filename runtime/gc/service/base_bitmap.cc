@@ -354,6 +354,41 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
   LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
 }
 
+void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
+  if(IsStructuredBitmap()) {
+    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
+    accounting::SharedSpaceBitmap* _mark_bmap_ =
+                  reinterpret_cast<accounting::SharedSpaceBitmap*>(this);
+
+    AShmemMap* _ashmem_p = &(_mark_bmap_->bitmap_data_->mem_map_);
+    if(!MemBaseMap::IsAShmemShared(_ashmem_p)) {
+      LOG(ERROR) << "IsAShmem...the bitmap was not originally shared";
+      LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
+          ", begin:" <<
+            reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+          ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+          ", size:" << MEM_MAP::AshmemSize(_ashmem_p) <<
+          ", heap_limit=" << _mark_bmap_->HeapLimit() <<
+          ", heap_begin=" << _mark_bmap_->HeapBegin() ;
+      //LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
+      memcpy(new_mem_address, _mark_bmap_->bitmap_data_,
+          SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+      AShmemMap* _new_ashmem_p = &(new_mem_address->mem_map_);
+      MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
+      _mark_bmap_->bitmap_data_ = new_mem_address;
+      LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
+          ", begin:" <<
+            reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+          ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+          ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
+          ", heap_limit=" << _mark_bmap_->HeapLimit() <<
+          ", heap_begin=" << _mark_bmap_->HeapBegin() ;
+
+      //LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
+    }
+  }
+}
+
 
 
 SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
