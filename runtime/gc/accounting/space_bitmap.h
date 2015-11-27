@@ -319,6 +319,7 @@ class SharedServerSpaceBitmap : public SharedSpaceBitmap {
 };//class SharedSpaceBitmap
 
 std::ostream& operator << (std::ostream& stream, const SharedServerSpaceBitmap& bitmap);
+
 class SpaceBitmap : public BaseBitmap {
  public:
   // Initialize a space bitmap so that it points to a bitmap large enough to cover a heap at
