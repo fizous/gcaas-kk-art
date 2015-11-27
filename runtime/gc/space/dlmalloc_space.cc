@@ -451,7 +451,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
               ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
               ", size:" << MEM_MAP::AshmemSize(_ashmem_p) <<
               ", heap_limit=" << _mark_bmap_->HeapLimit() ;
-          LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
+          //LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
           memcpy(&(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_),
               &(_mark_bmap_->bitmap_data_),
               SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
@@ -467,7 +467,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
               ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
               ", heap_limit=" << _mark_bmap_->HeapLimit() ;
 
-          LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
+          //LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
         }
 
 //        if(_mark_bmap_->bitmap_data_->mem_map_.flags_ == )
