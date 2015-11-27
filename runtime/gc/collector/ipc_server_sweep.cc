@@ -238,12 +238,19 @@ accounting::SharedServerSpaceBitmap* IPCServerMarkerSweep::GetMappedBitmap(
 //  _bitmap_mem_map->mapped_begin_ =
 //      reinterpret_cast<byte*>(_server_address->begin_);
 
-  if(current_mark_bitmap_ == NULL) {
-    current_mark_bitmap_ =
-        new accounting::SharedServerSpaceBitmap(bitmap_meta_addr,
-            mapped_server_address, offset_);
-  }
-  return current_mark_bitmap_;
+  accounting::SharedServerSpaceBitmap* _alloc_space_bitmap =
+      new accounting::SharedServerSpaceBitmap(bitmap_meta_addr,
+                                            mapped_server_address, offset_);
+
+//  if(mark_bitmaps_.empty()) {
+//
+//    if(current_mark_bitmap_ == NULL)
+//      current_mark_bitmap_ = _alloc_space_bitmap;
+//
+//    mark_bitmaps_.push_back(_alloc_space_bitmap);
+//  }
+
+  return _alloc_space_bitmap;
 }
 
 void IPCServerMarkerSweep::ServerScanObject(const mirror::Object* obj,
@@ -413,11 +420,29 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
       &(client_rec_->sharable_space_->heap_meta_.mark_stack_data_));
-  if(current_mark_bitmap_ == NULL) {
-    current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
-        KGCSpaceServerMarkBitmapInd_,
-          (curr_collector_ptr_->current_mark_bitmap_));
+
+  if(mark_bitmaps_.empty()) {
+    if(current_mark_bitmap_ == NULL) {
+      current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
+          KGCSpaceServerMarkBitmapInd_,
+            (curr_collector_ptr_->current_mark_bitmap_));
+      mark_bitmaps_.push_back(current_mark_bitmap_);
+    }
+    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
+          GetMappedBitmap(client_rec_->pair_mapps_,
+              KGCSpaceServerZygoteMarkBMInd_,
+            &(heap_meta_->reshared_zygote_.mark_bitmap_));
+      mark_bitmaps_.push_back(_temp_mark_bitmap);
+    }
+
+    LOG(ERROR) << "Pushed the mark_bitmaps in to the stack.." <<
+        mark_bitmaps_.size();
+
+
   }
+
+
 
   if(mark_stack_->IsEmpty())
     return false;

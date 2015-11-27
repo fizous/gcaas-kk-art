@@ -43,6 +43,7 @@ class IPCServerMarkerSweep {
 
   static const int KGCSpaceServerMarkStackInd_    = 2;
   static const int KGCSpaceServerMarkBitmapInd_   = 3;
+  static const int KGCSpaceServerZygoteMarkBMInd_   = 4;
 
   static int passed_bitmap_tests_;
 
@@ -59,6 +60,9 @@ class IPCServerMarkerSweep {
 
   accounting::GCSrvceBitmap mark_bitmap_;
   accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
+
+  std::vector<accounting::SharedServerSpaceBitmap*> mark_bitmaps_;
+
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
   // offset of java.lang.ref.Reference.referent
