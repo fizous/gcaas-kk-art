@@ -242,6 +242,9 @@ class SharedSpaceBitmap : public BaseBitmap {
   static void SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
       SharedSpaceBitmap* bitmapB);
 
+  SharedSpaceBitmap(GCSrvceBitmap*);
+  void ShareBitmapMemory(GCSrvceBitmap* new_mem_address);
+
   void Walk(Callback* callback, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
@@ -282,7 +285,7 @@ class SharedSpaceBitmap : public BaseBitmap {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_, Locks::mutator_lock_);
 
 
-  SharedSpaceBitmap(GCSrvceBitmap*);
+
 
 
   virtual ~SharedSpaceBitmap();
