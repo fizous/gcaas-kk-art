@@ -222,7 +222,7 @@ class IPCServerMarkerSweep {
 //  mirror::Class* GetClientClassFromObject(mirror::Object* obj);
   void MarkObject(const mirror::Object* obj);
   void MarkObjectNonNull(const mirror::Object* obj);
-  bool IsMappedObjectMarked(const mirror::Object* object) const;
+  bool IsMappedObjectMarked(const mirror::Object* object);
 
   byte* GetClientSpaceEnd(int index) const;
   byte* GetClientSpaceBegin(int index) const;

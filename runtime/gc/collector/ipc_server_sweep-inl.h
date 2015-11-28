@@ -767,7 +767,7 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
 }
 
 inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
-                                           const mirror::Object* object) const {
+                                           const mirror::Object* object)  {
   if (IsMappedObjectImmuned(object)) {
     return true;
   }
