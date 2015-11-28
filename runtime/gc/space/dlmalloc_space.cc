@@ -456,7 +456,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
         LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
         accounting::SharedSpaceBitmap* _mark_bmap_ =
                       reinterpret_cast<accounting::SharedSpaceBitmap*>(_mark_bitmap_);
-        accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
+        //accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
         _mark_bmap_->ShareBitmapMemory(
             &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_));
 
