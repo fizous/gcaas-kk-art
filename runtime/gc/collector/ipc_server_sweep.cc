@@ -337,7 +337,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       break;
     }
     popped_oject = mark_stack_->PopBack();
-    ServerScanObject(obj);
+    ServerScanObject(popped_oject);
   }
 
   if(false) {
