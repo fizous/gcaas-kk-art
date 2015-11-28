@@ -856,12 +856,13 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   if(!_found) {
     LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
   }
-  // This object was not previously marked.
-  if(!object_bitmap->Test(obj)) {
-    object_bitmap->Set(obj);
-    //TODO:: check the need to resize the mark stack here
-    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks(obj)));
-  }
+
+//  // This object was not previously marked.
+//  if(!object_bitmap->Test(obj)) {
+//    object_bitmap->Set(obj);
+//    //TODO:: check the need to resize the mark stack here
+//    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks(obj)));
+//  }
 }
 //
 //template <class TypeRef>
