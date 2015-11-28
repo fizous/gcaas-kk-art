@@ -860,7 +860,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   if(!object_bitmap->Test(obj)) {
     object_bitmap->Set(obj);
     //TODO:: check the need to resize the mark stack here
-    mark_stack_->PushBack(const_cast<mirror::Object*>(obj));
+    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks(obj)));
   }
 }
 //
