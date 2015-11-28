@@ -1049,7 +1049,8 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
   //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  if(false)
+    mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
 
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
   //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
