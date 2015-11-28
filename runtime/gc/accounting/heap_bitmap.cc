@@ -39,7 +39,7 @@ BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(/*Heap* heap,*/
   memcpy(header_addr, originalBMap->header_,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
   originalBMap->header_ = header_addr;
-  return this;
+  return originalBMap;
   //return new SharedHeapBitmap(/*heap,*/ header_addr);
 }
 
