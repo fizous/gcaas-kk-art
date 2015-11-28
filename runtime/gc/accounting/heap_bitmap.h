@@ -97,6 +97,7 @@ class BaseHeapBitmap {
 
 class SharedHeapBitmap : public BaseHeapBitmap {
  public:
+  typedef std::vector<SPACE_BITMAP*, GCAllocator<SPACE_BITMAP*> > SpaceBitmapVector;
   static int MaxHeapBitmapIndex;
   SharedHeapBitmap(/*Heap* heap, */GCSrvceSharedHeapBitmap* header_addr = NULL);
   ~SharedHeapBitmap(){}
@@ -106,26 +107,45 @@ class SharedHeapBitmap : public BaseHeapBitmap {
   void ReplaceBitmap(SPACE_BITMAP* old_bitmap, SPACE_BITMAP* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
+//  SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) {
+//    SPACE_BITMAP* _bitmap = NULL;
+//    for(int i = 0; i < header_->index_; i ++) {
+//      _bitmap = header_->bitmaps_[i];
+//      if (_bitmap->HasAddress(obj)) {
+//        return _bitmap;
+//      }
+//    }
+//    return NULL;
+//  }
+
+
   SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) {
-    SPACE_BITMAP* _bitmap = NULL;
-    for(int i = 0; i < header_->index_; i ++) {
-      _bitmap = header_->bitmaps_[i];
-      if (_bitmap->HasAddress(obj)) {
-        return _bitmap;
+    for (const auto& bitmap : continuous_space_bitmaps_) {
+      if (bitmap->HasAddress(obj)) {
+        return bitmap;
       }
     }
     return NULL;
   }
-
   int GetContinuousSize() {
-    return header_->index_;
+    return continuous_space_bitmaps_.size();
   }
+//  int GetContinuousSize() {
+//    return header_->index_;
+//  }
+
+//  SPACE_BITMAP* GetContBitmapFromIndex(int index) {
+//    return header_->bitmaps_[index];
+//  }
+
 
   SPACE_BITMAP* GetContBitmapFromIndex(int index) {
-    return header_->bitmaps_[index];
+    return continuous_space_bitmaps_[index];
   }
 
   GCSrvceSharedHeapBitmap* header_;
+  // Bitmaps covering continuous spaces.
+  SpaceBitmapVector continuous_space_bitmaps_;
  private:
 
 };

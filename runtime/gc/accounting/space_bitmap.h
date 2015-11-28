@@ -400,7 +400,8 @@ typedef struct GCSrvceSharedHeapBitmap_S {
   // pointer to the heap
   //const Heap* const heap_;
   //bitmaps array
-  SPACE_BITMAP* bitmaps_[HEAP_BITMAPS_ARR_CAPACITY];
+  //SPACE_BITMAP* bitmaps_[HEAP_BITMAPS_ARR_CAPACITY];
+  GCSrvceBitmap* bitmap_headers_[HEAP_BITMAPS_ARR_CAPACITY];
   // The index of the bitmap array
   volatile int index_;
 

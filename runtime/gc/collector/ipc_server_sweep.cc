@@ -456,6 +456,23 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
         KGCSpaceServerMarkStackInd_,
       &(client_rec_->sharable_space_->heap_meta_.mark_stack_data_));
 
+  if(all_bitmaps_.empty()) {
+    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
+          GetMappedBitmap(client_rec_->pair_mapps_,
+              KGCSpaceServerZygoteMarkBMInd_,
+            &(heap_meta_->reshared_zygote_.mark_bitmap_));
+      all_bitmaps_.push_back(_temp_mark_bitmap);
+
+
+      _temp_mark_bitmap =
+          GetMappedBitmap(client_rec_->pair_mapps_,
+              KGCSpaceServerZygoteLiveBMInd_,
+            &(heap_meta_->reshared_zygote_.live_bitmap_));
+      all_bitmaps_.push_back(_temp_mark_bitmap);
+    }
+  }
+
   if(mark_bitmaps_.empty()) {
     if(current_mark_bitmap_ == NULL) {
       current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,

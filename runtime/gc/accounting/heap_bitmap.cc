@@ -38,7 +38,9 @@ BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(/*Heap* heap,*/
          SharedHeapBitmap* originalBMap, GCSrvceSharedHeapBitmap* header_addr) {
   memcpy(header_addr, originalBMap->header_,
       SERVICE_ALLOC_ALIGN_BYTE(GCSrvceSharedHeapBitmap));
-  return new SharedHeapBitmap(/*heap,*/ header_addr);
+  originalBMap->header_ = header_addr;
+  return this;
+  //return new SharedHeapBitmap(/*heap,*/ header_addr);
 }
 
 
@@ -86,7 +88,7 @@ SharedHeapBitmap::SharedHeapBitmap(/*Heap* heap,*/
 //    *(const_cast<const Heap*>(header_->heap_)) = heap;
     header_->index_ = 0;
     for(int i = 0; i < HEAP_BITMAPS_ARR_CAPACITY; i++) {
-      header_->bitmaps_[i] = NULL;
+      header_->bitmap_headers_[i] = NULL;
     }
 
 //    GCSrvceSharedHeapBitmap _data_values = {heap, 0,
@@ -109,58 +111,101 @@ SharedHeapBitmap::SharedHeapBitmap(/*Heap* heap,*/
 
 
 void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap) {
-  DCHECK(bitmap != NULL);
   // Check for interval overlap.
-  SPACE_BITMAP* _temp = NULL;
-  LOG(ERROR) << "header is allocated? " << (header_ != NULL);
-  if(header_ != NULL) {
-    LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " <<
-        header_->index_;
-  } else {
-    LOG(FATAL) << "SharedHeapBitmap::AddContinuousSpaceBitmap..._header is not "
-        "allocated";
-  }
-  for(int i = 0; i < header_->index_; i++) {
-    _temp = header_->bitmaps_[i];
+  for (const auto& cur_bitmap : continuous_space_bitmaps_) {
     CHECK(!(
-        (bitmap->HeapBegin() < _temp->HeapLimit())
-          && (bitmap->HeapLimit() > _temp->HeapBegin())))
+        (bitmap->HeapBegin() < cur_bitmap->HeapLimit())
+          && (bitmap->HeapLimit() > cur_bitmap->HeapBegin())))
         << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
-        << _temp->Dump();
+        << cur_bitmap->Dump();
   }
-  MaxHeapBitmapIndex = (MaxHeapBitmapIndex < header_->index_) ?
-      header_->index_ : MaxHeapBitmapIndex;
-  if(header_->index_ >= HEAP_BITMAPS_ARR_CAPACITY) {
-    LOG(FATAL) << "AddContinuousSpaceBitmap ..exceeded Arr capacity.." <<
-        header_->index_;
-  }
-  header_->bitmaps_[header_->index_++] = bitmap;
+  continuous_space_bitmaps_.push_back(bitmap);
+  if(bitmap->IsStructuredBitmap()) {
+    LOG(ERROR) << "header is allocated? " << (header_ != NULL);
+    if(header_ != NULL) {
+      LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " <<
+          header_->index_;
+    } else {
+      LOG(FATAL) << "SharedHeapBitmap::AddContinuousSpaceBitmap..._header is not "
+          "allocated";
+    }
 
-  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop " <<
-      header_->index_ << ", max bitmap index = " << MaxHeapBitmapIndex;
+    MaxHeapBitmapIndex = (MaxHeapBitmapIndex < header_->index_) ?
+        header_->index_ : MaxHeapBitmapIndex;
+
+    if(header_->index_ >= HEAP_BITMAPS_ARR_CAPACITY) {
+      LOG(FATAL) << "AddContinuousSpaceBitmap ..exceeded Arr capacity.." <<
+          header_->index_;
+    }
+
+    accounting::SharedSpaceBitmap* _shared_bitmap =
+        (accounting::SharedSpaceBitmap*) bitmap;
+    header_->bitmap_headers_[header_->index_++] = _shared_bitmap->bitmap_data_;
+  }
+
+
+
+  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop "
+      << header_->index_ << ", max bitmap index = " << MaxHeapBitmapIndex;
+
+//  DCHECK(bitmap != NULL);
+//  // Check for interval overlap.
+//  SPACE_BITMAP* _temp = NULL;
+//
+//  for(int i = 0; i < header_->index_; i++) {
+//    _temp = header_->bitmap_headers_[i];
+//    CHECK(!(
+//        (bitmap->HeapBegin() < _temp->HeapLimit())
+//          && (bitmap->HeapLimit() > _temp->HeapBegin())))
+//        << "Bitmap " << bitmap->Dump() << " overlaps with existing bitmap "
+//        << _temp->Dump();
+//  }
+//  MaxHeapBitmapIndex = (MaxHeapBitmapIndex < header_->index_) ?
+//      header_->index_ : MaxHeapBitmapIndex;
+//  if(header_->index_ >= HEAP_BITMAPS_ARR_CAPACITY) {
+//    LOG(FATAL) << "AddContinuousSpaceBitmap ..exceeded Arr capacity.." <<
+//        header_->index_;
+//  }
+//  header_->bitmap_headers_[header_->index_++] = bitmap->;
+
+
 }
 
 void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
-  SPACE_BITMAP* _temp = NULL;
-  for(int i = 0; i < header_->index_; i ++) {
-    _temp = header_->bitmaps_[i];
-    _temp->Walk(callback, arg);
+  for (const auto& bitmap : continuous_space_bitmaps_) {
+    bitmap->Walk(callback, arg);
   }
+
+//  SPACE_BITMAP* _temp = NULL;
+//  for(int i = 0; i < header_->index_; i ++) {
+//    _temp = header_->bitmaps_[i];
+//    _temp->Walk(callback, arg);
+//  }
 }
 
 
 void SharedHeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap,
     BaseBitmap* new_bitmap) {
-  BaseBitmap* _temp = NULL;
-  for(int i = 0; i < header_->index_; i ++) {
-    _temp = header_->bitmaps_[i];
-    if(_temp == old_bitmap) {
-      header_->bitmaps_[i] = new_bitmap;
+  for (auto& bitmap : continuous_space_bitmaps_) {
+    if (bitmap == old_bitmap) {
+      bitmap = new_bitmap;
       return;
     }
   }
-  LOG(FATAL)  << "SharedHeapBitmap::ReplaceBitmap...bitmap "
-              << static_cast<const void*>(old_bitmap) << " not found";
+  LOG(FATAL) << "HeapBitmap::ReplaceBitmap; bitmap "
+             << static_cast<const void*>(old_bitmap) << " not found";
+
+//
+//  BaseBitmap* _temp = NULL;
+//  for(int i = 0; i < header_->index_; i ++) {
+//    _temp = header_->bitmaps_[i];
+//    if(_temp == old_bitmap) {
+//      header_->bitmaps_[i] = new_bitmap;
+//      return;
+//    }
+//  }
+//  LOG(FATAL)  << "SharedHeapBitmap::ReplaceBitmap...bitmap "
+//              << static_cast<const void*>(old_bitmap) << " not found";
 }
 
 
