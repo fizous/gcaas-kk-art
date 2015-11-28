@@ -332,15 +332,16 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
   const mirror::Object* popped_oject = NULL;
-  for (;;) {
-    if (mark_stack_->IsEmpty()) {
-      break;
+  if(false) {
+    for (;;) {
+      if (mark_stack_->IsEmpty()) {
+        break;
+      }
+      popped_oject = mark_stack_->PopBack();
+      ServerScanObject(popped_oject, 0);
     }
-    popped_oject = mark_stack_->PopBack();
-    ServerScanObject(popped_oject, 0);
   }
 
-  if(false) {
     mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
   }
 
