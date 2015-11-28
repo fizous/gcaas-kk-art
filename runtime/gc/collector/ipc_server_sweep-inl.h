@@ -470,7 +470,7 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(
                                                       ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != NULL /*&& !IsMarked(referent)*/) {//TODO: Implement ismarked
+  if (mapped_referent != NULL && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
     bool is_enqueued_object = IsMappedReferentEnqueued(reference);
@@ -771,6 +771,57 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
   if (IsMappedObjectImmuned(object)) {
     return true;
   }
+  const byte* casted_param = reinterpret_cast<const byte*>(object);
+  int matching_index = -1;
+  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param <  GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      matching_index = i;
+    }
+  }
+
+  if(matching_index == -1) {
+    LOG(FATAL) << "TestMappedBitmap..." << object;
+    return false;
+  }
+
+
+  accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
+  if(matching_index == KGCSpaceServerZygoteInd_) {
+    for (const auto& beetmap : mark_bitmaps_) {
+      if(beetmap == current_mark_bitmap_)
+        continue;
+      obj_beetmap = beetmap;
+    }
+  } else if (matching_index == KGCSpaceServerImageInd_) {
+    LOG(ERROR) << "$$$$$$$ Object marked comes from ImageSpace $$$$$$$$$$";
+    LOG(FATAL) << " marked object = " << object;
+  }
+  bool _resultHasAddress = obj_beetmap->HasAddress(object);
+  bool _resultTestFlag = obj_beetmap->Test(object);
+  if(!(_resultHasAddress && _resultHasAddress)) {
+    LOG(ERROR) << "Failed = " << passed_bitmap_tests_ <<
+        ", marching index = " << matching_index <<
+        ", Object does not belong to bitmap.." << object <<
+        ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
+        ", bitmap_size = " << current_mark_bitmap_->Size() <<
+        ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
+        ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
+        ", kBitsPerWord = " << kBitsPerWord <<
+        ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
+        ", (HasAddress): " << _resultHasAddress;
+    LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+  } else {
+    passed_bitmap_tests_ += 1;
+  }
+
+
+
+  marked_spaces_count_prof_[matching_index] += 1;
+
+
+  return true;
+
 
 //  if (current_mark_bitmap_->HasAddress(object)) {
 //    return current_mark_bitmap_->Test(object);

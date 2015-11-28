@@ -173,6 +173,7 @@ accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
 
 
 
+
 bool IPCServerMarkerSweep::TestMappedBitmap(
                                     const mirror::Object* mapped_object) {
   if(mapped_object == NULL)
