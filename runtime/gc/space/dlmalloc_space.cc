@@ -437,7 +437,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
       //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
       accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
       accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
-      if(_mark_bitmap_->IsStructuredBitmap()) {
+      if(_live_bitmap_->IsStructuredBitmap()) {
         accounting::SharedSpaceBitmap* _live_bmap_ =
                       reinterpret_cast<accounting::SharedSpaceBitmap*>(_live_bitmap_);
 
@@ -447,6 +447,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
             &(_struct_alloc_space->heap_meta_.reshared_zygote_.live_bitmap_));
 
         free(_backup);
+
+
       }
 
 
@@ -457,7 +459,6 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
         accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
         _mark_bmap_->ShareBitmapMemory(
             &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_));
-        free(_backup);
 
 
 //        AShmemMap* _ashmem_p = &(_mark_bmap_->bitmap_data_->mem_map_);

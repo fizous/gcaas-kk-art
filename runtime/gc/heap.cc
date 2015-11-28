@@ -1316,6 +1316,16 @@ void Heap::PreZygoteForkNoSpaceFork() {
 
 }
 
+
+void Heap::FixHeapBitmapEntries() {
+  accounting::SharedHeapBitmap* mark_bitmap =
+      (accounting::SharedHeapBitmap*) GetMarkBitmap();
+  accounting::SharedHeapBitmap* live_bitmap =
+      (accounting::SharedHeapBitmap*) GetLiveBitmap();
+  mark_bitmap->FixDataEntries();
+  live_bitmap->FixDataEntries();
+
+}
 void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   Thread* self = Thread::Current();
@@ -1377,7 +1387,9 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
             default_mark_stack_size));
         alloc_space_ = zygote_space->CreateSharableZygoteSpace("alloc space",
             _struct_alloc_space, shared_space);
+
         alloc_space_->SetHeapMeta(zygote_space, GetImageSpace()->cont_space_data_);
+        FixHeapBitmapEntries();
       }
 
 

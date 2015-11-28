@@ -183,16 +183,29 @@ void SharedHeapBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
 //  }
 }
 
-void SharedHeapBitmap::FixDataEntries(GCSrvceBitmap* old_entry,
-    GCSrvceBitmap* new_entry) {
-  if(new_entry == old_entry)
-    return;
-  for(int i = 0; i < header_->index_; i ++) {
-    if(old_entry == header_->bitmap_headers_[i]) {
-      header_->bitmap_headers_[i] = new_entry;
-      break;
-    }
+void SharedHeapBitmap::FixDataEntries() {
+
+
+  for(int i = 0; i < HEAP_BITMAPS_ARR_CAPACITY; i++) {
+    header_->bitmap_headers_[i] = NULL;
   }
+  header_->index_ = 0;
+  for (auto& bitmap : continuous_space_bitmaps_) {
+    if(!bitmap->IsStructuredBitmap())
+      continue;
+    SharedSpaceBitmap* beetmap = (SharedSpaceBitmap*)bitmap;
+    header_->bitmap_headers_[header_->index_++] = beetmap->bitmap_data_;
+  }
+
+
+//  if(new_entry == old_entry)
+//    return;
+//  for(int i = 0; i < header_->index_; i ++) {
+//    if(old_entry == header_->bitmap_headers_[i]) {
+//      header_->bitmap_headers_[i] = new_entry;
+//      break;
+//    }
+//  }
 }
 
 
@@ -200,11 +213,11 @@ void SharedHeapBitmap::ReplaceBitmap(BaseBitmap* old_bitmap,
     BaseBitmap* new_bitmap) {
   for (auto& bitmap : continuous_space_bitmaps_) {
     if (bitmap == old_bitmap) {
-      SharedSpaceBitmap* casted_old_beetmap = (SharedSpaceBitmap*)old_bitmap;
-      SharedSpaceBitmap* casted_new_beetmap = (SharedSpaceBitmap*)new_bitmap;
-      FixDataEntries(casted_old_beetmap->bitmap_data_,
-          casted_new_beetmap->bitmap_data_);
+//      SharedSpaceBitmap* casted_old_beetmap = (SharedSpaceBitmap*)old_bitmap;
+//      SharedSpaceBitmap* casted_new_beetmap = (SharedSpaceBitmap*)new_bitmap;
       bitmap = new_bitmap;
+      FixDataEntries();
+
       return;
     }
   }

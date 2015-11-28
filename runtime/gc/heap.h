@@ -449,7 +449,7 @@ class Heap {
 
 
   void PostZygoteForkWithSpaceFork(bool);
-
+  void FixHeapBitmapEntries()EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
