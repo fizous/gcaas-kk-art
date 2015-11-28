@@ -330,8 +330,20 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   uint32_t calculated_offset = offset_ / (sizeof(mirror::Object*));
   LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
 
-  mark_stack_->OperateOnStack(ExternalScanObjectVisit,
-      this);
+
+  const mirror::Object* popped_oject = NULL;
+  for (;;) {
+    if (mark_stack_->IsEmpty()) {
+      break;
+    }
+    popped_oject = mark_stack_->PopBack();
+    ServerScanObject(obj);
+  }
+
+  if(false) {
+    mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
+  }
+
 
 
   UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,

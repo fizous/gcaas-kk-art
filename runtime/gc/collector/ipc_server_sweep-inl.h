@@ -417,10 +417,6 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
 
 inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
   if (obj != NULL) {
-//    if(BelongsToOldHeap(obj)) {
-//      LOG(ERROR) << "XXX ERROR - BelongsToOldHeap";//  << static_cast<void*>(obj);
-//    }
-
     MarkObjectNonNull(obj);
   }
 }
@@ -520,7 +516,8 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
   }
 
-  TestMappedBitmap(mapped_object);
+  if(false)
+    TestMappedBitmap(mapped_object);
 
   if(!IsMappedObjectMarked(mapped_object)) {
     LOG(ERROR) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
@@ -840,31 +837,31 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
     return;
   }
 
-//  // Try to take advantage of locality of references within a space, failing this find the space
-//  // the hard way.
-//  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
-//  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-//    accounting::BaseBitmap* new_bitmap =
-//        heap_->GetMarkBitmap()->GetContinuousSpaceBitmap(obj);
-//    if (LIKELY(new_bitmap != NULL)) {
-//      object_bitmap = new_bitmap;
-//    } else {
-//      MarkLargeObject(obj, true);
-//      return;
-//    }
-//  }
-//
-//  // This object was not previously marked.
-//  if (!object_bitmap->Test(obj)) {
-//    object_bitmap->Set(obj);
-//    if (UNLIKELY(mark_stack_->Size() >= mark_stack_->Capacity())) {
-//      // Lock is not needed but is here anyways to please annotalysis.
-//      MutexLock mu(Thread::Current(), mark_stack_lock_);
-//      ExpandMarkStack();
-//    }
-//    // The object must be pushed on to the mark stack.
-//    mark_stack_->PushBack(const_cast<mirror::Object*>(obj));
-//  }
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  bool _found = true;
+  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    _found = false;
+    for (const auto& beetmap : mark_bitmaps_) {
+      if(beetmap == current_mark_bitmap_)
+        continue;
+      if(beetmap->HasAddress(obj)) {
+        object_bitmap = beetmap;
+        _found = true;
+        break;
+      }
+    }
+  }
+  if(!_found) {
+    LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
+  }
+  // This object was not previously marked.
+  if(!object_bitmap->Test(obj)) {
+    object_bitmap->Set(obj);
+    //TODO:: check the need to resize the mark stack here
+    mark_stack_->PushBack(const_cast<mirror::Object*>(obj));
+  }
 }
 //
 //template <class TypeRef>
