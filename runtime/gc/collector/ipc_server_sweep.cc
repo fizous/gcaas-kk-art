@@ -342,7 +342,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
     }
   }
 
-    mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
+  mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
 
 
 

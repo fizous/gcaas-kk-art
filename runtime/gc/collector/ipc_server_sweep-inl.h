@@ -840,7 +840,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   // Try to take advantage of locality of references within a space, failing this find the space
   // the hard way.
   bool _found = true;
-  accounting::BaseBitmap* object_bitmap = current_mark_bitmap_;
+  accounting::SharedServerSpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
     _found = false;
     for (const auto& beetmap : mark_bitmaps_) {
