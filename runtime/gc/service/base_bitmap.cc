@@ -377,11 +377,11 @@ void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
       MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
 
 
-      accounting::SharedHeapBitmap* _markHeapBitmap =
-          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetMarkBitmap();
+//      accounting::SharedHeapBitmap* _markHeapBitmap =
+//          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetMarkBitmap();
 //      _markHeapBitmap->FixDataEntries(_mark_bmap_->bitmap_data_, new_mem_address);
-      accounting::SharedHeapBitmap* _liveHeapBitmap =
-          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetLiveBitmap();
+//      accounting::SharedHeapBitmap* _liveHeapBitmap =
+//          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetLiveBitmap();
 //      _liveHeapBitmap->FixDataEntries(_mark_bmap_->bitmap_data_, new_mem_address);
       _mark_bmap_->bitmap_data_ = new_mem_address;
 
