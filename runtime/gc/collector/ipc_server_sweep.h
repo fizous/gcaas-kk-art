@@ -43,8 +43,9 @@ class IPCServerMarkerSweep {
 
   static const int KGCSpaceServerMarkStackInd_      = 2;
   static const int KGCSpaceServerMarkBitmapInd_     = 3;
-  static const int KGCSpaceServerZygoteMarkBMInd_   = 4;
-  static const int KGCSpaceServerZygoteLiveBMInd_   = 5;
+  static const int KGCSpaceServerLiveBitmapInd_     = 4;
+  static const int KGCSpaceServerZygoteMarkBMInd_   = 5;
+  static const int KGCSpaceServerZygoteLiveBMInd_   = 6;
 
   static int passed_bitmap_tests_;
 
