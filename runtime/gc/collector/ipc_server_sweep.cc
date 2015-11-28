@@ -469,6 +469,12 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
               KGCSpaceServerZygoteMarkBMInd_,
             &(heap_meta_->reshared_zygote_.mark_bitmap_));
       mark_bitmaps_.push_back(_temp_mark_bitmap);
+
+      _temp_mark_bitmap =
+          GetMappedBitmap(client_rec_->pair_mapps_,
+              KGCSpaceServerZygoteLiveBMInd_,
+            &(heap_meta_->reshared_zygote_.live_bitmap_));
+      live_bitmaps_.push_back(_temp_mark_bitmap);
     }
 
     LOG(ERROR) << "Pushed the mark_bitmaps in to the stack.." <<

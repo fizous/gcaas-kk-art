@@ -842,6 +842,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   bool _found = true;
   accounting::SharedServerSpaceBitmap* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    return;
     _found = false;
     for (const auto& beetmap : mark_bitmaps_) {
       if(beetmap == current_mark_bitmap_)
@@ -857,7 +858,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
     LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
   }
 
-  if(false) {
+  if(true) {
     // This object was not previously marked.
     if(!object_bitmap->Test(obj)) {
       object_bitmap->Set(obj);

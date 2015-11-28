@@ -41,9 +41,10 @@ class IPCServerMarkerSweep {
   static const int KGCSpaceServerAllocInd_    = 2;
 
 
-  static const int KGCSpaceServerMarkStackInd_    = 2;
-  static const int KGCSpaceServerMarkBitmapInd_   = 3;
+  static const int KGCSpaceServerMarkStackInd_      = 2;
+  static const int KGCSpaceServerMarkBitmapInd_     = 3;
   static const int KGCSpaceServerZygoteMarkBMInd_   = 4;
+  static const int KGCSpaceServerZygoteLiveBMInd_   = 5;
 
   static int passed_bitmap_tests_;
 
@@ -62,6 +63,7 @@ class IPCServerMarkerSweep {
   accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
 
   std::vector<accounting::SharedServerSpaceBitmap*> mark_bitmaps_;
+  std::vector<accounting::SharedServerSpaceBitmap*> live_bitmaps_;
 
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
