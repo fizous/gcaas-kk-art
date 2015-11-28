@@ -1048,11 +1048,12 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
-  LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
-  LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
@@ -1063,6 +1064,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  ipc_heap_->local_heap_->DumpSpaces();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   if(server_synchronize_ == 1) {
     RequestAppSuspension();
