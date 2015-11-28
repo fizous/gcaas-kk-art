@@ -106,7 +106,8 @@ class SharedHeapBitmap : public BaseHeapBitmap {
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   void ReplaceBitmap(SPACE_BITMAP* old_bitmap, SPACE_BITMAP* new_bitmap)
         EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
+  void FixDataEntries(GCSrvceBitmap* old_entry,
+      GCSrvceBitmap* new_entry);
 //  SPACE_BITMAP* GetContinuousSpaceBitmap(const mirror::Object* obj) {
 //    SPACE_BITMAP* _bitmap = NULL;
 //    for(int i = 0; i < header_->index_; i ++) {

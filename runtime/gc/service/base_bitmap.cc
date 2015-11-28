@@ -375,7 +375,17 @@ void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
                             SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
       AShmemMap* _new_ashmem_p = &(new_mem_address->mem_map_);
       MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
+
+
+      accounting::SharedHeapBitmap* _markHeapBitmap =
+          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetMarkBitmap();
+      _markHeapBitmap->FixDataEntries(_mark_bmap_->bitmap_data_, new_mem_address);
+      accounting::SharedHeapBitmap* _liveHeapBitmap =
+          (accounting::SharedHeapBitmap*)Runtime::Current()->GetHeap()->GetLiveBitmap();
+      _markHeapBitmap->FixDataEntries(_mark_bmap_->bitmap_data_, new_mem_address);
       _mark_bmap_->bitmap_data_ = new_mem_address;
+
+
       LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
           ", begin:" <<
             reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
