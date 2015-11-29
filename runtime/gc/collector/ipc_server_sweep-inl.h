@@ -516,7 +516,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
   }
 
-  if(true)
+  if(false)
     TestMappedBitmap(mapped_object);
 
   if(!IsMappedObjectMarked(mapped_object)) {
@@ -765,7 +765,6 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
 
 inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
                                            const mirror::Object* object)  {
-  return true;
   if (IsMappedObjectImmuned(object)) {
     return true;
   }
@@ -785,7 +784,7 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
 
   marked_spaces_count_prof_[matching_index] += 1;
   accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
-
+  bool _resultTestFlag = false;
   bool _resultHasAddress = obj_beetmap->HasAddress(object);
   if(!_resultHasAddress) {
     if(!_resultHasAddress) {
@@ -799,24 +798,33 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
     }
   }
 
-  bool _resultTestFlag = obj_beetmap->Test(object);
-  if(!(_resultHasAddress && _resultTestFlag)) {
-    LOG(ERROR) << "Failed = " << passed_bitmap_tests_ <<
-        ", marching index = " << matching_index <<
-        ", Object does not belong to bitmap.." << object <<
-        ", bitmap_begin = " << obj_beetmap->Begin() <<
-        ", bitmap_size = " << obj_beetmap->Size() <<
-        ", bitmap_heap_size = " << obj_beetmap->HeapSize() <<
-        ", heap_begin = " << obj_beetmap->HeapBegin() <<
-        ", kBitsPerWord = " << kBitsPerWord <<
-        ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
-        ", (HasAddress): " << _resultHasAddress;
-    LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+
+  if(_resultHasAddress) {
+    _resultTestFlag = obj_beetmap->Test(object);
+    if(_resultTestFlag)
+      passed_bitmap_tests_ += 1;
   }
 
-
-  return true;
+  return (_resultHasAddress && _resultTestFlag);
 }
+//  bool _resultTestFlag = obj_beetmap->Test(object);
+//  if(!(_resultHasAddress && _resultTestFlag)) {
+//    LOG(ERROR) << "Failed = " << passed_bitmap_tests_ <<
+//        ", marching index = " << matching_index <<
+//        ", Object does not belong to bitmap.." << object <<
+//        ", bitmap_begin = " << obj_beetmap->Begin() <<
+//        ", bitmap_size = " << obj_beetmap->Size() <<
+//        ", bitmap_heap_size = " << obj_beetmap->HeapSize() <<
+//        ", heap_begin = " << obj_beetmap->HeapBegin() <<
+//        ", kBitsPerWord = " << kBitsPerWord <<
+//        ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
+//        ", (HasAddress): " << _resultHasAddress;
+//    LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+//  }
+//
+//
+//  return true;
+//}
 
 inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   DCHECK(obj != NULL);
