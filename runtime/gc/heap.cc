@@ -851,6 +851,13 @@ void Heap::DumpSpaces() {
     LOG(INFO) << space << " " << *space << "\n"
               << live_bitmap << " " << *live_bitmap << "\n"
               << mark_bitmap << " " << *mark_bitmap;
+    if(mark_bitmap->IsStructuredBitmap()) {
+      accounting::SharedSpaceBitmap* shared_spc_beets =
+          (accounting::SharedSpaceBitmap*)mark_bitmap;
+      LOG(INFO) << "mark_bitmap_address = " << shared_spc_beets->bitmap_data_;
+      shared_spc_beets = (accounting::SharedSpaceBitmap*)live_bitmap;
+      LOG(INFO) << "live_bitmap_address = " << shared_spc_beets->bitmap_data_;
+    }
   }
   for (const auto& space : discontinuous_spaces_) {
     LOG(INFO) << space << " " << *space << "\n";
