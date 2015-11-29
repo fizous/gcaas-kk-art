@@ -1056,7 +1056,8 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
-  LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_;
+  LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
+      ", stack_size = " << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
 }
