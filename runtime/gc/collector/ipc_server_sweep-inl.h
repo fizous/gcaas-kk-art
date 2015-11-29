@@ -516,7 +516,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
       LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
   }
 
-  if(false)
+  if(true)
     TestMappedBitmap(mapped_object);
 
   if(!IsMappedObjectMarked(mapped_object)) {
