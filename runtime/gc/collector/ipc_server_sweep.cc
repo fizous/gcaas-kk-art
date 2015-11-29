@@ -192,8 +192,6 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
   }
 
 
-
-
   if(matching_index < 0) {
     LOG(FATAL) << "XXXX IPCServerMarkerSweep::TestMappedBitmap XXX " <<
                 mapped_object;
@@ -205,6 +203,7 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
 
   accounting::SharedServerSpaceBitmap* _object_beetmap = current_mark_bitmap_;
   bool _resultHasAddress = _object_beetmap->HasAddress(mapped_object);
+  bool _resultTestFlag = false;
   if(!_resultHasAddress) {
     for (const auto& beetmap : mark_bitmaps_) {
       _resultHasAddress = beetmap->HasAddress(mapped_object);
@@ -214,9 +213,12 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
       }
     }
   }
+  if(_resultHasAddress) {
+    _resultTestFlag = _object_beetmap->Test(mapped_object);
+  }
 
-  if(!_resultHasAddress) {
-    LOG(ERROR) << "failed[1] = " << passed_bitmap_tests_ << ", data_struct: " <<
+  if(!(_resultHasAddress && _resultTestFlag)) {
+    LOG(ERROR) << "failed = " << passed_bitmap_tests_ << ", data_struct: " <<
         _object_beetmap->bitmap_data_ <<
         ", Object does not belong to bitmap.." << mapped_object <<
         ", bitmap_begin = " << _object_beetmap->Begin() <<
@@ -224,92 +226,13 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
         ", bitmap_heap_size = " << _object_beetmap->HeapSize() <<
         ", heap_begin = " << _object_beetmap->HeapBegin() <<
         ", kBitsPerWord = " << kBitsPerWord <<
-        ", (test): " << _resultHasAddress << ", _resultHasAddress: " <<
+        ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
         ", (HasAddress): " << _resultHasAddress;
+    LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
     return false;
-  } else {
-    bool _resultTestFlag = _object_beetmap->Test(mapped_object);
-    if(!(_resultTestFlag)) {
-      LOG(ERROR) << "failed[2] = " << passed_bitmap_tests_ << ", data_struct: " <<
-          _object_beetmap->bitmap_data_ <<
-          ", Object does not belong to bitmap.." << mapped_object <<
-          ", bitmap_begin = " << _object_beetmap->Begin() <<
-          ", bitmap_size = " << _object_beetmap->Size() <<
-          ", bitmap_heap_size = " << _object_beetmap->HeapSize() <<
-          ", heap_begin = " << _object_beetmap->HeapBegin() <<
-          ", kBitsPerWord = " << kBitsPerWord <<
-          ", (test): " << _resultHasAddress << ", _resultHasAddress: " <<
-          ", (HasAddress): " << _resultHasAddress;
-      return false;
-    }
   }
 
-
-  if(false) {
-    bool _resultTestFlag = _object_beetmap->Test(mapped_object);
-
-    if(!(_resultHasAddress && _resultTestFlag)) {
-      LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
-          ", Object does not belong to bitmap.." << mapped_object <<
-          ", bitmap_begin = " << _object_beetmap->Begin() <<
-          ", bitmap_size = " << _object_beetmap->Size() <<
-          ", bitmap_heap_size = " << _object_beetmap->HeapSize() <<
-          ", heap_begin = " << _object_beetmap->HeapBegin() <<
-          ", kBitsPerWord = " << kBitsPerWord <<
-          ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
-          ", (HasAddress): " << _resultHasAddress;
-      LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
-    }
-  }
   passed_bitmap_tests_ += 1;
-
-//  if(matching_index == KGCSpaceServerAllocInd_) {
-//    bool _resultHasAddress = current_mark_bitmap_->HasAddress(mapped_object);
-//    bool _resultTestFlag = current_mark_bitmap_->Test(mapped_object);
-//    if(!(_resultHasAddress && _resultHasAddress)) {
-//      LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
-//          ", Object does not belong to bitmap.." << mapped_object <<
-//          ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
-//          ", bitmap_size = " << current_mark_bitmap_->Size() <<
-//          ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
-//          ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
-//          ", kBitsPerWord = " << kBitsPerWord <<
-//          ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
-//          ", (HasAddress): " << _resultHasAddress;
-//      LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
-//    } else {
-//      passed_bitmap_tests_ += 1;
-//    }
-//  } else if (matching_index == KGCSpaceServerZygoteInd_) {
-//    for (const auto& beetmap : mark_bitmaps_) {
-//      if(beetmap == current_mark_bitmap_)
-//        continue;
-//      bool _resultHasAddress = beetmap->HasAddress(mapped_object);
-//      bool _resultTestFlag = beetmap->Test(mapped_object);
-//      if(!(_resultHasAddress && _resultHasAddress)) {
-//        LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
-//            ", Object does not belong to bitmap zygote.." << mapped_object <<
-//            ", bitmap_begin = " << beetmap->Begin() <<
-//            ", bitmap_size = " << beetmap->Size() <<
-//            ", bitmap_heap_size = " << beetmap->HeapSize() <<
-//            ", heap_begin = " << beetmap->HeapBegin() <<
-//            ", kBitsPerWord = " << kBitsPerWord <<
-//            ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
-//            ", (HasAddress): " << _resultHasAddress;
-//        LOG(FATAL) << "[2]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
-//      } else {
-//        passed_bitmap_tests_ += 1;
-//      }
-//    }
-//  }
-//  if(matching_index == -1) {
-//    LOG(FATAL) << "TestMappedBitmap..." << mapped_object;
-//    return false;
-//  }
-//
-//  marked_spaces_count_prof_[matching_index] += 1;
-
-
   return true;
 }
 
