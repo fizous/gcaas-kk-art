@@ -194,9 +194,10 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
 
 
 
-  if(matching_index == -1) {
+  if(matching_index < 0) {
     LOG(FATAL) << "XXXX IPCServerMarkerSweep::TestMappedBitmap XXX " <<
                 mapped_object;
+    return false;
   }
   marked_spaces_count_prof_[matching_index] += 1;
   if(matching_index <= KGCSpaceServerZygoteInd_)
