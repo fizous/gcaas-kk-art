@@ -200,11 +200,21 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
     return false;
   }
   marked_spaces_count_prof_[matching_index] += 1;
-  if(matching_index <= KGCSpaceServerZygoteInd_)
+  if(matching_index == KGCSpaceServerImageInd_)
     return true;
 
   accounting::SharedServerSpaceBitmap* _object_beetmap = current_mark_bitmap_;
   bool _resultHasAddress = _object_beetmap->HasAddress(mapped_object);
+  if(!_resultHasAddress) {
+    for (const auto& beetmap : mark_bitmaps_) {
+      _resultHasAddress = beetmap->HasAddress(mapped_object);
+      if(_resultHasAddress) {
+        _object_beetmap = beetmap;
+        break;
+      }
+    }
+  }
+
   bool _resultTestFlag = _object_beetmap->Test(mapped_object);
 
   if(!(_resultHasAddress && _resultHasAddress)) {
