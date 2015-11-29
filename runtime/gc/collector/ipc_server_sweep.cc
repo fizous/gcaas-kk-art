@@ -217,7 +217,7 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
 
   bool _resultTestFlag = _object_beetmap->Test(mapped_object);
 
-  if(!(_resultHasAddress && _resultHasAddress)) {
+  if(!(_resultHasAddress && _resultTestFlag)) {
     LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
         ", Object does not belong to bitmap.." << mapped_object <<
         ", bitmap_begin = " << _object_beetmap->Begin() <<
