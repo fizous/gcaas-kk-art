@@ -520,7 +520,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     TestMappedBitmap(mapped_object);
 
   if(!IsMappedObjectMarked(mapped_object)) {
-    LOG(ERROR) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
+    LOG(FATAL) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
         " XXXXX ~~~~~~~~~~~~~~ ";
   }
 
@@ -843,8 +843,6 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
     _found = false;
     for (const auto& beetmap : mark_bitmaps_) {
-      if(beetmap == current_mark_bitmap_)
-        continue;
       if(beetmap->HasAddress(obj)) {
         object_bitmap = beetmap;
         _found = true;
@@ -856,7 +854,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
     LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
   }
 
-  if(false) {
+  if(true) {
     // This object was not previously marked.
     if(!object_bitmap->Test(obj)) {
       object_bitmap->Set(obj);
