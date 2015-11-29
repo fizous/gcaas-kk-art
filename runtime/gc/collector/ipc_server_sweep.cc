@@ -215,19 +215,21 @@ bool IPCServerMarkerSweep::TestMappedBitmap(
     }
   }
 
-  bool _resultTestFlag = _object_beetmap->Test(mapped_object);
+  if(false) {
+    bool _resultTestFlag = _object_beetmap->Test(mapped_object);
 
-  if(!(_resultHasAddress && _resultTestFlag)) {
-    LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
-        ", Object does not belong to bitmap.." << mapped_object <<
-        ", bitmap_begin = " << _object_beetmap->Begin() <<
-        ", bitmap_size = " << _object_beetmap->Size() <<
-        ", bitmap_heap_size = " << _object_beetmap->HeapSize() <<
-        ", heap_begin = " << _object_beetmap->HeapBegin() <<
-        ", kBitsPerWord = " << kBitsPerWord <<
-        ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
-        ", (HasAddress): " << _resultHasAddress;
-    LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+    if(!(_resultHasAddress && _resultTestFlag)) {
+      LOG(ERROR) << "success = " << passed_bitmap_tests_ <<
+          ", Object does not belong to bitmap.." << mapped_object <<
+          ", bitmap_begin = " << _object_beetmap->Begin() <<
+          ", bitmap_size = " << _object_beetmap->Size() <<
+          ", bitmap_heap_size = " << _object_beetmap->HeapSize() <<
+          ", heap_begin = " << _object_beetmap->HeapBegin() <<
+          ", kBitsPerWord = " << kBitsPerWord <<
+          ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
+          ", (HasAddress): " << _resultHasAddress;
+      LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+    }
   }
   passed_bitmap_tests_ += 1;
 
