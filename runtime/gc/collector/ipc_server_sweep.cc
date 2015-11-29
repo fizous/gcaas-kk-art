@@ -56,7 +56,8 @@ class ServerMarkObjectVisitor {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
-    mark_sweep_->MarkObject(ref);
+    if(false)
+      mark_sweep_->MarkObject(ref);
   }
 
  private:
@@ -475,6 +476,20 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
       }
     }
   }
+
+  LOG(ERROR) << " ####### marks_size = " << mark_bitmaps_.size() <<
+      " lives_size = " <<  live_bitmaps_.size() << " ####### ";
+  for (const auto& beetmap : live_bitmaps_) {
+    LOG(ERROR) << " live: " << beetmap->bitmap_data_ << ", " <<
+        beetmap->bitmap_data_->name_;
+  }
+  for (const auto& beetmap : mark_bitmaps_) {
+    LOG(ERROR) << " mark: " << beetmap->bitmap_data_ << ", " <<
+        beetmap->bitmap_data_->name_;
+  }
+
+
+
 }
 
 
