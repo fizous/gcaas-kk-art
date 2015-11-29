@@ -765,7 +765,6 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
 
 inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
                                            const mirror::Object* object)  {
-  return true;
   if (IsMappedObjectImmuned(object)) {
     return true;
   }
@@ -783,48 +782,38 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
     return false;
   }
 
-
+  marked_spaces_count_prof_[matching_index] += 1;
   accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
-  if(matching_index == KGCSpaceServerZygoteInd_) {
-    for (const auto& beetmap : mark_bitmaps_) {
-      if(beetmap == current_mark_bitmap_)
-        continue;
-      obj_beetmap = beetmap;
-    }
-  } else if (matching_index == KGCSpaceServerImageInd_) {
-    LOG(ERROR) << "$$$$$$$ Object marked comes from ImageSpace $$$$$$$$$$";
-    LOG(FATAL) << " marked object = " << object;
-  }
+
   bool _resultHasAddress = obj_beetmap->HasAddress(object);
+  if(!_resultHasAddress) {
+    if(!_resultHasAddress) {
+      for (const auto& beetmap : mark_bitmaps_) {
+        _resultHasAddress = beetmap->HasAddress(object);
+        if(_resultHasAddress) {
+          obj_beetmap = beetmap;
+          break;
+        }
+      }
+    }
+  }
+
   bool _resultTestFlag = obj_beetmap->Test(object);
-  if(!(_resultHasAddress && _resultHasAddress)) {
+  if(!(_resultHasAddress && _resultTestFlag)) {
     LOG(ERROR) << "Failed = " << passed_bitmap_tests_ <<
         ", marching index = " << matching_index <<
         ", Object does not belong to bitmap.." << object <<
-        ", bitmap_begin = " << current_mark_bitmap_->Begin() <<
-        ", bitmap_size = " << current_mark_bitmap_->Size() <<
-        ", bitmap_heap_size = " << current_mark_bitmap_->HeapSize() <<
-        ", heap_begin = " << current_mark_bitmap_->HeapBegin() <<
+        ", bitmap_begin = " << obj_beetmap->Begin() <<
+        ", bitmap_size = " << obj_beetmap->Size() <<
+        ", bitmap_heap_size = " << obj_beetmap->HeapSize() <<
+        ", heap_begin = " << obj_beetmap->HeapBegin() <<
         ", kBitsPerWord = " << kBitsPerWord <<
         ", (test): " << _resultTestFlag << ", _resultHasAddress: " <<
         ", (HasAddress): " << _resultHasAddress;
     LOG(FATAL) << "[1]&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
-  } else {
-    passed_bitmap_tests_ += 1;
   }
 
 
-
-  marked_spaces_count_prof_[matching_index] += 1;
-
-
-  return true;
-
-
-//  if (current_mark_bitmap_->HasAddress(object)) {
-//    return current_mark_bitmap_->Test(object);
-//  }
-  //todo handle the case when we need to share heapbitmap
   return true;
 }
 
