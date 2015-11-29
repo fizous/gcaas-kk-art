@@ -863,6 +863,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
       if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
         LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
       }
+      pushed_back_to_stack_++;
 //      LOG(ERROR) << "MarkObjectNonNull..object stack: " << oject_pushed;
       mark_stack_->PushBack(const_cast<mirror::Object*>(oject_pushed));
     } else {

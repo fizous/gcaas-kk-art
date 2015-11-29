@@ -48,6 +48,7 @@ class IPCServerMarkerSweep {
   static const int KGCSpaceServerZygoteLiveBMInd_   = 6;
 
   static int passed_bitmap_tests_;
+  static int pushed_back_to_stack_;
 
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;

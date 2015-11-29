@@ -43,6 +43,7 @@ namespace collector {
 
 
 int IPCServerMarkerSweep::passed_bitmap_tests_ = 0;
+int IPCServerMarkerSweep::pushed_back_to_stack_ = 0;
 class ServerMarkObjectVisitor {
  public:
   explicit ServerMarkObjectVisitor(IPCServerMarkerSweep* const server_mark_sweep)
@@ -354,6 +355,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       ", other_count = " << cashed_stats_client_.other_count_ <<
       ", reference_count = " << cashed_stats_client_.reference_count_ <<
       ", success_bitmaps = " << passed_bitmap_tests_ <<
+      "\n pushed_back_to_stack = " << pushed_back_to_stack_ <<
       "\n marked_bitmap_cnt: " <<
       StringPrintf("[%d] : %d \n[%d] : %d\n[%d] : %d",
           KGCSpaceServerImageInd_, marked_spaces_count_prof_[KGCSpaceServerImageInd_],
