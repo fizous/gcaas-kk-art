@@ -233,6 +233,7 @@ class IPCServerMarkerSweep {
   byte* GetServerSpaceEnd(int index) const;
   byte* GetServerSpaceBegin(int index) const;
 
+  void UpdateCurrentMarkBitmap(void);
   bool InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
   // Returns true if an object is inside of the immune region (assumed to be marked).
   bool IsMappedObjectImmuned(const mirror::Object* obj) const {

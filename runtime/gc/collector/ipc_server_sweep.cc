@@ -448,62 +448,122 @@ void IPCServerMarkerSweep::SetCachedReferencesPointers(
 
 }
 
-bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
-  curr_collector_ptr_ = collector_addr;
+void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
+  mark_bitmaps_.clear();
+  live_bitmaps_.clear();
+  accounting::GCSrvceSharedHeapBitmap* live_heap_beetmap =
+                                          &(heap_meta_->live_heap_bitmap_data_);
+  for(int i = 0; i < live_heap_beetmap->index_; i++) {
+    for (const auto& beetmap : all_bitmaps_) {
+      if(beetmap->bitmap_data_ == live_heap_beetmap->bitmap_headers_[i]) {
+        live_bitmaps_.push_back(beetmap);
+        break;
+      }
+    }
+  }
 
-  if(mark_stack_ == NULL)
+  accounting::GCSrvceSharedHeapBitmap* mark_heap_beetmap =
+                                          &(heap_meta_->mark_heap_bitmap_data_);
+  for(int i = 0; i < mark_heap_beetmap->index_; i++) {
+    for (const auto& beetmap : all_bitmaps_) {
+      if(beetmap->bitmap_data_ == mark_heap_beetmap->bitmap_headers_[i]) {
+        mark_bitmaps_.push_back(beetmap);
+        if(curr_collector_ptr_->current_mark_bitmap_ == beetmap->bitmap_data_) {
+          current_mark_bitmap_ = beetmap;
+        }
+        break;
+      }
+    }
+  }
+}
+
+
+bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
+  if(mark_stack_ == NULL) {
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
       &(client_rec_->sharable_space_->heap_meta_.mark_stack_data_));
+  }
 
   if(all_bitmaps_.empty()) {
-    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
-      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
-          GetMappedBitmap(client_rec_->pair_mapps_,
-              KGCSpaceServerZygoteMarkBMInd_,
-            &(heap_meta_->reshared_zygote_.mark_bitmap_));
-      all_bitmaps_.push_back(_temp_mark_bitmap);
+    accounting::SharedServerSpaceBitmap* _temp_beetmap = NULL;
+    _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
+        KGCSpaceServerZygoteMarkBMInd_,
+      &(heap_meta_->reshared_zygote_.mark_bitmap_));
+    all_bitmaps_.push_back(_temp_beetmap);
 
+    _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
+        KGCSpaceServerZygoteLiveBMInd_,
+      &(heap_meta_->reshared_zygote_.live_bitmap_));
+    all_bitmaps_.push_back(_temp_beetmap);
 
-      _temp_mark_bitmap =
-          GetMappedBitmap(client_rec_->pair_mapps_,
-              KGCSpaceServerZygoteLiveBMInd_,
-            &(heap_meta_->reshared_zygote_.live_bitmap_));
-      all_bitmaps_.push_back(_temp_mark_bitmap);
-    }
+    _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
+        KGCSpaceServerMarkBitmapInd_, &(client_rec_->sharable_space_->mark_bitmap_));
+    all_bitmaps_.push_back(_temp_beetmap);
+
+    _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
+        KGCSpaceServerLiveBitmapInd_, &(client_rec_->sharable_space_->live_bitmap_));
+    all_bitmaps_.push_back(_temp_beetmap);
   }
-
-  if(mark_bitmaps_.empty()) {
-    if(current_mark_bitmap_ == NULL) {
-      current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
-          KGCSpaceServerMarkBitmapInd_,
-            (curr_collector_ptr_->current_mark_bitmap_));
-      mark_bitmaps_.push_back(current_mark_bitmap_);
-    }
-    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
-      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
-          GetMappedBitmap(client_rec_->pair_mapps_,
-              KGCSpaceServerZygoteMarkBMInd_,
-            &(heap_meta_->reshared_zygote_.mark_bitmap_));
-      mark_bitmaps_.push_back(_temp_mark_bitmap);
-
-      _temp_mark_bitmap =
-          GetMappedBitmap(client_rec_->pair_mapps_,
-              KGCSpaceServerZygoteLiveBMInd_,
-            &(heap_meta_->reshared_zygote_.live_bitmap_));
-      live_bitmaps_.push_back(_temp_mark_bitmap);
-    }
-
-    LOG(ERROR) << "Pushed the mark_bitmaps in to the stack.." <<
-        mark_bitmaps_.size();
-
-
-  }
-
 
 
   if(mark_stack_->IsEmpty())
     return false;
+
+
+  curr_collector_ptr_ = collector_addr;
+
+
+  UpdateCurrentMarkBitmap();
+
+
+//  if(all_bitmaps_.empty()) {
+//    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+//      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
+//          GetMappedBitmap(client_rec_->pair_mapps_,
+//              KGCSpaceServerZygoteMarkBMInd_,
+//            &(heap_meta_->reshared_zygote_.mark_bitmap_));
+//      all_bitmaps_.push_back(_temp_mark_bitmap);
+//
+//
+//      _temp_mark_bitmap =
+//          GetMappedBitmap(client_rec_->pair_mapps_,
+//              KGCSpaceServerZygoteLiveBMInd_,
+//            &(heap_meta_->reshared_zygote_.live_bitmap_));
+//      all_bitmaps_.push_back(_temp_mark_bitmap);
+//    }
+//  }
+//
+//  if(mark_bitmaps_.empty()) {
+//    if(current_mark_bitmap_ == NULL) {
+//      current_mark_bitmap_ = GetMappedBitmap(client_rec_->pair_mapps_,
+//          KGCSpaceServerMarkBitmapInd_,
+//            (curr_collector_ptr_->current_mark_bitmap_));
+//      mark_bitmaps_.push_back(current_mark_bitmap_);
+//    }
+//    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+//      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
+//          GetMappedBitmap(client_rec_->pair_mapps_,
+//              KGCSpaceServerZygoteMarkBMInd_,
+//            &(heap_meta_->reshared_zygote_.mark_bitmap_));
+//      mark_bitmaps_.push_back(_temp_mark_bitmap);
+//
+//      _temp_mark_bitmap =
+//          GetMappedBitmap(client_rec_->pair_mapps_,
+//              KGCSpaceServerZygoteLiveBMInd_,
+//            &(heap_meta_->reshared_zygote_.live_bitmap_));
+//      live_bitmaps_.push_back(_temp_mark_bitmap);
+//    }
+//
+//    LOG(ERROR) << "Pushed the mark_bitmaps in to the stack.." <<
+//        mark_bitmaps_.size();
+//
+//
+//  }
+
+
+
+
 
   ResetStats();
 
