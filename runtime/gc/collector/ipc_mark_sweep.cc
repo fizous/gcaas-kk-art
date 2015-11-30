@@ -776,8 +776,9 @@ class ClientMarkObjectVisitor {
 template <typename MarkVisitor>
 inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
-  if(obj == NULL)
-    return;
+  if(obj == NULL) {
+    LOG(FATAL) << "XX ELEment cannot be null here IPCMarkSweep::ClientScanObjectVisit";
+  }
 
   bool found = false;
   const byte* casted_obj = reinterpret_cast<const byte*>(obj);
@@ -824,6 +825,8 @@ inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
     }
 
   }
+
+  ipc_heap_->local_heap_->VerifyObjectImpl(obj);
 
 }
 
@@ -1054,7 +1057,7 @@ void IPCMarkSweep::RequestAppSuspension(void) {
 
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
   //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
@@ -1092,7 +1095,7 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
       currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
   timings_.StartSplit("ProcessMarkStack");
   size_t thread_count = GetThreadCount(paused);
-  if (false && kParallelProcessMarkStack && thread_count > 1 &&
+  if (kParallelProcessMarkStack && thread_count > 1 &&
       mark_stack_->Size() >= kMinimumParallelMarkStackSize) {
     ProcessMarkStackParallel(thread_count);
   } else {
