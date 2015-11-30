@@ -489,6 +489,9 @@ void IPCServerMarkerSweep::SetCachedReferencesPointers(
       const_cast<mirror::Class*>(
           MapReferenceToServerChecks<mirror::Class>(src->java_lang_Class_));
 
+
+  LOG(ERROR) << "!!!!! JavaLangClass = " << dest->java_lang_Class_;
+
 }
 
 void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
