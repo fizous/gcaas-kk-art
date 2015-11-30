@@ -130,7 +130,7 @@ class IPCServerMarkerSweep {
       mirror::Object** list);
 
   template <typename MarkVisitor>
-  bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* obj,
+  bool ServerScanObjectVisitRemoval(const mirror::Object* obj,
       const MarkVisitor& visitor);
 
   template <typename MarkVisitor>
