@@ -541,10 +541,11 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
                                                                     visitor);
      return true;
     }
-  }/* else if (UNLIKELY(mapped_class_type == 2)) {
+  } else if (UNLIKELY(mapped_class_type == 2)) {
     cashed_stats_client_.class_count_ += 1;
     ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-  } else if (UNLIKELY(mapped_class_type == 3)) {
+    return true;
+  }/* else if (UNLIKELY(mapped_class_type == 3)) {
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
