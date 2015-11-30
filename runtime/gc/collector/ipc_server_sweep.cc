@@ -387,8 +387,6 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   if(true)
     ((accounting::ServerStructuredObjectStack*)mark_stack_)->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
 
-
-
   UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
       &cashed_references_client_);
 
