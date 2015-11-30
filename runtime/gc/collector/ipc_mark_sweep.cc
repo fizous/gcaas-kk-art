@@ -1092,7 +1092,7 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
       currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
   timings_.StartSplit("ProcessMarkStack");
   size_t thread_count = GetThreadCount(paused);
-  if (kParallelProcessMarkStack && thread_count > 1 &&
+  if (false && kParallelProcessMarkStack && thread_count > 1 &&
       mark_stack_->Size() >= kMinimumParallelMarkStackSize) {
     ProcessMarkStackParallel(thread_count);
   } else {
