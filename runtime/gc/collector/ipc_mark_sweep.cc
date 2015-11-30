@@ -776,6 +776,9 @@ class ClientMarkObjectVisitor {
 template <typename MarkVisitor>
 inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
+
+  ipc_heap_->local_heap_->VerifyObjectImpl(obj);
+
   if(obj == NULL) {
     LOG(FATAL) << "XX ELEment cannot be null here IPCMarkSweep::ClientScanObjectVisit";
   }
@@ -826,7 +829,7 @@ inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
 
   }
 
-  ipc_heap_->local_heap_->VerifyObjectImpl(obj);
+
 
 }
 
