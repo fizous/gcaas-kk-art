@@ -498,6 +498,63 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(
   }
 }
 
+
+template <typename MarkVisitor>
+bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* obj,
+    const MarkVisitor& visitor) {
+  if(!BelongsToOldHeap<mirror::Object>(obj)) {
+    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
+  }
+  const mirror::Object* mapped_object =
+                                MapReferenceToServerChecks<mirror::Object>(obj);
+
+
+
+  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
+    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
+  }
+  if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
+  }
+
+  if(false)
+    TestMappedBitmap(mapped_object);
+
+  if(!IsMappedObjectMarked(mapped_object)) {
+    LOG(FATAL) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
+        " XXXXX ~~~~~~~~~~~~~~ ";
+  }
+
+  const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
+
+  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
+    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
+  }
+
+  int mapped_class_type = GetMappedClassType(mapped_klass);
+  if (UNLIKELY(mapped_class_type < 2)) {
+    cashed_stats_client_.array_count_ += 1;
+    //android_atomic_add(1, &(array_count_));
+    if(mapped_class_type == 0) {
+      ServerVisitObjectArrayReferences(
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
+                                                                    visitor);
+     return true;
+    }
+  }/* else if (UNLIKELY(mapped_class_type == 2)) {
+    cashed_stats_client_.class_count_ += 1;
+    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
+  } else if (UNLIKELY(mapped_class_type == 3)) {
+    cashed_stats_client_.other_count_ += 1;
+    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
+    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+      ServerDelayReferenceReferent(mapped_klass,
+                                  mapped_object);
+    }
+  }*/
+  return false;
+}
+
 template <typename MarkVisitor>
 void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {

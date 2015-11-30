@@ -119,6 +119,7 @@ class IPCServerMarkerSweep {
 
 
   void ProcessMarckStack(void);
+  bool ServerScanObjectRemoval(const mirror::Object* obj);
   void ServerScanObject(const mirror::Object* obj, uint32_t calculated_offset);
 
   bool IsMappedReferentEnqueued(const mirror::Object* mapped_ref) const;
@@ -127,6 +128,11 @@ class IPCServerMarkerSweep {
       const mirror::Object* reference);
   void ServerEnqPendingReference(mirror::Object* ref,
       mirror::Object** list);
+
+  template <typename MarkVisitor>
+  bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* obj,
+      const MarkVisitor& visitor);
+
   template <typename MarkVisitor>
   void ServerScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);

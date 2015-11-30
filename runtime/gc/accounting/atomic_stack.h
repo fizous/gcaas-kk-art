@@ -472,6 +472,13 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     return stack_data_->server_begin_[ind];
   }
 
+  T RemoveEntryIndex(int32_t ind) {
+    T _value = stack_data_->server_begin_[ind];
+
+    return stack_data_->server_begin_[ind];
+  }
+
+
   T* GetBaseAddress(void) const {
     return stack_data_->server_begin_;
   }
@@ -528,6 +535,30 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     }
   }
 
+
+  typedef bool CallBackRemoval(T obj, void* arg);
+
+
+  void OperateRemovalOnStack(CallBackRemoval* visitor, void* args) {
+
+    int _back_index = android_atomic_release_load(&(stack_data_->back_index_));
+    int _front_index = android_atomic_release_load(&(stack_data_->front_index_));
+
+    int _index = _front_index;
+    while(_index < _back_index) {
+      T obj = GetEntryIndex(_index);
+      if(visitor(obj, args)) {//we should remove that element from the stack
+        _back_index -= 1;
+        for(int _elem = _index; _elem < _back_index; _elem++) {
+          SetEntryIndex(_elem, GetEntryIndex(_elem + 1));
+        }
+      } else {
+        _index++;
+      }
+    }
+    android_atomic_acquire_store(_front_index, &(stack_data_->front_index_));
+    android_atomic_acquire_store(_back_index, &(stack_data_->back_index_));
+  }
 
 
   DISALLOW_COPY_AND_ASSIGN(ServerStructuredAtomicStack);

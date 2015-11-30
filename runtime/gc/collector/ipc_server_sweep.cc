@@ -65,6 +65,27 @@ class ServerMarkObjectVisitor {
   IPCServerMarkerSweep* const mark_sweep_;
 };
 
+class ServerMarkObjectVisitorRemoval {
+ public:
+  explicit ServerMarkObjectVisitorRemoval(IPCServerMarkerSweep* const server_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(server_mark_sweep) {}
+
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const mirror::Object* /* obj */, const mirror::Object* ref,
+                  MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
+    if(true)
+      mark_sweep_->MarkObject(ref);
+  }
+
+ private:
+  IPCServerMarkerSweep* const mark_sweep_;
+};
+
 
 void IPCServerMarkerSweep::ResetStats(void) {
   memset(&cashed_stats_client_, 0, sizeof(space::GCSrvceCashedStatsCounters));
@@ -297,6 +318,12 @@ void IPCServerMarkerSweep::ServerScanObject(const mirror::Object* obj,
 //  }
 }
 
+bool IPCServerMarkerSweep::ServerScanObjectRemoval(const mirror::Object* obj) {
+  ServerMarkObjectVisitorRemoval visitor(this);
+  return ServerScanObjectVisitRemoval(obj, visitor);
+}
+
+
 static void ExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
   IPCServerMarkerSweep* param =
@@ -308,6 +335,20 @@ static void ExternalScanObjectVisit(mirror::Object* obj,
 
   param->ServerScanObject(obj, param->offset_);
 }
+
+static bool ExternalScanObjectVisitRemoval(mirror::Object* obj,
+    void* args) {
+  IPCServerMarkerSweep* param =
+      reinterpret_cast<IPCServerMarkerSweep*>(args);
+  //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
+//  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
+
+
+
+  return param->ServerScanObjectRemoval(obj);
+}
+
+
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
   LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
@@ -340,9 +381,11 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
     }
   }
 
-  if(true)
+  if(false)
     mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
 
+  if(true)
+    ((accounting::ServerStructuredObjectStack*)mark_stack_)->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
 
 
 
