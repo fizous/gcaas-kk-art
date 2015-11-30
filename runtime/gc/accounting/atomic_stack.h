@@ -541,7 +541,7 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
 
   void OperateRemovalOnStack(CallBackRemoval* visitor, void* args) {
 
-    int _back_index = android_atomic_release_load(&(stack_data_->back_index_));
+    //int _back_index = android_atomic_release_load(&(stack_data_->back_index_));
     int _front_index = android_atomic_release_load(&(stack_data_->front_index_));
 
     int _index = _front_index;
