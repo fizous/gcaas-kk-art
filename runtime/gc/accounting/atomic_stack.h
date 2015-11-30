@@ -545,10 +545,14 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     int _front_index = android_atomic_release_load(&(stack_data_->front_index_));
 
     int _index = _front_index;
-    while(_index < _back_index) {
+    while(true) {
+      int _back_index = android_atomic_release_load(&(stack_data_->back_index_));
+      if(_back_index == _index)
+        break;
       T obj = GetEntryIndex(_index);
       if(visitor(obj, args)) {//we should remove that element from the stack
-        _back_index -= 1;
+        android_atomic_add(-1, &(stack_data_->back_index_));
+        _back_index = android_atomic_release_load(&(stack_data_->back_index_));
         for(int _elem = _index; _elem < _back_index; _elem++) {
           SetEntryIndex(_elem, GetEntryIndex(_elem + 1));
         }
@@ -556,8 +560,19 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
         _index++;
       }
     }
-    android_atomic_acquire_store(_front_index, &(stack_data_->front_index_));
-    android_atomic_acquire_store(_back_index, &(stack_data_->back_index_));
+//    while(_index < _back_index) {
+//      T obj = GetEntryIndex(_index);
+//      if(visitor(obj, args)) {//we should remove that element from the stack
+//        _back_index -= 1;
+//        for(int _elem = _index; _elem < _back_index; _elem++) {
+//          SetEntryIndex(_elem, GetEntryIndex(_elem + 1));
+//        }
+//      } else {
+//        _index++;
+//      }
+//    }
+//    android_atomic_acquire_store(_front_index, &(stack_data_->front_index_));
+//    android_atomic_acquire_store(_back_index, &(stack_data_->back_index_));
   }
 
 
