@@ -144,7 +144,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   //set the sharable space to be shared
   android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
 
-  memset(&cashed_references_client_, 0, sizeof(cashed_references_client_));
+  memset(&cashed_references_client_, 0, sizeof(space::GCSrvceCashedReferences));
 
   //cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
@@ -371,7 +371,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
   const mirror::Object* popped_oject = NULL;
-  if(false) {
+  if(true) {
     for (;;) {
       if (mark_stack_->IsEmpty()) {
         break;
@@ -384,7 +384,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   if(false)
     mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
 
-  if(true)
+  if(false)
     ((accounting::ServerStructuredObjectStack*)mark_stack_)->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
 
 

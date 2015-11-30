@@ -124,8 +124,7 @@ class IPCServerMarkerSweep {
 
   bool IsMappedReferentEnqueued(const mirror::Object* mapped_ref) const;
   // Schedules an unmarked object for reference processing.
-  void ServerDelayReferenceReferent(const mirror::Class* klass,
-      const mirror::Object* reference);
+  void ServerDelayReferenceReferent(const mirror::Class* klass, mirror::Object* obj);
   void ServerEnqPendingReference(mirror::Object* ref,
       mirror::Object** list);
 

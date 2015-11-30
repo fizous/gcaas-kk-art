@@ -459,35 +459,35 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
 // the heap for later processing.
 void IPCServerMarkerSweep::ServerDelayReferenceReferent(
                                                     const mirror::Class* klass,
-                                              const mirror::Object* reference) {
+                                              mirror::Object* obj) {
   int32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
-                                  reinterpret_cast<const mirror::Object*>(klass),
+                                  reinterpret_cast<const mirror::Object*>(obj),
                                                       ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != NULL && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
-    bool is_enqueued_object = IsMappedReferentEnqueued(reference);
+    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
     if(IsSoftReferenceMappedClass(klass)) {
       if(!is_enqueued_object) {
-        ServerEnqPendingReference(const_cast<mirror::Object*>(reference),
+        ServerEnqPendingReference(const_cast<mirror::Object*>(obj),
             &(curr_collector_ptr_->cashed_references_.soft_reference_list_));
       }
     } else if(IsWeakReferenceMappedClass(klass)) {
       if(!is_enqueued_object) {
-        ServerEnqPendingReference(const_cast<mirror::Object*>(reference),
+        ServerEnqPendingReference(const_cast<mirror::Object*>(obj),
             &(curr_collector_ptr_->cashed_references_.weak_reference_list_));
       }
     } else if(IsFinalizerReferenceMappedClass(klass)) {
       if(!is_enqueued_object) {
-        ServerEnqPendingReference(const_cast<mirror::Object*>(reference),
+        ServerEnqPendingReference(const_cast<mirror::Object*>(obj),
             &(curr_collector_ptr_->cashed_references_.finalizer_reference_list_));
       }
     } else if(IsPhantomReferenceMappedClass(klass)) {
       if(!is_enqueued_object) {
-        ServerEnqPendingReference(const_cast<mirror::Object*>(reference),
+        ServerEnqPendingReference(const_cast<mirror::Object*>(obj),
             &(curr_collector_ptr_->cashed_references_.phantom_reference_list_));
       }
     } else {
@@ -549,8 +549,8 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-     // ServerDelayReferenceReferent(mapped_klass,
-     //                             mapped_object);
+      ServerDelayReferenceReferent(mapped_klass,
+          const_cast<mirror::Object*>(mapped_object));
     }
     return true;
   }
@@ -606,7 +606,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
       ServerDelayReferenceReferent(mapped_klass,
-                                  mapped_object);
+                                  const_cast<mirror::Object*>(mapped_object));
     }
   }
 }
