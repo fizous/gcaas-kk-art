@@ -510,7 +510,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
                                 MapReferenceToServerChecks<mirror::Object>(obj);
 
 
-  return false;
+ // return false;
 
   if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
     LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
@@ -535,6 +535,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if (UNLIKELY(mapped_class_type < 2)) {
+    return false;
     cashed_stats_client_.array_count_ += 1;
     //android_atomic_add(1, &(array_count_));
     if(mapped_class_type == 0) {
@@ -546,8 +547,9 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
   } else if (UNLIKELY(mapped_class_type == 2)) {
     cashed_stats_client_.class_count_ += 1;
     ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-    return false;
+    return true;
   } else if (UNLIKELY(mapped_class_type == 3)) {
+    return false;
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
@@ -555,7 +557,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
       ServerDelayReferenceReferent(mapped_klass,
           const_cast<mirror::Object*>(mapped_object));
     }
-    return false;
+
   }
   return false;
 }
