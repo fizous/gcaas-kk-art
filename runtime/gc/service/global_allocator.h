@@ -20,6 +20,10 @@
 
 #define GC_SERVICE_BUFFER_REQ_CAP   128
 
+
+#define GCSERVICE_ALLOC_VLOG_ON 0
+#define GCSERVICE_ALLOC_VLOG(severity)  if (GCSERVICE_ALLOC_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+
 namespace art {
 namespace gc {
 
