@@ -82,10 +82,12 @@ void ServerCollector::SignalCollector(bool is_explicit) {
   {
     MutexLock mu(self, run_mu_);
     if(thread_ != NULL) {
-      status_ = status_ + 1;
-      if(is_explicit) {
-        status_ |= (1<<30);
-      }
+      int32_t old_status = 0;
+      int32_t new_value = 0;
+      do {
+        old_status = status_;
+        new_value = old_status + (is_explicit? (1 << 16) : 1);
+      } while (android_atomic_cas(old_status, new_value, &status_) != 0);
       LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
@@ -113,13 +115,17 @@ int ServerCollector::WaitForRequest(void) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       MutexLock mu(self, run_mu_);
-      while(status_ <= 0) {
+      uint32_t _status_barrier = 0;
+      while((_status_barrier = android_atomic_release_load(&status_)) <= 0) {
         run_cond_.Wait(self);
       }
-      if((status_ & (1<<30) ) > 0) {
+      if(_status_barrier >= (1<<16)) {
         _result = 2;
       }
-      status_ = 0;
+
+      while (android_atomic_cas(_status_barrier, 0U, &status_) != 0) {
+        _status_barrier = android_atomic_release_load(&status_);
+      }
       LOG(ERROR) << "ServerCollector::WaitForRequest:: leaving WaitForRequest; status=" << status_;
       run_cond_.Broadcast(self);
     }
