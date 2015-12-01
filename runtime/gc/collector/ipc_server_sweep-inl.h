@@ -606,6 +606,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+      is_reference_class_cnt_++;
       ServerDelayReferenceReferent(mapped_klass,
                                   const_cast<mirror::Object*>(mapped_object));
     }

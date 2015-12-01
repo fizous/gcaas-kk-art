@@ -49,7 +49,7 @@ class IPCServerMarkerSweep {
 
   static int passed_bitmap_tests_;
   static int pushed_back_to_stack_;
-  static int is_reference_class_cnt_ = 0;
+  static int is_reference_class_cnt_;
 
   gcservice::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
