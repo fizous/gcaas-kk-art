@@ -329,7 +329,8 @@ bool IPCServerMarkerSweep::IsSyntheticMappedClass(
 
 bool IPCServerMarkerSweep::IsReferenceMappedClass(
                                             const mirror::Class* klass) const {
-  return (GetClassAccessFlags(klass) & kAccClassIsReference) != 0;
+  uint32_t _access_flags =  GetClassAccessFlags(klass);
+  return (_access_flags & kAccClassIsReference) != 0;
 }
 
 
