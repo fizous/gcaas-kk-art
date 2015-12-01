@@ -535,7 +535,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if (UNLIKELY(mapped_class_type < 2)) {
-    return false;
+    //return false;
     cashed_stats_client_.array_count_ += 1;
     //android_atomic_add(1, &(array_count_));
     if(mapped_class_type == 0) {
@@ -625,14 +625,20 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   if(!(IsMappedObjectToServer<mirror::ObjectArray<mirror::Object>>(mapped_arr))) {
     LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0000";
   }
-  const byte* raw_object_addr = reinterpret_cast<const byte*>(mapped_arr);
-  const byte* raw_addr_length_address = raw_object_addr +
-               mirror::Array::LengthOffset().Int32Value();
-  const size_t length =
-        static_cast<size_t>(*reinterpret_cast<const int32_t*>(raw_addr_length_address));
 
-  if(length == 0)
-    return;
+  uint32_t _length_read =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+          mirror::Array::LengthOffset());
+
+
+//  const byte* raw_object_addr = reinterpret_cast<const byte*>(mapped_arr);
+//  const byte* raw_addr_length_address = raw_object_addr +
+//               mirror::Array::LengthOffset().Int32Value();
+  const size_t length =
+        static_cast<size_t>(_length_read);
+
+//  if(length == 0)
+//    return;
 
   const size_t width = sizeof(mirror::Object*);
   int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
