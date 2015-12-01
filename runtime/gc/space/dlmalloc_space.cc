@@ -991,7 +991,7 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 
 bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 
-  if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrantS.ui.professional") == 0) ||
+  if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
       (strcmp(se_name_c_str, "purdue.dacapo") == 0))) {
     LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
     android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
