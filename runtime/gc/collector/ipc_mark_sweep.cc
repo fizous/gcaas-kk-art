@@ -1108,10 +1108,11 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 
 // Scan anything that's on the mark stack.
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
-  Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
-      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
   timings_.StartSplit("ProcessMarkStack");
+  Thread* currThread = Thread::Current();
+//  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
+//      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
+//  timings_.StartSplit("ProcessMarkStack");
   size_t thread_count = GetThreadCount(paused);
   if (kParallelProcessMarkStack && thread_count > 1 &&
       mark_stack_->Size() >= kMinimumParallelMarkStackSize) {
