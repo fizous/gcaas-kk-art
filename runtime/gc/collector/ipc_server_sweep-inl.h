@@ -549,7 +549,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
     ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
     return true;
   } else if (UNLIKELY(mapped_class_type == 3)) {
-    return false;
+
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
     if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
@@ -557,7 +557,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
       ServerDelayReferenceReferent(mapped_klass,
           const_cast<mirror::Object*>(mapped_object));
     }
-
+    return true;
   }
   return false;
 }
