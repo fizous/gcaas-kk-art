@@ -167,6 +167,18 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
   meta_->conc_count_ = 0;
   meta_->explicit_count_ = 0;
+
+  /* set the offsets */
+  meta_->reference_offsets_.reference_referent_offset_ =
+      local_heap_->reference_referent_offset_.Uint32Value();
+  meta_->reference_offsets_.reference_queue_offset_ =
+      local_heap_->reference_queue_offset_.Uint32Value();
+  meta_->reference_offsets_.reference_queueNext_offset_ =
+      local_heap_->reference_queueNext_offset_.Uint32Value();
+  meta_->reference_offsets_.reference_pendingNext_offset_ =
+      local_heap_->reference_pendingNext_offset_.Uint32Value();
+  meta_->reference_offsets_.finalizer_reference_zombie_offset_ =
+      local_heap_->finalizer_reference_zombie_offset_.Uint32Value();
 }
 
 
