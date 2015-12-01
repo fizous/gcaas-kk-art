@@ -372,7 +372,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
   const mirror::Object* popped_oject = NULL;
-  if(false) {
+  if(true) {
     for (;;) {
       if (mark_stack_->IsEmpty()) {
         break;
@@ -385,8 +385,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   if(false)
     mark_stack_->OperateOnStack(ExternalScanObjectVisit,this);
 
-  if(true)
-    ((accounting::ServerStructuredObjectStack*)mark_stack_)->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
+  if(false)
+    mark_stack_->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
 
   UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
       &cashed_references_client_);

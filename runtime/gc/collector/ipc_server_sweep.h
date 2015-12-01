@@ -69,7 +69,7 @@ class IPCServerMarkerSweep {
   std::vector<accounting::SharedServerSpaceBitmap*> mark_bitmaps_;
   std::vector<accounting::SharedServerSpaceBitmap*> live_bitmaps_;
 
-  accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
+  accounting::ServerStructuredObjectStack* mark_stack_;
 
   // offset of java.lang.ref.Reference.referent
   MemberOffset ref_referent_off_client_;
