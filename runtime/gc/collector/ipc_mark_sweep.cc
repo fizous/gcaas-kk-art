@@ -1109,7 +1109,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 // Scan anything that's on the mark stack.
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   timings_.StartSplit("ProcessMarkStack");
-  Thread* currThread = Thread::Current();
+//  Thread* currThread = Thread::Current();
 //  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
 //      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
 //  timings_.StartSplit("ProcessMarkStack");
