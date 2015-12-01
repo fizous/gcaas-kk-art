@@ -1074,7 +1074,7 @@ void IPCMarkSweep::RequestAppSuspension(void) {
 
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
   //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
   LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
@@ -1086,7 +1086,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->local_heap_->DumpSpaces();
+  //ipc_heap_->local_heap_->DumpSpaces();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   int _synchronized = 0;
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
