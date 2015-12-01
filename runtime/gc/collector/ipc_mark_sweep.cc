@@ -445,9 +445,10 @@ void IPCHeap::RaiseServerFlag(void) {
 }
 
 void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
-  collector->server_synchronize_ = ipc_flag_raised_;
+  android_atomic_acquire_store(ipc_flag_raised_, &(collector->server_synchronize_));
   Thread* self = Thread::Current();
-  if(collector->server_synchronize_) {
+  int _synchronized = 0;
+  if((_synchronized = android_atomic_release_load(&(collector->server_synchronize_))) > 0) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -466,7 +467,8 @@ void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
 
 void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
   Thread* self = Thread::Current();
-  if(collector->server_synchronize_) {
+  int _value_stored = 0;
+  while((_value_stored = android_atomic_release_load(&(collector->server_synchronize_))) > 0) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -474,7 +476,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
         conc_req_cond_->Wait(self);
       }
       meta_->conc_flag_ = 4;
-      collector->server_synchronize_ = 0;
+      while(android_atomic_cas(_value_stored, 0, &collector->server_synchronize_) != 0);
       meta_->collect_index_ = -1;
       meta_->current_collector_ = NULL;
       LOG(ERROR) << "\t client: Client notified completion";
@@ -1074,7 +1076,8 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->local_heap_->DumpSpaces();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
-  if(server_synchronize_ == 1) {
+  int _synchronized = 0;
+  if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
   } else {
     LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
