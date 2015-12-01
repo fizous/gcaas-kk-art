@@ -184,6 +184,12 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   virtual void MarkConcurrentRoots()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   virtual void MarkingPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
+  // Builds a mark stack and recursively mark until it empties.
+  void RecursiveMark()
+      EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
+      SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   virtual void MarkReachableObjects()
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

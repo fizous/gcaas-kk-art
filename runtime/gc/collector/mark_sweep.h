@@ -137,7 +137,7 @@ class MarkSweep : public GarbageCollector {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   // Builds a mark stack and recursively mark until it empties.
-  void RecursiveMark()
+  virtual void RecursiveMark()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

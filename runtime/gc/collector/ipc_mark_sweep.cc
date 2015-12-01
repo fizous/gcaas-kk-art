@@ -1174,6 +1174,13 @@ void IPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
+// Populates the mark stack based on the set of marked objects and
+// recursively marks until the mark stack is emptied.
+void IPCMarkSweep::RecursiveMark() {
+  base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+  ProcessMarkStack(false);
+}
+
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
   Thread* self = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
