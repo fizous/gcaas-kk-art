@@ -192,7 +192,7 @@ accounting::ServerStructuredObjectStack*  IPCServerMarkerSweep::GetMappedMarkSta
       accounting::ATOMIC_OBJ_STACK_T::CreateServerAtomicStack(stack_meta_address,
           reinterpret_cast<byte*>(_server_address->begin_));
 
-  return atomic_stack_dup;
+  return reinterpret_cast<accounting::ServerStructuredObjectStack*>(atomic_stack_dup);
 }
 
 
