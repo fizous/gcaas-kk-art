@@ -737,9 +737,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     LOG(ERROR) << " processing EXplicit GC Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
     //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
-    GCSrvceAgent* _agent =
-        GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    _agent->collector_->SignalCollector(true);
+//    GCSrvceAgent* _agent =
+//        GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
+//    _agent->collector_->SignalCollector(true);
   }
 
 }
