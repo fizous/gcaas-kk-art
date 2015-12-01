@@ -510,6 +510,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
                                 MapReferenceToServerChecks<mirror::Object>(obj);
 
 
+  return false;
 
   if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
     LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
