@@ -554,7 +554,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
       ServerDelayReferenceReferent(mapped_klass,
           const_cast<mirror::Object*>(mapped_object));
     }
-    return true;
+    return false;
   }
   return false;
 }
