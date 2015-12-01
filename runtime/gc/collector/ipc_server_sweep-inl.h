@@ -545,7 +545,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
   } else if (UNLIKELY(mapped_class_type == 2)) {
     cashed_stats_client_.class_count_ += 1;
     ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-    return true;
+    return false;
   } else if (UNLIKELY(mapped_class_type == 3)) {
     cashed_stats_client_.other_count_ += 1;
     ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
