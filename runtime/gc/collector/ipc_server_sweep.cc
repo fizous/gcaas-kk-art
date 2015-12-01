@@ -176,7 +176,7 @@ void IPCServerMarkerSweep::MarkReachableObjects(
 
 }
 
-accounting::ATOMIC_OBJ_STACK_T*  IPCServerMarkerSweep::GetMappedMarkStack(
+accounting::ServerStructuredObjectStack*  IPCServerMarkerSweep::GetMappedMarkStack(
     android::MappedPairProcessFD* pair_memory,
     int entry_ind,
     StructuredObjectStackData* stack_meta_address) {
