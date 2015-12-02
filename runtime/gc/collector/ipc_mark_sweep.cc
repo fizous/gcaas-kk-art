@@ -883,7 +883,7 @@ static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
 
-  param->ScanObjectVisitVerifyArray(obj, _temp_heap_beetmap);
+  param->ScanObjectVisitVerifyArray(obj, IPCMarkSweep::_temp_heap_beetmap);
   //param->ClientVerifyObject(obj);
 }
 
