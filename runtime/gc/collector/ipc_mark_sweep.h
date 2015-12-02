@@ -19,6 +19,9 @@
 #include "partial_mark_sweep.h"
 
 
+#define IPC_MARKSWEEP_VLOG_ON 0
+#define IPC_MARKSWEEP_VLOG(severity)  if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+
 
 #define GC_IPC_COLLECT_PHASE(PHASE, THREAD) \
     ScopedThreadStateChange tsc(THREAD, kWaitingForGCProcess);  \

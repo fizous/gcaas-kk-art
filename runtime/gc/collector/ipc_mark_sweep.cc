@@ -87,7 +87,7 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
       *gc_complete_mu_, _complete_condAddress);
 
 //  if(!StartCollectorDaemon()) {
-//    LOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
+//    IPC_MARKSWEEP_VLOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
 //        << " daemon .. XXXXXXXXX";
 //  }
 
@@ -118,7 +118,7 @@ bool IPCHeap::StartCollectorDaemon(void) {
 
 
 
-  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
+  IPC_MARKSWEEP_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
 
   CHECK_PTHREAD_CALL(pthread_create,
       (&collector_pthread_, NULL,
@@ -127,13 +127,13 @@ bool IPCHeap::StartCollectorDaemon(void) {
 
   Thread* self = Thread::Current();
   MutexLock mu(self, ms_lock_);
-  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon going " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon going " <<
       "waits for daemon initialization";
   while (collector_daemon_ == NULL) {
     ms_cond_.Wait(self);
   }
 
-  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon done " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon done " <<
       "with creating daemon ";
 
   //CreateCollectors();
@@ -187,7 +187,7 @@ void IPCHeap::AssignNextGCType(void) {
 }
 
 void* IPCHeap::RunDaemon(void* arg) {
-  LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
+  IPC_MARKSWEEP_VLOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
   IPCHeap* _ipc_heap = reinterpret_cast<IPCHeap*>(arg);
   CHECK(_ipc_heap != NULL);
 
@@ -201,7 +201,7 @@ void* IPCHeap::RunDaemon(void* arg) {
   }
 
 
-  LOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: broadcast" ;
+  IPC_MARKSWEEP_VLOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: broadcast" ;
   bool collector_loop = true;
   while(collector_loop) {
     collector_loop = _ipc_heap->RunCollectorDaemon();
@@ -258,12 +258,12 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
 void IPCHeap::SetLastProcessID(void) { //here we set the process of the app
   int _lastProcessID = local_heap_->GetLastProcessStateID();
   meta_->process_state_ = _lastProcessID;
-  LOG(ERROR) << "++++++ IPCHeap::SetLastProcessID: " << meta_->process_state_;
+  IPC_MARKSWEEP_VLOG(ERROR) << "++++++ IPCHeap::SetLastProcessID: " << meta_->process_state_;
 }
 
 
 bool IPCHeap::CheckTrimming() {
-  LOG(ERROR) << "bool IPCHeap::CheckTrimming()";
+  IPC_MARKSWEEP_VLOG(ERROR) << "bool IPCHeap::CheckTrimming()";
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
@@ -305,7 +305,7 @@ bool IPCHeap::CheckTrimming() {
 //    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
 //                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
 //    CHECK(!env->ExceptionCheck());
-    LOG(ERROR) << "bool IPCHeap::Posted a Request()";
+    IPC_MARKSWEEP_VLOG(ERROR) << "bool IPCHeap::Posted a Request()";
     return true;
   }
   return false;
@@ -317,7 +317,7 @@ void IPCHeap::TrimHeap(void)  {
 }
 
 collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
-  LOG(ERROR) << "*****Executing the WaitForConcurrentIPCGcToComplete**** " << self->GetTid();
+  IPC_MARKSWEEP_VLOG(ERROR) << "*****Executing the WaitForConcurrentIPCGcToComplete**** " << self->GetTid();
   collector::GcType last_gc_type = collector::kGcTypeNone;
   bool do_wait = false;
   if(meta_->concurrent_gc_) { // the heap is concurrent
@@ -412,7 +412,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   for (const auto& cur_collector : local_heap_->mark_sweep_collectors_) {
     if (cur_collector->IsConcurrent() == meta_->concurrent_gc_ && cur_collector->GetGcType() == gc_type) {
       collector = cur_collector;
-      LOG(ERROR) << "*** collector: " << collector->GetName();
+      IPC_MARKSWEEP_VLOG(ERROR) << "*** collector: " << collector->GetName();
       break;
     }
   }
@@ -422,7 +422,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+  IPC_MARKSWEEP_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
   meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
@@ -467,7 +467,7 @@ void IPCHeap::SetCurrentCollector(IPCMarkSweep* collector) {
       meta_->conc_flag_ = 2;
       meta_->collect_index_ = collector->collector_index_;
       meta_->current_collector_ = collector->meta_data_;
-      LOG(ERROR) << "\t client: Setting current collector as follows: " <<
+      IPC_MARKSWEEP_VLOG(ERROR) << "\t client: Setting current collector as follows: " <<
           "index = " << meta_->collect_index_ <<
           "\n\t    address = " << reinterpret_cast<void*>(meta_->current_collector_);
       conc_req_cond_->Broadcast(self);
@@ -491,7 +491,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
       while(android_atomic_cas(_value_stored, 0, &collector->server_synchronize_) != 0);
       meta_->collect_index_ = -1;
       meta_->current_collector_ = NULL;
-      LOG(ERROR) << "\t client: Client notified completion";
+      IPC_MARKSWEEP_VLOG(ERROR) << "\t client: Client notified completion";
       conc_req_cond_->Broadcast(self);
     }
   }
@@ -525,16 +525,16 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
 
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
+    IPC_MARKSWEEP_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
     while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
-    LOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_
+    IPC_MARKSWEEP_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_
         << ", gctype = " << meta_->gc_type_;
 
   }
@@ -548,7 +548,7 @@ bool IPCHeap::RunCollectorDaemon() {
 //   // meta_->is_gc_complete_ = 0;
 //    conc_req_cond_->Broadcast(self);
 //  }
-  LOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
+  IPC_MARKSWEEP_VLOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   if(meta_->gc_type_ == 1) {
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
@@ -557,7 +557,7 @@ bool IPCHeap::RunCollectorDaemon() {
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }
 
-  LOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
       <<"; explicit_count:" << meta_->explicit_count_;
   NotifyCompleteConcurrentTask();
@@ -573,11 +573,11 @@ bool IPCHeap::RunCollectorDaemon() {
 //    {
 //      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 //      while(meta_->is_gc_complete_ == 1) {
-//        LOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
+//        IPC_MARKSWEEP_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
 //        conc_req_cond_->Wait(self);
 //      }
 //      conc_req_cond_->Broadcast(self);
-//      LOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
+//      IPC_MARKSWEEP_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
 //    }
 //  }
   return true;
@@ -671,7 +671,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 
   meta_data_->is_concurrent_ = concurrent ? 1 : 0;
-  LOG(ERROR) << "############ Initializing IPC: " << collector_index_;
+  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << collector_index_;
   ResetMetaDataUnlocked();
 
   DumpValues();
@@ -699,7 +699,7 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
 }
 
 void AbstractIPCMarkSweep::DumpValues(void){
-  LOG(ERROR) << "Dump AbstractIPCMarkSweep: " << "zygote_begin: "
+  IPC_MARKSWEEP_VLOG(ERROR) << "Dump AbstractIPCMarkSweep: " << "zygote_begin: "
       << reinterpret_cast<void*>(heap_meta_->zygote_begin_)
       << "\n     zygote_end: " << reinterpret_cast<void*>(heap_meta_->zygote_end_)
       << "\n     image_begin: " << reinterpret_cast<void*>(heap_meta_->image_space_begin_)
@@ -728,14 +728,14 @@ accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
 //  }
 //
 //  if(ipc_heap_->ipc_flag_raised_ == 1) {
-//    LOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
+//    IPC_MARKSWEEP_VLOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
 //    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
 //    heap_meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
-//    LOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
+//    IPC_MARKSWEEP_VLOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
 //    ipc_heap_->ipc_flag_raised_ = 0;
 //    phase_cond_->Broadcast(currThread);
 //  } else {
-//    LOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
+//    IPC_MARKSWEEP_VLOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
 //    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
 //    phase_cond_->Broadcast(currThread);
 //  }
@@ -878,14 +878,14 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         &meta_data_->cashed_references_,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
-  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
+  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
       << GetGcType() << "; conc:" << IsConcurrent() <<" ###########";
 }
 
 
 
 void IPCMarkSweep::ClearMarkHolders(void) {
-  LOG(ERROR) << "IPCMarkSweep::ClearMarkHolders..............";
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::ClearMarkHolders..............";
   // Clear all of the spaces' mark bitmaps.
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->GetGcRetentionPolicy() != space::kGcRetentionPolicyNeverCollect) {
@@ -900,7 +900,7 @@ void IPCMarkSweep::ClearMarkHolders(void) {
 void IPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-  LOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->SetCurrentCollector(this);
 
@@ -914,7 +914,7 @@ void IPCMarkSweep::InitializePhase(void) {
 
   art::Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_INIT);
-  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::InitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   mark_stack_ = ipc_heap_->local_heap_->GetHeapMarkStack();
@@ -941,21 +941,21 @@ void IPCMarkSweep::InitializePhase(void) {
   reference_count_ = 0;
 
   FindDefaultMarkBitmap();
-  LOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   if(false)
     ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
 void IPCMarkSweep::ApplyTrimming(void) {
-  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
   ipc_heap_->CheckTrimming();
 }
 
 void IPCMarkSweep::FinishPhase(void) {
  Thread* currThread = Thread::Current();
  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
- LOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
+ IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
  MarkSweep::FinishPhase();
  ipc_heap_->ResetCurrentCollector(this);
@@ -979,7 +979,7 @@ void IPCMarkSweep::MarkConcurrentRoots() {
   // Visit all runtime roots and clear dirty flags.
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_CONC_MARK);
-  LOG(ERROR) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   Runtime::Current()->VisitConcurrentRoots(MarkObjectCallback, this, false, true);
   timings_.EndSplit();
@@ -1000,11 +1000,11 @@ void IPCMarkSweep::MarkConcurrentRoots() {
 void IPCMarkSweep::PostMarkingPhase(void){
 //  Thread* currThread = Thread::Current();
 //  ThreadList* thread_list = Runtime::Current()->GetThreadList();
-//  LOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
+//  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
 //      "threads: " << currThread->GetTid();
 //  if(false) {
 //    thread_list->SuspendAll();
-//    LOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+//    IPC_MARKSWEEP_VLOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
 //    thread_list->ResumeAll();
 //  }
 //  {
@@ -1019,7 +1019,7 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
-  LOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   BindBitmaps();
@@ -1038,10 +1038,10 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   if (Locks::mutator_lock_->IsExclusiveHeld(currThread)) {
     // If we exclusively hold the mutator lock, all threads must be suspended.
     MarkRoots();
-    LOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
+    IPC_MARKSWEEP_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
         currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   } else { //concurrent
-    LOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
+    IPC_MARKSWEEP_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
         currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
     MarkThreadRoots(currThread);
     // At this point the live stack should no longer have any mutators which push into it.
@@ -1068,15 +1068,15 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
-  //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   if(false)
     mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
 
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
-  //LOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
+  //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
-  LOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
@@ -1084,7 +1084,7 @@ void IPCMarkSweep::RequestAppSuspension(void) {
 
 void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   //ipc_heap_->local_heap_->DumpSpaces();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
@@ -1092,16 +1092,16 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
   } else {
-    LOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
+    IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   }
 
-  LOG(ERROR) << "      to : " << meta_data_->gc_phase_;
+  IPC_MARKSWEEP_VLOG(ERROR) << "      to : " << meta_data_->gc_phase_;
 }
 
 //void IPCMarkSweep::ProcessMarkStack(bool paused) {
 //  Thread* currThread = Thread::Current();
-//  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
+//  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
 //      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
 //  MarkSweep::ProcessMarkStack(paused);
 //}
@@ -1110,7 +1110,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   timings_.StartSplit("ProcessMarkStack");
 //  Thread* currThread = Thread::Current();
-//  LOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
+//  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
 //      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
 //  timings_.StartSplit("ProcessMarkStack");
   size_t thread_count = GetThreadCount(paused);
@@ -1151,7 +1151,7 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
 
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ <<
       "... MarkStackSize=" << mark_stack_->Size();
 //  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
@@ -1171,7 +1171,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   RecursiveMark();
 
   //MarkSweep::MarkReachableObjects();
-  LOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
 
@@ -1185,7 +1185,7 @@ void IPCMarkSweep::RecursiveMark() {
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
       << "; tid:" << self->GetTid();
   MarkSweep::ProcessMarkStackParallel(thread_count);
 }
@@ -1197,7 +1197,7 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCPartialMarkSweep::BindBitmaps() {
-  LOG(ERROR) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   IPCMarkSweep::BindBitmaps();
 
@@ -1222,7 +1222,7 @@ IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCStickyMarkSweep::BindBitmaps() {
-  LOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCStickyMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   IPCPartialMarkSweep::BindBitmaps();
 
@@ -1246,7 +1246,7 @@ void IPCStickyMarkSweep::BindBitmaps() {
 void IPCStickyMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   mark_stack_->Reset();
-  LOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
@@ -1261,7 +1261,7 @@ void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
 }
 
 void IPCStickyMarkSweep::MarkThreadRoots(Thread* self) {
-  LOG(ERROR) << "IPCStickyMarkSweep::MarkThreadRoots. starting: _______ " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCStickyMarkSweep::MarkThreadRoots. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   MarkRootsCheckpoint(self);
 }
@@ -1290,7 +1290,7 @@ bool IPCMarkSweep::IsConcurrent() const {
 */
 
 //void IPCMarkSweep::SwapBitmaps() {
-//  LOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
+//  IPC_MARKSWEEP_VLOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
 //  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
 //  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
 //  // bits of dead objects in the live bitmap.
@@ -1321,7 +1321,7 @@ bool IPCMarkSweep::IsConcurrent() const {
 //}
 /*
 void IPCMarkSweep::UnBindBitmaps() {
-  LOG(ERROR) << "IPCMarkSweep::UnBindBitmaps";
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
       space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
@@ -1332,7 +1332,7 @@ void IPCMarkSweep::UnBindBitmaps() {
 }
 
 void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
-  LOG(ERROR) << "IPCMarkSweep::BindLiveToMarkBitmap";
+  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
   space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
 //  space::SharableDlMallocSpace* _space =
@@ -1347,13 +1347,13 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     PartialMarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "partialIpcMS") {
-  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
+  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
 }
 
 
 void PartialIPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     PartialIPCMarkSweep::FinishPhase...begin:" <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "     PartialIPCMarkSweep::FinishPhase...begin:" <<
       currThread->GetTid();
   PartialMarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
@@ -1362,7 +1362,7 @@ void PartialIPCMarkSweep::FinishPhase(void) {
 void PartialIPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
   {
-    LOG(ERROR) << "     PartialIPCMarkSweep::InitializePhase. startingB: " <<
+    IPC_MARKSWEEP_VLOG(ERROR) << "     PartialIPCMarkSweep::InitializePhase. startingB: " <<
         currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
     PartialMarkSweep::InitializePhase();
   }
@@ -1371,7 +1371,7 @@ void PartialIPCMarkSweep::InitializePhase(void) {
 
 void PartialIPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     PartialIPCMarkSweep::MarkingPhase. startingA: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "     PartialIPCMarkSweep::MarkingPhase. startingA: " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
 
   PartialMarkSweep::MarkingPhase();
@@ -1383,21 +1383,21 @@ void PartialIPCMarkSweep::MarkingPhase(void) {
 void PartialIPCMarkSweep::MarkReachableObjects() {
 
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " <<PartialIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
   {
 
     HandshakeMarkingPhase();
   }
   PartialMarkSweep::MarkReachableObjects();
-  LOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " >>PartialIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
 
 
 
 //void PartialIPCMarkSweep::SwapBitmaps() {
-//  LOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
+//  IPC_MARKSWEEP_VLOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
 //  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
 //  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
 //  // bits of dead objects in the live bitmap.
@@ -1428,7 +1428,7 @@ void PartialIPCMarkSweep::MarkReachableObjects() {
 //}
 
 void PartialIPCMarkSweep::SwapBitmaps() {
-  LOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
+  IPC_MARKSWEEP_VLOG(ERROR) << "PartialIPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
   // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
   // bits of dead objects in the live bitmap.
@@ -1460,7 +1460,7 @@ void PartialIPCMarkSweep::SwapBitmaps() {
 
 
 void PartialIPCMarkSweep::UnBindBitmaps() {
-  LOG(ERROR) << "PartialIPCMarkSweep::UnBindBitmaps";
+  IPC_MARKSWEEP_VLOG(ERROR) << "PartialIPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
       space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
@@ -1471,7 +1471,7 @@ void PartialIPCMarkSweep::UnBindBitmaps() {
 }
 
 void PartialIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
-  LOG(ERROR) << "PartialIPCMarkSweep::BindLiveToMarkBitmap";
+  IPC_MARKSWEEP_VLOG(ERROR) << "PartialIPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
   space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
 //  space::SharableDlMallocSpace* _space =
@@ -1485,14 +1485,14 @@ StickyIPCMarkSweep::StickyIPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     StickyMarkSweep(ipcHeap->local_heap_, is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "stickyIpcMS") {
-  LOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
+  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: " << GetGcType() << " ###########";
 }
 
 
 
 void StickyIPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     StickyIPCMarkSweep::FinishPhase...begin:" <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "     StickyIPCMarkSweep::FinishPhase...begin:" <<
       currThread->GetTid();
   StickyMarkSweep::FinishPhase();
   ipc_heap_->AssignNextGCType();
@@ -1502,7 +1502,7 @@ void StickyIPCMarkSweep::FinishPhase(void) {
 void StickyIPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
   {
-    LOG(ERROR) << "     StickyIPCMarkSweep::InitializePhase. startingB: " <<
+    IPC_MARKSWEEP_VLOG(ERROR) << "     StickyIPCMarkSweep::InitializePhase. startingB: " <<
         currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
     StickyMarkSweep::InitializePhase();
   }
@@ -1510,7 +1510,7 @@ void StickyIPCMarkSweep::InitializePhase(void) {
 
 void StickyIPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << "     StickyIPCMarkSweep::MarkingPhase. startingA: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << "     StickyIPCMarkSweep::MarkingPhase. startingA: " <<
       currThread->GetTid() << "; phase:" << heap_meta_->gc_phase_;
 
   StickyMarkSweep::MarkingPhase();
@@ -1521,19 +1521,19 @@ void StickyIPCMarkSweep::MarkingPhase(void) {
 
 void StickyIPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  LOG(ERROR) << " <<StickyIPCMarkSweep::MarkReachableObjects. starting: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " <<StickyIPCMarkSweep::MarkReachableObjects. starting: " <<
       currThread->GetTid() ;
   {
     HandshakeMarkingPhase();
   }
   StickyMarkSweep::MarkReachableObjects();
-  LOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
+  IPC_MARKSWEEP_VLOG(ERROR) << " >>StickyIPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
 
 */
 //void StickyIPCMarkSweep::SwapBitmaps() {
-//  LOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
+//  IPC_MARKSWEEP_VLOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
 //  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
 //  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
 //  // bits of dead objects in the live bitmap.
@@ -1565,7 +1565,7 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
 
 /*
 void StickyIPCMarkSweep::SwapBitmaps() {
-  LOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
+  IPC_MARKSWEEP_VLOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
   // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
   // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
   // bits of dead objects in the live bitmap.
@@ -1596,7 +1596,7 @@ void StickyIPCMarkSweep::SwapBitmaps() {
 }
 
 void StickyIPCMarkSweep::UnBindBitmaps() {
-  LOG(ERROR) << "StickyIPCMarkSweep::UnBindBitmaps";
+  IPC_MARKSWEEP_VLOG(ERROR) << "StickyIPCMarkSweep::UnBindBitmaps";
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace()) {
       space::DL_MALLOC_SPACE* _space =space->AsDlMallocSpace();
@@ -1607,7 +1607,7 @@ void StickyIPCMarkSweep::UnBindBitmaps() {
 }
 
 void StickyIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
-  LOG(ERROR) << "StickyIPCMarkSweep::BindLiveToMarkBitmap";
+  IPC_MARKSWEEP_VLOG(ERROR) << "StickyIPCMarkSweep::BindLiveToMarkBitmap";
   CHECK(space->IsDlMallocSpace());
   space::DL_MALLOC_SPACE* _space = space->AsDlMallocSpace();
 //  space::SharableDlMallocSpace* _space =
