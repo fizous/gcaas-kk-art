@@ -86,6 +86,31 @@ constexpr bool kCountJavaLangRefs = false;
 constexpr bool kCheckLocks = kDebugLocking;
 
 
+
+void MarkSweep::ArraysVerifierScan(const Object* object) {
+  mirror::Class* klass = object->GetClass();
+  DCHECK(klass != NULL);
+  if (UNLIKELY(klass->IsArrayClass())) {
+    if (klass->IsObjectArrayClass()) {
+      const ObjectArray<Object>* _arr =
+          object->AsObjectArray<Object>();
+      size_t length = static_cast<size_t>(_arr->GetLength());
+      for (size_t i = 0; i < length; ++i) {
+        const Object* _element_i = _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
+        bool ismrk = false;
+        if(IsMarked(_element_i)) {
+          ismrk = true;
+        }
+
+        LOG(ERROR) << "client; arr; " << object << "; length; " << length <<
+            "; index; " << i << "; elem; " <<  _element_i <<
+            "; marked; " << ismrk;
+      }
+
+    }
+  }
+}
+
 inline bool MarkSweep::IsMarked(const Object* object) const
     SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
   if (IsImmune(object)) {

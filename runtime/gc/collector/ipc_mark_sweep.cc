@@ -861,41 +861,16 @@ void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
 
 
 
-#if (true || ART_GC_SERVICE)
 inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) {
   DCHECK(obj != NULL);
   if (kIsDebugBuild && !IsMarked(obj)) {
     heap_->DumpSpaces();
     LOG(FATAL) << "Scanning unmarked object " << obj;
   }
-  mirror::Class* klass = obj->GetClass();
-  DCHECK(klass != NULL);
-  if (UNLIKELY(klass->IsArrayClass())) {
-    if (kCountScannedTypes) {
-      ++array_count_;
-    }
-    if (klass->IsObjectArrayClass()) {
-      const mirror::ObjectArray<mirror::Object>* _arr =
-          obj->AsObjectArray<mirror::Object>();
-      size_t length = static_cast<size_t>(_arr->GetLength());
-      for (size_t i = 0; i < length; ++i) {
-        mirror::Object* _element_i = _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
-        bool ismrk = false;
-        if(reinterpret_cast<MarkSweep*>(this)->IsMarked(_element_i)) {
-          ismrk = true;
-        }
-
-        LOG(ERROR) << "client; arr; " << obj << "; length; " << length <<
-            "; index; " << i << "; elem; " <<  _element_i <<
-            "; marked; " << ismrk;
-      }
-
-
-    }
-  }
+  ArraysVerifierScan(obj);
 }
 
-#endif
+
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
