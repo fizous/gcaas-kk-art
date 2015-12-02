@@ -228,6 +228,27 @@ bool IPCServerMarkerSweep::IsMappedObjectToServer(
   return false;
 }
 
+
+template <class TypeRef>
+bool IPCServerMarkerSweep::IsMappedObjectToAllocationSpace(
+                                        const TypeRef* const ptr_param) const {
+  if(ptr_param == NULL)
+    return false;
+  if(!IsAligned<kObjectAlignment>(ptr_param))
+    return false;
+  const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
+//  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
+//    return true;
+//  }
+  for(int i = KGCSpaceServerAllocInd_; i <= KGCSpaceServerAllocInd_; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 template <class referenceKlass>
 bool IPCServerMarkerSweep::BelongsToOldHeap(
                                   const referenceKlass* const ptr_param) const {
@@ -663,7 +684,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   //const byte* _raw_data_element = NULL;
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    MemberOffset offset(_data_offset + i * width);
+    MemberOffset offset(_data_offset + static_cast<int32_t>(i * width));
     uint32_t _data_read =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
                                                                         offset);
@@ -685,7 +706,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
 //      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
 //    }
-    if(false)
+    if(IsMappedObjectToAllocationSpace(element_content))
       visitor(mapped_arr, element_content, offset, false);
   }
 
