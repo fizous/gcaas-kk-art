@@ -66,6 +66,8 @@ constexpr bool kCountJavaLangRefs = false;
 constexpr bool kCheckLocks = kDebugLocking;
 
 
+accounting::BaseHeapBitmap* _temp_heap_beetmap = NULL;
+
 IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     ms_lock_("heap-ipc lock"),
     ms_cond_("heap-ipcs::cond_", ms_lock_),
@@ -871,7 +873,7 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj,
   ArraysVerifierScan(obj, (void*)heap_beetmap);
 }
 
-accounting::BaseHeapBitmap* _temp_heap_beetmap = NULL;
+
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
