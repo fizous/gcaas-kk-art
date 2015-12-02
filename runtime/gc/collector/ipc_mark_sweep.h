@@ -159,6 +159,7 @@ class IPCHeap {
 class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
  public:
 
+  static accounting::BaseHeapBitmap* _temp_heap_beetmap;
   // Parallel GC data structures.
 //  UniquePtr<ThreadPool> thread_pool_;
 
@@ -179,7 +180,8 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   template <typename MarkVisitor>
   inline void ClientScanObjectVisit(const mirror::Object* obj,
       const MarkVisitor& visitor);
-  void ScanObjectVisitVerifyArray(const mirror::Object* obj);
+  void ScanObjectVisitVerifyArray(const mirror::Object* obj,
+      accounting::BaseHeapBitmap* heap_beetmap);
   void ClientVerifyObject(const mirror::Object* obj);
   virtual void FinishPhase();
   virtual void InitializePhase(void);
@@ -230,8 +232,8 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void FindDefaultMarkBitmap();
 
   void PreInitializePhase(void);
-  void HandshakeIPCSweepMarkingPhase(void);
-  void RequestAppSuspension(void);
+  void HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* heap_beetmap = NULL);
+  void RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap = NULL);
   void IPCMarkReachablePhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

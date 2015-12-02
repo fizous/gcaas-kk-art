@@ -861,16 +861,17 @@ void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
 
 
 
-inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) {
+inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj,
+    accounting::BaseHeapBitmap* heap_beetmap) {
   DCHECK(obj != NULL);
   if (kIsDebugBuild && !IsMarked(obj)) {
     heap_->DumpSpaces();
     LOG(FATAL) << "Scanning unmarked object " << obj;
   }
-  ArraysVerifierScan(obj);
+  ArraysVerifierScan(obj, heap_beetmap);
 }
 
-
+accounting::BaseHeapBitmap* _temp_heap_beetmap = NULL;
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
@@ -880,7 +881,7 @@ static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
 
-  param->ScanObjectVisitVerifyArray(obj);
+  param->ScanObjectVisitVerifyArray(obj, _temp_heap_beetmap);
   //param->ClientVerifyObject(obj);
 }
 
@@ -1076,7 +1077,7 @@ void IPCMarkSweep::MarkingPhase(void) {
 
 }
 
-void IPCMarkSweep::RequestAppSuspension(void) {
+void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap) {
   //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
@@ -1090,13 +1091,15 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   //thread_list->ResumeAll();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
-  if(true)
+  if(true) {
+    _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
     mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+  }
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
 }
 
-void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(void) {
+void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* heap_beetmap) {
   Thread* currThread = Thread::Current();
   IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;

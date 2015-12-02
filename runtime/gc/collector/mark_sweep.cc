@@ -87,7 +87,7 @@ constexpr bool kCheckLocks = kDebugLocking;
 
 
 
-void MarkSweep::ArraysVerifierScan(const Object* object) {
+void MarkSweep::ArraysVerifierScan(const Object* object, accounting::BaseHeapBitmap* heap_beetmap) {
   mirror::Class* klass = object->GetClass();
   DCHECK(klass != NULL);
   if (UNLIKELY(klass->IsArrayClass())) {
@@ -98,7 +98,7 @@ void MarkSweep::ArraysVerifierScan(const Object* object) {
       for (size_t i = 0; i < length; ++i) {
         const Object* _element_i = _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
         bool ismrk = false;
-        if(IsMarked(_element_i)) {
+        if(IsMarkedNoLocks(_element_i, heap_beetmap)) {
           ismrk = true;
         }
 
@@ -109,6 +109,20 @@ void MarkSweep::ArraysVerifierScan(const Object* object) {
 
     }
   }
+}
+
+
+bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
+    accounting::BaseHeapBitmap* heap_beetmap) const {
+  if (IsImmune(object)) {
+    return true;
+  }
+  if (current_mark_bitmap_->HasAddress(object)) {
+    return current_mark_bitmap_->Test(object);
+  }
+  if(heap_beetmap != NULL)
+    return heap_beetmap->Test(object);
+  return false;
 }
 
 inline bool MarkSweep::IsMarked(const Object* object) const
