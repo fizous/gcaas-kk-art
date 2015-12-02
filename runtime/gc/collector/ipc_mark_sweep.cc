@@ -29,6 +29,7 @@
 #include "mirror/dex_cache.h"
 
 #include "gc/collector/mark_sweep-inl.h"
+#include "gc/collector/mark_sweep.h"
 
 using ::art::mirror::Class;
 using ::art::mirror::Object;
