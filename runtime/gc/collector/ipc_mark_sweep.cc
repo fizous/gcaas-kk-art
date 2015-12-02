@@ -877,7 +877,7 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) 
       size_t length = static_cast<size_t>(_arr->GetLength());
       for (size_t i = 0; i < length; ++i) {
         LOG(ERROR) << "client; arr; " << obj << "; length; " << length <<
-            "; index; " << i << "; elem; " << _arr->GetWithoutChecks(static_cast<int32_t>(i));;
+            "; index; " << i << "; elem; " << _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));;
       }
 
 
