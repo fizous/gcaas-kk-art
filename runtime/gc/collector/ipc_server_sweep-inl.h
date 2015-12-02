@@ -680,8 +680,6 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
       "; length; " <<  length;
 
-  if(true)
-    return;
 //  if(length == 0)
 //    return;
 
@@ -713,7 +711,12 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
 //    }
    // if(IsMappedObjectToAllocationSpace(element_content))
-      visitor(mapped_arr, element_content, offset, false);
+
+
+    LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
+        "; length; " <<  length << "; index; " << i << "; elem; " << element_content;
+     if(false)
+       visitor(mapped_arr, element_content, offset, false);
   }
 
 }
