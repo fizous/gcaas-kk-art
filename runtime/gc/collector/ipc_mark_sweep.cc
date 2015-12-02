@@ -66,7 +66,7 @@ constexpr bool kCountJavaLangRefs = false;
 constexpr bool kCheckLocks = kDebugLocking;
 
 
-accounting::BaseHeapBitmap* _temp_heap_beetmap = NULL;
+accounting::BaseHeapBitmap* IPCMarkSweep::_temp_heap_beetmap = NULL;
 
 IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     ms_lock_("heap-ipc lock"),
