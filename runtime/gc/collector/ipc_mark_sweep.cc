@@ -1178,8 +1178,9 @@ void IPCMarkSweep::MarkReachableObjects() {
 // Populates the mark stack based on the set of marked objects and
 // recursively marks until the mark stack is emptied.
 void IPCMarkSweep::RecursiveMark() {
-  base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
-  ProcessMarkStack(false);
+  //base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+  //ProcessMarkStack(false);
+  MarkSweep::RecursiveMark();
 }
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
