@@ -49,7 +49,7 @@ class BaseHeapBitmap {
       GCSrvceSharedHeapBitmap* header_addr);
 
   virtual bool Test(const mirror::Object* obj) SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
+  virtual bool TestNoLock(const mirror::Object* obj);
 
   virtual void Clear(const mirror::Object* obj) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 

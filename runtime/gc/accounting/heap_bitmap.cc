@@ -44,6 +44,15 @@ BaseHeapBitmap* BaseHeapBitmap::ReShareHeapBitmap(/*Heap* heap,*/
 }
 
 
+bool BaseHeapBitmap::TestNoLock(const mirror::Object* obj) {
+  SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
+  if (LIKELY(bitmap != NULL)) {
+    return bitmap->Test(obj);
+  } else {
+    LOG(FATAL) << "Test: object does not belong to any bitmap";
+  }
+  return false;
+}
 bool BaseHeapBitmap::Test(const mirror::Object* obj) {
   SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
   if (LIKELY(bitmap != NULL)) {

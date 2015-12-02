@@ -123,7 +123,7 @@ bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
   }
   accounting::BaseHeapBitmap* heap_beetmap = ( accounting::BaseHeapBitmap*)_heap_beetmap;
   if(heap_beetmap != NULL)
-    return heap_beetmap->Test(object);
+    return heap_beetmap->TestNoLock(object);
   return false;
 }
 
