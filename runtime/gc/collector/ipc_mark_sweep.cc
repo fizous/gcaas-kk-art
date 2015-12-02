@@ -874,8 +874,9 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) 
     if (klass->IsObjectArrayClass()) {
       const mirror::ObjectArray<mirror::Object>* _arr =
           obj->AsObjectArray<mirror::Object>();
-      for (size_t i = 0; i < _arr->GetLength(); ++i) {
-        LOG(ERROR) << "client; arr; " << obj << "; length; " << _arr->GetLength() <<
+      size_t length = static_cast<size_t>(_arr->GetLength());
+      for (size_t i = 0; i < length; ++i) {
+        LOG(ERROR) << "client; arr; " << obj << "; length; " << length <<
             "; index; " << i << "; elem; " << _arr->GetWithoutChecks(static_cast<int32_t>(i));;
       }
 

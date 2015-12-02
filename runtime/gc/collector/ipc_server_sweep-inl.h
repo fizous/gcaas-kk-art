@@ -677,8 +677,8 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
         static_cast<size_t>(_length_read);
 
 
-  LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
-      "; length; " <<  length;
+//  LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
+//      "; length; " <<  length;
 
 //  if(length == 0)
 //    return;
