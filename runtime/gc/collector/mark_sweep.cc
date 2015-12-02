@@ -85,6 +85,19 @@ constexpr bool kCountJavaLangRefs = false;
 // Turn off kCheckLocks when profiling the GC since it slows the GC down by up to 40%.
 constexpr bool kCheckLocks = kDebugLocking;
 
+
+inline bool MarkSweep::IsMarked(const Object* object) const
+    SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
+  if (IsImmune(object)) {
+    return true;
+  }
+  DCHECK(current_mark_bitmap_ != NULL);
+  if (current_mark_bitmap_->HasAddress(object)) {
+    return current_mark_bitmap_->Test(object);
+  }
+  return heap_->GetMarkBitmap()->Test(object);
+}
+
 void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
   if (!space->HasBitmapsBound()) {
@@ -1709,17 +1722,6 @@ void MarkSweep::PreserveSomeSoftReferences(Object** list) {
   ProcessMarkStack(true);
 }
 
-inline bool MarkSweep::IsMarked(const Object* object) const
-    SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
-  if (IsImmune(object)) {
-    return true;
-  }
-  DCHECK(current_mark_bitmap_ != NULL);
-  if (current_mark_bitmap_->HasAddress(object)) {
-    return current_mark_bitmap_->Test(object);
-  }
-  return heap_->GetMarkBitmap()->Test(object);
-}
 
 // Unlink the reference list clearing references objects with white
 // referents.  Cleared references registered to a reference queue are
