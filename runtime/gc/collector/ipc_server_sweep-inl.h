@@ -369,9 +369,13 @@ bool IPCServerMarkerSweep::IsObjectArrayMappedKlass(
                                             const mirror::Class* klass) const {
   const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
   if(component_type != NULL) {
-    return(!IsPrimitiveMappedKlass(component_type));
+    return (!IsPrimitiveMappedKlass(component_type));
   }
   return false;
+}
+
+bool IPCServerMarkerSweep::IsMappedArrayClass(const mirror::Class* klass) const {
+  return (GetComponentTypeMappedClass(klass) != NULL);
 }
 
 
@@ -394,7 +398,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
   if(UNLIKELY(klass == cashed_references_client_.java_lang_Class_))
     return 2;
 
-  if(GetComponentTypeMappedClass(klass) != NULL) {
+  if(IsMappedArrayClass(klass)) {
     if(IsObjectArrayMappedKlass(klass))
       return 0;
     return 1;
@@ -538,12 +542,14 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
     //return false;
     cashed_stats_client_.array_count_ += 1;
     //android_atomic_add(1, &(array_count_));
+
     if(mapped_class_type == 0) {
+      return false;
       ServerVisitObjectArrayReferences(
         down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
                                                                     visitor);
     }
-    return false;
+    return true;
   } else if (UNLIKELY(mapped_class_type == 2)) {
     cashed_stats_client_.class_count_ += 1;
     ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
