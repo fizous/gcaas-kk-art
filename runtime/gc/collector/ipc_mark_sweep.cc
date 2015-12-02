@@ -881,7 +881,7 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) 
       for (size_t i = 0; i < length; ++i) {
         mirror::Object* _element_i = _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
         bool ismrk = false;
-        if(IsMarked(_element_i)) {
+        if(reinterpret_cast<MarkSweep*>(this)->IsMarked(_element_i)) {
           ismrk = true;
         }
 
