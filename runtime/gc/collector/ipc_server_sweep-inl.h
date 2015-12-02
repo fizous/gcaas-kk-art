@@ -580,7 +580,7 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
       ServerVisitObjectArrayReferences(
         down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
                                                                     visitor);
-      return false;
+      return true;
     }
     return true;
   } else if (UNLIKELY(mapped_class_type == 2)) {
@@ -706,7 +706,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
 //      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
 //    }
-    if(IsMappedObjectToAllocationSpace(element_content))
+   // if(IsMappedObjectToAllocationSpace(element_content))
       visitor(mapped_arr, element_content, offset, false);
   }
 
