@@ -676,6 +676,12 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
   const size_t length =
         static_cast<size_t>(_length_read);
 
+
+  LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
+      "; length; " <<  length;
+
+  if(true)
+    return;
 //  if(length == 0)
 //    return;
 
@@ -965,7 +971,7 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
     LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
   }
 
-  if(true) {
+  if(false) {
     // This object was not previously marked.
     if(!object_bitmap->Test(obj)) {
       object_bitmap->Set(obj);

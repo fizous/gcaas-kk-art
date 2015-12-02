@@ -179,6 +179,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   template <typename MarkVisitor>
   inline void ClientScanObjectVisit(const mirror::Object* obj,
       const MarkVisitor& visitor);
+  void ScanObjectVisitVerifyArray(const mirror::Object* obj);
   void ClientVerifyObject(const mirror::Object* obj);
   virtual void FinishPhase();
   virtual void InitializePhase(void);

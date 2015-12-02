@@ -859,6 +859,26 @@ void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
 
 
 
+inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) {
+  DCHECK(obj != NULL);
+  if (kIsDebugBuild && !IsMarked(obj)) {
+    heap_->DumpSpaces();
+    LOG(FATAL) << "Scanning unmarked object " << obj;
+  }
+  mirror::Class* klass = obj->GetClass();
+  DCHECK(klass != NULL);
+  if (UNLIKELY(klass->IsArrayClass())) {
+    if (kCountScannedTypes) {
+      ++array_count_;
+    }
+    if (klass->IsObjectArrayClass()) {
+      const mirror::ObjectArray<mirror::Object>* _arr =
+          obj->AsObjectArray<mirror::Object>();
+      LOG(ERROR) << "client; arr; " << obj << "; length; " << _arr->GetLength();
+
+    }
+  }
+}
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
@@ -868,8 +888,8 @@ static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
 //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
 
-
-  param->ClientVerifyObject(obj);
+  param->ScanObjectVisitVerifyArray(obj);
+  //param->ClientVerifyObject(obj);
 }
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
@@ -1069,15 +1089,17 @@ void IPCMarkSweep::RequestAppSuspension(void) {
   Thread* currThread = Thread::Current();
   //thread_list->SuspendAll();
   //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
-  if(false)
-    mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
+
 
   BlockForGCPhase(currThread, space::IPC_GC_PHASE_MARK_RECURSIVE);
+
   //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
+  if(true)
+    mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
 }
