@@ -235,7 +235,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   num_bytes_allocated_ = 0;
 
   // Default mark stack size in bytes.
-  static const size_t default_mark_stack_size = 64 * KB;
+  static const size_t default_mark_stack_size = 128 * KB/*64 * KB*/;
   mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("mark stack", default_mark_stack_size,
       false && (!Runtime::Current()->IsCompiler()) && (true || ART_GC_SERVICE)));
   allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("allocation stack",
