@@ -106,7 +106,8 @@ void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
         }
         LOG(ERROR) << "client; arr; " << object << "; length; " << length <<
             "; index; " << i << "; elem; " <<  _element_i <<
-            "; marked; " << (_element_i == NULL ? "X" : ismrk);
+            "; marked; " <<
+            StringPrintf("%s", (_element_i == NULL) ? "X" : StringPrintf("%s", ismrk ? "true" : "false"));
       }
 
     }
