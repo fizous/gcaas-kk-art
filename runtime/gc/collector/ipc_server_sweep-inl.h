@@ -50,7 +50,7 @@ byte* IPCServerMarkerSweep::GetClientSpaceBegin(int index) const {
 //}
 
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
+inline const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
                                       const uint32_t raw_address_value) const {
 //  if(raw_address_value == 0U)
 //    return nullptr;
@@ -124,7 +124,7 @@ void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_obje
   *word_addr = eq_client_value;
 }
 template <class referenceKlass>
-const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
+inline const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
                                       const referenceKlass* const ref_parm) {
   if(ref_parm == nullptr)
     return nullptr;
@@ -625,16 +625,16 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
   if(false)
     TestMappedBitmap(mapped_object);
 
-  if(!IsMappedObjectMarked(mapped_object)) {
-    LOG(FATAL) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
-        " XXXXX ~~~~~~~~~~~~~~ ";
-  }
+//  if(!IsMappedObjectMarked(mapped_object)) {
+//    LOG(FATAL) << " ~~~~~~~~~~~~~~ XXXXX UNMARKED OBJECT " << mapped_object <<
+//        " XXXXX ~~~~~~~~~~~~~~ ";
+//  }
 
   const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
 
-  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
-    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
-  }
+//  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
+//    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
+//  }
 
   int mapped_class_type = GetMappedClassType(mapped_klass);
   if (UNLIKELY(mapped_class_type < 2)) {
@@ -686,20 +686,22 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //  if(length == 0)
 //    return;
 
-  const size_t width = sizeof(mirror::Object*);
-  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
+//  const size_t width = sizeof(mirror::Object*);
+//  int32_t _data_offset = mirror::Array::DataOffset(width).Int32Value();
   //const byte* _raw_data_element = NULL;
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
-    MemberOffset offset(_data_offset + static_cast<int32_t>(i * width));
+    const size_t width = sizeof(mirror::Object*);
+    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+//    MemberOffset offset(_data_offset + static_cast<int32_t>(i * width));
     uint32_t _data_read =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
                                                                         offset);
     const mirror::Object* element_content =
         MapValueToServer<mirror::Object>(_data_read);
-    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
-      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
-    }
+//    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
+//      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
+//    }
 
 //    _raw_data_element = raw_object_addr + offset.Int32Value();
 //
@@ -717,7 +719,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     const mirror::Object* client_element_content =
         MapReferenceToClientChecks(element_content);
 
-    LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
+    LOG(ERROR) << "arraySe; " << mapped_arr << "; array; " << MapReferenceToClientChecks(mapped_arr) <<
         "; length; " <<  length << "; index; " << i << "; offset; " <<
         offset.Int32Value() << "; elemSe; " <<
         element_content << "; elem; " << client_element_content << "; marked; " <<
