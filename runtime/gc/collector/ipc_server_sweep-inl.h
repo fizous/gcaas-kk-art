@@ -145,7 +145,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(
   if(!BelongsToOldHeap<referenceKlass>(ref_parm)) {
     LOG(FATAL) << "..... MapReferenceToServer: ERROR00.." << ref_parm;
   }
-  if(ref_parm == NULL)
+  if(ref_parm == nullptr)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
 //  if(casted_param < GetClientSpaceEnd(KGCSpaceServerImageInd_)) {
@@ -163,7 +163,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServerChecks(
   LOG(FATAL) << "..... MapReferenceToServerChecks: ERROR001.." << ref_parm <<
       ", casted_param  = " << casted_param;
 
-  return NULL;
+  return nullptr;
 }
 
 
@@ -172,7 +172,7 @@ template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(
                                         const referenceKlass* const ref_parm) {
 
-  if(ref_parm == NULL)
+  if(ref_parm == nullptr)
     return ref_parm;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
 
@@ -192,7 +192,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(
 template <class TypeRef>
 bool IPCServerMarkerSweep::BelongsToServerHeap(
                                         const TypeRef* const ptr_param) const {
-  if(ptr_param == NULL)
+  if(ptr_param == nullptr)
     return true;
   const byte* casted_param = reinterpret_cast<const byte*>(ptr_param);
 //  if(casted_param < GetServerSpaceEnd(KGCSpaceServerImageInd_)) {
@@ -211,7 +211,7 @@ bool IPCServerMarkerSweep::BelongsToServerHeap(
 template <class TypeRef>
 bool IPCServerMarkerSweep::IsMappedObjectToServer(
                                         const TypeRef* const ptr_param) const {
-  if(ptr_param == NULL)
+  if(ptr_param == nullptr)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
@@ -232,7 +232,7 @@ bool IPCServerMarkerSweep::IsMappedObjectToServer(
 template <class TypeRef>
 bool IPCServerMarkerSweep::IsMappedObjectToAllocationSpace(
                                         const TypeRef* const ptr_param) const {
-  if(ptr_param == NULL)
+  if(ptr_param == nullptr)
     return false;
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
@@ -252,7 +252,7 @@ bool IPCServerMarkerSweep::IsMappedObjectToAllocationSpace(
 template <class referenceKlass>
 bool IPCServerMarkerSweep::BelongsToOldHeap(
                                   const referenceKlass* const ptr_param) const {
-  if(ptr_param == NULL)
+  if(ptr_param == nullptr)
     return true;
   if(!IsAligned<kObjectAlignment>(ptr_param))
     return false;
@@ -503,7 +503,7 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(
                                                       ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != NULL && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
+  if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
     bool is_enqueued_object = IsMappedReferentEnqueued(obj);
@@ -718,7 +718,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
         "; length; " <<  length << "; index; " << i << "; offset; " <<
         offset.Int32Value() << "; elemSe; " <<
         element_content << "; elem; " << client_element_content << "; marked; " <<
-        StringPrintf("%s", ((element_content == NULL) ? "XX" : (IsMappedObjectMarked(element_content) ? "true" : "false")));
+        StringPrintf("%s", ((element_content == nullptr) ? "XX" : (IsMappedObjectMarked(element_content) ? "true" : "false")));
 
      if(false)
        visitor(mapped_arr, element_content, offset, false);
@@ -866,8 +866,8 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
     // offsets the hard way. In the static case, just consider this
     // class.
     for (const mirror::Class* klass = is_static ? down_cast<const mirror::Class*>(obj) : GetMappedObjectKlass(obj);
-         klass != NULL;
-         klass = is_static ? NULL : GetSuperMappedClass(klass)) {
+         klass != nullptr;
+         klass = is_static ? nullptr : GetSuperMappedClass(klass)) {
       size_t num_reference_fields = (is_static
                                      ? GetNumReferenceStaticFields(klass)
                                      : GetNumReferenceInstanceFields(klass));
@@ -952,7 +952,7 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
 //}
 
 inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
-  DCHECK(obj != NULL);
+  DCHECK(obj != nullptr);
 
   if(!IsMappedObjectToServer<mirror::Object>(obj)) {
     LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
