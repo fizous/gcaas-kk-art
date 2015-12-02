@@ -861,7 +861,7 @@ void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
 
 
 
-
+#if (true || ART_GC_SERVICE)
 inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) {
   DCHECK(obj != NULL);
   if (kIsDebugBuild && !IsMarked(obj)) {
@@ -894,6 +894,8 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj) 
     }
   }
 }
+
+#endif
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
     void* args) {
