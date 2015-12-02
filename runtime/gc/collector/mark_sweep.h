@@ -338,7 +338,7 @@ class MarkSweep : public GarbageCollector {
   }
 
   void ArraysVerifierScan(const mirror::Object* object,
-      accounting::BaseHeapBitmap* heap_beetmap)
+      void* heap_beetmap)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
     EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 
@@ -347,7 +347,7 @@ class MarkSweep : public GarbageCollector {
   bool IsMarked(const mirror::Object* object) const;
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarkedNoLocks(const mirror::Object* object,
-      accounting::BaseHeapBitmap* heap_beetmap =NULL) const;
+      void* heap_beetmap =NULL) const;
 
   static bool IsMarkedCallback(const mirror::Object* object, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
