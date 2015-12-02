@@ -90,6 +90,7 @@ class ServerMarkObjectVisitorRemoval {
 
 void IPCServerMarkerSweep::ResetStats(void) {
   memset(&cashed_stats_client_, 0, sizeof(space::GCSrvceCashedStatsCounters));
+  pushed_back_to_stack_ = 0;
 }
 
 IPCServerMarkerSweep::IPCServerMarkerSweep(
