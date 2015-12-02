@@ -337,7 +337,8 @@ class MarkSweep : public GarbageCollector {
     clear_soft_references_ = val;
   }
 
-  void ArraysVerifierScan(const mirror::Object* object);
+  void ArraysVerifierScan(const mirror::Object* object)
+    SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
