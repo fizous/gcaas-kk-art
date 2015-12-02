@@ -87,7 +87,7 @@ constexpr bool kCheckLocks = kDebugLocking;
 
 
 
-void MarkSweep::ArraysVerifierScan(const Object* object, accounting::BaseHeapBitmap* _heap_beetmap) {
+void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
   mirror::Class* klass = object->GetClass();
   DCHECK(klass != NULL);
   if (UNLIKELY(klass->IsArrayClass())) {

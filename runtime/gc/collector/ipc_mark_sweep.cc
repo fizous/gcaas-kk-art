@@ -868,7 +868,7 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj,
     heap_->DumpSpaces();
     LOG(FATAL) << "Scanning unmarked object " << obj;
   }
-  ArraysVerifierScan(obj, heap_beetmap);
+  ArraysVerifierScan(obj, (void*)heap_beetmap);
 }
 
 accounting::BaseHeapBitmap* _temp_heap_beetmap = NULL;
