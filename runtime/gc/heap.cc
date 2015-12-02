@@ -1388,7 +1388,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         }
 
 
-        static const size_t default_mark_stack_size = 256 * KB;
+        static const size_t default_mark_stack_size = 512 * KB;
         mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
             &(_struct_alloc_space->heap_meta_.mark_stack_data_), true,
             default_mark_stack_size));
