@@ -28,6 +28,8 @@
 #include "mirror/class_loader.h"
 #include "mirror/dex_cache.h"
 
+#include "gc/collector/mark_sweep.h"
+
 using ::art::mirror::Class;
 using ::art::mirror::Object;
 namespace art {
