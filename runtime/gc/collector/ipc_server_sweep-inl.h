@@ -250,35 +250,46 @@ bool IPCServerMarkerSweep::BelongsToOldHeap(
 
 const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(
                                       const mirror::Object* mapped_obj_parm) {
-  const byte* raw_addr_class = reinterpret_cast<const byte*>(mapped_obj_parm) +
-      mirror::Object::ClassOffset().Int32Value();
-  const mirror::Class* class_address =
-      *reinterpret_cast<mirror::Class* const *>(raw_addr_class);
-  if (UNLIKELY(class_address == NULL)) {
-    LOG(FATAL) << "ERROR2....Null class in object: " << mapped_obj_parm;
-  } else if (UNLIKELY(!IsAligned<kObjectAlignment>(class_address))) {
-    LOG(FATAL) << "ERROR3.....Class isn't aligned: " << class_address <<
-        " in object: " << mapped_obj_parm;
-  } else if(!BelongsToOldHeap<mirror::Class>(class_address)) {
-    LOG(FATAL) << "ERROR4.....Class isn't aligned: " << class_address <<
-        " in object: " << mapped_obj_parm;
+  uint32_t _raw_class_value =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_obj_parm),
+          mirror::Object::ClassOffset());
+  const mirror::Class* c = MapValueToServer<mirror::Class>(_raw_class_value);
+
+
+  if(false) {
+
+    const byte* raw_addr_class = reinterpret_cast<const byte*>(mapped_obj_parm) +
+        mirror::Object::ClassOffset().Int32Value();
+    const mirror::Class* class_address =
+        *reinterpret_cast<mirror::Class* const *>(raw_addr_class);
+    if (UNLIKELY(class_address == NULL)) {
+      LOG(FATAL) << "ERROR2....Null class in object: " << mapped_obj_parm;
+    } else if (UNLIKELY(!IsAligned<kObjectAlignment>(class_address))) {
+      LOG(FATAL) << "ERROR3.....Class isn't aligned: " << class_address <<
+          " in object: " << mapped_obj_parm;
+    } else if(!BelongsToOldHeap<mirror::Class>(class_address)) {
+      LOG(FATAL) << "ERROR4.....Class isn't aligned: " << class_address <<
+          " in object: " << mapped_obj_parm;
+    }
+
+  //  if(class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+  //      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
+  //  }
+    const mirror::Class* mapped_class_address =
+        MapReferenceToServerChecks<mirror::Class>(class_address);
+  //  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+  //      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
+  //  }
+
+
+    if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
+      LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
+              " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
+    }
+    return mapped_class_address;
   }
 
-//  if(class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-//      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00000";
-//  }
-  const mirror::Class* mapped_class_address =
-      MapReferenceToServerChecks<mirror::Class>(class_address);
-//  if(mapped_class_address == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-//      LOG(FATAL) << "..... IPCServerMarkerSweep::GetMappedObjectKlass: ERROR00001";
-//  }
-
-
-  if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
-    LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
-            " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
-  }
-  return mapped_class_address;
+  return c;
 }
 
 
@@ -544,10 +555,11 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
     //android_atomic_add(1, &(array_count_));
 
     if(mapped_class_type == 0) {
-      return false;
+
       ServerVisitObjectArrayReferences(
         down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
                                                                     visitor);
+      return false;
     }
     return true;
   } else if (UNLIKELY(mapped_class_type == 2)) {
@@ -673,7 +685,8 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //    if(!(IsMappedObjectToServer<mirror::Object>(element_content))) {
 //      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
 //    }
-    visitor(mapped_arr, element_content, offset, false);
+    if(false)
+      visitor(mapped_arr, element_content, offset, false);
   }
 
 }
