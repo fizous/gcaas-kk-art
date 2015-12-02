@@ -77,7 +77,7 @@ template <class referenceKlass>
 uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
                                 const referenceKlass* mapped_reference) const {
   if(mapped_reference == nullptr)
-    return 0U;
+    return static_cast<uint32_t>(nullptr);
   const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetServerSpaceEnd(i)) &&
@@ -90,7 +90,7 @@ uint32_t IPCServerMarkerSweep::MapReferenceToValueClient(
 
   LOG(FATAL) << "IPCServerMarkerSweep::MapReferenceToValueClient....0000--raw_Address_value:"
       << mapped_reference;
-  return 0U;
+  return static_cast<uint32_t>(nullptr);
 }
 
 
