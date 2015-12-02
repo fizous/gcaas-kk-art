@@ -1092,7 +1092,7 @@ void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
   if(true) {
-    _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
+    _temp_heap_beetmap = heap_beetmap;//ipc_heap_->local_heap_->GetMarkBitmap();
     mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   }
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
@@ -1183,7 +1183,8 @@ void IPCMarkSweep::MarkReachableObjects() {
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
-  HandshakeIPCSweepMarkingPhase();
+
+  HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
   RecursiveMark();
 
