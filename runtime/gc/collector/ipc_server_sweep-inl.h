@@ -715,7 +715,7 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 
     LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
         "; length; " <<  length << "; index; " << i << "; elem; " <<
-        MapReferenceToClientChecks(element_content);
+        MapReferenceToClientChecks(element_content) << "; marked; " << IsMappedObjectMarked(element_content);
      if(false)
        visitor(mapped_arr, element_content, offset, false);
   }
