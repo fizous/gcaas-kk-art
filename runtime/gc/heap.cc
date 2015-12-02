@@ -199,7 +199,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   alloc_space_->SetFootprintLimit(alloc_space_->Capacity());
   AddContinuousSpace(alloc_space_);
 
-  DumpSpaces();
+  //DumpSpaces();
   // Allocate the large object space.
   if(!GC_HEAP_SRVCE_NO_LOS) {
     const bool kUseFreeListSpaceForLOS = false;
@@ -1416,8 +1416,8 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   for (const auto& collector : mark_sweep_collectors_) {
     collector->ResetCumulativeStatistics();
   }
-  LOG(ERROR) << "...........BEfore RTURTNING FROM POST ZYGOTE................";
-  DumpSpaces();
+  //LOG(ERROR) << "...........BEfore RTURTNING FROM POST ZYGOTE................";
+  //DumpSpaces();
   return;
  // } else {
     // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
