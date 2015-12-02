@@ -98,11 +98,12 @@ void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
       for (size_t i = 0; i < length; ++i) {
         const Object* _element_i = _arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
         bool ismrk = false;
-        //accounting::BaseHeapBitmap* heap_beetmap = ( accounting::BaseHeapBitmap*)_heap_beetmap;
-        if(IsMarkedNoLocks(_element_i, _heap_beetmap)) {
-          ismrk = true;
+        if(_element_i != NULL) {
+          //accounting::BaseHeapBitmap* heap_beetmap = ( accounting::BaseHeapBitmap*)_heap_beetmap;
+          if(IsMarkedNoLocks(_element_i, _heap_beetmap)) {
+            ismrk = true;
+          }
         }
-
         LOG(ERROR) << "client; arr; " << object << "; length; " << length <<
             "; index; " << i << "; elem; " <<  _element_i <<
             "; marked; " << (_element_i == NULL ? "X" : ismrk);
