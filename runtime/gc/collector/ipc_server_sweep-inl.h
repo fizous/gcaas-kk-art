@@ -53,7 +53,7 @@ template <class referenceKlass>
 const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
                                       const uint32_t raw_address_value) const {
   if(raw_address_value == 0U)
-    return NULL;
+    return nullptr;
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
     if((_raw_address < GetClientSpaceEnd(i)) &&
@@ -66,7 +66,7 @@ const referenceKlass* IPCServerMarkerSweep::MapValueToServer(
 
   LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
       << raw_address_value;
-  return NULL;
+  return nullptr;
 }
 
 
@@ -711,12 +711,14 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
 //      LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0002";
 //    }
    // if(IsMappedObjectToAllocationSpace(element_content))
-
+    const mirror::Object* client_element_content =
+        MapReferenceToClientChecks(element_content);
 
     LOG(ERROR) << "array; " << MapReferenceToClientChecks(mapped_arr) <<
-        "; length; " <<  length << "; index; " << i << "; elem; " <<
-        MapReferenceToClientChecks(element_content) << "; marked; " <<
-        StringPrintf("%s", (element_content == NULL) ? "XX" : (IsMappedObjectMarked(element_content) ? "true" : "false"));
+        "; length; " <<  length << "; index; " << i << "; offset; " <<
+        offset.Int32Value() << "; elemSe; " <<
+        element_content << "; elem; " << client_element_content << "; marked; " <<
+        StringPrintf("%s", ((element_content == NULL) ? "XX" : (IsMappedObjectMarked(element_content) ? "true" : "false")));
 
      if(false)
        visitor(mapped_arr, element_content, offset, false);

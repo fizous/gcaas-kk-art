@@ -104,8 +104,11 @@ void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
             ismrk = true;
           }
         }
+        const size_t width = sizeof(mirror::Object*);
+        MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
         LOG(ERROR) << "client; arr; " << object << "; length; " << length <<
-            "; index; " << i << "; elem; " <<  _element_i <<
+            "; index; " << i << "; offset; " <<
+            offset.Int32Value() << "; elem; " <<  _element_i <<
             "; marked; " <<
             StringPrintf("%s", ((_element_i == NULL) ? "XX" : (ismrk ? "true" : "false")));
       }
