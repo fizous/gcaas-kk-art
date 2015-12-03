@@ -607,20 +607,20 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
 template <typename MarkVisitor>
 void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
-  if(!BelongsToOldHeap<mirror::Object>(obj)) {
-    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
-  }
+//  if(!BelongsToOldHeap<mirror::Object>(obj)) {
+//    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
+//  }
   const mirror::Object* mapped_object =
                                 MapReferenceToServerChecks<mirror::Object>(obj);
 
 
 
-  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
-    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
-  }
-  if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
-      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
-  }
+//  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
+//    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
+//  }
+//  if(mapped_object == reinterpret_cast<const mirror::Object*>(GetClientSpaceEnd(KGCSpaceServerImageInd_))) {
+//      LOG(FATAL) << "..... ServerScanObjectVisit: ERROR02";
+//  }
 
   if(false)
     TestMappedBitmap(mapped_object);
@@ -664,9 +664,9 @@ template <typename Visitor>
 void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                           const mirror::ObjectArray<mirror::Object>* mapped_arr,
                                                   const Visitor& visitor) {
-  if(!(IsMappedObjectToServer<mirror::ObjectArray<mirror::Object>>(mapped_arr))) {
-    LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0000";
-  }
+//  if(!(IsMappedObjectToServer<mirror::ObjectArray<mirror::Object>>(mapped_arr))) {
+//    LOG(FATAL) << "ServerVisitObjectArrayReferences:: 0000";
+//  }
 
   uint32_t _length_read =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
@@ -959,9 +959,9 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
 inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
   DCHECK(obj != nullptr);
 
-  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
-    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
-  }
+//  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
+//    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
+//  }
   if (IsMappedObjectImmuned(obj)) {
     return;
   }

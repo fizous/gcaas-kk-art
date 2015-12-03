@@ -512,6 +512,10 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     //Reset();
   }
 
+  void AdjustIndeces(void){
+    android_atomic_acquire_store(0, &(stack_data_->front_index_));
+    android_atomic_acquire_store(0, &(stack_data_->back_index_));
+  }
 
   void Reset() {
     DCHECK(mem_map_.get() != NULL);
