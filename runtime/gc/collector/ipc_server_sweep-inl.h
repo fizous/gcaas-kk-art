@@ -306,10 +306,10 @@ const mirror::Class* IPCServerMarkerSweep::GetMappedObjectKlass(
   //  }
 
 
-    if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
-      LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
-              " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
-    }
+//    if(!BelongsToServerHeap<mirror::Class>(mapped_class_address)) {
+//      LOG(FATAL) << "IPCServerMarkerSweep::GetMappedObjectKlass..5.....Class isn't aligned: " << class_address <<
+//              " in object: " << mapped_obj_parm << "..mapped_class = " << mapped_class_address;
+//    }
     return mapped_class_address;
   }
 
@@ -918,16 +918,15 @@ inline bool IPCServerMarkerSweep::IsMappedObjectMarked(
   bool _resultTestFlag = false;
   bool _resultHasAddress = obj_beetmap->HasAddress(object);
   if(!_resultHasAddress) {
-    if(!_resultHasAddress) {
-      for (const auto& beetmap : mark_bitmaps_) {
-        _resultHasAddress = beetmap->HasAddress(object);
-        if(_resultHasAddress) {
-          obj_beetmap = beetmap;
-          break;
-        }
+    for (const auto& beetmap : mark_bitmaps_) {
+      _resultHasAddress = beetmap->HasAddress(object);
+      if(_resultHasAddress) {
+        obj_beetmap = beetmap;
+        break;
       }
     }
   }
+
 
 
   if(_resultHasAddress) {
