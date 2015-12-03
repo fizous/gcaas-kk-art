@@ -28,7 +28,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
   if(true)
   {
 
-    Thread* self = Thread::Current();
+    //Thread* self = Thread::Current();
 
 
     // Grab exclusively the mutator lock, set state to Runnable without checking for a pending
