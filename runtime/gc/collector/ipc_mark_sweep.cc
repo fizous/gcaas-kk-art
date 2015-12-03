@@ -1080,9 +1080,9 @@ void IPCMarkSweep::MarkingPhase(void) {
 }
 
 void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap) {
-  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  //ThreadList* thread_list = Runtime::Current()->GetThreadList();
   Thread* currThread = Thread::Current();
-  thread_list->SuspendAll();
+  //thread_list->SuspendAll();
   //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
 
 
@@ -1090,14 +1090,13 @@ void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap
 
   //IPC_MARKSWEEP_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
-
+  //thread_list->ResumeAll();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
   if(true) {
     _temp_heap_beetmap = heap_beetmap;//ipc_heap_->local_heap_->GetMarkBitmap();
     mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   }
-  thread_list->ResumeAll();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
 
 }
@@ -1112,6 +1111,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
   } else {
+    LOG(FATAL) << "DANGER::::::::#### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   }

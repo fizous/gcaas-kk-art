@@ -25,11 +25,23 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index) : index_(index), sharable_space_(sharable_space) {
   if(true)
   {
-    ipcHeap_ =
-        new gc::collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
-                                                  Runtime::Current()->GetHeap());
+    Runtime* runtime = Runtime::Current();
+    Thread* self = Thread::Current();
+    ThreadList* thread_list = runtime->GetThreadList();
 
-    ipcHeap_->CreateCollectors();
+    // Grab exclusively the mutator lock, set state to Runnable without checking for a pending
+    // suspend request as we're going to suspend soon anyway. We set the state to Runnable to avoid
+    // giving away the mutator lock.
+    thread_list->SuspendAll();
+    {
+      ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
+      ipcHeap_ =
+          new gc::collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
+                                                    Runtime::Current()->GetHeap());
+
+      ipcHeap_->CreateCollectors();
+    }
+    thread_list->ResumeAll();
 
 
 //    collector_ =
