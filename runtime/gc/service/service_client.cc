@@ -13,6 +13,8 @@
 #include "runtime.h"
 #include "ipcfs/ipcfs.h"
 #include "gc/collector/ipc_mark_sweep.h"
+#include "thread.h"
+#include "thread_list.h"
 
 namespace art {
 
