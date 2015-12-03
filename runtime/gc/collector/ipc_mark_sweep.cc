@@ -1093,7 +1093,7 @@ void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap
   //thread_list->ResumeAll();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
-  if(true) {
+  if(false) {
     _temp_heap_beetmap = heap_beetmap;//ipc_heap_->local_heap_->GetMarkBitmap();
     mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   }

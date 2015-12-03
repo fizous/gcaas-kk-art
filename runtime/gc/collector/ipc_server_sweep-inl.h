@@ -719,13 +719,14 @@ void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
     const mirror::Object* client_element_content =
         MapReferenceToClientChecks(element_content);
 
+    if(false) {
     LOG(ERROR) << "arraySe; " << mapped_arr << "; array; " << MapReferenceToClientChecks(mapped_arr) <<
         "; length; " <<  length << "; index; " << i << "; offset; " <<
         offset.Int32Value() << "; elemSe; " <<
         element_content << "; elem; " << client_element_content << "; marked; " <<
         StringPrintf("%s", ((element_content == nullptr) ? "XX" : (IsMappedObjectMarked(element_content) ? "true" : "false"))) << "; data_r; " << _data_read ;
-
-     if(false)
+    }
+     if(true)
        visitor(mapped_arr, element_content, offset, false);
   }
 
@@ -984,15 +985,15 @@ inline void IPCServerMarkerSweep::MarkObjectNonNull(const mirror::Object* obj) {
     LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
   }
 
-  if(false) {
+  if(true) {
     // This object was not previously marked.
     if(!object_bitmap->Test(obj)) {
       object_bitmap->Set(obj);
       //TODO:: check the need to resize the mark stack here
       const mirror::Object* oject_pushed = MapReferenceToClientChecks(obj);
-      if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
-        LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
-      }
+//      if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
+//        LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
+//      }
       pushed_back_to_stack_++;
 //      LOG(ERROR) << "MarkObjectNonNull..object stack: " << oject_pushed;
       mark_stack_->PushBack(const_cast<mirror::Object*>(oject_pushed));
