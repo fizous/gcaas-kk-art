@@ -1189,8 +1189,8 @@ void IPCMarkSweep::MarkReachableObjects() {
 
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
-  RecursiveMark();
-
+  //RecursiveMark();
+  MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
@@ -1201,7 +1201,7 @@ void IPCMarkSweep::MarkReachableObjects() {
 void IPCMarkSweep::RecursiveMark() {
   //base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
   //ProcessMarkStack(false);
-  MarkSweep::RecursiveMark();
+  //MarkSweep::RecursiveMark();
 }
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {

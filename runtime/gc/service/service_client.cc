@@ -27,23 +27,19 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index) : index_(index), sharable_space_(sharable_space) {
   if(true)
   {
-    Runtime* runtime = Runtime::Current();
+
     Thread* self = Thread::Current();
-    ThreadList* thread_list = runtime->GetThreadList();
+
 
     // Grab exclusively the mutator lock, set state to Runnable without checking for a pending
     // suspend request as we're going to suspend soon anyway. We set the state to Runnable to avoid
     // giving away the mutator lock.
-    thread_list->SuspendAll();
-    {
-      ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
+
       ipcHeap_ =
           new gc::collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
                                                     Runtime::Current()->GetHeap());
 
       ipcHeap_->CreateCollectors();
-    }
-    thread_list->ResumeAll();
 
 
 //    collector_ =
@@ -108,15 +104,32 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
   //Thread* self = Thread::Current();
 
   Runtime* runtime = Runtime::Current();
-  gc::Heap* heap = runtime->GetHeap();
-  gc::space::SharableDlMallocSpace* _sharable_space =
-        reinterpret_cast<gc::space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
 
-  if(!_sharable_space->RegisterGlobalCollector(se_name_c_str))
-    return;
-  LOG(ERROR) << " {InitClient} ";
-  service_client_ = new GCServiceClient(_sharable_space,
-      _sharable_space->GetSpaceIndex());
+
+
+  Thread* self = Thread::Current();
+  ThreadList* thread_list = runtime->GetThreadList();
+
+  // Grab exclusively the mutator lock, set state to Runnable without checking for a pending
+  // suspend request as we're going to suspend soon anyway. We set the state to Runnable to avoid
+  // giving away the mutator lock.
+  bool result = true;
+  thread_list->SuspendAll();
+  {
+    gc::Heap* heap = runtime->GetHeap();
+    ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
+    gc::space::SharableDlMallocSpace* _sharable_space =
+          reinterpret_cast<gc::space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
+
+    result = _sharable_space->RegisterGlobalCollector(se_name_c_str);
+
+    if(result) {
+      LOG(ERROR) << " {InitClient} ";
+      service_client_ = new GCServiceClient(_sharable_space,
+          _sharable_space->GetSpaceIndex());
+    }
+  }
+  thread_list->ResumeAll();
 }
 
 
