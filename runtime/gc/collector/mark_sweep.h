@@ -94,7 +94,6 @@ class MarkSweep : public GarbageCollector {
 
   ~MarkSweep() {}
 
-  virtual void SetCumulativeTimeStatsRecPhase();
   virtual void InitializePhase();
   virtual bool IsConcurrent() const;
   virtual bool HandleDirtyObjectsPhase() EXCLUSIVE_LOCKS_REQUIRED(Locks::mutator_lock_);
