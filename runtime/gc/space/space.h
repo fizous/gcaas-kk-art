@@ -198,6 +198,9 @@ typedef struct GCSrvceCashedStatsCounters_S {
   volatile int32_t class_count_;
   volatile int32_t other_count_;
   volatile int32_t reference_count_;
+
+
+  GCSrvceCollectorTimeStats total_stats_;
 }__attribute__((aligned(8))) GCSrvceCashedStatsCounters;
 
 typedef struct GCSrvceCashedReferenceOffsets_S {
@@ -218,7 +221,6 @@ typedef struct GCSrvceCollectorTimeStats_S {
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
   GCSrvceCashedStatsCounters cashed_stats_;
-  GCSrvceCollectorTimeStats time_stats_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
   accounting::GCSrvceBitmap* volatile current_mark_bitmap_;

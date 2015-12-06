@@ -27,9 +27,9 @@ namespace collector {
 
 PartialMarkSweep::PartialMarkSweep(Heap* heap, bool is_concurrent,
     space::GCSrvceCashedReferences* cashed_reference_record,
-    space::GCSrvceCollectorTimeStats* time_stats_record,
+    space::GCSrvceCashedStatsCounters* stats_record,
     const std::string& name_prefix)
-    : MarkSweep(heap, is_concurrent, cashed_reference_record, time_stats_record,
+    : MarkSweep(heap, is_concurrent, cashed_reference_record, stats_record,
         name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
   cumulative_timings_.SetName(GetName());
 }

@@ -88,8 +88,8 @@ class MarkSweep : public GarbageCollector {
   explicit MarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
-          space::GCSrvceCollectorTimeStats* time_stats_record =
-              (space::GCSrvceCollectorTimeStats*) calloc(1, sizeof(space::GCSrvceCollectorTimeStats)),
+          space::GCSrvceCashedStatsCounters* stats_record =
+              (space::GCSrvceCashedStatsCounters*) calloc(1, sizeof(space::GCSrvceCashedStatsCounters)),
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
@@ -207,6 +207,7 @@ class MarkSweep : public GarbageCollector {
   void IncFreedBytes(size_t val) {
     android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_bytes_));
   }
+
   size_t GetFreedLargeObjectBytes() const {
     return stats_counters_->freed_large_object_bytes_;
   }

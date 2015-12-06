@@ -33,8 +33,8 @@ class PartialMarkSweep : public MarkSweep {
   explicit PartialMarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
-          space::GCSrvceCollectorTimeStats* time_stats_record =
-              (space::GCSrvceCollectorTimeStats*) calloc(1, sizeof(space::GCSrvceCollectorTimeStats)),
+          space::GCSrvceCashedStatsCounters* stats_record =
+              (space::GCSrvceCashedStatsCounters*) calloc(1, sizeof(space::GCSrvceCashedStatsCounters)),
           const std::string& name_prefix = "");
   ~PartialMarkSweep() {}
 

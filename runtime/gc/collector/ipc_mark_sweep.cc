@@ -893,9 +893,9 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         &meta_data_->cashed_references_,
-        &meta_data_->time_stats_,
+        &meta_data_->cashed_stats_,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
-  time_stats_ = &meta_data_->time_stats_;
+//  time_stats_ = &meta_data_->time_stats_;
   IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() <<
       "; gcType: " << GetGcType() << "; conc:" << IsConcurrent() << " ###########";
 }
