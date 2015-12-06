@@ -90,7 +90,6 @@ class MarkSweep : public GarbageCollector {
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
           space::GCSrvceCollectorTimeStats* time_stats_record =
               (space::GCSrvceCollectorTimeStats*) calloc(1, sizeof(space::GCSrvceCollectorTimeStats)),
-
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
