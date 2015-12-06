@@ -197,7 +197,8 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
     const std::string& name_prefix) :
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
-               (is_concurrent ? "concurrent mark sweep": "mark sweep")),
+               (is_concurrent ? "concurrent mark sweep": "mark sweep"),
+               time_stats_record),
       current_mark_bitmap_(NULL),
       mark_stack_(NULL),
       gc_barrier_(new Barrier(0)),
@@ -205,7 +206,6 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
       cashed_references_record_(cashed_reference_record),
-      time_stats_(time_stats_record),
       clear_soft_references_(false) {
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());

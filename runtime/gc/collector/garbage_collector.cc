@@ -33,13 +33,15 @@ namespace art {
 namespace gc {
 namespace collector {
 
-GarbageCollector::GarbageCollector(Heap* heap, const std::string& name)
+GarbageCollector::GarbageCollector(Heap* heap, const std::string& name,
+    space::GCSrvceCollectorTimeStats* time_records)
     : heap_(heap),
       name_(name),
       verbose_(VLOG_IS_ON(heap)),
       duration_ns_(0),
       timings_(name_.c_str(), true, verbose_),
-      cumulative_timings_(name) {
+      cumulative_timings_(name),
+      time_stats_(time_records){
   ResetCumulativeStatistics();
 }
 

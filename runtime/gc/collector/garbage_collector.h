@@ -36,7 +36,8 @@ class GarbageCollector {
   // Returns true iff the garbage collector is concurrent.
   virtual bool IsConcurrent() const = 0;
 
-  GarbageCollector(Heap* heap, const std::string& name);
+  GarbageCollector(Heap* heap, const std::string& name,
+      space::GCSrvceCollectorTimeStats* time_records);
   virtual ~GarbageCollector() { }
 
   const char* GetName() const {
@@ -79,7 +80,7 @@ class GarbageCollector {
   virtual void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Cumulative statistics.
 #if (true||ART_GC_SERVICE)
-  gc::space::GCSrvceCollectorTimeStats* time_stats_;
+  space::GCSrvceCollectorTimeStats* time_stats_;
 #endif
  protected:
   // The initial phase. Done without mutators paused.
