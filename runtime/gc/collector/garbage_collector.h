@@ -77,7 +77,10 @@ class GarbageCollector {
   // Swap the live and mark bitmaps of spaces that are active for the collector. For partial GC,
   // this is the allocation space, for full GC then we swap the zygote bitmaps too.
   virtual void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-
+  // Cumulative statistics.
+#if (true||ART_GC_SERVICE)
+  gc::space::GCSrvceCollectorTimeStats* time_stats_;
+#endif
  protected:
   // The initial phase. Done without mutators paused.
   virtual void InitializePhase() = 0;
@@ -108,7 +111,6 @@ class GarbageCollector {
 
   // Cumulative statistics.
 #if (true||ART_GC_SERVICE)
-  gc::space::GCSrvceCollectorTimeStats* time_stats_;
 #else
   uint64_t total_time_ns_;
   uint64_t total_paused_time_ns_;
