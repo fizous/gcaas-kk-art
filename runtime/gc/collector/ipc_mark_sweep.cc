@@ -148,8 +148,8 @@ bool IPCHeap::StartCollectorDaemon(void) {
 
 void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   //meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-  meta_->freed_objects_   = 0;
-  meta_->freed_bytes_     = 0;
+//  meta_->freed_objects_   = 0;
+//  meta_->freed_bytes_     = 0;
   meta_->barrier_count_   = 0;
   meta_->conc_flag_       = 0;
 //  meta_->is_gc_complete_  = 0;
@@ -687,8 +687,8 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
  // heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-  heap_meta_->freed_objects_ = 0;
-  heap_meta_->freed_bytes_ = 0;
+//  heap_meta_->freed_objects_ = 0;
+//  heap_meta_->freed_bytes_ = 0;
   heap_meta_->barrier_count_ = 0;
   heap_meta_->conc_flag_ = 0;
 //  heap_meta_->is_gc_complete_ = 0;
@@ -943,20 +943,18 @@ void IPCMarkSweep::InitializePhase(void) {
   SetPhantomReferenceList(nullptr);
   SetClearedReferenceList(nullptr);
   SetCachedJavaLangClass(Class::GetJavaLangClass());
-  freed_bytes_ = 0;
-  freed_large_object_bytes_ = 0;
-  freed_objects_ = 0;
-  freed_large_objects_ = 0;
-  class_count_ = 0;
-  array_count_ = 0;
-  other_count_ = 0;
+
+
+
+  ResetCollectorStats();
+
   large_object_test_ = 0;
   large_object_mark_ = 0;
   classes_marked_ = 0;
   overhead_time_ = 0;
   work_chunks_created_ = 0;
   work_chunks_deleted_ = 0;
-  reference_count_ = 0;
+
 
   FindDefaultMarkBitmap();
   IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::InitializePhase. going for GCVerification: _______ " <<

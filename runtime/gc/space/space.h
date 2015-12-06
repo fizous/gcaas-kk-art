@@ -184,6 +184,16 @@ typedef struct GCSrvceCashedReferences_S {
 
 
 typedef struct GCSrvceCashedStatsCounters_S {
+  // Number of non large object bytes freed in this collection.
+  volatile int32_t freed_bytes_;
+  // Number of large object bytes freed.
+  volatile int32_t freed_large_object_bytes_;
+  // Number of objects freed in this collection.
+  volatile int32_t freed_objects_;
+  // Number of freed large objects.
+  volatile int32_t freed_large_objects_;
+
+
   volatile int32_t array_count_;
   volatile int32_t class_count_;
   volatile int32_t other_count_;
@@ -276,8 +286,8 @@ typedef struct GCSrvSharableHeapData_S {
   volatile int gc_type_;
 
   /* collection stats */
-  volatile int32_t freed_objects_;
-  volatile int32_t freed_bytes_;
+//  volatile int32_t freed_objects_;
+//  volatile int32_t freed_bytes_;
   volatile int32_t conc_count_;
   volatile int32_t explicit_count_;
 

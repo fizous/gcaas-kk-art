@@ -225,20 +225,14 @@ void MarkSweep::InitializePhase() {
   SetFinalizerReferenceList(nullptr);
   SetPhantomReferenceList(nullptr);
   SetClearedReferenceList(nullptr);
-  freed_bytes_ = 0;
-  freed_large_object_bytes_ = 0;
-  freed_objects_ = 0;
-  freed_large_objects_ = 0;
-  class_count_ = 0;
-  array_count_ = 0;
-  other_count_ = 0;
+  ResetCollectorStats();
+
   large_object_test_ = 0;
   large_object_mark_ = 0;
   classes_marked_ = 0;
   overhead_time_ = 0;
   work_chunks_created_ = 0;
   work_chunks_deleted_ = 0;
-  reference_count_ = 0;
   SetCachedJavaLangClass(Class::GetJavaLangClass());
   CHECK(GetCachedJavaLangClass() != nullptr);
 
@@ -249,6 +243,17 @@ void MarkSweep::InitializePhase() {
   heap_->PreGcVerification(this);
 }
 
+
+void MarkSweep::ResetCollectorStats(){
+  stats_counters_->freed_bytes_ = 0;
+  stats_counters_->freed_large_object_bytes_ = 0;
+  stats_counters_->freed_objects_ = 0;
+  stats_counters_->freed_large_objects_ = 0;
+  stats_counters_->reference_count_ = 0;
+  stats_counters_->class_count_ = 0;
+  stats_counters_->array_count_ = 0;
+  stats_counters_->other_count_ = 0;
+}
 void MarkSweep::ProcessReferences(Thread* self) {
   base::TimingLogger::ScopedSplit split("ProcessReferences", &timings_);
   WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
@@ -1382,8 +1387,8 @@ void MarkSweep::SweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {
   // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
   size_t freed_bytes = space->FreeList(self, num_ptrs, ptrs);
   heap->RecordFree(freed_objects, freed_bytes);
-  mark_sweep->freed_objects_.fetch_add(freed_objects);
-  mark_sweep->freed_bytes_.fetch_add(freed_bytes);
+  mark_sweep->IncFreedObjects(freed_objects);
+  mark_sweep->IncFreedBytes(freed_bytes);
 }
 
 void MarkSweep::ZygoteSweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {
@@ -1475,10 +1480,15 @@ void MarkSweep::SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocations, bool swa
   VLOG(heap) << "Freed " << freed_objects << "/" << count
              << " objects with size " << PrettySize(freed_bytes);
   heap_->RecordFree(freed_objects + freed_large_objects, freed_bytes + freed_large_object_bytes);
-  freed_objects_.fetch_add(freed_objects);
-  freed_large_objects_.fetch_add(freed_large_objects);
-  freed_bytes_.fetch_add(freed_bytes);
-  freed_large_object_bytes_.fetch_add(freed_large_object_bytes);
+  //freed_objects_.fetch_add(freed_objects);
+  IncFreedObjects(freed_objects);
+  //freed_large_objects_.fetch_add(freed_large_objects);
+  IncFreedLargeObjects(freed_large_objects);
+
+  //freed_bytes_.fetch_add(freed_bytes);
+  IncFreedBytes(freed_bytes);
+  //freed_large_object_bytes_.fetch_add(freed_large_object_bytes);
+  IncFreedLargeObjectBytes(freed_large_object_bytes);
   timings_.EndSplit();
 
   timings_.StartSplit("ResetStack");
@@ -1556,8 +1566,10 @@ void MarkSweep::SweepLargeObjects(bool swap_bitmaps) {
       ++freed_objects;
     }
   }
-  freed_large_objects_.fetch_add(freed_objects);
-  freed_large_object_bytes_.fetch_add(freed_bytes);
+  IncFreedLargeObjects(freed_objects);
+  IncFreedLargeObjectBytes(freed_bytes);
+//  freed_large_objects_.fetch_add(freed_objects);
+//  freed_large_object_bytes_.fetch_add(freed_bytes);
   GetHeap()->RecordFree(freed_objects, freed_bytes);
 }
 
@@ -1945,8 +1957,8 @@ void MarkSweep::FinishPhase() {
   CHECK(mark_stack_->IsEmpty());
 
   if (kCountScannedTypes) {
-    VLOG(gc) << "MarkSweep scanned classes=" << class_count_ << " arrays=" << array_count_
-             << " other=" << other_count_;
+    VLOG(gc) << "MarkSweep scanned classes=" << GetClassCount() << " arrays=" <<
+        GetArrayCount() << " other=" << GetOtherCount();
   }
 
   if (kCountTasks) {

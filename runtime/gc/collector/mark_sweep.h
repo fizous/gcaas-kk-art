@@ -169,6 +169,8 @@ class MarkSweep : public GarbageCollector {
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
+  void ResetCollectorStats(void);
+
   void ProcessReferences(Thread* self)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
@@ -200,21 +202,34 @@ class MarkSweep : public GarbageCollector {
       NO_THREAD_SAFETY_ANALYSIS;
 
   size_t GetFreedBytes() const {
-    return freed_bytes_;
+    return stats_counters_->freed_bytes_;
+  }
+  void IncFreedBytes(size_t val) {
+    android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_bytes_));
+  }
+  size_t GetFreedLargeObjectBytes() const {
+    return stats_counters_->freed_large_object_bytes_;
   }
 
-  size_t GetFreedLargeObjectBytes() const {
-    return freed_large_object_bytes_;
+  void IncFreedLargeObjectBytes(size_t val) {
+    android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_large_object_bytes_));
+  }
+
+  void IncFreedObjects(size_t val) {
+    android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_objects_));
   }
 
   size_t GetFreedObjects() const {
-    return freed_objects_;
+    return stats_counters_->freed_objects_;
   }
 
   size_t GetFreedLargeObjects() const {
-    return freed_large_objects_;
+    return stats_counters_->freed_large_objects_;
   }
 
+  void IncFreedLargeObjects(size_t val) {
+    android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_large_objects_));
+  }
 
 #if (true || ART_GC_SERVICE)
   void IncTotalTimeNs(uint64_t param) {
@@ -394,6 +409,21 @@ class MarkSweep : public GarbageCollector {
   void ArraysVerifierScan(const mirror::Object* object,
       void* heap_beetmap = NULL);
 
+
+  space::GCSrvceCashedStatsCounters* stats_counters_;
+
+  size_t GetClassCount() const{
+    return stats_counters_->class_count_;
+  }
+
+  size_t GetArrayCount() const{
+    return stats_counters_->array_count_;
+  }
+
+
+  size_t GetOtherCount() const{
+    return stats_counters_->other_count_;
+  }
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarked(const mirror::Object* object) const;
@@ -567,6 +597,10 @@ class MarkSweep : public GarbageCollector {
 
   // Parallel finger.
   AtomicInteger atomic_finger_;
+
+
+#if (true || ART_GC_SERVICE)
+#else
   // Number of non large object bytes freed in this collection.
   AtomicInteger freed_bytes_;
   // Number of large object bytes freed.
@@ -581,6 +615,7 @@ class MarkSweep : public GarbageCollector {
   AtomicInteger array_count_;
   // Number of non-class/arrays scanned, if kCountScannedTypes.
   AtomicInteger other_count_;
+#endif
   AtomicInteger large_object_test_;
   AtomicInteger large_object_mark_;
   AtomicInteger classes_marked_;
