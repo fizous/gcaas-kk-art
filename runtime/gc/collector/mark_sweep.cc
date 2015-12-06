@@ -199,6 +199,7 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
                name_prefix + (name_prefix.empty() ? "" : " ") +
                (is_concurrent ? "concurrent mark sweep": "mark sweep"),
                &stats_record->total_stats_),
+      stats_counters_(stats_record),
       current_mark_bitmap_(NULL),
       mark_stack_(NULL),
       gc_barrier_(new Barrier(0)),
@@ -206,8 +207,7 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
       cashed_references_record_(cashed_reference_record),
-      clear_soft_references_(false),
-      stats_counters_(stats_record) {
+      clear_soft_references_(false){
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
