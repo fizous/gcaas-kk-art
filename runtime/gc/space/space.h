@@ -182,6 +182,12 @@ typedef struct GCSrvceCashedReferences_S {
   mirror::Class* java_lang_Class_;
 } __attribute__((aligned(8))) GCSrvceCashedReferences;
 
+typedef struct GCSrvceCollectorTimeStats_S {
+  uint64_t total_time_ns_;
+  uint64_t total_paused_time_ns_;
+  uint64_t total_freed_objects_;
+  uint64_t total_freed_bytes_;
+} __attribute__((aligned(8))) GCSrvceCollectorTimeStats;
 
 typedef struct GCSrvceCashedStatsCounters_S {
   // Number of non large object bytes freed in this collection.
@@ -211,12 +217,7 @@ typedef struct GCSrvceCashedReferenceOffsets_S {
   size_t finalizer_reference_zombie_offset_;
 }__attribute__((aligned(8))) GCSrvceCashedReferenceOffsets;
 
-typedef struct GCSrvceCollectorTimeStats_S {
-  uint64_t total_time_ns_;
-  uint64_t total_paused_time_ns_;
-  uint64_t total_freed_objects_;
-  uint64_t total_freed_bytes_;
-} __attribute__((aligned(8))) GCSrvceCollectorTimeStats;
+
 
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
