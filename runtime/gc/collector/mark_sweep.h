@@ -424,6 +424,21 @@ class MarkSweep : public GarbageCollector {
   size_t GetOtherCount() const{
     return stats_counters_->other_count_;
   }
+
+
+  void IncClassCount(int val) {
+    android_atomic_add(val, &stats_counters_->class_count_);
+  }
+
+  void IncArrayCount(int val) {
+    android_atomic_add(val, &stats_counters_->array_count_);
+  }
+
+
+  void IncOtherCount(int val) {
+    android_atomic_add(val, &stats_counters_->other_count_);
+  }
+
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarked(const mirror::Object* object) const;

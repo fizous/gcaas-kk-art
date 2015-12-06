@@ -40,7 +40,7 @@ inline void MarkSweep::ScanObjectVisit(const mirror::Object* obj,
   DCHECK(klass != NULL);
   if (UNLIKELY(klass->IsArrayClass())) {
     if (kCountScannedTypes) {
-      ++array_count_;
+      IncArrayCount(1);
     }
     if (klass->IsObjectArrayClass()) {
       VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
@@ -48,12 +48,12 @@ inline void MarkSweep::ScanObjectVisit(const mirror::Object* obj,
   } else if (UNLIKELY(klass == GetCachedJavaLangClass())) {
     DCHECK_EQ(klass->GetClass(), GetCachedJavaLangClass());
     if (kCountScannedTypes) {
-      ++class_count_;
+      IncClassCount(1);
     }
     VisitClassReferences(klass, obj, visitor);
   } else {
     if (kCountScannedTypes) {
-      ++other_count_;
+      IncOtherCount(1);
     }
     VisitOtherReferences(klass, obj, visitor);
     if (UNLIKELY(klass->IsReferenceClass())) {
