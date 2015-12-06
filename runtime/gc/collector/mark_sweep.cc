@@ -206,8 +206,8 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
       large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
-      cashed_references_record_(cashed_reference_record),
-      clear_soft_references_(false){
+      clear_soft_references_(false),
+      cashed_references_record_(cashed_reference_record) {
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
