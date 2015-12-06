@@ -107,11 +107,14 @@ class GarbageCollector {
   base::TimingLogger timings_;
 
   // Cumulative statistics.
+#if (true || ART_GC_SERVICE)
+  space::GCSrvceCollectorTimeStats* time_stats_;
+#else
   uint64_t total_time_ns_;
   uint64_t total_paused_time_ns_;
   uint64_t total_freed_objects_;
   uint64_t total_freed_bytes_;
-
+#endif
   CumulativeLogger cumulative_timings_;
 
   std::vector<uint64_t> pause_times_;

@@ -198,9 +198,17 @@ typedef struct GCSrvceCashedReferenceOffsets_S {
   size_t finalizer_reference_zombie_offset_;
 }__attribute__((aligned(8))) GCSrvceCashedReferenceOffsets;
 
+typedef struct GCSrvceCollectorTimeStats_S {
+  uint64_t total_time_ns_;
+  uint64_t total_paused_time_ns_;
+  uint64_t total_freed_objects_;
+  uint64_t total_freed_bytes_;
+} __attribute__((aligned(8))) GCSrvceCollectorTimeStats;
+
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
   GCSrvceCashedStatsCounters cashed_stats_;
+  GCSrvceCollectorTimeStats time_stats_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
 
   accounting::GCSrvceBitmap* volatile current_mark_bitmap_;

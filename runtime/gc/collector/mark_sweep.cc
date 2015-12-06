@@ -193,6 +193,7 @@ void MarkSweep::BindBitmaps() {
 
 MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
     space::GCSrvceCashedReferences* cashed_reference_record,
+    space::GCSrvceCollectorTimeStats* time_stats_record,
     const std::string& name_prefix) :
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
@@ -204,11 +205,14 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
       mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
       is_concurrent_(is_concurrent),
       cashed_references_record_(cashed_reference_record),
+      time_stats_(time_stats_record),
       clear_soft_references_(false) {
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());
-
 }
+
+
+
 
 void MarkSweep::InitializePhase() {
   timings_.Reset();
@@ -1923,13 +1927,20 @@ void MarkSweep::FinishPhase() {
 
   timings_.NewSplit("RequestHeapTrim");
   ApplyTrimming();
+#if (true || ART_GC_SERVICE)
   // Update the cumulative statistics
+  IncTotalTimeNs(GetDurationNs());
+  IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+                                           std::plus<uint64_t>()));
+  IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
+  IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+#else
   total_time_ns_ += GetDurationNs();
   total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
                                            std::plus<uint64_t>());
   total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
   total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
-
+#endif
   // Ensure that the mark stack is empty.
   CHECK(mark_stack_->IsEmpty());
 

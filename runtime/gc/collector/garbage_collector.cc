@@ -54,10 +54,17 @@ void GarbageCollector::RegisterPause(uint64_t nano_length) {
 
 void GarbageCollector::ResetCumulativeStatistics() {
   cumulative_timings_.Reset();
+#if (true || ART_GC_SERVICE)
+  time_stats_->total_time_ns_ = 0;
+  time_stats_->total_paused_time_ns_ = 0;
+  time_stats_->total_freed_objects_ = 0;
+  time_stats_->total_freed_bytes_ = 0;
+#else
   total_time_ns_ = 0;
   total_paused_time_ns_ = 0;
   total_freed_objects_ = 0;
   total_freed_bytes_ = 0;
+#endif
 }
 
 void GarbageCollector::Run() {

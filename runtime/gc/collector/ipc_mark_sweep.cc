@@ -701,6 +701,7 @@ void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locki
   meta_data_->cashed_references_.immune_end_ = nullptr;
   meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
   meta_data_->current_mark_bitmap_ = NULL;
+
 }
 
 void AbstractIPCMarkSweep::DumpValues(void){
@@ -892,9 +893,11 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     AbstractIPCMarkSweep(ipcHeap, is_concurrent),
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         &meta_data_->cashed_references_,
+        &meta_data_->time_stats_,
         name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
-  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() << "; gcType: "
-      << GetGcType() << "; conc:" << IsConcurrent() <<" ###########";
+  time_stats_ = &meta_data_->time_stats_;
+  IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() <<
+      "; gcType: " << GetGcType() << "; conc:" << IsConcurrent() << " ###########";
 }
 
 
@@ -1189,8 +1192,8 @@ void IPCMarkSweep::MarkReachableObjects() {
 
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
-  //RecursiveMark();
-  MarkSweep::RecursiveMark();
+  RecursiveMark();
+  //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
@@ -1199,6 +1202,7 @@ void IPCMarkSweep::MarkReachableObjects() {
 // Populates the mark stack based on the set of marked objects and
 // recursively marks until the mark stack is emptied.
 void IPCMarkSweep::RecursiveMark() {
+  MarkSweep::RecursiveMark();
   //base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
   //ProcessMarkStack(false);
   //MarkSweep::RecursiveMark();

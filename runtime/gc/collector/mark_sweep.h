@@ -87,11 +87,15 @@ class MarkSweep : public GarbageCollector {
  public:
   explicit MarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
-          (space::GCSrvceCashedReferences*)calloc(1, sizeof(space::GCSrvceCashedReferences)),
+          (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
+          space::GCSrvceCollectorTimeStats* time_stats_record =
+              (space::GCSrvceCollectorTimeStats*) calloc(1, sizeof(space::GCSrvceCollectorTimeStats)),
+
       const std::string& name_prefix = "");
 
   ~MarkSweep() {}
 
+  virtual void SetCumulativeTimeStatsRecPhase();
   virtual void InitializePhase();
   virtual bool IsConcurrent() const;
   virtual bool HandleDirtyObjectsPhase() EXCLUSIVE_LOCKS_REQUIRED(Locks::mutator_lock_);
@@ -213,6 +217,57 @@ class MarkSweep : public GarbageCollector {
     return freed_large_objects_;
   }
 
+
+#if (true || ART_GC_SERVICE)
+  void IncTotalTimeNs(uint64_t param) {
+    time_stats_->total_time_ns_ += param;
+  }
+
+  void IncTotalPausedTimeNs(uint64_t param) {
+    time_stats_->total_paused_time_ns_ += param;
+  }
+
+  void IncTotalFreedObjects(uint64_t param) {
+    time_stats_->total_freed_objects_ += param;
+  }
+
+  void IncTotalFreedBytes(uint64_t param) {
+    time_stats_->total_freed_bytes_ += param;
+  }
+
+  uint64_t GetTotalTimeNs() const {
+    return time_stats_->total_time_ns_;
+  }
+
+  uint64_t GetTotalPausedTimeNs() const {
+    return time_stats_->total_paused_time_ns_;
+  }
+
+  uint64_t GetTotalFreedObjects() const {
+    return time_stats_->total_freed_objects_;
+  }
+
+  uint64_t GetTotalFreedBytes() const {
+    return time_stats_->total_freed_bytes_;
+  }
+
+#else
+  void IncTotalTimeNs(uint64_t param) {
+    total_time_ns_ += param;
+  }
+
+  void IncTotalPausedTimeNs(uint64_t param) {
+    total_paused_time_ns_ += param;
+  }
+
+  void IncTotalFreedObjects(uint64_t param) {
+    total_freed_objects_ += param;
+  }
+
+  void IncTotalFreedBytes(uint64_t param) {
+    total_freed_bytes_ += param;
+  }
+
   uint64_t GetTotalTimeNs() const {
     return total_time_ns_;
   }
@@ -228,6 +283,7 @@ class MarkSweep : public GarbageCollector {
   uint64_t GetTotalFreedBytes() const {
     return total_freed_bytes_;
   }
+#endif
 
   virtual mirror::Object* GetImmuneBegin() const{
     return cashed_references_record_->immune_begin_;
