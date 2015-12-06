@@ -649,8 +649,9 @@ class MarkSweep : public GarbageCollector {
   Mutex mark_stack_lock_ ACQUIRED_AFTER(Locks::classlinker_classes_lock_);
 
   const bool is_concurrent_;
-  space::GCSrvceCashedReferences* cashed_references_record_;
   bool clear_soft_references_;
+  space::GCSrvceCashedReferences* cashed_references_record_;
+
 
  private:
   friend class AddIfReachesAllocSpaceVisitor;  // Used by mod-union table.
