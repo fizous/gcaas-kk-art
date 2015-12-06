@@ -107,7 +107,7 @@ class GarbageCollector {
   base::TimingLogger timings_;
 
   // Cumulative statistics.
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   space::GCSrvceCollectorTimeStats* time_stats_;
 #else
   uint64_t total_time_ns_;

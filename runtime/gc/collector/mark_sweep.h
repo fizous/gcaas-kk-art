@@ -217,7 +217,7 @@ class MarkSweep : public GarbageCollector {
   }
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   void IncTotalTimeNs(uint64_t param) {
     time_stats_->total_time_ns_ += param;
   }
