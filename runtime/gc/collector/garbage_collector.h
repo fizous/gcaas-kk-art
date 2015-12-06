@@ -20,7 +20,7 @@
 #include "gc_type.h"
 #include "locks.h"
 #include "base/timing_logger.h"
-
+#include "gc/space/space.h"
 #include <stdint.h>
 #include <vector>
 
