@@ -95,15 +95,17 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       phantom_ref_queue_lock_(NULL),
       is_gc_running_(false),
       last_gc_type_(collector::kGcTypeNone),
-      next_gc_type_(collector::kGcTypePartial),
+
       capacity_(capacity),
 #if (true || ART_GC_SERVICE)
 #else
+      next_gc_type_(collector::kGcTypePartial),
       growth_limit_(growth_limit),
-#endif
       max_allowed_footprint_(initial_size),
       native_footprint_gc_watermark_(initial_size),
       native_footprint_limit_(2 * initial_size),
+#endif
+
       activity_thread_class_(NULL),
       application_thread_class_(NULL),
       activity_thread_(NULL),
@@ -176,6 +178,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetMinFree(min_free);
   SetMaxFree(max_free);
   SetTotalWaitTime(0);
+  SetNextGCType(collector::kGcTypePartial);
   SetMaxAllowedFootPrint(initial_size),
   SetNativeFootPrintGCWaterMark(initial_size),
   SetNativeFootPrintLimit(2 * initial_size),

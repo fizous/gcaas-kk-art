@@ -562,6 +562,11 @@ class Heap {
 
   // Swap the allocation stack with the live stack.
   void SwapStacks();
+
+
+  size_t GetMaxAllowedFootPrint() const {
+    return sub_record_meta_->max_allowed_footprint_;
+  }
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -893,9 +898,7 @@ class Heap {
     sub_record_meta_->next_gc_type_ = val;
   }
 
-  size_t GetMaxAllowedFootPrint() const {
-    return sub_record_meta_->max_allowed_footprint_;
-  }
+
 
   size_t GetNativeFootPrintLimit() const {
     return sub_record_meta_->native_footprint_limit_;
