@@ -26,6 +26,7 @@
 #include "gc/accounting/atomic_stack.h"
 #include "gc/accounting/card_table.h"
 #include "gc/collector/gc_type.h"
+#include "gc/space/space.h"
 #include "globals.h"
 #include "gtest/gtest.h"
 #include "jni.h"
