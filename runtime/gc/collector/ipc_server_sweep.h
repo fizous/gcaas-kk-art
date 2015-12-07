@@ -95,6 +95,8 @@ class IPCServerMarkerSweep {
       space::GCSrvceCashedReferences* src);
   void UpdateClientCachedReferences(space::GCSrvceCashedReferences* dest,
       space::GCSrvceCashedReferences* src);
+  void UpdateStatsRecord(space::GCSrvceCashedStatsCounters* dest,
+      space::GCSrvceCashedStatsCounters* src, bool atomicCp);
   void ResetStats(void);
 
   mirror::Object* MapObjectAddress(mirror::Object* obj);

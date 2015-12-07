@@ -1626,7 +1626,7 @@ void MarkSweep::DelayReferenceReferent(mirror::Class* klass, Object* obj) {
   Object* referent = heap_->GetReferenceReferent(obj);
   if (referent != NULL && !IsMarked(referent)) {
     if (kCountJavaLangRefs) {
-      ++reference_count_;
+      IncReferenceCount(1);
     }
     Thread* self = Thread::Current();
     // TODO: Remove these locks, and use atomic stacks for storing references?
@@ -1979,7 +1979,7 @@ void MarkSweep::FinishPhase() {
   }
 
   if (kCountJavaLangRefs) {
-    VLOG(gc) << "References scanned " << reference_count_;
+    VLOG(gc) << "References scanned " << GetReferenceCount();
   }
 
   // Update the cumulative loggers.

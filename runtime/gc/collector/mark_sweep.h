@@ -439,10 +439,19 @@ class MarkSweep : public GarbageCollector {
     return android_atomic_release_load(&stats_counters_->cards_scanned_);
   }
 
+
+  int32_t GetReferenceCount() {
+    return android_atomic_release_load(&stats_counters_->reference_count_);
+  }
+
   void IncClassCount(int val) {
     android_atomic_add(val, &stats_counters_->class_count_);
   }
 
+
+  void IncReferenceCount(int val) {
+    android_atomic_add(val, &stats_counters_->reference_count_);
+  }
   void IncArrayCount(int val) {
     android_atomic_add(val, &stats_counters_->array_count_);
   }

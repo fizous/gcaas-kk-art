@@ -390,6 +390,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   if(false)
     mark_stack_->OperateRemovalOnStack(ExternalScanObjectVisitRemoval, this);
 
+
+  UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_, true);
   UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
       &cashed_references_client_);
 
@@ -433,6 +435,22 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //    DCHECK(obj != NULL);
 //    ScanObjectVisit(obj, calculated_offset);
 //  }
+}
+
+
+void IPCServerMarkerSweep::UpdateStatsRecord(space::GCSrvceCashedStatsCounters* dest,
+    space::GCSrvceCashedStatsCounters* src,
+    bool atomicCp) {
+  if(atomicCp) {
+    android_atomic_add(src->array_count_, &dest->array_count_);
+    android_atomic_add(src->class_count_, &dest->class_count_);
+    android_atomic_add(src->other_count_, &dest->other_count_);
+    android_atomic_add(src->reference_count_, &dest->reference_count_);
+    android_atomic_add(src->cards_scanned_, &dest->cards_scanned_);
+  } else {
+    memcpy(dest, src, sizeof(space::GCSrvceCashedStatsCounters));
+  }
+
 }
 
 
