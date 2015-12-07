@@ -2705,5 +2705,12 @@ int64_t Heap::GetTotalMemory() const {
   return ret;
 }
 
+
+void Heap::SetSubHeapMetaData(space::GCSrvcHeapSubRecord* new_address) {
+  memcpy(new_address, sub_record_meta_, sizeof(space::GCSrvcHeapSubRecord));
+  free(sub_record_meta_);
+  sub_record_meta_ = new_address;
+}
+
 }  // namespace gc
 }  // namespace art

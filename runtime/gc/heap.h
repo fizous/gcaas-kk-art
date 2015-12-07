@@ -467,6 +467,7 @@ class Heap {
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 #if (true || ART_GC_SERVICE)
+  void SetSubHeapMetaData(space::GCSrvcHeapSubRecord* new_address);
   // Mark all the objects in the allocation stack in the specified bitmap.
   void MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                       accounting::ATOMIC_OBJ_STACK_T* stack)

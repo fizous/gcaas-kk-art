@@ -77,6 +77,9 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
     ipc_flag_raised_(0),
     collector_entry_(0) {
 
+
+  heap->SetSubHeapMetaData(&(meta_->sub_record_meta_));
+
   /* concurrent glags locks */
   SharedFutexData* _conc_futexAddress = &meta_->conc_lock_.futex_head_;
   SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
