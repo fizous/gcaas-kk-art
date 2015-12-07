@@ -2313,19 +2313,19 @@ void Heap::SetNextGCType(collector::GcType gc_type) {
 
 }
 
-void Heap::SetConcurrentStartBytes(size_t new_value) {
-  if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
-    SetConcStartBytes(new_value);
-  }
-}
+//void Heap::SetConcurrentStartBytes(size_t new_value) {
+//  if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
+//    SetConcStartBytes(new_value);
+//  }
+//}
 
-size_t Heap::GetConcurrentStartBytes(void) {
-  size_t return_val = 0;
-  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
-    return_val = GetConcStartBytes();
-  }
-  return return_val;
-}
+//size_t Heap::GetConcurrentStartBytes(void) {
+//  size_t return_val = 0;
+//  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+//    return_val = GetConcStartBytes();
+//  }
+//  return return_val;
+//}
 
 collector::GcType Heap::GetNextGCType(void) {
   collector::GcType gc_type;
