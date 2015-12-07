@@ -162,8 +162,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->next_gc_type_ = collector::kGcTypePartial;
   meta_->total_wait_time_ = 0;
   meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
-  meta_->last_gc_size_ = local_heap_->last_gc_size_;
-  meta_->last_gc_time_ns_ = local_heap_->last_gc_time_ns_;
+//  meta_->last_gc_size_ = local_heap_->GetLastGCSize();
+//  meta_->last_gc_time_ns_ = local_heap_->GetLastGCTime();
 
 
 
@@ -273,7 +273,7 @@ bool IPCHeap::CheckTrimming() {
   float utilization =
       static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
   if ((utilization > 0.75f && !local_heap_->IsLowMemoryMode()) ||
-      ((ms_time - meta_->sub_record_meta.last_trim_time_ms_) < 2 * 1000)) {
+      ((ms_time - local_heap_->GetLastTimeTrim()) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
     // not enabled, or if a heap trim occurred in the last two seconds.
     return false;
@@ -295,7 +295,7 @@ bool IPCHeap::CheckTrimming() {
 
 
   //todo : we will need to get rid of that. and use static initialization defined at the service
-  meta_->sub_record_meta.last_trim_time_ms_ = ms_time;
+  local_heap_->SetLastTimeTrim(ms_time);
   local_heap_->ListenForProcessStateChange();
 
   // Trim only if we do not currently care about pause times.
@@ -398,13 +398,13 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
   // Approximate allocation rate in bytes / second.
-  if (UNLIKELY(gc_start_time_ns == meta_->last_gc_time_ns_)) {
+  if (UNLIKELY(gc_start_time_ns == local_heap_->GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
   }
-  uint64_t ms_delta = NsToMs(gc_start_time_ns - meta_->last_gc_time_ns_);
+  uint64_t ms_delta = NsToMs(gc_start_time_ns - local_heap_->GetLastGCTime());
   if (ms_delta != 0) {
-    meta_->allocation_rate_ = ((gc_start_size - meta_->last_gc_size_) * 1000) / ms_delta;
-    VLOG(heap) << "Allocation rate: " << PrettySize(meta_->allocation_rate_) << "/s";
+    local_heap_->SetAllocationRate(((gc_start_size - local_heap_->GetLastGCSize()) * 1000) / ms_delta);
+    VLOG(heap) << "Allocation rate: " << PrettySize(local_heap_->GetAllocationRate()) << "/s";
   }
 
   if (gc_type == collector::kGcTypeSticky &&
@@ -604,7 +604,7 @@ bool IPCHeap::RunCollectorDaemon() {
 
 
 void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
-  size_t bytes_allocated = meta_->last_gc_size_;
+  size_t bytes_allocated = local_heap_->GetLastGCSize();
   size_t target_size;
   if (gc_type != collector::kGcTypeSticky) {
     // Grow the heap for non sticky GC.
@@ -641,7 +641,7 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
       // Calculate the estimated GC duration.
       double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
       // Estimate how many remaining bytes we will have when we need to start the next GC.
-      size_t remaining_bytes = meta_->allocation_rate_ * gc_duration_seconds;
+      size_t remaining_bytes = local_heap_->GetAllocationRate() * gc_duration_seconds;
       remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
       if (UNLIKELY(remaining_bytes > local_heap_->max_allowed_footprint_)) {
         // A never going to happen situation that from the estimated allocation rate we will exceed

@@ -285,6 +285,8 @@ typedef struct GCSrvSharableHeapData_S {
   StructuredObjectStackData mark_stack_data_;
   StructuredObjectStackData alloc_stack_data_;
 
+  GCSrvcHeapSubRecord sub_record_meta_;
+
   GCSrvSharableCollectorData collectors_[MARKSWEEP_COLLECTORS_ARRAY_CAPACITY];
 
   GCSrvceCashedReferenceOffsets reference_offsets_;
@@ -348,7 +350,7 @@ typedef struct GCSrvSharableHeapData_S {
   volatile int process_state_;
 
 
-  GCSrvcHeapSubRecord sub_record_meta_;
+
 
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
