@@ -420,7 +420,7 @@ class Heap {
   int64_t GetFreeMemory() const {
     return GetTotalMemory() - num_bytes_allocated_;
   }
-  size_t GetConcStartBytes(void);
+  size_t GetConcStartBytes(void) const;
 
   size_t GetMaxAllowedFootPrint();
   // Get the space that corresponds to an object's address. Current implementation searches all

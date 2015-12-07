@@ -2208,7 +2208,7 @@ size_t Heap::GetPercentFree() {
   return static_cast<size_t>(100.0f * static_cast<float>(GetFreeMemory()) / GetTotalMemory());
 }
 
-size_t Heap::GetConcStartBytes(void) {
+size_t Heap::GetConcStartBytes(void) const{
 //	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
 //		return max_allowed_footprint_;
 //	}
