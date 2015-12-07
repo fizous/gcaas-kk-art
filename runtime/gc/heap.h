@@ -422,7 +422,7 @@ class Heap {
   }
   size_t GetConcStartBytes(void) const;
 
-  size_t GetMaxAllowedFootPrint();
+
   // Get the space that corresponds to an object's address. Current implementation searches all
   // spaces in turn. If fail_ok is false then failing to find a space will cause an abort.
   // TODO: consider using faster data structure like binary tree.
@@ -547,10 +547,10 @@ class Heap {
   void GCServiceSignalConcGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
 
 
-  void SetNextGCType(collector::GcType gc_type);
+//  void SetNextGCType(collector::GcType gc_type);
 
 //  size_t GetConcurrentStartBytes(void);
-  collector::GcType GetNextGCType(void);
+//  collector::GcType GetNextGCType(void);
 
   void PreGcVerification(collector::GarbageCollector* gc);
 
@@ -883,6 +883,38 @@ class Heap {
 
   void IncTotalWaitTime(uint64_t param) {
     sub_record_meta_->total_wait_time_ += param;
+  }
+
+  collector::GcType GetNextGCType() const {
+    return sub_record_meta_->next_gc_type_;
+  }
+
+  void SetNextGCType(collector::GcType val)  {
+    sub_record_meta_->next_gc_type_ = val;
+  }
+
+  size_t GetMaxAllowedFootPrint() const {
+    return sub_record_meta_->max_allowed_footprint_;
+  }
+
+  size_t GetNativeFootPrintLimit() const {
+    return sub_record_meta_->native_footprint_limit_;
+  }
+
+  void SetNativeFootPrintLimit(size_t param)  {
+    sub_record_meta_->native_footprint_limit_ = param;
+  }
+
+  void SetNativeFootPrintGCWaterMark(size_t param)  {
+    sub_record_meta_->native_footprint_gc_watermark_ = param;
+  }
+
+  size_t GetNativeFootPrintGCWaterMark() const {
+    return sub_record_meta_->native_footprint_gc_watermark_;
+  }
+
+  void SetMaxAllowedFootPrint(size_t param) {
+    sub_record_meta_->max_allowed_footprint_ = param;
   }
 #else
   collector::GcType next_gc_type_;

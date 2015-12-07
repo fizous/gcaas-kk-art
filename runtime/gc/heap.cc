@@ -176,6 +176,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetMinFree(min_free);
   SetMaxFree(max_free);
   SetTotalWaitTime(0);
+  SetMaxAllowedFootPrint(initial_size),
+  SetNativeFootPrintGCWaterMark(initial_size),
+  SetNativeFootPrintLimit(2 * initial_size),
+
   LOG(ERROR) << "the runtime is a compiler ? " <<
       Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote()) {
@@ -302,7 +306,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     mark_sweep_collectors_.push_back(new collector::StickyMarkSweep(this, concurrent));
   }
 
-  CHECK_NE(max_allowed_footprint_, 0U);
+  CHECK_NE(GetMaxAllowedFootPrint(), 0U);
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Heap() exiting";
   }
@@ -985,7 +989,7 @@ void Heap::RecordFree(size_t freed_objects, size_t freed_bytes) {
 
 inline bool Heap::IsOutOfMemoryOnAllocation(size_t alloc_size, bool grow) {
   size_t new_footprint = num_bytes_allocated_ + alloc_size;
-  if (UNLIKELY(new_footprint > max_allowed_footprint_)) {
+  if (UNLIKELY(new_footprint > GetMaxAllowedFootPrint())) {
     if (UNLIKELY(new_footprint > GetGrowthLimit())) {
       return true;
     }
@@ -993,7 +997,7 @@ inline bool Heap::IsOutOfMemoryOnAllocation(size_t alloc_size, bool grow) {
       if (!grow) {
         return true;
       } else {
-        max_allowed_footprint_ = new_footprint;
+        SetMaxAllowedFootPrint(new_footprint);
       }
     }
   }
@@ -2214,9 +2218,7 @@ size_t Heap::GetConcStartBytes(void) const{
 //	}
 	return GetConcStartBytesValue();
 }
-size_t Heap::GetMaxAllowedFootPrint() {
-	return max_allowed_footprint_;
-}
+
 
 void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
   if (max_allowed_footprint > GetMaxMemory()) {
@@ -2225,7 +2227,7 @@ void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
               << PrettySize(GetMaxMemory());
     max_allowed_footprint = GetMaxMemory();
   }
-  max_allowed_footprint_ = max_allowed_footprint;
+  SetMaxAllowedFootPrint(max_allowed_footprint);
 }
 
 void Heap::UpdateMaxNativeFootprint() {
@@ -2237,8 +2239,8 @@ void Heap::UpdateMaxNativeFootprint() {
   } else if (target_size < native_size + GetMinFree()) {
     target_size = native_size + GetMinFree();
   }
-  native_footprint_gc_watermark_ = target_size;
-  native_footprint_limit_ = 2 * target_size - native_size;
+  SetNativeFootPrintGCWaterMark(target_size);
+  SetNativeFootPrintLimit(2 * target_size - native_size);
 }
 
 void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
@@ -2261,17 +2263,17 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   } else {
     // Based on how close the current heap size is to the target size, decide
     // whether or not to do a partial or sticky GC next.
-    if (bytes_allocated + GetMinFree() <= max_allowed_footprint_) {
+    if (bytes_allocated + GetMinFree() <= GetMaxAllowedFootPrint()) {
       SetNextGCType(collector::kGcTypeSticky);
     } else {
       SetNextGCType(collector::kGcTypePartial);
     }
 
     // If we have freed enough memory, shrink the heap back down.
-    if (bytes_allocated + GetMaxFree() < max_allowed_footprint_) {
+    if (bytes_allocated + GetMaxFree() < GetMaxAllowedFootPrint()) {
       target_size = bytes_allocated + GetMaxFree();
     } else {
-      target_size = std::max(bytes_allocated, max_allowed_footprint_);
+      target_size = std::max(bytes_allocated, GetMaxAllowedFootPrint());
     }
   }
 
@@ -2286,7 +2288,7 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
       // Estimate how many remaining bytes we will have when we need to start the next GC.
       size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
       remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
-      if (UNLIKELY(remaining_bytes > max_allowed_footprint_)) {
+      if (UNLIKELY(remaining_bytes > GetMaxAllowedFootPrint())) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule
         // another GC straight away.
@@ -2295,10 +2297,10 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        SetConcStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
+        SetConcStartBytes(std::max(GetMaxAllowedFootPrint() - remaining_bytes, bytes_allocated));
       }
-      DCHECK_LE(GetConcStartBytes(), max_allowed_footprint_);
-      DCHECK_LE(max_allowed_footprint_, GetGrowthLimit());
+      DCHECK_LE(GetConcStartBytes(), GetMaxAllowedFootPrint());
+      DCHECK_LE(GetMaxAllowedFootPrint(), GetGrowthLimit());
     }
   }
 
@@ -2306,12 +2308,12 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
 }
 
 
-void Heap::SetNextGCType(collector::GcType gc_type) {
-  if(!art::gcservice::GCServiceClient::SetNextGCType(gc_type)) {
-    next_gc_type_ = gc_type;
-  }
-
-}
+//void Heap::SetNextGCType(collector::GcType gc_type) {
+//  if(!art::gcservice::GCServiceClient::SetNextGCType(gc_type)) {
+//    next_gc_type_ = gc_type;
+//  }
+//
+//}
 
 //void Heap::SetConcurrentStartBytes(size_t new_value) {
 //  if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
@@ -2327,14 +2329,14 @@ void Heap::SetNextGCType(collector::GcType gc_type) {
 //  return return_val;
 //}
 
-collector::GcType Heap::GetNextGCType(void) {
-  collector::GcType gc_type;
-
-  if(!art::gcservice::GCServiceClient::GetNextGCType(&gc_type)) {
-    return next_gc_type_;
-  }
-  return gc_type;
-}
+//collector::GcType Heap::GetNextGCType(void) {
+//  collector::GcType gc_type;
+//
+//  if(!art::gcservice::GCServiceClient::GetNextGCType(&gc_type)) {
+//    return next_gc_type_;
+//  }
+//  return gc_type;
+//}
 
 void Heap::ClearGrowthLimit() {
   SetGrowthLimit(capacity_);
@@ -2627,10 +2629,10 @@ void Heap::RegisterNativeAllocation(int bytes) {
   // Total number of native bytes allocated.
   native_bytes_allocated_.fetch_add(bytes);
   Thread* self = Thread::Current();
-  if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_gc_watermark_) {
+  if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintGCWaterMark()) {
     // The second watermark is higher than the gc watermark. If you hit this it means you are
     // allocating native objects faster than the GC can keep up with.
-    if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_limit_) {
+    if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintLimit()) {
         JNIEnv* env = self->GetJniEnv();
         // Can't do this in WellKnownClasses::Init since System is not properly set up at that
         // point.
@@ -2648,7 +2650,7 @@ void Heap::RegisterNativeAllocation(int bytes) {
         }
 
         // If we still are over the watermark, attempt a GC for alloc and run finalizers.
-        if (static_cast<size_t>(native_bytes_allocated_) > native_footprint_limit_) {
+        if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintLimit()) {
         	mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
         	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
           CollectGarbageInternal(collector::kGcTypePartial, kGcCauseForAlloc, false);
