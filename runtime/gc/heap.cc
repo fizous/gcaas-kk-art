@@ -2208,7 +2208,7 @@ size_t Heap::GetPercentFree() {
   return static_cast<size_t>(100.0f * static_cast<float>(GetFreeMemory()) / GetTotalMemory());
 }
 
-size_t Heap::GetConcStartBytes() {
+size_t Heap::GetConcStartBytes(void) {
 //	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
 //		return max_allowed_footprint_;
 //	}
@@ -2616,11 +2616,11 @@ size_t Heap::Trim() {
 }
 
 bool Heap::IsGCRequestPending() const {
-  size_t return_val = 0;
-  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
-    return_val = GetConcStartBytes();
-  }
-  return (return_val != std::numeric_limits<size_t>::max());
+ // size_t return_val = 0;
+ // if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+//  size_t return_val = GetConcStartBytes();
+ // }
+  return (std::numeric_limits<size_t>::max() != GetConcStartBytes());
 }
 
 void Heap::RegisterNativeAllocation(int bytes) {
