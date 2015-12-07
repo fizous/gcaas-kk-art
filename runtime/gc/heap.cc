@@ -97,7 +97,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       last_gc_type_(collector::kGcTypeNone),
       next_gc_type_(collector::kGcTypePartial),
       capacity_(capacity),
+#if (true || ART_GC_SERVICE)
+#else
       growth_limit_(growth_limit),
+#endif
       max_allowed_footprint_(initial_size),
       native_footprint_gc_watermark_(initial_size),
       native_footprint_limit_(2 * initial_size),
@@ -109,8 +112,11 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       // Initially care about pauses in case we never get notified of process states, or if the JNI
       // code becomes broken.
       care_about_pause_times_(true),
+#if (true || ART_GC_SERVICE)
+#else
       concurrent_start_bytes_(concurrent_gc_ ? initial_size - kMinConcurrentRemainingBytes
           :  std::numeric_limits<size_t>::max()),
+#endif
 #if (true || ART_GC_SERVICE)
 #else
       total_bytes_freed_ever_(0),
@@ -145,10 +151,13 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       reference_queueNext_offset_(0),
       reference_pendingNext_offset_(0),
       finalizer_reference_zombie_offset_(0),
+#if (true || ART_GC_SERVICE)
+#else
       min_free_(min_free),
       max_free_(max_free),
       target_utilization_(target_utilization),
       total_wait_time_(0),
+#endif
       total_allocation_time_(0),
       verify_object_mode_(kHeapVerificationNotPermitted),
       running_on_valgrind_(RUNNING_ON_VALGRIND) {
@@ -160,7 +169,13 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetAllocationRate(0);
   SetTotalBytesFreedEver(0);
   SetTotalObjectsFreedEver(0);
-
+  SetGrowthLimit(growth_limit);
+  SetConcStartBytes(concurrent_gc_ ? initial_size - kMinConcurrentRemainingBytes
+          :  std::numeric_limits<size_t>::max());
+  SetTargetUtilization(target_utilization);
+  SetMinFree(min_free);
+  SetMaxFree(max_free);
+  SetTotalWaitTime(0);
   LOG(ERROR) << "the runtime is a compiler ? " <<
       Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote()) {
@@ -567,7 +582,7 @@ void Heap::DumpGcPerformanceInfo(std::ostream& os) {
        << "\n";
   }
   os << "Total mutator paused time: " << PrettyDuration(total_paused_time) << "\n";
-  os << "Total time waiting for GC to complete: " << PrettyDuration(total_wait_time_) << "\n";
+  os << "Total time waiting for GC to complete: " << PrettyDuration(GetTotalWaitTime()) << "\n";
   os << "Approximate GC data structures memory overhead: " << gc_memory_overhead_;
 }
 
@@ -971,7 +986,7 @@ void Heap::RecordFree(size_t freed_objects, size_t freed_bytes) {
 inline bool Heap::IsOutOfMemoryOnAllocation(size_t alloc_size, bool grow) {
   size_t new_footprint = num_bytes_allocated_ + alloc_size;
   if (UNLIKELY(new_footprint > max_allowed_footprint_)) {
-    if (UNLIKELY(new_footprint > growth_limit_)) {
+    if (UNLIKELY(new_footprint > GetGrowthLimit())) {
       return true;
     }
     if (!concurrent_gc_) {
@@ -1115,7 +1130,8 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
 void Heap::SetTargetHeapUtilization(float target) {
   DCHECK_GT(target, 0.0f);  // asserted in Java code
   DCHECK_LT(target, 1.0f);
-  target_utilization_ = target;
+  SetTargetUtilization(target);
+  //target_utilization_ = target;
 }
 
 size_t Heap::GetObjectsAllocated() const {
@@ -2170,7 +2186,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
         }
         last_gc_type = last_gc_type_;
         wait_time = NanoTime() - wait_start;
-        total_wait_time_ += wait_time;
+        IncTotalWaitTime(wait_time);
       }
       if (wait_time > long_pause_log_threshold_) {
         LOG(INFO) << "WaitForConcurrentGcToComplete blocked for " << PrettyDuration(wait_time);
@@ -2216,10 +2232,10 @@ void Heap::UpdateMaxNativeFootprint() {
   size_t native_size = native_bytes_allocated_;
   // TODO: Tune the native heap utilization to be a value other than the java heap utilization.
   size_t target_size = native_size / GetTargetHeapUtilization();
-  if (target_size > native_size + max_free_) {
-    target_size = native_size + max_free_;
-  } else if (target_size < native_size + min_free_) {
-    target_size = native_size + min_free_;
+  if (target_size > native_size + GetMaxFree()) {
+    target_size = native_size + GetMaxFree();
+  } else if (target_size < native_size + GetMinFree()) {
+    target_size = native_size + GetMinFree();
   }
   native_footprint_gc_watermark_ = target_size;
   native_footprint_limit_ = 2 * target_size - native_size;
@@ -2236,24 +2252,24 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   if (gc_type != collector::kGcTypeSticky) {
     // Grow the heap for non sticky GC.
     target_size = bytes_allocated / GetTargetHeapUtilization();
-    if (target_size > bytes_allocated + max_free_) {
-      target_size = bytes_allocated + max_free_;
-    } else if (target_size < bytes_allocated + min_free_) {
-      target_size = bytes_allocated + min_free_;
+    if (target_size > bytes_allocated + GetMaxFree()) {
+      target_size = bytes_allocated + GetMaxFree();
+    } else if (target_size < bytes_allocated + GetMinFree()) {
+      target_size = bytes_allocated + GetMinFree();
     }
     SetNextGCType(collector::kGcTypeSticky);
   } else {
     // Based on how close the current heap size is to the target size, decide
     // whether or not to do a partial or sticky GC next.
-    if (bytes_allocated + min_free_ <= max_allowed_footprint_) {
+    if (bytes_allocated + GetMinFree() <= max_allowed_footprint_) {
       SetNextGCType(collector::kGcTypeSticky);
     } else {
       SetNextGCType(collector::kGcTypePartial);
     }
 
     // If we have freed enough memory, shrink the heap back down.
-    if (bytes_allocated + max_free_ < max_allowed_footprint_) {
-      target_size = bytes_allocated + max_free_;
+    if (bytes_allocated + GetMaxFree() < max_allowed_footprint_) {
+      target_size = bytes_allocated + GetMaxFree();
     } else {
       target_size = std::max(bytes_allocated, max_allowed_footprint_);
     }
@@ -2282,7 +2298,7 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
         SetConcurrentStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
       }
       DCHECK_LE(GetConcurrentStartBytes(), max_allowed_footprint_);
-      DCHECK_LE(max_allowed_footprint_, growth_limit_);
+      DCHECK_LE(max_allowed_footprint_, GetGrowthLimit());
     }
   }
 
@@ -2299,14 +2315,14 @@ void Heap::SetNextGCType(collector::GcType gc_type) {
 
 void Heap::SetConcurrentStartBytes(size_t new_value) {
   if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
-    concurrent_start_bytes_ = new_value;
+    SetConcStartBytes(new_value);
   }
 }
 
 size_t Heap::GetConcurrentStartBytes(void) {
   size_t return_val = 0;
   if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
-    return_val = concurrent_start_bytes_;
+    return_val = GetConcStartBytes();
   }
   return return_val;
 }
@@ -2321,7 +2337,7 @@ collector::GcType Heap::GetNextGCType(void) {
 }
 
 void Heap::ClearGrowthLimit() {
-  growth_limit_ = capacity_;
+  SetGrowthLimit(capacity_);
   alloc_space_->ClearGrowthLimit();
 }
 
@@ -2602,7 +2618,7 @@ size_t Heap::Trim() {
 bool Heap::IsGCRequestPending() const {
   size_t return_val = 0;
   if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
-    return_val = concurrent_start_bytes_;
+    return_val = GetConcStartBytes();
   }
   return (return_val != std::numeric_limits<size_t>::max());
 }

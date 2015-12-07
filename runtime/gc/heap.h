@@ -713,10 +713,12 @@ class Heap {
   // Maximum size that the heap can reach.
   const size_t capacity_;
 
+#if (true || ART_GC_SERVICE)
+#else
   // The size the heap is limited to. This is initially smaller than capacity, but for largeHeap
   // programs it is "cleared" making it the same as capacity.
   size_t growth_limit_;
-
+#endif
   // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
   // a GC should be triggered.
   size_t max_allowed_footprint_;
@@ -739,11 +741,12 @@ class Heap {
 
   // Whether or not we currently care about pause times.
   bool care_about_pause_times_;
-
+#if (true || ART_GC_SERVICE)
+#else
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.
   size_t concurrent_start_bytes_;
-
+#endif
 
 
   // Primitive objects larger than this size are put in the large object space.
@@ -836,6 +839,55 @@ class Heap {
     sub_record_meta_->total_objects_freed_ever_ += param;
   }
 
+  void SetGrowthLimit(size_t growth) {
+    sub_record_meta_->growth_limit_ = growth;
+  }
+
+
+  size_t GetGrowthLimit() {
+    return sub_record_meta_->growth_limit_;
+  }
+
+
+  void SetConcStartBytes(size_t concStart) {
+    sub_record_meta_->concurrent_start_bytes_ = concStart;
+  }
+
+  size_t GetConcStartBytesValue() {
+    return sub_record_meta_->concurrent_start_bytes_;
+  }
+
+  void SetTargetUtilization(double targetUtil) {
+    sub_record_meta_->target_utilization_ = targetUtil;
+  }
+
+  void SetMinFree(size_t minFree) {
+    sub_record_meta_->min_free_ = minFree;
+  }
+
+  void SetMaxFree(size_t maxFree) {
+    sub_record_meta_->max_free_ = maxFree;
+  }
+
+  size_t GetMinFree() {
+    return sub_record_meta_->min_free_;
+  }
+
+  size_t GetMaxFree() {
+    return sub_record_meta_->max_free_;
+  }
+
+  void SetTotalWaitTime(uint64_t param) {
+    sub_record_meta_->total_wait_time_ = param;
+  }
+
+  uint64_t GetTotalWaitTime() {
+    return sub_record_meta_->total_wait_time_;
+  }
+
+  void IncTotalWaitTime(uint64_t param) {
+    sub_record_meta_->total_wait_time_ += param;
+  }
 #else
   // Since the heap was created, how many bytes have been freed.
   size_t total_bytes_freed_ever_;
@@ -891,6 +943,30 @@ class Heap {
   void SetLastGCTime(size_t param) {
     last_gc_time_ns_ = param;
   }
+
+  void SetGrowthLimit(size_t growth) {
+    growth_limit_ = growth;
+  }
+
+  void SetConcStartBytes(size_t concStart) {
+    concurrent_start_bytes_ = concStart;
+  }
+
+  void SetTargetUtilization(double targetUtil) {
+    target_utilization_ = targetUtil;
+  }
+
+  void SetMinFree(size_t minFree) {
+    min_free_ = minFree;
+  }
+
+  void SetMaxFree(size_t maxFree) {
+    max_free_ = maxFree;
+  }
+
+  void SetTotalWaitTime(uint64_t param) {
+    total_wait_time_ = param;
+  }
 #endif
   // Mark stack that we reuse to avoid re-allocating the mark stack.
   UniquePtr<accounting::ATOMIC_OBJ_STACK_T> mark_stack_;
@@ -919,6 +995,10 @@ class Heap {
   // offset of java.lang.ref.FinalizerReference.zombie
   MemberOffset finalizer_reference_zombie_offset_;
 
+#if (true || ART_GC_SERVICE)
+
+
+#else
   // Minimum free guarantees that you always have at least min_free_ free bytes after growing for
   // utilization, regardless of target utilization ratio.
   size_t min_free_;
@@ -931,6 +1011,8 @@ class Heap {
 
   // Total time which mutators are paused or waiting for GC to complete.
   uint64_t total_wait_time_;
+#endif
+
 
   // Total number of objects allocated in microseconds.
   AtomicInteger total_allocation_time_;

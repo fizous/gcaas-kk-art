@@ -242,6 +242,13 @@ typedef struct GCSrvcZygoteResharingRec_S{
 
 
 typedef struct GCSrvcHeapSubRecord_S {
+  // The size the heap is limited to. This is initially smaller than capacity, but for largeHeap
+  // programs it is "cleared" making it the same as capacity.
+  size_t growth_limit_;
+  // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
+  // it completes ahead of an allocation failing.
+  size_t concurrent_start_bytes_;
+
   // Since the heap was created, how many bytes have been freed.
   size_t total_bytes_freed_ever_;
 
@@ -260,6 +267,19 @@ typedef struct GCSrvcHeapSubRecord_S {
   // Estimated allocation rate (bytes / second). Computed between the time of the last GC cycle
   // and the start of the current one.
   uint64_t allocation_rate_;
+
+  // Minimum free guarantees that you always have at least min_free_ free bytes after growing for
+  // utilization, regardless of target utilization ratio.
+  size_t min_free_;
+
+  // The ideal maximum free size, when we grow the heap for utilization.
+  size_t max_free_;
+
+  // Target ideal heap utilization ratio
+  double target_utilization_;
+
+  // Total time which mutators are paused or waiting for GC to complete.
+  uint64_t total_wait_time_;
 } __attribute__((aligned(8))) GCSrvcHeapSubRecord;
 
 
