@@ -124,8 +124,12 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       verify_mod_union_table_(false),
       min_alloc_space_size_for_sticky_gc_(2 * MB),
       min_remaining_space_for_sticky_gc_(1 * MB),
+#if (true || ART_GC_SERVICE)
+      sub_record_meta_(calloc(1, sizeof(space::GCSrvcHeapSubRecord))),
+#else
       last_trim_time_ms_(0),
       allocation_rate_(0),
+#endif
       /* For GC a lot mode, we limit the allocations stacks to be kGcAlotInterval allocations. This
        * causes a lot of GC since we do a GC for alloc whenever the stack is full. When heap
        * verification is enabled, we limit the size of allocation stacks to speed up their
@@ -149,7 +153,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
     LOG(INFO) << "Heap() entering";
   }
 #if (true || ART_GC_SERVICE)
-  LOG(ERROR) << "the runtime is a compiler ? " << Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
+  SetLastTimeTrim(0);
+  SetAllocationRate(0);
+  LOG(ERROR) << "the runtime is a compiler ? " <<
+      Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote()) {
     LOG(ERROR) << "Zygote Process: We will initialize the Global Allocator now";
     gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
@@ -258,8 +265,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   finalizer_ref_queue_lock_ = new Mutex("Finalizer reference queue lock");
   phantom_ref_queue_lock_ = new Mutex("Phantom reference queue lock");
 
-  last_gc_time_ns_ = NanoTime();
-  last_gc_size_ = GetBytesAllocated();
+  SetLastGCTime(NanoTime());
+  SetLastGCSize(GetBytesAllocated());
 
   if (ignore_max_footprint_) {
     SetIdealFootprint(std::numeric_limits<size_t>::max());
@@ -1572,13 +1579,13 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = GetBytesAllocated();
   // Approximate allocation rate in bytes / second.
-  if (UNLIKELY(gc_start_time_ns == last_gc_time_ns_)) {
+  if (UNLIKELY(gc_start_time_ns == GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
   }
-  uint64_t ms_delta = NsToMs(gc_start_time_ns - last_gc_time_ns_);
+  uint64_t ms_delta = NsToMs(gc_start_time_ns - GetLastGCTime());
   if (ms_delta != 0) {
-    allocation_rate_ = ((gc_start_size - last_gc_size_) * 1000) / ms_delta;
-    VLOG(heap) << "Allocation rate: " << PrettySize(allocation_rate_) << "/s";
+    SetAllocationRate(((gc_start_size - GetLastGCSize()) * 1000) / ms_delta);
+    VLOG(heap) << "Allocation rate: " << PrettySize(GetAllocationRate()) << "/s";
   }
 
   if (gc_type == collector::kGcTypeSticky &&
@@ -2216,8 +2223,8 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
-  last_gc_size_ = bytes_allocated;
-  last_gc_time_ns_ = NanoTime();
+  SetLastGCSize(bytes_allocated);
+  SetLastGCTime(NanoTime());
 
   size_t target_size;
   if (gc_type != collector::kGcTypeSticky) {
@@ -2255,7 +2262,7 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
       // Calculate the estimated GC duration.
       double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
       // Estimate how many remaining bytes we will have when we need to start the next GC.
-      size_t remaining_bytes = allocation_rate_ * gc_duration_seconds;
+      size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
       remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
       if (UNLIKELY(remaining_bytes > max_allowed_footprint_)) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
@@ -2542,7 +2549,7 @@ void Heap::RequestHeapTrim() {
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
-  if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - last_trim_time_ms_) < 2 * 1000)) {
+  if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - GetLastTimeTrim()) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
     // not enabled, or if a heap trim occurred in the last two seconds.
     return;
@@ -2560,7 +2567,7 @@ void Heap::RequestHeapTrim() {
     }
   }
 
-  last_trim_time_ms_ = ms_time;
+  SetLastTimeTrim(ms_time);
   ListenForProcessStateChange();
 
   // Trim only if we do not currently care about pause times.

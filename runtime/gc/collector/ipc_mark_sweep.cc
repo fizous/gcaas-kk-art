@@ -273,7 +273,7 @@ bool IPCHeap::CheckTrimming() {
   float utilization =
       static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
   if ((utilization > 0.75f && !local_heap_->IsLowMemoryMode()) ||
-      ((ms_time - meta_->last_trim_time_ms_) < 2 * 1000)) {
+      ((ms_time - meta_->sub_record_meta.last_trim_time_ms_) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
     // not enabled, or if a heap trim occurred in the last two seconds.
     return false;
@@ -295,7 +295,7 @@ bool IPCHeap::CheckTrimming() {
 
 
   //todo : we will need to get rid of that. and use static initialization defined at the service
-  meta_->last_trim_time_ms_ = ms_time;
+  meta_->sub_record_meta.last_trim_time_ms_ = ms_time;
   local_heap_->ListenForProcessStateChange();
 
   // Trim only if we do not currently care about pause times.

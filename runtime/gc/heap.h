@@ -768,6 +768,52 @@ class Heap {
   // normal GC, it is important to not use it when we are almost out of memory.
   const size_t min_remaining_space_for_sticky_gc_;
 
+
+
+
+
+  // For a GC cycle, a bitmap that is set corresponding to the
+#if (true || ART_GC_SERVICE)
+  UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+  UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+  space::GCSrvcHeapSubRecord* sub_record_meta_;
+
+  uint64_t GetLastTimeTrim() {
+    return sub_record_meta_->last_trim_time_ms_;
+  }
+
+  uint64_t GetLastGCTime() {
+    return sub_record_meta_->last_gc_time_ns_;
+  }
+
+  uint64_t GetLastGCSize() {
+    return sub_record_meta_->last_gc_size_;
+  }
+
+  uint64_t GetAllocationRate() {
+    return sub_record_meta_->allocation_rate_;
+  }
+
+  void SetAllocationRate(uint64_t rate) {
+    sub_record_meta_->allocation_rate_ = rate;
+  }
+
+  void SetLastGCSize(size_t param) {
+    sub_record_meta_->last_gc_size_ = param;
+  }
+
+  void SetLastGCTime(size_t param) {
+    sub_record_meta_->last_gc_time_ns_ = param;
+  }
+
+  void SetLastTimeTrim(uint64_t param) {
+    sub_record_meta_->last_trim_time_ms_ = param;
+  }
+
+#else
+  UniquePtr<accounting::HeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+  UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+
   // The last time a heap trim occurred.
   uint64_t last_trim_time_ms_;
 
@@ -781,13 +827,38 @@ class Heap {
   // and the start of the current one.
   uint64_t allocation_rate_;
 
-  // For a GC cycle, a bitmap that is set corresponding to the
-#if (true || ART_GC_SERVICE)
-  UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
-  UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
-#else
-  UniquePtr<accounting::HeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
-  UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
+
+  uint64_t GetLastTimeTrim() {
+    return last_trim_time_ms_;
+  }
+
+  uint64_t GetLastGCTime() {
+    return last_gc_time_ns_;
+  }
+
+  uint64_t GetLastGCSize() {
+    return last_gc_size_;
+  }
+
+  uint64_t GetAllocationRate() {
+    return allocation_rate_;
+  }
+
+  void SetAllocationRate(uint64_t rate) {
+    allocation_rate_ = rate;
+  }
+
+  void SetLastTimeTrim(uint64_t param) {
+    last_trim_time_ms_ = param;
+  }
+
+  void SetLastGCSize(size_t param) {
+    last_gc_size_ = param;
+  }
+
+  void SetLastGCTime(size_t param) {
+    last_gc_time_ns_ = param;
+  }
 #endif
   // Mark stack that we reuse to avoid re-allocating the mark stack.
   UniquePtr<accounting::ATOMIC_OBJ_STACK_T> mark_stack_;
