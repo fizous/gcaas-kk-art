@@ -231,7 +231,8 @@ class Heap {
   // Target ideal heap utilization ratio, implements
   // dalvik.system.VMRuntime.getTargetHeapUtilization.
   double GetTargetHeapUtilization() const {
-    return target_utilization_;
+
+    return sub_record_meta_->target_utilization_;
   }
 
   // Data structure memory usage tracking.
@@ -408,7 +409,7 @@ class Heap {
   // were specified. Android apps start with a growth limit (small heap size) which is
   // cleared/extended for large apps.
   int64_t GetMaxMemory() const {
-    return growth_limit_;
+    return GetGrowthLimit();
   }
 
   // Implements java.lang.Runtime.totalMemory, returning the amount of memory consumed by an
@@ -844,7 +845,7 @@ class Heap {
   }
 
 
-  size_t GetGrowthLimit() {
+  size_t GetGrowthLimit() const {
     return sub_record_meta_->growth_limit_;
   }
 
@@ -860,6 +861,7 @@ class Heap {
   void SetTargetUtilization(double targetUtil) {
     sub_record_meta_->target_utilization_ = targetUtil;
   }
+
 
   void SetMinFree(size_t minFree) {
     sub_record_meta_->min_free_ = minFree;
