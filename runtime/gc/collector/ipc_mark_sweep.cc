@@ -611,24 +611,24 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
   if (gc_type != collector::kGcTypeSticky) {
     // Grow the heap for non sticky GC.
     target_size = bytes_allocated / local_heap_->GetTargetHeapUtilization();
-    if (target_size > bytes_allocated + local_heap_->max_free_) {
-      target_size = bytes_allocated + local_heap_->max_free_;
-    } else if (target_size < bytes_allocated + local_heap_->min_free_) {
-      target_size = bytes_allocated + local_heap_->min_free_;
+    if (target_size > bytes_allocated + local_heap_->GetMaxFree()) {
+      target_size = bytes_allocated + local_heap_->GetMaxFree();
+    } else if (target_size < bytes_allocated + local_heap_->GetMinFree()) {
+      target_size = bytes_allocated + local_heap_->GetMinFree();
     }
     meta_->next_gc_type_ = collector::kGcTypeSticky;
   } else {
     // Based on how close the current heap size is to the target size, decide
     // whether or not to do a partial or sticky GC next.
-    if (bytes_allocated + local_heap_->min_free_ <= local_heap_->max_allowed_footprint_) {
+    if (bytes_allocated + local_heap_->GetMinFree() <= local_heap_->max_allowed_footprint_) {
       local_heap_->SetNextGCType(collector::kGcTypeSticky);
     } else {
       local_heap_->SetNextGCType(collector::kGcTypePartial);
     }
 
     // If we have freed enough memory, shrink the heap back down.
-    if (bytes_allocated + local_heap_->max_free_ < local_heap_->max_allowed_footprint_) {
-      target_size = bytes_allocated + local_heap_->max_free_;
+    if (bytes_allocated + local_heap_->GetMaxFree() < local_heap_->max_allowed_footprint_) {
+      target_size = bytes_allocated + local_heap_->GetMaxFree();
     } else {
       target_size = std::max(bytes_allocated, local_heap_->max_allowed_footprint_);
     }
