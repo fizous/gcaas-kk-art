@@ -714,7 +714,7 @@ mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_co
     if (Dbg::IsAllocTrackingEnabled()) {
       Dbg::RecordAllocation(c, byte_count);
     }
-    if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_) >= GetConcurrentStartBytes())) {
+    if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_) >= GetConcStartBytes())) {
       // The SirtRef is necessary since the calls in RequestConcurrentGC are a safepoint.
       SirtRef<mirror::Object> ref(self, obj);
       RequestConcurrentGC(self);
@@ -2209,10 +2209,10 @@ size_t Heap::GetPercentFree() {
 }
 
 size_t Heap::GetConcStartBytes() {
-	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
-		return max_allowed_footprint_;
-	}
-	return GetConcurrentStartBytes();
+//	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
+//		return max_allowed_footprint_;
+//	}
+	return GetConcStartBytesValue();
 }
 size_t Heap::GetMaxAllowedFootPrint() {
 	return max_allowed_footprint_;
@@ -2297,7 +2297,7 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
         // right away.
         SetConcurrentStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
       }
-      DCHECK_LE(GetConcurrentStartBytes(), max_allowed_footprint_);
+      DCHECK_LE(GetConcStartBytes(), max_allowed_footprint_);
       DCHECK_LE(max_allowed_footprint_, GetGrowthLimit());
     }
   }

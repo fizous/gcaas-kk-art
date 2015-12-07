@@ -549,7 +549,7 @@ class Heap {
 
   void SetNextGCType(collector::GcType gc_type);
   void SetConcurrentStartBytes(size_t new_value);
-  size_t GetConcurrentStartBytes(void);
+//  size_t GetConcurrentStartBytes(void);
   collector::GcType GetNextGCType(void);
 
   void PreGcVerification(collector::GarbageCollector* gc);
