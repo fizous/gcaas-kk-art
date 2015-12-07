@@ -118,7 +118,7 @@ class IPCHeap {
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
 
-  void AssignNextGCType(void);
+//  void AssignNextGCType(void);
   void RaiseServerFlag(void);
   void ResetServerFlag(void);
   void SetCurrentCollector(IPCMarkSweep* collector);
