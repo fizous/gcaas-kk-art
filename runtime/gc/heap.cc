@@ -298,7 +298,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 
   if (ignore_max_footprint_) {
     SetIdealFootprint(std::numeric_limits<size_t>::max());
-    SetConcStartBytes(max_allowed_footprint_);
+    SetConcStartBytes(GetMaxAllowedFootPrint());
   }
 
   // Create our garbage collectors.
