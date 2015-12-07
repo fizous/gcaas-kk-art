@@ -378,6 +378,17 @@ class Heap {
   // Returns the total number of bytes allocated since the heap was created.
   size_t GetBytesAllocatedEver() const;
 
+#if (true || ART_GC_SERVICE)
+  // Returns the total number of objects freed since the heap was created.
+  size_t GetObjectsFreedEver() const {
+    return sub_record_meta_->total_objects_freed_ever_;
+  }
+
+  // Returns the total number of bytes freed since the heap was created.
+  size_t GetBytesFreedEver() const {
+    return sub_record_meta_->total_bytes_freed_ever_;
+  }
+#else
   // Returns the total number of objects freed since the heap was created.
   size_t GetObjectsFreedEver() const {
     return total_objects_freed_ever_;
@@ -387,7 +398,7 @@ class Heap {
   size_t GetBytesFreedEver() const {
     return total_bytes_freed_ever_;
   }
-
+#endif
   size_t GetMinAllocSpaceSizeForSticky() const {
     return min_alloc_space_size_for_sticky_gc_;
   }
@@ -733,11 +744,7 @@ class Heap {
   // it completes ahead of an allocation failing.
   size_t concurrent_start_bytes_;
 
-  // Since the heap was created, how many bytes have been freed.
-  size_t total_bytes_freed_ever_;
 
-  // Since the heap was created, how many objects have been freed.
-  size_t total_objects_freed_ever_;
 
   // Primitive objects larger than this size are put in the large object space.
   const size_t large_object_threshold_;
@@ -811,7 +818,31 @@ class Heap {
     sub_record_meta_->last_trim_time_ms_ = param;
   }
 
+
+  void SetTotalBytesFreedEver(size_t param) {
+    sub_record_meta_->total_bytes_freed_ever_ = param;
+  }
+
+  void SetTotalObjectsFreedEver(size_t param) {
+    sub_record_meta_->total_objects_freed_ever_ = param;
+  }
+
+
+  void IncTotalBytesFreedEver(size_t param) {
+    sub_record_meta_->total_bytes_freed_ever_ += param;
+  }
+
+  void IncTotalObjectsFreedEver(size_t param) {
+    sub_record_meta_->total_objects_freed_ever_ += param;
+  }
+
 #else
+  // Since the heap was created, how many bytes have been freed.
+  size_t total_bytes_freed_ever_;
+
+  // Since the heap was created, how many objects have been freed.
+  size_t total_objects_freed_ever_;
+
   UniquePtr<accounting::HeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
 

@@ -242,6 +242,12 @@ typedef struct GCSrvcZygoteResharingRec_S{
 
 
 typedef struct GCSrvcHeapSubRecord_S {
+  // Since the heap was created, how many bytes have been freed.
+  size_t total_bytes_freed_ever_;
+
+  // Since the heap was created, how many objects have been freed.
+  size_t total_objects_freed_ever_;
+
   // The last time a heap trim occurred.
   uint64_t last_trim_time_ms_;
 
@@ -330,10 +336,10 @@ typedef struct GCSrvSharableHeapData_S {
 //  // completes.
 //  volatile int is_gc_complete_;
   // Since the heap was created, how many bytes have been freed.
-  size_t total_bytes_freed_ever_;
-
-  // Since the heap was created, how many objects have been freed.
-  size_t total_objects_freed_ever_;
+//  size_t total_bytes_freed_ever_;
+//
+//  // Since the heap was created, how many objects have been freed.
+//  size_t total_objects_freed_ever_;
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //guarded by (gc_complete_lock_);

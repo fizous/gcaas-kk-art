@@ -111,8 +111,11 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       care_about_pause_times_(true),
       concurrent_start_bytes_(concurrent_gc_ ? initial_size - kMinConcurrentRemainingBytes
           :  std::numeric_limits<size_t>::max()),
+#if (true || ART_GC_SERVICE)
+#else
       total_bytes_freed_ever_(0),
       total_objects_freed_ever_(0),
+#endif
       large_object_threshold_(GC_HEAP_LARGE_OBJECT_THRESHOLD),
       num_bytes_allocated_(0),
       native_bytes_allocated_(0),
@@ -155,6 +158,9 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 #if (true || ART_GC_SERVICE)
   SetLastTimeTrim(0);
   SetAllocationRate(0);
+  SetTotalBytesFreedEver(0);
+  SetTotalObjectsFreedEver(0);
+
   LOG(ERROR) << "the runtime is a compiler ? " <<
       Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote()) {
@@ -1616,8 +1622,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
 
   collector->clear_soft_references_ = clear_soft_references;
   collector->Run();
-  total_objects_freed_ever_ += collector->GetFreedObjects();
-  total_bytes_freed_ever_ += collector->GetFreedBytes();
+  IncTotalObjectsFreedEver(collector->GetFreedObjects());
+  IncTotalBytesFreedEver(collector->GetFreedBytes());
   if (care_about_pause_times_) {
     const size_t duration = collector->GetDurationNs();
     std::vector<uint64_t> pauses = collector->GetPauseTimes();
