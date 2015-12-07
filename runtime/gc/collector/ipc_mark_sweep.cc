@@ -427,9 +427,10 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid() <<
-      "\n freed: " << collector->GetFreedObjects() << " objects";
-      "\n bytes_freed: " << collector->GetFreedBytes() << " bytes";
+  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type]
+      << " from thread ID:" << self->GetTid() <<
+      "\n freed: " << collector->GetFreedObjects() << " objects"
+      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
   // IPC_MARKSWEEP_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
