@@ -204,6 +204,7 @@ typedef struct GCSrvceCashedStatsCounters_S {
   volatile int32_t class_count_;
   volatile int32_t other_count_;
   volatile int32_t reference_count_;
+  volatile int32_t cards_scanned_;
 
 
   GCSrvceCollectorTimeStats total_stats_;

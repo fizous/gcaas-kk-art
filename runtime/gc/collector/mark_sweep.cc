@@ -954,7 +954,7 @@ class CardScanTask : public MarkStackTask<false> {
     ScanObjectParallelVisitor visitor(this);
     accounting::CARD_TABLE* card_table = mark_sweep_->GetHeap()->GetCardTable();
     size_t cards_scanned = card_table->Scan(bitmap_, begin_, end_, visitor, minimum_age_);
-    mark_sweep_->cards_scanned_.fetch_add(cards_scanned);
+    mark_sweep_->IncCardsScanned(cards_scanned);
     VLOG(heap) << "Parallel scanning cards " << reinterpret_cast<void*>(begin_) << " - "
         << reinterpret_cast<void*>(end_) << " = " << cards_scanned;
     // Finish by emptying our local mark stack.
@@ -1027,7 +1027,7 @@ void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
     const size_t mark_stack_delta = std::min(CardScanTask::kMaxSize / 2,
                                              mark_stack_size / mark_stack_tasks + 1);
     size_t ref_card_count = 0;
-    cards_scanned_ = 0;
+    SetCardsScanned(0);
     for (const auto& space : GetHeap()->GetContinuousSpaces()) {
       byte* card_begin = space->Begin();
       byte* card_end = space->End();
@@ -1070,7 +1070,7 @@ void MarkSweep::ScanGrayObjects(bool paused, byte minimum_age) {
     thread_pool->Wait(self, true, true);
     thread_pool->StopWorkers(self);
     if (paused) {
-      DCHECK_EQ(ref_card_count, static_cast<size_t>(cards_scanned_.load()));
+      DCHECK_EQ(ref_card_count, static_cast<size_t>(GetCardsScanned()));
     }
     timings_.EndSplit();
   } else {

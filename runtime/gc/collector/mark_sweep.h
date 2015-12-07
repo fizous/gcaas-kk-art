@@ -426,6 +426,18 @@ class MarkSweep : public GarbageCollector {
     return stats_counters_->other_count_;
   }
 
+  void IncCardsScanned(int val) {
+    android_atomic_add(val, &stats_counters_->cards_scanned_);
+  }
+
+
+  void SetCardsScanned(int val) {
+    stats_counters_->cards_scanned_ = 0;
+  }
+
+  int32_t GetCardsScanned() {
+    return android_atomic_release_load(&stats_counters_->cards_scanned_);
+  }
 
   void IncClassCount(int val) {
     android_atomic_add(val, &stats_counters_->class_count_);
@@ -631,6 +643,8 @@ class MarkSweep : public GarbageCollector {
   AtomicInteger array_count_;
   // Number of non-class/arrays scanned, if kCountScannedTypes.
   AtomicInteger other_count_;
+  AtomicInteger reference_count_;
+  AtomicInteger cards_scanned_;
 #endif
   AtomicInteger large_object_test_;
   AtomicInteger large_object_mark_;
@@ -638,8 +652,7 @@ class MarkSweep : public GarbageCollector {
   AtomicInteger overhead_time_;
   AtomicInteger work_chunks_created_;
   AtomicInteger work_chunks_deleted_;
-  AtomicInteger reference_count_;
-  AtomicInteger cards_scanned_;
+
 
   // Verification.
   size_t live_stack_freeze_size_;
