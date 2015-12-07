@@ -2290,12 +2290,12 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule
         // another GC straight away.
-        SetConcurrentStartBytes(bytes_allocated);
+        SetConcStartBytes(bytes_allocated);
       } else {
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        SetConcurrentStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
+        SetConcStartBytes(std::max(max_allowed_footprint_ - remaining_bytes, bytes_allocated));
       }
       DCHECK_LE(GetConcStartBytes(), max_allowed_footprint_);
       DCHECK_LE(max_allowed_footprint_, GetGrowthLimit());
