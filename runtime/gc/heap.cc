@@ -2504,7 +2504,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
 
   // We already have a request pending, no reason to start more until we update
   // concurrent_start_bytes_.
-  SetConcurrentStartBytes(std::numeric_limits<size_t>::max());
+  SetConcStartBytes(std::numeric_limits<size_t>::max());
 
 #if (true || ART_GC_SERVICE)
   if(!art::gcservice::GCServiceClient::RequestConcGC()) {
