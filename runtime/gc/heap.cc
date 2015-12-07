@@ -125,7 +125,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       min_alloc_space_size_for_sticky_gc_(2 * MB),
       min_remaining_space_for_sticky_gc_(1 * MB),
 #if (true || ART_GC_SERVICE)
-      sub_record_meta_(calloc(1, sizeof(space::GCSrvcHeapSubRecord))),
+      sub_record_meta_(reinterpret_cast<space::GCSrvcHeapSubRecord*>(calloc(1, sizeof(space::GCSrvcHeapSubRecord)))),
 #else
       last_trim_time_ms_(0),
       allocation_rate_(0),
