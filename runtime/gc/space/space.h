@@ -242,6 +242,17 @@ typedef struct GCSrvcZygoteResharingRec_S{
 
 
 typedef struct GCSrvcHeapSubRecord_S {
+  gc::collector::GcType next_gc_type_;
+  // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
+  // a GC should be triggered.
+  size_t max_allowed_footprint_;
+
+  // The watermark at which a concurrent GC is requested by registerNativeAllocation.
+  size_t native_footprint_gc_watermark_;
+
+  // The watermark at which a GC is performed inside of registerNativeAllocation.
+  size_t native_footprint_limit_;
+
   // The size the heap is limited to. This is initially smaller than capacity, but for largeHeap
   // programs it is "cleared" making it the same as capacity.
   size_t growth_limit_;
@@ -254,6 +265,13 @@ typedef struct GCSrvcHeapSubRecord_S {
 
   // Since the heap was created, how many objects have been freed.
   size_t total_objects_freed_ever_;
+
+  // Minimum free guarantees that you always have at least min_free_ free bytes after growing for
+  // utilization, regardless of target utilization ratio.
+  size_t min_free_;
+
+  // The ideal maximum free size, when we grow the heap for utilization.
+  size_t max_free_;
 
   // The last time a heap trim occurred.
   uint64_t last_trim_time_ms_;
@@ -268,18 +286,13 @@ typedef struct GCSrvcHeapSubRecord_S {
   // and the start of the current one.
   uint64_t allocation_rate_;
 
-  // Minimum free guarantees that you always have at least min_free_ free bytes after growing for
-  // utilization, regardless of target utilization ratio.
-  size_t min_free_;
-
-  // The ideal maximum free size, when we grow the heap for utilization.
-  size_t max_free_;
+  // Total time which mutators are paused or waiting for GC to complete.
+  uint64_t total_wait_time_;
 
   // Target ideal heap utilization ratio
   double target_utilization_;
 
-  // Total time which mutators are paused or waiting for GC to complete.
-  uint64_t total_wait_time_;
+
 } __attribute__((aligned(8))) GCSrvcHeapSubRecord;
 
 
@@ -364,7 +377,7 @@ typedef struct GCSrvSharableHeapData_S {
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //guarded by (gc_complete_lock_);
   volatile gc::collector::GcType last_gc_type_;
-  gc::collector::GcType next_gc_type_;
+//  gc::collector::GcType next_gc_type_;
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.
 //  size_t concurrent_start_bytes_;

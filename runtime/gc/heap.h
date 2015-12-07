@@ -709,7 +709,7 @@ class Heap {
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
-  collector::GcType next_gc_type_;
+
 
   // Maximum size that the heap can reach.
   const size_t capacity_;
@@ -720,15 +720,7 @@ class Heap {
   // programs it is "cleared" making it the same as capacity.
   size_t growth_limit_;
 #endif
-  // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
-  // a GC should be triggered.
-  size_t max_allowed_footprint_;
 
-  // The watermark at which a concurrent GC is requested by registerNativeAllocation.
-  size_t native_footprint_gc_watermark_;
-
-  // The watermark at which a GC is performed inside of registerNativeAllocation.
-  size_t native_footprint_limit_;
 
   // Activity manager members.
   jclass activity_thread_class_;
@@ -786,6 +778,8 @@ class Heap {
 
   // For a GC cycle, a bitmap that is set corresponding to the
 #if (true || ART_GC_SERVICE)
+
+
   UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   space::GCSrvcHeapSubRecord* sub_record_meta_;
@@ -891,6 +885,17 @@ class Heap {
     sub_record_meta_->total_wait_time_ += param;
   }
 #else
+  collector::GcType next_gc_type_;
+  // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
+  // a GC should be triggered.
+  size_t max_allowed_footprint_;
+
+  // The watermark at which a concurrent GC is requested by registerNativeAllocation.
+  size_t native_footprint_gc_watermark_;
+
+  // The watermark at which a GC is performed inside of registerNativeAllocation.
+  size_t native_footprint_limit_;
+
   // Since the heap was created, how many bytes have been freed.
   size_t total_bytes_freed_ever_;
 
