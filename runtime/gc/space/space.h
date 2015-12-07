@@ -346,7 +346,7 @@ typedef struct GCSrvSharableHeapData_S {
 
   /****** variables from original heap members *****/
   // Total time which mutators are paused or waiting for GC to complete.
-  uint64_t total_wait_time_;
+//  uint64_t total_wait_time_;
   // What kind of concurrency behavior is the runtime after? True for concurrent mark sweep GC,
   // false for stop-the-world mark sweep.
   int concurrent_gc_;
@@ -367,7 +367,7 @@ typedef struct GCSrvSharableHeapData_S {
   gc::collector::GcType next_gc_type_;
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.
-  size_t concurrent_start_bytes_;
+//  size_t concurrent_start_bytes_;
 
   /*
    * process state of the application. this helps to know the priority  of the

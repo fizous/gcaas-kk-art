@@ -160,8 +160,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   /* heap members */
   meta_->last_gc_type_ = collector::kGcTypeNone;
   meta_->next_gc_type_ = collector::kGcTypePartial;
-  meta_->total_wait_time_ = 0;
-  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
+//  meta_->total_wait_time_ = 0;
+//  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
 //  meta_->last_gc_size_ = local_heap_->GetLastGCSize();
 //  meta_->last_gc_time_ns_ = local_heap_->GetLastGCTime();
 
@@ -342,7 +342,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         }
         last_gc_type = meta_->last_gc_type_;
         wait_time = NanoTime() - wait_start;
-        meta_->total_wait_time_ += wait_time;
+        local_heap_->IncTotalWaitTime(wait_time);
       }
       if (wait_time > local_heap_->long_pause_log_threshold_) {
         LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
@@ -649,12 +649,12 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule
         // another GC straight away.
-        meta_->concurrent_start_bytes_ = bytes_allocated;
+        local_heap_->SetConcStartBytes(bytes_allocated);
       } else {
         // Start a concurrent GC when we get close to the estimated remaining bytes. When the
         // allocation rate is very high, remaining_bytes could tell us that we should start a GC
         // right away.
-        meta_->concurrent_start_bytes_ = std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated);
+        local_heap_->SetConcStartBytes(std::max(local_heap_->max_allowed_footprint_ - remaining_bytes, bytes_allocated));
       }
 //      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
 //      DCHECK_LE(max_allowed_footprint_, growth_limit_);
