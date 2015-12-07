@@ -168,8 +168,8 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 
 
   /* heap statistics */
-  meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
-  meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
+//  meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
+//  meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
   meta_->conc_count_ = 0;
   meta_->explicit_count_ = 0;
 
@@ -434,8 +434,10 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   // IPC_MARKSWEEP_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
-  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
-  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
+  local_heap_->IncTotalObjectsFreedEver(collector->GetFreedObjects());
+  local_heap_->IncTotalBytesFreedEver(collector->GetFreedBytes());
+//  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
+//  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
   LOG(ERROR) << "@@@@@@@@@@ YYYY @@@@@@" << gc_cause << " " << collector->GetName()
             << " GC freed "  <<  collector->GetFreedObjects() << "("
             << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
