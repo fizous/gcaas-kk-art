@@ -243,7 +243,7 @@ typedef struct GCSrvcZygoteResharingRec_S{
 
 typedef struct GCSrvcHeapSubRecord_S {
   //GUARDED_BY(gc_complete_lock_);
-  volatile gc::collector::GcType last_gc_type_;
+  gc::collector::GcType last_gc_type_;
 
   gc::collector::GcType next_gc_type_;
   // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating

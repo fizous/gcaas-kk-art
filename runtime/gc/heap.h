@@ -900,7 +900,7 @@ class Heap {
   }
 
   collector::GcType GetLastGCType() const {
-    return static_cast<volatile int>(android_atomic_release_load(
+    return static_cast<collector::GcType>(android_atomic_release_load(
         reinterpret_cast<int*>(&(sub_record_meta_->last_gc_type_))));
   }
 
