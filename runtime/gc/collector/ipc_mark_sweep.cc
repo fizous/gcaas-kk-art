@@ -937,9 +937,22 @@ void IPCMarkSweep::ClearMarkHolders(void) {
 void IPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
+
+
+
   IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->SetCurrentCollector(this);
+  ipc_heap_->meta_->reference_offsets_.reference_referent_offset_ =
+      ipc_heap_->local_heap_->reference_referent_offset_.Uint32Value();
+  ipc_heap_->meta_->reference_offsets_.reference_queue_offset_ =
+      ipc_heap_->local_heap_->reference_queue_offset_.Uint32Value();
+  ipc_heap_->meta_->reference_offsets_.reference_queueNext_offset_ =
+      ipc_heap_->local_heap_->reference_queueNext_offset_.Uint32Value();
+  ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_ =
+      ipc_heap_->local_heap_->reference_pendingNext_offset_.Uint32Value();
+  ipc_heap_->meta_->reference_offsets_.finalizer_reference_zombie_offset_ =
+      ipc_heap_->local_heap_->finalizer_reference_zombie_offset_.Uint32Value();
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
 
