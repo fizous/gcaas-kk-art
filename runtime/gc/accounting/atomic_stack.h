@@ -99,14 +99,14 @@ class StructuredAtomicStack {
   // Capacity is how many elements we can store in the stack.
   static StructuredAtomicStack* ShareStack(StructuredAtomicStack* original,
       StructuredObjectStackData* memory_data, bool shareMem, size_t high_capacity) {
-    LOG(ERROR) << "....Calling ShareStack...." << memory_data <<
-        ", with high capacity " << high_capacity;
+//    LOG(ERROR) << "....Calling ShareStack...." << memory_data <<
+//        ", with high capacity " << high_capacity;
     UniquePtr<StructuredAtomicStack> mark_stack(
         new StructuredAtomicStack(std::string(original->stack_data_->name_),
             high_capacity, memory_data, shareMem));
     mark_stack->Init(shareMem);
     if(!original->stack_data_->is_shared_) {
-      LOG(ERROR) << "....Original stack was not shared....";
+//      LOG(ERROR) << "....Original stack was not shared....";
       free(original->stack_data_);
     }
     return mark_stack.release();
@@ -172,29 +172,29 @@ class StructuredAtomicStack {
 //    stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
     if(stack_data_->is_shared_ == 1) {
-      LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
+//      LOG(ERROR) << "AAAAA.......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
       if(mem_map_.get()!=NULL) {
         byte* _calc_end = mem_map_->End();
         byte* _end = reinterpret_cast<byte*>(stack_data_->begin_) + _mem_length;
         if(_calc_end < _end) {
-          LOG(ERROR) << "...Need to resize the stack located at " <<
-              reinterpret_cast<void*>(stack_data_->begin_) <<
-              ", mem_end = " << reinterpret_cast<void*>(_calc_end) <<
-              ", atomic_pointer = " <<reinterpret_cast<void*>(_end) ;
+//          LOG(ERROR) << "...Need to resize the stack located at " <<
+//              reinterpret_cast<void*>(stack_data_->begin_) <<
+//              ", mem_end = " << reinterpret_cast<void*>(_calc_end) <<
+//              ", atomic_pointer = " <<reinterpret_cast<void*>(_end) ;
           MemBaseMap::AshmemResize(&stack_data_->memory_, _mem_length);
           stack_data_->begin_ = reinterpret_cast<T*>(stack_data_->memory_.begin_);
-          LOG(ERROR) << "...Done with to resize the stack located at " <<
-              reinterpret_cast<void*>(GetBaseAddress());
+//          LOG(ERROR) << "...Done with to resize the stack located at " <<
+//              reinterpret_cast<void*>(GetBaseAddress());
         }
-        LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
-            _mem_length << ", end:" <<
-            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
-        LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
+//        LOG(ERROR) << ".......Resetting Shared atomic stack......., memlength:" <<
+//            _mem_length << ", end:" <<
+//            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
+//        LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
       }
       memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
-      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
+//      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
       int result = madvise(GetBaseAddress(),
           sizeof(T) * stack_data_->capacity_, MADV_DONTNEED);
       if (result == -1) {
@@ -269,8 +269,8 @@ class StructuredAtomicStack {
 
   // Will clear the stack.
   virtual void Resize(size_t new_capacity) {
-    LOG(ERROR) << ".......Resizing atomic stack.......: " <<
-        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
+//    LOG(ERROR) << ".......Resizing atomic stack.......: " <<
+//        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
 
     stack_data_->capacity_ = new_capacity;
 
@@ -314,9 +314,9 @@ class StructuredAtomicStack {
 
 
   void DumpDataEntries(bool dumpEntries){
-    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~"
-        << ", data_address: " << reinterpret_cast<void*>(stack_data_)
-        << ", begin: " << GetBaseAddress() ;
+//    LOG(ERROR) << "~~~~~~~~~~~~~ AtomicStackDump (size:" << Size() << ") ~~~~~~~~~~~~~"
+//        << ", data_address: " << reinterpret_cast<void*>(stack_data_)
+//        << ", begin: " << GetBaseAddress() ;
 
     if(dumpEntries && !IsEmpty()) {
       int _index = 0;
@@ -392,19 +392,19 @@ class StructuredAtomicStack {
   virtual void Init(int shareMem) {
 
     if(mem_map_.get() != NULL) { // we should unmap first?
-      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
+//          stack_data_->capacity_;
       mem_map_.reset(NULL);
-      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
+//          stack_data_->capacity_;
     } else {
-      LOG(ERROR) << "Rinitializing allocation stack to initial size: " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "Rinitializing allocation stack to initial size: " <<
+//          stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(stack_data_->name_, NULL,
         stack_data_->capacity_ * sizeof(T), PROT_READ | PROT_WRITE,
         (shareMem == 1), &(stack_data_->memory_)));
-    LOG(ERROR) << "..........Created mem_map of the atomic stack.....";
+//    LOG(ERROR) << "..........Created mem_map of the atomic stack.....";
     CHECK(mem_map_.get() != NULL) << "couldn't allocate mark stack";
     byte* addr = mem_map_->Begin();
     CHECK(addr != NULL);
@@ -447,15 +447,15 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
   ServerStructuredAtomicStack(StructuredObjectStackData* data_addr,
       byte* serv_begin) : StructuredObjectStack(data_addr) {
     stack_data_->memory_.server_begin_ = serv_begin;
-    LOG(ERROR) << "server..begin = " <<
-        reinterpret_cast<void*>(stack_data_->memory_.server_begin_);
+//    LOG(ERROR) << "server..begin = " <<
+//        reinterpret_cast<void*>(stack_data_->memory_.server_begin_);
     Init(1);
   }
 
   // Will clear the stack.
   void Resize(size_t new_capacity) {
-    LOG(ERROR) << "ServerStructuredAtomicStack::.......Resizing atomic stack.......: " <<
-        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
+//    LOG(ERROR) << "ServerStructuredAtomicStack::.......Resizing atomic stack.......: " <<
+//        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
 
     stack_data_->capacity_ = new_capacity;
 
@@ -489,14 +489,14 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
   void Init(int shareMem) {
 
     if(mem_map_.get() != NULL) { // we should unmap first?
-      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "Reinitializing allocation stack to size: " <<
+//          stack_data_->capacity_;
       mem_map_.reset(NULL);
-      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "Unmapping the structuredMemMapfirst " <<
+//          stack_data_->capacity_;
     } else {
-      LOG(ERROR) << "ServerStructuredAtomicStack::Rinitializing allocation stack to initial size: " <<
-          stack_data_->capacity_;
+//      LOG(ERROR) << "ServerStructuredAtomicStack::Rinitializing allocation stack to initial size: " <<
+//          stack_data_->capacity_;
     }
     mem_map_.reset(MEM_MAP::CreateStructedMemMap(&(stack_data_->memory_)));
     LOG(ERROR) << "ServerStructuredAtomicStack::..........Created mem_map of the atomic stack.....";
@@ -506,9 +506,9 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
     stack_data_->debug_is_sorted_ = 1;
     stack_data_->server_begin_ = reinterpret_cast<T*>(addr);
     stack_data_->is_shared_ = shareMem;
-    LOG(ERROR) << "ServerStructuredAtomicStack::.........begin of the stack_data....." <<
-        reinterpret_cast<void*>(GetBaseAddress()) <<
-        ", and addr=" << reinterpret_cast<void*>(addr);
+//    LOG(ERROR) << "ServerStructuredAtomicStack::.........begin of the stack_data....." <<
+//        reinterpret_cast<void*>(GetBaseAddress()) <<
+//        ", and addr=" << reinterpret_cast<void*>(addr);
     //Reset();
   }
 
@@ -526,12 +526,12 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
 //    stack_data_->back_index_ = 0;
     stack_data_->debug_is_sorted_ = 1;
     if(stack_data_->is_shared_ == 1) {
-      LOG(ERROR) << "ServerStructuredAtomicStack::.......Resetting Shared atomic stack......., before the memset call";
+//      LOG(ERROR) << "ServerStructuredAtomicStack::.......Resetting Shared atomic stack......., before the memset call";
       size_t _mem_length =  sizeof(T) * stack_data_->capacity_;
 
-        LOG(ERROR) << "ServerStructuredAtomicStack::Resetting Shared atomic stack......., memlength:" <<
-            _mem_length << ", end:" <<
-            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
+//        LOG(ERROR) << "ServerStructuredAtomicStack::Resetting Shared atomic stack......., memlength:" <<
+//            _mem_length << ", end:" <<
+//            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
 
       memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
