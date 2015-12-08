@@ -211,7 +211,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void ClearMarkHolders(void);
 
   // Mark all reachable objects, done concurrently.
-  void PostMarkingPhase(void);
+  //void PostMarkingPhase(void);
   /*
 
 
@@ -235,7 +235,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* heap_beetmap = NULL);
   void RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap = NULL);
   void IPCMarkReachablePhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-  void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  //void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
 //
 //  void BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* space)

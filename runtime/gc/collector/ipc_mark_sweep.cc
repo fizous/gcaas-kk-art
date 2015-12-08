@@ -940,7 +940,7 @@ void IPCMarkSweep::PreInitializePhase(void) {
   IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   ipc_heap_->SetCurrentCollector(this);
-
+  SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
 
 
@@ -961,7 +961,7 @@ void IPCMarkSweep::InitializePhase(void) {
   SetFinalizerReferenceList(nullptr);
   SetPhantomReferenceList(nullptr);
   SetClearedReferenceList(nullptr);
-  SetCachedJavaLangClass(Class::GetJavaLangClass());
+
 
 
 
@@ -998,7 +998,8 @@ void IPCMarkSweep::FinishPhase(void) {
 }
 
 void IPCMarkSweep::FindDefaultMarkBitmap(void) {
-  current_mark_bitmap_ = SetMarkBitmap();
+  //current_mark_bitmap_ = SetMarkBitmap();
+  MarkSweep::FindDefaultMarkBitmap();
   meta_data_->current_mark_bitmap_ =
       (reinterpret_cast<accounting::SharedSpaceBitmap*>(current_mark_bitmap_))->bitmap_data_;
 }
@@ -1032,25 +1033,69 @@ void IPCMarkSweep::MarkConcurrentRoots() {
  *   3- loop on mark stack to rescan objects in the allocation space;
  *   4-
  */
-void IPCMarkSweep::PostMarkingPhase(void){
+//void IPCMarkSweep::PostMarkingPhase(void){
+////  Thread* currThread = Thread::Current();
+////  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+////  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
+////      "threads: " << currThread->GetTid();
+////  if(false) {
+////    thread_list->SuspendAll();
+////    IPC_MARKSWEEP_VLOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
+////    thread_list->ResumeAll();
+////  }
+////  {
+////    ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
+////    WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
+////    MarkReachableObjects();
+////  }
+//
+//}
+
+//void IPCMarkSweep::IPCMarkRootsPhase(void) {
+//  base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
 //  Thread* currThread = Thread::Current();
-//  ThreadList* thread_list = Runtime::Current()->GetThreadList();
-//  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::PostMarkingPhase: SSSSSSSSSSSSSSSSSSUspended the "
-//      "threads: " << currThread->GetTid();
-//  if(false) {
-//    thread_list->SuspendAll();
-//    IPC_MARKSWEEP_VLOG(ERROR) << "SSSSSSSSSSSSSSSSSSUspended the threads";
-//    thread_list->ResumeAll();
+//  UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
+//  IPC_MARKSWEEP_VLOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
+//      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+//
+//  BindBitmaps();
+//  FindDefaultMarkBitmap();
+//
+//  // Process dirty cards and add dirty cards to mod union tables.
+//  ipc_heap_->local_heap_->ProcessCards(timings_);
+//
+//  // Need to do this before the checkpoint since we don't want any threads to add references to
+//  // the live stack during the recursive mark.
+//  timings_.NewSplit("SwapStacks");
+//  //Fizo: here we can make the server gets which one is the right stack
+//  ipc_heap_->local_heap_->SwapStacks();
+//
+//  WriterMutexLock mu(currThread, *Locks::heap_bitmap_lock_);
+//  if (Locks::mutator_lock_->IsExclusiveHeld(currThread)) {
+//    // If we exclusively hold the mutator lock, all threads must be suspended.
+//    MarkRoots();
+//    IPC_MARKSWEEP_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
+//        currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+//  } else { //concurrent
+//    IPC_MARKSWEEP_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
+//        currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+//    MarkThreadRoots(currThread);
+//    // At this point the live stack should no longer have any mutators which push into it.
+//    MarkNonThreadRoots();
 //  }
-//  {
-//    ReaderMutexLock mu_mutator(currThread, *Locks::mutator_lock_);
-//    WriterMutexLock mu_heap_bitmap(currThread, *Locks::heap_bitmap_lock_);
-//    MarkReachableObjects();
-//  }
+//  live_stack_freeze_size_ = ipc_heap_->local_heap_->GetLiveStack()->Size();
+//  MarkConcurrentRoots();
+//
+//  ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
+//
+//  MarkReachableObjects();
+//  MarkReachableObjects();
+//}
+
+void IPCMarkSweep::IPCMarkReachablePhase(void) {
 
 }
-
-void IPCMarkSweep::IPCMarkRootsPhase(void) {
+void IPCMarkSweep::MarkingPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
@@ -1088,14 +1133,6 @@ void IPCMarkSweep::IPCMarkRootsPhase(void) {
   ipc_heap_->local_heap_->UpdateAndMarkModUnion(this, timings_, GetGcType());
 
   MarkReachableObjects();
-  //MarkReachableObjects();
-}
-
-void IPCMarkSweep::IPCMarkReachablePhase(void) {
-
-}
-void IPCMarkSweep::MarkingPhase(void) {
-  IPCMarkRootsPhase();
 
 }
 
@@ -1209,7 +1246,8 @@ void IPCMarkSweep::MarkReachableObjects() {
 
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
-  RecursiveMark();
+  if(false)
+    RecursiveMark();
   //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
