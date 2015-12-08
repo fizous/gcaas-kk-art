@@ -25,8 +25,7 @@ GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
     int index) : index_(index), sharable_space_(sharable_space) {
-  if(true)
-  {
+  if(true) {
 
     //Thread* self = Thread::Current();
 

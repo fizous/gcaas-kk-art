@@ -378,10 +378,10 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
       if (mark_stack_->IsEmpty()) {
         break;
       }
-      popped_oject = mark_stack_->PopFront();
+      popped_oject = mark_stack_->PopBack();
       ServerScanObject(popped_oject, 0);
     }
-    mark_stack_->AdjustIndeces();
+   // mark_stack_->AdjustIndeces();
   }
 
   if(false)
