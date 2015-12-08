@@ -844,6 +844,13 @@ void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass
 }
 
 
+bool IsArtFieldVolatile(const mirror::ArtField* field) {
+  uint32_t raw_fiel_value =
+      mirror::Object::GetRawValueFromObject(field,
+          mirror::ArtField::GetArtFieldsACcessFlagsOffset());
+  return (raw_fiel_value & kAccVolatile) != 0;
+}
+
 template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
                                                       const mirror::Object* obj,
@@ -884,10 +891,19 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
             mirror::Object::GetRawValueFromObject(field,
                                               mirror::ArtField::OffsetOffset());
         MemberOffset field_offset(field_word_value);
-        uint32_t raw_field_value =
-            mirror::Object::GetRawValueFromObject(obj, field_offset);
-        const mirror::Object* mapped_field_object =
-            MapValueToServer<mirror::Object>(raw_field_value);
+        uint32_t raw_field_value = 0;
+        const mirror::Object* mapped_field_object = NULL;
+        if(IsArtFieldVolatile(field)) {
+          raw_field_value =
+              mirror::Object::GetVolatileRawValueFromObject(
+                                          reinterpret_cast<const mirror::Object*>(obj),
+                                          field_offset);
+        } else {
+          raw_field_value =
+                      mirror::Object::GetRawValueFromObject(obj, field_offset);
+
+        }
+        mapped_field_object = MapValueToServer<mirror::Object>(raw_field_value);
         visitor(obj, mapped_field_object, field_offset, is_static);
       }
     }
