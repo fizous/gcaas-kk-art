@@ -850,7 +850,7 @@ void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass
 }
 
 
-bool IsArtFieldVolatile(const mirror::ArtField* field) {
+bool IPCServerMarkerSweep::IsArtFieldVolatile(const mirror::ArtField* field) {
   uint32_t raw_fiel_value =
       mirror::Object::GetRawValueFromObject(field,
           mirror::ArtField::GetArtFieldsACcessFlagsOffset());
