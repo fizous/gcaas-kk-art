@@ -714,7 +714,7 @@ class Heap {
   volatile bool is_gc_running_ GUARDED_BY(gc_complete_lock_);
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
-  volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
+  //volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
 
 
   // Maximum size that the heap can reach.
@@ -899,6 +899,15 @@ class Heap {
     sub_record_meta_->next_gc_type_ = val;
   }
 
+  collector::GcType GetLastGCType() const {
+    return static_cast<volatile int>(android_atomic_release_load(
+        static_cast<volatile int*>(&(sub_record_meta_->next_gc_type_))));
+  }
+
+  void SetLastGCType(collector::GcType val)  {
+    android_atomic_acquire_store(static_cast<int>(val),
+        static_cast<volatile int*>(&(sub_record_meta_->next_gc_type_)));
+  }
 
 
   size_t GetNativeFootPrintLimit() const {

@@ -94,11 +94,12 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       finalizer_ref_queue_lock_(NULL),
       phantom_ref_queue_lock_(NULL),
       is_gc_running_(false),
-      last_gc_type_(collector::kGcTypeNone),
+
 
       capacity_(capacity),
 #if (true || ART_GC_SERVICE)
 #else
+      last_gc_type_(collector::kGcTypeNone),
       next_gc_type_(collector::kGcTypePartial),
       growth_limit_(growth_limit),
       max_allowed_footprint_(initial_size),
@@ -179,9 +180,10 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetMaxFree(max_free);
   SetTotalWaitTime(0);
   SetNextGCType(collector::kGcTypePartial);
-  SetMaxAllowedFootPrint(initial_size),
-  SetNativeFootPrintGCWaterMark(initial_size),
-  SetNativeFootPrintLimit(2 * initial_size),
+  SetLastGCType(collector::kGcTypeNone);
+  SetMaxAllowedFootPrint(initial_size);
+  SetNativeFootPrintGCWaterMark(initial_size);
+  SetNativeFootPrintLimit(2 * initial_size);
 
   LOG(ERROR) << "the runtime is a compiler ? " <<
       Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
@@ -1687,7 +1689,7 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
       MutexLock mu(self, *gc_complete_lock_);
       mprofiler::VMProfiler::MProfMarkPostCollection();
       is_gc_running_ = false;
-      last_gc_type_ = gc_type;
+      SetLastGCType(gc_type);
       // Wake anyone who may have been waiting for the GC to complete.
       gc_complete_cond_->Broadcast(self);
   }
@@ -2191,7 +2193,7 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
         while (is_gc_running_) {
           gc_complete_cond_->Wait(self);
         }
-        last_gc_type = last_gc_type_;
+        last_gc_type = GetLastGCType();
         wait_time = NanoTime() - wait_start;
         IncTotalWaitTime(wait_time);
       }

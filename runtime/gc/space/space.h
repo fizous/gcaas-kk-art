@@ -242,6 +242,9 @@ typedef struct GCSrvcZygoteResharingRec_S{
 
 
 typedef struct GCSrvcHeapSubRecord_S {
+  //GUARDED_BY(gc_complete_lock_);
+  volatile gc::collector::GcType last_gc_type_;
+
   gc::collector::GcType next_gc_type_;
   // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
   // a GC should be triggered.
@@ -376,7 +379,7 @@ typedef struct GCSrvSharableHeapData_S {
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
   //guarded by (gc_complete_lock_);
-  volatile gc::collector::GcType last_gc_type_;
+//  volatile gc::collector::GcType last_gc_type_;
 //  gc::collector::GcType next_gc_type_;
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.

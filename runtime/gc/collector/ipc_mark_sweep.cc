@@ -161,7 +161,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->collect_index_ = -1;
 
   /* heap members */
-  meta_->last_gc_type_ = collector::kGcTypeNone;
+//  meta_->last_gc_type_ = collector::kGcTypeNone;
 //  meta_->next_gc_type_ = collector::kGcTypePartial;
 //  meta_->total_wait_time_ = 0;
 //  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
@@ -343,7 +343,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         while (meta_->is_gc_running_ == 1) {
           gc_complete_cond_->Wait(self);
         }
-        last_gc_type = meta_->last_gc_type_;
+        last_gc_type = local_heap_->GetLastGCType();
         wait_time = NanoTime() - wait_start;
         local_heap_->IncTotalWaitTime(wait_time);
       }
@@ -454,10 +454,10 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
-      meta_->is_gc_running_ = 0;
-      meta_->last_gc_type_ = gc_type;
+      local_heap_->SetLastGCType(gc_type);
       ResetServerFlag();
       // Wake anyone who may have been waiting for the GC to complete.
+      meta_->is_gc_running_ = 0;
       gc_complete_cond_->Broadcast(self);
   }
 
@@ -523,7 +523,8 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
 
 
 void IPCHeap::ResetServerFlag(void) {
-  if (!(curr_gc_cause_ == kGcCauseBackground || curr_gc_cause_ == kGcCauseExplicit))  { //a mutator is performing an allocation. do not involve service to get things done faster
+  if (!(curr_gc_cause_ == kGcCauseBackground ||
+      curr_gc_cause_ == kGcCauseExplicit))  { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
