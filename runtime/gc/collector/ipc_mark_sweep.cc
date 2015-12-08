@@ -177,6 +177,11 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->explicit_count_ = 0;
 
   /* set the offsets */
+  SetReferenceOffsets();
+}
+
+
+void IPCHeap::SetReferenceOffsets() {
   meta_->reference_offsets_.reference_referent_offset_ =
       local_heap_->reference_referent_offset_.Uint32Value();
   meta_->reference_offsets_.reference_queue_offset_ =
@@ -188,7 +193,6 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->reference_offsets_.finalizer_reference_zombie_offset_ =
       local_heap_->finalizer_reference_zombie_offset_.Uint32Value();
 }
-
 
 //void IPCHeap::AssignNextGCType(void) {
 //  meta_->next_gc_type_ = local_heap_->next_gc_type_;
@@ -942,17 +946,7 @@ void IPCMarkSweep::PreInitializePhase(void) {
 
   IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->SetCurrentCollector(this);
-  ipc_heap_->meta_->reference_offsets_.reference_referent_offset_ =
-      ipc_heap_->local_heap_->reference_referent_offset_.Uint32Value();
-  ipc_heap_->meta_->reference_offsets_.reference_queue_offset_ =
-      ipc_heap_->local_heap_->reference_queue_offset_.Uint32Value();
-  ipc_heap_->meta_->reference_offsets_.reference_queueNext_offset_ =
-      ipc_heap_->local_heap_->reference_queueNext_offset_.Uint32Value();
-  ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_ =
-      ipc_heap_->local_heap_->reference_pendingNext_offset_.Uint32Value();
-  ipc_heap_->meta_->reference_offsets_.finalizer_reference_zombie_offset_ =
-      ipc_heap_->local_heap_->finalizer_reference_zombie_offset_.Uint32Value();
+  ipc_heap_->SetReferenceOffsets();
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
 

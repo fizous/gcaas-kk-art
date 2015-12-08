@@ -116,6 +116,7 @@ class IPCHeap {
   bool RunCollectorDaemon(void);
   void NotifyCompleteConcurrentTask(void);
   void ResetHeapMetaDataUnlocked(void);
+  void SetReferenceOffsets(void);
   void CreateCollectors(void);
 
 //  void AssignNextGCType(void);
