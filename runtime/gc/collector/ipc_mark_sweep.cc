@@ -1293,6 +1293,9 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
 // the heap for later processing.
 void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
                                               mirror::Object* obj) {
+
+
+
   uint32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
                                   reinterpret_cast<const mirror::Object*>(obj),
@@ -1300,34 +1303,63 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
-   // cashed_stats_client_.reference_count_ += 1;
-    //Thread* self = Thread::Current();
-    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
-    if(IsSoftReferenceMappedClass(klass)) {
-      if(!is_enqueued_object) {
-        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-            &(cashed_references_record_->soft_reference_list_));
+    Thread* self = Thread::Current();
+    // TODO: Remove these locks, and use atomic stacks for storing references?
+    // We need to check that the references haven't already been enqueued since we can end up
+    // scanning the same reference multiple times due to dirty cards.
+    if (klass->IsSoftReferenceClass()) {
+      MutexLock mu(self, *heap_->GetSoftRefQueueLock());
+      if (!heap_->IsEnqueued(obj)) {
+        heap_->EnqueuePendingReference(obj, GetSoftReferenceList());
       }
-    } else if(IsWeakReferenceMappedClass(klass)) {
-      if(!is_enqueued_object) {
-        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-            &(cashed_references_record_->weak_reference_list_));
+    } else if (klass->IsWeakReferenceClass()) {
+      MutexLock mu(self, *heap_->GetWeakRefQueueLock());
+      if (!heap_->IsEnqueued(obj)) {
+        heap_->EnqueuePendingReference(obj, GetWeakReferenceList());
       }
-    } else if(IsFinalizerReferenceMappedClass(klass)) {
-      if(!is_enqueued_object) {
-        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-            &(cashed_references_record_->finalizer_reference_list_));
+    } else if (klass->IsFinalizerReferenceClass()) {
+      MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
+      if (!heap_->IsEnqueued(obj)) {
+        heap_->EnqueuePendingReference(obj, GetFinalizerReferenceList());
       }
-    } else if(IsPhantomReferenceMappedClass(klass)) {
-      if(!is_enqueued_object) {
-        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-            &(cashed_references_record_->phantom_reference_list_));
+    } else if (klass->IsPhantomReferenceClass()) {
+      MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
+      if (!heap_->IsEnqueued(obj)) {
+        heap_->EnqueuePendingReference(obj, GetPhantomReferenceList());
       }
     } else {
-      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
-                  << ", klass: " << klass
-                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
+      LOG(FATAL) << "Invalid reference type " << PrettyClass(klass)
+                 << " " << std::hex << klass->GetAccessFlags();
     }
+
+//   // cashed_stats_client_.reference_count_ += 1;
+//    //Thread* self = Thread::Current();
+//    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
+//    if(IsSoftReferenceMappedClass(klass)) {
+//      if(!is_enqueued_object) {
+//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+//            &(cashed_references_record_->soft_reference_list_));
+//      }
+//    } else if(IsWeakReferenceMappedClass(klass)) {
+//      if(!is_enqueued_object) {
+//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+//            &(cashed_references_record_->weak_reference_list_));
+//      }
+//    } else if(IsFinalizerReferenceMappedClass(klass)) {
+//      if(!is_enqueued_object) {
+//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+//            &(cashed_references_record_->finalizer_reference_list_));
+//      }
+//    } else if(IsPhantomReferenceMappedClass(klass)) {
+//      if(!is_enqueued_object) {
+//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+//            &(cashed_references_record_->phantom_reference_list_));
+//      }
+//    } else {
+//      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
+//                  << ", klass: " << klass
+//                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
+//    }
   }
 }
 
