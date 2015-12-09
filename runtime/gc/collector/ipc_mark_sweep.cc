@@ -781,7 +781,7 @@ void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
 
 void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
     space::IPC_GC_PHASE_ENUM phase) {
-  ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
+  ScopedThreadStateChange tsc(thread, kWaitingPerformingGc/*kWaitingForGCProcess*/);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
     while( meta_data_->gc_phase_ != phase) {
