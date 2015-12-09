@@ -2154,7 +2154,7 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
   // TODO: Not put these objects in the mark stack in the first place.
-  HandshakeIPCSweepMarkingPhase();
+  HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   RecursiveMarkDirtyObjects(false, accounting::ConstantsCardTable::kCardDirty - 1);
 }
 
