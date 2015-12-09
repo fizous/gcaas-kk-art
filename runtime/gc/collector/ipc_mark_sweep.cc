@@ -904,6 +904,16 @@ bool IPCMarkSweep::IsPhantomReferenceMappedClass(
   return (GetClassAccessFlags(klass) & kAccClassIsPhantomReference) != 0;
 }
 
+bool IPCMarkSweep::IsPrimitiveMappedKlass(
+                                            const mirror::Class* klass) const {
+  int32_t type_raw_value =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+          mirror::Class::PrimitiveTypeOffset());
+  Primitive::Type primitive_type =
+      static_cast<Primitive::Type>(type_raw_value);
+  return (primitive_type != Primitive::kPrimNot);
+}
+
 const mirror::Class* IPCMarkSweep::GetComponentTypeMappedClass(
                                       const mirror::Class* mapped_klass) const {
   uint32_t component_raw_value =
@@ -1008,6 +1018,20 @@ void IPCMarkSweep::RawVisitObjectArrayReferences(
   }
 
 }
+
+
+inline bool IPCMarkSweep::RawIsMarked(const Object* object)  {
+  if (IsImmune(object)) {
+    return true;
+  }
+  DCHECK(current_mark_bitmap_ != NULL);
+  if (current_mark_bitmap_->HasAddress(object)) {
+    return current_mark_bitmap_->Test(object);
+  }
+  return heap_->GetMarkBitmap()->Test(object);
+}
+
+
 
 inline bool IPCMarkSweep::IsMappedObjectMarked(
                                            const mirror::Object* object)  {
