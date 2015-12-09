@@ -1421,27 +1421,42 @@ template <typename MarkVisitor>
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
   const mirror::Class* mapped_klass = GetMappedObjectKlass(obj, 0);
-  int mapped_class_type = GetMappedClassType(mapped_klass);
-  if (UNLIKELY(mapped_class_type < 2)) {
-    //cashed_stats_client_.array_count_ += 1;
-    //android_atomic_add(1, &(array_count_));
-    if(mapped_class_type == 0) {
-      RawVisitObjectArrayReferences(
-        down_cast<const mirror::ObjectArray<mirror::Object>*>(obj),
-                                                                    visitor);
+
+
+  if (UNLIKELY(mapped_klass->IsArrayClass())) {
+    if (mapped_klass->IsObjectArrayClass()) {
+      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
-  } else if (UNLIKELY(mapped_class_type == 2)) {
-    //cashed_stats_client_.class_count_ += 1;
+  } else if (UNLIKELY(mapped_klass == GetCachedJavaLangClass())) {
     RawVisitClassReferences(mapped_klass, obj, visitor);
-  } else if (UNLIKELY(mapped_class_type == 3)) {
-    //cashed_stats_client_.other_count_ += 1;
-    RawVisitOtherReferences(mapped_klass, obj, visitor);
-    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-      //is_reference_class_cnt_++;
-      RawDelayReferenceReferent(mapped_klass,
-                                  const_cast<mirror::Object*>(obj));
+  } else {
+    VisitOtherReferences(mapped_klass, obj, visitor);
+    if (UNLIKELY(mapped_klass->IsReferenceClass())) {
+      RawDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
     }
   }
+
+//  int mapped_class_type = GetMappedClassType(mapped_klass);
+//  if (UNLIKELY(mapped_class_type < 2)) {
+//    //cashed_stats_client_.array_count_ += 1;
+//    //android_atomic_add(1, &(array_count_));
+//    if(mapped_class_type == 0) {
+//      RawVisitObjectArrayReferences(
+//        down_cast<const mirror::ObjectArray<mirror::Object>*>(obj),
+//                                                                    visitor);
+//    }
+//  } else if (UNLIKELY(mapped_class_type == 2)) {
+//    //cashed_stats_client_.class_count_ += 1;
+//    RawVisitClassReferences(mapped_klass, obj, visitor);
+//  } else if (UNLIKELY(mapped_class_type == 3)) {
+//    //cashed_stats_client_.other_count_ += 1;
+//    RawVisitOtherReferences(mapped_klass, obj, visitor);
+//    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+//      //is_reference_class_cnt_++;
+//      RawDelayReferenceReferent(mapped_klass,
+//                                  const_cast<mirror::Object*>(obj));
+//    }
+//  }
 }
 
 
@@ -1555,6 +1570,17 @@ void IPCMarkSweep::RawObjectScanner(void) {
       ipc_heap_->local_heap_->GetAllocSpace()->End();
   spaces_[2].base_ = ipc_heap_->local_heap_->GetAllocSpace()->Begin();
   spaces_[2].base_end_ = ipc_heap_->local_heap_->GetAllocSpace()->End();
+
+
+
+  for(int i = 0; i <= 2; i++) {
+    LOG(ERROR) << StringPrintf("X...space[%d]  --> client-start=%p, client-end=%p", i,
+        spaces_[i].client_base_, spaces_[i].client_end_);
+  }
+  for(int i = 0; i <= 2; i++) {
+    LOG(ERROR) << StringPrintf("X...space[%d]  --> server-start=%p, server-end=%p", i,
+        spaces_[i].base_, spaces_[i].base_end_);
+  }
 
   const mirror::Object* popped_oject = NULL;
   RawMarkObjectVisitor visitor(this);
