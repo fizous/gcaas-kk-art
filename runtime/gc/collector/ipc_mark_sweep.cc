@@ -1328,7 +1328,7 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
         heap_->EnqueuePendingReferenceNoLock(obj, GetPhantomReferenceList());
       }
     } else {
-      LOG(FATAL) << "Invalid reference type " << PrettyClass(klass)
+      LOG(FATAL) << "Invalid reference type " //<< PrettyClass(klass)
                  << " " << std::hex << klass->GetAccessFlags();
     }
 
