@@ -1066,26 +1066,26 @@ bool IPCMarkSweep::IsMappedReferentEnqueued(
 }
 
 
-void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
-    mirror::Object** list) {
-  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
-  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
-  if(mapped_head == NULL) {
-    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
-    SetClientFieldValue(ref,
-        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-    *head_pp = MapReferenceToValueClient(ref);
-  } else {
-    int32_t pending_next_raw_value =
-        mirror::Object::GetRawValueFromObject(
-            reinterpret_cast<const mirror::Object*>(mapped_head),
-            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
-    mirror::Object* mapped_pending_next =
-        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
-    SetClientFieldValue(mapped_pending_next, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-  }
-}
+//void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
+//    mirror::Object** list) {
+//  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+//  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+//  if(mapped_head == NULL) {
+//    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+//    SetClientFieldValue(ref,
+//        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+//    *head_pp = MapReferenceToValueClient(ref);
+//  } else {
+//    int32_t pending_next_raw_value =
+//        mirror::Object::GetRawValueFromObject(
+//            reinterpret_cast<const mirror::Object*>(mapped_head),
+//            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+//    mirror::Object* mapped_pending_next =
+//        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+//    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
+//    SetClientFieldValue(mapped_pending_next, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+//  }
+//}
 
 
 template <class referenceKlass>
