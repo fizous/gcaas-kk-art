@@ -1399,7 +1399,7 @@ inline void IPCMarkSweep::RawMarkObjectNonNull(const mirror::Object* obj) {
   bool _found = true;
   accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
   if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
-    accounting::BaseBitmap* new_bitmap =
+    accounting::SPACE_BITMAP* new_bitmap =
         _temp_heap_beetmap->GetContinuousSpaceBitmap(obj);
     if (LIKELY(new_bitmap != NULL)) {
       object_bitmap = new_bitmap;
