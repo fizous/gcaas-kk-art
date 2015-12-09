@@ -1253,7 +1253,7 @@ class RawMarkObjectVisitor {
   }
 
  private:
-  IPCServerMarkerSweep* const mark_sweep_;
+  IPCMarkSweep* const mark_sweep_;
 };
 
 void IPCMarkSweep::RawObjectScanner(void) {
