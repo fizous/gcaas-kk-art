@@ -373,7 +373,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
   const mirror::Object* popped_oject = NULL;
-  if(true) {
+  if(false) {
     for (;;) {
       if (mark_stack_->IsEmpty()) {
         break;

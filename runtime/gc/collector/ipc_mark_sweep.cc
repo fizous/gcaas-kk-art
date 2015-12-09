@@ -364,7 +364,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     GcCause gc_cause, bool clear_soft_references) {
   Thread* self = Thread::Current();
 
-  ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
+  ScopedThreadStateChange tsc(self, /*kWaitingPerformingGc*/kWaitingForGCProcess);
   Locks::mutator_lock_->AssertNotHeld(self);
 
   if (self->IsHandlingStackOverflow()) {
@@ -668,6 +668,8 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
   local_heap_->UpdateMaxNativeFootprint();
 }
 
+
+
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
     ipc_heap_(ipcHeap),
     collector_index_(ipcHeap->collector_entry_++),
@@ -789,8 +791,497 @@ void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
     }
   }
 }
+///////
+//////
+/////////////////////
+
+byte* IPCMarkSweep::GetServerSpaceEnd(int index) const {
+  return spaces_[index].base_end_;
+}
+byte* IPCMarkSweep::GetServerSpaceBegin(int index) const {
+  return spaces_[index].base_;
+}
 
 
+byte* IPCMarkSweep::GetClientSpaceEnd(int index) const {
+  return spaces_[index].client_end_;
+}
+byte* IPCMarkSweep::GetClientSpaceBegin(int index) const {
+  return spaces_[index].client_base_;
+}
+
+template <class referenceKlass>
+inline const referenceKlass* IPCMarkSweep::MapValueToServer(
+                                      const uint32_t raw_address_value,
+                                      const int32_t offset_) const {
+  const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
+  if(_raw_address == nullptr)
+    return nullptr;
+
+  for(int i = 0; i <= 2; i++) {
+    if((_raw_address < GetClientSpaceEnd(i)) &&
+        (_raw_address >= GetClientSpaceBegin(i))) {
+      if(i == 0)
+        return reinterpret_cast<const referenceKlass*>(_raw_address);
+      return reinterpret_cast<const referenceKlass*>(_raw_address + offset_);
+    }
+  }
+
+  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
+      << raw_address_value;
+  return nullptr;
+}
+inline uint32_t IPCMarkSweep::GetClassAccessFlags(
+                                            const mirror::Class* klass) const {
+  // Check class is loaded or this is java.lang.String that has a
+  // circularity issue during loading the names of its members
+  uint32_t raw_access_flag_value =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+      mirror::Class::AcessFlagsOffset());
+  return raw_access_flag_value;
+}
+
+// Returns true if the class is an interface.
+bool IPCMarkSweep::IsInterfaceMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccInterface) != 0;
+}
+
+// Returns true if the class is declared final.
+bool IPCMarkSweep::IsFinalMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccFinal) != 0;
+}
+
+bool IPCMarkSweep::IsFinalizableMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsFinalizable) != 0;
+}
+
+// Returns true if the class is abstract.
+bool IPCMarkSweep::IsAbstractMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccAbstract) != 0;
+}
+
+// Returns true if the class is an annotation.
+bool IPCMarkSweep::IsAnnotationMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccAnnotation) != 0;
+}
+
+// Returns true if the class is synthetic.
+bool IPCMarkSweep::IsSyntheticMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccSynthetic) != 0;
+}
+
+bool IPCMarkSweep::IsReferenceMappedClass(
+                                            const mirror::Class* klass) const {
+  uint32_t _access_flags =  GetClassAccessFlags(klass);
+  return (_access_flags & kAccClassIsReference) != 0;
+}
+
+
+bool IPCMarkSweep::IsWeakReferenceMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsWeakReference) != 0;
+}
+
+
+bool IPCMarkSweep::IsSoftReferenceMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccReferenceFlagsMask) == kAccClassIsReference;
+}
+
+bool IPCMarkSweep::IsFinalizerReferenceMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsFinalizerReference) != 0;
+}
+
+bool IPCMarkSweep::IsPhantomReferenceMappedClass(
+                                            const mirror::Class* klass) const {
+  return (GetClassAccessFlags(klass) & kAccClassIsPhantomReference) != 0;
+}
+
+const mirror::Class* IPCMarkSweep::GetComponentTypeMappedClass(
+                                      const mirror::Class* mapped_klass) const {
+  uint32_t component_raw_value =
+        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
+            mirror::Class::ComponentTypeOffset());
+  const mirror::Class* c = MapValueToServer<mirror::Class>(component_raw_value);
+  return c;
+}
+
+bool IPCMarkSweep::IsMappedArrayClass(const mirror::Class* klass) const {
+  return (GetComponentTypeMappedClass(klass) != NULL);
+}
+
+bool IPCMarkSweep::IsObjectArrayMappedKlass(
+                                            const mirror::Class* klass) const {
+  const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
+  if(component_type != NULL) {
+    return (!IsPrimitiveMappedKlass(component_type));
+  }
+  return false;
+}
+
+int IPCMarkSweep::GetMappedClassType(const mirror::Class* klass) const {
+
+
+  if(UNLIKELY(klass == GetCachedJavaLangClass()))
+    return 2;
+
+  if(IsMappedArrayClass(klass)) {
+    if(IsObjectArrayMappedKlass(klass))
+      return 0;
+    return 1;
+  }
+
+  return 3;
+}
+
+inline const mirror::Class* IPCMarkSweep::GetMappedObjectKlass(
+                                      const mirror::Object* mapped_obj_parm,
+                                      const int32_t offset_) {
+  uint32_t _raw_class_value =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_obj_parm),
+          mirror::Object::ClassOffset());
+  const mirror::Class* c = MapValueToServer<mirror::Class>(_raw_class_value, offset_);
+
+  return c;
+}
+
+template <typename Visitor>
+inline void IPCMarkSweep::RawVisitInstanceFieldsReferences(
+                                                    const mirror::Class* klass,
+                                                     const mirror::Object* obj,
+                                                     const Visitor& visitor) {
+  const int32_t reference_offsets =
+      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
+  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
+  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+  uint32_t reference_instance_offsets_val = *word_addr;
+  RawVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
+}
+
+template <typename Visitor>
+inline void IPCMarkSweep::RawVisitClassReferences(
+                        const mirror::Class* klass, const mirror::Object* obj,
+                                            const Visitor& visitor)  {
+  RawVisitInstanceFieldsReferences(klass, obj, visitor);
+  RawVisitStaticFieldsReferences(down_cast<const mirror::Class*>(obj), visitor);
+
+}
+template <typename Visitor>
+inline void IPCMarkSweep::RawVisitStaticFieldsReferences(
+                                                      const mirror::Class* klass,
+                                                      const Visitor& visitor) {
+  MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
+  uint32_t _raw_value_offsets =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+          reference_static_offset);
+  RawVisitFieldsReferences(klass, _raw_value_offsets, true, visitor);
+}
+
+template <typename Visitor>
+void IPCMarkSweep::RawVisitObjectArrayReferences(
+                          const mirror::ObjectArray<mirror::Object>* mapped_arr,
+                                                  const Visitor& visitor) {
+  uint32_t _length_read =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+          mirror::Array::LengthOffset());
+
+  const size_t length =
+        static_cast<size_t>(_length_read);
+
+  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
+    const size_t width = sizeof(mirror::Object*);
+    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+    uint32_t _data_read =
+        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+                                                                        offset);
+    const mirror::Object* element_content =
+        MapValueToServer<mirror::Object>(_data_read);
+
+    visitor(mapped_arr, element_content, offset, false);
+  }
+
+}
+
+inline bool IPCMarkSweep::IsMappedObjectMarked(
+                                           const mirror::Object* object)  {
+
+  return MarkSweep::IsMarked(object);
+//  if (IsMappedObjectImmuned(object)) {
+//    return true;
+//  }
+//  const byte* casted_param = reinterpret_cast<const byte*>(object);
+//  int matching_index = -1;
+//  for(int i = 0; i <= 2; i++) {
+//    if((casted_param <  GetServerSpaceEnd(i)) &&
+//        (casted_param >= GetServerSpaceBegin(i))) {
+//      matching_index = i;
+//    }
+//  }
+//
+//  if(matching_index == -1) {
+//    LOG(FATAL) << "TestMappedBitmap..." << object;
+//    return false;
+//  }
+//
+// // marked_spaces_count_prof_[matching_index] += 1;
+//  accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
+//  bool _resultTestFlag = false;
+//  bool _resultHasAddress = obj_beetmap->HasAddress(object);
+//  if(!_resultHasAddress) {
+//    for (const auto& beetmap : mark_bitmaps_) {
+//      _resultHasAddress = beetmap->HasAddress(object);
+//      if(_resultHasAddress) {
+//        obj_beetmap = beetmap;
+//        break;
+//      }
+//    }
+//  }
+//
+//
+//
+//  if(_resultHasAddress) {
+//    _resultTestFlag = obj_beetmap->Test(object);
+//  }
+//
+//  return (_resultHasAddress && _resultTestFlag);
+}
+
+bool IPCMarkSweep::IsMappedReferentEnqueued(
+                                      const mirror::Object* mapped_ref) const {
+  int32_t pending_next_raw_value =
+      mirror::Object::GetRawValueFromObject(
+          reinterpret_cast<const mirror::Object*>(mapped_ref),
+          ipc_heap_->local_heap_->reference_pendingNext_offset_);
+  const mirror::Object* mapped_pending_next =
+      MapValueToServer<mirror::Object>(pending_next_raw_value);
+
+  return (mapped_pending_next != nullptr);
+}
+
+
+void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
+    mirror::Object** list) {
+  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+  if(mapped_head == NULL) {
+    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+    SetClientFieldValue(ref,
+        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+    *head_pp = MapReferenceToValueClient(ref);
+  } else {
+    int32_t pending_next_raw_value =
+        mirror::Object::GetRawValueFromObject(
+            reinterpret_cast<const mirror::Object*>(mapped_head),
+            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+    mirror::Object* mapped_pending_next =
+        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
+    SetClientFieldValue(mapped_pending_next, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+  }
+}
+
+
+template <class referenceKlass>
+uint32_t IPCMarkSweep::MapReferenceToValueClient(
+                                const referenceKlass* mapped_reference) const {
+  if(mapped_reference == nullptr)
+    return 0U;
+  const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
+  for(int i = 0; i <= 2; i++) {
+    if((_raw_address < GetServerSpaceEnd(i)) &&
+        (_raw_address >= GetServerSpaceBegin(i))) {
+      if(i == 0)
+        return reinterpret_cast<uint32_t>(_raw_address);
+      return reinterpret_cast<uint32_t>(_raw_address - 0);
+    }
+  }
+
+  LOG(FATAL) << "IPCServerMarkerSweep::MapReferenceToValueClient....0000--raw_Address_value:"
+      << mapped_reference;
+  return 0U;
+}
+
+void IPCMarkSweep::SetClientFieldValue(const mirror::Object* mapped_object,
+          MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
+//  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
+  byte* raw_addr =
+      const_cast<byte*>(reinterpret_cast<const byte*>(mapped_object)) +
+      field_offset.Int32Value();
+  uint32_t* word_addr = reinterpret_cast<uint32_t*>(raw_addr);
+  uint32_t eq_client_value =
+                    MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
+  *word_addr = eq_client_value;
+}
+
+void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
+    mirror::Object** list) {
+  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+  if(mapped_head == NULL) {
+    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+    SetClientFieldValue(ref, ipc_heap_->local_heap_->reference_pendingNext_offset_, ref);
+    *head_pp = MapReferenceToValueClient(ref);
+  } else {
+    int32_t pending_next_raw_value =
+        mirror::Object::GetRawValueFromObject(
+            reinterpret_cast<const mirror::Object*>(mapped_head),
+            ipc_heap_->local_heap_->reference_pendingNext_offset_);
+    mirror::Object* mapped_pending_next =
+        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+    SetClientFieldValue(ref, ipc_heap_->local_heap_->reference_pendingNext_offset_, mapped_head);
+    SetClientFieldValue(mapped_pending_next,
+        ipc_heap_->local_heap_->reference_pendingNext_offset_, ref);
+  }
+}
+
+
+// Process the "referent" field in a java.lang.ref.Reference.  If the
+// referent has not yet been marked, put it on the appropriate list in
+// the heap for later processing.
+void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
+                                              mirror::Object* obj) {
+  int32_t referent_raw_value =
+      mirror::Object::GetVolatileRawValueFromObject(
+                                  reinterpret_cast<const mirror::Object*>(obj),
+                                  ipc_heap_->local_heap_->reference_pendingNext_offset_);
+  const mirror::Object* mapped_referent =
+      MapValueToServer<mirror::Object>(referent_raw_value);
+  if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
+   // cashed_stats_client_.reference_count_ += 1;
+    //Thread* self = Thread::Current();
+    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
+    if(IsSoftReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+            &(cashed_references_record_->soft_reference_list_));
+      }
+    } else if(IsWeakReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+            &(cashed_references_record_->weak_reference_list_));
+      }
+    } else if(IsFinalizerReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+            &(cashed_references_record_->finalizer_reference_list_));
+      }
+    } else if(IsPhantomReferenceMappedClass(klass)) {
+      if(!is_enqueued_object) {
+        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+            &(cashed_references_record_->phantom_reference_list_));
+      }
+    } else {
+      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
+                  << ", klass: " << klass
+                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
+    }
+  }
+}
+
+template <typename MarkVisitor>
+inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
+    const MarkVisitor& visitor) {
+  const mirror::Class* mapped_klass = GetMappedObjectKlass(obj, 0);
+  int mapped_class_type = GetMappedClassType(mapped_klass);
+  if (UNLIKELY(mapped_class_type < 2)) {
+    //cashed_stats_client_.array_count_ += 1;
+    //android_atomic_add(1, &(array_count_));
+    if(mapped_class_type == 0) {
+      RawVisitObjectArrayReferences(
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(obj),
+                                                                    visitor);
+    }
+  } else if (UNLIKELY(mapped_class_type == 2)) {
+    //cashed_stats_client_.class_count_ += 1;
+    RawVisitClassReferences(mapped_klass, obj, visitor);
+  } else if (UNLIKELY(mapped_class_type == 3)) {
+    //cashed_stats_client_.other_count_ += 1;
+    RawVisitOtherReferences(mapped_klass, obj, visitor);
+    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+      //is_reference_class_cnt_++;
+      RawDelayReferenceReferent(mapped_klass,
+                                  const_cast<mirror::Object*>(obj));
+    }
+  }
+}
+
+template <class referenceKlass>
+inline const referenceKlass* IPCMarkSweep::MapValueToServer(
+                                      const uint32_t raw_address_value,
+                                      const int32_t offset_) const {
+//  if(raw_address_value == 0U)
+//    return nullptr;
+  const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
+  if(_raw_address == nullptr)
+    return nullptr;
+
+  for(int i = 0; i <= 2; i++) {
+    if((_raw_address < GetClientSpaceEnd(i)) &&
+        (_raw_address >= GetClientSpaceBegin(i))) {
+      if(i == 0)
+        return reinterpret_cast<const referenceKlass*>(_raw_address);
+      return reinterpret_cast<const referenceKlass*>(_raw_address + offset_);
+    }
+  }
+
+  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
+      << raw_address_value;
+  return nullptr;
+}
+
+class RawMarkObjectVisitor {
+ public:
+  explicit RawMarkObjectVisitor(IPCMarkSweep* const raw_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
+
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const mirror::Object* /* obj */, const mirror::Object* ref,
+                  MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
+    mark_sweep_->MarkObject(ref);
+  }
+
+ private:
+  IPCServerMarkerSweep* const mark_sweep_;
+};
+
+void IPCMarkSweep::RawObjectScanner(void) {
+  const mirror::Object* popped_oject = NULL;
+  RawMarkObjectVisitor visitor(this);
+  for (;;) {
+    if (mark_stack_->IsEmpty()) {
+      break;
+    }
+    popped_oject = mark_stack_->PopBack();
+    RawScanObjectVisit(popped_oject, visitor);
+  }
+}
+
+
+
+
+
+
+
+
+
+/////////////////////
+/////
+////
+////
+
+////
 class ClientMarkObjectVisitor {
  public:
   explicit ClientMarkObjectVisitor(IPCMarkSweep* const client_mark_sweep)
@@ -1092,9 +1583,9 @@ void IPCMarkSweep::MarkConcurrentRoots() {
 //  MarkReachableObjects();
 //}
 
-void IPCMarkSweep::IPCMarkReachablePhase(void) {
-
-}
+//void IPCMarkSweep::IPCMarkReachablePhase(void) {
+//
+//}
 void IPCMarkSweep::MarkingPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
@@ -1167,6 +1658,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
   int _synchronized = 0;
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
+    RawObjectScanner();
   } else {
     LOG(FATAL) << "DANGER::::::::#### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";

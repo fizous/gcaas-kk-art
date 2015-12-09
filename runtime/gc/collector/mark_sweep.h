@@ -333,7 +333,7 @@ class MarkSweep : public GarbageCollector {
     return &cashed_references_record_->cleared_reference_list_;
   }
 
-  mirror::Class* GetCachedJavaLangClass(void) {
+  mirror::Class* GetCachedJavaLangClass(void) const{
     return cashed_references_record_->java_lang_Class_;
   }
 

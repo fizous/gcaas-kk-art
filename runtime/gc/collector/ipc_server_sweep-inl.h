@@ -123,6 +123,8 @@ void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_obje
                     MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
   *word_addr = eq_client_value;
 }
+
+
 template <class referenceKlass>
 inline const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
                                       const referenceKlass* const ref_parm) {

@@ -47,8 +47,18 @@ namespace collector {
 class IPCMarkSweep;
 class IPCHeap;
 
+
+typedef struct GCSrverRAWCollectorSpace_S {
+  // Immune range, every object inside the immune range is assumed to be marked.
+  byte* base_;
+  byte* base_end_;
+  byte* client_base_;
+  byte* client_end_;
+} __attribute__((aligned(8))) GCSrverRAWCollectorSpace;
+
 class AbstractIPCMarkSweep {
  public:
+
   IPCHeap* ipc_heap_;
   volatile int collector_index_;
   volatile int server_synchronize_;
@@ -75,6 +85,9 @@ class AbstractIPCMarkSweep {
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
+
+
+
   /************************
    * cumulative statistics
    ************************/
@@ -234,7 +247,91 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void PreInitializePhase(void);
   void HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* heap_beetmap = NULL);
   void RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap = NULL);
-  void IPCMarkReachablePhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+//  void IPCMarkReachablePhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
+
+
+  GCSrverRAWCollectorSpace spaces_[3];
+  byte* GetClientSpaceEnd(int index) const;
+  byte* GetClientSpaceBegin(int index) const;
+  byte* GetServerSpaceEnd(int index) const;
+  byte* GetServerSpaceBegin(int index) const;
+  void RawObjectScanner(void);
+  template <typename MarkVisitor>
+  void RawScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
+
+  const mirror::Class* GetMappedObjectKlass(
+                                        const mirror::Object* mapped_obj_parm,
+                                        const int32_t offset_);
+
+  template <class referenceKlass>
+  const referenceKlass* MapValueToServer(
+                                        const uint32_t raw_address_value,
+                                        const int32_t offset_) const;
+
+  template <typename Visitor>
+  void IPCMarkSweep::RawVisitObjectArrayReferences(
+                            const mirror::ObjectArray<mirror::Object>* mapped_arr,
+                                                    const Visitor& visitor);
+
+  template <typename Visitor>
+  void RawVisitClassReferences(
+                          const mirror::Class* klass, const mirror::Object* obj,
+                                              const Visitor& visitor);
+
+  template <typename Visitor>
+  void RawVisitStaticFieldsReferences(const mirror::Class* klass,
+                                                     const Visitor& visitor);
+
+  template <typename Visitor>
+  void RawVisitInstanceFieldsReferences(const mirror::Class* klass,
+                                                       const mirror::Object* obj,
+                                                       const Visitor& visitor);
+
+  template <typename Visitor>
+  void RawVisitFieldsReferences(const mirror::Object* obj,
+                              uint32_t ref_offsets, bool is_static,
+                              const Visitor& visitor);
+  void RawDelayReferenceReferent(const mirror::Class* klass,
+                                                mirror::Object* obj);
+  void RawEnqPendingReference(mirror::Object* ref,
+      mirror::Object** list);
+  bool IsMappedReferentEnqueued(const mirror::Object* mapped_ref) const;
+  template <class referenceKlass>
+  uint32_t MapReferenceToValueClient(
+                                  const referenceKlass* mapped_reference) const;
+  void SetClientFieldValue(const mirror::Object* mapped_object,
+            MemberOffset field_offset, const mirror::Object* mapped_ref_value);
+  bool IsMappedObjectMarked(const mirror::Object* object);
+  bool IsMappedObjectImmuned(const mirror::Object* obj) const {
+    return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
+  }
+
+  uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
+  int GetMappedClassType(const mirror::Class* klass) const;
+  bool IsMappedArrayClass(const mirror::Class* klass) const;
+  bool IsObjectArrayMappedKlass(const mirror::Class* klass) const;
+  const mirror::Class* GetComponentTypeMappedClass(const mirror::Class* mapped_klass)const;
+  bool IsPrimitiveMappedKlass(const mirror::Class* klass) const;
+  bool IsInterfaceMappedClass(const mirror::Class* klass) const;
+  bool IsFinalMappedClass(const mirror::Class* klass) const;
+  bool IsFinalizableMappedClass(const mirror::Class* klass) const;
+  bool IsReferenceMappedClass(const mirror::Class* klass) const;
+  // Returns true if the class is abstract.
+  bool IsAbstractMappedClass(const mirror::Class* klass)const;
+  // Returns true if the class is an annotation.
+  bool IsAnnotationMappedClass(const mirror::Class* klass) const;
+  // Returns true if the class is synthetic.
+  bool IsSyntheticMappedClass(const mirror::Class* klass) const;
+  bool IsWeakReferenceMappedClass(const mirror::Class* klass) const;
+  bool IsFinalizerReferenceMappedClass(const mirror::Class* klass)const;
+  bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
+  bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
+  template <class referenceKlass>
+  inline const referenceKlass* MapValueToServer(
+                                        const uint32_t raw_address_value) const;
+
+
   //void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
 //
