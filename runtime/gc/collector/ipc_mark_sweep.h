@@ -264,11 +264,6 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
                                         const mirror::Object* mapped_obj_parm,
                                         const int32_t offset_);
 
-  template <class referenceKlass>
-  const referenceKlass* MapValueToServer(
-                                        const uint32_t raw_address_value,
-                                        const int32_t offset_) const;
-
   template <typename Visitor>
   void RawVisitObjectArrayReferences(
                             const mirror::ObjectArray<mirror::Object>* mapped_arr,
