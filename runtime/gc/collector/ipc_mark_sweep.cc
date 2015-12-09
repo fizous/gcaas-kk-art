@@ -365,7 +365,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     GcCause gc_cause, bool clear_soft_references) {
   Thread* self = Thread::Current();
 
-  ScopedThreadStateChange tsc(self, /*kWaitingPerformingGc*/kWaitingForGCProcess);
+  ScopedThreadStateChange tsc(self, kWaitingPerformingGc/*kWaitingForGCProcess*/);
   Locks::mutator_lock_->AssertNotHeld(self);
 
   if (self->IsHandlingStackOverflow()) {
