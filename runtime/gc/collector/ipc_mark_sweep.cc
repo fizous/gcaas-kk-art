@@ -1185,6 +1185,14 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
   }
 }
 
+
+template <typename Visitor>
+void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
+                                                      const mirror::Object* obj,
+                                                      const Visitor& visitor) {
+  RawVisitInstanceFieldsReferences(klass, obj, visitor);
+}
+
 template <typename MarkVisitor>
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
@@ -1212,29 +1220,7 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
   }
 }
 
-template <class referenceKlass>
-inline const referenceKlass* IPCMarkSweep::MapValueToServer(
-                                      const uint32_t raw_address_value,
-                                      const int32_t offset_) const {
-//  if(raw_address_value == 0U)
-//    return nullptr;
-  const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
-  if(_raw_address == nullptr)
-    return nullptr;
 
-  for(int i = 0; i <= 2; i++) {
-    if((_raw_address < GetClientSpaceEnd(i)) &&
-        (_raw_address >= GetClientSpaceBegin(i))) {
-      if(i == 0)
-        return reinterpret_cast<const referenceKlass*>(_raw_address);
-      return reinterpret_cast<const referenceKlass*>(_raw_address + offset_);
-    }
-  }
-
-  LOG(FATAL) << "IPCServerMarkerSweep::MapValueToServer....0000--raw_Address_value:"
-      << raw_address_value;
-  return nullptr;
-}
 
 class RawMarkObjectVisitor {
  public:

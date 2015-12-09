@@ -287,6 +287,10 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void RawVisitInstanceFieldsReferences(const mirror::Class* klass,
                                                        const mirror::Object* obj,
                                                        const Visitor& visitor);
+  template <typename Visitor>
+  void RawVisitOtherReferences(const mirror::Class* klass,
+                                                        const mirror::Object* obj,
+                                                        const Visitor& visitor);
 
   template <typename Visitor>
   void RawVisitFieldsReferences(const mirror::Object* obj,
