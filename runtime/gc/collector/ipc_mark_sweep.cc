@@ -1061,13 +1061,13 @@ inline void IPCMarkSweep::RawVisitFieldsReferences(
     // class.
     for (const mirror::Class* klass = is_static ? obj->AsClass() : obj->GetClass();
          klass != NULL;
-         klass = is_static ? NULL : klass->GetSuperClass()) {
+         klass = is_static ? NULL : klass->GetSuperClassNoLock()) {
       size_t num_reference_fields = (is_static
                                      ? klass->NumReferenceStaticFields()
                                      : klass->NumReferenceInstanceFields());
       for (size_t i = 0; i < num_reference_fields; ++i) {
-        mirror::ArtField* field = (is_static ? klass->GetStaticField(i)
-                                   : klass->GetInstanceField(i));
+        mirror::ArtField* field = (is_static ? klass->GetStaticFieldNoLock(i)
+                                   : klass->GetInstanceFieldNoLock(i));
         MemberOffset field_offset = field->GetOffset();
         const mirror::Object* ref =
             obj->GetFieldObject<const mirror::Object*>(field_offset, false);
