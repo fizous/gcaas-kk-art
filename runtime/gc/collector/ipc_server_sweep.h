@@ -205,8 +205,6 @@ class IPCServerMarkerSweep {
                                                        const mirror::Object* obj,
                                                        const Visitor& visitor);
 
-  bool IsArtFieldVolatile(const mirror::ArtField* field);
-
   template <typename Visitor>
   void ServerVisitFieldsReferences(const mirror::Object* obj,
                               uint32_t ref_offsets, bool is_static,

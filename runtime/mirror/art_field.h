@@ -66,9 +66,7 @@ class MANAGED ArtField : public Object {
   static MemberOffset OffsetOffset() {
     return MemberOffset(OFFSETOF_MEMBER(ArtField, offset_));
   }
-  static MemberOffset GetArtFieldsACcessFlagsOffset() {
-    return OFFSET_OF_OBJECT_MEMBER(ArtField, access_flags_);
-  }
+
   MemberOffset GetOffsetDuringLinking() const;
 
   void SetOffset(MemberOffset num_bytes);
@@ -136,8 +134,6 @@ class MANAGED ArtField : public Object {
   bool IsVolatile() const {
     return (GetAccessFlags() & kAccVolatile) != 0;
   }
-
-
 
  private:
   // Field order required by test "ValidateFieldOrderOfJavaCppUnionClasses".

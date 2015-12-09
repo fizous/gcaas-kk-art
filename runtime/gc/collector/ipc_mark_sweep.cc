@@ -177,11 +177,6 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->explicit_count_ = 0;
 
   /* set the offsets */
-  SetReferenceOffsets();
-}
-
-
-void IPCHeap::SetReferenceOffsets() {
   meta_->reference_offsets_.reference_referent_offset_ =
       local_heap_->reference_referent_offset_.Uint32Value();
   meta_->reference_offsets_.reference_queue_offset_ =
@@ -193,6 +188,7 @@ void IPCHeap::SetReferenceOffsets() {
   meta_->reference_offsets_.finalizer_reference_zombie_offset_ =
       local_heap_->finalizer_reference_zombie_offset_.Uint32Value();
 }
+
 
 //void IPCHeap::AssignNextGCType(void) {
 //  meta_->next_gc_type_ = local_heap_->next_gc_type_;
@@ -555,7 +551,7 @@ bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
 
-  ScopedThreadStateChange tsc(self, kWaitingPerformingGc/*kWaitingForGCProcess*/);
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     IPC_MARKSWEEP_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
@@ -785,7 +781,7 @@ void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
 
 void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
     space::IPC_GC_PHASE_ENUM phase) {
-   ScopedThreadStateChange tsc(thread, kWaitingPerformingGc/*kWaitingForGCProcess*/);
+  ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
     while( meta_data_->gc_phase_ != phase) {
@@ -941,12 +937,9 @@ void IPCMarkSweep::ClearMarkHolders(void) {
 void IPCMarkSweep::PreInitializePhase(void) {
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_PRE_INIT);
-
-
-
   IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  //ipc_heap_->SetReferenceOffsets();
+  ipc_heap_->SetCurrentCollector(this);
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
 
