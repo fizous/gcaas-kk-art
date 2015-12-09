@@ -1988,8 +1988,8 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
   int _synchronized = 0;
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
-    _temp_heap_beetmap = heap_beetmap;
-    RawObjectScanner();
+    //_temp_heap_beetmap = heap_beetmap;
+    //RawObjectScanner();
   } else {
     LOG(FATAL) << "DANGER::::::::#### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
     IPC_MARKSWEEP_VLOG(ERROR) << " #### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
@@ -2071,6 +2071,8 @@ void IPCMarkSweep::MarkReachableObjects() {
   // Recursively mark all the non-image bits set in the mark bitmap.
   if(false)
     RecursiveMark();
+  _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
+  RawObjectScanner();
   //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
