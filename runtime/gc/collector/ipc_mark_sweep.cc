@@ -1245,6 +1245,73 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
 }
 
 
+template <class referenceKlass>
+inline const referenceKlass* IPCMarkSweep::MapReferenceToClientChecks(
+                                      const referenceKlass* const ref_parm) {
+  if(ref_parm == nullptr)
+    return nullptr;
+  const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
+  for(int i = 0; i <= 2; i++) {
+    if((casted_param < GetServerSpaceEnd(i)) &&
+        (casted_param >= GetServerSpaceBegin(i))) {
+      if(i == 0)
+        return ref_parm;
+      return reinterpret_cast<const referenceKlass*>(casted_param - 0);
+    }
+  }
+  LOG(FATAL) << "..... MapReferenceToClientChecks: .." << ref_parm;
+  return ref_parm;
+}
+
+inline void IPCMarkSweep::RawMarkObjectNonNull(const mirror::Object* obj) {
+  DCHECK(obj != nullptr);
+
+//  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
+//    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
+//  }
+  if (IsMappedObjectImmuned(obj)) {
+    return;
+  }
+
+  // Try to take advantage of locality of references within a space, failing this find the space
+  // the hard way.
+  bool _found = true;
+  accounting::SPACE_BITMAP* object_bitmap = current_mark_bitmap_;
+  if (UNLIKELY(!object_bitmap->HasAddress(obj))) {
+    accounting::BaseBitmap* new_bitmap =
+        _temp_heap_beetmap->GetContinuousSpaceBitmap(obj);
+    if (LIKELY(new_bitmap != NULL)) {
+      object_bitmap = new_bitmap;
+      _found = true;
+    }
+  }
+  if(!_found) {
+    LOG(FATAL) << "Object belongs to no Beetmaps.." << obj;
+  }
+
+  if(true) {
+    // This object was not previously marked.
+    if(!object_bitmap->Test(obj)) {
+      object_bitmap->Set(obj);
+      //TODO:: check the need to resize the mark stack here
+      const mirror::Object* oject_pushed = MapReferenceToClientChecks(obj);
+//      if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
+//        LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
+//      }
+      //pushed_back_to_stack_++;
+//      LOG(ERROR) << "MarkObjectNonNull..object stack: " << oject_pushed;
+      mark_stack_->PushBack(const_cast<mirror::Object*>(oject_pushed));
+    } else {
+     // LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull..object test failed.." << obj;
+    }
+  }
+}
+
+inline void IPCMarkSweep::RawMarkObject(const mirror::Object* obj) {
+  if (obj != NULL) {
+    RawMarkObjectNonNull(obj);
+  }
+}
 
 class RawMarkObjectVisitor {
  public:
@@ -1668,6 +1735,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
   int _synchronized = 0;
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
     RequestAppSuspension();
+    _temp_heap_beetmap = heap_beetmap;
     RawObjectScanner();
   } else {
     LOG(FATAL) << "DANGER::::::::#### IPCMarkSweep:: ipc_heap_->ipc_flag_raised_ was zero";
