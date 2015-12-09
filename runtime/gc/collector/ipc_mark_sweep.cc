@@ -1420,7 +1420,7 @@ void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
 template <typename MarkVisitor>
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
-  const mirror::Class* mapped_klass = GetMappedObjectKlass(obj, 0);
+  const mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
 
   if (UNLIKELY(mapped_klass->IsArrayClass())) {
     if (mapped_klass->IsObjectArrayClass()) {
