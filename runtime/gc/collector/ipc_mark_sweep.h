@@ -270,7 +270,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
                                         const int32_t offset_) const;
 
   template <typename Visitor>
-  void IPCMarkSweep::RawVisitObjectArrayReferences(
+  void RawVisitObjectArrayReferences(
                             const mirror::ObjectArray<mirror::Object>* mapped_arr,
                                                     const Visitor& visitor);
 
