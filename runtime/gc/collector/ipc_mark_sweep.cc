@@ -811,9 +811,9 @@ byte* IPCMarkSweep::GetClientSpaceBegin(int index) const {
 }
 
 template <class referenceKlass>
-inline const referenceKlass* IPCMarkSweep::MapValueToServer(
-                                      const uint32_t raw_address_value,
-                                      const int32_t offset_) const {
+const referenceKlass* IPCMarkSweep::MapValueToServer(
+                                      uint32_t raw_address_value,
+                                      int32_t offset_) const {
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   if(_raw_address == nullptr)
     return nullptr;
@@ -1055,7 +1055,7 @@ inline bool IPCMarkSweep::IsMappedObjectMarked(
 
 bool IPCMarkSweep::IsMappedReferentEnqueued(
                                       const mirror::Object* mapped_ref) const {
-  int32_t pending_next_raw_value =
+  const int32_t pending_next_raw_value =
       mirror::Object::GetRawValueFromObject(
           reinterpret_cast<const mirror::Object*>(mapped_ref),
           MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
@@ -1147,7 +1147,7 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
 // the heap for later processing.
 void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
                                               mirror::Object* obj) {
-  int32_t referent_raw_value =
+  uint32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
                                   reinterpret_cast<const mirror::Object*>(obj),
                                   MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));

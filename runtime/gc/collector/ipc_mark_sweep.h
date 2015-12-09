@@ -328,8 +328,8 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
   template <class referenceKlass>
   const referenceKlass* MapValueToServer(
-                                        const uint32_t raw_address_value,
-                                        const int32_t offset_ = 0U) const;
+                                        uint32_t raw_address_value,
+                                        int32_t offset_ = 0) const;
 
 
   //void IPCMarkRootsPhase(void) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
