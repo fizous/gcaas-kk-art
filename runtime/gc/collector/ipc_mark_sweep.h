@@ -305,7 +305,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   bool IsMappedObjectImmuned(const mirror::Object* obj) const {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
-  bool IPCMarkSweep::RawIsMarked(const mirror::Object* object);
+  bool RawIsMarked(const mirror::Object* object);
   uint32_t GetClassAccessFlags(const mirror::Class* klass) const;
   int GetMappedClassType(const mirror::Class* klass) const;
   bool IsMappedArrayClass(const mirror::Class* klass) const;
