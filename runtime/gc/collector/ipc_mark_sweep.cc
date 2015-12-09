@@ -1149,7 +1149,7 @@ inline bool IPCMarkSweep::RawIsMarked(const Object* object)  {
   if (current_mark_bitmap_->HasAddress(object)) {
     return current_mark_bitmap_->Test(object);
   }
-  return heap_->GetMarkBitmap()->Test(object);
+  return _temp_heap_beetmap->TestNoLock(object);
 }
 
 
