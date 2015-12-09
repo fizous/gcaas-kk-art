@@ -1533,7 +1533,7 @@ class RawMarkObjectVisitor {
           ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
 
   // TODO: Fixme when anotatalysis works with visitors.
-  void operator()(const mirror::Object* /* obj */, const mirror::Object* ref,
+  void operator()(const Object* /* obj */, const Object* ref,
                   MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
       NO_THREAD_SAFETY_ANALYSIS {
 //    if (kCheckLocks) {
