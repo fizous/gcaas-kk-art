@@ -1058,7 +1058,7 @@ bool IPCMarkSweep::IsMappedReferentEnqueued(
   int32_t pending_next_raw_value =
       mirror::Object::GetRawValueFromObject(
           reinterpret_cast<const mirror::Object*>(mapped_ref),
-          ipc_heap_->local_heap_->reference_pendingNext_offset_);
+          MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
   const mirror::Object* mapped_pending_next =
       MapValueToServer<mirror::Object>(pending_next_raw_value);
 
@@ -1126,18 +1126,18 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
   const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
   if(mapped_head == NULL) {
     // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
-    SetClientFieldValue(ref, ipc_heap_->local_heap_->reference_pendingNext_offset_, ref);
+    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
     *head_pp = MapReferenceToValueClient(ref);
   } else {
     int32_t pending_next_raw_value =
         mirror::Object::GetRawValueFromObject(
             reinterpret_cast<const mirror::Object*>(mapped_head),
-            ipc_heap_->local_heap_->reference_pendingNext_offset_);
+            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
     mirror::Object* mapped_pending_next =
         const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-    SetClientFieldValue(ref, ipc_heap_->local_heap_->reference_pendingNext_offset_, mapped_head);
+    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
     SetClientFieldValue(mapped_pending_next,
-        ipc_heap_->local_heap_->reference_pendingNext_offset_, ref);
+        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
   }
 }
 
@@ -1150,7 +1150,7 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
   int32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
                                   reinterpret_cast<const mirror::Object*>(obj),
-                                  ipc_heap_->local_heap_->reference_pendingNext_offset_);
+                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
