@@ -962,6 +962,86 @@ inline const mirror::Class* IPCMarkSweep::GetMappedObjectKlass(
   return c;
 }
 
+
+
+size_t IPCMarkSweep::GetNumReferenceStaticFields(
+                                        const mirror::Class* klass_ref) const {
+  uint32_t raw_static_fields_number =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
+      mirror::Class::ReferenceStaticFieldsOffset());
+  size_t mapped_value = static_cast<size_t>(raw_static_fields_number);
+  return mapped_value;
+}
+
+size_t IPCMarkSweep::GetNumReferenceInstanceFields(
+                                        const mirror::Class* klass_ref) const {
+  uint32_t raw_instance_fields_number =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
+      mirror::Class::ReferenceInstanceFieldsOffset());
+  size_t mapped_value = static_cast<size_t>(raw_instance_fields_number);
+  return mapped_value;
+}
+
+const mirror::Class* IPCMarkSweep::GetSuperMappedClass(
+                                            const mirror::Class* mapped_klass) {
+  int32_t raw_super_klass =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
+                                              mirror::Class::SuperClassOffset());
+  const mirror::Class* c = MapValueToServer<mirror::Class>(raw_super_klass);
+  return c;
+}
+
+
+template <typename Visitor>
+inline void IPCMarkSweep::RawVisitFieldsReferences(
+                                                      const mirror::Object* obj,
+                                                      uint32_t ref_offsets,
+                                                      bool is_static,
+                                                      const Visitor& visitor) {
+  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
+    // Found a reference offset bitmap.  Mark the specified offsets.
+#ifndef MOVING_COLLECTOR
+    // Clear the class bit since we mark the class as part of marking the classlinker roots.
+    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
+#endif
+    while (ref_offsets != 0) {
+      size_t right_shift = CLZ(ref_offsets);
+      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
+      uint32_t raw_fiel_value =
+          mirror::Object::GetRawValueFromObject(obj, field_offset);
+      const mirror::Object* mapped_field_object  =
+          MapValueToServer<mirror::Object>(raw_fiel_value);
+      visitor(obj, mapped_field_object, field_offset, is_static);
+      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
+    }
+  } else {
+    // There is no reference offset bitmap.  In the non-static case,
+    // walk up the class inheritance hierarchy and find reference
+    // offsets the hard way. In the static case, just consider this
+    // class.
+    for (const mirror::Class* klass = is_static ? down_cast<const mirror::Class*>(obj) : GetMappedObjectKlass(obj);
+         klass != nullptr;
+         klass = is_static ? nullptr : GetSuperMappedClass(klass)) {
+      size_t num_reference_fields = (is_static
+                                     ? GetNumReferenceStaticFields(klass)
+                                     : GetNumReferenceInstanceFields(klass));
+      for (size_t i = 0; i < num_reference_fields; ++i) {
+        const mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
+                                   : ServerClassGetInstanceField(klass, i));
+        uint32_t field_word_value =
+            mirror::Object::GetRawValueFromObject(field,
+                                              mirror::ArtField::OffsetOffset());
+        MemberOffset field_offset(field_word_value);
+        uint32_t raw_field_value =
+            mirror::Object::GetRawValueFromObject(obj, field_offset);
+        const mirror::Object* mapped_field_object =
+            MapValueToServer<mirror::Object>(raw_field_value);
+        visitor(obj, mapped_field_object, field_offset, is_static);
+      }
+    }
+  }
+}
+
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitInstanceFieldsReferences(
                                                     const mirror::Class* klass,
@@ -1326,7 +1406,7 @@ class RawMarkObjectVisitor {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
-    mark_sweep_->MarkObject(ref);
+    mark_sweep_->RawMarkObject(ref);
   }
 
  private:

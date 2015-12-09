@@ -257,12 +257,17 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   byte* GetServerSpaceEnd(int index) const;
   byte* GetServerSpaceBegin(int index) const;
   void RawObjectScanner(void);
+
+  const mirror::Class* GetSuperMappedClass(const mirror::Class* mapped_klass);
+  size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
+  size_t GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const;
+
   template <typename MarkVisitor>
   void RawScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
 
   const mirror::Class* GetMappedObjectKlass(
                                         const mirror::Object* mapped_obj_parm,
-                                        const int32_t offset_);
+                                        const int32_t offset_ = 0);
 
   template <typename Visitor>
   void RawVisitObjectArrayReferences(
