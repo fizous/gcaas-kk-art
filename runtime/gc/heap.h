@@ -273,6 +273,8 @@ class Heap {
   void EnqueueReference(mirror::Object* ref, mirror::Object** list)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   bool IsEnqueued(mirror::Object* ref) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  bool IsEnqueuedNoLock(mirror::Object* ref) ;
+
   void EnqueuePendingReference(mirror::Object* ref, mirror::Object** list)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   mirror::Object* DequeuePendingReference(mirror::Object** list)

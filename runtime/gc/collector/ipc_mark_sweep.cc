@@ -1309,22 +1309,22 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     // scanning the same reference multiple times due to dirty cards.
     if (klass->IsSoftReferenceClass()) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
-      if (!heap_->IsEnqueued(obj)) {
+      if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReference(obj, GetSoftReferenceList());
       }
     } else if (klass->IsWeakReferenceClass()) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
-      if (!heap_->IsEnqueued(obj)) {
+      if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReference(obj, GetWeakReferenceList());
       }
     } else if (klass->IsFinalizerReferenceClass()) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
-      if (!heap_->IsEnqueued(obj)) {
+      if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (klass->IsPhantomReferenceClass()) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
-      if (!heap_->IsEnqueued(obj)) {
+      if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReference(obj, GetPhantomReferenceList());
       }
     } else {

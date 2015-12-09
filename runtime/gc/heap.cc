@@ -2400,6 +2400,13 @@ bool Heap::IsEnqueued(mirror::Object* ref) {
   return ref->GetFieldObject<mirror::Object*>(GetReferencePendingNextOffset(), false) != nullptr;
 }
 
+
+bool Heap::IsEnqueuedNoLock(mirror::Object* ref) {
+  // Since the references are stored as cyclic lists it means that once enqueued, the pending next
+  // will always be non-null.
+  return ref->GetFieldObject<mirror::Object*>(GetReferencePendingNextOffset(), false) != nullptr;
+}
+
 void Heap::EnqueuePendingReference(mirror::Object* ref, mirror::Object** list) {
   DCHECK(ref != NULL);
   DCHECK(list != NULL);
