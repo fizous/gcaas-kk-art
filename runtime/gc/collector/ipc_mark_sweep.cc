@@ -28,7 +28,7 @@
 #include "mirror/class-inl.h"
 #include "mirror/class_loader.h"
 #include "mirror/dex_cache.h"
-
+#include "mirror/art_field-inl.h"
 #include "gc/collector/mark_sweep-inl.h"
 #include "gc/collector/mark_sweep.h"
 
