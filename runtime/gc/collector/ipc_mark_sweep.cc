@@ -1563,7 +1563,8 @@ class ClientMarkObjectVisitor {
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
     if(true)
-      mark_sweep_->MarkObject(ref);
+      MarkSweep::MarkObjectCallbackNoLock(ref, mark_sweep_);
+      //mark_sweep_->MarkObject(ref);
   }
 
  private:

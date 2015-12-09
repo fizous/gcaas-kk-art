@@ -387,6 +387,7 @@ class MarkSweep : public GarbageCollector {
   static void MarkObjectCallback(const mirror::Object* root, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
+  static void MarkObjectCallbackNoLock(const mirror::Object* root, void* arg);
 
   static void MarkRootParallelCallback(const mirror::Object* root, void* arg);
 
