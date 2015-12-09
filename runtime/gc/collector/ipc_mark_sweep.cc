@@ -1157,7 +1157,7 @@ inline bool IPCMarkSweep::RawIsMarked(const Object* object)  {
 inline bool IPCMarkSweep::IsMappedObjectMarked(
                                            const mirror::Object* object)  {
 
-  return MarkSweep::IsMarked(object);
+  return RawIsMarked(object);
 //  if (IsMappedObjectImmuned(object)) {
 //    return true;
 //  }
