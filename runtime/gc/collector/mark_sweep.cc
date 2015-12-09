@@ -1193,11 +1193,11 @@ void MarkSweep::RecursiveMark() {
   base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
   // RecursiveMark will build the lists of known instances of the Reference classes.
   // See DelayReferenceReferent for details.
-//  CHECK(*(GetSoftReferenceList()) == NULL);
-//  CHECK(*(GetWeakReferenceList()) == NULL);
-//  CHECK(*(GetFinalizerReferenceList()) == NULL);
-//  CHECK(*(GetPhantomReferenceList()) == NULL);
-//  CHECK(*(GetClearedReferenceList()) == NULL);
+  CHECK(*(GetSoftReferenceList()) == NULL);
+  CHECK(*(GetWeakReferenceList()) == NULL);
+  CHECK(*(GetFinalizerReferenceList()) == NULL);
+  CHECK(*(GetPhantomReferenceList()) == NULL);
+  CHECK(*(GetClearedReferenceList()) == NULL);
 
   if (kUseRecursiveMark) { // so far it is false
     const bool partial = GetGcType() == kGcTypePartial;
