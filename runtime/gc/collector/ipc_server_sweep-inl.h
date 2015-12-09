@@ -661,7 +661,7 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
 
 
 template <typename Visitor>
-void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
+inline void IPCServerMarkerSweep::ServerVisitObjectArrayReferences(
                           const mirror::ObjectArray<mirror::Object>* mapped_arr,
                                                   const Visitor& visitor) {
 //  if(!(IsMappedObjectToServer<mirror::ObjectArray<mirror::Object>>(mapped_arr))) {
@@ -772,7 +772,7 @@ inline void IPCServerMarkerSweep::ServerVisitStaticFieldsReferences(
 }
 
 
-size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(
+inline size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(
                                         const mirror::Class* klass_ref) const {
   uint32_t raw_static_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
@@ -781,7 +781,7 @@ size_t IPCServerMarkerSweep::GetNumReferenceStaticFields(
   return mapped_value;
 }
 
-size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(
+inline size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(
                                         const mirror::Class* klass_ref) const {
   uint32_t raw_instance_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
@@ -790,7 +790,7 @@ size_t IPCServerMarkerSweep::GetNumReferenceInstanceFields(
   return mapped_value;
 }
 
-const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(
+inline const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(
                                             const mirror::Class* mapped_klass) {
   int32_t raw_super_klass =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
@@ -800,7 +800,7 @@ const mirror::Class* IPCServerMarkerSweep::GetSuperMappedClass(
 }
 
 
-const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(
+inline const mirror::ArtField* IPCServerMarkerSweep::ServerClassGetInstanceField(
                                       const mirror::Class* klass, uint32_t i) {
   uint32_t instance_fields_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
@@ -850,7 +850,7 @@ void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass
 }
 
 
-bool IPCServerMarkerSweep::IsArtFieldVolatile(const mirror::ArtField* field) {
+inline bool IPCServerMarkerSweep::IsArtFieldVolatile(const mirror::ArtField* field) {
   uint32_t raw_fiel_value =
       mirror::Object::GetRawValueFromObject(field,
           mirror::ArtField::GetArtFieldsACcessFlagsOffset());
