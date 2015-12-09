@@ -1026,8 +1026,8 @@ inline void IPCMarkSweep::RawVisitFieldsReferences(
                                      ? GetNumReferenceStaticFields(klass)
                                      : GetNumReferenceInstanceFields(klass));
       for (size_t i = 0; i < num_reference_fields; ++i) {
-        const mirror::ArtField* field = (is_static ? ServerClassGetStaticField(klass, i)
-                                   : ServerClassGetInstanceField(klass, i));
+        const mirror::ArtField* field = (is_static ? RawClassGetStaticField(klass, i)
+                                   : RawClassGetInstanceField(klass, i));
         uint32_t field_word_value =
             mirror::Object::GetRawValueFromObject(field,
                                               mirror::ArtField::OffsetOffset());
