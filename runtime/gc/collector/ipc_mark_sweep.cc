@@ -555,7 +555,7 @@ bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
   IPC_MARKSWEEP_VLOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
 
-  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  ScopedThreadStateChange tsc(self, kWaitingPerformingGc/*kWaitingForGCProcess*/);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     IPC_MARKSWEEP_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
@@ -785,7 +785,7 @@ void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
 
 void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
     space::IPC_GC_PHASE_ENUM phase) {
- // ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
+   ScopedThreadStateChange tsc(thread, kWaitingPerformingGc/*kWaitingForGCProcess*/);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
     while( meta_data_->gc_phase_ != phase) {
