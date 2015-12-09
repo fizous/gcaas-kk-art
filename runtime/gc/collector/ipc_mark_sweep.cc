@@ -23,6 +23,7 @@
 #include "gc/space/large_object_space.h"
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/accounting/heap_bitmap.h"
+#include "gc/accounting/space_bitmap-inl.h"
 #include "gc/accounting/space_bitmap.h"
 #include "mirror/class-inl.h"
 #include "mirror/class_loader.h"
@@ -1455,6 +1456,28 @@ class RawMarkObjectVisitor {
 };
 
 void IPCMarkSweep::RawObjectScanner(void) {
+  spaces_[0].client_base_ =
+      heap_meta_->image_space_begin_;
+  spaces_[0].client_end_ =
+      heap_meta_->image_space_end_;
+  spaces_[0].base_ = heap_meta_->image_space_begin_;
+  spaces_[0].base_end_ = heap_meta_->image_space_end_;
+
+  spaces_[1].client_base_ =
+      heap_meta_->zygote_begin_;
+  spaces_[1].client_end_ =
+      heap_meta_->zygote_end_;
+  spaces_[1].base_ = heap_meta_->zygote_begin_;
+  spaces_[1].base_end_ = heap_meta_->zygote_end_;
+
+
+  spaces_[2].client_base_ =
+      ipc_heap_->local_heap_->GetAllocSpace()->Begin();
+  spaces_[2].client_end_ =
+      ipc_heap_->local_heap_->GetAllocSpace()->End();
+  spaces_[2].base_ = ipc_heap_->local_heap_->GetAllocSpace()->Begin();
+  spaces_[2].base_end_ = ipc_heap_->local_heap_->GetAllocSpace()->End();
+
   const mirror::Object* popped_oject = NULL;
   RawMarkObjectVisitor visitor(this);
   for (;;) {
