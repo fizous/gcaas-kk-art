@@ -310,7 +310,10 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   bool IsMappedObjectImmuned(const mirror::Object* obj) const {
     return obj >= GetImmuneBegin() && obj < GetImmuneEnd();
   }
-
+  const mirror::ArtField* RawClassGetStaticField(const mirror::Class* klass,
+      uint32_t i);
+  const mirror::ArtField* RawClassGetInstanceField(const mirror::Class* klass,
+      uint32_t i);
   template <class referenceKlass>
   const referenceKlass* MapReferenceToClientChecks(
                                         const referenceKlass* const ref_parm);

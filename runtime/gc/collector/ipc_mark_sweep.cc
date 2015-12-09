@@ -991,6 +991,47 @@ const mirror::Class* IPCMarkSweep::GetSuperMappedClass(
   return c;
 }
 
+const mirror::ArtField* IPCMarkSweep::RawClassGetInstanceField(
+                                      const mirror::Class* klass, uint32_t i) {
+  uint32_t instance_fields_raw =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+      mirror::Class::GetInstanceFieldsOffset());
+  const mirror::ObjectArray<mirror::ArtField>* instance_fields =
+      MapValueToServer<mirror::ObjectArray<mirror::ArtField>>(instance_fields_raw);
+  MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
+                                  + i * sizeof(mirror::Object*));
+  uint32_t instance_field_raw =
+      mirror::Object::GetRawValueFromObject(
+                      reinterpret_cast<const mirror::Object*>(instance_fields),
+                                                                  data_offset);
+  const mirror::ArtField* mapped_art_field =
+                        MapValueToServer<mirror::ArtField>(instance_field_raw);
+
+  return mapped_art_field;
+}
+
+
+inline const mirror::ArtField* IPCMarkSweep::RawClassGetStaticField(
+                                      const mirror::Class* klass, uint32_t i) {
+  uint32_t static_fields_raw =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+      mirror::Class::GetStaticFieldsOffset());
+  const mirror::ObjectArray<mirror::ArtField>* static_fields =
+      MapValueToServer<mirror::ObjectArray<mirror::ArtField>>(static_fields_raw);
+
+  MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
+      + i * sizeof(mirror::Object*));
+
+
+  uint32_t static_field_raw =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(static_fields),
+          data_offset);
+  const mirror::ArtField* mapped_art_field =
+      MapValueToServer<mirror::ArtField>(static_field_raw);
+
+
+  return mapped_art_field;
+}
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitFieldsReferences(
