@@ -946,7 +946,7 @@ void IPCMarkSweep::PreInitializePhase(void) {
 
   IPC_MARKSWEEP_VLOG(ERROR) << "__________ IPCMarkSweep::PreInitializePhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
-  ipc_heap_->SetReferenceOffsets();
+  //ipc_heap_->SetReferenceOffsets();
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
 
