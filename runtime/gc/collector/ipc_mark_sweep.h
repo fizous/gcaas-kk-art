@@ -332,7 +332,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   bool IsSoftReferenceMappedClass(const mirror::Class* klass) const;
   bool IsPhantomReferenceMappedClass(const mirror::Class* klass) const;
   template <class referenceKlass>
-  inline const referenceKlass* MapValueToServer(
+  const referenceKlass* MapValueToServer(
                                         const uint32_t raw_address_value) const;
 
 
