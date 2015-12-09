@@ -1310,22 +1310,22 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     if (klass->IsSoftReferenceClass()) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReference(obj, GetSoftReferenceList());
+        heap_->EnqueuePendingReferenceNoLock(obj, GetSoftReferenceList());
       }
     } else if (klass->IsWeakReferenceClass()) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReference(obj, GetWeakReferenceList());
+        heap_->EnqueuePendingReferenceNoLock(obj, GetWeakReferenceList());
       }
     } else if (klass->IsFinalizerReferenceClass()) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReference(obj, GetFinalizerReferenceList());
+        heap_->EnqueuePendingReferenceNoLock(obj, GetFinalizerReferenceList());
       }
     } else if (klass->IsPhantomReferenceClass()) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReference(obj, GetPhantomReferenceList());
+        heap_->EnqueuePendingReferenceNoLock(obj, GetPhantomReferenceList());
       }
     } else {
       LOG(FATAL) << "Invalid reference type " << PrettyClass(klass)

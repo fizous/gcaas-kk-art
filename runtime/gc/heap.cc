@@ -2422,6 +2422,22 @@ void Heap::EnqueuePendingReference(mirror::Object* ref, mirror::Object** list) {
   }
 }
 
+
+void Heap::EnqueuePendingReferenceNoLock(mirror::Object* ref, mirror::Object** list) {
+  DCHECK(ref != NULL);
+  DCHECK(list != NULL);
+  if (*list == NULL) {
+    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+    ref->SetFieldObject(reference_pendingNext_offset_, ref, false);
+    *list = ref;
+  } else {
+    mirror::Object* head =
+        (*list)->GetFieldObject<mirror::Object*>(reference_pendingNext_offset_, false);
+    ref->SetFieldObject(reference_pendingNext_offset_, head, false);
+    (*list)->SetFieldObject(reference_pendingNext_offset_, ref, false);
+  }
+}
+
 mirror::Object* Heap::DequeuePendingReference(mirror::Object** list) {
   DCHECK(list != NULL);
   DCHECK(*list != NULL);
