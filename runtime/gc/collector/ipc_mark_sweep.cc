@@ -1548,6 +1548,28 @@ class RawMarkObjectVisitor {
   IPCMarkSweep* const mark_sweep_;
 };
 
+class ClientMarkObjectVisitor {
+ public:
+  explicit ClientMarkObjectVisitor(IPCMarkSweep* const client_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(client_mark_sweep) {}
+
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const Object* /* obj */, const Object* ref, MemberOffset& /* offset */,
+                  bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
+    if(true)
+      mark_sweep_->MarkObject(ref);
+  }
+
+ private:
+  IPCMarkSweep* const mark_sweep_;
+};
+
+
 void IPCMarkSweep::RawObjectScanner(void) {
   spaces_[0].client_base_ =
       heap_meta_->image_space_begin_;
@@ -1583,7 +1605,8 @@ void IPCMarkSweep::RawObjectScanner(void) {
   }
 
   const mirror::Object* popped_oject = NULL;
-  RawMarkObjectVisitor visitor(this);
+  ClientMarkObjectVisitor visitor(this);
+  //RawMarkObjectVisitor visitor(this);
   for (;;) {
     if (mark_stack_->IsEmpty()) {
       break;
@@ -1607,26 +1630,6 @@ void IPCMarkSweep::RawObjectScanner(void) {
 ////
 
 ////
-class ClientMarkObjectVisitor {
- public:
-  explicit ClientMarkObjectVisitor(IPCMarkSweep* const client_mark_sweep)
-          ALWAYS_INLINE : mark_sweep_(client_mark_sweep) {}
-
-  // TODO: Fixme when anotatalysis works with visitors.
-  void operator()(const Object* /* obj */, const Object* ref, MemberOffset& /* offset */,
-                  bool /* is_static */) const ALWAYS_INLINE
-      NO_THREAD_SAFETY_ANALYSIS {
-//    if (kCheckLocks) {
-//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
-//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
-//    }
-    if(false)
-      mark_sweep_->MarkObject(ref);
-  }
-
- private:
-  IPCMarkSweep* const mark_sweep_;
-};
 
 template <typename MarkVisitor>
 inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
