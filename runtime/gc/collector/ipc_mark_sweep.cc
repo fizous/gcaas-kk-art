@@ -1540,7 +1540,8 @@ class RawMarkObjectVisitor {
 //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
-    mark_sweep_->RawMarkObject(ref);
+    //mark_sweep_->RawMarkObject(ref);
+    mark_sweep_->MarkObject(ref);
   }
 
  private:
