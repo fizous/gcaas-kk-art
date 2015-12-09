@@ -462,7 +462,7 @@ inline void IPCServerMarkerSweep::MarkObject(const mirror::Object* obj) {
 }
 
 
-bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
+inline bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
                                       const mirror::Object* mapped_ref) const {
   int32_t pending_next_raw_value =
       mirror::Object::GetRawValueFromObject(
