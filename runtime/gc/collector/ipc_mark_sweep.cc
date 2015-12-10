@@ -1318,7 +1318,7 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
   mirror::Object* head_object = *list;
   if(head_object == NULL) {
     SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-    *list = static_cast<mirror::Object*>(MapReferenceToValueClient(ref));
+    *list = reinterpret_cast<mirror::Object*>(MapReferenceToValueClient(ref));
   } else {
     MemberOffset off(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_);
     mirror::Object* head =
