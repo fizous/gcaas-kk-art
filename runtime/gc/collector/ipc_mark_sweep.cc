@@ -2036,6 +2036,10 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
   int _synchronized = 0;
   if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
+    //here we are doing the mark reachable on the server side
+    //if(true) {
+    base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+    //}
     RequestAppSuspension();
     //_temp_heap_beetmap = heap_beetmap;
     //RawObjectScanner();
@@ -2115,7 +2119,8 @@ void IPCMarkSweep::MarkReachableObjects() {
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
-  RecursiveMark();
+  if(false)
+    RecursiveMark();
 
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.

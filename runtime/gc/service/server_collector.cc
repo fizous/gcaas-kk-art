@@ -177,7 +177,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
       LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
           << " phase=" << curr_collector_addr_->gc_phase_;
 
-      if(false)
+      if(true)
         server_instant_->ipc_msweep_->MarkReachableObjects(curr_collector_addr_);
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
