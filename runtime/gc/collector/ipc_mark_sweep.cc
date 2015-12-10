@@ -1315,23 +1315,36 @@ void IPCMarkSweep::SetClientFieldValue(const mirror::Object* mapped_object,
 
 void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
-  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
-  if(mapped_head == NULL) {
-    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+  mirror::Object* head_object = *list;
+  if(head_object == NULL) {
     SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-    *head_pp = MapReferenceToValueClient(ref);
+    *list = MapReferenceToValueClient(ref);
   } else {
-    int32_t pending_next_raw_value =
-        mirror::Object::GetRawValueFromObject(
-            reinterpret_cast<const mirror::Object*>(mapped_head),
-            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
-    mirror::Object* mapped_pending_next =
-        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
-    SetClientFieldValue(mapped_pending_next,
-        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+    MemberOffset off(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_);
+    mirror::Object* head =
+        (*list)->GetFieldObject<mirror::Object*>(off, false);
+    ref->SetFieldObject(off, head, false);
+    (*list)->SetFieldObject(off, ref, false);
   }
+
+
+//  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+//  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+//  if(mapped_head == NULL) {
+//    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+//    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+//    *head_pp = MapReferenceToValueClient(ref);
+//  } else {
+//    int32_t pending_next_raw_value =
+//        mirror::Object::GetRawValueFromObject(
+//            reinterpret_cast<const mirror::Object*>(mapped_head),
+//            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+//    mirror::Object* mapped_pending_next =
+//        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+//    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
+//    SetClientFieldValue(mapped_pending_next,
+//        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+//  }
 }
 
 
@@ -1357,22 +1370,22 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     if (IsSoftReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetSoftReferenceList());
+        RawEnqPendingReference(obj, GetSoftReferenceList());
       }
     } else if (IsWeakReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetWeakReferenceList());
+        RawEnqPendingReference(obj, GetWeakReferenceList());
       }
     } else if (IsFinalizerReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetFinalizerReferenceList());
+        RawEnqPendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (IsPhantomReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetPhantomReferenceList());
+        RawEnqPendingReference(obj, GetPhantomReferenceList());
       }
     } else {
       LOG(FATAL) << "Invalid reference type " //<< PrettyClass(klass)
