@@ -1315,16 +1315,24 @@ void IPCMarkSweep::SetClientFieldValue(const mirror::Object* mapped_object,
 
 void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-  mirror::Object* head_object = *list;
-  if(head_object == NULL) {
+  mirror::Object* list_content = *list;
+  if(list_content == NULL) {
     SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
     *list = reinterpret_cast<mirror::Object*>(MapReferenceToValueClient(ref));
   } else {
     MemberOffset off(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_);
-    mirror::Object* head =
-        (*list)->GetFieldObject<mirror::Object*>(off, false);
-    ref->SetFieldObject(off, head, false);
-    (*list)->SetFieldObject(off, ref, false);
+
+    int32_t head_int_value = mirror::Object::GetRawValueFromObject(
+                reinterpret_cast<const mirror::Object*>(list_content), off);
+    mirror::Object* mapped_head =
+            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
+    SetClientFieldValue(ref, off, mapped_head);
+    SetClientFieldValue(list_content, off, ref);
+
+//    mirror::Object* head =
+//        (*list)->GetFieldObject<mirror::Object*>(off, false);
+//    ref->SetFieldObject(off, head, false);
+//    (*list)->SetFieldObject(off, ref, false);
   }
 
 
