@@ -1447,7 +1447,8 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   if (UNLIKELY(IsMappedArrayClass(klass))) {
 
     if (IsObjectArrayMappedKlass(klass)) {
-      VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+      //VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == GetCachedJavaLangClass())) {
 
