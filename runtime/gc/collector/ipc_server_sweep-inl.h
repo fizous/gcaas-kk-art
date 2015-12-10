@@ -482,9 +482,9 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
   mirror::Object* list_content = *list;
   if(list_content == NULL) {
     SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-    *list = reinterpret_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
+    *list = const_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
   } else {
-    list_content = MapReferenceToServer<mirror::Object>(list_content);
+    list_content = const_cast<mirror::Object*>(MapReferenceToServer<mirror::Object>(list_content));
     int32_t head_int_value = mirror::Object::GetRawValueFromObject(
                 reinterpret_cast<const mirror::Object*>(list_content),
                 ref_pendingNext_off_client_);
@@ -661,7 +661,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
     ServerVisitClassReferences(mapped_klass, obj, visitor);
   } else {
     cashed_stats_client_.other_count_ += 1;
-    RawVisitOtherReferences(mapped_klass, obj, visitor);
+    ServerVisitOtherReferences(mapped_klass, obj, visitor);
     if (UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
       is_reference_class_cnt_++;
       ServerDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
