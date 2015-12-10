@@ -925,12 +925,12 @@ const mirror::Class* IPCMarkSweep::GetComponentTypeMappedClass(
   return c;
 }
 
-bool IPCMarkSweep::IsMappedArrayClass(const mirror::Class* klass) const {
+bool IPCMarkSweep::IsMappedArrayClass(mirror::Class* klass) const {
   return (GetComponentTypeMappedClass(klass) != NULL);
 }
 
 bool IPCMarkSweep::IsObjectArrayMappedKlass(
-                                            const mirror::Class* klass) const {
+                                            mirror::Class* klass) const {
   const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
   if(component_type != NULL) {
     return (!IsPrimitiveMappedKlass(component_type));
@@ -944,8 +944,8 @@ int IPCMarkSweep::GetMappedClassType(const mirror::Class* klass) const {
   if(UNLIKELY(klass == GetCachedJavaLangClass()))
     return 2;
 
-  if(IsMappedArrayClass(klass)) {
-    if(IsObjectArrayMappedKlass(klass))
+  if(IsMappedArrayClass(const_cast<mirror::Class*>(klass))) {
+    if(IsObjectArrayMappedKlass(const_cast<mirror::Class*>(klass)))
       return 0;
     return 1;
   }
@@ -1444,9 +1444,9 @@ class RawMarkObjectVisitor {
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   RawMarkObjectVisitor visitor(this);
   mirror::Class* klass = const_cast<mirror::Class*>(GetMappedObjectKlass(obj, 0));//obj->GetClass();
-  if (UNLIKELY(klass->IsArrayClass())) {
+  if (UNLIKELY(IsMappedArrayClass(klass))) {
 
-    if (klass->IsObjectArrayClass()) {
+    if (IsObjectArrayMappedKlass(klass)) {
       VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
   } else if (UNLIKELY(klass == GetCachedJavaLangClass())) {
