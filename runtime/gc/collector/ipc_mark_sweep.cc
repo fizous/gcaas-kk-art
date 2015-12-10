@@ -1376,22 +1376,22 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     // We need to check that the references haven't already been enqueued since we can end up
     // scanning the same reference multiple times due to dirty cards.
     if (IsSoftReferenceMappedClass(klass)) {
-      MutexLock mu(self, *heap_->GetSoftRefQueueLock());
+      //MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
         RawEnqPendingReference(obj, GetSoftReferenceList());
       }
     } else if (IsWeakReferenceMappedClass(klass)) {
-      MutexLock mu(self, *heap_->GetWeakRefQueueLock());
+      //MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
         RawEnqPendingReference(obj, GetWeakReferenceList());
       }
     } else if (IsFinalizerReferenceMappedClass(klass)) {
-      MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
+      //MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
         RawEnqPendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (IsPhantomReferenceMappedClass(klass)) {
-      MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
+      //MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
         RawEnqPendingReference(obj, GetPhantomReferenceList());
       }
@@ -1475,8 +1475,8 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
 
     RawVisitClassReferences(klass, obj, visitor);
   } else {
-    VisitOtherReferences(klass, obj, visitor);
-    if (UNLIKELY(klass->IsReferenceClass())) {
+    RawVisitOtherReferences(klass, obj, visitor);
+    if (UNLIKELY(IsReferenceMappedClass(klass))) {
       RawDelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
     }
   }
