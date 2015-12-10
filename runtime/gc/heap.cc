@@ -147,8 +147,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
        * verification is enabled, we limit the size of allocation stacks to speed up their
        * searching.
        */
-      max_allocation_stack_size_(4 * (kGCALotMode ? kGcAlotInterval
-          : (kDesiredHeapVerification > kNoHeapVerification) ? KB : MB)),
+      max_allocation_stack_size_(kGCALotMode ? kGcAlotInterval
+          : (kDesiredHeapVerification > kNoHeapVerification) ? KB : MB),
       reference_referent_offset_(0),
       reference_queue_offset_(0),
       reference_queueNext_offset_(0),
@@ -1426,7 +1426,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         }
 
 
-        static const size_t default_mark_stack_size = 4096 * KB;
+        static const size_t default_mark_stack_size = 128 * KB;
         mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
             &(_struct_alloc_space->heap_meta_.mark_stack_data_), true,
             default_mark_stack_size));
