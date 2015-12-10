@@ -1349,7 +1349,7 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
 //                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_referent_offset_));
 //  const mirror::Object* mapped_referent =
 //      MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != nullptr && !IsMarkedNoLocks(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
+  if (mapped_referent != NULL && !IsMarkedNoLocks(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
     Thread* self = Thread::Current();
     // TODO: Remove these locks, and use atomic stacks for storing references?
     // We need to check that the references haven't already been enqueued since we can end up
@@ -1443,20 +1443,37 @@ class RawMarkObjectVisitor {
 
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   RawMarkObjectVisitor visitor(this);
-  const mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
+  mirror::Class* klass = obj->GetClass();
+  if (UNLIKELY(klass->IsArrayClass())) {
 
-  if (UNLIKELY(mapped_klass->IsArrayClass())) {
-    if (mapped_klass->IsObjectArrayClass()) {
-      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+    if (klass->IsObjectArrayClass()) {
+      VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
-  } else if (UNLIKELY(mapped_klass == GetCachedJavaLangClass())) {
-    RawVisitClassReferences(mapped_klass, obj, visitor);
+  } else if (UNLIKELY(klass == GetCachedJavaLangClass())) {
+
+    VisitClassReferences(klass, obj, visitor);
   } else {
-    RawVisitOtherReferences(mapped_klass, obj, visitor);
-    if (UNLIKELY(mapped_klass->IsReferenceClass())) {
-      RawDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
+    VisitOtherReferences(klass, obj, visitor);
+    if (UNLIKELY(klass->IsReferenceClass())) {
+      DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
     }
   }
+
+//  RawMarkObjectVisitor visitor(this);
+//  mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
+//
+//  if (UNLIKELY(mapped_klass->IsArrayClass())) {
+//    if (mapped_klass->IsObjectArrayClass()) {
+//      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+//    }
+//  } else if (UNLIKELY(mapped_klass == GetCachedJavaLangClass())) {
+//    RawVisitClassReferences(mapped_klass, obj, visitor);
+//  } else {
+//    RawVisitOtherReferences(mapped_klass, obj, visitor);
+//    if (UNLIKELY(mapped_klass->IsReferenceClass())) {
+//      RawDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
+//    }
+//  }
 
 //  int mapped_class_type = GetMappedClassType(mapped_klass);
 //  if (UNLIKELY(mapped_class_type < 2)) {
@@ -1594,10 +1611,11 @@ void IPCMarkSweep::RawObjectScanner(void) {
 
   spaces_[2].client_base_ =
       ipc_heap_->local_heap_->GetAllocSpace()->Begin();
-  spaces_[2].client_end_ =
-      ipc_heap_->local_heap_->GetAllocSpace()->End();
+  spaces_[2].client_end_ = spaces_[2].client_base_ +
+      ipc_heap_->local_heap_->GetAllocSpace()->Capacity();
   spaces_[2].base_ = ipc_heap_->local_heap_->GetAllocSpace()->Begin();
-  spaces_[2].base_end_ = ipc_heap_->local_heap_->GetAllocSpace()->End();
+  spaces_[2].base_end_ =
+      spaces_[2].base_ + ipc_heap_->local_heap_->GetAllocSpace()->Capacity();
 
 
 
