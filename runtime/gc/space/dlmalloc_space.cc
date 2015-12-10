@@ -195,12 +195,12 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
 
   CHECK(mspace != NULL);
 
-  LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> Done Filling dlmalloc_space_data_";
+  //LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> Done Filling dlmalloc_space_data_";
   static const uintptr_t kGcCardSize =
       static_cast<uintptr_t>(accounting::ConstantsCardTable::kCardSize);
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
-  LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
+  //LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
 #if true || ART_GC_SERVICE
 
   CreateBitmaps(Begin(), Capacity(), shareMem);
