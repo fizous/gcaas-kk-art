@@ -1354,22 +1354,22 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     // TODO: Remove these locks, and use atomic stacks for storing references?
     // We need to check that the references haven't already been enqueued since we can end up
     // scanning the same reference multiple times due to dirty cards.
-    if (klass->IsSoftReferenceClass()) {
+    if (IsSoftReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReferenceNoLock(obj, GetSoftReferenceList());
       }
-    } else if (klass->IsWeakReferenceClass()) {
+    } else if (IsWeakReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReferenceNoLock(obj, GetWeakReferenceList());
       }
-    } else if (klass->IsFinalizerReferenceClass()) {
+    } else if (IsFinalizerReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReferenceNoLock(obj, GetFinalizerReferenceList());
       }
-    } else if (klass->IsPhantomReferenceClass()) {
+    } else if (IsPhantomReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
         heap_->EnqueuePendingReferenceNoLock(obj, GetPhantomReferenceList());
