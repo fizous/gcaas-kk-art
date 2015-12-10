@@ -264,7 +264,6 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
   size_t GetNumReferenceInstanceFields(const mirror::Class* klass_ref) const;
 
-  template <typename MarkVisitor>
   void RawScanObjectVisit(const mirror::Object* obj)
             EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
               SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);

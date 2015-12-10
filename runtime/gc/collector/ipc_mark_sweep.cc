@@ -1440,7 +1440,7 @@ class RawMarkObjectVisitor {
   IPCMarkSweep* const mark_sweep_;
 };
 
-template <typename MarkVisitor>
+
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   RawMarkObjectVisitor visitor(this);
   const mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
