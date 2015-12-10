@@ -478,22 +478,40 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
 
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
-  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
-  if(mapped_head == NULL) {
-    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+
+  mirror::Object* list_content = *list;
+  if(list_content == NULL) {
     SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-    *head_pp = MapReferenceToValueClient(ref);
+    *list = reinterpret_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
   } else {
-    int32_t pending_next_raw_value =
-        mirror::Object::GetRawValueFromObject(
-            reinterpret_cast<const mirror::Object*>(mapped_head),
-            ref_pendingNext_off_client_);
-    mirror::Object* mapped_pending_next =
-        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
-    SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
+    list_content = MapReferenceToServer<mirror::Object>(list_content);
+    int32_t head_int_value = mirror::Object::GetRawValueFromObject(
+                reinterpret_cast<const mirror::Object*>(list_content),
+                ref_pendingNext_off_client_);
+    mirror::Object* mapped_head =
+            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
+    SetClientFieldValue(ref, ref_pendingNext_off_client_,
+        MapReferenceToClientChecks(mapped_head));
+    SetClientFieldValue(list_content, ref_pendingNext_off_client_,
+        MapReferenceToClientChecks(ref));
   }
+
+//  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+//  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+//  if(mapped_head == NULL) {
+//    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+//    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
+//    *head_pp = MapReferenceToValueClient(ref);
+//  } else {
+//    int32_t pending_next_raw_value =
+//        mirror::Object::GetRawValueFromObject(
+//            reinterpret_cast<const mirror::Object*>(mapped_head),
+//            ref_pendingNext_off_client_);
+//    mirror::Object* mapped_pending_next =
+//        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+//    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
+//    SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
+//  }
 }
 
 // Process the "referent" field in a java.lang.ref.Reference.  If the
@@ -508,7 +526,7 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(
                                                       ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
+  if (mapped_referent != NULL && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
     bool is_enqueued_object = IsMappedReferentEnqueued(obj);
@@ -607,15 +625,13 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
 }
 
 template <typename MarkVisitor>
-void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
+inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
 //  if(!BelongsToOldHeap<mirror::Object>(obj)) {
 //    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
 //  }
   const mirror::Object* mapped_object =
                                 MapReferenceToServerChecks<mirror::Object>(obj);
-
-
 
 //  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
 //    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
@@ -633,6 +649,26 @@ void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
 //  }
 
   const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
+
+  if (UNLIKELY(IsMappedArrayClass(mapped_klass))) {
+    cashed_stats_client_.array_count_ += 1;
+    if (IsObjectArrayMappedKlass(mapped_klass)) {
+      ServerVisitObjectArrayReferences(down_cast<const mirror::ObjectArray<mirror::Object>*>(obj), visitor);
+      //VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+    }
+  } else if (UNLIKELY(mapped_klass == cashed_references_client_.java_lang_Class_)) {
+    cashed_stats_client_.class_count_ += 1;
+    ServerVisitClassReferences(mapped_klass, obj, visitor);
+  } else {
+    cashed_stats_client_.other_count_ += 1;
+    RawVisitOtherReferences(mapped_klass, obj, visitor);
+    if (UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+      is_reference_class_cnt_++;
+      ServerDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
+    }
+  }
+
+
 
 //  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
 //    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
