@@ -1617,7 +1617,7 @@ void IPCMarkSweep::RawObjectScanner(void) {
   spaces_[2].base_end_ =
       spaces_[2].base_ + ipc_heap_->local_heap_->GetAllocSpace()->Capacity();
 
-
+  _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
 
   for(int i = 0; i <= 2; i++) {
     LOG(ERROR) << StringPrintf("X...space[%d]  --> client-start=%p, client-end=%p", i,
