@@ -1125,13 +1125,13 @@ inline void IPCMarkSweep::RawVisitInstanceFieldsReferences(
                                                     const mirror::Class* klass,
                                                      const mirror::Object* obj,
                                                      const Visitor& visitor) {
-  RawVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
-//  const int32_t reference_offsets =
-//      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
-//  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
-//  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
-//  uint32_t reference_instance_offsets_val = *word_addr;
-//  RawVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
+//  RawVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
+  const int32_t reference_offsets =
+      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
+  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
+  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+  uint32_t reference_instance_offsets_val = *word_addr;
+  RawVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
 }
 
 template <typename Visitor>
