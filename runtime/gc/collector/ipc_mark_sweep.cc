@@ -1159,32 +1159,32 @@ inline void IPCMarkSweep::RawVisitObjectArrayReferences(
                           const mirror::ObjectArray<mirror::Object>* mapped_arr,
                                                   const Visitor& visitor) {
 
-  const size_t length = static_cast<size_t>(mapped_arr->GetLength());
-  for (size_t i = 0; i < length; ++i) {
-    const mirror::Object* element = mapped_arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
-    const size_t width = sizeof(mirror::Object*);
-    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-    visitor(mapped_arr, element, offset, false);
-  }
-
-//  uint32_t _length_read =
-//      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
-//          mirror::Array::LengthOffset());
-//
-//  const size_t length =
-//        static_cast<size_t>(_length_read);
-//
-//  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
+//  const size_t length = static_cast<size_t>(mapped_arr->GetLength());
+//  for (size_t i = 0; i < length; ++i) {
+//    const mirror::Object* element = mapped_arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
 //    const size_t width = sizeof(mirror::Object*);
 //    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-//    uint32_t _data_read =
-//        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
-//                                                                        offset);
-//    const mirror::Object* element_content =
-//        MapValueToServer<mirror::Object>(_data_read);
-//
-//    visitor(mapped_arr, element_content, offset, false);
+//    visitor(mapped_arr, element, offset, false);
 //  }
+
+  uint32_t _length_read =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+          mirror::Array::LengthOffset());
+
+  const size_t length =
+        static_cast<size_t>(_length_read);
+
+  for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
+    const size_t width = sizeof(mirror::Object*);
+    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+    uint32_t _data_read =
+        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
+                                                                        offset);
+    const mirror::Object* element_content =
+        MapValueToServer<mirror::Object>(_data_read);
+
+    visitor(mapped_arr, element_content, offset, false);
+  }
 
 }
 
