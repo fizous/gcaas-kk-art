@@ -1443,7 +1443,7 @@ class RawMarkObjectVisitor {
 
 inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   RawMarkObjectVisitor visitor(this);
-  const mirror::Class* klass = GetMappedObjectKlass(obj, 0);//obj->GetClass();
+  mirror::Class* klass = const_cast<mirror::Class*>(GetMappedObjectKlass(obj, 0));//obj->GetClass();
   if (UNLIKELY(klass->IsArrayClass())) {
 
     if (klass->IsObjectArrayClass()) {
