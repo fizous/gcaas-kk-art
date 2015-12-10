@@ -1615,7 +1615,8 @@ void IPCMarkSweep::RawObjectScanner(void) {
       break;
     }
     popped_oject = mark_stack_->PopBack();
-    RawScanObjectVisit(popped_oject, visitor);
+    ScanObject(popped_oject);
+    //RawScanObjectVisit(popped_oject, visitor);
   }
 }
 

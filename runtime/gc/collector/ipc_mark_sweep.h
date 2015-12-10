@@ -256,7 +256,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   byte* GetClientSpaceBegin(int index) const;
   byte* GetServerSpaceEnd(int index) const;
   byte* GetServerSpaceBegin(int index) const;
-  void RawObjectScanner(void);
+  void RawObjectScanner(void)
+        EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   const mirror::Class* GetSuperMappedClass(const mirror::Class* mapped_klass);
   size_t GetNumReferenceStaticFields(const mirror::Class* klass_ref) const;
