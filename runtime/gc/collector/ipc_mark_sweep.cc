@@ -1146,12 +1146,12 @@ template <typename Visitor>
 inline void IPCMarkSweep::RawVisitStaticFieldsReferences(
                                                       const mirror::Class* klass,
                                                       const Visitor& visitor) {
-  RawVisitFieldsReferences(klass, klass->GetReferenceStaticOffsets(), true, visitor);
-//  MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
-//  uint32_t _raw_value_offsets =
-//      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-//          reference_static_offset);
-//  RawVisitFieldsReferences(klass, _raw_value_offsets, true, visitor);
+//  RawVisitFieldsReferences(klass, klass->GetReferenceStaticOffsets(), true, visitor);
+  MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
+  uint32_t _raw_value_offsets =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+          reference_static_offset);
+  RawVisitFieldsReferences(klass, _raw_value_offsets, true, visitor);
 }
 
 template <typename Visitor>
