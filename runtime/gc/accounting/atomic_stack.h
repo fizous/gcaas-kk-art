@@ -273,7 +273,9 @@ class StructuredAtomicStack {
 //        stack_data_->capacity_ << ", to newCapacity: "<<  new_capacity;
 
     stack_data_->capacity_ = new_capacity;
-
+if(stack_data_->is_shared_) {
+  LOG(FATAL) << ".......Resizing atomic stack WHILE IT IS SHARED.......: " << new_capacity;
+}
     //Reset();
     Init(stack_data_->is_shared_);
   }
