@@ -2066,13 +2066,13 @@ void IPCMarkSweep::MarkReachableObjects() {
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
-
+  RecursiveMark();
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
-  if(false)
-    RecursiveMark();
-  _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
-  RawObjectScanner();
+  //if(false)
+
+  //_temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
+ // RawObjectScanner();
   //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MARKSWEEP_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<

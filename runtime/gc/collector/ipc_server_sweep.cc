@@ -165,9 +165,6 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 void IPCServerMarkerSweep::MarkReachableObjects(
                             space::GCSrvSharableCollectorData* collector_addr) {
 
-  if(true)
-    return;
-
   Thread* _self = Thread::Current();
 
 

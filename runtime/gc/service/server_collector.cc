@@ -179,10 +179,9 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
       if(false)
         server_instant_->ipc_msweep_->MarkReachableObjects(curr_collector_addr_);
-
-      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
+      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
       performed_cycle_index_ = server_instant_->cycles_count_;
       server_instant_->phase_cond_->Broadcast(self);
     }
