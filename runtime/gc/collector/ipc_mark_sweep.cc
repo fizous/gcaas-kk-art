@@ -1346,7 +1346,7 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
 //  uint32_t referent_raw_value =
 //      mirror::Object::GetVolatileRawValueFromObject(
 //                                  reinterpret_cast<const mirror::Object*>(obj),
-//                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+//                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_referent_offset_));
 //  const mirror::Object* mapped_referent =
 //      MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
