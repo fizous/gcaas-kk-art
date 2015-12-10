@@ -1357,22 +1357,22 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     if (IsSoftReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetSoftReferenceList());
+        RawEnqPendingReference(obj, GetSoftReferenceList());
       }
     } else if (IsWeakReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetWeakReferenceList());
+        RawEnqPendingReference(obj, GetWeakReferenceList());
       }
     } else if (IsFinalizerReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetFinalizerReferenceList());
+        RawEnqPendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (IsPhantomReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!heap_->IsEnqueuedNoLock(obj)) {
-        heap_->EnqueuePendingReferenceNoLock(obj, GetPhantomReferenceList());
+        RawEnqPendingReference(obj, GetPhantomReferenceList());
       }
     } else {
       LOG(FATAL) << "Invalid reference type " //<< PrettyClass(klass)
