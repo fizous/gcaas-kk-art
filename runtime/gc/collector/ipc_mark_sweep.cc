@@ -1418,9 +1418,31 @@ inline void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
   RawVisitInstanceFieldsReferences(klass, obj, visitor);
 }
 
+class RawMarkObjectVisitor {
+ public:
+  explicit RawMarkObjectVisitor(IPCMarkSweep* const raw_mark_sweep)
+          ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
+
+  // TODO: Fixme when anotatalysis works with visitors.
+  void operator()(const Object* /* obj */, const Object* ref,
+                  MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
+      NO_THREAD_SAFETY_ANALYSIS {
+//    if (kCheckLocks) {
+//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+//    }
+    //mark_sweep_->RawMarkObject(ref);
+    if(ref != NULL)
+      mark_sweep_->RawMarkObject(ref);
+  }
+
+ private:
+  IPCMarkSweep* const mark_sweep_;
+};
+
 template <typename MarkVisitor>
-inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj,
-    const MarkVisitor& visitor) {
+inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
+  RawMarkObjectVisitor visitor(this);
   const mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
 
   if (UNLIKELY(mapped_klass->IsArrayClass())) {
@@ -1528,26 +1550,7 @@ inline void IPCMarkSweep::RawMarkObject(const mirror::Object* obj) {
   }
 }
 
-class RawMarkObjectVisitor {
- public:
-  explicit RawMarkObjectVisitor(IPCMarkSweep* const raw_mark_sweep)
-          ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
 
-  // TODO: Fixme when anotatalysis works with visitors.
-  void operator()(const Object* /* obj */, const Object* ref,
-                  MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
-      NO_THREAD_SAFETY_ANALYSIS {
-//    if (kCheckLocks) {
-//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
-//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
-//    }
-    //mark_sweep_->RawMarkObject(ref);
-    mark_sweep_->RawMarkObject(ref);
-  }
-
- private:
-  IPCMarkSweep* const mark_sweep_;
-};
 
 class ClientMarkObjectVisitor {
  public:
@@ -1609,14 +1612,14 @@ void IPCMarkSweep::RawObjectScanner(void) {
 
   const mirror::Object* popped_oject = NULL;
   //ClientMarkObjectVisitor visitor(this);
-  RawMarkObjectVisitor visitor(this);
+
   for (;;) {
     if (mark_stack_->IsEmpty()) {
       break;
     }
     popped_oject = mark_stack_->PopBack();
-    ScanObject(popped_oject);
-    //RawScanObjectVisit(popped_oject, visitor);
+    //ScanObject(popped_oject);
+    RawScanObjectVisit(popped_oject);
   }
 }
 
