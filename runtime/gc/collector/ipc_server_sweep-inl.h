@@ -479,39 +479,39 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
 
-  mirror::Object* list_content = *list;
-  if(list_content == NULL) {
-    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-    *list = const_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
-  } else {
-    list_content = const_cast<mirror::Object*>(MapReferenceToServer<mirror::Object>(list_content));
-    int32_t head_int_value = mirror::Object::GetRawValueFromObject(
-                reinterpret_cast<const mirror::Object*>(list_content),
-                ref_pendingNext_off_client_);
-    mirror::Object* mapped_head =
-            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
-    SetClientFieldValue(ref, ref_pendingNext_off_client_,
-        MapReferenceToClientChecks(mapped_head));
-    SetClientFieldValue(list_content, ref_pendingNext_off_client_,
-        MapReferenceToClientChecks(ref));
-  }
-
-//  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
-//  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
-//  if(mapped_head == NULL) {
-//    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+//  mirror::Object* list_content = *list;
+//  if(list_content == NULL) {
 //    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-//    *head_pp = MapReferenceToValueClient(ref);
+//    *list = const_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
 //  } else {
-//    int32_t pending_next_raw_value =
-//        mirror::Object::GetRawValueFromObject(
-//            reinterpret_cast<const mirror::Object*>(mapped_head),
-//            ref_pendingNext_off_client_);
-//    mirror::Object* mapped_pending_next =
-//        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-//    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
-//    SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
+//    list_content = const_cast<mirror::Object*>(MapReferenceToServer<mirror::Object>(list_content));
+//    int32_t head_int_value = mirror::Object::GetRawValueFromObject(
+//                reinterpret_cast<const mirror::Object*>(list_content),
+//                ref_pendingNext_off_client_);
+//    mirror::Object* mapped_head =
+//            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
+//    SetClientFieldValue(ref, ref_pendingNext_off_client_,
+//        MapReferenceToClientChecks(mapped_head));
+//    SetClientFieldValue(list_content, ref_pendingNext_off_client_,
+//        MapReferenceToClientChecks(ref));
 //  }
+
+  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+  if(mapped_head == NULL) {
+    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
+    *head_pp = MapReferenceToValueClient(ref);
+  } else {
+    int32_t pending_next_raw_value =
+        mirror::Object::GetRawValueFromObject(
+            reinterpret_cast<const mirror::Object*>(mapped_head),
+            ref_pendingNext_off_client_);
+    mirror::Object* mapped_pending_next =
+        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
+    SetClientFieldValue(mapped_pending_next, ref_pendingNext_off_client_, ref);
+  }
 }
 
 // Process the "referent" field in a java.lang.ref.Reference.  If the
