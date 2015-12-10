@@ -1357,22 +1357,22 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
     if (IsSoftReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetSoftRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        RawEnqPendingReference(obj, GetSoftReferenceList());
+        heap_->EnqueuePendingReference(obj, GetSoftReferenceList());
       }
     } else if (IsWeakReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetWeakRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        RawEnqPendingReference(obj, GetWeakReferenceList());
+        heap_->EnqueuePendingReference(obj, GetWeakReferenceList());
       }
     } else if (IsFinalizerReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetFinalizerRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        RawEnqPendingReference(obj, GetFinalizerReferenceList());
+        heap_->EnqueuePendingReference(obj, GetFinalizerReferenceList());
       }
     } else if (IsPhantomReferenceMappedClass(klass)) {
       MutexLock mu(self, *heap_->GetPhantomRefQueueLock());
       if (!IsMappedReferentEnqueued(obj)) {
-        RawEnqPendingReference(obj, GetPhantomReferenceList());
+        heap_->EnqueuePendingReference(obj, GetPhantomReferenceList());
       }
     } else {
       LOG(FATAL) << "Invalid reference type " //<< PrettyClass(klass)
@@ -1456,7 +1456,7 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   } else {
     VisitOtherReferences(klass, obj, visitor);
     if (UNLIKELY(klass->IsReferenceClass())) {
-      RawDelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
+      DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
     }
   }
 
