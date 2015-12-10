@@ -146,7 +146,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   //set the sharable space to be shared
   android_atomic_acquire_store(2, &(client_rec_->sharable_space_->register_gc_));
 
-  memset(&cashed_references_client_, 0, sizeof(space::GCSrvceCashedReferences));
+  //memset(&cashed_references_client_, 0, sizeof(space::GCSrvceCashedReferences));
 
   //cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
   LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
@@ -393,8 +393,8 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 
 
   UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_, true);
-  UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
-      &cashed_references_client_);
+//  UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
+//      &cashed_references_client_);
 
   LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
       cashed_stats_client_.array_count_ <<
@@ -651,8 +651,8 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   LOG(ERROR) << "-------------------------RESTARTING-------------------------";
 
-  SetCachedReferencesPointers(&cashed_references_client_,
-      &curr_collector_ptr_->cashed_references_);
+//  SetCachedReferencesPointers(&cashed_references_client_,
+//      &curr_collector_ptr_->cashed_references_);
 
 
 

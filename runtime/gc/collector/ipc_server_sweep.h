@@ -83,7 +83,7 @@ class IPCServerMarkerSweep {
   MemberOffset ref_reference_zombie_off_client_;
 
 
-  space::GCSrvceCashedReferences cashed_references_client_;
+  //space::GCSrvceCashedReferences cashed_references_client_;
   space::GCSrvceCashedStatsCounters cashed_stats_client_;
 
 
@@ -254,11 +254,11 @@ class IPCServerMarkerSweep {
   }
 
   mirror::Object* GetImmuneBegin() const{
-    return cashed_references_client_.immune_begin_;
+    return curr_collector_ptr_->cashed_references_.immune_begin_;
   }
 
   mirror::Object* GetImmuneEnd() const {
-    return cashed_references_client_.immune_end_;
+    return curr_collector_ptr_->cashed_references_.immune_end_;
   }
 
 

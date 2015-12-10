@@ -432,7 +432,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
     LOG(FATAL) << "ERROR005...GetMappedClassType";
   }
 
-  if(UNLIKELY(klass == cashed_references_client_.java_lang_Class_))
+  if(UNLIKELY(klass == curr_collector_ptr_->cashed_references_.java_lang_Class_))
     return 2;
 
   if(IsMappedArrayClass(klass)) {
@@ -656,7 +656,7 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
       ServerVisitObjectArrayReferences(down_cast<const mirror::ObjectArray<mirror::Object>*>(obj), visitor);
       //VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
     }
-  } else if (UNLIKELY(mapped_klass == cashed_references_client_.java_lang_Class_)) {
+  } else if (UNLIKELY(mapped_klass == curr_collector_ptr_->cashed_references_.java_lang_Class_)) {
     cashed_stats_client_.class_count_ += 1;
     ServerVisitClassReferences(mapped_klass, obj, visitor);
   } else {
@@ -674,27 +674,27 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
 //    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
 //  }
 
-  int mapped_class_type = GetMappedClassType(mapped_klass);
-  if (UNLIKELY(mapped_class_type < 2)) {
-    cashed_stats_client_.array_count_ += 1;
-    //android_atomic_add(1, &(array_count_));
-    if(mapped_class_type == 0) {
-      ServerVisitObjectArrayReferences(
-        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
-                                                                    visitor);
-    }
-  } else if (UNLIKELY(mapped_class_type == 2)) {
-    cashed_stats_client_.class_count_ += 1;
-    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-  } else if (UNLIKELY(mapped_class_type == 3)) {
-    cashed_stats_client_.other_count_ += 1;
-    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
-    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-      is_reference_class_cnt_++;
-      ServerDelayReferenceReferent(mapped_klass,
-                                  const_cast<mirror::Object*>(mapped_object));
-    }
-  }
+//  int mapped_class_type = GetMappedClassType(mapped_klass);
+//  if (UNLIKELY(mapped_class_type < 2)) {
+//    cashed_stats_client_.array_count_ += 1;
+//    //android_atomic_add(1, &(array_count_));
+//    if(mapped_class_type == 0) {
+//      ServerVisitObjectArrayReferences(
+//        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
+//                                                                    visitor);
+//    }
+//  } else if (UNLIKELY(mapped_class_type == 2)) {
+//    cashed_stats_client_.class_count_ += 1;
+//    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
+//  } else if (UNLIKELY(mapped_class_type == 3)) {
+//    cashed_stats_client_.other_count_ += 1;
+//    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
+//    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+//      is_reference_class_cnt_++;
+//      ServerDelayReferenceReferent(mapped_klass,
+//                                  const_cast<mirror::Object*>(mapped_object));
+//    }
+//  }
 }
 
 
