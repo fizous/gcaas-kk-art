@@ -493,6 +493,10 @@ inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   object_bitmap->Clear(obj);
 }
 
+
+
+
+
 inline void MarkSweep::MarkObjectNonNull(const Object* obj) {
   DCHECK(obj != NULL);
 
@@ -719,7 +723,7 @@ void MarkSweep::MarkRoot(const Object* obj) {
 
 void MarkSweep::MarkObjectCallbackNoLock(const mirror::Object* root, void* arg) {
   if(root != NULL)
-    reinterpret_cast<MarkSweep*>(arg)->MarkObjectNonNull(root);
+    reinterpret_cast<MarkSweep*>(arg)->MarkObjectNonNullParallel(root);
 }
 
 void MarkSweep::MarkRootParallelCallback(const Object* root, void* arg) {
