@@ -1456,7 +1456,7 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
   } else {
     VisitOtherReferences(klass, obj, visitor);
     if (UNLIKELY(klass->IsReferenceClass())) {
-      DelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
+      RawDelayReferenceReferent(klass, const_cast<mirror::Object*>(obj));
     }
   }
 
