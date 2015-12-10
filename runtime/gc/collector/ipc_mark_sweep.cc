@@ -1155,7 +1155,7 @@ inline void IPCMarkSweep::RawVisitStaticFieldsReferences(
 }
 
 template <typename Visitor>
-void IPCMarkSweep::RawVisitObjectArrayReferences(
+inline void IPCMarkSweep::RawVisitObjectArrayReferences(
                           const mirror::ObjectArray<mirror::Object>* mapped_arr,
                                                   const Visitor& visitor) {
 
@@ -1338,17 +1338,17 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
 // Process the "referent" field in a java.lang.ref.Reference.  If the
 // referent has not yet been marked, put it on the appropriate list in
 // the heap for later processing.
-void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
+inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
                                               mirror::Object* obj) {
 
+  Object* mapped_referent = ipc_heap_->local_heap_->GetReferenceReferent(obj);
 
-
-  uint32_t referent_raw_value =
-      mirror::Object::GetVolatileRawValueFromObject(
-                                  reinterpret_cast<const mirror::Object*>(obj),
-                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
-  const mirror::Object* mapped_referent =
-      MapValueToServer<mirror::Object>(referent_raw_value);
+//  uint32_t referent_raw_value =
+//      mirror::Object::GetVolatileRawValueFromObject(
+//                                  reinterpret_cast<const mirror::Object*>(obj),
+//                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+//  const mirror::Object* mapped_referent =
+//      MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     Thread* self = Thread::Current();
     // TODO: Remove these locks, and use atomic stacks for storing references?
@@ -1412,7 +1412,7 @@ void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
 
 
 template <typename Visitor>
-void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
+inline void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
                                                       const mirror::Object* obj,
                                                       const Visitor& visitor) {
   RawVisitInstanceFieldsReferences(klass, obj, visitor);
