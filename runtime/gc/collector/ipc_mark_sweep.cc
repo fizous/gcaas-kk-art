@@ -1592,6 +1592,7 @@ class ClientMarkObjectVisitor {
   IPCMarkSweep* const mark_sweep_;
 };
 
+static int first_timer_runner_ = false;
 
 void IPCMarkSweep::RawObjectScanner(void) {
   timings_.StartSplit("ProcessMarkStack");
@@ -1620,13 +1621,16 @@ void IPCMarkSweep::RawObjectScanner(void) {
 
   _temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
 
-  for(int i = 0; i <= 2; i++) {
-    LOG(ERROR) << StringPrintf("X...space[%d]  --> client-start=%p, client-end=%p", i,
-        spaces_[i].client_base_, spaces_[i].client_end_);
-  }
-  for(int i = 0; i <= 2; i++) {
-    LOG(ERROR) << StringPrintf("X...space[%d]  --> server-start=%p, server-end=%p", i,
-        spaces_[i].base_, spaces_[i].base_end_);
+  if(!first_timer_runner_) {
+    first_timer_runner_ = true;
+    for(int i = 0; i <= 2; i++) {
+      LOG(ERROR) << StringPrintf("X...space[%d]  --> client-start=%p, client-end=%p", i,
+          spaces_[i].client_base_, spaces_[i].client_end_);
+    }
+    for(int i = 0; i <= 2; i++) {
+      LOG(ERROR) << StringPrintf("X...space[%d]  --> server-start=%p, server-end=%p", i,
+          spaces_[i].base_, spaces_[i].base_end_);
+    }
   }
 
   const mirror::Object* popped_oject = NULL;
