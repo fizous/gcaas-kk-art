@@ -1371,7 +1371,7 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != NULL && !RawIsMarked(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
-    Thread* self = Thread::Current();
+    //Thread* self = Thread::Current();
     // TODO: Remove these locks, and use atomic stacks for storing references?
     // We need to check that the references haven't already been enqueued since we can end up
     // scanning the same reference multiple times due to dirty cards.
