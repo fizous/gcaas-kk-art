@@ -290,7 +290,7 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
 
   COPY_NAME_TO_STRUCT(hb_p->name_, name);
 
-  LOG(ERROR) << "---DOne creating Shared Space Bitmap---";
+  //LOG(ERROR) << "---DOne creating Shared Space Bitmap---";
 }
 
 

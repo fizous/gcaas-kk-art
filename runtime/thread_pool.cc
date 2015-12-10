@@ -44,7 +44,7 @@ ThreadPoolWorker::~ThreadPoolWorker() {
 
 void ThreadPoolWorker::Run() {
   Thread* self = Thread::Current();
-  GCMMP_VLOG(INFO) << "GCMMP: New Thread Worker with systemID:" << self->GetTid();
+  //GCMMP_VLOG(INFO) << "GCMMP: New Thread Worker with systemID:" << self->GetTid();
   Task* task = NULL;
   thread_pool_->creation_barier_.Wait(self);
   while ((task = thread_pool_->GetTask(self)) != NULL) {
