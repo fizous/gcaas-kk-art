@@ -83,7 +83,7 @@ class IPCServerMarkerSweep {
   MemberOffset ref_reference_zombie_off_client_;
 
 
-  //space::GCSrvceCashedReferences cashed_references_client_;
+  space::GCSrvceCashedReferences cashed_references_client_;
   space::GCSrvceCashedStatsCounters cashed_stats_client_;
 
 
@@ -205,6 +205,8 @@ class IPCServerMarkerSweep {
                                                        const mirror::Object* obj,
                                                        const Visitor& visitor);
 
+  bool IsArtFieldVolatile(const mirror::ArtField* field);
+
   template <typename Visitor>
   void ServerVisitFieldsReferences(const mirror::Object* obj,
                               uint32_t ref_offsets, bool is_static,
@@ -254,11 +256,11 @@ class IPCServerMarkerSweep {
   }
 
   mirror::Object* GetImmuneBegin() const{
-    return curr_collector_ptr_->cashed_references_.immune_begin_;
+    return cashed_references_client_.immune_begin_;
   }
 
   mirror::Object* GetImmuneEnd() const {
-    return curr_collector_ptr_->cashed_references_.immune_end_;
+    return cashed_references_client_.immune_end_;
   }
 
 

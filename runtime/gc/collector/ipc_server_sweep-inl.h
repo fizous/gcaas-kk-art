@@ -123,8 +123,6 @@ void IPCServerMarkerSweep::SetClientFieldValue(const mirror::Object* mapped_obje
                     MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
   *word_addr = eq_client_value;
 }
-
-
 template <class referenceKlass>
 inline const referenceKlass* IPCServerMarkerSweep::MapReferenceToClientChecks(
                                       const referenceKlass* const ref_parm) {
@@ -432,7 +430,7 @@ int IPCServerMarkerSweep::GetMappedClassType(const mirror::Class* klass) const {
     LOG(FATAL) << "ERROR005...GetMappedClassType";
   }
 
-  if(UNLIKELY(klass == curr_collector_ptr_->cashed_references_.java_lang_Class_))
+  if(UNLIKELY(klass == cashed_references_client_.java_lang_Class_))
     return 2;
 
   if(IsMappedArrayClass(klass)) {
@@ -478,24 +476,6 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
 
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
-
-//  mirror::Object* list_content = *list;
-//  if(list_content == NULL) {
-//    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
-//    *list = const_cast<mirror::Object*>(MapReferenceToClientChecks(ref));
-//  } else {
-//    list_content = const_cast<mirror::Object*>(MapReferenceToServer<mirror::Object>(list_content));
-//    int32_t head_int_value = mirror::Object::GetRawValueFromObject(
-//                reinterpret_cast<const mirror::Object*>(list_content),
-//                ref_pendingNext_off_client_);
-//    mirror::Object* mapped_head =
-//            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
-//    SetClientFieldValue(ref, ref_pendingNext_off_client_,
-//        MapReferenceToClientChecks(mapped_head));
-//    SetClientFieldValue(list_content, ref_pendingNext_off_client_,
-//        MapReferenceToClientChecks(ref));
-//  }
-
   uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
   const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
   if(mapped_head == NULL) {
@@ -526,7 +506,7 @@ void IPCServerMarkerSweep::ServerDelayReferenceReferent(
                                                       ref_referent_off_client_);
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != NULL && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
+  if (mapped_referent != nullptr && !IsMappedObjectMarked(mapped_referent)) {//TODO: Implement ismarked
     cashed_stats_client_.reference_count_ += 1;
     //Thread* self = Thread::Current();
     bool is_enqueued_object = IsMappedReferentEnqueued(obj);
@@ -625,13 +605,15 @@ bool IPCServerMarkerSweep::ServerScanObjectVisitRemoval(const mirror::Object* ob
 }
 
 template <typename MarkVisitor>
-inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
+void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* obj,
     const MarkVisitor& visitor) {
 //  if(!BelongsToOldHeap<mirror::Object>(obj)) {
 //    LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX";
 //  }
   const mirror::Object* mapped_object =
                                 MapReferenceToServerChecks<mirror::Object>(obj);
+
+
 
 //  if(!IsMappedObjectToServer<mirror::Object>(mapped_object)) {
 //    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR01";
@@ -650,51 +632,31 @@ inline void IPCServerMarkerSweep::ServerScanObjectVisit(const mirror::Object* ob
 
   const mirror::Class* mapped_klass = GetMappedObjectKlass(mapped_object);
 
-  if (UNLIKELY(IsMappedArrayClass(mapped_klass))) {
-    cashed_stats_client_.array_count_ += 1;
-    if (IsObjectArrayMappedKlass(mapped_klass)) {
-      ServerVisitObjectArrayReferences(down_cast<const mirror::ObjectArray<mirror::Object>*>(obj), visitor);
-      //VisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
-    }
-  } else if (UNLIKELY(mapped_klass == curr_collector_ptr_->cashed_references_.java_lang_Class_)) {
-    cashed_stats_client_.class_count_ += 1;
-    ServerVisitClassReferences(mapped_klass, obj, visitor);
-  } else {
-    cashed_stats_client_.other_count_ += 1;
-    ServerVisitOtherReferences(mapped_klass, obj, visitor);
-    if (UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-      is_reference_class_cnt_++;
-      ServerDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
-    }
-  }
-
-
-
 //  if(!IsMappedObjectToServer<mirror::Class>(mapped_klass)) {
 //    LOG(FATAL) << "..... ServerScanObjectVisit: ERROR03";
 //  }
 
-//  int mapped_class_type = GetMappedClassType(mapped_klass);
-//  if (UNLIKELY(mapped_class_type < 2)) {
-//    cashed_stats_client_.array_count_ += 1;
-//    //android_atomic_add(1, &(array_count_));
-//    if(mapped_class_type == 0) {
-//      ServerVisitObjectArrayReferences(
-//        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
-//                                                                    visitor);
-//    }
-//  } else if (UNLIKELY(mapped_class_type == 2)) {
-//    cashed_stats_client_.class_count_ += 1;
-//    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
-//  } else if (UNLIKELY(mapped_class_type == 3)) {
-//    cashed_stats_client_.other_count_ += 1;
-//    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
-//    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-//      is_reference_class_cnt_++;
-//      ServerDelayReferenceReferent(mapped_klass,
-//                                  const_cast<mirror::Object*>(mapped_object));
-//    }
-//  }
+  int mapped_class_type = GetMappedClassType(mapped_klass);
+  if (UNLIKELY(mapped_class_type < 2)) {
+    cashed_stats_client_.array_count_ += 1;
+    //android_atomic_add(1, &(array_count_));
+    if(mapped_class_type == 0) {
+      ServerVisitObjectArrayReferences(
+        down_cast<const mirror::ObjectArray<mirror::Object>*>(mapped_object),
+                                                                    visitor);
+    }
+  } else if (UNLIKELY(mapped_class_type == 2)) {
+    cashed_stats_client_.class_count_ += 1;
+    ServerVisitClassReferences(mapped_klass, mapped_object, visitor);
+  } else if (UNLIKELY(mapped_class_type == 3)) {
+    cashed_stats_client_.other_count_ += 1;
+    ServerVisitOtherReferences(mapped_klass, mapped_object, visitor);
+    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+      is_reference_class_cnt_++;
+      ServerDelayReferenceReferent(mapped_klass,
+                                  const_cast<mirror::Object*>(mapped_object));
+    }
+  }
 }
 
 
@@ -776,12 +738,18 @@ inline void IPCServerMarkerSweep::ServerVisitInstanceFieldsReferences(
                                                     const mirror::Class* klass,
                                                      const mirror::Object* obj,
                                                      const Visitor& visitor) {
-  const int32_t reference_offsets =
-      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
-  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
-  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
-  uint32_t reference_instance_offsets_val = *word_addr;
+  uint32_t reference_instance_offsets_val =
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
+          mirror::Class::GetReferenceInstanceOffsetsOffset());
   ServerVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
+
+
+//  const int32_t reference_offsets =
+//      mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
+//  const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
+//  const int32_t* word_addr = reinterpret_cast<const int32_t*>(raw_addr);
+//  uint32_t reference_instance_offsets_val = *word_addr;
+//  ServerVisitFieldsReferences(obj, reference_instance_offsets_val, false, visitor);
 }
 
 template <typename Visitor>
@@ -882,6 +850,13 @@ void IPCServerMarkerSweep::ServerVisitOtherReferences(const mirror::Class* klass
 }
 
 
+//bool IPCServerMarkerSweep::IsArtFieldVolatile(const mirror::ArtField* field) {
+//  uint32_t raw_fiel_value =
+//      mirror::Object::GetRawValueFromObject(field,
+//          mirror::ArtField::GetArtFieldsACcessFlagsOffset());
+//  return (raw_fiel_value & kAccVolatile) != 0;
+//}
+
 template <typename Visitor>
 inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
                                                       const mirror::Object* obj,
@@ -922,10 +897,12 @@ inline void IPCServerMarkerSweep::ServerVisitFieldsReferences(
             mirror::Object::GetRawValueFromObject(field,
                                               mirror::ArtField::OffsetOffset());
         MemberOffset field_offset(field_word_value);
-        uint32_t raw_field_value =
-            mirror::Object::GetRawValueFromObject(obj, field_offset);
-        const mirror::Object* mapped_field_object =
-            MapValueToServer<mirror::Object>(raw_field_value);
+        uint32_t raw_field_value = 0;
+        const mirror::Object* mapped_field_object = NULL;
+          raw_field_value =
+                      mirror::Object::GetRawValueFromObject(obj, field_offset);
+
+        mapped_field_object = MapValueToServer<mirror::Object>(raw_field_value);
         visitor(obj, mapped_field_object, field_offset, is_static);
       }
     }
