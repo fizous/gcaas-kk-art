@@ -719,7 +719,7 @@ void MarkSweep::MarkRoot(const Object* obj) {
 
 void MarkSweep::MarkObjectCallbackNoLock(const mirror::Object* root, void* arg) {
   if(root != NULL)
-    reinterpret_cast<MarkSweep*>(arg)->MarkObjectNonNullParallel(root);
+    reinterpret_cast<MarkSweep*>(arg)->MarkObjectNonNull(root);
 }
 
 void MarkSweep::MarkRootParallelCallback(const Object* root, void* arg) {
