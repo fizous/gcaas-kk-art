@@ -1542,7 +1542,7 @@ class RawMarkObjectVisitor {
 //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
 //    }
     //mark_sweep_->RawMarkObject(ref);
-    mark_sweep_->MarkObject(ref);
+    mark_sweep_->RawMarkObject(ref);
   }
 
  private:
@@ -1608,8 +1608,8 @@ void IPCMarkSweep::RawObjectScanner(void) {
   }
 
   const mirror::Object* popped_oject = NULL;
-  ClientMarkObjectVisitor visitor(this);
-  //RawMarkObjectVisitor visitor(this);
+  //ClientMarkObjectVisitor visitor(this);
+  RawMarkObjectVisitor visitor(this);
   for (;;) {
     if (mark_stack_->IsEmpty()) {
       break;
