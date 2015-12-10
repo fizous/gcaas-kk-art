@@ -2372,9 +2372,7 @@ mirror::Object* Heap::GetReferenceReferent(mirror::Object* reference) {
 }
 
 
-mirror::Object* Heap::GetReferenceReferentNoLock(mirror::Object* reference) {
-  return reference->GetFieldObject<mirror::Object*>(reference_referent_offset_, true);
-}
+
 
 void Heap::ClearReferenceReferent(mirror::Object* reference) {
   DCHECK(reference != NULL);

@@ -1349,7 +1349,7 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
 //                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_referent_offset_));
 //  const mirror::Object* mapped_referent =
 //      MapValueToServer<mirror::Object>(referent_raw_value);
-  if (mapped_referent != nullptr && !IsMarked(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
+  if (mapped_referent != nullptr && !IsMarkedNoLocks(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
     Thread* self = Thread::Current();
     // TODO: Remove these locks, and use atomic stacks for storing references?
     // We need to check that the references haven't already been enqueued since we can end up

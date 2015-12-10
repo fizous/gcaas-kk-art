@@ -265,7 +265,6 @@ class Heap {
                            MemberOffset reference_pendingNext_offset,
                            MemberOffset finalizer_reference_zombie_offset);
 
-  mirror::Object* GetReferenceReferentNoLock(mirror::Object* reference);
   mirror::Object* GetReferenceReferent(mirror::Object* reference);
   void ClearReferenceReferent(mirror::Object* reference) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 

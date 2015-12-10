@@ -144,6 +144,7 @@ inline bool MarkSweep::IsMarked(const Object* object) const
   return heap_->GetMarkBitmap()->Test(object);
 }
 
+
 void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
   if (!space->HasBitmapsBound()) {
