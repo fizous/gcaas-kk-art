@@ -1573,6 +1573,7 @@ class ClientMarkObjectVisitor {
 
 
 void IPCMarkSweep::RawObjectScanner(void) {
+  timings_.StartSplit("ProcessMarkStack");
   spaces_[0].client_base_ =
       heap_meta_->image_space_begin_;
   spaces_[0].client_end_ =
@@ -2066,8 +2067,8 @@ void IPCMarkSweep::MarkReachableObjects() {
       _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
-  //RecursiveMark();
-  RawObjectScanner();
+  RecursiveMark();
+
   HandshakeIPCSweepMarkingPhase(ipc_heap_->local_heap_->GetMarkBitmap());
   // Recursively mark all the non-image bits set in the mark bitmap.
   //if(false)
@@ -2083,8 +2084,9 @@ void IPCMarkSweep::MarkReachableObjects() {
 // Populates the mark stack based on the set of marked objects and
 // recursively marks until the mark stack is emptied.
 void IPCMarkSweep::RecursiveMark() {
-  MarkSweep::RecursiveMark();
-  //base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+  //MarkSweep::RecursiveMark();
+  base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+  RawObjectScanner();
   //ProcessMarkStack(false);
   //MarkSweep::RecursiveMark();
 }
