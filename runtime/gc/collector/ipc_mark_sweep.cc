@@ -2039,6 +2039,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
     //here we are doing the mark reachable on the server side
     //if(true) {
     base::TimingLogger::ScopedSplit split("RecursiveMark", &timings_);
+    timings_.StartSplit("ProcessMarkStack");
     //}
     RequestAppSuspension();
     //_temp_heap_beetmap = heap_beetmap;

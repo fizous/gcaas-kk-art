@@ -476,6 +476,13 @@ bool IPCServerMarkerSweep::IsMappedReferentEnqueued(
 
 void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
+  mirror::Object* list_content = *list;
+  if(list_content == NULL) {
+
+  } else {
+
+  }
+
   uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
   const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
   if(mapped_head == NULL) {
