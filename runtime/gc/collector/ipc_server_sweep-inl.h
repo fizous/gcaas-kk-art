@@ -478,7 +478,7 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
     mirror::Object** list) {
   mirror::Object* list_content = *list;
   if(list_content == NULL) {
-    SetClientFieldValue(ref, ref_pendingNext_off_client_, MapReferenceToClient(ref));
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, ref);
     *list = const_cast<mirror::Object*>(MapReferenceToClient(ref));
   } else {
     const mirror::Object* mapped_list_content =
@@ -488,8 +488,8 @@ void IPCServerMarkerSweep::ServerEnqPendingReference(mirror::Object* ref,
                                           ref_pendingNext_off_client_);
     mirror::Object* mapped_head =
             const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
-    SetClientFieldValue(ref, ref_pendingNext_off_client_, MapReferenceToClient(mapped_head));
-    SetClientFieldValue(mapped_list_content, ref_pendingNext_off_client_, MapReferenceToClient(ref));
+    SetClientFieldValue(ref, ref_pendingNext_off_client_, mapped_head);
+    SetClientFieldValue(mapped_list_content, ref_pendingNext_off_client_, ref);
 
 //
 //
