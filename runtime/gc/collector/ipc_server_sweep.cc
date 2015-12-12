@@ -163,7 +163,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
-  Thread* _self = Thread::Current();
+  //Thread* _self = Thread::Current();
   UpdateCurrentMarkBitmap();
   SetCachedReferencesPointers(&cashed_references_client_,
       &curr_collector_ptr_->cashed_references_);
