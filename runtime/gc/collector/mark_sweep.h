@@ -84,11 +84,7 @@ class Heap;
 namespace collector {
 
 
-struct SweepCallbackContext {
-  MarkSweep* mark_sweep;
-  space::AllocSpace* space;
-  Thread* self;
-};
+
 
 
 
@@ -708,6 +704,14 @@ class MarkSweep : public GarbageCollector {
 
   DISALLOW_COPY_AND_ASSIGN(MarkSweep);
 };
+
+
+struct SweepCallbackContext {
+  MarkSweep* mark_sweep;
+  space::AllocSpace* space;
+  Thread* self;
+};
+
 
 }  // namespace collector
 }  // namespace gc
