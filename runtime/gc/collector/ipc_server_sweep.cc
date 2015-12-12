@@ -162,8 +162,32 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 }
 
 
+void IPCServerMarkerSweep::SweepCallback(size_t num_ptrs, mirror::Object** ptrs,
+    void* arg) {
+  SweepCallbackContext* context = static_cast<SweepCallbackContext*>(arg);
+  MarkSweep* mark_sweep = context->mark_sweep;
+  Heap* heap = mark_sweep->GetHeap();
+  space::AllocSpace* space = context->space;
+  Thread* self = context->self;
+  Locks::heap_bitmap_lock_->AssertExclusiveHeld(self);
+  // Use a bulk free, that merges consecutive objects before freeing or free per object?
+  // Documentation suggests better free performance with merging, but this may be at the expensive
+  // of allocation.
+  size_t freed_objects = num_ptrs;
+  // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
+  size_t freed_bytes = space->FreeList(self, num_ptrs, ptrs);
+
+  android_atomic_add(-freed_bytes,
+      &(client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
+
+  android_atomic_add(static_cast<int32_t>(freed_objects),
+      &(cashed_stats_client_.freed_objects_));
+  android_atomic_add(static_cast<int32_t>(freed_bytes),
+      &(cashed_stats_client_.freed_bytes_));
+}
+
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
-  //Thread* _self = Thread::Current();
+  Thread* _self = Thread::Current();
   UpdateCurrentMarkBitmap();
   SetCachedReferencesPointers(&cashed_references_client_,
       &curr_collector_ptr_->cashed_references_);
@@ -176,11 +200,21 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 
   uintptr_t begin =
       reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
-  uintptr_t end = reinterpret_cast<uintptr_t>(client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_);
+
+  byte* end_address =
+      client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_;
+  const mirror::Object* _obj_end = reinterpret_cast<mirror::Object*>(end_address);
+  uintptr_t end =
+      reinterpret_cast<uintptr_t>(MapReferenceToServer<mirror::Object>(_obj_end));
+
 
   LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
       << "; begin = " << begin << "; end = " << end << " - is_partial? "
       << StringPrintf("%s", partial? "true" : "false");
+
+  SweepCallbackContext scc;
+  scc.mark_sweep = NULL;
+  scc.self = _self;
 
 }
 
