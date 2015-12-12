@@ -555,6 +555,8 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
     }
   }
 
+  current_live_bitmap_ = live_bitmaps_[live_bitmaps_.size()-1];
+
   LOG(ERROR) << " ####### marks_size = " << mark_bitmaps_.size() <<
       " lives_size = " <<  live_bitmaps_.size() << " ####### ";
   for (const auto& beetmap : live_bitmaps_) {
@@ -566,7 +568,9 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
         beetmap->bitmap_data_->name_;
   }
   LOG(ERROR) << " current_mark_bitmap_: " << current_mark_bitmap_->bitmap_data_ <<
-      ", " << current_mark_bitmap_->bitmap_data_->name_;
+      ", " << current_mark_bitmap_->bitmap_data_->name_ <<
+      "\n current_live_bitmap_: " << current_live_bitmap_->bitmap_data_ <<
+      ", " << current_live_bitmap_->bitmap_data_->name_;
 
 
 }

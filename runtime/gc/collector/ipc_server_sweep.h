@@ -64,6 +64,7 @@ class IPCServerMarkerSweep {
 
   accounting::GCSrvceBitmap mark_bitmap_;
   accounting::SharedServerSpaceBitmap* current_mark_bitmap_;
+  accounting::SharedServerSpaceBitmap* current_live_bitmap_;
 
   std::vector<accounting::SharedServerSpaceBitmap*> all_bitmaps_;
   std::vector<accounting::SharedServerSpaceBitmap*> mark_bitmaps_;
