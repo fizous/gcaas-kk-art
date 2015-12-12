@@ -209,7 +209,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 
 
   LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
-      << StringPrintf("; begin = %p, end = %p, %s", begin, end, partial? "true" : "false");
+      << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
 
 //  SweepCallbackContext scc;
 //  scc.mark_sweep = NULL;
