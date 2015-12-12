@@ -179,9 +179,38 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
       if(true)
         server_instant_->ipc_msweep_->MarkReachableObjects(curr_collector_addr_);
+
       LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
           << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
       curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_MARK_RECURSIVE;
+//      performed_cycle_index_ = server_instant_->cycles_count_;
+      server_instant_->phase_cond_->Broadcast(self);
+    }
+  }
+
+
+  void WaitForSweepPhase(Thread* self) {
+    LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ " << self->GetTid();
+    ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+    {
+      IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
+      while(true) {
+        if(curr_collector_addr_ != NULL) {
+          if(curr_collector_addr_->gc_phase_ == space::IPC_GC_PHASE_SWEEP) {
+            break;
+          }
+        }
+        server_instant_->phase_cond_->Wait(self);
+      }
+      LOG(ERROR) << " ++++ Phase TASK noticed change  ++++ " << self->GetTid()
+          << " phase=" << curr_collector_addr_->gc_phase_;
+
+      if(true)
+        server_instant_->ipc_msweep_->SweepSpaces(curr_collector_addr_);
+
+      LOG(ERROR) << " ++++ post Phase TASK updated the phase of the GC: "
+          << self->GetTid() << ", phase:" << curr_collector_addr_->gc_phase_;
+      curr_collector_addr_->gc_phase_ = space::IPC_GC_PHASE_FINALIZE_SWEEP;
       performed_cycle_index_ = server_instant_->cycles_count_;
       server_instant_->phase_cond_->Broadcast(self);
     }

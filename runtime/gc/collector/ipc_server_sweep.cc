@@ -162,6 +162,19 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 }
 
 
+void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
+  Thread* _self = Thread::Current();
+  UpdateCurrentMarkBitmap();
+  SetCachedReferencesPointers(&cashed_references_client_,
+      &curr_collector_ptr_->cashed_references_);
+
+  GcType _collection_type =
+      client_rec_->sharable_space_->heap_meta_.sub_record_meta_.next_gc_type_;
+  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type;
+
+}
+
+
 void IPCServerMarkerSweep::MarkReachableObjects(
                             space::GCSrvSharableCollectorData* collector_addr) {
   Thread* _self = Thread::Current();
@@ -558,8 +571,7 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
 
 }
 
-
-bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
+void IPCServerMarkerSweep::SetMarkHolders(space::GCSrvSharableCollectorData* collector_addr) {
   if(mark_stack_ == NULL) {
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
@@ -586,7 +598,12 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
         KGCSpaceServerLiveBitmapInd_, &(client_rec_->sharable_space_->live_bitmap_));
     all_bitmaps_.push_back(_temp_beetmap);
   }
+}
 
+
+bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
+
+  SetMarkHolders(collector_addr);
 
   if(mark_stack_->IsEmpty())
     return false;

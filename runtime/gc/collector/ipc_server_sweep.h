@@ -139,6 +139,7 @@ class IPCServerMarkerSweep {
   void ServerScanObjectVisit(const mirror::Object* obj, const MarkVisitor& visitor);
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
+  void SweepSpaces(space::GCSrvSharableCollectorData* collector_addr);
 
   template <class referenceKlass>
   uint32_t MapReferenceToValueClient(const referenceKlass* mapped_reference) const;
@@ -249,6 +250,7 @@ class IPCServerMarkerSweep {
   byte* GetServerSpaceBegin(int index) const;
 
   void UpdateCurrentMarkBitmap(void);
+  void SetMarkHolders(space::GCSrvSharableCollectorData* collector_addr);
   bool InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr);
   // Returns true if an object is inside of the immune region (assumed to be marked).
   bool IsMappedObjectImmuned(const mirror::Object* obj) const {

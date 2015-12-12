@@ -2154,49 +2154,98 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
 
 
 void IPCMarkSweep::Sweep(bool swap_bitmaps) {
+  Thread* self = Thread::Current();
+  UpdateGCPhase(self, space::IPC_GC_PHASE_SWEEP);
   base::TimingLogger::ScopedSplit("Sweep", &timings_);
-
-  const bool partial = (GetGcType() == kGcTypePartial);
-  SweepCallbackContext scc;
-  scc.mark_sweep = this;
-  scc.self = Thread::Current();
-  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
-    // We always sweep always collect spaces.
-    bool sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect);
-    if (!partial && !sweep_space) {
-      // We sweep full collect spaces when the GC isn't a partial GC (ie its full).
-      sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect);
-    }
-    if (sweep_space) {
-      uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
-      uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
-      scc.space = space->AsDlMallocSpace();
-
-      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
-      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
-
-      if (swap_bitmaps) {
-        std::swap(live_bitmap, mark_bitmap);
+  int _synchronized = 0;
+  if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
+    BlockForGCPhase(self, space::IPC_GC_PHASE_FINALIZE_SWEEP);
+    const bool partial = (GetGcType() == kGcTypePartial);
+    SweepCallbackContext scc;
+    scc.mark_sweep = this;
+    scc.self = self;
+    for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+      // We always sweep always collect spaces.
+      bool sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect);
+      if (!partial && !sweep_space) {
+        // We sweep full collect spaces when the GC isn't a partial GC (ie its full).
+        sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect);
       }
-      if (!space->IsZygoteSpace()) {
-        base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
-        // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
+      if (sweep_space) {
+        uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
+        uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
+        scc.space = space->AsDlMallocSpace();
 
-        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                             &SweepCallback, reinterpret_cast<void*>(&scc));
+        accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+        accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
 
-      } else {
-        base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
-        // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
-        // memory.
+        if (swap_bitmaps) {
+          std::swap(live_bitmap, mark_bitmap);
+        }
+        if (!space->IsZygoteSpace()) {
+          base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
+          // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
 
-        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                            &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
+          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+
+        } else {
+          base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
+          // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
+          // memory.
+
+          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                              &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
 
 
+        }
+      }
+    }
+  } else {
+    const bool partial = (GetGcType() == kGcTypePartial);
+    SweepCallbackContext scc;
+    scc.mark_sweep = this;
+    scc.self = self;
+    for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+      // We always sweep always collect spaces.
+      bool sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect);
+      if (!partial && !sweep_space) {
+        // We sweep full collect spaces when the GC isn't a partial GC (ie its full).
+        sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect);
+      }
+      if (sweep_space) {
+        uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
+        uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
+        scc.space = space->AsDlMallocSpace();
+
+        accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+        accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
+        if (swap_bitmaps) {
+          std::swap(live_bitmap, mark_bitmap);
+        }
+        if (!space->IsZygoteSpace()) {
+          base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
+          // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
+
+          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+
+        } else {
+          base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
+          // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
+          // memory.
+
+          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                              &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
+
+
+        }
       }
     }
   }
+
+
   SweepLargeObjects(swap_bitmaps);
 }
 
@@ -2270,6 +2319,12 @@ void IPCStickyMarkSweep::MarkReachableObjects() {
 }
 
 void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
+  Thread* self = Thread::Current();
+  UpdateGCPhase(self, space::IPC_GC_PHASE_SWEEP);
+  int _synchronized = 0;
+  if((_synchronized = android_atomic_release_load(&(server_synchronize_))) == 1) {
+    BlockForGCPhase(self, space::IPC_GC_PHASE_FINALIZE_SWEEP);
+  }
   accounting::ATOMIC_OBJ_STACK_T* live_stack = GetHeap()->GetLiveStack();
   SweepArray(live_stack, false);
 }
