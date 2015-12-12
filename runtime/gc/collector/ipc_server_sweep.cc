@@ -178,8 +178,9 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
       reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
   uintptr_t end = reinterpret_cast<uintptr_t>(client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_);
 
-  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type <<
-      "; begin = " << begin << "; end = " << end;
+  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
+      << "; begin = " << begin << "; end = " << end << " - is_partial? "
+      << StringPrintf("%s", partial? "true" : "false");
 
 }
 
