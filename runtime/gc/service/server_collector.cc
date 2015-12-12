@@ -237,6 +237,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
       return;
     }
     WaitForPhaseAddress(self);
+    WaitForSweepPhase(self);
 
 
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
