@@ -1339,11 +1339,11 @@ void MarkSweep::VerifySystemWeaks() {
   runtime->GetJavaVM()->SweepWeakGlobals(VerifyIsLiveCallback, this);
 }
 
-struct SweepCallbackContext {
-  MarkSweep* mark_sweep;
-  space::AllocSpace* space;
-  Thread* self;
-};
+//struct SweepCallbackContext {
+//  MarkSweep* mark_sweep;
+//  space::AllocSpace* space;
+//  Thread* self;
+//};
 
 class CheckpointMarkThreadRoots : public Closure {
  public:

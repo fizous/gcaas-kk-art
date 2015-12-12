@@ -2152,6 +2152,58 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
   MarkSweep::ProcessMarkStackParallel(thread_count);
 }
 
+
+void IPCMarkSweep::Sweep(bool swap_bitmaps) {
+  base::TimingLogger::ScopedSplit("Sweep", &timings_);
+
+  const bool partial = (GetGcType() == kGcTypePartial);
+  SweepCallbackContext scc;
+  scc.mark_sweep = this;
+  scc.self = Thread::Current();
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    // We always sweep always collect spaces.
+    bool sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect);
+    if (!partial && !sweep_space) {
+      // We sweep full collect spaces when the GC isn't a partial GC (ie its full).
+      sweep_space = (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyFullCollect);
+    }
+    if (sweep_space) {
+      uintptr_t begin = reinterpret_cast<uintptr_t>(space->Begin());
+      uintptr_t end = reinterpret_cast<uintptr_t>(space->End());
+      scc.space = space->AsDlMallocSpace();
+
+      accounting::SPACE_BITMAP* live_bitmap = space->GetLiveBitmap();
+      accounting::SPACE_BITMAP* mark_bitmap = space->GetMarkBitmap();
+
+      if (swap_bitmaps) {
+        std::swap(live_bitmap, mark_bitmap);
+      }
+      if (!space->IsZygoteSpace()) {
+        base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
+        // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
+
+        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                             &SweepCallback, reinterpret_cast<void*>(&scc));
+
+      } else {
+        base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
+        // Zygote sweep takes care of dirtying cards and clearing live bits, does not free actual
+        // memory.
+
+        accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+                                            &ZygoteSweepCallback, reinterpret_cast<void*>(&scc));
+
+
+      }
+    }
+  }
+  SweepLargeObjects(swap_bitmaps);
+}
+
+
+
+
+
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
     : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {

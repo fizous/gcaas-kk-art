@@ -198,6 +198,7 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
   void ClientVerifyObject(const mirror::Object* obj);
   virtual void FinishPhase();
   virtual void InitializePhase(void);
+  virtual void Sweep(bool swap_bitmaps) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Everything inside the immune range is assumed to be marked.
   void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
   virtual void MarkConcurrentRoots()

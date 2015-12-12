@@ -83,6 +83,16 @@ class Heap;
 
 namespace collector {
 
+
+struct SweepCallbackContext {
+  MarkSweep* mark_sweep;
+  space::AllocSpace* space;
+  Thread* self;
+};
+
+
+
+
 class MarkSweep : public GarbageCollector {
  public:
   explicit MarkSweep(Heap* heap, bool is_concurrent,
