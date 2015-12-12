@@ -190,7 +190,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
 
 
   void WaitForSweepPhase(Thread* self) {
-    LOG(ERROR) << " ++++ task waiting for the reachable phase ++++ " << self->GetTid();
+    LOG(ERROR) << " ++++ task waiting for the sweeping phase ++++ " << self->GetTid();
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       IPMutexLock interProcMu(self, *(server_instant_->phase_mu_));
@@ -243,6 +243,8 @@ class ServerMarkReachableTask : public WorkStealingTask {
     LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran mark reachables task @@@@@@@@@@@@@@@@@@@ "
         << self->GetTid();
     WaitForReachablePhaseAddress(self);
+    LOG(ERROR) << "@@@@@@@@@@@@@@@@ We ran Sweeping phase task @@@@@@@@@@@@@@@@@@@ "
+        << self->GetTid();
     WaitForSweepPhase(self);
     //ExecuteReachableMarking(self);
   }
