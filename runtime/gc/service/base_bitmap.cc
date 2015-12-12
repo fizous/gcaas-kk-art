@@ -4,10 +4,6 @@
  *  Created on: Sep 14, 2015
  *      Author: hussein
  */
-
-
-
-
 #include "base/logging.h"
 #include "dex_file-inl.h"
 #include "gc/accounting/heap_bitmap.h"
@@ -40,7 +36,8 @@ namespace accounting {
 
 void BaseBitmap::CopyFrom(BaseBitmap* source_bitmap) {
   DCHECK_EQ(Size(), source_bitmap->Size());
-  std::copy(source_bitmap->Begin(), source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
+  std::copy(source_bitmap->Begin(),
+      source_bitmap->Begin() + source_bitmap->Size() / kWordSize, Begin());
 }
 
 
@@ -129,8 +126,7 @@ static void WalkInstanceFields(BaseBitmap* visited,
 
 // For an unvisited object, visit it then all its children found via fields.
 static void WalkFieldsInOrder(BaseBitmap* visited,
-    BaseBitmap::Callback* callback, mirror::Object* obj,
-                      void* arg)
+    BaseBitmap::Callback* callback, mirror::Object* obj, void* arg)
     SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
   if (visited->Test(obj)) {
     return;
@@ -158,7 +154,8 @@ static void WalkFieldsInOrder(BaseBitmap* visited,
     }
   } else if (obj->IsObjectArray()) {
     // Walk elements of an object array
-    mirror::ObjectArray<mirror::Object>* obj_array = obj->AsObjectArray<mirror::Object>();
+    mirror::ObjectArray<mirror::Object>* obj_array =
+        obj->AsObjectArray<mirror::Object>();
     int32_t length = obj_array->GetLength();
     for (int32_t i = 0; i < length; i++) {
       mirror::Object* value = obj_array->Get(i);
@@ -169,8 +166,8 @@ static void WalkFieldsInOrder(BaseBitmap* visited,
   }
 }
 
-// Visits set bits with an in order traversal.  The callback is not permitted to change the bitmap
-// bits or max during the traversal.
+// Visits set bits with an in order traversal.  The callback is not permitted to
+// change the bitmap bits or max during the traversal.
 void BaseBitmap::InOrderWalk(BaseBitmap::Callback* callback, void* arg) {
   UniquePtr<BaseBitmap> visited(SpaceBitmap::Create("bitmap for in-order walk",
                                        reinterpret_cast<byte*>(HeapBegin()),
@@ -184,7 +181,8 @@ void BaseBitmap::InOrderWalk(BaseBitmap::Callback* callback, void* arg) {
       uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       while (w != 0) {
         const size_t shift = CLZ(w);
-        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj =
+            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         WalkFieldsInOrder(visited.get(), callback, obj, arg);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       }
@@ -207,7 +205,8 @@ void BaseBitmap::Walk(BaseBitmap::Callback* callback, void* arg) {
       uintptr_t ptr_base = IndexToOffset(i) + HeapBegin();
       do {
         const size_t shift = CLZ(w);
-        mirror::Object* obj = reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
+        mirror::Object* obj =
+            reinterpret_cast<mirror::Object*>(ptr_base + shift * kAlignment);
         (*callback)(obj, arg);
         w ^= static_cast<size_t>(kWordHighBitMask) >> shift;
       } while (w != 0);
@@ -241,8 +240,8 @@ void SharedSpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   if (new_size < Size()) {
     bitmap_data_->bitmap_size_ = new_size;
   }
-  // Not sure if doing this trim is necessary, since nothing past the end of the heap capacity
-  // should be marked.
+  // Not sure if doing this trim is necessary, since nothing past the end of
+  // the heap capacity should be marked.
 }
 
 std::string SharedSpaceBitmap::GetName() const {
@@ -299,7 +298,8 @@ void BaseBitmap::InitSrvcBitmap(accounting::GCSrvceBitmap **hb,
 BaseBitmap* BaseBitmap::Create(const std::string& name, byte* heap_begin,
     size_t heap_capacity, bool shareMem) {
   accounting::GCSrvceBitmap* _gcServiceBitmapP = NULL;
-  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  size_t bitmap_size =
+      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
   InitSrvcBitmap(&_gcServiceBitmapP, name, heap_begin, heap_capacity,
       bitmap_size, shareMem);
   return new SharedSpaceBitmap(_gcServiceBitmapP);
@@ -308,7 +308,8 @@ BaseBitmap* BaseBitmap::Create(const std::string& name, byte* heap_begin,
 BaseBitmap* BaseBitmap::CreateSharedSpaceBitmap(accounting::GCSrvceBitmap **hb,
     const std::string& name, byte* heap_begin, size_t heap_capacity,
     bool shareMem) {
-  size_t bitmap_size = OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
+  size_t bitmap_size =
+      OffsetToIndex(RoundUp(heap_capacity, kAlignment * kBitsPerWord)) * kWordSize;
   InitSrvcBitmap(hb, name, heap_begin, heap_capacity, bitmap_size, shareMem);
 
   return new SharedSpaceBitmap(*hb);

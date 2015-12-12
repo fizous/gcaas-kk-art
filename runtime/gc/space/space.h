@@ -276,6 +276,12 @@ typedef struct GCSrvcHeapSubRecord_S {
   // The ideal maximum free size, when we grow the heap for utilization.
   size_t max_free_;
 
+  // Number of bytes allocated.  Adjusted after each allocation and free.
+  volatile int32_t num_bytes_allocated_;
+
+  // Bytes which are allocated and managed by native code but still need to be accounted for.
+  volatile int32_t native_bytes_allocated_;
+
   // The last time a heap trim occurred.
   uint64_t last_trim_time_ms_;
 

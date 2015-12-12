@@ -368,10 +368,63 @@ class Heap {
 
   void AddFinalizerReference(Thread* self, mirror::Object* object);
 
+
+
+#if (true || ART_GC_SERVICE)
   // Returns the number of bytes currently allocated.
+  size_t GetBytesAllocated() const {
+    return sub_record_meta_->num_bytes_allocated_;
+  }
+
+  int32_t GetAtomicBytesAllocated() {
+    return android_atomic_release_load(&(sub_record_meta_->num_bytes_allocated_));
+  }
+
+  void IncAtomicBytesAllocated(int val) {
+    android_atomic_add(val, &(sub_record_meta_->num_bytes_allocated_));
+  }
+
+  void SetNumBytesAllocated(size_t val) {
+    sub_record_meta_->num_bytes_allocated_ = val;
+  }
+
+  // Returns the number of bytes currently allocated.
+  size_t GetNativeBytesAllocated() const {
+    return sub_record_meta_->native_bytes_allocated_;
+  }
+
+  int32_t GetAtomicNativeBytesAllocated() {
+    return android_atomic_release_load(&(sub_record_meta_->native_bytes_allocated_));
+  }
+
+  void SetNativeBytesAllocated(size_t val) {
+    sub_record_meta_->native_bytes_allocated_ = val;
+  }
+
+
+  void IncAtomicNativeBytesAllocated(int val) {
+    android_atomic_add(val, &(sub_record_meta_->native_bytes_allocated_));
+  }
+
+  bool CASAtomicNativeBytesAllocated(int32_t expected, int32_t new_val) {
+    return
+        android_atomic_cas(expected, new_val,
+            &(sub_record_meta_->native_bytes_allocated_)) == 0;
+  }
+
+#else
   size_t GetBytesAllocated() const {
     return num_bytes_allocated_;
   }
+
+  void SetNumBytesAllocated(size_t val) {
+    num_bytes_allocated_ = val;
+  }
+  void SetNativeBytesAllocated(size_t val) {
+    native_bytes_allocated_ = val;
+  }
+#endif
+
 
   // Returns the number of objects currently allocated.
   size_t GetObjectsAllocated() const;
@@ -421,7 +474,7 @@ class Heap {
 
   // Implements java.lang.Runtime.freeMemory.
   int64_t GetFreeMemory() const {
-    return GetTotalMemory() - num_bytes_allocated_;
+    return GetTotalMemory() - GetBytesAllocated();
   }
   size_t GetConcStartBytes(void) const;
 
@@ -753,13 +806,14 @@ class Heap {
 
   // Primitive objects larger than this size are put in the large object space.
   const size_t large_object_threshold_;
-
+#if (true || ART_GC_SERVICE)
+#else
   // Number of bytes allocated.  Adjusted after each allocation and free.
   AtomicInteger num_bytes_allocated_;
 
   // Bytes which are allocated and managed by native code but still need to be accounted for.
   AtomicInteger native_bytes_allocated_;
-
+#endif
   // Data structure GC overhead.
   AtomicInteger gc_memory_overhead_;
 

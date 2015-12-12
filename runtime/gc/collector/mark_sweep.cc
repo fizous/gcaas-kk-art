@@ -126,7 +126,7 @@ bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
   if (current_mark_bitmap_->HasAddress(object)) {
     return current_mark_bitmap_->Test(object);
   }
-  accounting::BaseHeapBitmap* heap_beetmap = ( accounting::BaseHeapBitmap*)_heap_beetmap;
+  accounting::BaseHeapBitmap* heap_beetmap = (accounting::BaseHeapBitmap*)_heap_beetmap;
   if(heap_beetmap != NULL)
     return heap_beetmap->TestNoLock(object);
   return false;
@@ -350,8 +350,8 @@ void MarkSweep::MarkThreadRoots(Thread* self) {
 }
 
 void MarkSweep::MarkReachableObjects() {
-  // Mark everything allocated since the last as GC live so that we can sweep concurrently,
-  // knowing that new allocations won't be marked as live.
+  // Mark everything allocated since the last as GC live so that we can sweep
+  // concurrently, knowing that new allocations won't be marked as live.
   timings_.StartSplit("MarkStackAsLive");
   accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
   space::LargeObjectSpace* _LOS = heap_->large_object_space_;
@@ -382,15 +382,17 @@ void MarkSweep::ReclaimPhase() {
     base::TimingLogger::ScopedSplit split("UnMarkAllocStack", &timings_);
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
     accounting::ATOMIC_OBJ_STACK_T* allocation_stack = GetHeap()->allocation_stack_.get();
-    // The allocation stack contains things allocated since the start of the GC. These may have been
-    // marked during this GC meaning they won't be eligible for reclaiming in the next sticky GC.
-    // Remove these objects from the mark bitmaps so that they will be eligible for sticky
-    // collection.
-    // There is a race here which is safely handled. Another thread such as the hprof could
-    // have flushed the alloc stack after we resumed the threads. This is safe however, since
-    // reseting the allocation stack zeros it out with madvise. This means that we will either
-    // read NULLs or attempt to unmark a newly allocated object which will not be marked in the
-    // first place.
+    // The allocation stack contains things allocated since the start of the GC.
+    // These may have been marked during this GC meaning they won't be eligible
+    // for reclaiming in the next sticky GC.
+    // Remove these objects from the mark bitmaps so that they will be eligible
+    // for sticky collection.
+    // There is a race here which is safely handled. Another thread such as the
+    // hprof could have flushed the alloc stack after we resumed the threads.
+    // This is safe however, since reseting the allocation stack zeros it out
+    // with madvise. This means that we will either read NULLs or attempt to
+    // unmark a newly allocated object which will not be marked in the first
+    // place.
     mirror::Object** end = allocation_stack->End();
     for (mirror::Object** it = allocation_stack->Begin(); it != end; ++it) {
       const Object* obj = *it;
@@ -1319,8 +1321,8 @@ void MarkSweep::VerifyIsLive(const Object* obj) {
   if (!heap->GetLiveBitmap()->Test(obj)) {
     space::LargeObjectSpace* large_object_space = GetHeap()->GetLargeObjectsSpace();
     if (large_object_space != NULL && !large_object_space->GetLiveObjects()->Test(obj)) {
-      if (std::find(heap->allocation_stack_->Begin(), heap->allocation_stack_->End(), obj) ==
-          heap->allocation_stack_->End()) {
+      if (std::find(heap->allocation_stack_->Begin(), heap->allocation_stack_->End(), obj)
+            == heap->allocation_stack_->End()) {
         // Object not found!
         heap->DumpSpaces();
         LOG(FATAL) << "Found dead object " << obj;
@@ -1368,8 +1370,8 @@ void MarkSweep::MarkRootsCheckpoint(Thread* self) {
   CheckpointMarkThreadRoots check_point(this);
   timings_.StartSplit("MarkRootsCheckpoint");
   ThreadList* thread_list = Runtime::Current()->GetThreadList();
-  // Request the check point is run on all threads returning a count of the threads that must
-  // run through the barrier including self.
+  // Request the check point is run on all threads returning a count of the
+  // threads that must run through the barrier including self.
   size_t barrier_count = thread_list->RunCheckpoint(&check_point);
   // Release locks then wait for all mutator threads to pass the barrier.
   // TODO: optimize to not release locks when there are no threads to wait for.
@@ -1415,7 +1417,8 @@ void MarkSweep::ZygoteSweepCallback(size_t num_ptrs, Object** ptrs, void* arg) {
   }
 }
 
-void MarkSweep::SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocations, bool swap_bitmaps) {
+void MarkSweep::SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocations,
+                                                            bool swap_bitmaps) {
   space::DLMALLOC_SPACE_T* space = heap_->GetAllocSpace();
   timings_.StartSplit("SweepArray");
   // Newly allocated objects MUST be in the alloc space and those are the only objects which we are
@@ -1585,7 +1588,8 @@ void MarkSweep::SweepLargeObjects(bool swap_bitmaps) {
   GetHeap()->RecordFree(freed_objects, freed_bytes);
 }
 
-void MarkSweep::CheckReference(const Object* obj, const Object* ref, MemberOffset offset, bool is_static) {
+void MarkSweep::CheckReference(const Object* obj, const Object* ref,
+                                          MemberOffset offset, bool is_static) {
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->IsDlMallocSpace() && space->Contains(ref)) {
       DCHECK(IsMarked(obj));
@@ -1594,7 +1598,8 @@ void MarkSweep::CheckReference(const Object* obj, const Object* ref, MemberOffse
       if (!is_marked) {
         LOG(INFO) << *space;
         LOG(WARNING) << (is_static ? "Static ref'" : "Instance ref'") << PrettyTypeOf(ref)
-                     << "' (" << reinterpret_cast<const void*>(ref) << ") in '" << PrettyTypeOf(obj)
+                     << "' (" << reinterpret_cast<const void*>(ref) << ") in '"
+                     << PrettyTypeOf(obj)
                      << "' (" << reinterpret_cast<const void*>(obj) << ") at offset "
                      << reinterpret_cast<void*>(offset.Int32Value()) << " wasn't marked";
 
@@ -1618,7 +1623,8 @@ void MarkSweep::CheckReference(const Object* obj, const Object* ref, MemberOffse
         bool obj_marked = heap_->GetCardTable()->IsDirty(obj);
         if (!obj_marked) {
           LOG(WARNING) << "Object '" << PrettyTypeOf(obj) << "' "
-                       << "(" << reinterpret_cast<const void*>(obj) << ") contains references to "
+                       << "(" << reinterpret_cast<const void*>(obj)
+                       << ") contains references to "
                        << "the alloc space, but wasn't card marked";
         }
       }

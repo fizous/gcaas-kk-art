@@ -126,9 +126,10 @@ void GarbageCollector::Run() {
 }
 
 void GarbageCollector::SwapBitmaps() {
-  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
-  // these bitmaps. The bitmap swapping is an optimization so that we do not need to clear the live
-  // bits of dead objects in the live bitmap.
+  // Swap the live and mark bitmaps for each alloc space. This is needed since
+  // sweep re-swaps these bitmaps. The bitmap swapping is an optimization so
+  // that we do not need to clear the live bits of dead objects in the live
+  // bitmap.
   const GcType gc_type = GetGcType();
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     // We never allocate into zygote spaces.

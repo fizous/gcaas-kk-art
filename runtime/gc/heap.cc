@@ -126,8 +126,11 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       total_objects_freed_ever_(0),
 #endif
       large_object_threshold_(GC_HEAP_LARGE_OBJECT_THRESHOLD),
+#if (true || ART_GC_SERVICE)
+#else
       num_bytes_allocated_(0),
       native_bytes_allocated_(0),
+#endif
       gc_memory_overhead_(0),
       verify_missing_card_marks_(false),
       verify_system_weaks_(false),
@@ -181,6 +184,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetTotalWaitTime(0);
   SetNextGCType(collector::kGcTypePartial);
   SetLastGCType(collector::kGcTypeNone);
+  SetNumBytesAllocated(0);
+  SetNativeBytesAllocated(0);
   SetMaxAllowedFootPrint(initial_size);
   SetNativeFootPrintGCWaterMark(initial_size);
   SetNativeFootPrintLimit(2 * initial_size);
@@ -269,7 +274,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   CHECK(zygote_mod_union_table_.get() != NULL) << "Failed to create Zygote mod-union table";
 
   // TODO: Count objects in the image space here.
-  num_bytes_allocated_ = 0;
+  SetNumBytesAllocated(0);
 
   // Default mark stack size in bytes.
   static const size_t default_mark_stack_size = 128 * KB/*64 * KB*/;
@@ -723,7 +728,7 @@ mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_co
     if (Dbg::IsAllocTrackingEnabled()) {
       Dbg::RecordAllocation(c, byte_count);
     }
-    if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_) >= GetConcStartBytes())) {
+    if (UNLIKELY(static_cast<size_t>(GetBytesAllocated()) >= GetConcStartBytes())) {
       // The SirtRef is necessary since the calls in RequestConcurrentGC are a safepoint.
       SirtRef<mirror::Object> ref(self, obj);
       RequestConcurrentGC(self);
@@ -904,7 +909,7 @@ void Heap::DumpSpaces() {
 void Heap::VerifyObjectBody(const mirror::Object* obj) {
   CHECK(IsAligned<kObjectAlignment>(obj)) << "Object isn't aligned: " << obj;
   // Ignore early dawn of the universe verifications.
-  if (UNLIKELY(static_cast<size_t>(num_bytes_allocated_.load()) < 10 * KB)) {
+  if (UNLIKELY(static_cast<size_t>(GetAtomicBytesAllocated()) < 10 * KB)) {
     return;
   }
   const byte* raw_addr = reinterpret_cast<const byte*>(obj) +
@@ -951,7 +956,7 @@ void Heap::VerifyHeap() {
 inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   DCHECK(obj != NULL);
   DCHECK_GT(size, 0u);
-  num_bytes_allocated_.fetch_add(size);
+  IncAtomicBytesAllocated(size);
 
   if (Runtime::Current()->HasStatsEnabled()) {
     RuntimeStats* thread_stats = Thread::Current()->GetStats();
@@ -977,8 +982,8 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
 }
 
 void Heap::RecordFree(size_t freed_objects, size_t freed_bytes) {
-  DCHECK_LE(freed_bytes, static_cast<size_t>(num_bytes_allocated_));
-  num_bytes_allocated_.fetch_sub(freed_bytes);
+  DCHECK_LE(freed_bytes, static_cast<size_t>(GetBytesAllocated()));
+  IncAtomicBytesAllocated(-freed_bytes);
 
   if (Runtime::Current()->HasStatsEnabled()) {
     RuntimeStats* thread_stats = Thread::Current()->GetStats();
@@ -993,7 +998,7 @@ void Heap::RecordFree(size_t freed_objects, size_t freed_bytes) {
 }
 
 inline bool Heap::IsOutOfMemoryOnAllocation(size_t alloc_size, bool grow) {
-  size_t new_footprint = num_bytes_allocated_ + alloc_size;
+  size_t new_footprint = GetBytesAllocated() + alloc_size;
   if (UNLIKELY(new_footprint > GetMaxAllowedFootPrint())) {
     if (UNLIKELY(new_footprint > GetGrowthLimit())) {
       return true;
@@ -2236,7 +2241,7 @@ void Heap::SetIdealFootprint(size_t max_allowed_footprint) {
 }
 
 void Heap::UpdateMaxNativeFootprint() {
-  size_t native_size = native_bytes_allocated_;
+  size_t native_size = GetNativeBytesAllocated();
   // TODO: Tune the native heap utilization to be a value other than the java heap utilization.
   size_t target_size = native_size / GetTargetHeapUtilization();
   if (target_size > native_size + GetMaxFree()) {
@@ -2658,12 +2663,12 @@ bool Heap::IsGCRequestPending() const {
 
 void Heap::RegisterNativeAllocation(int bytes) {
   // Total number of native bytes allocated.
-  native_bytes_allocated_.fetch_add(bytes);
+  IncAtomicNativeBytesAllocated(bytes);
   Thread* self = Thread::Current();
-  if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintGCWaterMark()) {
+  if (static_cast<size_t>(GetNativeBytesAllocated()) > GetNativeFootPrintGCWaterMark()) {
     // The second watermark is higher than the gc watermark. If you hit this it means you are
     // allocating native objects faster than the GC can keep up with.
-    if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintLimit()) {
+    if (static_cast<size_t>(GetNativeBytesAllocated()) > GetNativeFootPrintLimit()) {
         JNIEnv* env = self->GetJniEnv();
         // Can't do this in WellKnownClasses::Init since System is not properly set up at that
         // point.
@@ -2681,7 +2686,7 @@ void Heap::RegisterNativeAllocation(int bytes) {
         }
 
         // If we still are over the watermark, attempt a GC for alloc and run finalizers.
-        if (static_cast<size_t>(native_bytes_allocated_) > GetNativeFootPrintLimit()) {
+        if (static_cast<size_t>(GetNativeBytesAllocated()) > GetNativeFootPrintLimit()) {
         	mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
         	mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent();
           CollectGarbageInternal(collector::kGcTypePartial, kGcCauseForAlloc, false);
@@ -2705,14 +2710,14 @@ void Heap::RegisterNativeAllocation(int bytes) {
 void Heap::RegisterNativeFree(int bytes) {
   int expected_size, new_size;
   do {
-      expected_size = native_bytes_allocated_.load();
+      expected_size = GetAtomicNativeBytesAllocated();
       new_size = expected_size - bytes;
       if (new_size < 0) {
         ThrowRuntimeException("attempted to free %d native bytes with only %d native bytes registered as allocated",
                               bytes, expected_size);
         break;
       }
-  } while (!native_bytes_allocated_.compare_and_swap(expected_size, new_size));
+  } while (!CASAtomicNativeBytesAllocated(expected_size, new_size));
 }
 
 int64_t Heap::GetTotalMemory() const {
