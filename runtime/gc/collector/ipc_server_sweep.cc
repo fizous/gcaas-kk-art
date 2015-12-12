@@ -170,7 +170,16 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 
   GcType _collection_type =
       client_rec_->sharable_space_->heap_meta_.sub_record_meta_.next_gc_type_;
-  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type;
+  const bool partial = (_collection_type == kGcTypePartial);
+  //sweep allocation space first
+
+
+  uintptr_t begin =
+      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
+  uintptr_t end = reinterpret_cast<uintptr_t>(client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_);
+
+  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type <<
+      "; begin = " << begin << "; end = " end;
 
 }
 
