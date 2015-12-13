@@ -204,7 +204,7 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     bytes_freed += _lastFreedBytes;
   }
   space::GCSrvDlMallocSpace* _dlmalloc_space =
-      client_rec_->sharable_space_->dlmalloc_space_data_;
+      &(client_rec_->sharable_space_->dlmalloc_space_data_);
   if (space::kRecentFreeCount > 0) {
     for (size_t i = 0; i < num_ptrs; i++) {
       //RegisterRecentFree
