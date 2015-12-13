@@ -189,21 +189,21 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     mirror::Object** ptrs) {
   DCHECK(ptrs != NULL);
 
-//  // Don't need the lock to calculate the size of the freed pointers.
-//  size_t bytes_freed = 0;
-//  size_t _lastFreedBytes = 0;
-//  for (size_t i = 0; i < num_ptrs; i++) {
-//    mirror::Object* ptr = ptrs[i];
-//    const size_t look_ahead = 8;
-//    if (true && i + look_ahead < num_ptrs) {
-//      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
-//      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
-//    }
-//    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
-//    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
-//
-//    bytes_freed += _lastFreedBytes;
-//  }
+  // Don't need the lock to calculate the size of the freed pointers.
+  size_t bytes_freed = 0;
+  size_t _lastFreedBytes = 0;
+  for (size_t i = 0; i < num_ptrs; i++) {
+    mirror::Object* ptr = ptrs[i];
+    const size_t look_ahead = 8;
+    if (true && i + look_ahead < num_ptrs) {
+      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
+      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
+    }
+    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
+    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
+
+    bytes_freed += _lastFreedBytes;
+  }
 //  space::GCSrvDlMallocSpace* _dlmalloc_space =
 //      &(client_rec_->sharable_space_->dlmalloc_space_data_);
 //  if (space::kRecentFreeCount > 0) {
@@ -226,7 +226,7 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
 //    return bytes_freed;
 //  }
 
-  return 0;
+  return bytes_freed;
 }
 
 void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs,
