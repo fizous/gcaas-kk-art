@@ -189,42 +189,44 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     mirror::Object** ptrs) {
   DCHECK(ptrs != NULL);
 
-  // Don't need the lock to calculate the size of the freed pointers.
-  size_t bytes_freed = 0;
-  size_t _lastFreedBytes = 0;
-  for (size_t i = 0; i < num_ptrs; i++) {
-    mirror::Object* ptr = ptrs[i];
-    const size_t look_ahead = 8;
-    if (true && i + look_ahead < num_ptrs) {
-      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
-      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
-    }
-    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
-    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
+//  // Don't need the lock to calculate the size of the freed pointers.
+//  size_t bytes_freed = 0;
+//  size_t _lastFreedBytes = 0;
+//  for (size_t i = 0; i < num_ptrs; i++) {
+//    mirror::Object* ptr = ptrs[i];
+//    const size_t look_ahead = 8;
+//    if (true && i + look_ahead < num_ptrs) {
+//      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
+//      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
+//    }
+//    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
+//    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
+//
+//    bytes_freed += _lastFreedBytes;
+//  }
+//  space::GCSrvDlMallocSpace* _dlmalloc_space =
+//      &(client_rec_->sharable_space_->dlmalloc_space_data_);
+//  if (space::kRecentFreeCount > 0) {
+//    for (size_t i = 0; i < num_ptrs; i++) {
+//      //RegisterRecentFree
+//      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
+//      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
+//          const_cast<mirror::Class*>(GetMappedObjectKlass(ptrs[i]));
+//      _dlmalloc_space->recent_free_pos_ =
+//          (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
+//    }
+//  }
+//
+//
+//
+//  {
+//    _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
+//    _dlmalloc_space->num_objects_allocated_ -= num_ptrs;
+//    //mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
+//    return bytes_freed;
+//  }
 
-    bytes_freed += _lastFreedBytes;
-  }
-  space::GCSrvDlMallocSpace* _dlmalloc_space =
-      &(client_rec_->sharable_space_->dlmalloc_space_data_);
-  if (space::kRecentFreeCount > 0) {
-    for (size_t i = 0; i < num_ptrs; i++) {
-      //RegisterRecentFree
-      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
-      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
-          const_cast<mirror::Class*>(GetMappedObjectKlass(ptrs[i]));
-      _dlmalloc_space->recent_free_pos_ =
-          (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
-    }
-  }
-
-
-
-  {
-    _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
-    _dlmalloc_space->num_objects_allocated_ -= num_ptrs;
-    mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
-    return bytes_freed;
-  }
+  return 0;
 }
 
 void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs,
@@ -240,13 +242,13 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   size_t freed_bytes = _mark_sweeper->ServerFreeSpaceList(context->self_,
       num_ptrs, ptrs);
 
-  android_atomic_add(-freed_bytes,
-      &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
-
-  android_atomic_add(static_cast<int32_t>(freed_objects),
-      &(_mark_sweeper->cashed_stats_client_.freed_objects_));
-  android_atomic_add(static_cast<int32_t>(freed_bytes),
-      &(_mark_sweeper->cashed_stats_client_.freed_bytes_));
+//  android_atomic_add(-freed_bytes,
+//      &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
+//
+//  android_atomic_add(static_cast<int32_t>(freed_objects),
+//      &(_mark_sweeper->cashed_stats_client_.freed_objects_));
+//  android_atomic_add(static_cast<int32_t>(freed_bytes),
+//      &(_mark_sweeper->cashed_stats_client_.freed_bytes_));
 }
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
