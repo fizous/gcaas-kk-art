@@ -211,7 +211,7 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
       //RegisterRecentFree
       _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
       _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
-          const_cast<mirror::Object*>(GetMappedObjectKlass(ptrs[i]));
+          const_cast<mirror::Class*>(GetMappedObjectKlass(ptrs[i]));
       _dlmalloc_space->recent_free_pos_ =
           (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
     }
@@ -237,7 +237,8 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   // of allocation.
   size_t freed_objects = num_ptrs;
   // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
-  size_t freed_bytes = ServerFreeSpaceList(context->self_, num_ptrs, ptrs);
+  size_t freed_bytes = _mark_sweeper->ServerFreeSpaceList(context->self_,
+      num_ptrs, ptrs);
 
   android_atomic_add(-freed_bytes,
       &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
@@ -285,9 +286,9 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
           _server_sweep_context.mspace_);
       // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
 
-    accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_, begin, end,
-                                         &ServerSweepCallback,
-                                         reinterpret_cast<void*>(&ServerSweepCallbackContext));
+    accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_,
+                                        begin, end, &ServerSweepCallback,
+                           reinterpret_cast<void*>(&_server_sweep_context));
 
   }
 
