@@ -172,11 +172,18 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
 
 
 
-
+struct ServerSweepCallbackContext {
+  void* mspace;
+  space::GCSrvSharableDlMallocSpace* space_data_;
+  Thread* self;
+};
 
 
 void IPCServerMarkerSweep::SweepCallback(size_t num_ptrs, mirror::Object** ptrs,
     void* arg) {
+    SweepCallbackContext scc;
+    scc.mark_sweep = NULL;
+    scc.self = _self;
 //  SweepCallbackContext* context = static_cast<SweepCallbackContext*>(arg);
 //  MarkSweep* mark_sweep = context->mark_sweep;
 //  Heap* heap = mark_sweep->GetHeap();
@@ -200,7 +207,7 @@ void IPCServerMarkerSweep::SweepCallback(size_t num_ptrs, mirror::Object** ptrs,
 }
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
-  //Thread* _self = Thread::Current();
+  Thread* _self = Thread::Current();
   UpdateCurrentMarkBitmap();
   SetCachedReferencesPointers(&cashed_references_client_,
       &curr_collector_ptr_->cashed_references_);
@@ -224,17 +231,20 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
   LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
       << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
 
-  void* msp = create_mspace_with_base((void*)begin,
-      static_cast<size_t>(end - begin), false /*locked*/);
+  if(_collection_type != kGcTypeSticky) {
+    ServerSweepCallbackContext _server_sweep_context;
 
-  if(msp != NULL) {
-    LOG(ERROR) << " malloc_space created successfully";
-    // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
+    _server_sweep_context.mspace = create_mspace_with_base((void*)begin,
+        static_cast<size_t>(end - begin), false /*locked*/);
+    _server_sweep_context.self = _self;
+    _server_sweep_context.space_data_ = client_rec_->sharable_space_;
+
+    LOG(ERROR) << StringPrintf("malloc_space created successfully..%p",
+          _server_sweep_context.mspace);
+      // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
   }
 
-//  SweepCallbackContext scc;
-//  scc.mark_sweep = NULL;
-//  scc.self = _self;
+
 
 }
 
