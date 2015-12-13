@@ -181,9 +181,6 @@ struct ServerSweepCallbackContext {
 
 void IPCServerMarkerSweep::SweepCallback(size_t num_ptrs, mirror::Object** ptrs,
     void* arg) {
-    SweepCallbackContext scc;
-    scc.mark_sweep = NULL;
-    scc.self = _self;
 //  SweepCallbackContext* context = static_cast<SweepCallbackContext*>(arg);
 //  MarkSweep* mark_sweep = context->mark_sweep;
 //  Heap* heap = mark_sweep->GetHeap();
