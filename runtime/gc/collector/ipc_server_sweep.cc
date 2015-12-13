@@ -178,29 +178,72 @@ struct ServerSweepCallbackContext {
   Thread* self;
 };
 
+size_t ServerAllocationSizeNonvirtual(const mirror::Object* obj) {
+  return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj))) +
+      kWordSize;
+}
 
-void IPCServerMarkerSweep::SweepCallback(size_t num_ptrs, mirror::Object** ptrs,
+
+size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
+    mirror::Object** ptrs) {
+  DCHECK(ptrs != NULL);
+
+  // Don't need the lock to calculate the size of the freed pointers.
+  size_t bytes_freed = 0;
+  size_t _lastFreedBytes = 0;
+  for (size_t i = 0; i < num_ptrs; i++) {
+    mirror::Object* ptr = ptrs[i];
+    const size_t look_ahead = 8;
+    if (true && i + look_ahead < num_ptrs) {
+      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
+      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
+    }
+    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
+    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
+
+    bytes_freed += _lastFreedBytes;
+  }
+  space::GCSrvDlMallocSpace* _dlmalloc_space =
+      client_rec_->sharable_space_->dlmalloc_space_data_;
+  if (space::kRecentFreeCount > 0) {
+    for (size_t i = 0; i < num_ptrs; i++) {
+      //RegisterRecentFree
+      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
+      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
+          GetMappedObjectKlass(ptrs[i]);
+      _dlmalloc_space->recent_free_pos_ =
+          (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
+    }
+  }
+
+
+
+  {
+    _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
+    _dlmalloc_space->num_objects_allocated_ -= num_ptrs;
+    mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
+    return bytes_freed;
+  }
+}
+
+void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs,
     void* arg) {
-//  SweepCallbackContext* context = static_cast<SweepCallbackContext*>(arg);
-//  MarkSweep* mark_sweep = context->mark_sweep;
-//  Heap* heap = mark_sweep->GetHeap();
-//  space::AllocSpace* space = context->space;
-//  Thread* self = context->self;
-//  Locks::heap_bitmap_lock_->AssertExclusiveHeld(self);
-//  // Use a bulk free, that merges consecutive objects before freeing or free per object?
-//  // Documentation suggests better free performance with merging, but this may be at the expensive
-//  // of allocation.
-//  size_t freed_objects = num_ptrs;
-//  // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
-//  size_t freed_bytes = space->FreeList(self, num_ptrs, ptrs);
-//
-//  android_atomic_add(-freed_bytes,
-//      &(client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
-//
-//  android_atomic_add(static_cast<int32_t>(freed_objects),
-//      &(cashed_stats_client_.freed_objects_));
-//  android_atomic_add(static_cast<int32_t>(freed_bytes),
-//      &(cashed_stats_client_.freed_bytes_));
+  ServerSweepCallbackContext* context = static_cast<ServerSweepCallbackContext*>(arg);
+
+  // Use a bulk free, that merges consecutive objects before freeing or free per object?
+  // Documentation suggests better free performance with merging, but this may be at the expensive
+  // of allocation.
+  size_t freed_objects = num_ptrs;
+  // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
+  size_t freed_bytes = ServerFreeSpaceList(context->self, num_ptrs, ptrs);
+
+  android_atomic_add(-freed_bytes,
+      &(client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
+
+  android_atomic_add(static_cast<int32_t>(freed_objects),
+      &(cashed_stats_client_.freed_objects_));
+  android_atomic_add(static_cast<int32_t>(freed_bytes),
+      &(cashed_stats_client_.freed_bytes_));
 }
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
@@ -231,15 +274,18 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
   if(_collection_type != kGcTypeSticky) {
     ServerSweepCallbackContext _server_sweep_context;
 
-    _server_sweep_context.mspace = create_mspace_with_base((void*)
-        (spaces_[KGCSpaceServerAllocInd_].client_base_),
-        static_cast<size_t>(end - begin), false /*locked*/);
+    _server_sweep_context.mspace = (void*)spaces_[KGCSpaceServerAllocInd_].base_;
     _server_sweep_context.self = _self;
     _server_sweep_context.space_data_ = client_rec_->sharable_space_;
 
     LOG(ERROR) << StringPrintf("malloc_space created successfully..%p",
           _server_sweep_context.mspace);
       // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
+
+    accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_, begin, end,
+                                         &ServerSweepCallback,
+                                         reinterpret_cast<void*>(&ServerSweepCallbackContext));
+
   }
 
 

@@ -141,7 +141,9 @@ class IPCServerMarkerSweep {
   //void ExternalScanObjectVisit(mirror::Object* obj, void* calculated_offset);
   void MarkReachableObjects(space::GCSrvSharableCollectorData* collector_addr);
   void SweepSpaces(space::GCSrvSharableCollectorData* collector_addr);
-  void SweepCallback(size_t num_ptrs, mirror::Object** ptrs, void* arg);
+  size_t ServerFreeSpaceList(Thread* self, size_t num_ptrs,
+      mirror::Object** ptrs);
+  void ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs, void* arg);
   template <class referenceKlass>
   uint32_t MapReferenceToValueClient(const referenceKlass* mapped_reference) const;
   template <class referenceKlass>
