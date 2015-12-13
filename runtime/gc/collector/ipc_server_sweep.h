@@ -143,7 +143,7 @@ class IPCServerMarkerSweep {
   void SweepSpaces(space::GCSrvSharableCollectorData* collector_addr);
   size_t ServerFreeSpaceList(Thread* self, size_t num_ptrs,
       mirror::Object** ptrs);
-  void ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs, void* arg);
+  static void ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs, void* arg);
   template <class referenceKlass>
   uint32_t MapReferenceToValueClient(const referenceKlass* mapped_reference) const;
   template <class referenceKlass>
