@@ -231,7 +231,8 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
   if(_collection_type != kGcTypeSticky) {
     ServerSweepCallbackContext _server_sweep_context;
 
-    _server_sweep_context.mspace = create_mspace_with_base((void*)begin,
+    _server_sweep_context.mspace = create_mspace_with_base((void*)
+        (spaces_[KGCSpaceServerAllocInd_].client_base_),
         static_cast<size_t>(end - begin), false /*locked*/);
     _server_sweep_context.self = _self;
     _server_sweep_context.space_data_ = client_rec_->sharable_space_;
