@@ -237,10 +237,13 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   // Use a bulk free, that merges consecutive objects before freeing or free per object?
   // Documentation suggests better free performance with merging, but this may be at the expensive
   // of allocation.
-  size_t freed_objects = num_ptrs;
+  //size_t freed_objects = num_ptrs;
   // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
   size_t freed_bytes = _mark_sweeper->ServerFreeSpaceList(context->self_,
       num_ptrs, ptrs);
+  if(freed_bytes != 0) {
+
+  }
 
 //  android_atomic_add(-freed_bytes,
 //      &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
