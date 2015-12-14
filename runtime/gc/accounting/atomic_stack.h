@@ -214,6 +214,11 @@ class StructuredAtomicStack {
     DCHECK_LT(static_cast<size_t>(index), stack_data_->capacity_);
     //stack_data_->back_index_ = index + 1;
 
+    if(index >= stack_data_->capacity_) {
+      LOG(FATAL) << "ERROR in pushing back " << index << "; capacity = " <<
+          stack_data_->capacity_;
+    }
+
     android_atomic_add(1, &(stack_data_->back_index_));
     SetEntryIndex(index, value);
   }
