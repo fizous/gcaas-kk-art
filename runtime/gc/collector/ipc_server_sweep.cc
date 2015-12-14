@@ -222,14 +222,16 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
   }
 
 
-  {
-    _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
-    _dlmalloc_space->num_objects_allocated_ -= num_ptrs;
+ // {
+    android_atomic_add(-bytes_freed,
+        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
+    android_atomic_add(-num_ptrs,
+        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
    // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
-  }
-
-  return bytes_freed;
+//  }
+//
+//  return bytes_freed;
 }
 
 void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object** ptrs,
