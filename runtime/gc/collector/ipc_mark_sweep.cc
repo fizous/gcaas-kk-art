@@ -2187,8 +2187,6 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
           // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
           mirror::Object** objects_array = mark_stack_->GetBaseAddress();
           size_t num_ptrs = mark_stack_->Size();
-          mirror::Object** objects_array = mark_stack_->GetBaseAddress();
-          size_t num_ptrs = mark_stack_->Size();
 
           mspace_bulk_free(
               (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
