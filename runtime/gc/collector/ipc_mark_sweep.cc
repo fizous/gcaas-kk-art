@@ -2189,9 +2189,13 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
           size_t num_ptrs = mark_stack_->Size();
 
           LOG(ERROR) << "==== mark stack size for bulk free is ==== " << num_ptrs;
-          mspace_bulk_free(
-              (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
-              reinterpret_cast<void**>(objects_array), num_ptrs);
+
+          space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
+
+
+//          mspace_bulk_free(
+//              (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
+//              reinterpret_cast<void**>(objects_array), num_ptrs);
 
 
           mark_stack_->Reset();

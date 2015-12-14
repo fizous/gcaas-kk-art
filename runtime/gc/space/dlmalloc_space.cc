@@ -653,6 +653,13 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   return bytes_freed;
 }
 
+
+size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){
+  MutexLock mu(self, *getMu());
+  mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
+  return 0;
+}
+
 size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs) {
   DCHECK(ptrs != NULL);
 

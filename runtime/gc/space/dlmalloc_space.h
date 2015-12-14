@@ -113,6 +113,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   virtual size_t AllocationSize(const mirror::Object* obj);
   virtual size_t Free(Thread* self, mirror::Object* ptr);
   virtual size_t FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs);
+  virtual size_t FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){return 0;}
 
   mirror::Object* AllocNonvirtual(Thread* self, size_t num_bytes, size_t* bytes_allocated);
 
