@@ -597,6 +597,8 @@ void IPCServerMarkerSweep::UpdateStatsRecord(space::GCSrvceCashedStatsCounters* 
     android_atomic_add(src->other_count_, &dest->other_count_);
     android_atomic_add(src->reference_count_, &dest->reference_count_);
     android_atomic_add(src->cards_scanned_, &dest->cards_scanned_);
+    android_atomic_add(src->freed_objects_, &dest->freed_objects_);
+    android_atomic_add(src->freed_bytes_, &dest->freed_objects_);
   } else {
     memcpy(dest, src, sizeof(space::GCSrvceCashedStatsCounters));
   }
