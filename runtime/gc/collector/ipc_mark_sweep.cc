@@ -2228,8 +2228,28 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
           base::TimingLogger::ScopedSplit split("SweepAllocSpace", &timings_);
           // Bitmaps are pre-swapped for optimization which enables sweeping with the heap unlocked.
 
-          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+
+          mirror::Object** objects_array = mark_stack_->GetBaseAddress();
+          size_t num_ptrs = mark_stack_->Size();
+
+          mspace_bulk_free(
+              (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
+              reinterpret_cast<void**>(objects_array), num_ptrs);
+
+
+          mark_stack_->Reset();
+
+//          for (;;) {
+//            if (mark_stack_->IsEmpty()) {
+//              break;
+//            }
+//            popped_oject = mark_stack_->PopBack();
+//            //ScanObject(popped_oject);
+//            RawScanObjectVisit(popped_oject);
+//          }
+//          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+//                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+
 
         } else {
           base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);

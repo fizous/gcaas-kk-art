@@ -217,9 +217,9 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
           (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
     }
   }
-//  for (size_t i = 0; i < num_ptrs; i++) {
-//    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
-//  }
+  for (size_t i = 0; i < num_ptrs; i++) {
+    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
+  }
 
 
   {
@@ -302,6 +302,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
     accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_,
                            begin, end, &ServerSweepCallback,
                            reinterpret_cast<void*>(&_server_sweep_context));
+    mark_stack_->Sort();
 
   }
 
