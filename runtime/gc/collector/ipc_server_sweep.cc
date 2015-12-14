@@ -107,6 +107,7 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
                                   client_rec_->pair_mapps_->second->mem_maps_[0].begin_))),
         curr_collector_ptr_(NULL),
         current_mark_bitmap_(NULL),
+        current_live_bitmap_(NULL),
         mark_stack_(NULL),
   ref_referent_off_client_(heap_meta_->reference_offsets_.reference_referent_offset_),
   ref_queue_off_client_(heap_meta_->reference_offsets_.reference_queue_offset_),
