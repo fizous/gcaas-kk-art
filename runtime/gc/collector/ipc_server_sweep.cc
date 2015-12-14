@@ -263,6 +263,7 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
 }
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
+
   Thread* _self = Thread::Current();
   UpdateCurrentMarkBitmap();
   SetCachedReferencesPointers(&cashed_references_client_,
@@ -274,22 +275,25 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
   //sweep allocation space first
 
 
-  uintptr_t begin =
-      reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
 
-  byte* end_address =
-      client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_;
-  const mirror::Object* _obj_end = reinterpret_cast<mirror::Object*>(end_address);
-  uintptr_t end =
-      reinterpret_cast<uintptr_t>(MapReferenceToServer<mirror::Object>(_obj_end));
-
-
-  LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
-      << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
 
 
   if(_collection_type != kGcTypeSticky) {
+    uintptr_t begin =
+        reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].base_);
+
+    byte* end_address =
+        client_rec_->sharable_space_->dlmalloc_space_data_.cont_space_data_.end_;
+    const mirror::Object* _obj_end = reinterpret_cast<mirror::Object*>(end_address);
+    uintptr_t end =
+        reinterpret_cast<uintptr_t>(MapReferenceToServer<mirror::Object>(_obj_end));
+
+
+    LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
+        << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
+
     mark_stack_->Reset();
+    ResetStats();
     ServerSweepCallbackContext _server_sweep_context;
 
     _server_sweep_context.server_mark_Sweep_ = this;
@@ -305,6 +309,9 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
                            begin, end, &ServerSweepCallback,
                            reinterpret_cast<void*>(&_server_sweep_context));
     mark_stack_->Sort();
+
+    UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_, true);
+
     LOG(ERROR) << "=== mark stack size on server size is ===  " << mark_stack_->Size();
 
   }
