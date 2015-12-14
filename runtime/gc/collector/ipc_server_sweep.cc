@@ -303,6 +303,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
                            begin, end, &ServerSweepCallback,
                            reinterpret_cast<void*>(&_server_sweep_context));
     mark_stack_->Sort();
+    LOG(ERROR) << "=== mark stack size on server size is ===  " << mark_stack_->Size();
 
   }
 
