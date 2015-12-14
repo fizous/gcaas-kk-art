@@ -221,7 +221,7 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
   {
     _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
     _dlmalloc_space->num_objects_allocated_ -= num_ptrs;
-    mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
+   // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
   }
 
