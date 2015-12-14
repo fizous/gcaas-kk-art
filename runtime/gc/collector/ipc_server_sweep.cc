@@ -217,6 +217,10 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
           (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
     }
   }
+//  for (size_t i = 0; i < num_ptrs; i++) {
+//    mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
+//  }
+
 
   {
     _dlmalloc_space->num_bytes_allocated_ -= bytes_freed;
@@ -281,7 +285,9 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
   LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
       << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
 
+
   if(_collection_type != kGcTypeSticky) {
+    mark_stack_->Reset();
     ServerSweepCallbackContext _server_sweep_context;
 
     _server_sweep_context.server_mark_Sweep_ = this;
@@ -294,7 +300,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
       // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
 
     accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_,
-                                        begin, end, &ServerSweepCallback,
+                           begin, end, &ServerSweepCallback,
                            reinterpret_cast<void*>(&_server_sweep_context));
 
   }
