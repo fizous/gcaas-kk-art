@@ -205,18 +205,18 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
 
     bytes_freed += _lastFreedBytes;
   }
-//  space::GCSrvDlMallocSpace* _dlmalloc_space =
-//      &(client_rec_->sharable_space_->dlmalloc_space_data_);
-//  if (space::kRecentFreeCount > 0) {
-//    for (size_t i = 0; i < num_ptrs; i++) {
+  space::GCSrvDlMallocSpace* _dlmalloc_space =
+      &(client_rec_->sharable_space_->dlmalloc_space_data_);
+  if (space::kRecentFreeCount > 0) {
+    for (size_t i = 0; i < num_ptrs; i++) {
 //      //RegisterRecentFree
-//      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
-//      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
-//          const_cast<mirror::Class*>(GetMappedObjectKlass(ptrs[i]));
-//      _dlmalloc_space->recent_free_pos_ =
-//          (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
-//    }
-//  }
+      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].first = ptrs[i];
+      _dlmalloc_space->recent_freed_objects_[_dlmalloc_space->recent_free_pos_].second =
+          const_cast<mirror::Class*>(GetMappedObjectKlass(ptrs[i]));
+      _dlmalloc_space->recent_free_pos_ =
+          (_dlmalloc_space->recent_free_pos_ + 1) & space::kRecentFreeMask;
+    }
+  }
 //
 //
 //
