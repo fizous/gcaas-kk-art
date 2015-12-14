@@ -245,7 +245,8 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   if(freed_bytes != 0) {
 
   }
-  LOG(ERROR) << "ServerSweepCallback..objects: " << freed_objects;
+  LOG(ERROR) << "ServerSweepCallback..objects: " << freed_objects <<
+      ", freed_bytes = " << freed_bytes;
 
 //  android_atomic_add(-freed_bytes,
 //      &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
