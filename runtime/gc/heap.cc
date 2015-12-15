@@ -277,7 +277,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetNumBytesAllocated(0);
 
   // Default mark stack size in bytes.
-  static const size_t default_mark_stack_size = 128 * KB/*64 * KB*/;
+  static const size_t default_mark_stack_size = /*128 * KB*/ 64 * KB;
   mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("mark stack", default_mark_stack_size,
       false && (!Runtime::Current()->IsCompiler()) && (true || ART_GC_SERVICE)));
   allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("allocation stack",
@@ -1431,7 +1431,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
         }
 
 
-        static const size_t default_mark_stack_size = 128 * KB;
+        static const size_t default_mark_stack_size = 256 * KB;
         mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(mark_stack_.release(),
             &(_struct_alloc_space->heap_meta_.mark_stack_data_), true,
             default_mark_stack_size));
