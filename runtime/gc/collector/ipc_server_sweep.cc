@@ -221,14 +221,15 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
   }
 
+  android_atomic_add(-bytes_freed,
+      reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
+  android_atomic_add(-num_ptrs,
+      reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
+ // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
+  return bytes_freed;
 
  // {
-    android_atomic_add(-bytes_freed,
-        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
-    android_atomic_add(-num_ptrs,
-        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
-   // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
-    return bytes_freed;
+
 //  }
 //
 //  return bytes_freed;
@@ -246,9 +247,7 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
   size_t freed_bytes = _mark_sweeper->ServerFreeSpaceList(context->self_,
       num_ptrs, ptrs);
-  if(freed_bytes != 0) {
 
-  }
 //  LOG(ERROR) << "ServerSweepCallback..objects: " << freed_objects <<
 //      ", freed_bytes = " << freed_bytes << "; space::kRecentFreeCount = " <<
 //      space::kRecentFreeCount;
@@ -256,10 +255,16 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   android_atomic_add(-freed_bytes,
       &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
 
-  android_atomic_add(static_cast<int32_t>(freed_objects),
-      &(_mark_sweeper->cashed_stats_client_.freed_objects_));
-  android_atomic_add(static_cast<int32_t>(freed_bytes),
-      &(_mark_sweeper->cashed_stats_client_.freed_bytes_));
+
+  cashed_stats_client_.freed_objects_ +=  freed_objects;
+  cashed_stats_client_.freed_bytes_ += freed_bytes;
+
+
+
+//  android_atomic_add(static_cast<int32_t>(freed_objects),
+//      &(cashed_stats_client_.freed_objects_));
+//  android_atomic_add(static_cast<int32_t>(freed_bytes),
+//      &(cashed_stats_client_.freed_bytes_));
 }
 
 void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collector_addr) {
@@ -310,9 +315,14 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
                            reinterpret_cast<void*>(&_server_sweep_context));
     mark_stack_->Sort();
 
-    UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_, true);
+    UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_,
+        true);
 
-    LOG(ERROR) << "=== mark stack size on server size is ===  " << mark_stack_->Size();
+    LOG(ERROR) << "=== mark stack size on server size is ===  " <<
+        mark_stack_->Size() <<   ",  freed_objects_ = " <<
+        cashed_stats_client_.freed_objects_ << ", freed_bytes_ = " <<
+        cashed_stats_client_.freed_bytes_;
+
 
   }
 
