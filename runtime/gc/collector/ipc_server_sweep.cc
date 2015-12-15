@@ -766,15 +766,16 @@ void IPCServerMarkerSweep::SetMarkHolders(space::GCSrvSharableCollectorData* col
 bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* collector_addr) {
 
   SetMarkHolders(collector_addr);
+  curr_collector_ptr_ = collector_addr;
+
+
+  UpdateCurrentMarkBitmap();
 
   if(mark_stack_->IsEmpty())
     return false;
 
 
-  curr_collector_ptr_ = collector_addr;
 
-
-  UpdateCurrentMarkBitmap();
 
 
 //  if(all_bitmaps_.empty()) {
@@ -820,10 +821,6 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 //
 //
 //  }
-
-
-
-
 
   ResetStats();
 
