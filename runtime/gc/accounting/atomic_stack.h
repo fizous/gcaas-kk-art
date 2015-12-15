@@ -192,7 +192,12 @@ class StructuredAtomicStack {
 //            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
 //        LOG(ERROR) << ", calcEnd:" << reinterpret_cast<void*>(mem_map_->End());
       }
-      memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
+      //memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
+      int result = madvise(GetBaseAddress(),
+          _mem_length, MADV_DONTNEED);
+      if (result == -1) {
+        PLOG(WARNING) << "madvise failed in Atomic Stack shared here";
+      }
     } else {
 //      LOG(ERROR) << ".......Resetting Non Shared atomic stack.......";
       int result = madvise(GetBaseAddress(),
@@ -540,7 +545,12 @@ class ServerStructuredAtomicStack : public StructuredObjectStack {
 //            _mem_length << ", end:" <<
 //            reinterpret_cast<void*>((reinterpret_cast<byte*>(GetBaseAddress()) + _mem_length));
 
-      memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
+      int result = madvise(GetBaseAddress(),
+          _mem_length, MADV_DONTNEED);
+      if (result == -1) {
+        PLOG(WARNING) << "madvise failed in Atomic Stack";
+      }
+     // memset(reinterpret_cast<void*>(GetBaseAddress()), 0, _mem_length);
     } else {
       PLOG(ERROR) << "shared atomic stack has to be shared failed";
     }
