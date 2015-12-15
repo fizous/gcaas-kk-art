@@ -333,7 +333,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 
 void IPCServerMarkerSweep::MarkReachableObjects(
                             space::GCSrvSharableCollectorData* collector_addr) {
-  Thread* _self = Thread::Current();
+//  Thread* _self = Thread::Current();
 
 
   if(InitMarkingPhase(collector_addr)) {
