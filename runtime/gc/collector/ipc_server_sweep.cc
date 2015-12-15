@@ -256,8 +256,8 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
       &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
 
 
-  cashed_stats_client_.freed_objects_ +=  freed_objects;
-  cashed_stats_client_.freed_bytes_ += freed_bytes;
+  _mark_sweeper->cashed_stats_client_.freed_objects_ +=  freed_objects;
+  _mark_sweeper->cashed_stats_client_.freed_bytes_ += freed_bytes;
 
 
 
