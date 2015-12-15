@@ -160,7 +160,7 @@ class CheckReferenceVisitor {
                 << "(" << PrettyTypeOf(ref) << ") without being in mod-union table";
       LOG(INFO) << "FromSpace " << from_space->GetName() << " type " << from_space->GetGcRetentionPolicy();
       LOG(INFO) << "ToSpace " << to_space->GetName() << " type " << to_space->GetGcRetentionPolicy();
-      mod_union_table_->GetHeap()->DumpSpaces();
+      //mod_union_table_->GetHeap()->DumpSpaces();
       LOG(FATAL) << "FATAL ERROR";
     }
   }
@@ -304,7 +304,7 @@ void ModUnionTableCardCache::MarkReferences(collector::MarkSweep* mark_sweep) {
     auto start = reinterpret_cast<uintptr_t>(card_table->AddrFromCard(card_addr));
     auto end = start + ConstantsCardTable::kCardSize;
     auto obj_start = reinterpret_cast<Object*>(start);
-    if(false&& mark_sweep->IsInterprocess()) {
+    if(false && mark_sweep->IsInterprocess()) {
       LOG(ERROR) << "------ModUnionTableCardCache::MarkReferences---" <<
           reinterpret_cast<void*>(obj_start);
     }

@@ -1392,8 +1392,8 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   // of the remaining available heap memory.
   if(shared_space) {
 
-    LOG(ERROR) << "...........VERIFY BEFORE RESHARING................";
-    DumpSpaces();
+//    LOG(ERROR) << "...........VERIFY BEFORE RESHARING................";
+//    DumpSpaces();
 
     int _space_index = 0;
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
@@ -1406,20 +1406,20 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
     if(false  /*!GetCardTable()->shareCardTable(&_struct_alloc_space->card_table_data_)*/) {
       LOG(ERROR) << "Error in sharing the Card table";
     } else {
-      LOG(ERROR) << "Success in sharing the Card table";
+    //  LOG(ERROR) << "Success in sharing the Card table";
       {
-        LOG(ERROR) << "Locking heapbitmap lock";
+     //   LOG(ERROR) << "Locking heapbitmap lock";
 
         WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
-        LOG(ERROR) << "Resharing live_heap_bitmap_data_";
+       // LOG(ERROR) << "Resharing live_heap_bitmap_data_";
         live_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(live_bitmap_.release()),
                                   &_struct_alloc_space->heap_meta_.live_heap_bitmap_data_));
-        LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
+        //LOG(ERROR) << "Resharing mark_heap_bitmap_data_";
         mark_bitmap_.reset(accounting::BaseHeapBitmap::ReShareHeapBitmap(/*this,*/
             reinterpret_cast<accounting::SharedHeapBitmap*>(mark_bitmap_.release()),
                                   &_struct_alloc_space->heap_meta_.mark_heap_bitmap_data_));
-        LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
+      // LOG(ERROR) << "Done Resharing mark_heap_bitmap_data_";
         if(false) {
           allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::ShareStack(allocation_stack_.release(),
               &(_struct_alloc_space->heap_meta_.alloc_stack_data_), true,
@@ -1709,8 +1709,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
 void Heap::UpdateAndMarkModUnion(collector::MarkSweep* mark_sweep, base::TimingLogger& timings,
                                  collector::GcType gc_type) {
 
-  LOG(ERROR) << " ##### Heap::UpdateAndMarkModUnion:: gctype = " << gc_type
-      << "; IPC= " << (mark_sweep->IsInterprocess() ? "true" : "false");
+//  LOG(ERROR) << " ##### Heap::UpdateAndMarkModUnion:: gctype = " << gc_type
+//      << "; IPC= " << (mark_sweep->IsInterprocess() ? "true" : "false");
   if (gc_type == collector::kGcTypeSticky) {
     // Don't need to do anything for mod union table in this case since we are only scanning dirty
     // cards.
