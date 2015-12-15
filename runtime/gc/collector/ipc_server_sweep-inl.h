@@ -188,7 +188,7 @@ const referenceKlass* IPCServerMarkerSweep::MapReferenceToServer(
     }
   }
 
-  LOG(ERROR) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
+  //LOG(ERROR) << "..... MapReferenceToServer: ERROR001.." << ref_parm;
   return ref_parm;
 }
 

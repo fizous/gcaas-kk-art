@@ -155,16 +155,16 @@ IPCServerMarkerSweep::IPCServerMarkerSweep(
   memset(&cashed_references_client_, 0, sizeof(space::GCSrvceCashedReferences));
 
   //cashed_references_client_.java_lang_Class_ = client_record->java_lang_Class_cached_;
-  LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
-      ", java_lang_class = ";//; << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);
-  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    LOG(ERROR) << StringPrintf("...space[%d]  --> client-start=%p, client-end=%p", i,
-        spaces_[i].client_base_, spaces_[i].client_end_);
-  }
-  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
-    LOG(ERROR) << StringPrintf("...space[%d]  --> server-start=%p, server-end=%p", i,
-        spaces_[i].base_, spaces_[i].base_end_);
-  }
+ // LOG(ERROR) << "Initialized the IPC_SERVER_SWEEP with Offset:" << offset_ <<
+ //     ", java_lang_class = ";//; << reinterpret_cast<void*>(cashed_references_client_.java_lang_Class_);
+//  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//    LOG(ERROR) << StringPrintf("...space[%d]  --> client-start=%p, client-end=%p", i,
+//        spaces_[i].client_base_, spaces_[i].client_end_);
+//  }
+//  for(int i = KGCSpaceServerImageInd_; i <= KGCSpaceServerAllocInd_; i++) {
+//    LOG(ERROR) << StringPrintf("...space[%d]  --> server-start=%p, server-end=%p", i,
+//        spaces_[i].base_, spaces_[i].base_end_);
+//  }
 }
 
 
@@ -294,8 +294,8 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
         reinterpret_cast<uintptr_t>(MapReferenceToServer<mirror::Object>(_obj_end));
 
 
-    LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
-        << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
+//    LOG(ERROR) << " ===== IPCServerMarkerSweep::SweepSpaces " << _collection_type
+//        << StringPrintf("; begin = 0x%08x, end = 0x%08x, %s", begin, end, partial? "true" : "false");
 
     mark_stack_->Reset();
     ResetStats();
@@ -306,8 +306,8 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
     _server_sweep_context.self_ = _self;
     _server_sweep_context.space_data_ = client_rec_->sharable_space_;
 
-    LOG(ERROR) << StringPrintf("malloc_space created successfully..%p",
-          _server_sweep_context.mspace_);
+//    LOG(ERROR) << StringPrintf("malloc_space created successfully..%p",
+//          _server_sweep_context.mspace_);
       // mspace_bulk_free(msp, reinterpret_cast<void**>(ptrs), num_ptrs);
 
     accounting::SPACE_BITMAP::SweepWalk(*current_live_bitmap_, *current_mark_bitmap_,
@@ -318,10 +318,10 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
     UpdateStatsRecord(&curr_collector_ptr_->cashed_stats_, &cashed_stats_client_,
         true);
 
-    LOG(ERROR) << "=== mark stack size on server size is ===  " <<
-        mark_stack_->Size() <<   ",  freed_objects_ = " <<
-        cashed_stats_client_.freed_objects_ << ", freed_bytes_ = " <<
-        cashed_stats_client_.freed_bytes_;
+//    LOG(ERROR) << "=== mark stack size on server size is ===  " <<
+//        mark_stack_->Size() <<   ",  freed_objects_ = " <<
+//        cashed_stats_client_.freed_objects_ << ", freed_bytes_ = " <<
+//        cashed_stats_client_.freed_bytes_;
 
 
   }
@@ -337,9 +337,9 @@ void IPCServerMarkerSweep::MarkReachableObjects(
 
 
   if(InitMarkingPhase(collector_addr)) {
-    LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
-        << _self->GetTid() << "; address " <<
-        reinterpret_cast<void*>(collector_addr);
+//    LOG(ERROR) << " ++++ IPCServerMarkerSweep::MarkReachableObjects: "
+//        << _self->GetTid() << "; address " <<
+//        reinterpret_cast<void*>(collector_addr);
     ProcessMarckStack();
   }
 
@@ -522,10 +522,10 @@ static bool ExternalScanObjectVisitRemoval(mirror::Object* obj,
 
 
 void IPCServerMarkerSweep::ProcessMarckStack() {
-  LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
-  LOG(ERROR) << "IPCServerMarkerSweep::ProcessMarckStack....size:" << mark_stack_->Size();
+  //LOG(ERROR) << "%%%%%%%%%%%%%%%%%%%%%%%";
+  //LOG(ERROR) << "IPCServerMarkerSweep::ProcessMarckStack....size:" << mark_stack_->Size();
   if(mark_stack_->IsEmpty()) {
-    LOG(ERROR) << "+++++++++++++++++++++++";
+    //LOG(ERROR) << "+++++++++++++++++++++++";
     return;
   }
 //  static const size_t kFifoSize = 4;
@@ -538,7 +538,7 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
 //          reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_base_),
 //              reinterpret_cast<uintptr_t>(spaces_[KGCSpaceServerAllocInd_].client_end_));
   uint32_t calculated_offset = offset_ / (sizeof(mirror::Object*));
-  LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
+  //LOG(ERROR) << "Calculated offset..." <<  calculated_offset;
 
 
   const mirror::Object* popped_oject = NULL;
@@ -564,19 +564,19 @@ void IPCServerMarkerSweep::ProcessMarckStack() {
   UpdateClientCachedReferences(&curr_collector_ptr_->cashed_references_,
       &cashed_references_client_);
 
-  LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
-      cashed_stats_client_.array_count_ <<
-      ", class_count = " << cashed_stats_client_.class_count_ <<
-      ", other_count = " << cashed_stats_client_.other_count_ <<
-      ", reference_count = " << cashed_stats_client_.reference_count_ <<
-      ", success_bitmaps = " << passed_bitmap_tests_ <<
-      "\n isRefClassCnt = " << is_reference_class_cnt_<<
-      "\n pushed_back_to_stack = " << pushed_back_to_stack_ <<
-      "\n marked_bitmap_cnt: " <<
-      StringPrintf("[%d] : %d \n[%d] : %d\n[%d] : %d",
-          KGCSpaceServerImageInd_, marked_spaces_count_prof_[KGCSpaceServerImageInd_],
-          KGCSpaceServerZygoteInd_, marked_spaces_count_prof_[KGCSpaceServerZygoteInd_],
-          KGCSpaceServerAllocInd_, marked_spaces_count_prof_[KGCSpaceServerAllocInd_]);
+//  LOG(ERROR) << "+++++++++++++++++++++++ array_count = " <<
+//      cashed_stats_client_.array_count_ <<
+//      ", class_count = " << cashed_stats_client_.class_count_ <<
+//      ", other_count = " << cashed_stats_client_.other_count_ <<
+//      ", reference_count = " << cashed_stats_client_.reference_count_ <<
+//      ", success_bitmaps = " << passed_bitmap_tests_ <<
+//      "\n isRefClassCnt = " << is_reference_class_cnt_<<
+//      "\n pushed_back_to_stack = " << pushed_back_to_stack_ <<
+//      "\n marked_bitmap_cnt: " <<
+//      StringPrintf("[%d] : %d \n[%d] : %d\n[%d] : %d",
+//          KGCSpaceServerImageInd_, marked_spaces_count_prof_[KGCSpaceServerImageInd_],
+//          KGCSpaceServerZygoteInd_, marked_spaces_count_prof_[KGCSpaceServerZygoteInd_],
+//          KGCSpaceServerAllocInd_, marked_spaces_count_prof_[KGCSpaceServerAllocInd_]);
 
 
 
@@ -681,7 +681,7 @@ void IPCServerMarkerSweep::SetCachedReferencesPointers(
           MapReferenceToServerChecks<mirror::Class>(src->java_lang_Class_));
 
 
-  LOG(ERROR) << "!!!!! JavaLangClass = " << dest->java_lang_Class_;
+//  LOG(ERROR) << "!!!!! JavaLangClass = " << dest->java_lang_Class_;
 
 }
 
@@ -714,21 +714,21 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
   }
 
   current_live_bitmap_ = live_bitmaps_[live_bitmaps_.size()-1];
-
-  LOG(ERROR) << " ####### marks_size = " << mark_bitmaps_.size() <<
-      " lives_size = " <<  live_bitmaps_.size() << " ####### ";
-  for (const auto& beetmap : live_bitmaps_) {
-    LOG(ERROR) << " live: " << beetmap->bitmap_data_ << ", " <<
-        beetmap->bitmap_data_->name_;
-  }
-  for (const auto& beetmap : mark_bitmaps_) {
-    LOG(ERROR) << " mark: " << beetmap->bitmap_data_ << ", " <<
-        beetmap->bitmap_data_->name_;
-  }
-  LOG(ERROR) << " current_mark_bitmap_: " << current_mark_bitmap_->bitmap_data_ <<
-      ", " << current_mark_bitmap_->bitmap_data_->name_ <<
-      "\n current_live_bitmap_: " << current_live_bitmap_->bitmap_data_ <<
-      ", " << current_live_bitmap_->bitmap_data_->name_;
+//
+//  LOG(ERROR) << " ####### marks_size = " << mark_bitmaps_.size() <<
+//      " lives_size = " <<  live_bitmaps_.size() << " ####### ";
+//  for (const auto& beetmap : live_bitmaps_) {
+//    LOG(ERROR) << " live: " << beetmap->bitmap_data_ << ", " <<
+//        beetmap->bitmap_data_->name_;
+//  }
+//  for (const auto& beetmap : mark_bitmaps_) {
+//    LOG(ERROR) << " mark: " << beetmap->bitmap_data_ << ", " <<
+//        beetmap->bitmap_data_->name_;
+//  }
+//  LOG(ERROR) << " current_mark_bitmap_: " << current_mark_bitmap_->bitmap_data_ <<
+//      ", " << current_mark_bitmap_->bitmap_data_->name_ <<
+//      "\n current_live_bitmap_: " << current_live_bitmap_->bitmap_data_ <<
+//      ", " << current_live_bitmap_->bitmap_data_->name_;
 
 
 }
@@ -826,7 +826,7 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
   ResetStats();
 
-  LOG(ERROR) << "-------------------------RESTARTING-------------------------";
+//  LOG(ERROR) << "-------------------------RESTARTING-------------------------";
 
   SetCachedReferencesPointers(&cashed_references_client_,
       &curr_collector_ptr_->cashed_references_);
@@ -834,7 +834,7 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
 
 
-  LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
+//  LOG(ERROR) << "----------------------DONE RESTARTING-----------------------";
   return true;
 }
 
