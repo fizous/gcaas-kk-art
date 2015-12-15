@@ -275,7 +275,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 //      &curr_collector_ptr_->cashed_references_);
 
   GcType _collection_type = static_cast<GcType>(curr_collector_ptr_->gc_type_);
-      client_rec_->sharable_space_->heap_meta_.sub_record_meta_.next_gc_type_;
+//      client_rec_->sharable_space_->heap_meta_.sub_record_meta_.next_gc_type_;
   const bool partial = (_collection_type == kGcTypePartial);
   //sweep allocation space first
 
