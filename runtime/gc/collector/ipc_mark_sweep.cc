@@ -1854,10 +1854,10 @@ void IPCMarkSweep::InitializePhase(void) {
     ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
-void IPCMarkSweep::ApplyTrimming(void) {
-  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
-  ipc_heap_->CheckTrimming();
-}
+//void IPCMarkSweep::ApplyTrimming(void) {
+//  IPC_MARKSWEEP_VLOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
+//  ipc_heap_->CheckTrimming();
+//}
 
 void IPCMarkSweep::FinishPhase(void) {
  Thread* currThread = Thread::Current();
