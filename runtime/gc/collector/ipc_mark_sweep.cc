@@ -2190,7 +2190,7 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
           mirror::Object** objects_array = mark_stack_->GetBaseAddress();
           size_t num_ptrs = mark_stack_->Size();
 
-          LOG(ERROR) << "==== mark stack size for bulk free is ==== " << num_ptrs;
+          //LOG(ERROR) << "==== mark stack size for bulk free is ==== " << num_ptrs;
 
           space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
 
