@@ -271,10 +271,10 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
 
   Thread* _self = Thread::Current();
   UpdateCurrentMarkBitmap();
-  SetCachedReferencesPointers(&cashed_references_client_,
-      &curr_collector_ptr_->cashed_references_);
+//  SetCachedReferencesPointers(&cashed_references_client_,
+//      &curr_collector_ptr_->cashed_references_);
 
-  GcType _collection_type =
+  GcType _collection_type = static_cast<GcType>(curr_collector_ptr_->gc_type_);
       client_rec_->sharable_space_->heap_meta_.sub_record_meta_.next_gc_type_;
   const bool partial = (_collection_type == kGcTypePartial);
   //sweep allocation space first
@@ -734,10 +734,12 @@ void IPCServerMarkerSweep::UpdateCurrentMarkBitmap(void) {
 }
 
 void IPCServerMarkerSweep::SetMarkHolders(space::GCSrvSharableCollectorData* collector_addr) {
+
+  space::GCSrvSharableDlMallocSpace* _shspace = client_rec_->sharable_space_;
   if(mark_stack_ == NULL) {
     mark_stack_ = GetMappedMarkStack(client_rec_->pair_mapps_,
         KGCSpaceServerMarkStackInd_,
-      &(client_rec_->sharable_space_->heap_meta_.mark_stack_data_));
+      &(_shspace->heap_meta_.mark_stack_data_));
   }
 
   if(all_bitmaps_.empty()) {
@@ -753,11 +755,11 @@ void IPCServerMarkerSweep::SetMarkHolders(space::GCSrvSharableCollectorData* col
     all_bitmaps_.push_back(_temp_beetmap);
 
     _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
-        KGCSpaceServerMarkBitmapInd_, &(client_rec_->sharable_space_->mark_bitmap_));
+        KGCSpaceServerMarkBitmapInd_, &(_shspace->mark_bitmap_));
     all_bitmaps_.push_back(_temp_beetmap);
 
     _temp_beetmap = GetMappedBitmap(client_rec_->pair_mapps_,
-        KGCSpaceServerLiveBitmapInd_, &(client_rec_->sharable_space_->live_bitmap_));
+        KGCSpaceServerLiveBitmapInd_, &(_shspace->live_bitmap_));
     all_bitmaps_.push_back(_temp_beetmap);
   }
 }

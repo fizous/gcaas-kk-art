@@ -226,7 +226,7 @@ typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
   GCSrvceCashedStatsCounters cashed_stats_;
   volatile IPC_GC_PHASE_ENUM gc_phase_;
-
+  volatile int gc_type_;
   accounting::GCSrvceBitmap* volatile current_mark_bitmap_;
 
   int is_concurrent_;
