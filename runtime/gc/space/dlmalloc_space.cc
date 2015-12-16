@@ -907,10 +907,10 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
   return NULL;
 }
 
-template<typename T, size_t N>
-T * endArr(T (&ra)[N]) {
-    return ra + N;
-}
+//template<typename T, size_t N>
+//T * endArr(T (&ra)[N]) {
+//    return ra + N;
+//}
 SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
     MEM_MAP* mem_map, void* mspace,  byte* begin, byte* end,
     size_t growth_limit, bool shareMem,
@@ -932,7 +932,7 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
             &sharable_space_data_->ip_lock_.cond_var_);
   }
-  app_list_(ProfiledBenchmarks, endArr(ProfiledBenchmarks));
+  app_list_(ProfiledBenchmarks, std::end(ProfiledBenchmarks));
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
