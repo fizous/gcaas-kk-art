@@ -1689,7 +1689,9 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
         }
     }
   }
-
+  LOG(INFO) << gc_cause << " " << collector->GetName()
+            << " GC freed "  <<  collector->GetFreedObjects() << "("
+            << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, ";
   {
       MutexLock mu(self, *gc_complete_lock_);
       mprofiler::VMProfiler::MProfMarkPostCollection();

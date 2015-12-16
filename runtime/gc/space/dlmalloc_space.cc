@@ -910,7 +910,7 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
 const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
     "com.aurorasoftworks.quadrant.ui.professional",
     "purdue.dacapo",
-    "com.android.browser",
+    //"com.android.browser",
     "com.pandora.android",
     "purdue.specjvm98"
 };
