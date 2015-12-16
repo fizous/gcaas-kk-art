@@ -2632,10 +2632,14 @@ void Heap::RequestHeapTrim() {
 
   // Trim only if we do not currently care about pause times.
   if (!care_about_pause_times_) {
-    #if (true || ART_GC_SERVICE)
+
+   LOG(ERROR) << "--------- Request Heap::Trim() -------------";
+   if(false){
+     #if (true || ART_GC_SERVICE)
+
       art::gcservice::GCServiceClient::RequestHeapTrim();
     #endif
-
+   }
     JNIEnv* env = self->GetJniEnv();
     DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
     DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
@@ -2646,9 +2650,11 @@ void Heap::RequestHeapTrim() {
 }
 
 size_t Heap::Trim() {
-	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
+	LOG(ERROR) << "--------- Heap::Trim() -------------";
+  mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();
+
   mprofiler::VMProfiler::MProfMarkEndTrimHWEvent();
   return _trimmed;
 }
