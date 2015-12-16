@@ -184,7 +184,7 @@ static void VMRuntime_trimHeap(JNIEnv*, jobject) {
 
   uint64_t end_ns = NanoTime();
 
-  LOG(INFO) << "Heap trim of managed (duration=" << PrettyDuration(gc_heap_end_ns - start_ns)
+  LOG(ERROR) << "Heap trim of managed (duration=" << PrettyDuration(gc_heap_end_ns - start_ns)
       << ", advised=" << PrettySize(managed_reclaimed) << ") and native (duration="
       << PrettyDuration(end_ns - gc_heap_end_ns) << ", advised=" << PrettySize(native_reclaimed)
       << ") heaps. Managed heap utilization of " << static_cast<int>(100 * managed_utilization)

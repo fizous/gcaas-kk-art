@@ -2629,11 +2629,11 @@ void Heap::RequestHeapTrim() {
 
   SetLastTimeTrim(ms_time);
   ListenForProcessStateChange();
-
+  LOG(ERROR) << "--------- Request Heap::Trim() ; care about pause time-------------";
   // Trim only if we do not currently care about pause times.
   if (!care_about_pause_times_) {
 
-   LOG(ERROR) << "--------- Request Heap::Trim() -------------";
+   LOG(ERROR) << "--------- Request Heap::Trim() ; no care about pause time-------------";
    if(false){
      #if (true || ART_GC_SERVICE)
 
