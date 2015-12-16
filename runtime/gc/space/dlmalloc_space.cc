@@ -935,7 +935,7 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
             &sharable_space_data_->ip_lock_.cond_var_);
   }
-  for(int i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
+  for(size_t i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
     app_list_.push_back(std::string(ProfiledBenchmarks[i]));
   }
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
