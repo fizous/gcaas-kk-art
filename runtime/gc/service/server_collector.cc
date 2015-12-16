@@ -304,9 +304,9 @@ class ServerIPCListenerTask : public WorkStealingTask {
           if(*collector_index_ != -1) {
             SetCurrentCollector(self);
             server_instant_->heap_data_->conc_flag_ = 3;
-            LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~"
-                << self->GetTid() << "; conc_flag = "
-                << server_instant_->heap_data_->conc_flag_;
+//            LOG(ERROR) << "~~~~~~~~~~~~~~~ WaitForCollector is leaving ~~~~~~~"
+//                << self->GetTid() << "; conc_flag = "
+//                << server_instant_->heap_data_->conc_flag_;
             server_instant_->conc_req_cond_->Broadcast(self);
             break;
           }
