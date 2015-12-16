@@ -929,6 +929,7 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
             &sharable_space_data_->ip_lock_.cond_var_);
   }
+  app_list_(ProfiledBenchmarks, end(ProfiledBenchmarks));
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
@@ -996,31 +997,44 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 
 }
 
+
+const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
+    "com.aurorasoftworks.quadrant.ui.professional",
+    "purdue.dacapo",
+    "com.android.browser",
+};
+
 bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
-
-  if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
-      (strcmp(se_name_c_str, "purdue.dacapo") == 0)
-      ||(strcmp(se_name_c_str, "com.pandora.android") == 0))) {
-    LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
-    android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
-//    if(false){
-//      AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
-//          "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
-//          true);
-//      if(_local_pointer != NULL) {
-//        LOG(ERROR) << "++++++++++++Success Registering " << se_name_c_str << "++++++++++++";
-//        unsigned int* _addr = reinterpret_cast<unsigned int*>(_local_pointer->begin_);
-//        *_addr = 0xdeadcafe;
-//        return true;
-//      }
-//      LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
-//    }
-    return true;
-  } else {
-    LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
-        se_name_c_str << ")";
+  for (size_t i = 0; i < app_list_.size(); i++) {
+    if (strcmp(se_name_c_str, app_list_[i].c_str()) == 0) {
+      LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
+      android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
+      return true;
+    }
   }
-
+//  if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
+//      (strcmp(se_name_c_str, "purdue.dacapo") == 0)
+//      ||(strcmp(se_name_c_str, "com.pandora.android") == 0))) {
+//    LOG(ERROR) << "++++++++++++Registering Quadrant++++++++++++";
+//    android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
+////    if(false){
+////      AShmemMap* _local_pointer = MemBaseMap::CreateAShmemMap(&(sharable_space_data_->test_memory_),
+////          "test_memory", NULL, 4096, PROT_READ | PROT_WRITE,
+////          true);
+////      if(_local_pointer != NULL) {
+////        LOG(ERROR) << "++++++++++++Success Registering " << se_name_c_str << "++++++++++++";
+////        unsigned int* _addr = reinterpret_cast<unsigned int*>(_local_pointer->begin_);
+////        *_addr = 0xdeadcafe;
+////        return true;
+////      }
+////      LOG(ERROR) << "TestMemory could not be created (" << se_name_c_str << ")";
+////    }
+//    return true;
+//  } else {
+//
+//  }
+  LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
+      se_name_c_str << ")";
   return false;
 }
 

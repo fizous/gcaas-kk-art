@@ -325,6 +325,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
 class SharableDlMallocSpace : public DlMallocSpace {
  public:
+  static const char* ProfiledBenchmarks[];
   static GCSrvSharableDlMallocSpace* AllocateDataMemory();
 
   SharableDlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
@@ -367,7 +368,7 @@ class SharableDlMallocSpace : public DlMallocSpace {
   GCSrvSharableDlMallocSpace* sharable_space_data_;
   GCSrvDlMallocSpace* dlmalloc_space_data_;
   volatile int bound_mark_bitmaps_;
-
+  std::vector<std::string> app_list_;
 };//class SharableDlMallocSpace
 
 
