@@ -130,13 +130,13 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap
   }
   continuous_space_bitmaps_.push_back(bitmap);
   if(bitmap->IsStructuredBitmap()) {
-    LOG(ERROR) << "header is allocated? " << (header_ != NULL);
+//    LOG(ERROR) << "header is allocated? " << (header_ != NULL);
     if(header_ != NULL) {
-      LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " <<
-          header_->index_;
+//      LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: Index: " <<
+//          header_->index_;
     } else {
-      LOG(FATAL) << "SharedHeapBitmap::AddContinuousSpaceBitmap..._header is not "
-          "allocated";
+//      LOG(FATAL) << "SharedHeapBitmap::AddContinuousSpaceBitmap..._header is not "
+//          "allocated";
     }
 
     MaxHeapBitmapIndex = (MaxHeapBitmapIndex < header_->index_) ?
@@ -154,8 +154,8 @@ void SharedHeapBitmap::AddContinuousSpaceBitmap(accounting::SPACE_BITMAP* bitmap
 
 
 
-  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop "
-      << header_->index_ << ", max bitmap index = " << MaxHeapBitmapIndex;
+//  LOG(ERROR) << "SharedHeapBitmap::AddContinuousSpaceBitmap: We passed the loop "
+//      << header_->index_ << ", max bitmap index = " << MaxHeapBitmapIndex;
 
 //  DCHECK(bitmap != NULL);
 //  // Check for interval overlap.

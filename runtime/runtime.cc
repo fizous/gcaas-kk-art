@@ -951,7 +951,7 @@ void Runtime::StartDaemonThreads() {
   VLOG(startup) << "Runtime::StartDaemonThreads entering";
 
   Thread* self = Thread::Current();
-  GCMMP_VLOG(INFO) << "GCMMP: Creating the GC Daemons after we Did a fork From Zygote";
+ // GCMMP_VLOG(INFO) << "GCMMP: Creating the GC Daemons after we Did a fork From Zygote";
   // Must be in the kNative state for calling native methods.
   CHECK_EQ(self->GetState(), kNative);
 
