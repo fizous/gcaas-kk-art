@@ -1783,8 +1783,7 @@ IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     MarkSweep(ipcHeap->local_heap_, is_concurrent,
         &meta_data_->cashed_references_,
         &meta_data_->cashed_stats_,
-
-        name_prefix + (name_prefix.empty() ? "" : " ") + "ipcMS") {
+        name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypeFull;
 //  time_stats_ = &meta_data_->time_stats_;
   IPC_MARKSWEEP_VLOG(ERROR) << "############ Initializing IPC: " << GetName() <<
@@ -2274,7 +2273,7 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
-    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
+    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypePartial;
   cumulative_timings_.SetName(GetName());
 }
@@ -2300,7 +2299,7 @@ void IPCPartialMarkSweep::BindBitmaps() {
 IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix)
     : IPCPartialMarkSweep(ipcHeap, is_concurrent,
-                       name_prefix + (name_prefix.empty() ? "" : " ") + "sticky") {
+                       name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypeSticky;
   cumulative_timings_.SetName(GetName());
 }

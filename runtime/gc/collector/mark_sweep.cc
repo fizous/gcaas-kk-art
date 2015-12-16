@@ -198,7 +198,7 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
     const std::string& name_prefix) :
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
-               (is_concurrent ? "concurrent mark sweep": "mark sweep"),
+               (is_concurrent ? "Conc": "nonConc"),
                &stats_record->total_stats_),
       stats_counters_(stats_record),
       current_mark_bitmap_(NULL),

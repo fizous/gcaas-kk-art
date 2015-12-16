@@ -2555,7 +2555,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
     return;
   } else {
     /**/
-    LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
+   // LOG(ERROR) << "Skipping request ConcGC without handshaking the GCService";
 //    JNIEnv* env = self->GetJniEnv();
 //    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
 //    DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);

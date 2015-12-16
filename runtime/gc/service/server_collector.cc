@@ -404,7 +404,7 @@ void ServerCollector::ExecuteGC(int gc_type) {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 
-    LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
+ //   LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
     heap_data_->conc_flag_ = 1;
     heap_data_->gc_type_ = gc_type;
     conc_req_cond_->Broadcast(self);
@@ -428,7 +428,7 @@ void ServerCollector::ExecuteGC(int gc_type) {
 
 
 void ServerCollector::Run(void) {
-  LOG(ERROR) << "ServerCollector::Run";
+ // LOG(ERROR) << "ServerCollector::Run";
 
   /* initialize gc_workers_pool_ */
  // Thread* self = Thread::Current();
@@ -436,11 +436,11 @@ void ServerCollector::Run(void) {
 
   int _gc_type = 0;
   while(true) {
-    LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
+   // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
     _gc_type = WaitForRequest();
     ExecuteGC(_gc_type);
 
-    LOG(ERROR) << "---------------workers are done ------";
+   // LOG(ERROR) << "---------------workers are done ------";
     //WaitForGCTask();
   }
 }
@@ -467,7 +467,7 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 //    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
 //    return NULL;
 //  }
-  LOG(ERROR) << "ServerCollector::RunCollectorDaemon after broadcast" ;
+ // LOG(ERROR) << "ServerCollector::RunCollectorDaemon after broadcast" ;
 
   _server->Run();
 
