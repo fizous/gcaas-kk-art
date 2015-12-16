@@ -911,6 +911,8 @@ const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
     "com.aurorasoftworks.quadrant.ui.professional",
     "purdue.dacapo",
     "com.android.browser",
+    "com.pandora.android",
+    "purdue.specjvm98"
 };
 
 SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
