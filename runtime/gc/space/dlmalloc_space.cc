@@ -923,6 +923,7 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         , dlmalloc_space_data_(&(sharable_space_data_->dlmalloc_space_data_))
         , bound_mark_bitmaps_(0){
 
+
   sharable_space_data_->register_gc_ = 0;
 
   if(false) {
@@ -934,7 +935,9 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
             &sharable_space_data_->ip_lock_.cond_var_);
   }
-  app_list_(ProfiledBenchmarks, ProfiledBenchmarks +  NELEM(ProfiledBenchmarks));
+  for(int i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
+    app_list_.push_back(std::string(ProfiledBenchmarks[i]));
+  }
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
