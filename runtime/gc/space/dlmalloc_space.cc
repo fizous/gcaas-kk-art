@@ -907,10 +907,12 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
   return NULL;
 }
 
-//template<typename T, size_t N>
-//T * endArr(T (&ra)[N]) {
-//    return ra + N;
-//}
+const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
+    "com.aurorasoftworks.quadrant.ui.professional",
+    "purdue.dacapo",
+    "com.android.browser",
+};
+
 SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
     MEM_MAP* mem_map, void* mspace,  byte* begin, byte* end,
     size_t growth_limit, bool shareMem,
@@ -1004,11 +1006,7 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 }
 
 
-const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
-    "com.aurorasoftworks.quadrant.ui.professional",
-    "purdue.dacapo",
-    "com.android.browser",
-};
+
 
 bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   for (size_t i = 0; i < app_list_.size(); i++) {
