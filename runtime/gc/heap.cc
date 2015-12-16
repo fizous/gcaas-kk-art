@@ -327,12 +327,12 @@ void Heap::CreateThreadPool() {
   if (num_threads != 0) {
     thread_pool_.reset(new ThreadPool(num_threads));
   }
-  byte* zygote_space_begin =  alloc_space_->Begin();
-  byte* zygote_space_end =  alloc_space_->End();
-//  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
-//      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
-  byte* image_space_begin =  GetImageSpace()->Begin();
-  byte* image_space_end =  GetImageSpace()->End();
+//  byte* zygote_space_begin =  alloc_space_->Begin();
+//  byte* zygote_space_end =  alloc_space_->End();
+////  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
+////      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
+//  byte* image_space_begin =  GetImageSpace()->Begin();
+//  byte* image_space_end =  GetImageSpace()->End();
 
 
 //  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: "
