@@ -136,7 +136,7 @@ size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
     bool shareMem) {
   if(shareMem) {
-    LOG(ERROR) << "Skipped Creating Bitmaps DlMallocSpace";
+    //LOG(ERROR) << "Skipped Creating Bitmaps DlMallocSpace";
     return true;
   }
 
@@ -159,8 +159,8 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
        dlmalloc_space_data_->bitmap_index_;
 
 
-   LOG(ERROR) << "Inside DlMallocSpace::CreateBitmaps .." << GetName() << " index: " <<
-       dlmalloc_space_data_->bitmap_index_;
+//   LOG(ERROR) << "Inside DlMallocSpace::CreateBitmaps .." << GetName() << " index: " <<
+//       dlmalloc_space_data_->bitmap_index_;
    return _result;
 }
 
@@ -261,17 +261,17 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
   growth_limit = RoundUp(growth_limit, kPageSize);
   capacity = RoundUp(capacity, kPageSize);
 
-  LOG(ERROR) << "CREATING ZYGOTE SPACE ...... Runtime::Current()->IsZygote(): "
-      << Runtime::Current()->IsZygote();
+//  LOG(ERROR) << "CREATING ZYGOTE SPACE ...... Runtime::Current()->IsZygote(): "
+//      << Runtime::Current()->IsZygote();
   UniquePtr<MEM_MAP> mem_map(
       (Runtime::Current()->IsZygote() ?
           MEM_MAP::CreateStructedMemMap(name.c_str(), requested_begin, capacity,
                     PROT_READ | PROT_WRITE, shareMem) :
           MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
                     PROT_READ | PROT_WRITE, shareMem)));
-  if(Runtime::Current()->IsZygote()) {
-    LOG(ERROR) << "RuntimeIsZygote...with FD = " << mem_map->GetFD();
-  }
+//  if(Runtime::Current()->IsZygote()) {
+//    LOG(ERROR) << "RuntimeIsZygote...with FD = " << mem_map->GetFD();
+//  }
   if (mem_map.get() == NULL) {
     LOG(ERROR) << "Failed to allocate pages for alloc space (" << name << ") of size "
         << PrettySize(capacity);

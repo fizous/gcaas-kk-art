@@ -566,7 +566,7 @@ class ContinuousSpace : public Space {
   GCSrvceContinuousSpace* cont_space_data_;
 
   static GCSrvceContinuousSpace* AllocateContSpaceMemory() {
-    LOG(ERROR) << "Allocating Memory GCSrvceContinuousSpace";
+//    LOG(ERROR) << "Allocating Memory GCSrvceContinuousSpace";
     return reinterpret_cast<GCSrvceContinuousSpace*>(calloc(1,
         SERVICE_ALLOC_ALIGN_BYTE(GCSrvceContinuousSpace)));
   }

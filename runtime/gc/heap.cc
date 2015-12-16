@@ -190,12 +190,12 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   SetNativeFootPrintGCWaterMark(initial_size);
   SetNativeFootPrintLimit(2 * initial_size);
 
-  LOG(ERROR) << "the runtime is a compiler ? " <<
-      Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
+//  LOG(ERROR) << "the runtime is a compiler ? " <<
+//      Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote()) {
-    LOG(ERROR) << "Zygote Process: We will initialize the Global Allocator now";
+    //LOG(ERROR) << "Zygote Process: We will initialize the Global Allocator now";
     gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
-    LOG(ERROR) << "Zygote: Done initializing with global allocator";
+   // LOG(ERROR) << "Zygote: Done initializing with global allocator";
   }
   if(Runtime::Current()->IsCompiler()) {
     live_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
@@ -217,7 +217,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (!image_file_name.empty()) {
     space::ImageSpace* image_space = space::ImageSpace::Create(image_file_name);
     CHECK(image_space != NULL) << "Failed to create space for " << image_file_name;
-    GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " << image_file_name;
+//    GCMMP_VLOG(INFO) << "HeapCreation: opening image file: " << image_file_name;
     AddContinuousSpace(image_space);
     // Oat files referenced by image files immediately follow them in memory, ensure alloc space
     // isn't going to get in the middle
@@ -229,7 +229,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
                                           kPageSize));
     }
   } else {
-  	GCMMP_VLOG(INFO) << "HeapCreation: image file name was empty: ";
+//  	GCMMP_VLOG(INFO) << "HeapCreation: image file name was empty: ";
   }
 
   alloc_space_ = space::DlMallocSpace::Create(Runtime::Current()->IsZygote() ?
@@ -329,15 +329,15 @@ void Heap::CreateThreadPool() {
   }
   byte* zygote_space_begin =  alloc_space_->Begin();
   byte* zygote_space_end =  alloc_space_->End();
-  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
-      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
+//  LOG(ERROR) << "+++ Zygotebegin = " << reinterpret_cast<void*>(zygote_space_begin)
+//      << "+++ Zygoteend = " << reinterpret_cast<void*>(zygote_space_end);
   byte* image_space_begin =  GetImageSpace()->Begin();
   byte* image_space_end =  GetImageSpace()->End();
 
 
-  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: "
-      << reinterpret_cast<void*>(image_space_begin)
-      << ", imageSpaceEnd: " << reinterpret_cast<void*>(image_space_end);
+//  LOG(ERROR) << "FinalizeHeapAfterInit --> imagespaceBegin: "
+//      << reinterpret_cast<void*>(image_space_begin)
+//      << ", imageSpaceEnd: " << reinterpret_cast<void*>(image_space_end);
 }
 
 void Heap::DeleteThreadPool() {
