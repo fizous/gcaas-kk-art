@@ -127,7 +127,7 @@ MemBaseMap* MemBaseMap::CreateStructedMemMap(const char* ashmem_name, byte* addr
       prot, shareMem);
 
   if(_checkP == NULL) {
-    LOG(ERROR) << "MemBaseMap::CreateStructruedMemMap -- > could not allocate shared memory map";
+//    LOG(ERROR) << "MemBaseMap::CreateStructruedMemMap -- > could not allocate shared memory map";
     return NULL;
   }
 
@@ -244,9 +244,9 @@ void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
         ") of ahmem failed";
     return;
   }
-  LOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
-      " succeeded and new address is " << reinterpret_cast<void*>(remapped_address) <<
-      ", with new size = " << new_size << ", old_sizes = " << _original_size;
+//  LOG(ERROR) << "remap(" << reinterpret_cast<void*>(addr->base_begin_) <<
+//      " succeeded and new address is " << reinterpret_cast<void*>(remapped_address) <<
+//      ", with new size = " << new_size << ", old_sizes = " << _original_size;
   addr->base_begin_ = remapped_address;
   addr->begin_ = remapped_address;
   addr->base_size_ = new_size;
@@ -256,11 +256,11 @@ void MemBaseMap::AshmemResize(AShmemMap* addr, size_t new_size) {
 AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
     AShmemMap* dest_ashmem_mem_map) {
   if((source_ashmem_mem_map->flags_ & MAP_SHARED) != 0) {
-    LOG(ERROR) << "the Memory was already shared before";
+//    LOG(ERROR) << "the Memory was already shared before";
     return NULL;
   }
   if(dest_ashmem_mem_map == NULL) {
-    LOG(ERROR) << "the destination sharedAshmemmap is not allocated";
+//    LOG(ERROR) << "the destination sharedAshmemmap is not allocated";
     return NULL;
   }
 
@@ -276,8 +276,8 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, MAP_SHARED,
       source_ashmem_mem_map->fd_, 0));
 
-  LOG(ERROR) << "temp_pointer: " << reinterpret_cast<void*>(temp_pointer) <<
-      ", size:" << source_ashmem_mem_map->size_;
+//  LOG(ERROR) << "temp_pointer: " << reinterpret_cast<void*>(temp_pointer) <<
+//      ", size:" << source_ashmem_mem_map->size_;
 
   memcpy(temp_pointer, source_ashmem_mem_map->begin_,
       source_ashmem_mem_map->size_);
@@ -300,16 +300,16 @@ AShmemMap* MemBaseMap::ShareAShmemMap(AShmemMap* source_ashmem_mem_map,
                 << "\n" << maps;
     return NULL;
   }
-  LOG(ERROR) << "...the actual allocated = " << reinterpret_cast<void*>(actual);
+//  LOG(ERROR) << "...the actual allocated = " << reinterpret_cast<void*>(actual);
   std::string _name_string(source_ashmem_mem_map->name_);
   MemBaseMap::AShmemFillData(dest_ashmem_mem_map, actual,
       source_ashmem_mem_map->size_, actual,
       source_ashmem_mem_map->size_, source_ashmem_mem_map->prot_, flags, _fd,
       _name_string, NULL);
 
-  LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
-      << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
-      ", begin = " << reinterpret_cast<void*>(dest_ashmem_mem_map->begin_);
+//  LOG(ERROR) << "source_ashmem_mem_map->size_:" << source_ashmem_mem_map->size_
+//      << ", dest_ashmem_mem_map->size=" << dest_ashmem_mem_map->size_ <<
+//      ", begin = " << reinterpret_cast<void*>(dest_ashmem_mem_map->begin_);
 
 
   memcpy(dest_ashmem_mem_map->begin_, temp_pointer, dest_ashmem_mem_map->size_);
@@ -345,13 +345,13 @@ void MemBaseMap::AshmemDestructData(AShmemMap* addr, bool release_pointer) {
     return;
   if (!(addr->base_begin_ == NULL && addr->base_size_ == 0)) {
     if(addr->fd_!=-1) {
-      LOG(ERROR) << "before close";
+//      LOG(ERROR) << "before close";
       close(addr->fd_);
-      LOG(ERROR) << "After close";
+//      LOG(ERROR) << "After close";
     }
-    LOG(ERROR) << "before Calling UnmapAtEnd";
+//    LOG(ERROR) << "before Calling UnmapAtEnd";
     AshmemUnMapAtEnd(addr, reinterpret_cast<byte*>(addr->base_begin_));
-    LOG(ERROR) << "After Calling UnmapAtEnd";
+//    LOG(ERROR) << "After Calling UnmapAtEnd";
   }
 
   if(release_pointer)

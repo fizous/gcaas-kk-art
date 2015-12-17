@@ -418,17 +418,17 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
 
   if((gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) && shareMem) { // share the zygote space
     AShmemMap* _ptr = GetMemMap()->GetAshmemMapAddress();
-    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
-        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
-        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
-        ", size:" << _ptr->size_;
+//    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
+//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
+//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
+//        ", size:" << _ptr->size_;
     AShmemMap* _new_ptr =
         &(_struct_alloc_space->heap_meta_.reshared_zygote_.zygote_space_);
     GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(_ptr,_new_ptr));
-    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
-        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
-        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
-        ", size:" << _new_ptr->size_ << ", old_size:" << _ptr->size_;
+//    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
+//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
+//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
+//        ", size:" << _new_ptr->size_ << ", old_size:" << _ptr->size_;
     free(_ptr);
 
 
@@ -453,7 +453,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
 
 
       if(_mark_bitmap_->IsStructuredBitmap()) {
-        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
+//        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
         accounting::SharedSpaceBitmap* _mark_bmap_ =
                       reinterpret_cast<accounting::SharedSpaceBitmap*>(_mark_bitmap_);
         //accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
@@ -556,7 +556,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   //TODO: fizo: check what's wrong here?
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
-  /*VLOG(heap)*/ LOG(ERROR) << "CREATEZYGOTE: :" << "Begin "
+  VLOG(heap) << "CREATEZYGOTE: :" << "Begin "
              << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
