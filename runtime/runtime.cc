@@ -233,7 +233,7 @@ void Runtime::Abort() {
 
 
 bool Runtime::GCSrvcePreZygoteFork() {
-  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
+//  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   bool _should_fork_service = false;
   if(gc::gcservice::GCServiceGlobalAllocator::ShouldForkService()) {
     _should_fork_service = true;
@@ -258,7 +258,7 @@ void Runtime::GCPServiceFinalizeInit() {
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
   bool should_share = /*true;//*/(gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps >=0 );
   heap_->PostZygoteForkWithSpaceFork(should_share && shared_space);
-  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
+//  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
   return true;
 }
 
@@ -925,7 +925,7 @@ void Runtime::DidForkFromZygote(bool initialize) {
   is_zygote_ = false;
   //heap_->DumpSpaces();
   GCPServiceFinalizeInit();
-  GCMMP_VLOG(INFO) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
+ // GCMMP_VLOG(INFO) << "GCMMP: Creating the thread pool after we Did a fork From Zygote";
   // Create the thread pool.
   if(initialize) {
     heap_->CreateThreadPool();

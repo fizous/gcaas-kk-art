@@ -352,7 +352,7 @@ void SharedSpaceBitmap::SwapSharedBitmaps(SharedSpaceBitmap* bitmapA,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
   memcpy(bitmapB->bitmap_data_, &_temp_bitmap_data,
       SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-  LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
+//  LOG(ERROR) << " ~~~~~~ SharedSpaceBitmap::SwapSharedBitmaps ~~~~~~~";
 }
 
 void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
@@ -387,13 +387,13 @@ void SharedSpaceBitmap::ShareBitmapMemory(GCSrvceBitmap* new_mem_address) {
       _mark_bmap_->bitmap_data_ = new_mem_address;
 
 
-      LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
-          ", begin:" <<
-            reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
-          ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
-          ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
-          ", heap_limit=" << _mark_bmap_->HeapLimit() <<
-          ", heap_begin=" << _mark_bmap_->HeapBegin() ;
+//      LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
+//          ", begin:" <<
+//            reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+//          ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+//          ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
+//          ", heap_limit=" << _mark_bmap_->HeapLimit() <<
+//          ", heap_begin=" << _mark_bmap_->HeapBegin() ;
 
       //LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
     }
@@ -418,10 +418,10 @@ SharedServerSpaceBitmap::SharedServerSpaceBitmap(GCSrvceBitmap* data_p,
       reinterpret_cast<uintptr_t>(reinterpret_cast<byte*>(bitmap_data_->heap_begin_) +
                                                           mapping_heap_offset_);
 
-  LOG(ERROR) << StringPrintf("SharedServerSpaceBitmap .. server_bitmap_begin = %p "
-      "with size=%zd, and mapped_heap_begin = %p, original mapped_begin=%p",
-      server_bitmap_begin_, Size(), reinterpret_cast<const void*>(mapped_heap_begin_),
-      reinterpret_cast<const void*>(bitmap_data_->heap_begin_));
+//  LOG(ERROR) << StringPrintf("SharedServerSpaceBitmap .. server_bitmap_begin = %p "
+//      "with size=%zd, and mapped_heap_begin = %p, original mapped_begin=%p",
+//      server_bitmap_begin_, Size(), reinterpret_cast<const void*>(mapped_heap_begin_),
+//      reinterpret_cast<const void*>(bitmap_data_->heap_begin_));
 //  SetMappedHeapOffset();
 }
 

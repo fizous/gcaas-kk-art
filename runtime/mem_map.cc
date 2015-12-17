@@ -390,7 +390,8 @@ MemMap::MemMap(const std::string& name, byte* begin, size_t size, void* base_beg
 
 
 
-MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count, int prot, bool shareMem) {
+MEM_MAP* MEM_MAP::MapAnonymous(const char* name, byte* addr, size_t byte_count,
+    int prot, bool shareMem) {
   if (byte_count == 0) {
     return new MemMap(name, NULL, 0, NULL, 0, prot);
   }

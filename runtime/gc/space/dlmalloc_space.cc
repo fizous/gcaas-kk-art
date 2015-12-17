@@ -814,8 +814,8 @@ void DlMallocSpace::Dump(std::ostream& os) const {
 }
 
 bool DlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
-  LOG(ERROR) << " ~~~~ DlMallocSpace::RegisterGlobalCollector ~~~~~ " <<
-      se_name_c_str;
+//  LOG(ERROR) << " ~~~~ DlMallocSpace::RegisterGlobalCollector ~~~~~ " <<
+//      se_name_c_str;
   return false;
 }
 /*
@@ -975,8 +975,8 @@ GCSrvSharableDlMallocSpace* SharableDlMallocSpace::AllocateDataMemory(void) {
 
 bool SharableDlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
     bool shareMem) {
-  LOG(ERROR) << "Inside SharableDlMallocSpace::CreateBitmaps .. index: " <<
-      dlmalloc_space_data_->bitmap_index_;
+//  LOG(ERROR) << "Inside SharableDlMallocSpace::CreateBitmaps .. index: " <<
+//      dlmalloc_space_data_->bitmap_index_;
   return true;
 
 }
@@ -1004,8 +1004,8 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
            , Begin(), Capacity(), shareMem)));
    DCHECK(mark_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #"
        << dlmalloc_space_data_->bitmap_index_;
-   LOG(ERROR) << "Inside SharableDlMallocSpace::CreateSharableBitmaps " << GetName() << ".. index: " <<
-       dlmalloc_space_data_->bitmap_index_;
+//   LOG(ERROR) << "Inside SharableDlMallocSpace::CreateSharableBitmaps " << GetName() << ".. index: " <<
+//       dlmalloc_space_data_->bitmap_index_;
    return _result;
 
 }
