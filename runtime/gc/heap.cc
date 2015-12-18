@@ -2224,11 +2224,15 @@ size_t Heap::GetPercentFree() {
   return static_cast<size_t>(100.0f * static_cast<float>(GetFreeMemory()) / GetTotalMemory());
 }
 
-size_t Heap::GetConcStartBytes(void) const{
-//	if(GetConcurrentStartBytes() == std::numeric_limits<size_t>::max()) {
-//		return max_allowed_footprint_;
-//	}
-	return GetConcStartBytesValue();
+size_t Heap::GetConcStartBytes(bool forProfile) const {
+  size_t _conc_start = GetConcStartBytesValue();
+  if(!forProfile) {
+    return _conc_start;
+  }
+  if(_conc_start == std::numeric_limits<size_t>::max()) {
+    return GetMaxAllowedFootPrint();
+  }
+	return _conc_start;
 }
 
 

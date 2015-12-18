@@ -476,7 +476,7 @@ class Heap {
   int64_t GetFreeMemory() const {
     return GetTotalMemory() - GetBytesAllocated();
   }
-  size_t GetConcStartBytes(void) const;
+  size_t GetConcStartBytes(bool forProfile = false) const;
 
 
   // Get the space that corresponds to an object's address. Current implementation searches all
