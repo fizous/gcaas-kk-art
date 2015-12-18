@@ -437,10 +437,10 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type]
-      << " from thread ID:" << self->GetTid() <<
-      "\n freed: " << collector->GetFreedObjects() << " objects"
-      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
+//  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type]
+//      << " from thread ID:" << self->GetTid() <<
+//      "\n freed: " << collector->GetFreedObjects() << " objects"
+//      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
   // IPC_MARKSWEEP_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
@@ -448,14 +448,14 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   local_heap_->IncTotalBytesFreedEver(collector->GetFreedBytes());
 //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
 //  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
-  LOG(ERROR) << "@@@@@@@@@@ YYYY @@@@@@" << gc_cause << " " << collector->GetName()
-            << " GC freed "  <<  collector->GetFreedObjects() << "("
-            << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
-            << collector->GetFreedLargeObjects() << "("
-            << PrettySize(collector->GetFreedLargeObjectBytes()) << ") LOS objects, "
-            //<< percent_free << "% free, "
-            << PrettySize(local_heap_->GetBytesAllocated()) << "/"
-            << PrettySize(local_heap_->GetTotalMemory());
+//  LOG(ERROR) << "@@@@@@@@@@ YYYY @@@@@@" << gc_cause << " " << collector->GetName()
+//            << " GC freed "  <<  collector->GetFreedObjects() << "("
+//            << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
+//            << collector->GetFreedLargeObjects() << "("
+//            << PrettySize(collector->GetFreedLargeObjectBytes()) << ") LOS objects, "
+//            //<< percent_free << "% free, "
+//            << PrettySize(local_heap_->GetBytesAllocated()) << "/"
+//            << PrettySize(local_heap_->GetTotalMemory());
             //<< ", " << "paused " << pause_string.str()
             //<< " total " << PrettyDuration((duration / 1000) * 1000);
 
