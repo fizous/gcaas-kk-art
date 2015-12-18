@@ -432,7 +432,11 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.index = 1.0 * (_allocBytes >> kGCMMPLogAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
+#if ART_GC_SERVICE
+	heapStatus.currAllocBytes = (size_t) heap_->GetBytesAllocated();
+#else
 	heapStatus.currAllocBytes = (size_t) allocatedBytesData.cntLive.load();//heap_->GetBytesAllocated();
+#endif
 	heapStatus.concurrentStartBytes =
 			heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
 	heapStatus.currFootPrint =

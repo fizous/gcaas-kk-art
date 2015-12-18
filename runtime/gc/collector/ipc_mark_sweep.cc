@@ -463,6 +463,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       IPMutexLock interProcMu(self, *gc_complete_mu_);
       local_heap_->SetLastGCType(gc_type);
       ResetServerFlag();
+      mprofiler::VMProfiler::MProfMarkPostCollection();
       // Wake anyone who may have been waiting for the GC to complete.
       meta_->is_gc_running_ = 0;
       gc_complete_cond_->Broadcast(self);

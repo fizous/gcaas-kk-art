@@ -257,8 +257,6 @@ public:
   EventMarkerManager* markerManager;
 
   GCMMPHeapStatus heapStatus;
-
-
   GCMMPHeapIntegral heapIntegral_;
 
   uint64_t GetRelevantCPUTime(void) const {
