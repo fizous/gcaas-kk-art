@@ -411,7 +411,7 @@ void VMProfiler::startProfiling(void) {
 
 inline int VMProfiler::GCPGetCalculateStartBytes(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	int _diffLiveConc = heap_->GetConcStartBytes() - heap_->GetBytesAllocated();
+	int _diffLiveConc = heap_->GetConcStartBytes(true) - heap_->GetBytesAllocated();
 	return _diffLiveConc;
 }
 
@@ -1087,7 +1087,7 @@ void PerfCounterProfiler::logPerfData() {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetConcStartBytes(true) << ", footPrint: " <<
 			heap_->GetMaxAllowedFootPrint();
 	uint64_t _sumData = 0;
 	uint64_t _sumGc = 0;
@@ -2154,7 +2154,7 @@ void ObjectSizesProfiler::gcpLogPerfData() {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetConcStartBytes(true) << ", footPrint: " <<
 			heap_->GetMaxAllowedFootPrint();
 
 	GCHistogramObjSizesManager* _histManager = getObjHistograms();
@@ -2444,7 +2444,7 @@ void ThreadAllocProfiler::gcpLogPerfData() {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetConcStartBytes(true) << ", footPrint: " <<
 			heap_->GetMaxAllowedFootPrint();
 
 	GCPThreadAllocManager* _dataMgr = getThreadHistManager();
@@ -2791,7 +2791,7 @@ void CohortProfiler::gcpLogPerfData() {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
 			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes() << ", footPrint: " <<
+			heap_->GetConcStartBytes(true) << ", footPrint: " <<
 			heap_->GetMaxAllowedFootPrint();
 
 	GCCohortManager* _coManager = getCohortManager();
