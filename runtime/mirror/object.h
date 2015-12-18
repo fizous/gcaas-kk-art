@@ -103,6 +103,8 @@ class MANAGED Object {
     return const_cast<volatile int32_t*>(word_addr);
   }
 
+  void SetLockWord(uint32_t new_val);
+
   uint32_t GetThinLockId();
 
   void MonitorEnter(Thread* self) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_)

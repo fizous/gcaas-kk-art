@@ -293,6 +293,11 @@ inline void Object::VerifyObject(const Object* obj) {
   }
 }
 
+
+inline void Object::SetLockWord(uint32_t new_val) {
+  SetField32(OFFSET_OF_OBJECT_MEMBER(Object, monitor_), new_val, false, false);
+}
+
 }  // namespace mirror
 }  // namespace art
 

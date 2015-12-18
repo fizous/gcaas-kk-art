@@ -244,9 +244,11 @@ void IPCHeap::ConcurrentGC(Thread* self) {
       return;
     }
   }
+  mprofiler::VMProfiler::MProfMarkStartConcGCHWEvent();
   if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageIPC(local_heap_->GetNextGCType(), kGcCauseBackground, false);
   }
+  mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
 //  local_heap_->ConcurrentGC(self);
 //  {
 //    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
@@ -331,6 +333,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
   collector::GcType last_gc_type = collector::kGcTypeNone;
   bool do_wait = false;
   if(meta_->concurrent_gc_) { // the heap is concurrent
+    mprofiler::VMProfiler::MProfMarkWaitTimeEvent(self);
     uint64_t wait_start = NanoTime();
     {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
@@ -353,6 +356,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
+    mprofiler::VMProfiler::MProfMarkEndWaitTimeEvent(self);
   }
   return last_gc_type;
 }
@@ -395,6 +399,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     }
   }
 
+  mprofiler::VMProfiler::MProfMarkPreCollection();
   if (gc_cause == kGcCauseForAlloc && Runtime::Current()->HasStatsEnabled()) {
     ++Runtime::Current()->GetStats()->gc_for_alloc_count;
     ++Thread::Current()->GetStats()->gc_for_alloc_count;
