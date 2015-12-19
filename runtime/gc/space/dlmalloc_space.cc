@@ -937,9 +937,26 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
         new InterProcessConditionVariable("shared-space CondVar", *_ipMutex,
             &sharable_space_data_->ip_lock_.cond_var_);
   }
-  for(size_t i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
-    app_list_.push_back(std::string(ProfiledBenchmarks[i]));
+
+  const char* _bench_list_path = getenv("GC_PROFILE_BENCHMARK_LIST");
+  if(_bench_list_path != NULL) {
+    LOG(ERROR) << "XXXXXXX Environment variable bench list set to: " << _bench_list_path;
+    std::string _file_lines;
+    if (!ReadFileToString(_bench_list_path, &_file_lines)) {
+      LOG(ERROR) << "(couldn't read " << _bench_list_path << ")\n";
+      return;
+    }
+    Split(_file_lines, '\n', app_list_);
+    for(size_t i = 0; i < app_list_.size(); i ++) {
+      LOG(ERROR) << "application... "<< app_list_[i] << "\n";
+    }
+  } else {
+    for(size_t i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
+      app_list_.push_back(std::string(ProfiledBenchmarks[i]));
+    }
   }
+
+
   CreateSharableBitmaps(Begin(), Capacity(), shareMem);
 }
 
