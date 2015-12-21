@@ -489,7 +489,7 @@ void Heap::ListenForProcessStateChange() {
     care_about_pause_times_ = process_state_cares_about_pause_time_.find(process_state) !=
         process_state_cares_about_pause_time_.end();
 
-    /*VLOG(heap)*/LOG(ERROR) << "New process state " << process_state
+    VLOG(heap) << "New process state " << process_state
                << " care about pauses " << care_about_pause_times_;
   }
 }
@@ -851,7 +851,7 @@ byte* Heap::GetMaxAddress() {
 }
 
 void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
-  LOG(ERROR) << "Precollectors size is: " << mark_sweep_collectors_.size();
+//  LOG(ERROR) << "Precollectors size is: " << mark_sweep_collectors_.size();
 //  for (const auto& cur_collector : mark_sweep_collectors_) {
 //    LOG(ERROR) << "A-Collector: " << cur_collector->GetName() <<", type: " << cur_collector->GetGcType();
 //  }
@@ -859,22 +859,22 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
   while( iter != mark_sweep_collectors_.end()) {
     if(((*iter)->GetGcType() == newCollector->GetGcType())
         && (((*iter)->IsConcurrent() == newCollector->IsConcurrent()))) {
-      LOG(ERROR) << "Removing original Marksweep; gc_type:" <<
-          newCollector->GetGcType() << "conc: " << newCollector->IsConcurrent();
+//      LOG(ERROR) << "Removing original Marksweep; gc_type:" <<
+//          newCollector->GetGcType() << "conc: " << newCollector->IsConcurrent();
       mark_sweep_collectors_.erase(iter);
       break;
     }
     ++iter;
   }
-  LOG(ERROR) << "Postcollectors size is: " << mark_sweep_collectors_.size();
-  LOG(ERROR) << "Added the new marksweep (IPC)";
+  //LOG(ERROR) << "Postcollectors size is: " << mark_sweep_collectors_.size();
+  //LOG(ERROR) << "Added the new marksweep (IPC)";
   mark_sweep_collectors_.push_back(newCollector);
-  LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
+  //LOG(ERROR) << "before leave size is: " << mark_sweep_collectors_.size();
 
-  for (const auto& cur_collector : mark_sweep_collectors_) {
-    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() << ", type: " <<
-        cur_collector->GetGcType();
-  }
+//  for (const auto& cur_collector : mark_sweep_collectors_) {
+//    LOG(ERROR) << "B-Collector: " << cur_collector->GetName() << ", type: " <<
+//        cur_collector->GetGcType();
+//  }
 
 
 
@@ -2635,11 +2635,11 @@ void Heap::RequestHeapTrim() {
 
   SetLastTimeTrim(ms_time);
   ListenForProcessStateChange();
-  LOG(ERROR) << "--------- Request Heap::Trim() ; care about pause time-------------";
+  //LOG(ERROR) << "--------- Request Heap::Trim() ; care about pause time-------------";
   // Trim only if we do not currently care about pause times.
   if (!care_about_pause_times_) {
 
-   LOG(ERROR) << "--------- Request Heap::Trim() ; no care about pause time-------------";
+   //LOG(ERROR) << "--------- Request Heap::Trim() ; no care about pause time-------------";
    if(false){
      #if (true || ART_GC_SERVICE)
 
@@ -2656,7 +2656,7 @@ void Heap::RequestHeapTrim() {
 }
 
 size_t Heap::Trim() {
-	LOG(ERROR) << "--------- Heap::Trim() -------------";
+//	LOG(ERROR) << "--------- Heap::Trim() -------------";
   mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();

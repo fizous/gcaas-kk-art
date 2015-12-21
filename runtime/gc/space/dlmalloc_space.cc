@@ -940,16 +940,16 @@ SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
 
   const char* _bench_list_path = getenv("GC_PROFILE_BENCHMARK_LIST");
   if(_bench_list_path != NULL) {
-    LOG(ERROR) << "XXXXXXX Environment variable bench list set to: " << _bench_list_path;
+    //LOG(ERROR) << "XXXXXXX Environment variable bench list set to: " << _bench_list_path;
     std::string _file_lines;
     if (!ReadFileToString(_bench_list_path, &_file_lines)) {
       LOG(ERROR) << "(couldn't read " << _bench_list_path << ")\n";
       return;
     }
     Split(_file_lines, '\n', app_list_);
-    for(size_t i = 0; i < app_list_.size(); i ++) {
-      LOG(ERROR) << "application... "<< app_list_[i] << "\n";
-    }
+//    for(size_t i = 0; i < app_list_.size(); i ++) {
+//      LOG(ERROR) << "application... "<< app_list_[i] << "\n";
+//    }
   } else {
     for(size_t i = 0; i < NELEM(ProfiledBenchmarks); i ++) {
       app_list_.push_back(std::string(ProfiledBenchmarks[i]));
