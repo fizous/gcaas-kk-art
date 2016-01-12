@@ -416,6 +416,15 @@ class Heap {
 
 #else
 
+  int32_t GetAtomicBytesAllocated() {
+    return num_bytes_allocated_.load();
+  }
+
+  void IncAtomicBytesAllocated(int val) {
+    num_bytes_allocated_.fetch_add(val);
+  }
+
+
   void IncAtomicNativeBytesAllocated(int val) {
     native_bytes_allocated_.fetch_add(val);
   }
