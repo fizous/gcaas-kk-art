@@ -208,8 +208,8 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   }
 
 #else
-  live_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
-  mark_bitmap_.reset(new accounting::HeapBitmap(/*this*/));
+  live_bitmap_.reset(new accounting::HeapBitmap(this);
+  mark_bitmap_.reset(new accounting::HeapBitmap(this);
 #endif
   // Requested begin for the alloc space, to follow the mapped image and oat files
   byte* requested_alloc_space_begin = NULL;
