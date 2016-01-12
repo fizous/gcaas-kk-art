@@ -231,7 +231,7 @@ typedef struct GCSrvSharableCollectorData_S {
 
   int is_concurrent_;
 } __attribute__((aligned(8))) GCSrvSharableCollectorData;
-#endif
+
 // this struct is used to capture metadata of the zygote space
 // during the sharing process.
 typedef struct GCSrvcZygoteResharingRec_S{
@@ -240,7 +240,7 @@ typedef struct GCSrvcZygoteResharingRec_S{
   accounting::GCSrvceBitmap live_bitmap_;
   accounting::GCSrvceBitmap mark_bitmap_;
 } __attribute__((aligned(8))) GCSrvcZygoteResharingRec;
-
+#endif
 
 
 typedef struct GCSrvcHeapSubRecord_S {
