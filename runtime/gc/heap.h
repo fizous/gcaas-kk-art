@@ -452,6 +452,9 @@ class Heap {
     return sub_record_meta_->max_allowed_footprint_;
   }
 #else
+  size_t GetMaxAllowedFootPrint() const {
+    return max_allowed_footprint_;
+  }
   // Returns the total number of objects freed since the heap was created.
   size_t GetObjectsFreedEver() const {
     return total_objects_freed_ever_;
