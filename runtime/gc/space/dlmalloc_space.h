@@ -561,7 +561,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     recent_free_pos_ = newVal;
   }
 
-  mirror::Object* GetObjectRecentFreeObject(int pos){
+  mirror::Object* GetObjectRecentFreeObject(int pos) const{
     return recent_freed_objects_[pos].first;
   }
 
