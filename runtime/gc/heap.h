@@ -813,6 +813,7 @@ class Heap {
 #if ART_GC_SERVICE
 #else
   volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
+  collector::GcType next_gc_type_;
 #endif
 
   // Maximum size that the heap can reach.
@@ -823,6 +824,15 @@ class Heap {
   // The size the heap is limited to. This is initially smaller than capacity, but for largeHeap
   // programs it is "cleared" making it the same as capacity.
   size_t growth_limit_;
+
+  // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
+  // a GC should be triggered.
+  size_t max_allowed_footprint_;
+
+  // The watermark at which a concurrent GC is requested by registerNativeAllocation.
+  size_t native_footprint_gc_watermark_;
+
+  size_t native_footprint_limit_;
 #endif
 
 
@@ -843,11 +853,18 @@ class Heap {
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.
   size_t concurrent_start_bytes_;
+
+  // Since the heap was created, how many bytes have been freed.
+  size_t total_bytes_freed_ever_;
+
+  // Since the heap was created, how many objects have been freed.
+  size_t total_objects_freed_ever_;
 #endif
 
 
   // Primitive objects larger than this size are put in the large object space.
   const size_t large_object_threshold_;
+
 #if (ART_GC_SERVICE)
 #else
   // Number of bytes allocated.  Adjusted after each allocation and free.
@@ -1029,22 +1046,10 @@ class Heap {
     sub_record_meta_->max_allowed_footprint_ = param;
   }
 #else
-  collector::GcType next_gc_type_;
-  // When the number of bytes allocated exceeds the footprint TryAllocate returns NULL indicating
-  // a GC should be triggered.
-  size_t max_allowed_footprint_;
 
-  // The watermark at which a concurrent GC is requested by registerNativeAllocation.
-  size_t native_footprint_gc_watermark_;
 
-  // The watermark at which a GC is performed inside of registerNativeAllocation.
-  size_t native_footprint_limit_;
 
-  // Since the heap was created, how many bytes have been freed.
-  size_t total_bytes_freed_ever_;
 
-  // Since the heap was created, how many objects have been freed.
-  size_t total_objects_freed_ever_;
 
   UniquePtr<accounting::HeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::HeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
