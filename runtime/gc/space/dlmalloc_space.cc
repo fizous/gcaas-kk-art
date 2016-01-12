@@ -324,13 +324,15 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
 
 
 
-
+#if ART_GC_SERVICE
 void DlMallocSpace::BindLiveToMarkBitmaps(void) {
   //LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
   accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
   temp_bitmap_.reset(_mark_bitmap_content);
   mark_bitmap_.reset(live_bitmap_.get());
 }
+#endif
+
 
 void DlMallocSpace::SwapBitmaps() {
   //LOG(ERROR) << " ~~~~~~ DlMallocSpace::SwapBitmaps ~~~~~~~";
@@ -486,8 +488,7 @@ mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
 }
 
 void DlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
-  dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].first = ptr;
-  dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
+  SetRecentFreeObject(ptr);
   SetRecentFreePos((GetRecentFreePos() + 1) & kRecentFreeMask);
 }
 

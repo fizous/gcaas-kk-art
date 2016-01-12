@@ -246,6 +246,11 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
     dlmalloc_space_data_->recent_free_pos_ = newVal;
   }
 
+  void SetRecentFreeObject(mirror::Object* ptr){
+    dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].first = ptr;
+    dlmalloc_space_data_->recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
+  }
+
   // Returns the class of a recently freed object.
   mirror::Class* FindRecentFreedObject(const mirror::Object* obj);
   static void* CreateMallocSpace(void* base, size_t morecore_start, size_t initial_size);
@@ -551,6 +556,11 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     return recent_free_pos_;
   }
 
+
+  void SetRecentFreePos(size_t newVal){
+    recent_free_pos_ = newVal;
+  }
+
   mirror::Object* GetObjectRecentFreeObject(int pos){
     return recent_freed_objects_[pos].first;
   }
@@ -558,6 +568,12 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   mirror::Class* GetClassRecentFreeObject(int pos){
     return recent_freed_objects_[pos].second;
   }
+
+  void SetRecentFreeObject(mirror::Object* ptr){
+    recent_freed_objects_[GetRecentFreePos()].first = ptr;
+    recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
+  }
+
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);
