@@ -253,7 +253,7 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_pre
                mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
                is_concurrent_(is_concurrent),
                clear_soft_references_(false) {}
-}
+
 #endif
 
 
