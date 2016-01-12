@@ -1136,7 +1136,7 @@ void VMProfiler::dumpEventMarks(void) {
 
 
 	if(false) {
-	  LOG(ERROR) << "<<<< total written: " << dataLength <<
+	  LOG(ERROR) << "<<<< total written: " << (sizeof(EventMarker) * markerManager->currIndex) <<
 			", Sizeof(EventMarker):"<< sizeof(EventMarker)
 			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
 			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
