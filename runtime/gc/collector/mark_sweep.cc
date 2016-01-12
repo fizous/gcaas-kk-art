@@ -117,7 +117,7 @@ void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
   }
 }
 
-
+#if (ART_GC_SERVICE)
 bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
     void* _heap_beetmap) const {
   if (IsImmune(object)) {
@@ -131,7 +131,7 @@ bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
     return heap_beetmap->TestNoLock(object);
   return false;
 }
-
+#endif
 inline bool MarkSweep::IsMarked(const Object* object) const
     SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
   if (IsImmune(object)) {
@@ -147,13 +147,15 @@ inline bool MarkSweep::IsMarked(const Object* object) const
 
 void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
+#if (ART_GC_SERVICE)
   if (!space->HasBitmapsBound()) {
     BindLiveToMarkBitmap(space);
   }
-
-  /*if (space->GetLiveBitmap() != space->GetMarkBitmap()) {
+#else
+  if(space->GetLiveBitmap() != space->GetMarkBitmap()) {
     BindLiveToMarkBitmap(space);
-  }*/
+  }
+#endif
 
   // Add the space to the immune region.
   if (GetImmuneBegin() == NULL) {
@@ -1896,6 +1898,8 @@ void MarkSweep::ProcessReferences(Object** soft_references, bool clear_soft,
   timings_.EndSplit();
 }
 
+
+#if (ART_GC_SERVICE)
 void MarkSweep::UnBindBitmaps() {
   base::TimingLogger::ScopedSplit split("UnBindBitmaps", &timings_);
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
@@ -1922,6 +1926,26 @@ void MarkSweep::UnBindBitmaps() {
     }
   }
 }
+#else
+void MarkSweep::UnBindBitmaps() {
+  base::TimingLogger::ScopedSplit split("UnBindBitmaps", &timings_);
+  for (const auto& space : GetHeap()->GetContinuousSpaces()) {
+    if (space->IsDlMallocSpace()) {
+      space::DL_MALLOC_SPACE* alloc_space = space->AsDlMallocSpace();
+
+      if (alloc_space->temp_bitmap_.get() != NULL) {
+        // At this point, the temp_bitmap holds our old mark bitmap.
+        accounting::SPACE_BITMAP* new_bitmap = alloc_space->temp_bitmap_.release();
+        GetHeap()->GetMarkBitmap()->ReplaceBitmap(alloc_space->mark_bitmap_.get(), new_bitmap);
+        CHECK_EQ(alloc_space->mark_bitmap_.release(), alloc_space->live_bitmap_.get());
+        alloc_space->mark_bitmap_.reset(new_bitmap);
+        DCHECK(alloc_space->temp_bitmap_.get() == NULL);
+      }
+    }
+  }
+}
+#endif
+
 
 void MarkSweep::ApplyTrimming() {
   GetHeap()->RequestHeapTrim();
