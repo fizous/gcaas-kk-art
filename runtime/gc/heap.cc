@@ -95,12 +95,14 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       phantom_ref_queue_lock_(NULL),
       is_gc_running_(false),
 
-
-      capacity_(capacity),
 #if (ART_GC_SERVICE)
 #else
       last_gc_type_(collector::kGcTypeNone),
       next_gc_type_(collector::kGcTypePartial),
+#endif
+      capacity_(capacity),
+#if (ART_GC_SERVICE)
+#else
       growth_limit_(growth_limit),
       max_allowed_footprint_(initial_size),
       native_footprint_gc_watermark_(initial_size),
@@ -119,9 +121,6 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 #else
       concurrent_start_bytes_(concurrent_gc_ ? initial_size - kMinConcurrentRemainingBytes
           :  std::numeric_limits<size_t>::max()),
-#endif
-#if (ART_GC_SERVICE)
-#else
       total_bytes_freed_ever_(0),
       total_objects_freed_ever_(0),
 #endif
