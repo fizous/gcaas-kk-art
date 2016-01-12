@@ -36,8 +36,13 @@ class GarbageCollector {
   // Returns true iff the garbage collector is concurrent.
   virtual bool IsConcurrent() const = 0;
 
+
+#if (ART_GC_SERVICE)
   GarbageCollector(Heap* heap, const std::string& name,
       space::GCSrvceCollectorTimeStats* time_records);
+#else
+  GarbageCollector(Heap* heap, const std::string& name);
+#endif
   virtual ~GarbageCollector() { }
 
   const char* GetName() const {

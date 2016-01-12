@@ -33,6 +33,7 @@ namespace art {
 namespace gc {
 namespace collector {
 
+#if (ART_GC_SERVICE)
 GarbageCollector::GarbageCollector(Heap* heap, const std::string& name,
     space::GCSrvceCollectorTimeStats* time_records)
     : time_stats_(time_records),
@@ -44,6 +45,24 @@ GarbageCollector::GarbageCollector(Heap* heap, const std::string& name,
       cumulative_timings_(name){
   ResetCumulativeStatistics();
 }
+
+#else
+
+GarbageCollector::GarbageCollector(Heap* heap, const std::string& name)
+    : heap_(heap),
+      name_(name),
+      verbose_(VLOG_IS_ON(heap)),
+      duration_ns_(0),
+      timings_(name_.c_str(), true, verbose_),
+      cumulative_timings_(name){
+  ResetCumulativeStatistics();
+}
+
+
+#endif
+
+
+
 
 bool GarbageCollector::HandleDirtyObjectsPhase() {
   DCHECK(IsConcurrent());
