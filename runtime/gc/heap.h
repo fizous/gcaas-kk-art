@@ -416,6 +416,10 @@ class Heap {
 
 #else
 
+  void IncAtomicNativeBytesAllocated(int val) {
+    native_bytes_allocated_.fetch_add(val);
+  }
+
   int32_t GetAtomicNativeBytesAllocated() {
     return native_bytes_allocated_.load();
   }
@@ -796,8 +800,10 @@ class Heap {
   volatile bool is_gc_running_ GUARDED_BY(gc_complete_lock_);
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
-  //volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
-
+#if ART_GC_SERVICE
+#else
+  volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
+#endif
 
   // Maximum size that the heap can reach.
   const size_t capacity_;
@@ -1056,6 +1062,14 @@ class Heap {
 
   void SetNextGCType(collector::GcType val)  {
     next_gc_type_ = val;
+  }
+
+  void SetLastGCType(collector::GcType val)  {
+    last_gc_type_ = val;
+  }
+
+  collector::GcType GetLastGCType() const {
+    return last_gc_type_;
   }
 
   collector::GcType GetNextGCType() const {

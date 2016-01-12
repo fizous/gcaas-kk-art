@@ -1571,10 +1571,12 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
                                                bool clear_soft_references) {
 
   collector::GcType returned_gc_type = collector::kGcTypeNone;
+#if GC_ART_SERVICE
   if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
       clear_soft_references, &returned_gc_type)) {
     return returned_gc_type;
   }
+#endif
   Thread* self = Thread::Current();
 
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc);
