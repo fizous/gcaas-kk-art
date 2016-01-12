@@ -31,7 +31,7 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
                                                       size_t* bytes_allocated) {
   mirror::Object* obj;
   {
-    MutexLock mu(self, *getMu());
+    DLMALLOC_SPACE_LOCK_MACRO;
     obj = AllocWithoutGrowthLocked(num_bytes, bytes_allocated);
   }
   if (obj != NULL) {

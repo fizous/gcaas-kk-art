@@ -276,7 +276,13 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   virtual void SetHeapMeta(DlMallocSpace*, GCSrvceContinuousSpace*){}
 
+  mirror::Object* GetObjectRecentFreeObject(int pos){
+    return dlmalloc_space_data_->recent_freed_objects_[pos].first;
+  }
 
+  mirror::Object* GetClassRecentFreeObject(int pos){
+    return dlmalloc_space_data_->recent_freed_objects_[pos].second;
+  }
 
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
@@ -541,7 +547,17 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
 
 //  SharedDlMallocSpace* CreateZygoteSpaceWithSharedSpace(const char* alloc_space_name);
 
+  size_t GetRecentFreePos(){
+    return recent_free_pos_;
+  }
 
+  mirror::Object* GetObjectRecentFreeObject(int pos){
+    return recent_freed_objects_[pos].first;
+  }
+
+  mirror::Class* GetClassRecentFreeObject(int pos){
+    return recent_freed_objects_[pos].second;
+  }
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);

@@ -468,6 +468,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   return alloc_space;
 }
 
+
+
 mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
   size_t pos = GetRecentFreePos();
   // Start at the most recently freed object and work our way back since there may be duplicates
@@ -475,8 +477,8 @@ mirror::Class* DlMallocSpace::FindRecentFreedObject(const mirror::Object* obj) {
   if (kRecentFreeCount > 0) {
     for (size_t i = 0; i + 1 < kRecentFreeCount + 1; ++i) {
       pos = pos != 0 ? pos - 1 : kRecentFreeMask;
-      if (dlmalloc_space_data_->recent_freed_objects_[pos].first == obj) {
-        return dlmalloc_space_data_->recent_freed_objects_[pos].second;
+      if (GetObjectRecentFreeObject(pos) == obj) {
+        return GetClassRecentFreeObject(pos);
       }
     }
   }
