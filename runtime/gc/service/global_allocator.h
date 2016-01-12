@@ -18,6 +18,8 @@
 #include "gc/space/space.h"
 
 
+#if ART_GC_SERVICE
+
 #define GC_SERVICE_BUFFER_REQ_CAP   128
 
 
@@ -331,5 +333,7 @@ private:
 }//namespace gcservice
 }//namespace gc
 }//namespace art
+
+#endif //ART_GC_SERVICE
 
 #endif /* ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_ */
