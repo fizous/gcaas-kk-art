@@ -416,6 +416,10 @@ class Heap {
 
 #else
 
+  bool CASAtomicNativeBytesAllocated(int32_t expected, int32_t new_val) {
+    return native_bytes_allocated_.compare_and_swap(expected, new_val);
+  }
+
   // Returns the number of bytes currently allocated.
   size_t GetNativeBytesAllocated() const {
     return native_bytes_allocated_;
@@ -1038,6 +1042,31 @@ class Heap {
   // and the start of the current one.
   uint64_t allocation_rate_;
 
+
+  void SetNativeFootPrintGCWaterMark(size_t param)  {
+    native_footprint_gc_watermark_ = param;
+  }
+
+
+  size_t GetNativeFootPrintLimit() const {
+    return native_footprint_limit_;
+  }
+
+  size_t GetMinFree() {
+    return min_free_;
+  }
+
+  size_t GetMaxFree() {
+    return max_free_;
+  }
+
+  void IncTotalObjectsFreedEver(size_t param) {
+    total_objects_freed_ever_ += param;
+  }
+
+  void SetNativeFootPrintLimit(size_t param)  {
+    native_footprint_limit_ = param;
+  }
 
   size_t GetConcStartBytesValue() const {
     return concurrent_start_bytes_;
