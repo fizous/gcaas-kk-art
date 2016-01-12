@@ -228,12 +228,7 @@ class Heap {
   // implement dalvik.system.VMRuntime.clearGrowthLimit.
   void ClearGrowthLimit();
 
-  // Target ideal heap utilization ratio, implements
-  // dalvik.system.VMRuntime.getTargetHeapUtilization.
-  double GetTargetHeapUtilization() const {
 
-    return sub_record_meta_->target_utilization_;
-  }
 
   // Data structure memory usage tracking.
   void RegisterGCAllocation(size_t bytes);
@@ -371,6 +366,13 @@ class Heap {
 
 
 #if (ART_GC_SERVICE)
+  // Target ideal heap utilization ratio, implements
+  // dalvik.system.VMRuntime.getTargetHeapUtilization.
+  double GetTargetHeapUtilization() const {
+
+    return sub_record_meta_->target_utilization_;
+  }
+
   // Returns the number of bytes currently allocated.
   size_t GetBytesAllocated() const {
     return sub_record_meta_->num_bytes_allocated_;
