@@ -398,11 +398,13 @@ class Runtime {
 
   void SetStatsEnabled(bool new_state);
 
+
+#if ART_GC_SERVICE
   bool GCSrvcePreZygoteFork();
   void RegisterCollector(const char* se_name_c_str);
   void GCPServiceFinalizeInit() ;
   bool GCSrvcePostZygoteFork(bool);
-
+#endif
 
   bool PreZygoteFork();
   bool InitZygote();

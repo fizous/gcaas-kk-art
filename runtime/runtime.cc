@@ -36,8 +36,14 @@
 #include "debugger.h"
 #include "gc/accounting/card_table-inl.h"
 #include "gc/heap.h"
+
+#if ART_GC_SERVICE
+
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_client.h"
+#endif
+
+
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerHeap.h"
 #include "gc/space/space.h"
@@ -231,7 +237,7 @@ void Runtime::Abort() {
   // notreached
 }
 
-
+#if ART_GC_SERVICE
 bool Runtime::GCSrvcePreZygoteFork() {
 //  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   bool _should_fork_service = false;
@@ -245,7 +251,6 @@ bool Runtime::GCSrvcePreZygoteFork() {
   return _should_fork_service;
 }
 
-
 void Runtime::RegisterCollector(const char* se_name_c_str) {
   gcservice::GCServiceClient::InitClient(se_name_c_str);
 }
@@ -255,12 +260,22 @@ void Runtime::GCPServiceFinalizeInit() {
   gcservice::GCServiceClient::FinalizeInitClient();
 }
 
+
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
   bool should_share = /*true;//*/(gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps >=0 );
   heap_->PostZygoteForkWithSpaceFork(should_share && shared_space);
 //  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
   return true;
 }
+#else
+
+#endif
+
+
+
+
+
+
 
 
 bool Runtime::PreZygoteFork() {
