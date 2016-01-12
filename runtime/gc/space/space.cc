@@ -22,6 +22,8 @@ namespace art {
 namespace gc {
 namespace space {
 
+
+#if ART_GC_SERVICE
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
   if(0)
@@ -40,6 +42,16 @@ Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     LOG(ERROR) << "Leaving Space Constructor";
 }
 
+#else
+Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy) :
+    name_space_data_(name),
+    gc_retention_policy_(gc_retention_policy){}
+
+#endif
+
+
+
+
 
 void Space::Dump(std::ostream& os) const {
   os << GetName() << ":" << GetGcRetentionPolicy();
@@ -50,7 +62,7 @@ std::ostream& operator<<(std::ostream& os, const Space& space) {
   return os;
 }
 
-
+#if ART_GC_SERVICE
 ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 GCSrvceContinuousSpace* cont_space_data) :
@@ -71,6 +83,14 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
 }
+#else
+
+
+}
+#endif
+
+
+
 
 MemMapSpace::MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
             GcRetentionPolicy gc_retention_policy, GCSrvceContinuousSpace* cont_space_data)
