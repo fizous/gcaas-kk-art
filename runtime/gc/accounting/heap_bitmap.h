@@ -257,7 +257,7 @@ class HeapBitmap {
     }
   }
 
-  bool HeapBitmap::TestNoLock(const mirror::Object* obj) {
+  bool TestNoLock(const mirror::Object* obj) {
     SPACE_BITMAP* bitmap = GetContinuousSpaceBitmap(obj);
     if (LIKELY(bitmap != NULL)) {
       return bitmap->Test(obj);
