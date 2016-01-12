@@ -24,9 +24,16 @@
 
 
 
-#define GC_SERVICE_SHARABLE_HEAP_BITMAP    true
+#define GC_SERVICE_SHARABLE_HEAP_BITMAP    ART_GC_SERVICE
 
 
+#ifndef BASE_HEAP_BITMAP_T
+  #if (ART_GC_SERVICE)
+    #define BASE_HEAP_BITMAP_T BaseHeapBitmap
+  #else
+    #define BASE_HEAP_BITMAP_T HeapBitmap
+  #endif
+#endif
 
 
 namespace art {
