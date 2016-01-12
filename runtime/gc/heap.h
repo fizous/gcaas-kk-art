@@ -415,6 +415,17 @@ class Heap {
   }
 
 #else
+
+  // Returns the number of bytes currently allocated.
+  size_t GetNativeBytesAllocated() const {
+    return native_bytes_allocated_;
+  }
+
+  double GetTargetHeapUtilization() const {
+
+    return target_utilization_;
+  }
+
   size_t GetBytesAllocated() const {
     return num_bytes_allocated_;
   }
@@ -1027,6 +1038,10 @@ class Heap {
   // and the start of the current one.
   uint64_t allocation_rate_;
 
+
+  size_t GetConcStartBytesValue() const {
+    return concurrent_start_bytes_;
+  }
 
   size_t GetGrowthLimit() const {
     return growth_limit_;
