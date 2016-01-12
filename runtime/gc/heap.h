@@ -445,6 +445,10 @@ class Heap {
   size_t GetBytesFreedEver() const {
     return sub_record_meta_->total_bytes_freed_ever_;
   }
+
+  size_t GetMaxAllowedFootPrint() const {
+    return sub_record_meta_->max_allowed_footprint_;
+  }
 #else
   // Returns the total number of objects freed since the heap was created.
   size_t GetObjectsFreedEver() const {
@@ -621,9 +625,7 @@ class Heap {
   void SwapStacks();
 
 
-  size_t GetMaxAllowedFootPrint() const {
-    return sub_record_meta_->max_allowed_footprint_;
-  }
+
  private:
   // Allocates uninitialized storage. Passing in a null space tries to place the object in the
   // large object space.
@@ -841,11 +843,11 @@ class Heap {
 
   // For a GC cycle, a bitmap that is set corresponding to the
 #if (ART_GC_SERVICE)
-
+  space::GCSrvcHeapSubRecord* sub_record_meta_;
 
   UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
   UniquePtr<accounting::BaseHeapBitmap> mark_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
-  space::GCSrvcHeapSubRecord* sub_record_meta_;
+
 
   uint64_t GetLastTimeTrim() {
     return sub_record_meta_->last_trim_time_ms_;
