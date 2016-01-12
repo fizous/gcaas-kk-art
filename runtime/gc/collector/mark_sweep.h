@@ -475,6 +475,10 @@ class MarkSweep : public GarbageCollector {
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarkedNoLocks(const mirror::Object* object,
       void* heap_beetmap = NULL) const;
+#else
+  // Returns true if the object has its bit set in the mark bitmap.
+  bool IsMarkedNoLocks(const mirror::Object* object,
+      void* heap_beetmap = NULL) const;
 #endif
   static bool IsMarkedCallback(const mirror::Object* object, void* arg)
       SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);

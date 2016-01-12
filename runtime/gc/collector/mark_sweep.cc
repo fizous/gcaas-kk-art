@@ -131,6 +131,21 @@ bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
     return heap_beetmap->TestNoLock(object);
   return false;
 }
+#else
+bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
+    void* _heap_beetmap) const {
+  if (IsImmune(object)) {
+    return true;
+  }
+  if (current_mark_bitmap_->HasAddress(object)) {
+    return current_mark_bitmap_->Test(object);
+  }
+  return heap_->GetMarkBitmap()->Test(object);
+//  accounting::BaseHeapBitmap* heap_beetmap = (accounting::BaseHeapBitmap*)_heap_beetmap;
+//  if(heap_beetmap != NULL)
+//    return heap_beetmap->TestNoLock(object);
+//  return false;
+}
 #endif
 inline bool MarkSweep::IsMarked(const Object* object) const
     SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
