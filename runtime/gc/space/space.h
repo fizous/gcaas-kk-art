@@ -221,7 +221,7 @@ typedef struct GCSrvceCashedReferenceOffsets_S {
 }__attribute__((aligned(8))) GCSrvceCashedReferenceOffsets;
 
 
-
+#if (ART_GC_SERVICE)
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
   GCSrvceCashedStatsCounters cashed_stats_;
@@ -231,7 +231,7 @@ typedef struct GCSrvSharableCollectorData_S {
 
   int is_concurrent_;
 } __attribute__((aligned(8))) GCSrvSharableCollectorData;
-
+#endif
 // this struct is used to capture metadata of the zygote space
 // during the sharing process.
 typedef struct GCSrvcZygoteResharingRec_S{
@@ -310,7 +310,7 @@ typedef struct GCSrvcHeapSubRecord_S {
 
 
 
-
+#if (ART_GC_SERVICE)
 typedef struct GCSrvSharableHeapData_S {
   /* gc barrier */
   SynchronizedLockHead gc_barrier_lock_;
@@ -404,6 +404,9 @@ typedef struct GCSrvSharableHeapData_S {
 
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
+
+
+
 typedef struct GCSrvSharableDlMallocSpace_S {
 
   GCSrvDlMallocSpace dlmalloc_space_data_;
@@ -434,7 +437,7 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
 
 
-#if (ART_GC_SERVICE)
+
 
 
 // A space contains memory allocated for managed objects.
