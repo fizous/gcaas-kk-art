@@ -43,6 +43,7 @@ class GarbageCollector {
 #else
   GarbageCollector(Heap* heap, const std::string& name);
 #endif
+
   virtual ~GarbageCollector() { }
 
   const char* GetName() const {
