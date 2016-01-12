@@ -1087,6 +1087,14 @@ class Heap {
   void SetTotalWaitTime(uint64_t param) {
     total_wait_time_ = param;
   }
+
+  uint64_t GetTotalWaitTime() {
+    return total_wait_time_;
+  }
+
+  void SetMaxAllowedFootPrint(size_t param) {
+    max_allowed_footprint_ = param;
+  }
 #endif
   // Mark stack that we reuse to avoid re-allocating the mark stack.
   UniquePtr<accounting::ATOMIC_OBJ_STACK_T> mark_stack_;
