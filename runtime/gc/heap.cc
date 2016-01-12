@@ -1367,6 +1367,8 @@ void Heap::PreZygoteForkNoSpaceFork() {
 }
 
 
+
+#if (ART_GC_SERVICE)
 void Heap::FixHeapBitmapEntries() {
   accounting::SharedHeapBitmap* mark_bitmap =
       (accounting::SharedHeapBitmap*) GetMarkBitmap();
@@ -1482,7 +1484,7 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
   //create shared space here
 }
 
-
+#endif
 
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
