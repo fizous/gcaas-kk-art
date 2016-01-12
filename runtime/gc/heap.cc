@@ -1355,7 +1355,13 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   // Even if we waited for a GC we still need to do another GC since weaks allocated during the
   // last GC will not have necessarily been cleared.
 
-  if(!art::gcservice::GCServiceClient::RequestExplicitGC()) {
+  bool doRequest = true;
+
+#if ART_GC_SERVICE
+  doRequest = !(art::gcservice::GCServiceClient::RequestExplicitGC());
+#endif
+
+  if(doRequest) {
     mprofiler::VMProfiler::MProfMarkStartExplGCHWEvent();
     Thread* self = Thread::Current();
     //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();

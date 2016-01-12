@@ -610,7 +610,8 @@ template <typename T>
 class AtomicStack {
  public:
   // Capacity is how many elements we can store in the stack.
-  static AtomicStack* Create(const std::string& name, size_t capacity) {
+  static AtomicStack* Create(const std::string& name, size_t capacity,
+      bool shareMem = false) {
     UniquePtr<AtomicStack> mark_stack(new AtomicStack(name, capacity));
     mark_stack->Init();
     return mark_stack.release();
@@ -725,6 +726,11 @@ class AtomicStack {
 
   bool Contains(const T& value) const {
     return std::find(Begin(), End(), value) != End();
+  }
+
+
+  virtual T* GetBaseAddress(void) const {
+    return begin_;
   }
 
  private:
