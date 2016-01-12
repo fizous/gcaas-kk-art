@@ -194,7 +194,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
   virtual void SwapBitmaps();
   virtual void BindLiveToMarkBitmaps(void);
-  virtual accounting::SPACE_BITMAP* UnBindBitmaps(void);
+
 //  virtual void BindLiveToMarkBitmap(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
 //  virtual void UnBindBitmaps(void) EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
@@ -505,7 +505,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   //fizo, we need to override this
   // Swap the live and mark bitmaps of this space. This is used by the GC for concurrent sweeping.
   void SwapBitmaps();
-
+  virtual accounting::SPACE_BITMAP* UnBindBitmaps(void);
   // Turn ourself into a zygote space and return a new alloc space which has our unused memory.
   DL_MALLOC_SPACE* CreateZygoteSpace(const char* alloc_space_name, bool shareMem = false);
 
@@ -561,7 +561,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     recent_free_pos_ = newVal;
   }
 
-  mirror::Object* GetObjectRecentFreeObject(int pos) const{
+  const mirror::Object* GetObjectRecentFreeObject(int pos) {
     return recent_freed_objects_[pos].first;
   }
 
