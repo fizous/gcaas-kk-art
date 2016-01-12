@@ -26,6 +26,15 @@
 
 
 
+#ifndef DLMALLOC_SPACE_LOCK_MACRO
+  #if (ART_GC_SERVICE)
+    #define DLMALLOC_SPACE_LOCK_MACRO MutexLock mu(Thread::Current(), *getMu())
+  #else
+    #define DLMALLOC_SPACE_LOCK_MACRO MutexLock mu(Thread::Current(), lock_)
+  #endif
+#endif
+
+
 namespace art {
 namespace mprofiler {
 	class MProfiler;

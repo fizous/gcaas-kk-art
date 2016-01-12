@@ -633,23 +633,23 @@ size_t DlMallocSpace::Trim() {
 
 void DlMallocSpace::Walk(void(*callback)(void *start, void *end, size_t num_bytes, void* callback_arg),
                       void* arg) {
-  MutexLock mu(Thread::Current(), *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   mspace_inspect_all(GetMspace(), callback, arg);
   callback(NULL, NULL, 0, arg);  // Indicate end of a space.
 }
 
 size_t DlMallocSpace::GetFootprint() {
-  MutexLock mu(Thread::Current(), *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   return mspace_footprint(GetMspace());
 }
 
 size_t DlMallocSpace::GetFootprintLimit() {
-  MutexLock mu(Thread::Current(), *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   return mspace_footprint_limit(GetMspace());
 }
 
 void DlMallocSpace::SetFootprintLimit(size_t new_size) {
-  MutexLock mu(Thread::Current(), *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   VLOG(heap) << "DLMallocSpace::SetFootprintLimit " << PrettySize(new_size);
   // Compare against the actual footprint, rather than the Size(), because the heap may not have
   // grown all the way to the allowed size yet.
