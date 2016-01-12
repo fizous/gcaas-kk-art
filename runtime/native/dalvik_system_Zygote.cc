@@ -404,7 +404,7 @@ static bool NeedsNoRandomizeWorkaround() {
 }
 #endif
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 
 
 static pid_t GCSrvcForkGCService(void) {
@@ -708,7 +708,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
                                            jint debug_flags, jobjectArray rlimits, jint mount_external,
                                            jstring se_info, jstring se_name) {
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   return GCSrvcForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits,
       0, 0, mount_external, se_info, se_name, false);
 #else
@@ -720,7 +720,7 @@ static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint g
 static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
                                           jint debug_flags, jobjectArray rlimits,
                                           jlong permittedCapabilities, jlong effectiveCapabilities) {
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   pid_t pid = GCSrvcForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,

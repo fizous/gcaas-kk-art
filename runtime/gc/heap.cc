@@ -57,7 +57,7 @@
 #include "gc_profiler/MProfiler.h"
 #include "gc_profiler/MProfilerTypes.h"
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #include "service/global_allocator.h"
 #include "service/service_space.h"
 #include "service/service_client.h"
@@ -97,7 +97,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 
 
       capacity_(capacity),
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
       last_gc_type_(collector::kGcTypeNone),
       next_gc_type_(collector::kGcTypePartial),
@@ -115,18 +115,18 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       // Initially care about pauses in case we never get notified of process states, or if the JNI
       // code becomes broken.
       care_about_pause_times_(true),
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
       concurrent_start_bytes_(concurrent_gc_ ? initial_size - kMinConcurrentRemainingBytes
           :  std::numeric_limits<size_t>::max()),
 #endif
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
       total_bytes_freed_ever_(0),
       total_objects_freed_ever_(0),
 #endif
       large_object_threshold_(GC_HEAP_LARGE_OBJECT_THRESHOLD),
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
       num_bytes_allocated_(0),
       native_bytes_allocated_(0),
@@ -139,7 +139,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       verify_mod_union_table_(false),
       min_alloc_space_size_for_sticky_gc_(2 * MB),
       min_remaining_space_for_sticky_gc_(1 * MB),
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
       sub_record_meta_(reinterpret_cast<space::GCSrvcHeapSubRecord*>(calloc(1, sizeof(space::GCSrvcHeapSubRecord)))),
 #else
       last_trim_time_ms_(0),
@@ -157,7 +157,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
       reference_queueNext_offset_(0),
       reference_pendingNext_offset_(0),
       finalizer_reference_zombie_offset_(0),
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
       min_free_(min_free),
       max_free_(max_free),
@@ -170,7 +170,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   if (VLOG_IS_ON(heap) || VLOG_IS_ON(startup)) {
     LOG(INFO) << "Heap() entering";
   }
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   SetLastTimeTrim(0);
   SetAllocationRate(0);
   SetTotalBytesFreedEver(0);
@@ -279,13 +279,13 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
   // Default mark stack size in bytes.
   static const size_t default_mark_stack_size = /*128 * KB*/ 64 * KB;
   mark_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("mark stack", default_mark_stack_size,
-      false && (!Runtime::Current()->IsCompiler()) && (true || ART_GC_SERVICE)));
+      false && (!Runtime::Current()->IsCompiler()) && (ART_GC_SERVICE)));
   allocation_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("allocation stack",
                                                           max_allocation_stack_size_,
-       false &&       (!Runtime::Current()->IsCompiler()) &&       (true || ART_GC_SERVICE)));
+       false &&       (!Runtime::Current()->IsCompiler()) &&       (ART_GC_SERVICE)));
   live_stack_.reset(accounting::ATOMIC_OBJ_STACK_T::Create("live stack",
                                                     max_allocation_stack_size_,
-       false && (!Runtime::Current()->IsCompiler()) &&    (true || ART_GC_SERVICE)));
+       false && (!Runtime::Current()->IsCompiler()) &&    (ART_GC_SERVICE)));
 
   // It's still too early to take a lock because there are no threads yet, but we can create locks
   // now. We don't create it earlier to make it clear that you can't use locks during heap
@@ -883,7 +883,7 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
 
 void Heap::DumpSpaces() {
   for (const auto& space : continuous_spaces_) {
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
     accounting::BaseBitmap* live_bitmap = space->GetLiveBitmap();
     accounting::BaseBitmap* mark_bitmap = space->GetMarkBitmap();
 #else
@@ -1528,7 +1528,7 @@ void Heap::FlushAllocStack() {
 }
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 void Heap::MarkAllocStack(accounting::BaseBitmap* bitmap, accounting::SpaceSetMap* large_objects,
                           accounting::ATOMIC_OBJ_STACK_T* stack) {
 #else
@@ -1816,7 +1816,7 @@ class VerifyReferenceVisitor {
             accounting::ConstantsCardTable::kCardSize);
         LOG(ERROR) << "Card " << reinterpret_cast<void*>(card_addr) << " covers " << cover_begin
             << "-" << cover_end;
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
         accounting::BaseBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);
 #else
         accounting::SpaceBitmap* bitmap = heap_->GetLiveBitmap()->GetContinuousSpaceBitmap(obj);
@@ -2036,7 +2036,7 @@ bool Heap::VerifyMissingCardMarks() {
 }
 
 void Heap::SwapStacks() {
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   if(!accounting::ATOMIC_OBJ_STACK_T::SwapStacks(allocation_stack_.get(),
                                                           live_stack_.get())) {
     allocation_stack_.swap(live_stack_);
@@ -2550,7 +2550,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
   // concurrent_start_bytes_.
   SetConcStartBytes(std::numeric_limits<size_t>::max());
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   if(!art::gcservice::GCServiceClient::RequestConcGC()) {
     JNIEnv* env = self->GetJniEnv();
     DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
@@ -2641,7 +2641,7 @@ void Heap::RequestHeapTrim() {
 
    //LOG(ERROR) << "--------- Request Heap::Trim() ; no care about pause time-------------";
    if(false){
-     #if (true || ART_GC_SERVICE)
+     #if (ART_GC_SERVICE)
 
       art::gcservice::GCServiceClient::RequestHeapTrim();
     #endif

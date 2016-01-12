@@ -201,7 +201,7 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
   //LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
-#if true || ART_GC_SERVICE
+#if ART_GC_SERVICE
 
   CreateBitmaps(Begin(), Capacity(), shareMem);
 

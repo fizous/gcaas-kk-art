@@ -474,7 +474,7 @@ inline void MarkSweep::MarkObjectNonNullParallel(const Object* obj) {
   }
 }
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   DCHECK(!IsImmune(obj));
   // Try to take advantage of locality of references within a space, failing this find the space
@@ -940,7 +940,7 @@ class MarkStackTask : public Task {
   }
 };
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 class CardScanTask : public MarkStackTask<false> {
  public:
   CardScanTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, accounting::BaseBitmap* bitmap,
@@ -1135,7 +1135,7 @@ void MarkSweep::VerifyImageRoots() {
 }
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 class RecursiveMarkTask : public MarkStackTask<false> {
  public:
   RecursiveMarkTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
@@ -1958,7 +1958,7 @@ void MarkSweep::FinishPhase() {
 
   timings_.NewSplit("RequestHeapTrim");
   ApplyTrimming();
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   // Update the cumulative statistics
   IncTotalTimeNs(GetDurationNs());
   IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
