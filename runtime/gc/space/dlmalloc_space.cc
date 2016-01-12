@@ -130,6 +130,8 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
   DISALLOW_COPY_AND_ASSIGN(ValgrindDlMallocSpace);
 };
 
+
+#if ART_GC_SERVICE
 //size_t DlMallocSpace::bitmap_index_ = 0;
 size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
@@ -163,7 +165,7 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
 //       dlmalloc_space_data_->bitmap_index_;
    return _result;
 }
-
+#endif
 
 
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,

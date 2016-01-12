@@ -13,6 +13,9 @@
 #include "gc/space/dlmalloc_space.h"
 #include "gc/accounting/space_bitmap.h"
 
+
+#if ART_GC_SERVICE
+
 namespace art {
 namespace gc {
 namespace space {
@@ -274,6 +277,8 @@ typedef struct GCSrvceDlMallocSpace_S {
 
 
 
+
+#endif //ART_GC_SERVICE
 
 
 

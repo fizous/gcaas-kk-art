@@ -33,16 +33,7 @@ namespace accounting {
 
 
 
-void SpaceBitmap::Clear() {
-  if (Begin() != NULL) {
-    // This returns the memory to the system.  Successive page faults will return zeroed memory.
-    int result = madvise(Begin(), Size(), MADV_DONTNEED);
-//    int result = memset(Begin(), 0, Size());
-    if (result == -1) {
-      PLOG(FATAL) << "madvise failed";
-    }
-  }
-}
+
 
 std::string SpaceBitmap::GetName() const {
   return name_;
@@ -106,7 +97,16 @@ void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
 }
 
 #if (ART_GC_SERVICE)
-
+void SpaceBitmap::Clear() {
+  if (Begin() != NULL) {
+    // This returns the memory to the system.  Successive page faults will return zeroed memory.
+    int result = madvise(Begin(), Size(), MADV_DONTNEED);
+//    int result = memset(Begin(), 0, Size());
+    if (result == -1) {
+      PLOG(FATAL) << "madvise failed";
+    }
+  }
+}
 #else
 
 void SpaceBitmap::Clear() {
@@ -294,7 +294,7 @@ void SpaceBitmap::InOrderWalk(SpaceBitmap::Callback* callback, void* arg) {
   }
 }
 
-#endif
+#endif //ART_GC_SERVICE
 
 
 
