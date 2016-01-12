@@ -1025,6 +1025,10 @@ class Heap {
   uint64_t allocation_rate_;
 
 
+  size_t GetGrowthLimit() const {
+    return growth_limit_;
+  }
+
   uint64_t GetLastTimeTrim() {
     return last_trim_time_ms_;
   }
