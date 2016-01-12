@@ -708,10 +708,11 @@ class MarkSweep : public GarbageCollector {
   // Current space, we check this space first to avoid searching for the appropriate space for an
   // object.
   accounting::SPACE_BITMAP* current_mark_bitmap_;
-
+#if (ART_GC_SERVICE)
+#else
   // Cache java.lang.Class for optimization.
-  //mirror::Class* java_lang_Class_;
-
+  mirror::Class* java_lang_Class_;
+#endif
   accounting::ATOMIC_OBJ_STACK_T* mark_stack_;
 
 
@@ -721,8 +722,6 @@ class MarkSweep : public GarbageCollector {
 
 #if (ART_GC_SERVICE)
 #else
-  // Cache java.lang.Class for optimization.
-  mirror::Class* java_lang_Class_;
 
   // Immune range, every object inside the immune range is assumed to be marked.
   mirror::Object* immune_begin_;

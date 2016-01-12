@@ -42,27 +42,6 @@ Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     LOG(ERROR) << "Leaving Space Constructor";
 }
 
-#else
-Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy) :
-    name_space_data_(name),
-    gc_retention_policy_(gc_retention_policy){}
-
-#endif
-
-
-
-
-
-void Space::Dump(std::ostream& os) const {
-  os << GetName() << ":" << GetGcRetentionPolicy();
-}
-
-std::ostream& operator<<(std::ostream& os, const Space& space) {
-  space.Dump(os);
-  return os;
-}
-
-#if ART_GC_SERVICE
 ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_retention_policy,
                 byte* begin, byte* end,
                 GCSrvceContinuousSpace* cont_space_data) :
@@ -83,14 +62,6 @@ ContinuousSpace::ContinuousSpace(const std::string& name, GcRetentionPolicy gc_r
   cont_space_data_->begin_ = begin;
   cont_space_data_->end_ = end;
 }
-#else
-
-
-}
-#endif
-
-
-
 
 MemMapSpace::MemMapSpace(const std::string& name, MEM_MAP* mem_map, size_t initial_size,
             GcRetentionPolicy gc_retention_policy, GCSrvceContinuousSpace* cont_space_data)
@@ -110,6 +81,32 @@ DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
     live_objects_(new accounting::SpaceSetMap("large live objects")),
     mark_objects_(new accounting::SpaceSetMap("large marked objects")) {
 }
+#else
+Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy)
+    : name_(name), gc_retention_policy_(gc_retention_policy) { }
+
+DiscontinuousSpace::DiscontinuousSpace(const std::string& name,
+                                       GcRetentionPolicy gc_retention_policy) :
+    Space(name, gc_retention_policy),
+    live_objects_(new accounting::SpaceSetMap("large live objects")),
+    mark_objects_(new accounting::SpaceSetMap("large marked objects")) {
+}
+#endif
+
+
+
+
+
+void Space::Dump(std::ostream& os) const {
+  os << GetName() << ":" << GetGcRetentionPolicy();
+}
+
+std::ostream& operator<<(std::ostream& os, const Space& space) {
+  space.Dump(os);
+  return os;
+}
+
+
 
 }  // namespace space
 }  // namespace gc
