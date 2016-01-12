@@ -438,6 +438,7 @@ public:
   	return 0;
   }
 
+  virtual void initEventBulk(void);
   virtual void initMarkerManager(void);
 
   virtual void notifyFreeing(size_t objSize, mirror::Object*) {
@@ -480,6 +481,7 @@ public:
 
   virtual void addEventMarker(GCMMP_ACTIVITY_ENUM);
   virtual void dumpEventMarks(void);
+  virtual bool dumpEventArchive(EventMarkerArchive* event_archive);
 
 
 //  virtual void AddEventMarker(GCMMP_ACTIVITY_ENUM){}

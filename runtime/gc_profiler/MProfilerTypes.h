@@ -91,6 +91,13 @@ typedef struct EventMarker_S {
 	GCMMP_ACTIVITY_ENUM evType;
 } EventMarker;
 
+
+typedef struct EventMarkerArchive_S {
+  EventMarker* markers_;
+  EventMarkerArchive_S* next_event_bulk_;
+} EventMarkerArchive;
+
+
 /*
  * Container of all the events in the profiler
  */
@@ -99,6 +106,8 @@ typedef struct EventMarkerManager_S {
 	int32_t currIndex;
 	/* pointer to the area of the memory holding all the events */
 	EventMarker* markers; //
+	EventMarkerArchive* events_archive_;
+	int32_t archiveCnt_;
 } EventMarkerManager;
 
 

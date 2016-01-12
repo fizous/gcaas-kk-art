@@ -953,15 +953,58 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		_address->currHSize = allocatedBytesData.cntTotal.load();
 		_address->currTime = GetRelevantRealTime();
 	}
-	if(markerManager->currIndex > kGCMMPMaxEventsCounts) {
-		LOG(ERROR) << "Index of events exceeds the maximum allowed";
+	if(markerManager->currIndex >= kGCMMPMaxEventsCounts) {
+	  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->currIndex";
+	  initMarkerManager();
+
 	}
 }
+
+
+
+void VMProfiler::initEventBulk(void) {
+  size_t capacity =
+      RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
+
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(StringPrintf("EventsTimeLine%d", markerManager->archiveCnt_).c_str() , NULL,
+      capacity, PROT_READ | PROT_WRITE));
+  if(markerManager->markers != NULL) {
+    EventMarkerArchive* new_bulk_archive =
+        (EventMarkerArchive*) calloc(1, sizeof(EventMarkerManager));
+    new_bulk_archive->markers_ = markerManager->markers;
+    new_bulk_archive->next_event_bulk_ = NULL;
+
+    EventMarkerArchive* last_archive_bulk = markerManager->events_archive_;
+    if(last_archive_bulk == NULL) {
+      markerManager->events_archive_ = new_bulk_archive;
+    } else {
+      while(last_archive_bulk->next_event_bulk_ != NULL) {
+        last_archive_bulk = last_archive_bulk->next_event_bulk_;
+      }
+      last_archive_bulk->next_event_bulk_ = new_bulk_archive;
+    }
+    markerManager->archiveCnt_++;
+  }
+
+
+  if (mem_map.get() == NULL) {
+    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity);
+    return;
+  } else {
+    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity);
+  }
+  markerManager->currIndex = 0;
+  markerManager->markers = (EventMarker*)(mem_map->Begin());
+}
+
 
 void VMProfiler::initMarkerManager(void) {
 	LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
 
-	evt_manager_lock_ = new Mutex("Event manager lock");
+	if(evt_manager_lock_ == NULL)
+	  evt_manager_lock_ = new Mutex("Event manager lock");
 	Thread* self = Thread::Current();
 	{
 		MutexLock mu(self, *evt_manager_lock_);
@@ -970,21 +1013,31 @@ void VMProfiler::initMarkerManager(void) {
 			LOG(ERROR) <<  "no need to initialize event manager ";
 			return;
 		}
-		size_t capacity =
-				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
-		markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-		UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
-				capacity, PROT_READ | PROT_WRITE));
-		markerManager->currIndex = 0;
-		if (mem_map.get() == NULL) {
-			LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-					<< PrettySize(capacity);
-			return;
-		} else {
-			LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-					<< PrettySize(capacity);
+		if(markerManager == NULL) {
+		  markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
+		  markerManager->events_archive_ = NULL;
+		  markerManager->markers = NULL;
+		  markerManager->currIndex = 0;
+		  markerManager->archiveCnt_ = 0;
 		}
-		markerManager->markers = (EventMarker*)(mem_map->Begin());
+		initEventBulk();
+
+
+//		size_t capacity =
+//				RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
+//
+//		UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
+//				capacity, PROT_READ | PROT_WRITE));
+//		markerManager->currIndex = 0;
+//		if (mem_map.get() == NULL) {
+//			LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+//					<< PrettySize(capacity);
+//			return;
+//		} else {
+//			LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+//					<< PrettySize(capacity);
+//		}
+//		markerManager->markers = (EventMarker*)(mem_map->Begin());
 
 		//mem_map.release();
 	}
@@ -1050,32 +1103,53 @@ inline void PerfCounterProfiler::DumpEventMarks(void){
 	dumpEventMarks();
 }
 
+
+bool VMProfiler::dumpEventArchive(EventMarkerArchive* event_archive) {
+
+  size_t dataLength =
+      sizeof(EventMarker) * kGCMMPMaxEventsCounts;
+  bool successWrite = dump_file_->WriteFully(event_archive->markers_, dataLength);
+
+  return successWrite;
+}
+
 void VMProfiler::dumpEventMarks(void) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *evt_manager_lock_);
-
-	size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
-
-	bool successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
+	bool successWrite = true;
+	EventMarkerArchive* _event_archive_iter = markerManager->events_archive_;
+	while(successWrite && _event_archive_iter != NULL) {
+	  successWrite = (successWrite && dumpEventArchive(_event_archive_iter));
+	  _event_archive_iter = _event_archive_iter->next_event_bulk_;
+	}
 	if(successWrite) {
-		GCPDumpEndMarker(dump_file_);
-		LOG(ERROR) << "<<<< Succeeded dump to file" ;
-		//successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	  size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
+	  if(dataLength > 0) {
+	    successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
+	    if(successWrite) {
+	      GCPDumpEndMarker(dump_file_);
+	    }
+	  }
 	}
 
-	LOG(ERROR) << "<<<< total written: " << dataLength <<
+
+
+
+	if(false) {
+	  LOG(ERROR) << "<<<< total written: " << dataLength <<
 			", Sizeof(EventMarker):"<< sizeof(EventMarker)
 			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
 			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
 
-	for(int _indIter = 0; _indIter < markerManager->currIndex; _indIter++) {
-		EventMarker* marker = markerManager->markers + _indIter;
-		if(marker == NULL)
-			return;
-		LOG(ERROR) << "---->>>>> data written:<<["<<_indIter<<"] evtYpe:" <<
-				marker->evType << "; currHSize:" << marker->currHSize << "; time:"
-				<< marker->currTime;
+    for(int _indIter = 0; _indIter < markerManager->currIndex; _indIter++) {
+      EventMarker* marker = markerManager->markers + _indIter;
+      if(marker == NULL)
+        return;
+      LOG(ERROR) << "---->>>>> data written:<<["<<_indIter<<"] evtYpe:" <<
+          marker->evType << "; currHSize:" << marker->currHSize << "; time:"
+          << marker->currTime;
 
+    }
 	}
 }
 
