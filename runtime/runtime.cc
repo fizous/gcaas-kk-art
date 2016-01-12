@@ -936,6 +936,9 @@ bool Runtime::InitZygote() {
   return true;
 }
 
+
+
+#if ART_GC_SERVICE
 void Runtime::DidForkFromZygote(bool initialize) {
   is_zygote_ = false;
   //heap_->DumpSpaces();
@@ -955,6 +958,22 @@ void Runtime::DidForkFromZygote(bool initialize) {
     //heap_->DumpSpaces();
   }
 }
+
+
+#else
+void Runtime::DidForkFromZygote(bool initialize) {
+  is_zygote_ = false;
+
+  // Create the thread pool.
+  heap_->CreateThreadPool();
+
+  StartSignalCatcher();
+
+  // Start the JDWP thread. If the command-line debugger flags specified "suspend=y",
+  // this will pause the runtime, so we probably want this to come last.
+  Dbg::StartJdwp();
+}
+#endif
 
 void Runtime::StartSignalCatcher() {
   if (!is_zygote_) {

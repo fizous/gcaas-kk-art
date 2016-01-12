@@ -41,6 +41,7 @@ StickyMarkSweep::StickyMarkSweep(Heap* heap, bool is_concurrent, const std::stri
   cumulative_timings_.SetName(GetName());
 }
 #endif
+
 void StickyMarkSweep::BindBitmaps() {
   PartialMarkSweep::BindBitmaps();
 
@@ -50,7 +51,11 @@ void StickyMarkSweep::BindBitmaps() {
   // and live bitmap is that marking the objects will place them in the live bitmap.
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) {
-      if(!space->HasBitmapsBound()) {
+      bool shouldBind = false;
+#if ART_GC_SERVICE
+      shouldBind = space->HasBitmapsBound();
+#endif
+      if(!shouldBind) {
         BindLiveToMarkBitmap(space);
       }
       //BindLiveToMarkBitmap(space);
