@@ -91,13 +91,19 @@ namespace collector {
 
 class MarkSweep : public GarbageCollector {
  public:
+#if ART_GC_SERVICE
+
   explicit MarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
           space::GCSrvceCashedStatsCounters* stats_record =
               (space::GCSrvceCashedStatsCounters*) calloc(1, sizeof(space::GCSrvceCashedStatsCounters)),
       const std::string& name_prefix = "");
+#else
+  explicit MarkSweep(Heap* heap, bool is_concurrent,
+      const std::string& name_prefix = "");
 
+#endif
   ~MarkSweep() {}
 
   virtual void InitializePhase();

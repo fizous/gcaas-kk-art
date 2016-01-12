@@ -25,6 +25,8 @@ namespace art {
 namespace gc {
 namespace collector {
 
+#if ART_GC_SERVICE
+
 PartialMarkSweep::PartialMarkSweep(Heap* heap, bool is_concurrent,
     space::GCSrvceCashedReferences* cashed_reference_record,
     space::GCSrvceCashedStatsCounters* stats_record,
@@ -33,6 +35,13 @@ PartialMarkSweep::PartialMarkSweep(Heap* heap, bool is_concurrent,
         name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
   cumulative_timings_.SetName(GetName());
 }
+
+#else
+PartialMarkSweep::PartialMarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix)
+    : MarkSweep(heap, is_concurrent, name_prefix + (name_prefix.empty() ? "" : " ") + "partial") {
+  cumulative_timings_.SetName(GetName());
+}
+#endif
 
 void PartialMarkSweep::BindBitmaps() {
   MarkSweep::BindBitmaps();

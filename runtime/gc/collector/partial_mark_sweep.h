@@ -29,13 +29,16 @@ class PartialMarkSweep : public MarkSweep {
   virtual GcType GetGcType() const {
     return kGcTypePartial;
   }
-
+#if ART_GC_SERVICE
   explicit PartialMarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),
           space::GCSrvceCashedStatsCounters* stats_record =
               (space::GCSrvceCashedStatsCounters*) calloc(1, sizeof(space::GCSrvceCashedStatsCounters)),
           const std::string& name_prefix = "");
+#else
+  explicit PartialMarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
+#endif
   ~PartialMarkSweep() {}
 
  protected:

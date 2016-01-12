@@ -30,13 +30,16 @@ class StickyMarkSweep : public PartialMarkSweep {
   GcType GetGcType() const {
     return kGcTypeSticky;
   }
-
+#if ART_GC_SERVICE
   explicit StickyMarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*)calloc(1, sizeof(space::GCSrvceCashedReferences)),
           space::GCSrvceCashedStatsCounters* time_stats_record =
               (space::GCSrvceCashedStatsCounters*) calloc(1, sizeof(space::GCSrvceCashedStatsCounters)),
               const std::string& name_prefix = "");
+#else
+  explicit StickyMarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix = "");
+#endif
   ~StickyMarkSweep() {}
 
  protected:
