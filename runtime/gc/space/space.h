@@ -32,7 +32,7 @@
 #define MARKSWEEP_COLLECTORS_ARRAY_CAPACITY   6
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
 #ifndef DLMALLOC_SPACE_T
 #define DLMALLOC_SPACE_T DlMallocSpace
@@ -434,7 +434,7 @@ typedef struct GCSrvSharableDlMallocSpace_S {
 
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 
 
 // A space contains memory allocated for managed objects.
@@ -1040,7 +1040,7 @@ class Space {
     return name_.c_str();
   }
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   // The policy of when objects are collected associated with this space.
   GcRetentionPolicy GetGcRetentionPolicy() const {
     return gc_retention_policy_;
@@ -1163,7 +1163,7 @@ class ContinuousSpace : public Space {
  public:
   // Address at which the space begins
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   virtual byte* Begin() const {
     return begin_;
   }

@@ -28,7 +28,7 @@
 #include "globals.h"
 #include "utils.h"
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #define MEM_MAP MemBaseMap
 #else
 #define MEM_MAP MemMap
@@ -111,7 +111,7 @@ typedef AtomicStackData<mirror::Object*> StructuredObjectStackData;
 
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 
 // Used to keep track of mmap segments.
 class MemBaseMap {

@@ -36,7 +36,7 @@ class Heap;
 
 namespace accounting {
 
-#if true || ART_GC_SERVICE
+#if ART_GC_SERVICE
 
 
 class SharedHeapBitmap;

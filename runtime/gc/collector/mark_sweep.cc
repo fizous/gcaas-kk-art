@@ -1966,11 +1966,16 @@ void MarkSweep::FinishPhase() {
   IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
   IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
 #else
-  total_time_ns_ += GetDurationNs();
-  total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
-                                           std::plus<uint64_t>());
-  total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
-  total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
+  IncTotalTimeNs(GetDurationNs());
+  IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+                                           std::plus<uint64_t>()));
+  IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
+  IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+  //  total_time_ns_ += GetDurationNs();
+//  total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+//                                           std::plus<uint64_t>());
+//  total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
+//  total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
 #endif
   // Ensure that the mark stack is empty.
   CHECK(mark_stack_->IsEmpty());

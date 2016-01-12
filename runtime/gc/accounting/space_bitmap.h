@@ -32,7 +32,7 @@
 
 #define HEAP_BITMAPS_ARR_CAPACITY 3
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #define SPACE_BITMAP  BaseBitmap
 #else
 #define SPACE_BITMAP  SpaceBitmap
@@ -49,7 +49,7 @@ class Heap;
 namespace accounting {
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 
 
 

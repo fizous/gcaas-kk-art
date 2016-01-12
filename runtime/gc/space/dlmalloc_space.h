@@ -41,7 +41,7 @@ namespace space {
 
 //class SharedDlMallocSpace;
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 
 
 

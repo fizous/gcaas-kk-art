@@ -29,7 +29,7 @@
 
 
 #ifndef ATOMIC_STACK_KLASS
-  #if (true || ART_GC_SERVICE)
+  #if (ART_GC_SERVICE)
     #define ATOMIC_STACK_KLASS    StructuredAtomicStack
     #define ATOMIC_OBJ_STACK_T    StructuredObjectStack
   #else
@@ -64,7 +64,7 @@ namespace accounting {
   class ModUnionTableBitmap;
   class MarkStackChunk;
   typedef ATOMIC_STACK_KLASS<mirror::Object*> ATOMIC_OBJ_STACK_T;
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #define SPACE_BITMAP BaseBitmap
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T
 #define ABSTRACT_CONTINUOUS_SPACE_T ContinuousSpace
@@ -238,7 +238,7 @@ class MarkSweep : public GarbageCollector {
     android_atomic_add(static_cast<int32_t>(val), &(stats_counters_->freed_large_objects_));
   }
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
   void IncTotalTimeNs(uint64_t param) {
     time_stats_->total_time_ns_ += param;
   }
@@ -643,7 +643,7 @@ class MarkSweep : public GarbageCollector {
   AtomicInteger atomic_finger_;
 
 
-#if (true || ART_GC_SERVICE)
+#if (ART_GC_SERVICE)
 #else
   // Number of non large object bytes freed in this collection.
   AtomicInteger freed_bytes_;
