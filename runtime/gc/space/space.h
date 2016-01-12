@@ -45,6 +45,9 @@
 #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
 #define DL_MALLOC_SPACE  DlMallocSpace
+#ifndef ABSTRACT_CONTINUOUS_SPACE_T
+#define ABSTRACT_CONTINUOUS_SPACE_T ContinuousSpace
+#endif
 #define CONTINUOUS_SPACE_T ContinuousSpace
 #endif
 
