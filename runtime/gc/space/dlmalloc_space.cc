@@ -348,7 +348,7 @@ mirror::Object* DlMallocSpace::Alloc(Thread* self, size_t num_bytes, size_t* byt
 mirror::Object* DlMallocSpace::AllocWithGrowth(Thread* self, size_t num_bytes, size_t* bytes_allocated) {
   mirror::Object* result;
   {
-    MutexLock mu(self, *getMu());
+    DLMALLOC_SPACE_LOCK_MACRO;
     // Grow as much as possible within the mspace.
     size_t max_allowed = Capacity();
     mspace_set_footprint_limit(GetMspace(), max_allowed);
@@ -491,7 +491,7 @@ void DlMallocSpace::RegisterRecentFree(mirror::Object* ptr) {
 
 
 size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
-  MutexLock mu(self, *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   if (kDebugSpaces) {
     CHECK(ptr != NULL);
     CHECK(Contains(ptr)) << "Free (" << ptr << ") not in bounds of heap " << *this;
@@ -511,7 +511,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 
 
 size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){
-  MutexLock mu(self, *getMu());
+  DLMALLOC_SPACE_LOCK_MACRO;
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
   return 0;
 }
@@ -536,7 +536,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
   }
 
   if (kRecentFreeCount > 0) {
-    MutexLock mu(self, *getMu());
+    DLMALLOC_SPACE_LOCK_MACRO;
     for (size_t i = 0; i < num_ptrs; i++) {
       RegisterRecentFree(ptrs[i]);
     }
@@ -557,7 +557,7 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
   }
 
   {
-    MutexLock mu(self, *getMu());
+    DLMALLOC_SPACE_LOCK_MACRO;
     UpdateBytesAllocated(-bytes_freed);
     UpdateObjectsAllocated(-num_ptrs);//num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
@@ -621,7 +621,7 @@ size_t DlMallocSpace::GCPGetAllocationSize(const mirror::Object* obj){
 
 size_t DlMallocSpace::Trim() {
 	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
-  MutexLock mu(Thread::Current(), *getMu());
+	DLMALLOC_SPACE_LOCK_MACRO;
   // Trim to release memory at the end of the space.
   mspace_trim(GetMspace(), 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
