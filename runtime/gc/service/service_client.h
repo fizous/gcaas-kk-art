@@ -8,6 +8,9 @@
 #ifndef ART_RUNTIME_GC_SERVICE_SERVICE_CLIENT_H_
 #define ART_RUNTIME_GC_SERVICE_SERVICE_CLIENT_H_
 
+
+#if ART_GC_SERVICE
+
 #include "gc/space/dlmalloc_space.h"
 #include "ipcfs/ipcfs.h"
 #include "gc/collector/ipc_mark_sweep.h"
@@ -58,5 +61,8 @@ class GCServiceClient {
 
 }//namespace gcservice
 }//namespace art
+
+
+#endif //ART_GC_SERVICE
 
 #endif /* ART_RUNTIME_GC_SERVICE_SERVICE_CLIENT_H_ */

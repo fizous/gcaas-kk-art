@@ -19,6 +19,8 @@
 #include "partial_mark_sweep.h"
 
 
+
+#if ART_GC_SERVICE
 #define IPC_MARKSWEEP_VLOG_ON 0
 #define IPC_MARKSWEEP_VLOG(severity)  if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
@@ -435,5 +437,7 @@ class IPCStickyMarkSweep : public IPCPartialMarkSweep {
 }
 }
 }
+
+#endif
 
 #endif /* ART_RUNTIME_GC_COLLECTOR_IPC_MARK_SWEEP_H_ */
