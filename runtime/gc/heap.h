@@ -416,6 +416,10 @@ class Heap {
 
 #else
 
+  int32_t GetAtomicNativeBytesAllocated() {
+    return native_bytes_allocated_.load();
+  }
+
   bool CASAtomicNativeBytesAllocated(int32_t expected, int32_t new_val) {
     return native_bytes_allocated_.compare_and_swap(expected, new_val);
   }
@@ -1042,6 +1046,25 @@ class Heap {
   // and the start of the current one.
   uint64_t allocation_rate_;
 
+  size_t GetNativeFootPrintGCWaterMark() const {
+    return native_footprint_gc_watermark_;
+  }
+
+  void IncTotalWaitTime(uint64_t param) {
+    total_wait_time_ += param;
+  }
+
+  void SetNextGCType(collector::GcType val)  {
+    next_gc_type_ = val;
+  }
+
+  collector::GcType GetNextGCType() const {
+    return next_gc_type_;
+  }
+
+  void IncTotalBytesFreedEver(size_t param) {
+    total_bytes_freed_ever_ += param;
+  }
 
   void SetNativeFootPrintGCWaterMark(size_t param)  {
     native_footprint_gc_watermark_ = param;
