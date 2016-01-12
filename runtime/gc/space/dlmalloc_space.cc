@@ -375,168 +375,6 @@ void DlMallocSpace::SetGrowthLimit(size_t growth_limit) {
   }
 }
 
-
-DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_space_name,
-    GCSrvSharableDlMallocSpace* sharable_dlmalloc_space, bool shareMem) {
-  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
-  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(Begin()));
-  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(End()));
-  DCHECK(IsAligned<kPageSize>(Begin()));
-  DCHECK(IsAligned<kPageSize>(End()));
-  size_t size = RoundUp(Size(), kPageSize);
-  // Trim the heap so that we minimize the size of the Zygote space.
-  Trim();
-  // Trim our mem-map to free unused pages.
-  GetMemMap()->UnMapAtEnd(End());
-  // TODO: Not hardcode these in?
-  const size_t starting_size = kPageSize;
-  const size_t initial_size = 2 * MB;
-  // Remaining size is for the new alloc space.
-  //TODO: fizo: check what's wrong here?
-  const size_t growth_limit = Capacity() - size;
-  const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "A] Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
-             << "End " << reinterpret_cast<const void*>(End()) << "\n"
-             << "Size " << size << "\n"
-             << "GrowthLimit " << Capacity() << "\n"
-             << "Capacity " << Capacity();
-  SetGrowthLimit(RoundUp(size, kPageSize));
-  SetFootprintLimit(RoundUp(size, kPageSize));
-  // FIXME: Do we need reference counted pointers here?
-  // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
-  VLOG(heap) << "Creating new AllocSpace: ";
-  VLOG(heap) << "Size " << GetMemMap()->Size();
-  VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
-  VLOG(heap) << "Capacity " << PrettySize(capacity);
-  MEM_MAP* _space_mem_map = NULL;
-  DL_MALLOC_SPACE* alloc_space = NULL;
-
-  GCSrvSharableDlMallocSpace* _struct_alloc_space = sharable_dlmalloc_space;
-  if(_struct_alloc_space == NULL) {
-    _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
-  }
-
-  if((gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) && shareMem) { // share the zygote space
-    AShmemMap* _ptr = GetMemMap()->GetAshmemMapAddress();
-//    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
-//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
-//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
-//        ", size:" << _ptr->size_;
-    AShmemMap* _new_ptr =
-        &(_struct_alloc_space->heap_meta_.reshared_zygote_.zygote_space_);
-    GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(_ptr,_new_ptr));
-//    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
-//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
-//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
-//        ", size:" << _new_ptr->size_ << ", old_size:" << _ptr->size_;
-    free(_ptr);
-
-
-    if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
-      //share the bitmaps too
-      //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
-      accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
-      accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
-      if(_live_bitmap_->IsStructuredBitmap()) {
-        accounting::SharedSpaceBitmap* _live_bmap_ =
-                      reinterpret_cast<accounting::SharedSpaceBitmap*>(_live_bitmap_);
-
-        accounting::GCSrvceBitmap* _backup =  _live_bmap_->bitmap_data_;
-
-        _live_bmap_->ShareBitmapMemory(
-            &(_struct_alloc_space->heap_meta_.reshared_zygote_.live_bitmap_));
-
-        free(_backup);
-
-
-      }
-
-
-      if(_mark_bitmap_->IsStructuredBitmap()) {
-//        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
-        accounting::SharedSpaceBitmap* _mark_bmap_ =
-                      reinterpret_cast<accounting::SharedSpaceBitmap*>(_mark_bitmap_);
-        //accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
-        _mark_bmap_->ShareBitmapMemory(
-            &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_));
-
-
-//        AShmemMap* _ashmem_p = &(_mark_bmap_->bitmap_data_->mem_map_);
-//        if(!MemBaseMap::IsAShmemShared(_ashmem_p)) {
-//          LOG(ERROR) << "IsAShmem...the bitmap was not originally shared";
-//          LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
-//              ", begin:" <<
-//                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
-//              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
-//              ", size:" << MEM_MAP::AshmemSize(_ashmem_p) <<
-//              ", heap_limit=" << _mark_bmap_->HeapLimit() <<
-//              ", heap_begin=" << _mark_bmap_->HeapBegin() ;
-//          //LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
-//          memcpy(&(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_),
-//              (_mark_bmap_->bitmap_data_),
-//              SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
-//          AShmemMap* _new_ashmem_p =
-//              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_.mem_map_);
-//          MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
-//          _mark_bmap_->bitmap_data_ =
-//              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_);
-//          LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
-//              ", begin:" <<
-//                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
-//              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
-//              ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
-//              ", heap_limit=" << _mark_bmap_->HeapLimit() <<
-//              ", heap_begin=" << _mark_bmap_->HeapBegin() ;
-//
-//          //LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
-//        }
-
-//        if(_mark_bmap_->bitmap_data_->mem_map_.flags_ == )
-//        accounting::SpaceBitmap* _mark_bmap_ =
-//            reinterpret_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
-//        AShmemMap* _ptr_ashmem = _mark_bmap_->GetMemMap()->GetAshmemMapAddress();
-//        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
-//            ", begin:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->Begin()) <<
-//            ", end:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->End()) <<
-//            ", size:" << _ptr_ashmem->size_;
-      }
-
-
-    }
-  }
-
-  _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
-                                    capacity, PROT_READ | PROT_WRITE, shareMem,
-                          &(_struct_alloc_space->dlmalloc_space_data_.memory_));
-  UniquePtr<MEM_MAP> mem_map(_space_mem_map);
-  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
-  // Protect memory beyond the initial size.
-  byte* end = mem_map->Begin() + starting_size;
-  if (capacity - initial_size > 0) {
-    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
-          alloc_space_name);
-  }
-
-  /* test sharing zygote space */
-//  byte* old_zyg = GetMspace();
-//  CHECK_MEMORY_CALL(munmap, (old_zyg, size), "zygote - mspace");
-//  int _fd = 0;
-//  byte* _new_zygote_ptr = reinterpret_cast<byte*>(mmap(old_zyg, size,
-//        prot, MAP_SHARED | MAP_FIXED, _fd, 0));
-
-
-  alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
-        mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
-
-
-  live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
-  CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
-  mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
-  CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
-  VLOG(heap) << "zygote space creation done";
-  return alloc_space;
-}
-
 DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     bool shareMem) {
   SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
@@ -572,6 +410,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   MEM_MAP* _space_mem_map = NULL;
   DL_MALLOC_SPACE* alloc_space = NULL;
+#if ART_GC_SERVICE
   if(shareMem) {
     GCSrvSharableDlMallocSpace* _struct_alloc_space =
         SharableDlMallocSpace::AllocateDataMemory();
@@ -603,6 +442,23 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
     alloc_space = new DlMallocSpace(alloc_space_name, mem_map.release(),
         mspace, End(), end, growth_limit, shareMem);
   }
+#else
+  _space_mem_map = MEM_MAP::MapAnonymous(alloc_space_name, End(),
+      capacity, PROT_READ | PROT_WRITE, shareMem);
+  UniquePtr<MEM_MAP> mem_map(_space_mem_map);
+  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
+  // Protect memory beyond the initial size.
+  byte* end = mem_map->Begin() + starting_size;
+  if (capacity - initial_size > 0) {
+    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+        alloc_space_name);
+  }
+  alloc_space = new DlMallocSpace(alloc_space_name, mem_map.release(),
+      mspace, End(), end, growth_limit, shareMem);
+#endif
+
+
+
 
   live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
   CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
@@ -907,6 +763,8 @@ IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
   return NULL;
 }
 
+
+#if (ART_GC_SERVICE)
 const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
     "com.aurorasoftworks.quadrant.ui.professional",
     "purdue.dacapo",
@@ -914,6 +772,170 @@ const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
     "com.pandora.android",
     "purdue.specjvm98"
 };
+
+
+
+DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_space_name,
+    GCSrvSharableDlMallocSpace* sharable_dlmalloc_space, bool shareMem) {
+  SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(End()), kPageSize)));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(Begin()));
+  DCHECK(IsAligned<accounting::ConstantsCardTable::kCardSize>(End()));
+  DCHECK(IsAligned<kPageSize>(Begin()));
+  DCHECK(IsAligned<kPageSize>(End()));
+  size_t size = RoundUp(Size(), kPageSize);
+  // Trim the heap so that we minimize the size of the Zygote space.
+  Trim();
+  // Trim our mem-map to free unused pages.
+  GetMemMap()->UnMapAtEnd(End());
+  // TODO: Not hardcode these in?
+  const size_t starting_size = kPageSize;
+  const size_t initial_size = 2 * MB;
+  // Remaining size is for the new alloc space.
+  //TODO: fizo: check what's wrong here?
+  const size_t growth_limit = Capacity() - size;
+  const size_t capacity = Capacity() - size;
+  LOG(ERROR) << "A] Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+             << "End " << reinterpret_cast<const void*>(End()) << "\n"
+             << "Size " << size << "\n"
+             << "GrowthLimit " << Capacity() << "\n"
+             << "Capacity " << Capacity();
+  SetGrowthLimit(RoundUp(size, kPageSize));
+  SetFootprintLimit(RoundUp(size, kPageSize));
+  // FIXME: Do we need reference counted pointers here?
+  // Make the two spaces share the same mark bitmaps since the bitmaps span both of the spaces.
+  VLOG(heap) << "Creating new AllocSpace: ";
+  VLOG(heap) << "Size " << GetMemMap()->Size();
+  VLOG(heap) << "GrowthLimit " << PrettySize(growth_limit);
+  VLOG(heap) << "Capacity " << PrettySize(capacity);
+  MEM_MAP* _space_mem_map = NULL;
+  DL_MALLOC_SPACE* alloc_space = NULL;
+
+  GCSrvSharableDlMallocSpace* _struct_alloc_space = sharable_dlmalloc_space;
+  if(_struct_alloc_space == NULL) {
+    _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
+  }
+
+  if((gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) && shareMem) { // share the zygote space
+    AShmemMap* _ptr = GetMemMap()->GetAshmemMapAddress();
+//    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
+//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
+//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
+//        ", size:" << _ptr->size_;
+    AShmemMap* _new_ptr =
+        &(_struct_alloc_space->heap_meta_.reshared_zygote_.zygote_space_);
+    GetMemMap()->SetAshmemAddress(MEM_MAP::ShareAShmemMap(_ptr,_new_ptr));
+//    LOG(ERROR) << ".....GCservice .. Done Resharing Zygote......" <<
+//        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
+//        ", end:" << reinterpret_cast<const void*>(GetMemMap()->End()) <<
+//        ", size:" << _new_ptr->size_ << ", old_size:" << _ptr->size_;
+    free(_ptr);
+
+
+    if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+      //share the bitmaps too
+      //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
+      accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();
+      accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
+      if(_live_bitmap_->IsStructuredBitmap()) {
+        accounting::SharedSpaceBitmap* _live_bmap_ =
+                      reinterpret_cast<accounting::SharedSpaceBitmap*>(_live_bitmap_);
+
+        accounting::GCSrvceBitmap* _backup =  _live_bmap_->bitmap_data_;
+
+        _live_bmap_->ShareBitmapMemory(
+            &(_struct_alloc_space->heap_meta_.reshared_zygote_.live_bitmap_));
+
+        free(_backup);
+
+
+      }
+
+
+      if(_mark_bitmap_->IsStructuredBitmap()) {
+//        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......";// <<
+        accounting::SharedSpaceBitmap* _mark_bmap_ =
+                      reinterpret_cast<accounting::SharedSpaceBitmap*>(_mark_bitmap_);
+        //accounting::GCSrvceBitmap* _backup =  _mark_bmap_->bitmap_data_;
+        _mark_bmap_->ShareBitmapMemory(
+            &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_));
+
+
+//        AShmemMap* _ashmem_p = &(_mark_bmap_->bitmap_data_->mem_map_);
+//        if(!MemBaseMap::IsAShmemShared(_ashmem_p)) {
+//          LOG(ERROR) << "IsAShmem...the bitmap was not originally shared";
+//          LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
+//              ", begin:" <<
+//                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+//              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_ashmem_p)) <<
+//              ", size:" << MEM_MAP::AshmemSize(_ashmem_p) <<
+//              ", heap_limit=" << _mark_bmap_->HeapLimit() <<
+//              ", heap_begin=" << _mark_bmap_->HeapBegin() ;
+//          //LOG(ERROR) << "dumping old_bitmap.." << mark_bitmap_;
+//          memcpy(&(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_),
+//              (_mark_bmap_->bitmap_data_),
+//              SERVICE_ALLOC_ALIGN_BYTE(accounting::GCSrvceBitmap));
+//          AShmemMap* _new_ashmem_p =
+//              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_.mem_map_);
+//          MEM_MAP::ShareAShmemMap(_ashmem_p, _new_ashmem_p);
+//          _mark_bmap_->bitmap_data_ =
+//              &(_struct_alloc_space->heap_meta_.reshared_zygote_.mark_bitmap_);
+//          LOG(ERROR) << ".....GCservice .. end Resharing Zygote bitmap......" <<
+//              ", begin:" <<
+//                reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+//              ", end:" << reinterpret_cast<const void*>(MEM_MAP::AshmemBegin(_new_ashmem_p)) <<
+//              ", size:" << MEM_MAP::AshmemSize(_new_ashmem_p)<<
+//              ", heap_limit=" << _mark_bmap_->HeapLimit() <<
+//              ", heap_begin=" << _mark_bmap_->HeapBegin() ;
+//
+//          //LOG(ERROR) << "dumping new_bitmap.." << mark_bitmap_;
+//        }
+
+//        if(_mark_bmap_->bitmap_data_->mem_map_.flags_ == )
+//        accounting::SpaceBitmap* _mark_bmap_ =
+//            reinterpret_cast<accounting::SpaceBitmap*>(_mark_bitmap_);
+//        AShmemMap* _ptr_ashmem = _mark_bmap_->GetMemMap()->GetAshmemMapAddress();
+//        LOG(ERROR) << ".....GCservice .. Start Resharing Zygote bitmap......" <<
+//            ", begin:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->Begin()) <<
+//            ", end:" << reinterpret_cast<const void*>(_mark_bmap_->GetMemMap()->End()) <<
+//            ", size:" << _ptr_ashmem->size_;
+      }
+
+
+    }
+  }
+
+  _space_mem_map = MEM_MAP::CreateStructedMemMap(alloc_space_name, End(),
+                                    capacity, PROT_READ | PROT_WRITE, shareMem,
+                          &(_struct_alloc_space->dlmalloc_space_data_.memory_));
+  UniquePtr<MEM_MAP> mem_map(_space_mem_map);
+  void* mspace = CreateMallocSpace(End(), starting_size, initial_size);
+  // Protect memory beyond the initial size.
+  byte* end = mem_map->Begin() + starting_size;
+  if (capacity - initial_size > 0) {
+    CHECK_MEMORY_CALL(mprotect, (end, capacity - initial_size, PROT_NONE),
+          alloc_space_name);
+  }
+
+  /* test sharing zygote space */
+//  byte* old_zyg = GetMspace();
+//  CHECK_MEMORY_CALL(munmap, (old_zyg, size), "zygote - mspace");
+//  int _fd = 0;
+//  byte* _new_zygote_ptr = reinterpret_cast<byte*>(mmap(old_zyg, size,
+//        prot, MAP_SHARED | MAP_FIXED, _fd, 0));
+
+
+  alloc_space = new SharableDlMallocSpace(alloc_space_name, mem_map.release(),
+        mspace, End(), end, growth_limit, shareMem, _struct_alloc_space);
+
+
+  live_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+  CHECK_EQ(live_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+  mark_bitmap_->SetHeapLimit(reinterpret_cast<uintptr_t>(End()));
+  CHECK_EQ(mark_bitmap_->HeapLimit(), reinterpret_cast<uintptr_t>(End()));
+  VLOG(heap) << "zygote space creation done";
+  return alloc_space;
+}
+
 
 SharableDlMallocSpace::SharableDlMallocSpace(const std::string& name,
     MEM_MAP* mem_map, void* mspace,  byte* begin, byte* end,
@@ -1064,7 +1086,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
   return false;
 }
 
-
+#endif
 //void SharableDlMallocSpace::SwapBitmaps () {
 //  LOG(ERROR) << " ~~~~~~ SharableDlMallocSpace::SwapBitmaps ~~~~~~~";
 // // DlMallocSpace::SwapBitmaps();
