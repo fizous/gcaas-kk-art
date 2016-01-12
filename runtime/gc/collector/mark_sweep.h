@@ -276,41 +276,6 @@ class MarkSweep : public GarbageCollector {
   uint64_t GetTotalFreedBytes() const {
     return time_stats_->total_freed_bytes_;
   }
-
-#else
-  void IncTotalTimeNs(uint64_t param) {
-    total_time_ns_ += param;
-  }
-
-  void IncTotalPausedTimeNs(uint64_t param) {
-    total_paused_time_ns_ += param;
-  }
-
-  void IncTotalFreedObjects(uint64_t param) {
-    total_freed_objects_ += param;
-  }
-
-  void IncTotalFreedBytes(uint64_t param) {
-    total_freed_bytes_ += param;
-  }
-
-  uint64_t GetTotalTimeNs() const {
-    return total_time_ns_;
-  }
-
-  uint64_t GetTotalPausedTimeNs() const {
-    return total_paused_time_ns_;
-  }
-
-  uint64_t GetTotalFreedObjects() const {
-    return total_freed_objects_;
-  }
-
-  uint64_t GetTotalFreedBytes() const {
-    return total_freed_bytes_;
-  }
-#endif
-
   virtual mirror::Object* GetImmuneBegin() const{
     return cashed_references_record_->immune_begin_;
   }
@@ -374,6 +339,106 @@ class MarkSweep : public GarbageCollector {
   void SetCachedJavaLangClass(mirror::Class* address) {
     cashed_references_record_->java_lang_Class_ = address;
   }
+#else
+  void IncTotalTimeNs(uint64_t param) {
+    total_time_ns_ += param;
+  }
+
+  void IncTotalPausedTimeNs(uint64_t param) {
+    total_paused_time_ns_ += param;
+  }
+
+  void IncTotalFreedObjects(uint64_t param) {
+    total_freed_objects_ += param;
+  }
+
+  void IncTotalFreedBytes(uint64_t param) {
+    total_freed_bytes_ += param;
+  }
+
+  uint64_t GetTotalTimeNs() const {
+    return total_time_ns_;
+  }
+
+  uint64_t GetTotalPausedTimeNs() const {
+    return total_paused_time_ns_;
+  }
+
+  uint64_t GetTotalFreedObjects() const {
+    return total_freed_objects_;
+  }
+
+  uint64_t GetTotalFreedBytes() const {
+    return total_freed_bytes_;
+  }
+
+  virtual mirror::Object* GetImmuneBegin() const{
+    return immune_begin_;
+  }
+
+  virtual  mirror::Object* GetImmuneEnd() const {
+    return immune_end_;
+  }
+
+  // Immune range, every object inside the immune range is assumed to be marked.
+
+
+
+  mirror::Object** GetSoftReferenceList() {
+    return &soft_reference_list_;
+  }
+
+  mirror::Object** GetWeakReferenceList() {
+    return &weak_reference_list_;
+  }
+
+  mirror::Object** GetFinalizerReferenceList() {
+    return &finalizer_reference_list_;
+  }
+
+
+  mirror::Object** GetPhantomReferenceList() {
+    return &phantom_reference_list_;
+  }
+
+
+  mirror::Object** GetClearedReferenceList() {
+    return &cleared_reference_list_;
+  }
+
+  mirror::Class* GetCachedJavaLangClass(void) const{
+    return java_lang_Class_;
+  }
+
+  void SetSoftReferenceList(mirror::Object* obj) {
+    soft_reference_list_ = obj;
+  }
+
+  void SetWeakReferenceList(mirror::Object* obj) {
+    weak_reference_list_ = obj;
+  }
+
+  void SetFinalizerReferenceList(mirror::Object* obj) {
+    finalizer_reference_list_ = obj;
+  }
+
+
+  void SetPhantomReferenceList(mirror::Object* obj) {
+    phantom_reference_list_ = obj;
+  }
+
+
+  void SetClearedReferenceList(mirror::Object* obj) {
+    cleared_reference_list_ = obj;
+  }
+
+  void SetCachedJavaLangClass(mirror::Class* address) {
+    java_lang_Class_ = address;
+  }
+
+#endif
+
+
 
   // Everything inside the immune range is assumed to be marked.
   virtual void SetImmuneRange(mirror::Object* begin, mirror::Object* end);
@@ -656,6 +721,21 @@ class MarkSweep : public GarbageCollector {
 
 #if (ART_GC_SERVICE)
 #else
+  // Cache java.lang.Class for optimization.
+  mirror::Class* java_lang_Class_;
+
+  // Immune range, every object inside the immune range is assumed to be marked.
+  mirror::Object* immune_begin_;
+  mirror::Object* immune_end_;
+
+  mirror::Object* soft_reference_list_;
+  mirror::Object* weak_reference_list_;
+  mirror::Object* finalizer_reference_list_;
+  mirror::Object* phantom_reference_list_;
+  mirror::Object* cleared_reference_list_;
+
+
+
   // Number of non large object bytes freed in this collection.
   AtomicInteger freed_bytes_;
   // Number of large object bytes freed.
@@ -690,7 +770,11 @@ class MarkSweep : public GarbageCollector {
 
   const bool is_concurrent_;
   bool clear_soft_references_;
+
+#if (ART_GC_SERVICE)
   space::GCSrvceCashedReferences* cashed_references_record_;
+#else
+#endif
 
 
  private:

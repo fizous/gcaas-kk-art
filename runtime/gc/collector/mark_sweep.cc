@@ -238,17 +238,21 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_pre
         GarbageCollector(heap,
                name_prefix + (name_prefix.empty() ? "" : " ") +
                (is_concurrent ? "concurrent mark sweep": "mark sweep")),
-      stats_counters_(stats_record),
-      current_mark_bitmap_(NULL),
-      mark_stack_(NULL),
-      gc_barrier_(new Barrier(0)),
-      large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
-      mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
-      is_concurrent_(is_concurrent),
-      clear_soft_references_(false),
-      cashed_references_record_(cashed_reference_record) {
-  memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
-  SetCachedJavaLangClass(Class::GetJavaLangClass());
+               current_mark_bitmap_(NULL),
+               java_lang_Class_(NULL),
+               mark_stack_(NULL),
+               immune_begin_(NULL),
+               immune_end_(NULL),
+               soft_reference_list_(NULL),
+               weak_reference_list_(NULL),
+               finalizer_reference_list_(NULL),
+               phantom_reference_list_(NULL),
+               cleared_reference_list_(NULL),
+               gc_barrier_(new Barrier(0)),
+               large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
+               mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
+               is_concurrent_(is_concurrent),
+               clear_soft_references_(false) {}
 }
 #endif
 
@@ -464,10 +468,19 @@ void MarkSweep::ReclaimPhase() {
   }
 }
 
+
+#if ART_GC_SERVICE
 void MarkSweep::SetImmuneRange(Object* begin, Object* end) {
   cashed_references_record_->immune_begin_ = begin;
   cashed_references_record_->immune_end_ = end;
 }
+#else
+void MarkSweep::SetImmuneRange(Object* begin, Object* end) {
+  immune_begin_ = begin;
+  immune_end_ = end;
+}
+#endif
+
 
 void MarkSweep::FindDefaultMarkBitmap() {
   base::TimingLogger::ScopedSplit split("FindDefaultMarkBitmap", &timings_);
