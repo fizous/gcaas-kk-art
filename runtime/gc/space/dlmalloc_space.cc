@@ -798,14 +798,17 @@ accounting::SPACE_BITMAP* DlMallocSpace::UnBindBitmaps(void) {
 
 
 
+
+
+
+#if (ART_GC_SERVICE)
+
 IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
     size_t initial_size, size_t growth_limit,
     size_t capacity, byte* requested_begin, bool shareMem) {
   return NULL;
 }
 
-
-#if (ART_GC_SERVICE)
 const char* SharableDlMallocSpace::ProfiledBenchmarks[] = {
     "com.aurorasoftworks.quadrant.ui.professional",
     "purdue.dacapo",
