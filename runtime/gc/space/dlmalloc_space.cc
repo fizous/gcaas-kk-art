@@ -168,6 +168,9 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
 #endif
 
 
+
+
+#if ART_GC_SERVICE
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem,
                        GCSrvDlMallocSpace* space_data_mem)
@@ -203,11 +206,32 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
   CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
   //LOG(ERROR) << "DlMallocSpace::DlMallocSpace--> After KCardSize";
-#if ART_GC_SERVICE
 
   CreateBitmaps(Begin(), Capacity(), shareMem);
 
+  for (auto& freed : dlmalloc_space_data_->recent_freed_objects_) {
+    freed.first = nullptr;
+    freed.second = nullptr;
+  }
+}
+
 #else
+size_t DlMallocSpace::bitmap_index_ = 0;
+
+DlMallocSpace::DlMallocSpace(const std::string& name, MemMap* mem_map, void* mspace, byte* begin,
+                       byte* end, size_t growth_limit, bool shareMem)
+    : MemMapSpace(name, mem_map, end - begin, kGcRetentionPolicyAlwaysCollect),
+      recent_free_pos_(0), num_bytes_allocated_(0), num_objects_allocated_(0),
+      total_bytes_allocated_(0), total_objects_allocated_(0),
+      lock_("allocation space lock", kAllocSpaceLock), mspace_(mspace),
+      growth_limit_(growth_limit) {
+  CHECK(mspace != NULL);
+
+  size_t bitmap_index = bitmap_index_++;
+
+  static const uintptr_t kGcCardSize = static_cast<uintptr_t>(accounting::CardTable::kCardSize);
+  CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->Begin())));
+  CHECK(IsAligned<kGcCardSize>(reinterpret_cast<uintptr_t>(mem_map->End())));
   live_bitmap_.reset(accounting::SpaceBitmap::Create(
       StringPrintf("allocspace %s live-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
       Begin(), Capacity()));
@@ -217,12 +241,16 @@ DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* ms
       StringPrintf("allocspace %s mark-bitmap %d", name.c_str(), static_cast<int>(bitmap_index)),
       Begin(), Capacity()));
   DCHECK(live_bitmap_.get() != NULL) << "could not create allocspace mark bitmap #" << bitmap_index;
-#endif
-  for (auto& freed : dlmalloc_space_data_->recent_freed_objects_) {
+
+  for (auto& freed : recent_freed_objects_) {
     freed.first = nullptr;
     freed.second = nullptr;
   }
 }
+
+#endif
+
+
 
 DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_size, size_t
                                      growth_limit, size_t capacity,
@@ -265,12 +293,20 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
 
 //  LOG(ERROR) << "CREATING ZYGOTE SPACE ...... Runtime::Current()->IsZygote(): "
 //      << Runtime::Current()->IsZygote();
+
+
+#if ART_GC_SERVICE
   UniquePtr<MEM_MAP> mem_map(
       (Runtime::Current()->IsZygote() ?
           MEM_MAP::CreateStructedMemMap(name.c_str(), requested_begin, capacity,
                     PROT_READ | PROT_WRITE, shareMem) :
           MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
                     PROT_READ | PROT_WRITE, shareMem)));
+#else
+  UniquePtr<MEM_MAP> mem_map(
+      (MEM_MAP::MapAnonymous(name.c_str(), requested_begin, capacity,
+                    PROT_READ | PROT_WRITE, shareMem)));
+#endif
 //  if(Runtime::Current()->IsZygote()) {
 //    LOG(ERROR) << "RuntimeIsZygote...with FD = " << mem_map->GetFD();
 //  }
