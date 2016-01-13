@@ -945,6 +945,10 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	EventMarker* _address = NULL;
 	{
 		MutexLock mu(self, *evt_manager_lock_);
+		if(markerManager->currIndex == kGCMMPMaxEventsCounts) {
+		  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->currIndex";
+		  initEventBulk();
+		}
 		_address = markerManager->markers + markerManager->currIndex;
 		markerManager->currIndex++;
 	}
@@ -952,11 +956,6 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		_address->evType = evtMark;
 		_address->currHSize = allocatedBytesData.cntTotal.load();
 		_address->currTime = GetRelevantRealTime();
-	}
-	if(markerManager->currIndex >= kGCMMPMaxEventsCounts) {
-	  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->currIndex";
-	  initMarkerManager(false);
-
 	}
 }
 
