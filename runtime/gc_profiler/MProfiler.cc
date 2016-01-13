@@ -953,7 +953,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		}
 		_address = &markerManager->markers_[markerManager->curr_index_];
 		if(did_extend) {
-		  LOG(ERROR) << "_Address was assigned";
+		  LOG(ERROR) << "_Address was assigned.." << (void*)_address;
 		}
 		android_atomic_add(1, &(markerManager->curr_index_));
     if(did_extend) {
