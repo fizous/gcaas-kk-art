@@ -268,11 +268,14 @@ class Heap {
   void EnqueueReference(mirror::Object* ref, mirror::Object** list)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   bool IsEnqueued(mirror::Object* ref) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
-  bool IsEnqueuedNoLock(mirror::Object* ref) ;
 
+  bool IsEnqueuedNoLock(mirror::Object* ref) ;
+#if ART_GC_SERVICE
   void EnqueuePendingReferenceNoLock(mirror::Object* ref, mirror::Object** list);
+#endif
   void EnqueuePendingReference(mirror::Object* ref, mirror::Object** list)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   mirror::Object* DequeuePendingReference(mirror::Object** list)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
@@ -1075,7 +1078,7 @@ class Heap {
     total_wait_time_ += param;
   }
 
-  void SetNextGCType(collector::GcType val)  {
+  void SetNextGCType(collector::GcType val)  GUARDED_BY(gc_complete_lock_){
     next_gc_type_ = val;
   }
 

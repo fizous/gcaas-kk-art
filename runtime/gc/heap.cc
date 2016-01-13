@@ -2462,7 +2462,7 @@ void Heap::EnqueuePendingReference(mirror::Object* ref, mirror::Object** list) {
   }
 }
 
-
+#if ART_GC_SERVICE
 void Heap::EnqueuePendingReferenceNoLock(mirror::Object* ref, mirror::Object** list) {
   DCHECK(ref != NULL);
   DCHECK(list != NULL);
@@ -2477,6 +2477,7 @@ void Heap::EnqueuePendingReferenceNoLock(mirror::Object* ref, mirror::Object** l
     (*list)->SetFieldObject(reference_pendingNext_offset_, ref, false);
   }
 }
+#endif
 
 mirror::Object* Heap::DequeuePendingReference(mirror::Object** list) {
   DCHECK(list != NULL);

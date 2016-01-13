@@ -551,11 +551,17 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 }
 
 
+#if ART_GC_SERVICE
+
 size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){
   DLMALLOC_SPACE_LOCK_MACRO;
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
   return 0;
 }
+#else
+
+#endif
+
 
 size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** ptrs) {
   DCHECK(ptrs != NULL);

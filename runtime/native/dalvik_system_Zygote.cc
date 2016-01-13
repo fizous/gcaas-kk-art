@@ -742,7 +742,9 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
       if (waitpid(pid, &status, WNOHANG) == pid) {
           LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
       }
+#if (ART_GC_SERVICE)
       gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 1;
+#endif
   }
   return pid;
 }
