@@ -950,7 +950,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		  initEventBulk();
 		}
 		_address = markerManager->markers + markerManager->currIndex;
-		markerManager->currIndex++;
+		android_atomic_add(1, &(markerManager->currIndex));
 	}
 	if(_address != NULL) {
 		_address->evType = evtMark;
