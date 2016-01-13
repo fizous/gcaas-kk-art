@@ -1082,11 +1082,11 @@ class Heap {
     next_gc_type_ = val;
   }
 
-  void SetLastGCType(collector::GcType val)  SHARED_LOCKS_REQUIRED(gc_complete_lock_) {
+  void SetLastGCType(collector::GcType val)  EXCLUSIVE_LOCKS_REQUIRED(gc_complete_lock_) {
     last_gc_type_ = val;
   }
 
-  collector::GcType GetLastGCType() const {
+  collector::GcType GetLastGCType()  EXCLUSIVE_LOCKS_REQUIRED(gc_complete_lock_) const {
     return last_gc_type_;
   }
 
