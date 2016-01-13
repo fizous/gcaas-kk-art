@@ -947,7 +947,8 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	  bool did_extend = false;
 		MutexLock mu(self, *evt_manager_lock_);
 		if(markerManager->curr_index_ >= kGCMMPMaxEventsCounts) {
-		  LOG(ERROR) << "Thread::Current() = " << self->GetTid() << "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
+		  LOG(ERROR) << "Thread::Current() = " << self->GetTid() <<
+		      "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
 		  initEventBulk();
 		  did_extend = true;
 		}
@@ -993,20 +994,7 @@ inline void VMProfiler::initEventBulk(void) {
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 
 
-  if(markerManager->markers_ == NULL) { // first time to have events
-    UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
-        capacity, PROT_READ | PROT_WRITE));
-    if (mem_map.get() == NULL) {
-      LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-          << PrettySize(capacity);
-      return;
-    } else {
-      LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-          << PrettySize(capacity) << ", and address is : " << (reinterpret_cast<void*>(mem_map->Begin()));
-    }
-    markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
-
-  } else { //reassigning the archive
+  if(markerManager->markers_ != NULL) {
     LOG(ERROR) << "<<<<Start With archiving>>>";
 
     EventMarkerArchive** headListP = &markerManager->events_archive_;
@@ -1016,7 +1004,8 @@ inline void VMProfiler::initEventBulk(void) {
     }
 
 
-    *headListP = reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+    *headListP =
+        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
 
     (*headListP)->next_event_bulk_ = NULL;
     (*headListP)->markers_ = markerManager->markers_;
@@ -1024,60 +1013,26 @@ inline void VMProfiler::initEventBulk(void) {
     LOG(ERROR) << "<<<<Done With archiving>>> " <<
         reinterpret_cast<void*>(*headListP) << ", archiving: " <<
         (reinterpret_cast<void*>((*headListP)->markers_));
+  }
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
+      capacity, PROT_READ | PROT_WRITE));
 
-
-
-
-//    LOG(ERROR) << "Start archiving "<< reinterpret_cast<void*>(markerManager->markers_);
-//    EventMarkerArchive* new_bulk_archive =
-//
-//    new_bulk_archive->next_event_bulk_ = NULL;
-//    new_bulk_archive->markers_ = markerManager->markers_;
-//
-//
-//    EventMarkerArchive* headList = markerManager->events_archive_;
-//    if(headList == NULL) {
-//      markerManager->events_archive_ = new_bulk_archive;
-//    } else {
-//      while(headList->next_event_bulk_ != NULL) {
-//        headList = headList->next_event_bulk_;
-//      }
-//      headList->next_event_bulk_ = new_bulk_archive;
-//    }
-//    markerManager->archive_cnt_++;
+  if (mem_map.get() == NULL) {
+    LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity);
+    return;
+  } else {
+    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity) << ", and address is : " <<
+        (reinterpret_cast<void*>(mem_map->Begin()));
   }
 
+  markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
   android_atomic_acquire_store(0, &markerManager->curr_index_);
 
-//  if(false && markerManager->markers_ != NULL) {
-//    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerArchive) <<
-//        ", sizeof pointer is: " << sizeof(EventMarker*);
-//
-//
-//
-//    LOG(ERROR) << "address of new bulk archive = " <<
-//        (reinterpret_cast<void*>(new_bulk_archive));
-//    new_bulk_archive->markers_ = markerManager->markers_;
-//    new_bulk_archive->next_event_bulk_ = NULL;
-//
-//    EventMarkerArchive* last_archive_bulk = markerManager->events_archive_;
-//    if(last_archive_bulk == NULL) {
-//      markerManager->events_archive_ = new_bulk_archive;
-//    } else {
-//      while(last_archive_bulk->next_event_bulk_ != NULL) {
-//        last_archive_bulk = last_archive_bulk->next_event_bulk_;
-//      }
-//      last_archive_bulk->next_event_bulk_ = new_bulk_archive;
-//    }
-//    markerManager->archive_cnt_++;
-//  }
-//
-//
-//
-//  markerManager->curr_index_ = 0;
-//  markerManager->markers_ = (EventMarker*)(mem_map->Begin());
-//
-//  LOG(ERROR) << "LEaving VMProfiler::initEventBulk";
+  LOG(ERROR) << "leaving VMProfiler::initEventBulk " <<
+      (reinterpret_cast<void*>(mem_map->Begin()));
+
 }
 
 
