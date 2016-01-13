@@ -947,7 +947,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	  bool did_extend = false;
 		MutexLock mu(self, *evt_manager_lock_);
 		if(markerManager->curr_index_ >= kGCMMPMaxEventsCounts) {
-		  LOG(ERROR) << "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_";
+		  LOG(ERROR) << "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
 		  initEventBulk();
 		  did_extend = true;
 		}
