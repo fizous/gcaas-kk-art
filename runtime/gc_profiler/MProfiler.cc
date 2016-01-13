@@ -952,11 +952,23 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		  did_extend = true;
 		}
 		_address = &markerManager->markers_[markerManager->curr_index_];
+		if(did_extend) {
+		  LOG(ERROR) << "_Address was assigned";
+		}
 		android_atomic_add(1, &(markerManager->curr_index_));
+    if(did_extend) {
+      LOG(ERROR) << "currindex values is " << markerManager->curr_index_;
+    }
 	  if(_address != NULL) {
+	    if(did_extend) {
+	      LOG(ERROR) << "inside address is not null ";
+	    }
 	    _address->evType = evtMark;
 	    _address->currHSize = allocatedBytesData.cntTotal.load();
 	    _address->currTime = GetRelevantRealTime();
+      if(did_extend) {
+        LOG(ERROR) << "assigned values ";
+      }
 	  }
 	  if(did_extend) {
 	    LOG(ERROR) << "Leaving addEventMarker";
