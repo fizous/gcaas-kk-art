@@ -140,7 +140,7 @@ public:
 
  bool shareCardTable(CardBaseTableFields*);
  // Value used to compute card table addresses from object addresses, see GetBiasedBegin
- virtual byte* BiasedBegin() const {
+ virtual byte* GetBiasedBegin() const {
    return fields_->biased_begin_;
  }
  // Card table doesn't begin at the beginning of the mem_map_, instead it is displaced by offset
