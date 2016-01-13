@@ -953,7 +953,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		}
 		_address = &markerManager->markers_[markerManager->curr_index_];
 		if(did_extend) {
-		  LOG(ERROR) << "_Address was assigned.." << (void*)_address;
+		  LOG(ERROR) << "_Address was assigned.." << reinterpret_cast<void*>(_address);
 		}
 		android_atomic_add(1, &(markerManager->curr_index_));
     if(did_extend) {
@@ -988,47 +988,64 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 
 inline void VMProfiler::initEventBulk(void) {
   LOG(ERROR) << "Init Event Bulk";
+
   size_t capacity =
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
-      capacity, PROT_READ | PROT_WRITE));
-  if (mem_map.get() == NULL) {
-    LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity);
-    return;
-  } else {
-    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity) << ", and address is : " << ((void*)mem_map->Begin());
-  }
-  if(false && markerManager->markers_ != NULL) {
-    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerArchive) << ", sizeof pointer is: " << sizeof(EventMarker*);
 
-    EventMarkerArchive* new_bulk_archive =
-        (EventMarkerArchive*) calloc(1, sizeof(EventMarkerArchive));
-
-    LOG(ERROR) << "address of new bulk archive = " << ((void*)new_bulk_archive);
-    new_bulk_archive->markers_ = markerManager->markers_;
-    new_bulk_archive->next_event_bulk_ = NULL;
-
-    EventMarkerArchive* last_archive_bulk = markerManager->events_archive_;
-    if(last_archive_bulk == NULL) {
-      markerManager->events_archive_ = new_bulk_archive;
+  if(markerManager->markers_ == NULL) { // first time to have events
+    UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
+        capacity, PROT_READ | PROT_WRITE));
+    if (mem_map.get() == NULL) {
+      LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+          << PrettySize(capacity);
+      return;
     } else {
-      while(last_archive_bulk->next_event_bulk_ != NULL) {
-        last_archive_bulk = last_archive_bulk->next_event_bulk_;
-      }
-      last_archive_bulk->next_event_bulk_ = new_bulk_archive;
+      LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+          << PrettySize(capacity) << ", and address is : " << (reinterpret_cast<void*>(mem_map->Begin()));
     }
+    markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
+
+  } else { //reassigning the archive
+    LOG(ERROR) << "Start archiving "<< reinterpret_cast<void*>(markerManager->markers_);
+    EventMarkerArchive* new_bulk_archive =
+        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+    new_bulk_archive->next_event_bulk_ = NULL;
+    new_bulk_archive->markers_ = markerManager->markers_;
     markerManager->archive_cnt_++;
   }
 
+  android_atomic_acquire_store(0, &markerManager->curr_index_);
 
-
-  markerManager->curr_index_ = 0;
-  markerManager->markers_ = (EventMarker*)(mem_map->Begin());
-
-  LOG(ERROR) << "LEaving VMProfiler::initEventBulk";
+//  if(false && markerManager->markers_ != NULL) {
+//    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerArchive) <<
+//        ", sizeof pointer is: " << sizeof(EventMarker*);
+//
+//
+//
+//    LOG(ERROR) << "address of new bulk archive = " <<
+//        (reinterpret_cast<void*>(new_bulk_archive));
+//    new_bulk_archive->markers_ = markerManager->markers_;
+//    new_bulk_archive->next_event_bulk_ = NULL;
+//
+//    EventMarkerArchive* last_archive_bulk = markerManager->events_archive_;
+//    if(last_archive_bulk == NULL) {
+//      markerManager->events_archive_ = new_bulk_archive;
+//    } else {
+//      while(last_archive_bulk->next_event_bulk_ != NULL) {
+//        last_archive_bulk = last_archive_bulk->next_event_bulk_;
+//      }
+//      last_archive_bulk->next_event_bulk_ = new_bulk_archive;
+//    }
+//    markerManager->archive_cnt_++;
+//  }
+//
+//
+//
+//  markerManager->curr_index_ = 0;
+//  markerManager->markers_ = (EventMarker*)(mem_map->Begin());
+//
+//  LOG(ERROR) << "LEaving VMProfiler::initEventBulk";
 }
 
 
