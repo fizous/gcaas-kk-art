@@ -617,7 +617,7 @@ class AtomicStack {
     return mark_stack.release();
   }
 
-  ~AtomicStack() {}
+  virtual ~AtomicStack() {}
 
   void Reset() {
     DCHECK(mem_map_.get() != NULL);
