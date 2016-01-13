@@ -1014,7 +1014,8 @@ inline void VMProfiler::initEventBulk(void) {
         reinterpret_cast<void*>(*headListP) << ", archiving: " <<
         (reinterpret_cast<void*>((*headListP)->markers_));
   }
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
+  std::string mapName("EventsTimeLine");
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(mapName.c_str(), NULL,
       capacity, PROT_READ | PROT_WRITE));
 
   if (mem_map.get() == NULL) {
