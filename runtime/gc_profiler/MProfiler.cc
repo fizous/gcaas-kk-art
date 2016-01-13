@@ -945,18 +945,19 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	EventMarker* _address = NULL;
 	{
 		MutexLock mu(self, *evt_manager_lock_);
-		if(markerManager->currIndex == kGCMMPMaxEventsCounts) {
-		  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->currIndex";
+		if(markerManager->curr_index_ == kGCMMPMaxEventsCounts) {
+		  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->curr_index_";
 		  initEventBulk();
 		}
-		_address = markerManager->markers + markerManager->currIndex;
-		android_atomic_add(1, &(markerManager->currIndex));
+		_address = markerManager->markers_ + markerManager->curr_index_;
+		android_atomic_add(1, &(markerManager->curr_index_));
+	  if(_address != NULL) {
+	    _address->evType = evtMark;
+	    _address->currHSize = allocatedBytesData.cntTotal.load();
+	    _address->currTime = GetRelevantRealTime();
+	  }
 	}
-	if(_address != NULL) {
-		_address->evType = evtMark;
-		_address->currHSize = allocatedBytesData.cntTotal.load();
-		_address->currTime = GetRelevantRealTime();
-	}
+
 }
 
 
@@ -966,12 +967,12 @@ void VMProfiler::initEventBulk(void) {
   size_t capacity =
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(StringPrintf("EventsTimeLine%d", markerManager->archiveCnt_).c_str() , NULL,
+  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
       capacity, PROT_READ | PROT_WRITE));
-  if(markerManager->markers != NULL) {
+  if(markerManager->markers_ != NULL) {
     EventMarkerArchive* new_bulk_archive =
         (EventMarkerArchive*) calloc(1, sizeof(EventMarkerManager));
-    new_bulk_archive->markers_ = markerManager->markers;
+    new_bulk_archive->markers_ = markerManager->markers_;
     new_bulk_archive->next_event_bulk_ = NULL;
 
     EventMarkerArchive* last_archive_bulk = markerManager->events_archive_;
@@ -983,7 +984,7 @@ void VMProfiler::initEventBulk(void) {
       }
       last_archive_bulk->next_event_bulk_ = new_bulk_archive;
     }
-    markerManager->archiveCnt_++;
+    markerManager->archive_cnt_++;
   }
 
 
@@ -995,8 +996,10 @@ void VMProfiler::initEventBulk(void) {
     LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
         << PrettySize(capacity);
   }
-  markerManager->currIndex = 0;
-  markerManager->markers = (EventMarker*)(mem_map->Begin());
+  markerManager->curr_index_ = 0;
+  markerManager->markers_ = (EventMarker*)(mem_map->Begin());
+
+  LOG(ERROR) << "LEaving VMProfiler::initEventBulk";
 }
 
 
@@ -1016,9 +1019,9 @@ void VMProfiler::initMarkerManager(bool firstCall) {
 		if(firstCall) {
       markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
       markerManager->events_archive_ = NULL;
-      markerManager->markers = NULL;
-      markerManager->currIndex = 0;
-      markerManager->archiveCnt_ = 0;
+      markerManager->markers_ = NULL;
+      markerManager->curr_index_ = 0;
+      markerManager->archive_cnt_ = 0;
 		}
 
 		initEventBulk();
@@ -1029,7 +1032,7 @@ void VMProfiler::initMarkerManager(bool firstCall) {
 //
 //		UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
 //				capacity, PROT_READ | PROT_WRITE));
-//		markerManager->currIndex = 0;
+//		markerManager->curr_index_ = 0;
 //		if (mem_map.get() == NULL) {
 //			LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
 //					<< PrettySize(capacity);
@@ -1124,9 +1127,9 @@ void VMProfiler::dumpEventMarks(void) {
 	  _event_archive_iter = _event_archive_iter->next_event_bulk_;
 	}
 	if(successWrite) {
-	  size_t dataLength =  sizeof(EventMarker) * markerManager->currIndex;
+	  size_t dataLength =  sizeof(EventMarker) * markerManager->curr_index_;
 	  if(dataLength > 0) {
-	    successWrite = dump_file_->WriteFully(markerManager->markers, dataLength);
+	    successWrite = dump_file_->WriteFully(markerManager->markers_, dataLength);
 	    if(successWrite) {
 	      GCPDumpEndMarker(dump_file_);
 	    }
@@ -1137,13 +1140,13 @@ void VMProfiler::dumpEventMarks(void) {
 
 
 	if(false) {
-	  LOG(ERROR) << "<<<< total written: " << (sizeof(EventMarker) * markerManager->currIndex) <<
+	  LOG(ERROR) << "<<<< total written: " << (sizeof(EventMarker) * markerManager->curr_index_) <<
 			", Sizeof(EventMarker):"<< sizeof(EventMarker)
 			<< ".. sizeof(uint64_t):" << sizeof(uint64_t) << ".. sizeof(int32_t):"
 			<< sizeof(int32_t) << ".. sizeof (evtYpe:):" << sizeof(GCMMP_ACTIVITY_ENUM);
 
-    for(int _indIter = 0; _indIter < markerManager->currIndex; _indIter++) {
-      EventMarker* marker = markerManager->markers + _indIter;
+    for(int _indIter = 0; _indIter < markerManager->curr_index_; _indIter++) {
+      EventMarker* marker = markerManager->markers_ + _indIter;
       if(marker == NULL)
         return;
       LOG(ERROR) << "---->>>>> data written:<<["<<_indIter<<"] evtYpe:" <<

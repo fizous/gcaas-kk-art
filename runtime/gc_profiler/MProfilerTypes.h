@@ -103,11 +103,11 @@ typedef struct EventMarkerArchive_S {
  */
 typedef struct EventMarkerManager_S {
 	/* current index of the event being triggered */
-	volatile int32_t currIndex;
+	volatile int32_t curr_index_;
 	/* pointer to the area of the memory holding all the events */
-	EventMarker* markers; //
+	EventMarker* markers_; //
 	EventMarkerArchive* events_archive_;
-	int32_t archiveCnt_;
+	int32_t archive_cnt_;
 } EventMarkerManager;
 
 
