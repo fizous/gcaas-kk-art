@@ -1015,10 +1015,11 @@ inline void VMProfiler::initEventBulk(void) {
         (reinterpret_cast<void*>((*headListP)->markers_));
   }
   std::string mapName("EventsTimeLine");
-  UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous(mapName.c_str(), NULL,
-      capacity, PROT_READ | PROT_WRITE));
 
-  if (mem_map.get() == NULL) {
+  MEM_MAP* mem_map = MEM_MAP::MapAnonymous(mapName.c_str(), NULL,
+      capacity, PROT_READ | PROT_WRITE);
+
+  if (mem_map == NULL) {
     LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
         << PrettySize(capacity);
     return;
@@ -1027,6 +1028,8 @@ inline void VMProfiler::initEventBulk(void) {
         << PrettySize(capacity) << ", and address is : " <<
         (reinterpret_cast<void*>(mem_map->Begin()));
   }
+
+//  map_archives_.put(markerManager->archive_cnt_, mem_map);
 
   markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
   android_atomic_acquire_store(0, &markerManager->curr_index_);

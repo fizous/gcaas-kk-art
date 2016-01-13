@@ -107,7 +107,7 @@ typedef struct EventMarkerManager_S {
 	/* pointer to the area of the memory holding all the events */
 	EventMarker* markers_; //
 	EventMarkerArchive* events_archive_;
-	int32_t archive_cnt_;
+	uint32_t archive_cnt_;
 } EventMarkerManager;
 
 

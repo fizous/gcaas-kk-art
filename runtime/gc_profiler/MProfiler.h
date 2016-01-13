@@ -12,12 +12,14 @@
 #include <list>
 #include "locks.h"
 #include "base/mutex.h"
+#include "safe_map.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
 #include "base/logging.h"
 #include "thread_state.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfilerHeap.h"
+#include "gc/accounting/gc_allocator.h"
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
@@ -255,6 +257,10 @@ public:
 
   Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
+
+  typedef SafeMap<uint32_t, MEM_MAP*, std::less<MEM_MAP*>,
+      accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
+  ArchiveMemMapsT map_archives_ GUARDED_BY(*evt_manager_lock_);
 
   GCMMPHeapStatus heapStatus;
   GCMMPHeapIntegral heapIntegral_;
