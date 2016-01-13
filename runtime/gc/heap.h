@@ -1086,7 +1086,7 @@ class Heap {
     last_gc_type_ = val;
   }
 
-  collector::GcType GetLastGCType()  EXCLUSIVE_LOCKS_REQUIRED(gc_complete_lock_) const {
+  collector::GcType GetLastGCType() const EXCLUSIVE_LOCKS_REQUIRED(gc_complete_lock_)  {
     return last_gc_type_;
   }
 
