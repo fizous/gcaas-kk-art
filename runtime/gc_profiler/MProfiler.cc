@@ -1002,12 +1002,12 @@ inline void VMProfiler::initEventBulk(void) {
         << PrettySize(capacity) << ", and address is : " << ((void*)mem_map->Begin());
   }
   if(markerManager->markers_ != NULL) {
-    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerManager);
+    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerArchive) << ", sizeof pointer is: " << sizeof(EventMarker*);
 
     EventMarkerArchive* new_bulk_archive =
         (EventMarkerArchive*) calloc(1, sizeof(EventMarkerArchive));
 
-    LOG(ERROR) << "sizeof address of new bulk archive = " << ((void*)new_bulk_archive);
+    LOG(ERROR) << "address of new bulk archive = " << ((void*)new_bulk_archive);
     new_bulk_archive->markers_ = markerManager->markers_;
     new_bulk_archive->next_event_bulk_ = NULL;
 

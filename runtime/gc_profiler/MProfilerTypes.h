@@ -93,7 +93,7 @@ typedef struct EventMarker_S {
 
 
 typedef struct EventMarkerArchive_S {
-  EventMarker* markers_;
+  EventMarker  *markers_;
   EventMarkerArchive_S *next_event_bulk_;
 } EventMarkerArchive;
 
