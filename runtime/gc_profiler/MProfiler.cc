@@ -951,7 +951,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 		  initEventBulk();
 		  did_extend = true;
 		}
-		_address = markerManager->markers_ + markerManager->curr_index_;
+		_address = &markerManager->markers_[markerManager->curr_index_];
 		android_atomic_add(1, &(markerManager->curr_index_));
 	  if(_address != NULL) {
 	    _address->evType = evtMark;
@@ -968,7 +968,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 
 
 
-void VMProfiler::initEventBulk(void) {
+inline void VMProfiler::initEventBulk(void) {
   LOG(ERROR) << "Init Event Bulk";
   size_t capacity =
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
