@@ -1001,7 +1001,7 @@ inline void VMProfiler::initEventBulk(void) {
     LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
         << PrettySize(capacity) << ", and address is : " << ((void*)mem_map->Begin());
   }
-  if(markerManager->markers_ != NULL) {
+  if(false && markerManager->markers_ != NULL) {
     LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerArchive) << ", sizeof pointer is: " << sizeof(EventMarker*);
 
     EventMarkerArchive* new_bulk_archive =
