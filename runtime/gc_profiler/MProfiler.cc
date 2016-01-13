@@ -964,7 +964,13 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	      LOG(ERROR) << "inside address is not null ";
 	    }
 	    _address->evType = evtMark;
+      if(did_extend) {
+        LOG(ERROR) << "evtMark ";
+      }
 	    _address->currHSize = allocatedBytesData.cntTotal.load();
+      if(did_extend) {
+        LOG(ERROR) << "cntTotal ";
+      }
 	    _address->currTime = GetRelevantRealTime();
       if(did_extend) {
         LOG(ERROR) << "assigned values ";
@@ -996,10 +1002,10 @@ inline void VMProfiler::initEventBulk(void) {
         << PrettySize(capacity) << ", and address is : " << ((void*)mem_map->Begin());
   }
   if(markerManager->markers_ != NULL) {
-    LOG(ERROR) << "sizeof EventMarkerManager = " << sizeof(EventMarkerManager);
+    LOG(ERROR) << "sizeof EventMarkerArchive = " << sizeof(EventMarkerManager);
 
     EventMarkerArchive* new_bulk_archive =
-        (EventMarkerArchive*) calloc(1, sizeof(EventMarkerManager));
+        (EventMarkerArchive*) calloc(1, sizeof(EventMarkerArchive));
 
     LOG(ERROR) << "sizeof address of new bulk archive = " << ((void*)new_bulk_archive);
     new_bulk_archive->markers_ = markerManager->markers_;
