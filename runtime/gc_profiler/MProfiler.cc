@@ -944,10 +944,12 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
 	EventMarker* _address = NULL;
 	{
+	  bool did_extend = false;
 		MutexLock mu(self, *evt_manager_lock_);
-		if(markerManager->curr_index_ == kGCMMPMaxEventsCounts) {
+		if(markerManager->curr_index_ >= kGCMMPMaxEventsCounts) {
 		  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->curr_index_";
 		  initEventBulk();
+		  did_extend = true;
 		}
 		_address = markerManager->markers_ + markerManager->curr_index_;
 		android_atomic_add(1, &(markerManager->curr_index_));
@@ -956,6 +958,10 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	    _address->currHSize = allocatedBytesData.cntTotal.load();
 	    _address->currTime = GetRelevantRealTime();
 	  }
+	  if(did_extend) {
+	    LOG(ERROR) << "Leaving addEventMarker";
+	  }
+
 	}
 
 }
