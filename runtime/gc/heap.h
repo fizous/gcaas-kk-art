@@ -1078,11 +1078,11 @@ class Heap {
     total_wait_time_ += param;
   }
 
-  void SetNextGCType(collector::GcType val)  GUARDED_BY(gc_complete_lock_){
+  void SetNextGCType(collector::GcType val) {
     next_gc_type_ = val;
   }
 
-  void SetLastGCType(collector::GcType val)  {
+  void SetLastGCType(collector::GcType val)  SHARED_LOCKS_REQUIRED(gc_complete_lock_) {
     last_gc_type_ = val;
   }
 
