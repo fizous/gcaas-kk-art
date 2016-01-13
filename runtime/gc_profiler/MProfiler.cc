@@ -947,8 +947,8 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	  bool did_extend = false;
 		MutexLock mu(self, *evt_manager_lock_);
 		if(markerManager->curr_index_ >= kGCMMPMaxEventsCounts) {
-		  LOG(ERROR) << "Thread::Current() = " << self->GetTid() <<
-		      "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
+//		  LOG(ERROR) << "Thread::Current() = " << self->GetTid() <<
+//		      "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
 		  initEventBulk();
 		  did_extend = true;
 		}
@@ -961,9 +961,9 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
       LOG(ERROR) << "currindex values is " << markerManager->curr_index_;
     }
 	  if(_address != NULL) {
-	    if(did_extend) {
-	      LOG(ERROR) << "inside address is not null ";
-	    }
+//	    if(false && did_extend) {
+//	      LOG(ERROR) << "inside address is not null ";
+//	    }
 	    _address->evType = evtMark;
       if(did_extend) {
         LOG(ERROR) << "evtMark ";
