@@ -521,7 +521,7 @@ public:
 
 	void dumpProfData(bool);
 
-	void initMarkerManager(void) {
+	void initMarkerManager(bool firstCall) {
 		markerManager = NULL;
 	}
 };
