@@ -1007,9 +1007,30 @@ inline void VMProfiler::initEventBulk(void) {
     markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
 
   } else { //reassigning the archive
+    LOG(ERROR) << "<<<<Start With archiving>>>";
+
+    EventMarkerArchive** headListP = &markerManager->events_archive_;
+
+    while(*headListP != NULL) {
+      headListP = &((*headListP)->next_event_bulk_);
+    }
+
+
+    *headListP = reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+
+    (*headListP)->next_event_bulk_ = NULL;
+    (*headListP)->markers_ = markerManager->markers_;
+
+    LOG(ERROR) << "<<<<Done With archiving>>> " <<
+        reinterpret_cast<void*>(*headListP) << ", archiving: " <<
+        (reinterpret_cast<void*>((*headListP)->markers_));
+
+
+
+
 //    LOG(ERROR) << "Start archiving "<< reinterpret_cast<void*>(markerManager->markers_);
 //    EventMarkerArchive* new_bulk_archive =
-//        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+//
 //    new_bulk_archive->next_event_bulk_ = NULL;
 //    new_bulk_archive->markers_ = markerManager->markers_;
 //
