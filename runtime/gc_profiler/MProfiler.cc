@@ -760,7 +760,7 @@ void VMProfiler::InitCommonData() {
 	dumpHeapConfigurations(&heapConf);
 
 	if(isMarkHWEvents()){
-		initMarkerManager();
+		initMarkerManager(true);
 	} else {
 		markerManager = NULL;
 		LOG(ERROR) <<  "no need to initialize event manager ";
@@ -955,7 +955,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	}
 	if(markerManager->currIndex >= kGCMMPMaxEventsCounts) {
 	  LOG(ERROR) << "Index of events exceeds the maximum allowed...markerManager->currIndex";
-	  initMarkerManager();
+	  initMarkerManager(false);
 
 	}
 }
@@ -963,6 +963,7 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 
 
 void VMProfiler::initEventBulk(void) {
+  LOG(ERROR) << "Init Event Bulk";
   size_t capacity =
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 
@@ -1000,10 +1001,10 @@ void VMProfiler::initEventBulk(void) {
 }
 
 
-void VMProfiler::initMarkerManager(void) {
+void VMProfiler::initMarkerManager(bool firstCall) {
 	LOG(ERROR) << "CPUFreqProfiler: Initializing the eventsManager";
 
-	if(evt_manager_lock_ == NULL)
+	if(firstCall)
 	  evt_manager_lock_ = new Mutex("Event manager lock");
 	Thread* self = Thread::Current();
 	{
@@ -1013,13 +1014,14 @@ void VMProfiler::initMarkerManager(void) {
 			LOG(ERROR) <<  "no need to initialize event manager ";
 			return;
 		}
-		if(markerManager == NULL) {
-		  markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
-		  markerManager->events_archive_ = NULL;
-		  markerManager->markers = NULL;
-		  markerManager->currIndex = 0;
-		  markerManager->archiveCnt_ = 0;
+		if(firstCall) {
+      markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
+      markerManager->events_archive_ = NULL;
+      markerManager->markers = NULL;
+      markerManager->currIndex = 0;
+      markerManager->archiveCnt_ = 0;
 		}
+
 		initEventBulk();
 
 

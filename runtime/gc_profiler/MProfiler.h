@@ -439,7 +439,7 @@ public:
   }
 
   virtual void initEventBulk(void);
-  virtual void initMarkerManager(void);
+  virtual void initMarkerManager(bool firstCall);
 
   virtual void notifyFreeing(size_t objSize, mirror::Object*) {
   	accountFreeing(objSize);
