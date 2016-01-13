@@ -219,7 +219,7 @@ class MarkSweep : public GarbageCollector {
     return freed_bytes_;
   }
   void IncFreedBytes(size_t val) {
-    freed_bytes_ += val;
+    freed_bytes_.fetch_add(val);
   }
 
   size_t GetFreedLargeObjectBytes() const {
@@ -615,15 +615,15 @@ class MarkSweep : public GarbageCollector {
 
 
    void IncReferenceCount(int val) {
-     reference_count_+=val;
+     reference_count_.fetch_add(val);
    }
    void IncArrayCount(int val) {
-     array_count_+=val;
+     array_count_.fetch_add(val);
    }
 
 
    void IncOtherCount(int val) {
-     other_count_+=val;
+     other_count_.fetch_add(val);
    }
 
 #endif
