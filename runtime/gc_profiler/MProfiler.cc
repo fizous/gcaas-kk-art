@@ -975,9 +975,21 @@ void VMProfiler::initEventBulk(void) {
 
   UniquePtr<MEM_MAP> mem_map(MEM_MAP::MapAnonymous("EventsTimeLine", NULL,
       capacity, PROT_READ | PROT_WRITE));
+  if (mem_map.get() == NULL) {
+    LOG(FATAL) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity);
+    return;
+  } else {
+    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+        << PrettySize(capacity) << ", and address is : " << ((void*)mem_map->Begin());
+  }
   if(markerManager->markers_ != NULL) {
+    LOG(ERROR) << "sizeof EventMarkerManager = " << sizeof(EventMarkerManager);
+
     EventMarkerArchive* new_bulk_archive =
         (EventMarkerArchive*) calloc(1, sizeof(EventMarkerManager));
+
+    LOG(ERROR) << "sizeof address of new bulk archive = " << ((void*)new_bulk_archive);
     new_bulk_archive->markers_ = markerManager->markers_;
     new_bulk_archive->next_event_bulk_ = NULL;
 
@@ -994,14 +1006,7 @@ void VMProfiler::initEventBulk(void) {
   }
 
 
-  if (mem_map.get() == NULL) {
-    LOG(ERROR) << "CPUFreqProfiler: Failed to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity);
-    return;
-  } else {
-    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity);
-  }
+
   markerManager->curr_index_ = 0;
   markerManager->markers_ = (EventMarker*)(mem_map->Begin());
 
