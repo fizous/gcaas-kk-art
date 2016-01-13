@@ -232,30 +232,6 @@ MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
   memset(cashed_references_record_, 0, sizeof(space::GCSrvceCashedReferences));
   SetCachedJavaLangClass(Class::GetJavaLangClass());
 }
-#else
-
-MarkSweep::MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix) :
-        GarbageCollector(heap,
-               name_prefix + (name_prefix.empty() ? "" : " ") +
-               (is_concurrent ? "concurrent mark sweep": "mark sweep")),
-               current_mark_bitmap_(NULL),
-               java_lang_Class_(NULL),
-               mark_stack_(NULL),
-               immune_begin_(NULL),
-               immune_end_(NULL),
-               soft_reference_list_(NULL),
-               weak_reference_list_(NULL),
-               finalizer_reference_list_(NULL),
-               phantom_reference_list_(NULL),
-               cleared_reference_list_(NULL),
-               gc_barrier_(new Barrier(0)),
-               large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
-               mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
-               is_concurrent_(is_concurrent),
-               clear_soft_references_(false) {}
-
-#endif
-
 
 
 void MarkSweep::InitializePhase() {
@@ -298,6 +274,69 @@ void MarkSweep::ResetCollectorStats(){
   stats_counters_->array_count_ = 0;
   stats_counters_->other_count_ = 0;
 }
+#else
+
+MarkSweep::MarkSweep(Heap* heap, bool is_concurrent, const std::string& name_prefix) :
+        GarbageCollector(heap,
+               name_prefix + (name_prefix.empty() ? "" : " ") +
+               (is_concurrent ? "concurrent mark sweep": "mark sweep")),
+               current_mark_bitmap_(NULL),
+               java_lang_Class_(NULL),
+               mark_stack_(NULL),
+               immune_begin_(NULL),
+               immune_end_(NULL),
+               soft_reference_list_(NULL),
+               weak_reference_list_(NULL),
+               finalizer_reference_list_(NULL),
+               phantom_reference_list_(NULL),
+               cleared_reference_list_(NULL),
+               gc_barrier_(new Barrier(0)),
+               large_object_lock_("mark sweep large object lock", kMarkSweepLargeObjectLock),
+               mark_stack_lock_("mark sweep mark stack lock", kMarkSweepMarkStackLock),
+               is_concurrent_(is_concurrent),
+               clear_soft_references_(false) {}
+
+
+
+
+void MarkSweep::InitializePhase() {
+  timings_.Reset();
+  base::TimingLogger::ScopedSplit split("InitializePhase", &timings_);
+  mark_stack_ = heap_->mark_stack_.get();
+  DCHECK(mark_stack_ != nullptr);
+  SetImmuneRange(nullptr, nullptr);
+  soft_reference_list_ = nullptr;
+  weak_reference_list_ = nullptr;
+  finalizer_reference_list_ = nullptr;
+  phantom_reference_list_ = nullptr;
+  cleared_reference_list_ = nullptr;
+  freed_bytes_ = 0;
+  freed_large_object_bytes_ = 0;
+  freed_objects_ = 0;
+  freed_large_objects_ = 0;
+  class_count_ = 0;
+  array_count_ = 0;
+  other_count_ = 0;
+  large_object_test_ = 0;
+  large_object_mark_ = 0;
+  classes_marked_ = 0;
+  overhead_time_ = 0;
+  work_chunks_created_ = 0;
+  work_chunks_deleted_ = 0;
+  reference_count_ = 0;
+  java_lang_Class_ = Class::GetJavaLangClass();
+  CHECK(java_lang_Class_ != nullptr);
+
+  FindDefaultMarkBitmap();
+
+  // Do any pre GC verification.
+  timings_.NewSplit("PreGcVerification");
+  heap_->PreGcVerification(this);
+}
+
+#endif
+
+
 void MarkSweep::ProcessReferences(Thread* self) {
   base::TimingLogger::ScopedSplit split("ProcessReferences", &timings_);
   WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);

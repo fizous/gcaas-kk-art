@@ -488,7 +488,7 @@ class MarkSweep : public GarbageCollector {
   void ArraysVerifierScan(const mirror::Object* object,
       void* heap_beetmap = NULL);
 
-
+#if ART_GC_SERVICE
   space::GCSrvceCashedStatsCounters* stats_counters_;
 
   size_t GetClassCount() const{
@@ -538,6 +538,9 @@ class MarkSweep : public GarbageCollector {
   void IncOtherCount(int val) {
     android_atomic_add(val, &stats_counters_->other_count_);
   }
+#else
+#endif
+
 
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
