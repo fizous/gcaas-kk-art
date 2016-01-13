@@ -214,7 +214,7 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static const int kGCMMPMaxEventsCounts = 128;
+	static const int kGCMMPMaxEventsCounts = 1024;
 
 	//static AtomicInteger GCPTotalAllocBytes;
 
