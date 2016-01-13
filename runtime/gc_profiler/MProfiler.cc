@@ -1007,12 +1007,23 @@ inline void VMProfiler::initEventBulk(void) {
     markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
 
   } else { //reassigning the archive
-    LOG(ERROR) << "Start archiving "<< reinterpret_cast<void*>(markerManager->markers_);
-    EventMarkerArchive* new_bulk_archive =
-        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
-    new_bulk_archive->next_event_bulk_ = NULL;
-    new_bulk_archive->markers_ = markerManager->markers_;
-    markerManager->archive_cnt_++;
+//    LOG(ERROR) << "Start archiving "<< reinterpret_cast<void*>(markerManager->markers_);
+//    EventMarkerArchive* new_bulk_archive =
+//        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+//    new_bulk_archive->next_event_bulk_ = NULL;
+//    new_bulk_archive->markers_ = markerManager->markers_;
+//
+//
+//    EventMarkerArchive* headList = markerManager->events_archive_;
+//    if(headList == NULL) {
+//      markerManager->events_archive_ = new_bulk_archive;
+//    } else {
+//      while(headList->next_event_bulk_ != NULL) {
+//        headList = headList->next_event_bulk_;
+//      }
+//      headList->next_event_bulk_ = new_bulk_archive;
+//    }
+//    markerManager->archive_cnt_++;
   }
 
   android_atomic_acquire_store(0, &markerManager->curr_index_);
