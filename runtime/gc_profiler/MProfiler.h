@@ -434,7 +434,7 @@ public:
   }
 
   virtual int32_t getGCEventsCounts(void) {
-  	if(markerManager != NULL) return markerManager->currIndex;
+  	if(markerManager != NULL) return markerManager->curr_index_;
   	return 0;
   }
 
