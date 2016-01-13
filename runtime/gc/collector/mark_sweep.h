@@ -510,7 +510,7 @@ class MarkSweep : public GarbageCollector {
 
 
   void SetCardsScanned(int val) {
-    stats_counters_->cards_scanned_ = 0;
+    stats_counters_->cards_scanned_ = val;
   }
 
   int32_t GetCardsScanned() {
@@ -539,6 +539,58 @@ class MarkSweep : public GarbageCollector {
     android_atomic_add(val, &stats_counters_->other_count_);
   }
 #else
+
+
+  size_t GetClassCount() const{
+     return class_count_.load();
+   }
+
+   size_t GetArrayCount() const{
+     return array_count_.load();
+   }
+
+
+   size_t GetOtherCount() const{
+     return other_count_.load();
+   }
+
+   void IncCardsScanned(int val) {
+     cards_scanned_.fetch_add(val);
+   }
+
+
+   void SetCardsScanned(int val) {
+     cards_scanned_ = val;
+   }
+
+   int32_t GetCardsScanned() {
+     return cards_scanned_.load();
+   }
+
+
+   int32_t GetReferenceCount() {
+     return reference_count_.load();
+   }
+
+
+   void IncClassCount(int val) {
+     class_count_.fetch_add(val);
+   }
+
+
+
+   void IncReferenceCount(int val) {
+     reference_count_+=val;
+   }
+   void IncArrayCount(int val) {
+     array_count_+=val;
+   }
+
+
+   void IncOtherCount(int val) {
+     other_count_+=val;
+   }
+
 #endif
 
 
