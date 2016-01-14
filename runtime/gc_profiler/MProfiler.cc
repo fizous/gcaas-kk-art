@@ -1713,7 +1713,7 @@ void VMProfiler::GCMMProfPerfCounters(const char* name) {
 
 		for (size_t i = 0; i < app_list_.size(); i++) {
 			if (strcmp(name, app_list_[i].c_str()) == 0) {
-				GCMMP_VLOG(INFO) << "MProfiler found a target VM " << name << " " <<
+				LOG(ERROR) << "MProfiler found a target VM " << name << " " <<
 						app_list_.size();
 				GCMMPThreadProf::vmProfiler = this;
 				startProfiling();
