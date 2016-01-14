@@ -1010,6 +1010,8 @@ inline void VMProfiler::initEventBulk(void) {
     (*headListP)->next_event_bulk_ = NULL;
     (*headListP)->markers_ = markerManager->markers_;
 
+    markerManager->archive_cnt_++;
+
     LOG(ERROR) << "<<<<Done With archiving>>> " <<
         reinterpret_cast<void*>(*headListP) << ", archiving: " <<
         (reinterpret_cast<void*>((*headListP)->markers_));
@@ -1029,7 +1031,7 @@ inline void VMProfiler::initEventBulk(void) {
         (reinterpret_cast<void*>(mem_map->Begin()));
   }
 
-//  map_archives_.put(markerManager->archive_cnt_, mem_map);
+  map_archives_.Put(markerManager->archive_cnt_, mem_map);
 
   markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
   android_atomic_acquire_store(0, &markerManager->curr_index_);
