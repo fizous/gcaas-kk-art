@@ -944,41 +944,18 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 	Thread* self = Thread::Current();
 	EventMarker* _address = NULL;
 	{
-	  bool did_extend = false;
 		MutexLock mu(self, *evt_manager_lock_);
 		if(markerManager->curr_index_ >= kGCMMPMaxEventsCounts) {
 //		  LOG(ERROR) << "Thread::Current() = " << self->GetTid() <<
 //		      "+++++Index of events exceeds the maximum allowed...markerManager->curr_index_: " << markerManager->curr_index_;
 		  initEventBulk();
-		  did_extend = true;
 		}
 		_address = &markerManager->markers_[markerManager->curr_index_];
-//		if(did_extend) {
-//		  LOG(ERROR) << "_Address was assigned.." << reinterpret_cast<void*>(_address);
-//		}
 		android_atomic_add(1, &(markerManager->curr_index_));
-    if(did_extend) {
-      LOG(ERROR) << "currindex values is " << markerManager->curr_index_;
-    }
 	  if(_address != NULL) {
-//	    if(false && did_extend) {
-//	      LOG(ERROR) << "inside address is not null ";
-//	    }
 	    _address->evType = evtMark;
-      if(did_extend) {
-        LOG(ERROR) << "evtMark ";
-      }
 	    _address->currHSize = allocatedBytesData.cntTotal.load();
-      if(did_extend) {
-        LOG(ERROR) << "cntTotal ";
-      }
 	    _address->currTime = GetRelevantRealTime();
-      if(did_extend) {
-        LOG(ERROR) << "assigned values ";
-      }
-	  }
-	  if(did_extend) {
-	    LOG(ERROR) << "Leaving addEventMarker";
 	  }
 
 	}
@@ -988,14 +965,14 @@ inline void VMProfiler::addEventMarker(GCMMP_ACTIVITY_ENUM evtMark) {
 
 
 inline void VMProfiler::initEventBulk(void) {
-  LOG(ERROR) << "Init Event Bulk";
+//  LOG(ERROR) << "Init Event Bulk";
 
   size_t capacity =
       RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
 
 
   if(markerManager->markers_ != NULL) {
-    LOG(ERROR) << "<<<<Start With archiving>>>";
+//    LOG(ERROR) << "<<<<Start With archiving>>>";
 
     EventMarkerArchive** headListP = &markerManager->events_archive_;
 
@@ -1012,9 +989,9 @@ inline void VMProfiler::initEventBulk(void) {
 
     markerManager->archive_cnt_++;
 
-    LOG(ERROR) << "<<<<Done With archiving>>> " <<
-        reinterpret_cast<void*>(*headListP) << ", archiving: " <<
-        (reinterpret_cast<void*>((*headListP)->markers_));
+//    LOG(ERROR) << "<<<<Done With archiving>>> " <<
+//        reinterpret_cast<void*>(*headListP) << ", archiving: " <<
+//        (reinterpret_cast<void*>((*headListP)->markers_));
   }
   std::string mapName("EventsTimeLine");
 
@@ -1026,9 +1003,9 @@ inline void VMProfiler::initEventBulk(void) {
         << PrettySize(capacity);
     return;
   } else {
-    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
-        << PrettySize(capacity) << ", and address is : " <<
-        (reinterpret_cast<void*>(mem_map->Begin()));
+//    LOG(ERROR) << "CPUFreqProfiler: succeeded to allocate pages for alloc space (EventsTimeLine) of size "
+//        << PrettySize(capacity) << ", and address is : " <<
+//        (reinterpret_cast<void*>(mem_map->Begin()));
   }
 
   map_archives_.Put(markerManager->archive_cnt_, mem_map);
@@ -1036,8 +1013,8 @@ inline void VMProfiler::initEventBulk(void) {
   markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
   android_atomic_acquire_store(0, &markerManager->curr_index_);
 
-  LOG(ERROR) << "leaving VMProfiler::initEventBulk " <<
-      (reinterpret_cast<void*>(mem_map->Begin()));
+//  LOG(ERROR) << "leaving VMProfiler::initEventBulk " <<
+//      (reinterpret_cast<void*>(mem_map->Begin()));
 
 }
 
