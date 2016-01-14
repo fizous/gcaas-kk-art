@@ -119,7 +119,25 @@ typedef struct GCPHistogramRecAtomic_S {
 	double pcntTotal;
 } GCPHistogramRecAtomic;
 
-
+//typedef struct GCPHistogramRecAtomicWrapper_S {
+//  GCPHistogramRecAtomic atomic_support_;
+//  uint64_t cntLive_over_flow_;
+//  uint64_t cntTotal_over_flow_;
+//} GCPHistogramRecAtomicWrapper;
+//
+//
+//
+//class GCPHistRecDataWrapper {
+// public:
+//  GCPHistogramRecAtomicWrapper recorded_data_;
+//  uint64_t get_cnt_total() {
+//    return recorded_data_.cntTotal_over_flow_;
+//  }
+//
+//  uint64_t inc_cnt_total(int value) {
+//    return recorded_data_.cntTotal_over_flow_ += fetch_add ;
+//  }
+//};
 
 typedef struct PACKED(4) GCPHistogramRec_S {
 	uint64_t   index;

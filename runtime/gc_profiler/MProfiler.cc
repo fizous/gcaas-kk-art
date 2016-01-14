@@ -436,7 +436,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.allocatedBytes = _allocBytes;
 
 
-	LOG(ERROR) << "index: " << heapStatus.index  << "; alloc_bytes:" <<  _allocBytes;
+//	LOG(ERROR) << "index: " << heapStatus.index  << "; alloc_bytes:" <<  _allocBytes;
 
 
 #if ART_GC_SERVICE
