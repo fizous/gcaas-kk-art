@@ -262,7 +262,7 @@ public:
 //
 //  typedef SafeMap<uint32_t, MEM_MAP*, std::less<MEM_MAP*>,
 //      gc::accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
-  SafeMap<uint32_t, MEM_MAP*> map_archives_ GUARDED_BY(*evt_manager_lock_);
+  SafeMap<uint32_t, MEM_MAP*> map_archives_ /*GUARDED_BY(*evt_manager_lock_)*/;
 
   GCMMPHeapStatus heapStatus;
   GCMMPHeapIntegral heapIntegral_;
