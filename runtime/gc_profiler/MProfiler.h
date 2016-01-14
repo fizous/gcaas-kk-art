@@ -228,6 +228,8 @@ public:
 
 	static int kGCMMPLogAllocWindowDump;
 
+	static bool system_server_created_;
+
 	std::vector<std::string> app_list_;
 
 	const bool enabled_;

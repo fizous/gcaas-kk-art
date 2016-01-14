@@ -189,6 +189,8 @@ size_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZ
 VMProfiler* GCMMPThreadProf::vmProfiler = NULL;
 GCPHistogramRecAtomic VMProfiler::allocatedBytesData;
 
+bool VMProfiler::system_server_created_ = false;
+
 
 const int VMProfiler::kGCMMPDumpEndMarker = -99999999;
 

@@ -692,8 +692,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
           se_name_c_str = se_name->c_str();
           LOG(ERROR) << "java_se_name: " << se_name_c_str;
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST || ART_USE_GC_DEFAULT_PROFILER)
-          LOG(ERROR) << "java_se_name: " << se_name_c_str;
-          mprofiler::VMProfiler::dvmGCMMProfPerfCountersVative(se_name->c_str());
+          if(mprofiler::VMProfiler::system_server_created_) {
+            LOG(ERROR) << "java_se_name: " << se_name_c_str;
+            mprofiler::VMProfiler::dvmGCMMProfPerfCountersVative(se_name->c_str());
+          }
 #endif
           CHECK(se_name_c_str != NULL);
       }
@@ -763,6 +765,10 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
       }
 #if (ART_GC_SERVICE)
       gc::gcservice::GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 1;
+#endif
+
+#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST || ART_USE_GC_DEFAULT_PROFILER)
+      mprofiler::VMProfiler::system_server_created_ = true;
 #endif
   }
   return pid;
