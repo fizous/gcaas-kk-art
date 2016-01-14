@@ -52,6 +52,11 @@
 
 #include "gc/service/global_allocator.h"
 
+
+#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST || ART_USE_GC_DEFAULT_PROFILER)
+#include "gc_profiler/MProfiler.h"
+#endif
+
 namespace art {
 
 static pid_t gSystemServerPid = 0;
