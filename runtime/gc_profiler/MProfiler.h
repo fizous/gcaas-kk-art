@@ -366,6 +366,9 @@ public:
   void OpenDumpFile(void);
   void InitCommonData(void);
   virtual bool periodicDaemonExec(void) = 0;
+
+  static void dvmGCMMProfPerfCountersVative(const char*);
+
   void ShutdownProfiling(void);
   void startProfiling(void);
   void ProcessSignalCatcher(int);

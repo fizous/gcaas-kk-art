@@ -673,9 +673,20 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       }
       const char* se_name_c_str = NULL;
       UniquePtr<ScopedUtfChars> se_name;
+//      if (java_se_name != NULL) {
+//          se_name.reset(new ScopedUtfChars(env, java_se_name));
+//          se_name_c_str = se_name->c_str();
+//          CHECK(se_name_c_str != NULL);
+//          runtime->RegisterCollector(se_name_c_str);
+//          LOG(ERROR) << "SEName: " << se_name_c_str;
+//      }
+
       if (java_se_name != NULL) {
           se_name.reset(new ScopedUtfChars(env, java_se_name));
           se_name_c_str = se_name->c_str();
+#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+          VMProfiler::dvmGCMMProfPerfCountersVative(se_name->c_str());
+#endif
           CHECK(se_name_c_str != NULL);
       }
       rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);

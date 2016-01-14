@@ -676,6 +676,16 @@ void VMProfiler::createAppList(GCMMP_Options* argOptions) {
 	//  LOG(ERROR) << "<<<<<<dump list of packages>>>>>>>";
 }
 
+
+void VMProfiler::dvmGCMMProfPerfCountersVative(const char* vmName){
+  art::mprofiler::VMProfiler* mProfiler =
+      art::Runtime::Current()->GetVMProfiler();
+  if(mProfiler != NULL) {
+    mProfiler->GCMMProfPerfCounters(vmName);
+  }
+
+}
+
 VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 						index_(argOptions->mprofile_type_),
 						enabled_((argOptions->mprofile_type_ != VMProfiler::kGCMMPDisableMProfile) || (argOptions->gcp_type_ != VMProfiler::kGCMMPDisableMProfile)),
@@ -3761,10 +3771,10 @@ MProfiler::MProfiler(GCMMP_Options* argOptions)
 }// namespace art
 
 void dvmGCMMProfPerfCounters(const char* vmName){
-	art::mprofiler::VMProfiler* mProfiler =
-			art::Runtime::Current()->GetVMProfiler();
-	if(mProfiler != NULL) {
-		mProfiler->GCMMProfPerfCounters(vmName);
-	}
+//	art::mprofiler::VMProfiler* mProfiler =
+//			art::Runtime::Current()->GetVMProfiler();
+//	if(mProfiler != NULL) {
+//		mProfiler->GCMMProfPerfCounters(vmName);
+//	}
 
 }
