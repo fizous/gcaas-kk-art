@@ -1029,7 +1029,7 @@ inline void VMProfiler::initEventBulk(void) {
         (reinterpret_cast<void*>(mem_map->Begin()));
   }
 
-//  map_archives_.put(markerManager->archive_cnt_, mem_map);
+  map_archives_.put(markerManager->archive_cnt_, mem_map);
 
   markerManager->markers_ = reinterpret_cast<EventMarker*>(mem_map->Begin());
   android_atomic_acquire_store(0, &markerManager->curr_index_);

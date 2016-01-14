@@ -259,7 +259,7 @@ public:
   EventMarkerManager* markerManager;
 
   typedef SafeMap<uint32_t, MEM_MAP*, std::less<MEM_MAP*>,
-      accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
+      gc::accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
   ArchiveMemMapsT map_archives_ GUARDED_BY(*evt_manager_lock_);
 
   GCMMPHeapStatus heapStatus;
