@@ -168,7 +168,8 @@ art::mprofiler::VMProfiler* createVMProfiler(GCMMP_Options* opts, void* entry)
 	return new T(opts, entry);
 }
 
-
+typedef SafeMap<uint32_t, MEM_MAP*, std::less<MEM_MAP*>,
+    gc::accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
 
 class VMProfiler {
 
@@ -258,8 +259,7 @@ public:
   Mutex* evt_manager_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   EventMarkerManager* markerManager;
 
-  typedef SafeMap<uint32_t, MEM_MAP*, std::less<MEM_MAP*>,
-      gc::accounting::GCAllocator<std::pair<uint32_t, MEM_MAP*> > > ArchiveMemMapsT;
+
   ArchiveMemMapsT map_archives_ GUARDED_BY(*evt_manager_lock_);
 
   GCMMPHeapStatus heapStatus;
