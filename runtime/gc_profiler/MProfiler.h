@@ -13,6 +13,7 @@
 #include "locks.h"
 #include "base/mutex.h"
 #include "safe_map.h"
+#include "mem_map.h"
 #include "base/unix_file/fd_file.h"
 #include "os.h"
 #include "base/logging.h"
