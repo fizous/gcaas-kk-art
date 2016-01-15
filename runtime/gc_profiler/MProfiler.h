@@ -118,8 +118,8 @@ typedef struct PACKED(4) GCMMPProfilingEntry_S {
 
 /* class to keep track of integrals (area under curve for the heap volume)*/
 class GCMMPHeapIntegral {
-	size_t lastHeapSize_; /* the heap from which we start measuring */
-	size_t lastTime_;		 /* the point we last check the integration */
+  uint64_t lastHeapSize_; /* the heap from which we start measuring */
+	uint64_t lastTime_;		 /* the point we last check the integration */
 	double accIntegral_;  /* accumulative integral */
 	double gcCounts_;
 	double gcCPULoad_;
@@ -129,17 +129,21 @@ public:
 	GCMMPHeapIntegral(void): lastHeapSize_(0), lastTime_(0),	accIntegral_(0),
 			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {}
 
-	void gcpPreCollectionMark(GCPHistogramRecAtomic* allocationRec){
-		size_t deltaAllocBytes =
-				((size_t) allocationRec->cntTotal.load()) - lastTime_;
+	void gcpPreCollectionMark(SafeGCPHistogramRec* allocationRec){
+	  uint64_t total_alloc_bytes = 0;
+    uint64_t curr_alloc_bytes = 0;
+
+    allocationRec->read_counts(&total_alloc_bytes, &curr_alloc_bytes);
+
+	  uint64_t deltaAllocBytes = total_alloc_bytes - lastTime_;
 
 
-		size_t _currBytes =  (size_t)allocationRec->cntLive.load();
-		size_t _maxHeapP = _currBytes;
-		size_t _minHeapP = lastHeapSize_;
+		//size_t _currBytes =  (size_t)allocationRec->cntLive.load();
+	  uint64_t _maxHeapP = curr_alloc_bytes;
+	  uint64_t _minHeapP = lastHeapSize_;
 
-		if(lastHeapSize_ > _currBytes) {
-			_minHeapP = _currBytes;
+		if(lastHeapSize_ > curr_alloc_bytes) {
+			_minHeapP = curr_alloc_bytes;
 			_maxHeapP = lastHeapSize_;
 		}
 
@@ -150,9 +154,8 @@ public:
 		gcCounts_++;
 	}
 
-	void gcpPostCollectionMark(GCPHistogramRecAtomic* allocationRec) {
-		lastTime_ = (size_t) allocationRec->cntTotal.load();
-		lastHeapSize_ = allocationRec->cntLive.load();
+	void gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
+	  allocationRec->read_counts(&lastTime_, &lastHeapSize_);
 	}
 
 	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
@@ -222,11 +225,14 @@ public:
 
 	//static AtomicInteger GCPTotalAllocBytes;
 
-	static GCPHistogramRecAtomic allocatedBytesData;
+	//static GCPHistogramRecAtomic allocatedBytesData;
+
+	SafeGCPHistogramRec* allocatedBytesData_;
 
 	static int kGCMMPLogAllocWindow;
-
+  static int kGCMMPAllocWindow;
 	static int kGCMMPLogAllocWindowDump;
+  static int kGCMMPAllocWindowDump;
 
 	static bool system_server_created_;
 
@@ -358,12 +364,23 @@ public:
 	}
 
 	void accountFreeing(size_t objSize) {
-		GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
+	  allocatedBytesData_->dec_counts(objSize);
+//		GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
 	}
 
 	void accountAllocating(size_t objSize) {
-		GCPHistRecData::GCPIncAtomicRecData(objSize, &allocatedBytesData);
+	  allocatedBytesData_->inc_counts(objSize);
 	}
+
+	void accountAllocating(size_t objSize, uint64_t* before_val, uint64_t* after_val) {
+	  allocatedBytesData_->inc_counts(objSize, before_val, after_val);
+	}
+
+
+
+//  void accountAllocating(size_t objSize) {
+//    GCPHistRecData::GCPIncAtomicRecData(objSize, &allocatedBytesData);
+//  }
 
   void OpenDumpFile(void);
   void InitCommonData(void);
@@ -443,7 +460,7 @@ public:
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   static int32_t GCPCalcCohortIndex(void) {
-  	return (allocatedBytesData.cntTotal.load() >> GCHistogramDataManager::kGCMMPCohortLog);
+  	return (allocatedBytesData_->get_total_count() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
   virtual int32_t getGCEventsCounts(void) {

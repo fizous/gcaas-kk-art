@@ -75,7 +75,7 @@ void MPPerfCounter::getGCDataDistributions(uint64_t* totalVal,
 
 
 
-void PerfEventLogger::addEvents(int32_t tag, uint64_t data) {
+void PerfEventLogger::addEvents(uint64_t tag, uint64_t data) {
 	events.push_back(EventReading(tag, data));
 }
 
@@ -134,7 +134,7 @@ void MPPerfCounter::readPerfData(void) {
 }
 
 
-void MPPerfCounter::storeReading(int32_t tag) {
+void MPPerfCounter::storeReading(uint64_t tag) {
 	readPerfData();
 	evtLogger.addEvents(tag, data);
 }

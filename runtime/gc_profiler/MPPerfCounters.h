@@ -135,8 +135,8 @@ typedef struct GC_MMPHeapConf_S {
 typedef struct GCMMPHeapStatus_S {
 	double 			index;
 	double			timeInNsec;
-	size_t 			allocatedBytes;
-	size_t 			currAllocBytes;
+	uint64_t 		allocatedBytes;
+	uint64_t 		currAllocBytes;
 	size_t			currFootPrint;
 	size_t 			heapIdealFree;
 	size_t 			concurrentStartBytes;
@@ -172,14 +172,14 @@ typedef struct GCMMPCPIDataDumped_S {
 class PerfEventLogger {
  public:
   // Splits are nanosecond times and split names.
-  typedef std::pair<int32_t, uint64_t> EventReading;
+  typedef std::pair<uint64_t, uint64_t> EventReading;
   typedef std::vector<EventReading> EventReadings;
 
   EventReadings events;
   GCPauseThreadMarker eventMarkers[GCMMP_GC_BRK_MAXIMUM];
   uint64_t eventAccMarkers[GCMMP_GC_BRK_MAXIMUM];
 
-  void addEvents(int32_t, uint64_t);
+  void addEvents(uint64_t, uint64_t);
   void addStartMarkEvent(GCMMP_BREAK_DOWN_ENUM, uint64_t);
   uint64_t addEndMarkEvent(GCMMP_BREAK_DOWN_ENUM, uint64_t);
   void dumpMarks(void);
@@ -227,7 +227,7 @@ public:
 
   static MPPerfCounter* Create(const char* event_name);
 
-  void storeReading(int32_t);
+  void storeReading(uint64_t);
 
   void addStartEvent(GCMMP_BREAK_DOWN_ENUM);
   void addEndEvent(GCMMP_BREAK_DOWN_ENUM);

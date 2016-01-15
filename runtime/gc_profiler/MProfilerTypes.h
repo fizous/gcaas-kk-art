@@ -86,9 +86,10 @@ typedef struct EventMarker_S {
 	/* time of the event */
 	uint64_t currTime;
 	/* the heap size when the event was marked */
-	int32_t currHSize;
+	uint64_t currHSize;
 	/* event type */
 	GCMMP_ACTIVITY_ENUM evType;
+
 } EventMarker;
 
 
@@ -118,6 +119,8 @@ typedef struct GCPHistogramRecAtomic_S {
 	double pcntLive;
 	double pcntTotal;
 } GCPHistogramRecAtomic;
+
+
 
 //typedef struct GCPHistogramRecAtomicWrapper_S {
 //  GCPHistogramRecAtomic atomic_support_;
@@ -156,6 +159,58 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 	double totalSize;
 } GCPCohortRecordData;
 
+
+
+typedef struct PACKED(4) GCPSafeRecData_S {
+  uint64_t index_;
+  uint64_t cntLive_;
+  uint64_t cntTotal_;
+} GCPSafeRecData;
+
+
+class SafeGCPHistogramRec {
+ public:
+  GCPSafeRecData dataRec_;
+  Mutex* safe_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+
+  SafeGCPHistogramRec() {
+    safe_lock_ = new Mutex("SafeGCPHistogramRec lock");
+    memset((void*)&dataRec_, 0, sizeof(GCPSafeRecData));
+  }
+
+  void inc_counts(size_t val) {
+    MutexLock mu(Thread::Current(), *safe_lock_);
+    dataRec_.cntLive_ += val;
+    dataRec_.cntTotal_ += val;
+  }
+
+  void inc_counts(size_t val, uint64_t* before_val, uint64_t* after_val) {
+    MutexLock mu(Thread::Current(), *safe_lock_);
+    *before_val = dataRec_.cntTotal_;
+    dataRec_.cntLive_ += val;
+    dataRec_.cntTotal_ += val;
+    *after_val = dataRec_.cntTotal_;
+  }
+
+  void dec_counts(int val) {
+    MutexLock mu(Thread::Current(), *safe_lock_);
+    dataRec_.cntLive_ -= val;
+  }
+
+  void read_counts(uint64_t* total_cnt, uint64_t* live_cnt) {
+    MutexLock mu(Thread::Current(), *safe_lock_);
+    *total_cnt = dataRec_.cntTotal_;
+    *live_cnt = dataRec_.cntLive_;
+  }
+
+  uint64_t get_total_count() {
+    return dataRec_.cntTotal_;
+  }
+
+
+
+
+};
 
 
 class GCPHistRecData {
@@ -758,11 +813,11 @@ protected:
 	}
 
 	size_t calcObjBD(size_t objSize) {
-		return allocRec_->load() - objSize;
+		return static_cast<size_t>(allocRec_->get_total_count() - objSize);
 	}
 
 	size_t calcObjLifeTime(size_t objBD) {
-		return allocRec_->load() - objBD;
+		return static_cast<size_t>(allocRec_->get_total_count() - objBD);
 	}
 
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
@@ -786,11 +841,11 @@ public:
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
 	GCPCohortsTable 			cohortsTable_;
-	AtomicInteger* 				allocRec_;
+	SafeGCPHistogramRec* 				allocRec_;
 
 	GCPPairHistogramRecords lifeTimeHistograms_[kGCMMPMaxHistogramEntries];
 
-	GCCohortManager(AtomicInteger*);
+	GCCohortManager(SafeGCPHistogramRec*);
 	void initHistograms(void);
 
 	void addObject(size_t, size_t, mirror::Object*);
@@ -911,7 +966,7 @@ public:
 	GCPDistanceRecord selReferenceStats_;
 	GCPDistanceRecord mutationStats_;
 
-	GCRefDistanceManager(AtomicInteger*);
+	GCRefDistanceManager(SafeGCPHistogramRec*);
 
 	void resetCurrentCounters();
 
@@ -1233,8 +1288,8 @@ public:
   MPPerfCounter* GetPerfRecord() {
     return perf_record_;
   }
-  void readPerfCounter(int32_t);
-  void readPerfCounter(int32_t, uint64_t*, uint64_t*, uint64_t*);
+  void readPerfCounter(uint64_t);
+  void readPerfCounter(uint64_t, uint64_t*, uint64_t*, uint64_t*);
   uint64_t getDataPerfCounter();
 
 

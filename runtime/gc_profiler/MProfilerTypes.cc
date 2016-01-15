@@ -894,7 +894,7 @@ bool GCPThreadAllocManager::gcpDumpSummaryManagedData(art::File* dumpFile) {
 
 /******************** GCCohortManager ***********************/
 
-GCCohortManager::GCCohortManager(AtomicInteger* allocRec) :
+GCCohortManager::GCCohortManager(SafeGCPHistogramRec* allocRec) :
 		GCHistogramDataManager(false) {
 	//get the correct cohort index;
 	allocRec_ = allocRec;
@@ -1204,8 +1204,8 @@ void GCCohortManager::gcpFinalizeProfileCycle(void) {
 
 /*********************** GCRefDistanceManager **************************/
 
-GCRefDistanceManager::GCRefDistanceManager(AtomicInteger* atomicInt) :
-		GCCohortManager(atomicInt) {
+GCRefDistanceManager::GCRefDistanceManager(SafeGCPHistogramRec* safeTotalAccount) :
+		GCCohortManager(safeTotalAccount) {
 	initDistanceArray();
 }
 
