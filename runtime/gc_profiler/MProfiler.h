@@ -94,6 +94,7 @@ class ConditionVariable;
 class Mutex;
 class Thread;
 class MembersOffset;
+class Thread;
 
 namespace mirror{
 class Object;
