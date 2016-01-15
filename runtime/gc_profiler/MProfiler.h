@@ -131,39 +131,11 @@ public:
 	GCMMPHeapIntegral(void): lastHeapSize_(0), lastTime_(0),	accIntegral_(0),
 			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {}
 
-	void gcpPreCollectionMark(SafeGCPHistogramRec* allocationRec){
-	  uint64_t total_alloc_bytes = 0;
-    uint64_t curr_alloc_bytes = 0;
+	void gcpPreCollectionMark(SafeGCPHistogramRec* allocationRec);
 
-    allocationRec->read_counts(Thread::Current(), &total_alloc_bytes, &curr_alloc_bytes);
+	void gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec);
 
-	  uint64_t deltaAllocBytes = total_alloc_bytes - lastTime_;
-
-
-		//size_t _currBytes =  (size_t)allocationRec->cntLive.load();
-	  uint64_t _maxHeapP = curr_alloc_bytes;
-	  uint64_t _minHeapP = lastHeapSize_;
-
-		if(lastHeapSize_ > curr_alloc_bytes) {
-			_minHeapP = curr_alloc_bytes;
-			_maxHeapP = lastHeapSize_;
-		}
-
-		double _extraSpace = 0.5 * (_maxHeapP - _minHeapP);
-
-		_extraSpace += deltaAllocBytes * _minHeapP;
-		accIntegral_ += _extraSpace;
-		gcCounts_++;
-	}
-
-	void gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
-	  allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
-	}
-
-	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
-		heapStatus->heapIntegral = accIntegral_;
-		heapStatus->gcCounts = gcCounts_;
-	}
+	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus);
 };//GCMMPHeapIntegral
 
 
