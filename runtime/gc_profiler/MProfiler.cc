@@ -435,7 +435,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	uint64_t _curr_alloc_bytes_ = 0;
 
 
-	allocatedBytesData_->read_counts(&_allocBytes, &_curr_alloc_bytes_);
+	allocatedBytesData_->read_counts(Thread::Current(), &_allocBytes, &_curr_alloc_bytes_);
 
 
 	heapStatus.index = (_allocBytes / kGCMMPAllocWindowDump);
@@ -614,7 +614,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 						uint64_t _total_bytes = 0;
 						uint64_t _curr_bytes = 0;
 
-						allocatedBytesData_->read_counts(&_total_bytes, &_curr_bytes);
+						allocatedBytesData_->read_counts(self, &_total_bytes, &_curr_bytes);
 
 						dataDumped.index = _total_bytes >> kGCMMPLogAllocWindowDump;
 						dataDumped.currCycles = accData.currCycles;

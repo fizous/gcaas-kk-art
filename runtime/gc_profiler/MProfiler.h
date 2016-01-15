@@ -24,6 +24,7 @@
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
+#include "thread.h"
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
@@ -133,7 +134,7 @@ public:
 	  uint64_t total_alloc_bytes = 0;
     uint64_t curr_alloc_bytes = 0;
 
-    allocationRec->read_counts(&total_alloc_bytes, &curr_alloc_bytes);
+    allocationRec->read_counts(Thread::Current(), &total_alloc_bytes, &curr_alloc_bytes);
 
 	  uint64_t deltaAllocBytes = total_alloc_bytes - lastTime_;
 
@@ -155,7 +156,7 @@ public:
 	}
 
 	void gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
-	  allocationRec->read_counts(&lastTime_, &lastHeapSize_);
+	  allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
 	}
 
 	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
@@ -364,16 +365,16 @@ public:
 	}
 
 	void accountFreeing(size_t objSize) {
-	  allocatedBytesData_->dec_counts(objSize);
+	  allocatedBytesData_->dec_counts(Thread::Current(), objSize);
 //		GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
 	}
 
 	void accountAllocating(size_t objSize) {
-	  allocatedBytesData_->inc_counts(objSize);
+	  allocatedBytesData_->inc_counts(Thread::Current(),objSize);
 	}
 
 	void accountAllocating(size_t objSize, uint64_t* before_val, uint64_t* after_val) {
-	  allocatedBytesData_->inc_counts(objSize, before_val, after_val);
+	  allocatedBytesData_->inc_counts(Thread::Current(),objSize, before_val, after_val);
 	}
 
 

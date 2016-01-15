@@ -178,27 +178,27 @@ class SafeGCPHistogramRec {
     memset((void*)&dataRec_, 0, sizeof(GCPSafeRecData));
   }
 
-  void inc_counts(size_t val) {
-    MutexLock mu(Thread::Current(), *safe_lock_);
+  void inc_counts(Thread* th, size_t val) {
+    MutexLock mu(th, *safe_lock_);
     dataRec_.cntLive_ += val;
     dataRec_.cntTotal_ += val;
   }
 
-  void inc_counts(size_t val, uint64_t* before_val, uint64_t* after_val) {
-    MutexLock mu(Thread::Current(), *safe_lock_);
+  void inc_counts(Thread* th, size_t val, uint64_t* before_val, uint64_t* after_val) {
+    MutexLock mu(th, *safe_lock_);
     *before_val = dataRec_.cntTotal_;
     dataRec_.cntLive_ += val;
     dataRec_.cntTotal_ += val;
     *after_val = dataRec_.cntTotal_;
   }
 
-  void dec_counts(int val) {
-    MutexLock mu(Thread::Current(), *safe_lock_);
+  void dec_counts(Thread* th, int val) {
+    MutexLock mu(th, *safe_lock_);
     dataRec_.cntLive_ -= val;
   }
 
-  void read_counts(uint64_t* total_cnt, uint64_t* live_cnt) {
-    MutexLock mu(Thread::Current(), *safe_lock_);
+  void read_counts(Thread* th, uint64_t* total_cnt, uint64_t* live_cnt) {
+    MutexLock mu(th, *safe_lock_);
     *total_cnt = dataRec_.cntTotal_;
     *live_cnt = dataRec_.cntLive_;
   }
