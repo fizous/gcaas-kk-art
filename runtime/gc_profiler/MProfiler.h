@@ -228,7 +228,7 @@ public:
 
 	//static GCPHistogramRecAtomic allocatedBytesData;
 
-	SafeGCPHistogramRec* allocatedBytesData_;
+	static SafeGCPHistogramRec* allocatedBytesData_;
 
 	static int kGCMMPLogAllocWindow;
   static int kGCMMPAllocWindow;

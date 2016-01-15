@@ -189,6 +189,9 @@ int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPAllocWindowDump = (1 << GCP_WINDOW_RANGE_LOG);
 size_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZE;
 VMProfiler* GCMMPThreadProf::vmProfiler = NULL;
+
+
+SafeGCPHistogramRec* VMProfiler::allocatedBytesData_ = NULL;
 //GCPHistogramRecAtomic VMProfiler::allocatedBytesData;
 
 bool VMProfiler::system_server_created_ = false;
