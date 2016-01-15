@@ -1006,7 +1006,7 @@ size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 		LOG(ERROR) << "startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 	_firstRecP = getCoRecFromIndices(_startRow, _startIndex);
 	if(_firstRecP == NULL) {
-		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+//		LOG(ERROR) << "NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 		return 0;
 	}
 
@@ -1030,7 +1030,7 @@ size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 			if(_colIter == _endIndex && _endRow == _rowIter)
 				break;
 			if(_rowIter >= cohortsTable_.cohortRows_.size() || _colIter >= (size_t)kGCMMPMaxRowCap){
-				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
+//				LOG(ERROR) << "2--NULL:::BD="<<_profHeader->objBD<<"; currentBytes="<< allocRec_->load()<<"; capacit=" << cohortsTable_.cohortRows_.size() <<",startRow=" << _startRow<< "; startInd=" << _startIndex << "; endRow=" << _endRow << "; endIndex=" << _endIndex;
 				return 0;
 			}
 			_LastRecP =  getCoRecFromIndices(_rowIter, _colIter);
