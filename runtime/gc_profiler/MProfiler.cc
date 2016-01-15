@@ -1934,6 +1934,23 @@ inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) 
   heapStatus->gcCounts = gcCounts_;
 }
 
+
+inline void VMProfiler::accountFreeing(size_t objSize) {
+  allocatedBytesData_->dec_counts(Thread::Current(), objSize);
+//    GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
+}
+
+inline void VMProfiler::accountAllocating(size_t objSize) {
+  allocatedBytesData_->inc_counts(Thread::Current(),objSize);
+}
+
+inline void VMProfiler::accountAllocating(size_t objSize, uint64_t* before_val, uint64_t* after_val) {
+  allocatedBytesData_->inc_counts(Thread::Current(),objSize, before_val, after_val);
+}
+
+
+
+
 void VMProfiler::MProfMarkPreCollection(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		VMProfiler* _vmProfiler = Runtime::Current()->GetVMProfiler();

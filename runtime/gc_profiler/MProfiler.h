@@ -337,24 +337,13 @@ public:
 		gc_trimmer_ = thread;
 	}
 
-	void accountFreeing(size_t objSize) {
-	  allocatedBytesData_->dec_counts(Thread::Current(), objSize);
-//		GCPHistRecData::GCPDecAtomicRecData(objSize, &allocatedBytesData);
-	}
+	void accountFreeing(size_t objSize);
 
-	void accountAllocating(size_t objSize) {
-	  allocatedBytesData_->inc_counts(Thread::Current(),objSize);
-	}
+	void accountAllocating(size_t objSize);
 
-	void accountAllocating(size_t objSize, uint64_t* before_val, uint64_t* after_val) {
-	  allocatedBytesData_->inc_counts(Thread::Current(),objSize, before_val, after_val);
-	}
+	void accountAllocating(size_t objSize, uint64_t* before_val,
+	                       uint64_t* after_val);
 
-
-
-//  void accountAllocating(size_t objSize) {
-//    GCPHistRecData::GCPIncAtomicRecData(objSize, &allocatedBytesData);
-//  }
 
   void OpenDumpFile(void);
   void InitCommonData(void);
