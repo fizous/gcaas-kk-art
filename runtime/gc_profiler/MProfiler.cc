@@ -435,10 +435,10 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 
 
 	uint64_t _allocBytes = 0;
-	uint64_t _curr_alloc_bytes_ = 0;
+	uint64_t _curr_alloc_bytes = 0;
 
 
-	allocatedBytesData_->read_counts(Thread::Current(), &_allocBytes, &_curr_alloc_bytes_);
+	allocatedBytesData_->read_counts(Thread::Current(), &_allocBytes, &_curr_alloc_bytes);
 
 
 	heapStatus.index = (_allocBytes / kGCMMPAllocWindowDump);
@@ -447,7 +447,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 #if ART_GC_SERVICE
   heapStatus.currAllocBytes = (size_t) heap_->GetBytesAllocated();
 #else
-  heapStatus.currAllocBytes = _curr_alloc_bytes_;//heap_->GetBytesAllocated();
+  heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
 #endif
   heapStatus.concurrentStartBytes =
       static_cast<uint32_t>(heapStatus.currAllocBytes + GCPGetCalculateStartBytes());//heap_->GetConcStartBytes();
@@ -457,7 +457,9 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
   heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
   heapIntegral_.gcpUpdateHeapStatus(&heapStatus);
 	//uint32_t _allocBytes = static_cast<uint32_t>(allocatedBytesData.cntTotal.load());
-//	LOG(ERROR) << "index: " << heapStatus.index  << "; alloc_bytes:" <<  _allocBytes;
+	LOG(ERROR) << "index: " << heapStatus.index
+	    << "; alloc_bytes:" <<  _allocBytes
+	    << "; currc_bytes:" <<  _curr_alloc_bytes;
 	//heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 }
 
