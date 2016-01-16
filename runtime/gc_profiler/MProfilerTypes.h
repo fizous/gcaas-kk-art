@@ -89,7 +89,8 @@ typedef struct EventMarker_S {
 	uint64_t currHSize;
 	/* event type */
 	GCMMP_ACTIVITY_ENUM evType;
-
+  /* padding*/
+  uint32_t padding_;
 } EventMarker;
 
 
