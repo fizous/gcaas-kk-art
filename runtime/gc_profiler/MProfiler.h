@@ -24,7 +24,7 @@
 #include "cutils/system_clock.h"
 #include "utils.h"
 #include "offsets.h"
-#include "thread.h"
+
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
