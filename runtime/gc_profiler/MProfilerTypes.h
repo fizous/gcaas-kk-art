@@ -193,7 +193,7 @@ class SafeGCPHistogramRec {
     *after_val = dataRec_.cntTotal_;
   }
 
-  void dec_counts(Thread* th, int val) {
+  void dec_counts(Thread* th, size_t val) {
     MutexLock mu(th, *safe_lock_);
     dataRec_.cntLive_ -= val;
   }
