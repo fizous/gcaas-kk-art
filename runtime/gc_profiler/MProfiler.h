@@ -64,12 +64,12 @@
   #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)							 ((void) 0)
   #define GCP_PROFILE_OBJ_CLASS(klass, obj)                ((void) 0)
   #if (ART_USE_GC_DEFAULT_PROFILER)
-    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
-		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
+    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
+		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize, isZygote)
     #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
 	    art::mprofiler::VMProfiler::MProfNotifyAlloc(allocatedSpace, objSize, obj)
   #else // NOT (ART_USE_GC_DEFAULT_PROFILER)
-    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
+    #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
 		  ((void) 0)
     #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
 		  ((void) 0)
@@ -392,7 +392,7 @@ public:
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
 	static void MProfObjClass(mirror::Class*, mirror::Object*);
-	static void MProfNotifyFree(size_t, mirror::Object*);
+	static void MProfNotifyFree(size_t, mirror::Object*, bool);
 //	static void MProfNotifyFree(size_t,size_t);
 	static void MProfileSignalCatcher(int);
 	static void MProfDetachThread(art::Thread*);

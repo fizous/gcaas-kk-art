@@ -99,7 +99,7 @@ size_t LargeObjectMapSpace::Free(Thread* self, mirror::Object* ptr) {
   //size_t objectSize = allocation_size;//AllocationSizeNoOverhead(ptr);
   UpdateBytesAllocated(-allocation_size);
   //num_bytes_allocated_ -= allocation_size;
-  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, ptr);
+  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, ptr, false);
   UpdateObjectsAllocated(-1);
   //--num_objects_allocated_;
   delete found->second;
@@ -238,7 +238,7 @@ size_t FreeListSpace::Free(Thread* self, mirror::Object* obj) {
   CHECK(IsAligned<kAlignment>(header));
   size_t allocation_size = header->AllocationSize();
   //size_t objectSize = allocation_size;//;AllocationSize(obj) - sizeof(AllocationHeader);
-  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, obj);
+  GCMMP_HANDLE_FINE_PRECISE_FREE(allocation_size, obj, false);
   DCHECK_GT(allocation_size, size_t(0));
   DCHECK(IsAligned<kAlignment>(allocation_size));
   // Look at the next chunk.

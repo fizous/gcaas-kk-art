@@ -1814,8 +1814,8 @@ void VMProfiler::MProfAttachThread(art::Thread* th) {
 //}
 
 
-void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj) {
-	if(VMProfiler::IsMProfRunning()) {
+void VMProfiler::MProfNotifyFree(size_t allocSpace, mirror::Object* obj, bool isZygote) {
+	if(VMProfiler::IsMProfRunning() && !isZygote) {
 		VMProfiler* _vmProfiler = Runtime::Current()->GetVMProfiler();
 		_vmProfiler->notifyFreeing(allocSpace, obj);
 	}
