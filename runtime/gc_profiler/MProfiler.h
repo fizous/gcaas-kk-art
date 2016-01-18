@@ -396,7 +396,7 @@ public:
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
-	static void MProfAttachThreadPostRenaming(art::Thread*);
+	static void MProfAttachThreadPostRenaming(art::Thread*, const char*);
 //	static void MProfNotifyAlloc(size_t,size_t);
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
@@ -448,7 +448,7 @@ public:
   }
 
   virtual void attachSingleThread(Thread* t);
-  void attachSingleThreadPostRenaming(Thread* thread);
+  void attachSingleThreadPostRenaming(Thread* thread, const char* name);
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
 
   virtual void setPauseManager(GCMMPThreadProf* thProf) {

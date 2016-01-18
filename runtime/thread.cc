@@ -413,7 +413,7 @@ void Thread::SetThreadName(const char* name) {
   name_->assign(name);
   ::art::SetThreadName(name);
   Dbg::DdmSendThreadNotification(this, CHUNK_TYPE("THNM"));
-  mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current());
+  mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current(), name);
 }
 
 void Thread::InitStackHwm() {
