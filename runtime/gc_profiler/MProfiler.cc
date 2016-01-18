@@ -861,7 +861,9 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread, const char* thread_
   if(thread_name != NULL) {
     _th_name_str->assign(thread_name);
   } else {
-    _th_name_str = thread->name_;
+    std::string _temp_str;
+    thread->GetThreadName(_temp_str);
+    _th_name_str = &_temp_str;
   }
 
 //	std::string thread_name;
@@ -925,7 +927,9 @@ void VMProfiler::attachSingleThread(Thread* thread, const char* thread_name) {
 	if(thread_name != NULL) {
 	  _th_name_str->assign(thread_name);
 	} else {
-	  _th_name_str = thread->name_;
+	  std::string _temp_str;
+	  thread->GetThreadName(_temp_str);
+	  _th_name_str = &_temp_str;
 	}
 
 
