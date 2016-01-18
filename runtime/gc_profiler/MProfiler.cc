@@ -929,6 +929,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	  GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
 	      thread->GetTid();
 	  delayedProfThread_.push_back(thread);
+	  return;
 	}
 
 
