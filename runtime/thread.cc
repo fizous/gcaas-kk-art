@@ -309,7 +309,6 @@ void Thread::Init(ThreadList* thread_list, JavaVMExt* java_vm) {
   InitStackHwm();
 
   jni_env_ = new JNIEnvExt(this, java_vm);
-  SetProfRec(NULL);
   thread_list->Register(this);
 }
 
@@ -348,6 +347,7 @@ Thread* Thread::Attach(const char* thread_name, bool as_daemon, jobject thread_g
     if (thread_name != NULL) {
       self->name_->assign(thread_name);
       ::art::SetThreadName(thread_name);
+      mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current());
     }
   }
 
@@ -413,6 +413,7 @@ void Thread::SetThreadName(const char* name) {
   name_->assign(name);
   ::art::SetThreadName(name);
   Dbg::DdmSendThreadNotification(this, CHUNK_TYPE("THNM"));
+  mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current());
 }
 
 void Thread::InitStackHwm() {

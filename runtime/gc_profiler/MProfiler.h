@@ -28,8 +28,15 @@
 /**********************************************************************
  * 											Macros Definitions
  **********************************************************************/
+
+#if ART_GC_PROFILER_VERBOSE
+  #define GC_V_ENABLED  true
+#else
+  #define GC_V_ENABLED  false
+#endif
+
 /* log information. used to monitor the flow of the profiler.*/
-#define GCMMP_VLOG(severity) if (ART_GC_PROFILER_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+#define GCMMP_VLOG(severity) if (GC_V_ENABLED) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
 
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
@@ -259,6 +266,7 @@ public:
 
 
   std::vector<GCMMPThreadProf*> threadProfList_;
+  std::vector<Thread*> delayedProfThread_;
 
   art::File* GetDumpFile(void) const {
   	return dump_file_;
@@ -388,6 +396,7 @@ public:
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
 	static void MProfAttachThread(art::Thread*);
+	static void MProfAttachThreadPostRenaming(art::Thread*);
 //	static void MProfNotifyAlloc(size_t,size_t);
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
@@ -439,7 +448,7 @@ public:
   }
 
   virtual void attachSingleThread(Thread* t);
-
+  void attachSingleThreadPostRenaming(Thread* thread);
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
 
   virtual void setPauseManager(GCMMPThreadProf* thProf) {
@@ -460,8 +469,7 @@ public:
 
 
   static bool GCPDumpEndMarker(art::File* dumpFile){
-  	return dumpFile->WriteFully(&kGCMMPDumpEndMarker,
-   			sizeof(int));
+  	return dumpFile->WriteFully(&kGCMMPDumpEndMarker, static_cast<int64_t>(sizeof(int)));
   }
 
 	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
@@ -493,7 +501,7 @@ public:
 		return heapStatus.index;
 	}
 	virtual void resetHeapAllocStatus() {
-		memset((void*)&heapStatus, 0, sizeof(GCMMPHeapStatus));
+		memset((void*)&heapStatus, 0, static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
 	}
 };
 

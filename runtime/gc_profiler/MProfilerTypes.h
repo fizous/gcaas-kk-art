@@ -176,7 +176,7 @@ class SafeGCPHistogramRec {
 
   SafeGCPHistogramRec() {
     safe_lock_ = new Mutex("SafeGCPHistogramRec lock");
-    memset((void*)&dataRec_, 0, sizeof(GCPSafeRecData));
+    memset((void*)&dataRec_, 0, static_cast<int64_t>(sizeof(GCPSafeRecData)));
   }
 
   void inc_counts(Thread* th, size_t val) {
@@ -237,8 +237,8 @@ public:
 
 
 	void initDataRecords(uint64_t kIndex) {
-		memset((void*)&dataRec_, 0, sizeof(GCPHistogramRec));
-		memset((void*)&atomicDataRec_, 0, sizeof(GCPHistogramRecAtomic));
+		memset((void*)&dataRec_, 0, static_cast<int64_t>(sizeof(GCPHistogramRec)));
+		memset((void*)&atomicDataRec_, 0, static_cast<int64_t>(sizeof(GCPHistogramRecAtomic)));
 		dataRec_.index = kIndex;
 		atomicDataRec_.index = kIndex;
 	}
@@ -292,7 +292,7 @@ public:
 
 	void GCPZerofyHistAtomicRecData(GCPHistogramRecAtomic* rec) {
 		uint64_t _index = rec->index;
-	  memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+	  memset((void*)(rec), 0, static_cast<int64_t>(sizeof(GCPHistogramRecAtomic)));
 	  rec->index = _index;
 	  rec->cntLive.store(0);
 	  rec->cntTotal.store(0);
@@ -300,7 +300,7 @@ public:
 
 	void gcpZerofyHistAtomicRecData(void) {
 		uint64_t _index = atomicDataRec_.index;
-	  memset((void*)(&atomicDataRec_), 0, sizeof(GCPHistogramRecAtomic));
+	  memset((void*)(&atomicDataRec_), 0, static_cast<int64_t>(sizeof(GCPHistogramRecAtomic)));
 	  atomicDataRec_.index = _index;
 	  atomicDataRec_.cntLive.store(0);
 	  atomicDataRec_.cntTotal.store(0);
@@ -735,20 +735,20 @@ public:
 
 
   void gcpResetHistogramRecData(GCPHistogramRec* rec) {
-  	memset((void*)(rec), 0, sizeof(GCPHistogramRec));
+  	memset((void*)(rec), 0, static_cast<int64_t>(sizeof(GCPHistogramRec)));
   	rec->pcntLive = 100.0;
   	rec->pcntTotal = 100.0;
   }
 
   void gcpResetHistogramAtomicRecData(GCPHistogramRecAtomic* rec) {
-  	memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+  	memset((void*)(rec), 0, static_cast<int64_t>(sizeof(GCPHistogramRecAtomic)));
   	rec->pcntLive = 100.0;
   	rec->pcntTotal = 100.0;
   }
 
   void gcpZerofyHistogramAtomicRecData(GCPHistogramRecAtomic* rec) {
   	uint64_t _index = rec->index;
-  	memset((void*)(rec), 0, sizeof(GCPHistogramRecAtomic));
+  	memset((void*)(rec), 0, static_cast<int64_t>(sizeof(GCPHistogramRecAtomic)));
   	rec->index = _index;
   }
 
@@ -1188,7 +1188,7 @@ public:
 	 void InitPausesEntry(GCPauseThreadMarker** entryPointer) {
 			*entryPointer =
 					reinterpret_cast<GCPauseThreadMarker*>(calloc(kGCMMPMaxEventEntries,
-					sizeof(GCPauseThreadMarker)));
+					                                              static_cast<int64_t>(sizeof(GCPauseThreadMarker))));
 		} //InitPausesEntry
 
 	 void IncrementIndices(void) {

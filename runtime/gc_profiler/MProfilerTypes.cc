@@ -42,17 +42,17 @@ size_t GCHistogramDataManager::kGCMMPCohortSize =
 
 /**************************** GCPHistRecData *********************************/
 bool GCPHistRecData::GCPDumpHistRecord(art::File* file, GCPHistogramRec* rec) {
-	return file->WriteFully(rec, sizeof(GCPHistogramRec));
+	return file->WriteFully(rec, static_cast<int64_t>(sizeof(GCPHistogramRec)));
 }
 
 inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
-	return file->WriteFully(&dataRec_, sizeof(GCPHistogramRec));
+	return file->WriteFully(&dataRec_, static_cast<int64_t>(sizeof(GCPHistogramRec)));
 }
 
 inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	GCPHistogramRec _dummyRec;
 	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
-	return file->WriteFully(&_dummyRec, sizeof(GCPHistogramRec));
+	return file->WriteFully(&_dummyRec, static_cast<int64_t>(sizeof(GCPHistogramRec)));
 }
 
 inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
@@ -1379,21 +1379,21 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		_totalPercTotal = 100.0 - _selfRefPercTotal;
 		_totalPercLastWindow = 100.0 - _selfRefPercLastWindow;
 
-		_success = dumpFile->WriteFully(&_recDisplayMuts, sizeof(GCPDistanceRecDisplay));
-		_success &= dumpFile->WriteFully(&_totalPercLastWindow, sizeof(double));
-		_success &= dumpFile->WriteFully(&_totalPercTotal, sizeof(double));
+		_success = dumpFile->WriteFully(&_recDisplayMuts, static_cast<int64_t>(sizeof(GCPDistanceRecDisplay)));
+		_success &= dumpFile->WriteFully(&_totalPercLastWindow, static_cast<int64_t>(sizeof(double)));
+		_success &= dumpFile->WriteFully(&_totalPercTotal, static_cast<int64_t>(sizeof(double)));
 
-		if (ART_GC_PROFILER_VERBOSE)
+		if (GC_V_ENABLED)
 			logRecDisplay(&_recDisplayMuts);
 		GCMMP_VLOG(INFO) << "lastWindowPerc:" << StringPrintf("%f", _totalPercLastWindow)
 				<< "; totalPerc:" << StringPrintf("%f", _totalPercTotal);
 
 
-		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, sizeof(GCPDistanceRecDisplay));
-		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, sizeof(double));
-		_success &= dumpFile->WriteFully(&_selfRefPercTotal, sizeof(double));
+		_success &= dumpFile->WriteFully(&_recDisplaySelfMuts, static_cast<int64_t>(sizeof(GCPDistanceRecDisplay)));
+		_success &= dumpFile->WriteFully(&_selfRefPercLastWindow, static_cast<int64_t>(sizeof(double)));
+		_success &= dumpFile->WriteFully(&_selfRefPercTotal, static_cast<int64_t>(sizeof(double)));
 
-		if (ART_GC_PROFILER_VERBOSE)
+		if (GC_V_ENABLED)
 			logRecDisplay(&_recDisplaySelfMuts);
 		GCMMP_VLOG(INFO) << "lastWindowPerc:" << StringPrintf("%f", _selfRefPercLastWindow)
 				<< "; totalPerc:" << StringPrintf("%f", _selfRefPercTotal);
@@ -1476,7 +1476,7 @@ void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
 //}
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
-	return dump_file->WriteFully(gcpGetDataRecP(), sizeof(GCPHistogramRec));
+	return dump_file->WriteFully(gcpGetDataRecP(), static_cast<int64_t>(sizeof(GCPHistogramRec)));
 }
 
 /********************* GCClassTableManager profiling ****************/

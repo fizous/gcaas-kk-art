@@ -239,7 +239,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 		if(limit_ > 0) {
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
 			for(int entryInd = 0; entryInd < limit_; entryInd++) {
-				file->WriteFully(&pauseEvents[bucketInd][entryInd], sizeof(GCMMP_ProfileActivity));
+				file->WriteFully(&pauseEvents[bucketInd][entryInd], static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
 				GCMMP_VLOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
 			}
 		}
@@ -307,7 +307,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 
 void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
 	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-		memset((void*) &thProf->timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
+		memset((void*) &thProf->timeBrks[_iter], 0, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
 	}
 	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
 	GCPauseThreadManager::startRealTime = start_time_ns_;
@@ -771,7 +771,7 @@ VMProfiler::VMProfiler(GCMMP_Options* argOptions, void* entry) :
 
 void VMProfiler::dumpHeapConfigurations(GC_MMPHeapConf* heapConf) {
 
-	bool successWrite = dump_file_->WriteFully(heapConf, sizeof(GC_MMPHeapConf));
+	bool successWrite = dump_file_->WriteFully(heapConf, static_cast<int64_t>(sizeof(GC_MMPHeapConf)));
 	if(!successWrite) {
 		LOG(ERROR) << "VMProfiler : dumpHeapConfigurations error writing heap header";
 	} else {
@@ -840,6 +840,14 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 
 void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
+
+  if(thread->IsStillStarting()) {
+    GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
+        thread->GetTid();
+    delayedProfThread_.push_back(thread);
+  }
+
+
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -895,9 +903,32 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	threadProfList_.push_back(threadProf);
 }
 
+void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
+  Thread* self = Thread::Current();
+  GCMMP_VLOG(INFO) << "VMProfiler: Attaching attachSingleThreadPostRenaming " << self->GetTid();
+  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+  MutexLock mu(self, *Locks::thread_list_lock_);
+  std::vector<Thread*>::iterator iter = delayedProfThread_.begin();
+  while( iter != delayedProfThread_.end()) {
+    if((*iter)->GetTid() == thread->GetTid()) {
+      GCMMP_VLOG(INFO) << "VMProfiler: found delayed thread: " << thread->GetTid();
+      delayedProfThread_.erase(iter);
+      attachSingleThread(thread);
+      break;
+    }
+  }
+}
 
 void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
+
+	if(thread->IsStillStarting()) {
+	  GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
+	      thread->GetTid();
+	  delayedProfThread_.push_back(thread);
+	}
+
+
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
 		if(threadProf->state == GCMMP_TH_RUNNING) {
@@ -1010,7 +1041,7 @@ inline void VMProfiler::initEventBulk(void) {
 //  LOG(ERROR) << "Init Event Bulk";
 
   size_t capacity =
-      RoundUp(sizeof(EventMarker) * kGCMMPMaxEventsCounts, kPageSize);
+      RoundUp(static_cast<size_t>(sizeof(EventMarker) * kGCMMPMaxEventsCounts), kPageSize);
 
 
   if(markerManager->markers_ != NULL) {
@@ -1024,7 +1055,7 @@ inline void VMProfiler::initEventBulk(void) {
 
 
     *headListP =
-        reinterpret_cast<EventMarkerArchive*>(calloc(1, sizeof(EventMarkerArchive)));
+        reinterpret_cast<EventMarkerArchive*>(calloc(1, static_cast<int64_t>(sizeof(EventMarkerArchive))));
 
     (*headListP)->next_event_bulk_ = NULL;
     (*headListP)->markers_ = markerManager->markers_;
@@ -1075,7 +1106,7 @@ void VMProfiler::initMarkerManager(bool firstCall) {
 			return;
 		}
 		if(firstCall) {
-      markerManager = (EventMarkerManager*) calloc(1, sizeof(EventMarkerManager));
+      markerManager = (EventMarkerManager*) calloc(1, static_cast<int64_t>(sizeof(EventMarkerManager)));
       markerManager->events_archive_ = NULL;
       markerManager->markers_ = NULL;
       markerManager->curr_index_ = 0;
@@ -1254,7 +1285,7 @@ bool GCDaemonCPIProfiler::periodicDaemonExec(void){
 }
 
 inline void PerfCounterProfiler::dumpHeapStats(void) {
-	bool successWrite = dump_file_->WriteFully(&heapStatus, sizeof(GCMMPHeapStatus));
+	bool successWrite = dump_file_->WriteFully(&heapStatus, static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
 	if(successWrite) {
 
 	} else {
@@ -1264,7 +1295,7 @@ inline void PerfCounterProfiler::dumpHeapStats(void) {
 
 
 inline void GCDaemonCPIProfiler::dumpCPIStats(GCMMPCPIDataDumped* dataD) {
-	bool successWrite = dump_file_->WriteFully(dataD, sizeof(GCMMPCPIDataDumped));
+	bool successWrite = dump_file_->WriteFully(dataD, static_cast<int64_t>(sizeof(GCMMPCPIDataDumped)));
 	if(successWrite) {
 
 	} else {
@@ -1422,7 +1453,7 @@ GCDaemonCPIProfiler::GCDaemonCPIProfiler(GCMMP_Options* argOptions, void* entry)
 	if(initCounters(perfName_) != 0) {
 		LOG(ERROR) << "GCDaemonCPIProfiler : init counters returned error";
 	} else {
-		memset(&accData, 0, sizeof(GCMMPCPIData));
+		memset(&accData, 0, static_cast<int64_t>(sizeof(GCMMPCPIData)));
 		LOG(ERROR) << "GCDaemonCPIProfiler : Initializer";
 	}
 }
@@ -1588,13 +1619,13 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 		art::File* f = vmProfiler->GetDumpFile();
 		int _pid = profRec->GetTid();
 		int _type = profRec->getThreadTag();
-		f->WriteFully(&_pid, sizeof(int));
-		f->WriteFully(&_type, sizeof(int));
+		f->WriteFully(&_pid, static_cast<int64_t>(sizeof(int)));
+		f->WriteFully(&_type, static_cast<int64_t>(sizeof(int)));
 		if(profRec->GetEndTime() == 0) {
 			profRec->GetliveTimeInfo()->finalMarker =
 					vmProfiler->end_time_ns_ - vmProfiler->start_time_ns_;
 		}
-		f->WriteFully(profRec->GetliveTimeInfo(), sizeof(GCMMP_ProfileActivity));
+		f->WriteFully(profRec->GetliveTimeInfo(), static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
 
 		GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 
@@ -1623,11 +1654,11 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 
 	GCMMP_VLOG(INFO) << " Dumping the MMU information ";
 
-	successWrite = dump_file_->WriteFully(&start_time_ns_, sizeof(uint64_t));
+	successWrite = dump_file_->WriteFully(&start_time_ns_, static_cast<int64_t>(sizeof(uint64_t)));
 
 
 	if(successWrite) {
-		successWrite = dump_file_->WriteFully(&end_time_ns_, sizeof(uint64_t));
+		successWrite = dump_file_->WriteFully(&end_time_ns_, static_cast<int64_t>(sizeof(uint64_t)));
 	}
 	LOG(ERROR) <<  "Uptime is " << uptime_nanos() << "; endTime is: " << end_time_ns_;
 	if(successWrite) {
@@ -1799,9 +1830,19 @@ inline bool VMProfiler::IsMProfHWRunning() {
  * Attach a thread from the MProfiler
  */
 void VMProfiler::MProfAttachThread(art::Thread* th) {
+  th->SetProfRec(NULL);
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetVMProfiler()->attachSingleThread(th);
 	}
+}
+
+/*
+ * Attach a thread from the MProfiler after setting the thread name
+ */
+void VMProfiler::MProfAttachThreadPostRenaming(art::Thread* th) {
+  if(VMProfiler::IsMProfRunning()) {
+    Runtime::Current()->GetVMProfiler()->attachSingleThreadPostRenaming(th);
+  }
 }
 
 
@@ -2312,10 +2353,10 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
 	bool successWrite = dump_file_->WriteFully(&heapStatus,
-			sizeof(GCMMPHeapStatus));
+	                                           static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
 	int32_t _mutations = GCHistogramDataManager::GCPTotalMutationsCount.load();
 	successWrite &= dump_file_->WriteFully(&_mutations,
-			sizeof(int32_t));
+	                                       static_cast<int64_t>(sizeof(int32_t)));
 	if(successWrite) {
 
 	} else {
