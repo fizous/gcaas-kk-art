@@ -916,6 +916,7 @@ void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
       attachSingleThread(thread);
       break;
     }
+    ++iter;
   }
 }
 
