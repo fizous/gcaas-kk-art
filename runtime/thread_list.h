@@ -83,7 +83,7 @@ class ThreadList {
       EXCLUSIVE_LOCKS_REQUIRED(Locks::thread_list_lock_);
 
   // Add/remove current thread from list.
-  void Register(Thread* self)
+  void Register(Thread* self, const char* thread_name)
       EXCLUSIVE_LOCKS_REQUIRED(Locks::runtime_shutdown_lock_)
       LOCKS_EXCLUDED(Locks::mutator_lock_, Locks::thread_list_lock_);
   void Unregister(Thread* self) LOCKS_EXCLUDED(Locks::mutator_lock_, Locks::thread_list_lock_);

@@ -387,7 +387,7 @@ public:
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
-	static void MProfAttachThread(art::Thread*);
+	static void MProfAttachThread(art::Thread*, const char*);
 //	static void MProfNotifyAlloc(size_t,size_t);
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
@@ -438,7 +438,7 @@ public:
   	accountFreeing(objSize);
   }
 
-  virtual void attachSingleThread(Thread* t);
+  virtual void attachSingleThread(Thread* t, const char* thread_name);
 
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
 

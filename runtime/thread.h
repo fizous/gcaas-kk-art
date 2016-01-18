@@ -642,7 +642,7 @@ class PACKED(4) Thread {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
   void RemoveFromThreadGroup(ScopedObjectAccess& soa) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  void Init(ThreadList*, JavaVMExt*) EXCLUSIVE_LOCKS_REQUIRED(Locks::runtime_shutdown_lock_);
+  void Init(ThreadList*, JavaVMExt*, const char*) EXCLUSIVE_LOCKS_REQUIRED(Locks::runtime_shutdown_lock_);
   void InitCardTable();
   void InitCpu();
   void InitTlsEntryPoints();

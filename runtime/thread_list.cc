@@ -501,7 +501,7 @@ void ThreadList::SuspendAllDaemonThreads() {
   }
   LOG(ERROR) << "suspend all daemons failed";
 }
-void ThreadList::Register(Thread* self) {
+void ThreadList::Register(Thread* self, const char* thread_name) {
   DCHECK_EQ(self, Thread::Current());
 
   if (VLOG_IS_ON(threads)) {
@@ -521,7 +521,7 @@ void ThreadList::Register(Thread* self) {
   }
   CHECK(!Contains(self));
   list_.push_back(self);
-	art::mprofiler::VMProfiler::MProfAttachThread(self);
+	art::mprofiler::VMProfiler::MProfAttachThread(self, thread_name);
 }
 
 void ThreadList::Unregister(Thread* self) {

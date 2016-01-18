@@ -834,7 +834,7 @@ void VMProfiler::OpenDumpFile() {
 static void GCMMPVMAttachThread(Thread* t, void* arg) {
 	VMProfiler* vmProfiler = reinterpret_cast<VMProfiler*>(arg);
 	if(vmProfiler != NULL) {
-		vmProfiler->attachSingleThread(t);
+		vmProfiler->attachSingleThread(t, NULL);
 	}
 }
 
@@ -896,7 +896,7 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 }
 
 
-void VMProfiler::attachSingleThread(Thread* thread) {
+void VMProfiler::attachSingleThread(Thread* thread, const char* thread_name) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	GCMMPThreadProf* threadProf = thread->GetProfRec();
 	if(threadProf != NULL) {
@@ -913,33 +913,40 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			return;
 		}
 	}
+	std::string* _th_name_str;
+	if(thread_name != NULL) {
+	  _th_name_str->assign(thread_name);
+	} else {
+	  _th_name_str = thread->name_;
+	}
 
-	std::string thread_name;
-	thread->GetThreadName(thread_name);
+
+//	std::string thread_name;
+//	thread->GetThreadName(thread_name);
 	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
-	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+	if(_th_name_str->compare("GCDaemon") == 0) { //that's the GCDaemon
 		setGcDaemon(thread);
 
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
-					thread->GetTid() << thread_name;
+					thread->GetTid() << *_th_name_str;
 			return;
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
 		_tag = GCMMP_THREAD_GCDAEMON;
 	} else {
-		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+		if(_th_name_str->compare("HeapTrimmerDaemon") == 0) {
 			setGcTrimmer(thread);
 			setThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
 				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " <<
-						thread->GetTid() << thread_name;
+						thread->GetTid() << *_th_name_str;
 				return;
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 			_tag = GCMMP_THREAD_GCTRIM;
-		} else if(thread_name.compare("main") == 0) { //that's the main thread
+		} else if(_th_name_str->compare("main") == 0) { //that's the main thread
 			setMainThread(thread);
 			_tag = GCMMP_THREAD_MAIN;
 			setThreadAffinity(thread, true);
@@ -948,7 +955,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
-			thread->GetTid() << thread_name;
+			thread->GetTid() << *_th_name_str;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
@@ -1385,8 +1392,11 @@ void VMProfiler::attachThreads(){
 	Thread* self = Thread::Current();
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
-	MutexLock mu(self, *Locks::thread_list_lock_);
+	thread_list->SuspendAll();
+	//MutexLock mu(self, *Locks::thread_list_lock_);
 	thread_list->ForEach(GCMMPVMAttachThread, this);
+
+	thread_list->ResumeAll();
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
 }
 
@@ -1798,9 +1808,10 @@ inline bool VMProfiler::IsMProfHWRunning() {
 /*
  * Attach a thread from the MProfiler
  */
-void VMProfiler::MProfAttachThread(art::Thread* th) {
+void VMProfiler::MProfAttachThread(art::Thread* th, const char* thread_name) {
+  th->SetProfRec(NULL);
 	if(VMProfiler::IsMProfRunning()) {
-		Runtime::Current()->GetVMProfiler()->attachSingleThread(th);
+		Runtime::Current()->GetVMProfiler()->attachSingleThread(th, thread_name);
 	}
 }
 

@@ -147,7 +147,7 @@ void* Thread::CreateCallback(void* arg) {
     // Check that if we got here we cannot be shutting down (as shutdown should never have started
     // while threads are being born).
     CHECK(!runtime->IsShuttingDown());
-    self->Init(runtime->GetThreadList(), runtime->GetJavaVM());
+    self->Init(runtime->GetThreadList(), runtime->GetJavaVM(), NULL);
     Runtime::Current()->EndThreadBirth();
   }
   {
@@ -287,7 +287,7 @@ void Thread::CreateNativeThread(JNIEnv* env, jobject java_peer, size_t stack_siz
   }
 }
 
-void Thread::Init(ThreadList* thread_list, JavaVMExt* java_vm) {
+void Thread::Init(ThreadList* thread_list, JavaVMExt* java_vm, const char* thread_name) {
   // This function does all the initialization that must be run by the native thread it applies to.
   // (When we create a new thread from managed code, we allocate the Thread* in Thread::Create so
   // we can handshake with the corresponding native thread when it's ready.) Check this native
@@ -309,8 +309,7 @@ void Thread::Init(ThreadList* thread_list, JavaVMExt* java_vm) {
   InitStackHwm();
 
   jni_env_ = new JNIEnvExt(this, java_vm);
-  SetProfRec(NULL);
-  thread_list->Register(this);
+  thread_list->Register(this, thread_name);
 }
 
 Thread* Thread::Attach(const char* thread_name, bool as_daemon, jobject thread_group,
@@ -329,7 +328,8 @@ Thread* Thread::Attach(const char* thread_name, bool as_daemon, jobject thread_g
     } else {
       Runtime::Current()->StartThreadBirth();
       self = new Thread(as_daemon);
-      self->Init(runtime->GetThreadList(), runtime->GetJavaVM());
+      //we added threadname here because we want to capture the name since the early beginning of registering the thread
+      self->Init(runtime->GetThreadList(), runtime->GetJavaVM(), thread_name);
       Runtime::Current()->EndThreadBirth();
     }
   }
