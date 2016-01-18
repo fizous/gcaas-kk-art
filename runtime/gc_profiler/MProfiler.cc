@@ -955,7 +955,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 		setThreadAffinity(thread, false);
 		if(!IsAttachGCDaemon()) {
 			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
-					thread->GetTid() << thread_name;
+					thread->GetTid() << ", name: " <<thread_name;
 			return;
 		}
 		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
@@ -966,7 +966,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			setThreadAffinity(thread, false);
 			if(!IsAttachGCDaemon()) {
 				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " <<
-						thread->GetTid() << thread_name;
+						thread->GetTid() << ", name: " << thread_name;
 				return;
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
@@ -980,7 +980,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
-			thread->GetTid() << thread_name;
+			thread->GetTid() << ", name: " << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
 	threadProf->setThreadTag(_tag);
 	threadProfList_.push_back(threadProf);
