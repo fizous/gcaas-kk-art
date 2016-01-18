@@ -347,7 +347,7 @@ Thread* Thread::Attach(const char* thread_name, bool as_daemon, jobject thread_g
     if (thread_name != NULL) {
       self->name_->assign(thread_name);
       ::art::SetThreadName(thread_name);
-      mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current());
+      mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current(), thread_name);
     }
   }
 
