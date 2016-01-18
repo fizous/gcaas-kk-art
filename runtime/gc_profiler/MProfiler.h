@@ -387,7 +387,7 @@ public:
 	static bool IsMProfRunning();
 	static bool IsMProfilingTimeEvent();
 	static bool IsMProfHWRunning();
-	static void MProfAttachThread(art::Thread*, const char*);
+	static void MProfAttachThread(art::Thread*);
 //	static void MProfNotifyAlloc(size_t,size_t);
 //  static void MProfNotifyAlloc(size_t, mirror::Object*);
 	static void MProfNotifyAlloc(size_t, size_t, mirror::Object*);
@@ -438,7 +438,7 @@ public:
   	accountFreeing(objSize);
   }
 
-  virtual void attachSingleThread(Thread* t, const char* thread_name);
+  virtual void attachSingleThread(Thread* t);
 
   virtual MPPerfCounter* createHWCounter(Thread*){return NULL;}
 
@@ -578,7 +578,7 @@ public:
 	~GCDaemonCPIProfiler(){};
 	bool createHWEvents(void) {return true;}
 	bool isMarkHWEvents(void) {return true;}
-	void attachSingleThread(Thread*, const char* thread_name);
+	void attachSingleThread(Thread*);
 	MPPerfCounter* createHWCounter(Thread*);
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM);
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM);
