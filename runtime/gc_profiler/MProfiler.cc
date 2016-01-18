@@ -906,7 +906,7 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
   Thread* self = Thread::Current();
   GCMMP_VLOG(INFO) << "VMProfiler: Attaching attachSingleThreadPostRenaming " << self->GetTid();
-  ThreadList* thread_list = Runtime::Current()->GetThreadList();
+ // ThreadList* thread_list = Runtime::Current()->GetThreadList();
   MutexLock mu(self, *Locks::thread_list_lock_);
   std::vector<Thread*>::iterator iter = delayedProfThread_.begin();
   while( iter != delayedProfThread_.end()) {
