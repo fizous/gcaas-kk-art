@@ -1405,9 +1405,10 @@ void VMProfiler::attachThreads(){
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
 	thread_list->SuspendAll();
-	MutexLock mu(self, *Locks::thread_list_lock_);
-	thread_list->ForEach(GCMMPVMAttachThread, this);
-
+	{
+    MutexLock mu(self, *Locks::thread_list_lock_);
+    thread_list->ForEach(GCMMPVMAttachThread, this);
+	}
 	thread_list->ResumeAll();
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
 }
