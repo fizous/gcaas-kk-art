@@ -578,7 +578,7 @@ public:
 	~GCDaemonCPIProfiler(){};
 	bool createHWEvents(void) {return true;}
 	bool isMarkHWEvents(void) {return true;}
-	void attachSingleThread(Thread*);
+	void attachSingleThread(Thread*, const char* thread_name);
 	MPPerfCounter* createHWCounter(Thread*);
 	void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM);
 	void addHWEndEvent(GCMMP_BREAK_DOWN_ENUM);
