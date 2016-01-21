@@ -33,7 +33,7 @@ namespace art {
 namespace mprofiler {
 
 
-//AtomicInteger GCHistogramDataManager::GCPTotalMutationsCount;
+SafeGCPHistogramRec* GCHistogramDataManager::gcpTotalMutationsCount_ = NULL;
 AtomicInteger GCHistogramDataManager::kGCPLastCohortIndex;
 int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 int GCHistogramDataManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
