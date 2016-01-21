@@ -1423,8 +1423,12 @@ void VMProfiler::attachThreads(){
 	Thread* self = Thread::Current();
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
-	MutexLock mu(self, *Locks::thread_list_lock_);
-	thread_list->ForEach(GCMMPVMAttachThread, this);
+	thread_list->SuspendAll();
+	{
+    MutexLock mu(self, *Locks::thread_list_lock_);
+    thread_list->ForEach(GCMMPVMAttachThread, this);
+	}
+	thread_list->ResumeAll();
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
 }
 
@@ -3025,7 +3029,7 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 	Thread* self = Thread::Current();
 	MutexLock mu(self, *prof_thread_mutex_);
-	accountFreeing(getCohortManager()->removeObject(allocatedMemory, obj));
+	accountFreeing(static_cast<size_t>(getCohortManager()->removeObject(allocatedMemory, obj)));
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 

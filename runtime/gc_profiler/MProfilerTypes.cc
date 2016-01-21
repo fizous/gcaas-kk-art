@@ -985,7 +985,7 @@ uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
 		//the object was not registered
-		GCMMP_VLOG(INFO)  << "---------Found none registered object";
+		//GCMMP_VLOG(INFO)  << "---------Found none registered object";
 		return 0;
 	}
 	uint64_t lifeTime = calcObjLifeTime(_profHeader->objBD);
