@@ -527,7 +527,8 @@ public:
 	}
 
 	static void GCPIncMutations(Thread* thread) {
-	  gcpTotalMutationsCount_->inc_counts(thread, 1);
+	  if(gcpTotalMutationsCount_!= NULL)
+	    gcpTotalMutationsCount_->inc_counts(thread, 1);
 //		GCPTotalMutationsCount++;
 	}
 
