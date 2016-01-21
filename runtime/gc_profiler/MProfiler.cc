@@ -1882,7 +1882,8 @@ void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
 
 void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
 		size_t objSize, mirror::Object* obj) {
-	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
+	if(false)
+	  GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetVMProfiler()->notifyAllocation(allocatedSpace,
 				objSize, obj);
@@ -3029,9 +3030,12 @@ inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
-	Thread* self = Thread::Current();
-	MutexLock mu(self, *prof_thread_mutex_);
-	accountFreeing(static_cast<size_t>(getCohortManager()->removeObject(allocatedMemory, obj)));
+
+  if(false){
+    Thread* self = Thread::Current();
+    MutexLock mu(self, *prof_thread_mutex_);
+    accountFreeing(static_cast<size_t>(getCohortManager()->removeObject(allocatedMemory, obj)));
+  }
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
 
