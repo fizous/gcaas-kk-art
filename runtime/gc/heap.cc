@@ -2150,7 +2150,7 @@ void Heap::PreSweepingGcVerification(collector::GarbageCollector* gc) {
 }
 
 void Heap::gcpIncMutationCnt(void) {
-	art::mprofiler::GCHistogramDataManager::GCPIncMutations();
+	art::mprofiler::GCHistogramDataManager::GCPIncMutations(Thread::Current());
 }
 
 void Heap::gcpIncMutationCnt(const mirror::Object* dst, size_t elementPos,
