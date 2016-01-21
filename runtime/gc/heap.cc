@@ -2153,7 +2153,6 @@ void Heap::gcpIncMutationCnt(void) {
   mprofiler::VMProfiler* mP = Runtime::Current()->GetVMProfiler();
   if(LIKELY(mP == NULL || !mP->IsProfilingRunning()))
     return;
-
 	art::mprofiler::GCHistogramDataManager::GCPIncMutations(Thread::Current());
 }
 
