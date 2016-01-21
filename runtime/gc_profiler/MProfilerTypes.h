@@ -179,6 +179,11 @@ class SafeGCPHistogramRec {
     memset((void*)&dataRec_, 0, static_cast<int64_t>(sizeof(GCPSafeRecData)));
   }
 
+  void reset(Thread* th) {
+    MutexLock mu(th, *safe_lock_);
+    memset((void*)&dataRec_, 0, static_cast<int64_t>(sizeof(GCPSafeRecData)));
+  }
+
   void inc_counts(Thread* th, size_t val) {
     MutexLock mu(th, *safe_lock_);
     dataRec_.cntLive_ += val;
@@ -487,7 +492,7 @@ public:
 	static size_t kGCMMPCohortSize;
 
 	//static AtomicInteger GCPTotalMutationsCount;
-  static SafeGCPHistogramRec*  gcpTotalMutationsCount_;
+  static SafeGCPHistogramRec  gcpTotalMutationsCount_;
 
 	int32_t GCPGetLastManagedCohort() {
 		return kGCPLastCohortIndex.load();
@@ -527,8 +532,7 @@ public:
 	}
 
 	static void GCPIncMutations(Thread* thread) {
-	  if(gcpTotalMutationsCount_!= NULL)
-	    gcpTotalMutationsCount_->inc_counts(thread, 1);
+	    gcpTotalMutationsCount_.inc_counts(thread, 1);
 //		GCPTotalMutationsCount++;
 	}
 

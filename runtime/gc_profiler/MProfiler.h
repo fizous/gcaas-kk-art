@@ -208,7 +208,7 @@ public:
 
 	//static GCPHistogramRecAtomic allocatedBytesData;
 
-	static SafeGCPHistogramRec* allocatedBytesData_;
+	static SafeGCPHistogramRec allocatedBytesData_;
 
 	static int kGCMMPLogAllocWindow;
   static int kGCMMPAllocWindow;
@@ -432,9 +432,7 @@ public:
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   static int32_t GCPCalcCohortIndex(void) {
-    if(allocatedBytesData_ == NULL)
-      return 0;
-  	return (allocatedBytesData_->get_total_count() >> GCHistogramDataManager::kGCMMPCohortLog);
+  	return (allocatedBytesData_.get_total_count() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
   virtual int32_t getGCEventsCounts(void) {

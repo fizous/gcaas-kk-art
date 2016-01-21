@@ -33,7 +33,7 @@ namespace art {
 namespace mprofiler {
 
 
-SafeGCPHistogramRec* GCHistogramDataManager::gcpTotalMutationsCount_ = NULL;
+SafeGCPHistogramRec GCHistogramDataManager::gcpTotalMutationsCount_;
 AtomicInteger GCHistogramDataManager::kGCPLastCohortIndex;
 int GCHistogramDataManager::kGCMMPCohortLog = VMProfiler::kGCMMPDefaultCohortLog;
 int GCHistogramDataManager::kGCMMPHeaderSize = sizeof(GCPExtraObjHeader);
@@ -339,7 +339,7 @@ inline void GCHistogramObjSizesManager::calculateAtomicPercentiles(void) {
 }
 
 void GCHistogramObjSizesManager::logManagedData(void) {
-	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_->get_total_count();
+	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_.get_total_count();
 	GCPPairHistogramRecords* _globalRec =
 			(GCPPairHistogramRecords*) histData_;
 	GCPPairHistogramRecords* _dataRec = NULL;
@@ -697,7 +697,7 @@ bool GCPThreadAllocManager::gcpDumpHistSpaceTable(art::File* dump_file,
 }
 
 void GCPThreadAllocManager::logManagedData(void) {
-	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_->get_total_count();
+	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_.get_total_count();
 	if(false) {
 		LOG(ERROR) << "<<Dumping Global Record>>>";
 		GCPPairHistogramRecords* _record =
@@ -1170,7 +1170,7 @@ void GCCohortManager::logManagedData(void) {
 	size_t _rowBytes = 0;
 	LOG(ERROR) << "Count of Cohort Rows: "<< cohortsTable_.cohortRows_.size() <<
 			"; table index: " << cohortsTable_.index;
-	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_->get_total_count();
+	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_.get_total_count();
 	int _rIndex = 0;
 	for (const auto& _rowIterP : cohortsTable_.cohortRows_) {
 		_rowBytes = (_rowIterP->index_) * sizeof(GCPCohortRecordData);
@@ -1680,7 +1680,7 @@ void GCClassTableManager::logManagedData(void){
 	LOG(ERROR) << "+++table class size is " <<
 			Runtime::Current()->GetInternTable()->classTableProf_.size();
 
-	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_->get_total_count();
+	LOG(ERROR) << "TotalMutations: " << gcpTotalMutationsCount_.get_total_count();
 	if(true)
 		return;
 	double _cntLive = 0.0;
