@@ -145,7 +145,7 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocatedMemory, obj);
-	_extraHeader->objSize = objSize;
+	_extraHeader->objSize = static_cast<uint64_t>(objSize);
 	_extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 
@@ -175,7 +175,7 @@ inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 //	}
 }
 
-size_t GCHistogramObjSizesManager::removeObject(size_t allocSpace,
+uint64_t GCHistogramObjSizesManager::removeObject(size_t allocSpace,
 		mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
@@ -577,7 +577,7 @@ void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
 	}
 }
 
-size_t GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+uint64_t GCPThreadAllocManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =
 			GCHistogramDataManager::GCPGetObjProfHeader(allocSpace, obj);
 
@@ -972,15 +972,15 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocatedMemory, obj);
 	addObjectToCohRecord(objSize);
-	_profHeader->objSize = objSize;
+	_profHeader->objSize = static_cast<uint64_t>(objSize);
 	//we need to calculate the correct bytes without the allocated memory
-	_profHeader->objBD = calcObjBD(objSize);
+	_profHeader->objBD = calcObjBD(_profHeader->objSize);
 }
 
 
 
 
-size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {
@@ -988,10 +988,10 @@ size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 		GCMMP_VLOG(INFO)  << "---------Found none registered object";
 		return 0;
 	}
-	size_t lifeTime = calcObjLifeTime(_profHeader->objBD);
-	size_t histIndex = (32 - CLZ(lifeTime)) - 1;
+	uint64_t lifeTime = calcObjLifeTime(_profHeader->objBD);
+	uint64_t histIndex = (64 - CLZ(lifeTime)) - 1;
 	lifeTimeHistograms_[histIndex].gcpPairIncRecData(_profHeader->objSize);
-	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(_profHeader->objSize);
+	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(static_cast<size_t>(_profHeader->objSize));
 
 	size_t _startRow, _startIndex, _endRow, _endIndex = 0;
 	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
@@ -1019,9 +1019,9 @@ size_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 		//first precisely calculate the cohort boundaries
 		_LastRecP = getCoRecFromIndices(_endRow, _endIndex);
 		updateDelCohRecObj(_LastRecP,
-				(_profHeader->objBD + _profHeader->objSize) % kGCMMPCohortSize);
+		                   static_cast<size_t>((_profHeader->objBD + _profHeader->objSize) % kGCMMPCohortSize));
 		updateDelCohRecObj(_firstRecP,
-				(kGCMMPCohortSize - (_profHeader->objBD % kGCMMPCohortSize)));
+		                   static_cast<size_t>((kGCMMPCohortSize - (_profHeader->objBD % kGCMMPCohortSize))));
 		updateDelCohRecObjCnts(_firstRecP);
 
 
@@ -1050,7 +1050,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	size_t _cohIndex = (_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
+	size_t _cohIndex = static_cast<size_t>(_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
 	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
 	GCPCohortsRow* _row = cohortsTable_.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
@@ -1609,7 +1609,7 @@ GCPHistRecData* GCClassTableManager::addObjectClassPair(mirror::Class* klass,
 //}
 
 
-inline size_t GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
+inline uint64_t GCClassTableManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 				GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) {

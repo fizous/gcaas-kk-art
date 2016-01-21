@@ -400,7 +400,7 @@ public:
 		sizeData_.initDataRecords(kIndex);
 	}
 
-	void gcpPairIncRecData(size_t space){
+	void gcpPairIncRecData(uint64_t space){
 		countData_.gcpIncRecData();
 		sizeData_.gcpIncRecData(space);
 	}
@@ -410,7 +410,7 @@ public:
 		sizeData_.gcpIncAtomicRecData(space);
 	}
 
-	bool gcpPairDecRecData(size_t space){
+	bool gcpPairDecRecData(uint64_t space){
 		if(countData_.dataRec_.cntLive > 0) {
 			countData_.gcpDecRecData();
 			sizeData_.gcpDecRecData(space);
@@ -458,11 +458,11 @@ public:
 
 
 typedef struct PACKED(4) GCPExtraObjHeader_S {
-	size_t objSize;
+  uint64_t objSize;
 	union {
 		GCHistogramDataManager* histRecP;
 		GCPHistRecData* dataRec;
-		size_t objBD;
+		uint64_t objBD;
 	};
 } GCPExtraObjHeader;
 
@@ -544,7 +544,7 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
-  virtual size_t removeObject(size_t, mirror::Object*) {return 0;}
+  virtual uint64_t removeObject(size_t, mirror::Object*) {return 0;}
 
   virtual void logManagedData(void) {}
   virtual bool gcpDumpHistRec(art::File*);
@@ -817,12 +817,12 @@ protected:
 		return cohRowSZ_ + sizeof(int);
 	}
 
-	size_t calcObjBD(size_t objSize) {
-		return static_cast<size_t>(allocRec_->get_total_count() - objSize);
+	uint64_t calcObjBD(uint64_t objSize) {
+		return allocRec_->get_total_count() - objSize;
 	}
 
-	size_t calcObjLifeTime(size_t objBD) {
-		return static_cast<size_t>(allocRec_->get_total_count() - objBD);
+	uint64_t calcObjLifeTime(uint64_t objBD) {
+		return allocRec_->get_total_count() - objBD;
 	}
 
 	size_t getSpaceLeftCohort(GCPCohortRecordData* rec) {
@@ -863,7 +863,7 @@ public:
 
   void gcpDumpCohortData(art::File*);
 	GCPCohortRecordData* getCoRecFromObj(size_t allocSpace, mirror::Object* obj);
-	size_t removeObject(size_t allocSpace, mirror::Object* obj);
+	uint64_t removeObject(size_t allocSpace, mirror::Object* obj);
 	void gcpFinalizeProfileCycle(void);
 	void gcpZeorfyAllAtomicRecords(void);
 
@@ -895,12 +895,12 @@ public:
 
 	void getCoAddrFromBytes(size_t* startRow,
 			size_t* startIndex, size_t* endRow, size_t* endIndex,
-			size_t bd, size_t objSize) {
-		*startIndex = (bd >> kGCMMPCohortLog);
+			uint64_t bd, uint64_t objSize) {
+		*startIndex = static_cast<size_t>(bd >> kGCMMPCohortLog);
 		*startRow = *startIndex /  kGCMMPMaxRowCap;
 		*startIndex = (*startIndex) % kGCMMPMaxRowCap;
 
-		*endIndex = ( (bd + objSize) >> kGCMMPCohortLog);
+		*endIndex = static_cast<size_t>( (bd + objSize) >> kGCMMPCohortLog);
 		*endRow = *endIndex /  kGCMMPMaxRowCap;
 		*endIndex = (*endIndex) % kGCMMPMaxRowCap;
 	}
@@ -1003,7 +1003,7 @@ public:
 	void initHistograms();
 
 	void addObject(size_t, size_t, mirror::Object*);
-  size_t removeObject(size_t, mirror::Object*);
+	uint64_t removeObject(size_t, mirror::Object*);
 	//std::unordered_map<size_t, GCPHistogramRec*> histogramMapTable;
 
 //	SafeMap<size_t, mirror::Class*, std::less<size_t>,
@@ -1059,7 +1059,7 @@ public:
 
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
-	size_t removeObject(size_t, mirror::Object*);
+	uint64_t removeObject(size_t, mirror::Object*);
 	void gcpRemoveObjectFromIndex(size_t, size_t, bool);
 	void gcpRemoveObjFromEntriesWIndex(size_t, size_t);
 
@@ -1131,7 +1131,7 @@ public:
 	/* overriden methods */
 	void initHistograms();
 	void addObject(size_t, size_t, mirror::Object*);
-	size_t removeObject(size_t, mirror::Object*);
+	uint64_t removeObject(size_t, mirror::Object*);
 	void addObjectForThread(size_t, size_t, mirror::Object*, GCMMPThreadProf*);
 	void setThreadManager(GCMMPThreadProf*);
 	bool dettachThreadFromManager(GCMMPThreadProf*);

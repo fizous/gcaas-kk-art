@@ -337,6 +337,7 @@ GCMMPThreadProf::GCMMPThreadProf(MProfiler* mProfiler, Thread* thread)
 	GCMMP_VLOG(INFO) << "MProfiler : ThreadProf is initialized";
 }
 #endif
+
 GCMMPThreadProf::~GCMMPThreadProf() {
 
 }
