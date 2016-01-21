@@ -2444,7 +2444,8 @@ bool ObjectSizesProfiler::periodicDaemonExec(void) {
 		}
 #if GCP_COLLECT_FOR_PROFILE
 		gc::Heap* heap_ = Runtime::Current()->GetHeap();
-		heap_->CollectGarbageForProfile(false);
+		if(false)
+		  heap_->CollectGarbageForProfile(false);
 		LOG(ERROR) << "finished calling GCCollection";
 #endif
 		return getRecivedShutDown();
