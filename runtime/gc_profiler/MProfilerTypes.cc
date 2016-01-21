@@ -934,15 +934,15 @@ void GCCohortManager::initHistograms(void) {
 	addCohortRecord();
 
 	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
-		lifeTimeHistograms_[i].gcpPairSetRecordIndices((uint64_t)((i+1) & (0x00000000FFFFFFFF)));
+		lifeTimeHistograms_[i].gcpPairSetRecordIndices((uint64_t)((i+1)));
 	}
 }
 
 inline uint64_t GCCohortManager::calcNewCohortIndex() {
 	if(currCohortP == NULL) {
-		return (VMProfiler::GCPCalcCohortIndex() & 0x00000000FFFFFFFF);
+		return static_cast<uint64_t>(VMProfiler::GCPCalcCohortIndex());
 	}
-	return (currCohortP->index_+1);
+	return (currCohortP->index_ + 1);
 }
 
 inline void GCCohortManager::addObjectToCohRecord(size_t objSize) {

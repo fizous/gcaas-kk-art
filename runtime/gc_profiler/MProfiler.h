@@ -432,6 +432,8 @@ public:
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
   static int32_t GCPCalcCohortIndex(void) {
+    if(allocatedBytesData_ == NULL)
+      return 0;
   	return (allocatedBytesData_->get_total_count() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
@@ -469,7 +471,8 @@ public:
 
 
   static bool GCPDumpEndMarker(art::File* dumpFile){
-  	return dumpFile->WriteFully(&kGCMMPDumpEndMarker, static_cast<int64_t>(sizeof(int)));
+  	return dumpFile->WriteFully(&kGCMMPDumpEndMarker,
+  	                            static_cast<int64_t>(sizeof(int)));
   }
 
 	virtual void addHWStartEvent(GCMMP_BREAK_DOWN_ENUM){};
