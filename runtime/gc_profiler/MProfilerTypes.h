@@ -485,7 +485,9 @@ public:
 	static AtomicInteger kGCPLastCohortIndex;
 	static int kGCMMPCohortLog;
 	static size_t kGCMMPCohortSize;
-	static AtomicInteger GCPTotalMutationsCount;
+
+	//static AtomicInteger GCPTotalMutationsCount;
+  static SafeGCPHistogramRec*  gcpTotalMutationsCount_;
 
 	int32_t GCPGetLastManagedCohort() {
 		return kGCPLastCohortIndex.load();
@@ -524,8 +526,9 @@ public:
 		return GCHistogramDataManager::kGCMMPHeaderSize;
 	}
 
-	static void GCPIncMutations() {
-		GCPTotalMutationsCount++;
+	static void GCPIncMutations(Thread* thread) {
+	  gcpTotalMutationsCount_->inc_counts(thread, 1);
+//		GCPTotalMutationsCount++;
 	}
 
   static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
@@ -846,7 +849,7 @@ public:
 	GCPCohortRecordData*	currCohortP;
 	GCPCohortsRow*    		currCoRowP;
 	GCPCohortsTable 			cohortsTable_;
-	SafeGCPHistogramRec* 				allocRec_;
+	SafeGCPHistogramRec* 	allocRec_;
 
 	GCPPairHistogramRecords lifeTimeHistograms_[kGCMMPMaxHistogramEntries];
 

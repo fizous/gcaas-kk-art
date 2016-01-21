@@ -2160,7 +2160,8 @@ inline bool VMProfiler::IsMProfilingTimeEvent() {
 
 void ObjectSizesProfiler::initializeProfilerData(bool initHistData){
 	srand (time(NULL));
-	GCHistogramDataManager::GCPTotalMutationsCount.store(0);
+	GCHistogramDataManager::gcpTotalMutationsCount_ = new SafeGCPHistogramRec();
+//	GCHistogramDataManager::GCPTotalMutationsCount.store(0);
 	if(initHistData)
 		initHistDataManager();
 	LOG(ERROR) << "ObjectSizesProfiler : initializeProfilerData";
@@ -2359,9 +2360,14 @@ inline void ObjectSizesProfiler::gcpRemoveObject(size_t allocatedMemory,
 inline void ObjectSizesProfiler::dumpHeapStats(void) {
 	bool successWrite = dump_file_->WriteFully(&heapStatus,
 	                                           static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
-	int32_t _mutations = GCHistogramDataManager::GCPTotalMutationsCount.load();
-	successWrite &= dump_file_->WriteFully(&_mutations,
-	                                       static_cast<int64_t>(sizeof(int32_t)));
+	uint64_t _totalMutations = 0;
+	uint64_t _currMutations = 0;
+
+	GCHistogramDataManager::gcpTotalMutationsCount_->read_counts(Thread::Current(),
+	                                                             &_totalMutations, &_currMutations);
+//	    GCHistogramDataManager::GCPTotalMutationsCount.load();
+	successWrite &= dump_file_->WriteFully(&_totalMutations,
+	                                       static_cast<int64_t>(sizeof(uint64_t)));
 	if(successWrite) {
 
 	} else {
@@ -2923,13 +2929,15 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 	GCRefDistanceManager* _manager = getDistanceProfManager();
 	if(_manager == NULL)
 		return;
-	int32_t currMutationCnt =
-			GCHistogramDataManager::GCPTotalMutationsCount.load();
-	GCHistogramDataManager::GCPIncMutations();
+	uint64_t currMutationCnt = 0;
+	uint64_t totalMutationCnt = 0;
+	Thread* self = Thread::Current();
+			GCHistogramDataManager::gcpTotalMutationsCount_->read_counts(self,&totalMutationCnt, &currMutationCnt);
+	GCHistogramDataManager::GCPIncMutations(self);
 	_manager->profileDistance(dst, member_offset, new_value);
-	if(IsMutationsWindowsSet() && currMutationCnt > 0 &&
-			currMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
-		Thread* self = Thread::Current();
+	if(IsMutationsWindowsSet() && totalMutationCnt > 0 &&
+	    totalMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
+
 		{
 			MutexLock mu(self, *prof_thread_mutex_);
 			receivedSignal_ = true;
