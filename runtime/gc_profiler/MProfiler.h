@@ -48,8 +48,8 @@
   #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */
   #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z)                \
 	  (gcpAddObject(x,y,z))
-  #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize)   \
-	  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize)
+  #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
+	  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize, isZygote)
   #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)	        \
 	  (extendedSize = art::mprofiler::ObjectSizesProfiler::GCPAddMProfilingExtraBytes(actualSize))
   #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize)      \
