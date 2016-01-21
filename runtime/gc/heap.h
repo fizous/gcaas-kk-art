@@ -51,7 +51,7 @@
 #endif
  #define CONTINUOUS_SPACE_T ContinuousSpace
 #else
-  #if (ART_USE_GC_DEFAULT_PROFILER)
+  #if (ART_USE_GC_DEFAULT_PROFILER || ART_USE_GC_PROFILER)
     #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max())
   #else
     #define GC_HEAP_LARGE_OBJECT_THRESHOLD (3 * kPageSize)
