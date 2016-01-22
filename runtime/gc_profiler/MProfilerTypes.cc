@@ -992,8 +992,13 @@ uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	}
 	uint64_t lifeTime = calcObjLifeTime(_profHeader->objBD);
 	uint32_t histIndex = static_cast<size_t>((64 - CLZ(lifeTime)) - 1);
+
+	GCMMP_VLOG(INFO)  << "---cohort_index: " << histIndex;
+
 	lifeTimeHistograms_[histIndex].gcpPairIncRecData(_profHeader->objSize);
 	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(static_cast<size_t>(_profHeader->objSize));
+
+
 
 	size_t _startRow, _startIndex, _endRow, _endIndex = 0;
 	getCoAddrFromBytes(&_startRow, &_startIndex, &_endRow, &_endIndex,
