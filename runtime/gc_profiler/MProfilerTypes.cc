@@ -985,7 +985,7 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
     uint32_t _leadZeros = 0;\
     uint32_t _highBits = High32Bits(value); \
     _leadZeros += CLZ(_highBits);\
-    if(_highBits == 32) {                   \
+    if(_highBits == 0) {                   \
       uint32_t _lowBits = Low32Bits(value);\
       _leadZeros += CLZ(_lowBits);\
     }\
@@ -1006,7 +1006,7 @@ uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCP_CALC_HIST_INDEX(histIndex, lifeTime);
 
 
-	GCMMP_VLOG(INFO)  << "---cohort_index: " << histIndex << ", lifeTime: " << lifeTime;
+	GCMMP_VLOG(INFO)  << "---histogram_index: " << histIndex << ", lifeTime: " << lifeTime;
 
 	lifeTimeHistograms_[histIndex].gcpPairIncRecData(_profHeader->objSize);
 	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(static_cast<size_t>(_profHeader->objSize));
