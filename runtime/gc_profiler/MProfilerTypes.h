@@ -34,7 +34,7 @@
 #define GCP_DEFAULT_COHORT_LOG						18
 #define GCP_DEAFULT_COHORT_SIZE						262144 // 256k
 
-#define GCP_MAX_HISTOGRAM_SIZE						32
+#define GCP_MAX_HISTOGRAM_SIZE						64
 #define GCMMP_GCPAUSE_ARRAY_SIZE					32
 
 namespace art {
