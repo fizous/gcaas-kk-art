@@ -983,13 +983,13 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
-	if(_profHeader->objSize == 0) {
+	if(_profHeader == NULL || _profHeader->objSize == 0) {
 		//the object was not registered
 		//GCMMP_VLOG(INFO)  << "---------Found none registered object";
 		return 0;
 	}
 	uint64_t lifeTime = calcObjLifeTime(_profHeader->objBD);
-	uint64_t histIndex = (64 - CLZ(lifeTime)) - 1;
+	uint32_t histIndex = static_cast<size_t>((64 - CLZ(lifeTime)) - 1);
 	lifeTimeHistograms_[histIndex].gcpPairIncRecData(_profHeader->objSize);
 	lifeTimeHistograms_[histIndex].gcpPairIncAtomicRecData(static_cast<size_t>(_profHeader->objSize));
 

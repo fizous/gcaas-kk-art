@@ -538,7 +538,7 @@ public:
 
   static GCPExtraObjHeader* GCPGetObjProfHeader(size_t allocatedMemory,
   		mirror::Object* obj) {
-  	byte* address = reinterpret_cast<byte*>(reinterpret_cast<uintptr_t>(obj) +
+  	byte* address = reinterpret_cast<byte*>(reinterpret_cast<byte*>(obj) +
   			allocatedMemory - sizeof(GCPExtraObjHeader));
   	GCPExtraObjHeader* extraHeader =
   			reinterpret_cast<GCPExtraObjHeader*>(address);

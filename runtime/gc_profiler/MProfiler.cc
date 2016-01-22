@@ -3029,10 +3029,11 @@ inline void CohortProfiler::gcpAddObject(size_t allocatedMemory,
 inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
 		mirror::Object* obj) {
 
-  if(false){
+  if(true){
     Thread* self = Thread::Current();
     MutexLock mu(self, *prof_thread_mutex_);
-    accountFreeing(static_cast<size_t>(getCohortManager()->removeObject(allocatedMemory, obj)));
+    uint64_t _size = getCohortManager()->removeObject(allocatedMemory, obj);
+    accountFreeing(static_cast<size_t>(_size));
   }
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
