@@ -1176,6 +1176,9 @@ bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 
 
 void GCCohortManager::logManagedData(void) {
+  if(_rowIterP->index_ == 0)
+    return;
+
 	size_t _rowBytes = 0;
 	LOG(ERROR) << "Count of Cohort Rows: "<< cohortsTable_.cohortRows_.size() <<
 			"; table index: " << cohortsTable_.index;
