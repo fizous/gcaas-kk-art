@@ -43,6 +43,19 @@
 
 
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+
+#define GCP_CALC_HIST_INDEX(_coh_index, value)  \
+    uint32_t _leadZeros = 1;                    \
+    uint32_t _highBits = High32Bits(value);     \
+    _leadZeros += CLZ(_highBits);               \
+    if(_highBits == 0) {                        \
+      uint32_t _lowBits = Low32Bits(value);     \
+      _leadZeros += CLZ(_lowBits);              \
+    }                                           \
+    _coh_index = (64 - _leadZeros);
+
+
+
   #define GCP_DISABLE_CONC_COLLECT					1 /* turn off ConcurrentGC */
   #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
   #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */

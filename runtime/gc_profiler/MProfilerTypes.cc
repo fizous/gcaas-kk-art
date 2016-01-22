@@ -978,20 +978,6 @@ void GCCohortManager::addObject(size_t allocatedMemory, size_t objSize,
 }
 
 
-
-
-
-#define GCP_CALC_HIST_INDEX(_coh_index, value) \
-    uint32_t _leadZeros = 0;\
-    uint32_t _highBits = High32Bits(value); \
-    _leadZeros += CLZ(_highBits);\
-    if(_highBits == 0) {                   \
-      uint32_t _lowBits = Low32Bits(value);\
-      _leadZeros += CLZ(_lowBits);\
-    }\
-    _coh_index = (64 - _leadZeros);
-
-
 uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 	GCPExtraObjHeader* _profHeader =
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
