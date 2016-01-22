@@ -987,6 +987,8 @@ uint64_t GCCohortManager::removeObject(size_t allocSpace, mirror::Object* obj) {
 		//the object was not registered
 		//GCMMP_VLOG(INFO)  << "---------Found none registered object";
 		return 0;
+	} else {
+	  return 0;
 	}
 	uint64_t lifeTime = calcObjLifeTime(_profHeader->objBD);
 	uint32_t histIndex = static_cast<size_t>((64 - CLZ(lifeTime)) - 1);
