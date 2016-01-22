@@ -1882,8 +1882,7 @@ void VMProfiler::MProfObjClass(mirror::Class* klass, mirror::Object* obj) {
 
 void VMProfiler::MProfNotifyAlloc(size_t allocatedSpace,
 		size_t objSize, mirror::Object* obj) {
-	if(false)
-	  GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
+	GCP_RESET_OBJ_PROFILER_HEADER(allocatedSpace,obj);
 	if(VMProfiler::IsMProfRunning()) {
 		Runtime::Current()->GetVMProfiler()->notifyAllocation(allocatedSpace,
 				objSize, obj);
