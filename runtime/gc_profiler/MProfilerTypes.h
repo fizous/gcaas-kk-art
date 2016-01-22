@@ -494,8 +494,8 @@ public:
 	//static AtomicInteger GCPTotalMutationsCount;
   static SafeGCPHistogramRec  gcpTotalMutationsCount_;
 
-	int32_t GCPGetLastManagedCohort() {
-		return kGCPLastCohortIndex.load();
+	uint64_t GCPGetLastManagedCohort() {
+		return static_cast<uint64_t>(kGCPLastCohortIndex.load());
 	}
 
 	void GCPSetLastManagedCohort(int32_t newIndex) {
@@ -837,7 +837,8 @@ protected:
 		return kGCMMPCohortSize - rec->totalSize;
 	}
 
-	uint64_t calcNewCohortIndex();
+	int getCohortsCount(void);
+
 
 	bool gcpDumpSizeHistAtomicLifeTable(art::File*,
 			bool);
@@ -874,7 +875,7 @@ public:
 	uint64_t removeObject(size_t allocSpace, mirror::Object* obj);
 	void gcpFinalizeProfileCycle(void);
 	void gcpZeorfyAllAtomicRecords(void);
-
+	uint64_t calcNewCohortIndex();
 	void updateCohRecObj(GCPCohortRecordData* rec, size_t fit) {
 		rec->liveSize  += fit;
 		rec->totalSize += fit;

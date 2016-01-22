@@ -110,7 +110,7 @@ void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords(void) {
 
 void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 
-  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  uint64_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
   if(_newCohortIndex != GCPGetLastManagedCohort()) {
   	gcpZeorfyAllAtomicRecords();
   	GCPSetLastManagedCohort(_newCohortIndex);
@@ -866,7 +866,7 @@ void GCPThreadAllocManager::gcpZeorfyAllAtomicRecords() {
 }
 
 void GCPThreadAllocManager::gcpFinalizeProfileCycle(){
-	int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+	uint64_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
 	if(_newCohortIndex != GCPGetLastManagedCohort()) {
 		gcpZeorfyAllAtomicRecords();
 		GCPSetLastManagedCohort(_newCohortIndex);
@@ -940,7 +940,7 @@ void GCCohortManager::initHistograms(void) {
 
 inline uint64_t GCCohortManager::calcNewCohortIndex() {
 	if(currCohortP == NULL) {
-		return static_cast<uint64_t>(VMProfiler::GCPCalcCohortIndex());
+		return VMProfiler::GCPCalcCohortIndex();
 	}
 	return (currCohortP->index_ + 1);
 }
@@ -1176,7 +1176,7 @@ bool GCCohortManager::gcpDumpManagedData(art::File* dumpFile,
 
 
 void GCCohortManager::logManagedData(void) {
-  if(_rowIterP->index_ == 0)
+  if(VMProfiler::GCPCalcCohortIndex() == 0)
     return;
 
 	size_t _rowBytes = 0;
@@ -1206,7 +1206,7 @@ void GCCohortManager::gcpZeorfyAllAtomicRecords(void) {
 }
 
 void GCCohortManager::gcpFinalizeProfileCycle(void) {
-  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  uint64_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
   if(_newCohortIndex != GCPGetLastManagedCohort()) {
   	gcpZeorfyAllAtomicRecords();
   	GCPSetLastManagedCohort(_newCohortIndex);
@@ -1472,7 +1472,7 @@ void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
 		bool shouldInitHist) {
 	generateNewSecret();
 	parentManager_ = pManager;
-	GCPSetLastManagedCohort(VMProfiler::GCPCalcCohortIndex());
+	GCPSetLastManagedCohort(static_cast<int32_t>(VMProfiler::GCPCalcCohortIndex()));
 	if(shouldInitHist)
 		initHistograms();
 }
@@ -1902,7 +1902,7 @@ void GCClassTableManager::gcpZeorfyAllAtomicRecords(void) {
 
 void GCClassTableManager::gcpFinalizeProfileCycle(void) {
 
-  int32_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
+  uint64_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
   if(_newCohortIndex != GCPGetLastManagedCohort()) {
   	gcpZeorfyAllAtomicRecords();
   	GCPSetLastManagedCohort(_newCohortIndex);

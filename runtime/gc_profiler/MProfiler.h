@@ -444,7 +444,7 @@ public:
 
   static VMProfiler* CreateVMprofiler(GCMMP_Options*);
 
-  static int32_t GCPCalcCohortIndex(void) {
+  static uint64_t GCPCalcCohortIndex(void) {
   	return (allocatedBytesData_.get_total_count() >> GCHistogramDataManager::kGCMMPCohortLog);
   }
 
