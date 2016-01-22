@@ -1073,8 +1073,8 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	size_t _cohIndex = static_cast<size_t>(_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
-	size_t _rowIndex = _cohIndex /  kGCMMPMaxRowCap;
+	uint64_t _cohIndex = _profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog;
+	size_t _rowIndex = static_cast<size_t>(_cohIndex /  kGCMMPMaxRowCap);
 	GCPCohortsRow* _row = cohortsTable_.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
 
