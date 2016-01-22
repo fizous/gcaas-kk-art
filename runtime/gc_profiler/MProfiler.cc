@@ -3033,7 +3033,8 @@ inline void CohortProfiler::gcpRemoveObject(size_t allocatedMemory,
     Thread* self = Thread::Current();
     MutexLock mu(self, *prof_thread_mutex_);
     uint64_t _size = getCohortManager()->removeObject(allocatedMemory, obj);
-    accountFreeing(static_cast<size_t>(_size));
+    if(_size > 0)
+      accountFreeing(static_cast<size_t>(_size));
   }
 	//GCHistogramManager::GCPRemoveObj(allocatedMemory, obj);
 }
