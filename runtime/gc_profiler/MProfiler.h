@@ -45,7 +45,7 @@
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
 
 #define GCP_CALC_HIST_INDEX(_coh_index, value)  \
-    uint32_t _leadZeros = 1;                    \
+    uint32_t _leadZeros = 0;                    \
     uint32_t _highBits = High32Bits(value);     \
     _leadZeros += CLZ(_highBits);               \
     if(_highBits == 0) {                        \
