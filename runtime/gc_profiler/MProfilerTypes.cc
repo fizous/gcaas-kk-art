@@ -73,8 +73,8 @@ void GCHistogramObjSizesManager::initHistograms(void) {
 	/* initialize the global record */
 	histData_ = new GCPPairHistogramRecords(0);
 	/* initialize the histogram tables */
-	for(size_t i = 0; i < (size_t) kGCMMPMaxHistogramEntries; i++) {
-		sizeHistograms_[i].gcpPairSetRecordIndices((uint64_t)((i+1) & (0x00000000FFFFFFFF)));
+	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		sizeHistograms_[i].gcpPairSetRecordIndices(static_cast<uint64_t>(i+1));
 	}
 //	gcpResetHistogramData();
 //	gcpResetAtomicData();
