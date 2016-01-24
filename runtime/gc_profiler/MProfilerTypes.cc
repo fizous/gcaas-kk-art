@@ -1353,7 +1353,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		selReferenceStats_.inc_counts(_curr_thread,1);
 //		selReferenceStats_.total_++;
 	}
-	_refDistanceIndex = GCP_CALC_HIST_INDEX(_refDistanceIndex, _refDistance); //(32 - CLZ(_refDistance));
+	GCP_CALC_HIST_INDEX(_refDistanceIndex, _refDistance); //(32 - CLZ(_refDistance));
 	if(directionCase == -1) {
 		negRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
 //		negRefDist_[_refDistanceIndex].total_++;
