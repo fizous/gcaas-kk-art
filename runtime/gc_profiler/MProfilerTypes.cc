@@ -564,7 +564,8 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 //	extraHeader->objSize = objSize;
 //	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
-	objSizesHistMgr_->gcpNoAggAddSingleDataToPairHist(objSize, &objSizesHistMgr_->sizeHistograms_[histIndex]);
+	objSizesHistMgr_->gcpNoAggAddSingleDataToPairHist(objSize,
+	                                                  &objSizesHistMgr_->sizeHistograms_[histIndex]);
 }
 
 void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
@@ -1059,7 +1060,7 @@ GCPCohortRecordData* GCCohortManager::getCoRecFromObj(size_t allocSpace,
 			GCHistogramObjSizesManager::GCPGetObjProfHeader(allocSpace, obj);
 	if(_profHeader->objSize == 0) //the object was not registered
 		return NULL;
-	uint64_t _cohIndex = _profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog;
+	uint64_t _cohIndex = (_profHeader->objBD >> GCHistogramDataManager::kGCMMPCohortLog);
 	size_t _rowIndex = static_cast<size_t>(_cohIndex /  kGCMMPMaxRowCap);
 	GCPCohortsRow* _row = cohortsTable_.cohortRows_[_rowIndex];
 	GCPCohortRecordData* _cohRec = &_row->cohorts[_cohIndex%_rowIndex];
@@ -1226,7 +1227,7 @@ void GCRefDistanceManager::initDistanceArray(void) {
 	for(int64_t i = 0; i < static_cast<int64_t>(kGCMMPMaxHistogramEntries); i++) {
 		//_index = i * 1.0;/*(uint64_t)((i) & (0x00000000FFFFFFFF));*/
 		posRefDist_[i].setIndex(i);
-		posRefDist_[i].setIndex(-1 * i);
+		negRefDist_[i].setIndex(-1 * i);
 	}
 	mutationStats_.setIndex(0);
 	selReferenceStats_.setIndex(1);
@@ -1398,9 +1399,12 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		_totalPercTotal = 100.0 - _selfRefPercTotal;
 		_totalPercLastWindow = 100.0 - _selfRefPercLastWindow;
 
-		_success = dumpFile->WriteFully(&_recDisplayMuts, static_cast<int64_t>(sizeof(GCPDistanceRecDisplay)));
-		_success &= dumpFile->WriteFully(&_totalPercLastWindow, static_cast<int64_t>(sizeof(double)));
-		_success &= dumpFile->WriteFully(&_totalPercTotal, static_cast<int64_t>(sizeof(double)));
+		_success = dumpFile->WriteFully(&_recDisplayMuts,
+		                                static_cast<int64_t>(sizeof(GCPDistanceRecDisplay)));
+		_success &= dumpFile->WriteFully(&_totalPercLastWindow,
+		                                 static_cast<int64_t>(sizeof(double)));
+		_success &= dumpFile->WriteFully(&_totalPercTotal,
+		                                 static_cast<int64_t>(sizeof(double)));
 
 		if (GC_V_ENABLED)
 			logRecDisplay(&_recDisplayMuts);
@@ -1499,7 +1503,8 @@ void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
 //}
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
-	return dump_file->WriteFully(gcpGetDataRecP(), static_cast<int64_t>(sizeof(GCPHistogramRec)));
+	return dump_file->WriteFully(gcpGetDataRecP(),
+	                             static_cast<int64_t>(sizeof(GCPHistogramRec)));
 }
 
 /********************* GCClassTableManager profiling ****************/
