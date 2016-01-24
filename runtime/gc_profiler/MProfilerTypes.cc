@@ -1291,7 +1291,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 	GCPExtraObjHeader* _youngProfHeader = _sourceProfHeader;
 
 	int directionCase = 1;
-	size_t _refDistanceIndex = 0;
+	uint32_t _refDistanceIndex = 0;
 	uint64_t _refDistance = 0;
 
 
@@ -1353,7 +1353,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		selReferenceStats_.inc_counts(_curr_thread,1);
 //		selReferenceStats_.total_++;
 	}
-	_refDistanceIndex = (32 - CLZ(_refDistance));
+	_refDistanceIndex = GCP_CALC_HIST_INDEX(_refDistanceIndex, _refDistance); //(32 - CLZ(_refDistance));
 	if(directionCase == -1) {
 		negRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
 //		negRefDist_[_refDistanceIndex].total_++;
@@ -1445,7 +1445,7 @@ void GCRefDistanceManager::logManagedData(void) {
 
 bool GCRefDistanceManager::gcpDumpManagedData(art::File* dumpFile,
 		bool dumpGlobalData) {
-	LOG(ERROR) << "dumping reference distances";
+	//LOG(ERROR) << "dumping reference distances";
 	bool _success = gcpDumpHistTable(dumpFile, dumpGlobalData);
 	return _success;
 }
