@@ -1436,12 +1436,12 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 
 void GCRefDistanceManager::logManagedData(void) {
   Thread* _curr_thread = Thread::Current();
-	LOG(ERROR) << "----dumping Positive----------";
+	LOG(ERROR) << "<<----dumping Positive---------->>";
 	copyArrayForDisplay(_curr_thread, posRefDist_);
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 		logRecDisplay(&arrayDisplay_[i]);
 	}
-	LOG(ERROR) << "----dumping Negative----------";
+	LOG(ERROR) << "<<----dumping Negative---------->>";
   copyArrayForDisplay(_curr_thread, negRefDist_);
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
 	  logRecDisplay(&arrayDisplay_[i]);
