@@ -1439,7 +1439,7 @@ void GCRefDistanceManager::logManagedData(void) {
 	}
 	LOG(ERROR) << "----dumping Negative----------";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%lu",negRefDist_[i].get_total_count());
+		LOG(ERROR) << i << ": " << StringPrintf("%llu",negRefDist_[i].get_total_count());
 	}
 }
 
