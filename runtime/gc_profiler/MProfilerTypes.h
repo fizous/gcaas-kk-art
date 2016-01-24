@@ -976,8 +976,9 @@ protected:
 	}
 
 	void logRecDisplay(GCPDistanceRecDisplay* recDisplay) {
-		LOG(ERROR) << "index:" << StringPrintf("%f", recDisplay->index_) <<
-				"; live:" << recDisplay->live_ << "; total:" << recDisplay->total_;
+		LOG(ERROR) << StringPrintf("index:%f; live:%llu; total:%llu",
+		                                       recDisplay->index_,
+		                                       recDisplay->live_, recDisplay->total_);
 	}
 
 public:
