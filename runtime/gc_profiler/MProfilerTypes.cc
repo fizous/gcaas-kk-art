@@ -1223,10 +1223,10 @@ GCRefDistanceManager::GCRefDistanceManager(SafeGCPHistogramRec* safeTotalAccount
 
 void GCRefDistanceManager::initDistanceArray(void) {
 	//int64_t _index = 0;
-	for(int64_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+	for(int64_t i = 0; i < static_cast<int64_t>(kGCMMPMaxHistogramEntries); i++) {
 		//_index = i * 1.0;/*(uint64_t)((i) & (0x00000000FFFFFFFF));*/
 		posRefDist_[i].setIndex(i);
-		posRefDist_[i].setIndex(-i);
+		posRefDist_[i].setIndex(-1 * i);
 	}
 	mutationStats_.setIndex(0);
 	selReferenceStats_.setIndex(1);
@@ -1316,14 +1316,14 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 				getCoRecFromIndices(_endRowOld, _endIndexOld);
 		double _oldPopFactor = _oldCohortRecP->liveSize / _oldCohortRecP->totalSize;
 		uint64_t _oldBoundary =
-				(_oldProfHeader->objBD + _oldProfHeader->objSize) % kGCMMPCohortSize;
+				(_oldProfHeader->objBD + _oldProfHeader->objSize) % static_cast<uint64_t>(kGCMMPCohortSize);
 		uint64_t _youngBoundary =
-				(_youngProfHeader->objBD) % kGCMMPCohortSize;
+				(_youngProfHeader->objBD) % static_cast<uint64_t>(kGCMMPCohortSize);
 		if(_endRowOld == _startRowYoung && _endIndexOld == _startIndexYoung) {
 			//special case when both objects in the same cohort
 			_refDistance = (uint64_t) (_oldPopFactor * (_youngBoundary - _oldBoundary));
 		} else {
-			_refDistance += (uint64_t)((kGCMMPCohortSize - _oldBoundary) * _oldPopFactor);
+			_refDistance += (uint64_t)((static_cast<uint64_t>(kGCMMPCohortSize) - _oldBoundary) * _oldPopFactor);
 			GCPCohortRecordData*_youngCohortRecP =
 							getCoRecFromIndices(_startRowYoung, _startIndexYoung);
 			double _youngPopFactor =
@@ -1362,7 +1362,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 //		posRefDist_[_refDistanceIndex].total_++;
 	}
 
-	mutationStats_.inc_counts(_curr_thread,1);
+	mutationStats_.inc_counts(_curr_thread, 1);
 //	mutationStats_.total_++;
 }
 
