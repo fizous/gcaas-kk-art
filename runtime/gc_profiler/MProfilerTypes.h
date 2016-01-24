@@ -967,6 +967,7 @@ protected:
 	                         SafeGCPHistogramRec* src) {
 		dist->index_ = static_cast<double>(src->dataRec_.index_);
 		src->read_counts(thread, &dist->total_, &dist->live_);
+		dist->padding_ = 0;
 	}
 	void copyArrayForDisplay(Thread* thread, SafeGCPHistogramRec arrRefs[]){
 		for(int iter = 0; iter < kGCMMPMaxHistogramEntries; iter++) {

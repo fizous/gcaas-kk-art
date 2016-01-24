@@ -1375,6 +1375,8 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		GCPDistanceRecDisplay _recDisplayMuts;
 		GCPDistanceRecDisplay _recDisplaySelfMuts;
 
+
+
 		double _selfRefPercTotal = 0.0;
 		double _selfRefPercLastWindow = 0.0;
 
