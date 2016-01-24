@@ -163,7 +163,7 @@ typedef struct PACKED(4) GCPCohortRecordData_S {
 
 
 typedef struct PACKED(4) GCPSafeRecData_S {
-  uint64_t index_;
+  int64_t index_;
   uint64_t cntLive_;
   uint64_t cntTotal_;
 } GCPSafeRecData;
@@ -177,6 +177,15 @@ class SafeGCPHistogramRec {
   SafeGCPHistogramRec() {
     safe_lock_ = new Mutex("SafeGCPHistogramRec lock");
     memset((void*)&dataRec_, 0, static_cast<int64_t>(sizeof(GCPSafeRecData)));
+  }
+
+
+  void setIndex(uint64_t ind) {
+    dataRec_.index_ = ind;
+  }
+  void resetLiveData(Thread* th){
+    MutexLock mu(th, *safe_lock_);
+    dataRec_.cntLive_ = 0;
   }
 
   void reset(Thread* th) {
@@ -216,11 +225,10 @@ class SafeGCPHistogramRec {
   uint64_t get_total_count() {
     return dataRec_.cntTotal_;
   }
-
-
-
-
 };
+
+
+
 
 
 class GCPHistRecData {
@@ -946,23 +954,23 @@ public:
 
 typedef struct PACKED(4) GCPDistanceRecDisplay_S {
 	double index_;
-	size_t live_;
-	size_t total_;
+	uint64_t live_;
+	uint64_t total_;
+	uint64_t padding_;
 }  GCPDistanceRecDisplay;
 
 class GCRefDistanceManager : public GCCohortManager {
 protected:
 	void initDistanceArray(void);
 
-	void copyToDisplayRecord(GCPDistanceRecDisplay* dist,
-			GCPDistanceRecord* src) {
-		dist->index_ = src->index_;
-		dist->live_ = (size_t)src->live_.load();
-		dist->total_ = (size_t)src->total_.load();
+	void copyToDisplayRecord(Thread* thread, GCPDistanceRecDisplay* dist,
+	                         SafeGCPHistogramRec* src) {
+		dist->index_ = static_cast<double>(src->dataRec_.index_);
+		src->read_counts(thread, &dist->total_, &dist->live_);
 	}
-	void copyArrayForDisplay(GCPDistanceRecord arrRefs[]){
+	void copyArrayForDisplay(Thread* thread, SafeGCPHistogramRec arrRefs[]){
 		for(int iter = 0; iter < kGCMMPMaxHistogramEntries; iter++) {
-			copyToDisplayRecord(&arrayDisplay_[iter], &arrRefs[iter]);
+			copyToDisplayRecord(thread, &arrayDisplay_[iter], &arrRefs[iter]);
 		}
 	}
 
@@ -972,13 +980,20 @@ protected:
 	}
 
 public:
-	static size_t kGCMMPMutationWindowSize;
-	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
-	GCPDistanceRecord negRefDist_[kGCMMPMaxHistogramEntries];
+	static uint64_t kGCMMPMutationWindowSize;
+	SafeGCPHistogramRec posRefDist_[kGCMMPMaxHistogramEntries];
+	SafeGCPHistogramRec negRefDist_[kGCMMPMaxHistogramEntries];
+
+
+//	GCPDistanceRecord posRefDist_[kGCMMPMaxHistogramEntries];
+//	GCPDistanceRecord negRefDist_[kGCMMPMaxHistogramEntries];
 
 	GCPDistanceRecDisplay arrayDisplay_[kGCMMPMaxHistogramEntries];
-	GCPDistanceRecord selReferenceStats_;
-	GCPDistanceRecord mutationStats_;
+//	GCPDistanceRecord selReferenceStats_;
+//	GCPDistanceRecord mutationStats_;
+
+	SafeGCPHistogramRec selReferenceStats_;
+	SafeGCPHistogramRec mutationStats_;
 
 	GCRefDistanceManager(SafeGCPHistogramRec*);
 

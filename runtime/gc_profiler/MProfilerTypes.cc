@@ -1222,25 +1222,26 @@ GCRefDistanceManager::GCRefDistanceManager(SafeGCPHistogramRec* safeTotalAccount
 }
 
 void GCRefDistanceManager::initDistanceArray(void) {
-	double _index = 0.0;
-	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		_index = i * 1.0;/*(uint64_t)((i) & (0x00000000FFFFFFFF));*/
-		posRefDist_[i].index_ = _index;
-		negRefDist_[i].index_ = -_index;
+	//int64_t _index = 0;
+	for(int64_t i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+		//_index = i * 1.0;/*(uint64_t)((i) & (0x00000000FFFFFFFF));*/
+		posRefDist_[i].setIndex(i);
+		posRefDist_[i].setIndex(-i);
 	}
-	mutationStats_.index_ = 0.0;
-	selReferenceStats_.index_ = 1.0;
+	mutationStats_.setIndex(0);
+	selReferenceStats_.setIndex(1);
 
 }
 
 
 void GCRefDistanceManager::resetCurrentCounters(void) {
+  Thread* self_thread = Thread::Current();
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		posRefDist_[i].resetLiveData();
-		negRefDist_[i].resetLiveData();
+		posRefDist_[i].resetLiveData(self_thread);
+		negRefDist_[i].resetLiveData(self_thread);
 	}
-	mutationStats_.resetLiveData();
-	selReferenceStats_.resetLiveData();
+	mutationStats_.resetLiveData(self_thread);
+	selReferenceStats_.resetLiveData(self_thread);
 }
 
 void GCRefDistanceManager::gcpFinalizeProfileCycle(void) {
@@ -1291,7 +1292,7 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 
 	int directionCase = 1;
 	size_t _refDistanceIndex = 0;
-	size_t _refDistance = 0;
+	uint64_t _refDistance = 0;
 
 
 	if(sourceObj == sinkObj) {
@@ -1314,15 +1315,15 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		GCPCohortRecordData* _oldCohortRecP =
 				getCoRecFromIndices(_endRowOld, _endIndexOld);
 		double _oldPopFactor = _oldCohortRecP->liveSize / _oldCohortRecP->totalSize;
-		size_t _oldBoundary =
+		uint64_t _oldBoundary =
 				(_oldProfHeader->objBD + _oldProfHeader->objSize) % kGCMMPCohortSize;
-		size_t _youngBoundary =
+		uint64_t _youngBoundary =
 				(_youngProfHeader->objBD) % kGCMMPCohortSize;
 		if(_endRowOld == _startRowYoung && _endIndexOld == _startIndexYoung) {
 			//special case when both objects in the same cohort
-			_refDistance = (size_t) (_oldPopFactor * (_youngBoundary - _oldBoundary));
+			_refDistance = (uint64_t) (_oldPopFactor * (_youngBoundary - _oldBoundary));
 		} else {
-			_refDistance += (size_t)((kGCMMPCohortSize - _oldBoundary) * _oldPopFactor);
+			_refDistance += (uint64_t)((kGCMMPCohortSize - _oldBoundary) * _oldPopFactor);
 			GCPCohortRecordData*_youngCohortRecP =
 							getCoRecFromIndices(_startRowYoung, _startIndexYoung);
 			double _youngPopFactor =
@@ -1335,10 +1336,13 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 				if(_colIter == _startIndexYoung && _startRowYoung == _rowIter)
 					break;
 				_cohorRecIter =  getCoRecFromIndices(_rowIter, _colIter);
-				_refDistance +=  (size_t)(_cohorRecIter->liveSize);
+				_refDistance +=  (static_cast<uint64_t>(_cohorRecIter->liveSize));
 			}
 		}
 	}
+
+
+	Thread* _curr_thread = Thread::Current();
 
 	if(directionCase == -1) {
 		_refDistance += _oldProfHeader->objSize - member_offset;
@@ -1346,25 +1350,26 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 		_refDistance += member_offset + _oldProfHeader->objSize;
 	} else {
 		_refDistance += member_offset;
-		selReferenceStats_.live_++;
-		selReferenceStats_.total_++;
+		selReferenceStats_.inc_counts(_curr_thread,1);
+//		selReferenceStats_.total_++;
 	}
 	_refDistanceIndex = (32 - CLZ(_refDistance));
 	if(directionCase == -1) {
-		negRefDist_[_refDistanceIndex].live_++;
-		negRefDist_[_refDistanceIndex].total_++;
+		negRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
+//		negRefDist_[_refDistanceIndex].total_++;
 	} else {
-		posRefDist_[_refDistanceIndex].live_++;
-		posRefDist_[_refDistanceIndex].total_++;
+		posRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
+//		posRefDist_[_refDistanceIndex].total_++;
 	}
 
-	mutationStats_.live_++;
-	mutationStats_.total_++;
+	mutationStats_.inc_counts(_curr_thread,1);
+//	mutationStats_.total_++;
 }
 
 bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		bool dumpGlobalData) {
 	bool _success   = false;
+	Thread* _curr_thread = Thread::Current();
 	if(dumpGlobalData) {
 		GCMMP_VLOG(INFO) << "-----summary-----";
 		GCPDistanceRecDisplay _recDisplayMuts;
@@ -1376,8 +1381,8 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 		double _totalPercTotal = 0.0;
 		double _totalPercLastWindow = 0.0;
 
-		copyToDisplayRecord(&_recDisplayMuts, &mutationStats_);
-		copyToDisplayRecord(&_recDisplaySelfMuts, &selReferenceStats_);
+		copyToDisplayRecord(_curr_thread, &_recDisplayMuts, &mutationStats_);
+		copyToDisplayRecord(_curr_thread, &_recDisplaySelfMuts, &selReferenceStats_);
 
 //		_recDisplayMuts.index_ = mutationStats_.total_.load() * 1.0;
 //		_recDisplaySelfMuts.index_ = mutationStats_.total_.load() * 1.0;
@@ -1416,10 +1421,10 @@ bool GCRefDistanceManager::gcpDumpHistTable(art::File* dumpFile,
 			LOG(ERROR) << "error dumping global record in GCRefDistanceManager::gcpDumpHistTable";
 		}
 	}
-	copyArrayForDisplay(negRefDist_);
+	copyArrayForDisplay(_curr_thread, negRefDist_);
 	_success = dumpFile->WriteFully(arrayDisplay_,
 			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
-	copyArrayForDisplay(posRefDist_);
+	copyArrayForDisplay(_curr_thread, posRefDist_);
 	_success &= dumpFile->WriteFully(arrayDisplay_,
 			kGCMMPMaxHistogramEntries * sizeof(GCPDistanceRecDisplay));
 	if(_success)
@@ -1434,7 +1439,7 @@ void GCRefDistanceManager::logManagedData(void) {
 	}
 	LOG(ERROR) << "----dumping Negative----------";
 	for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
-		LOG(ERROR) << i << ": " << StringPrintf("%d",negRefDist_[i].total_.load());
+		LOG(ERROR) << i << ": " << StringPrintf("%lu",negRefDist_[i].get_total_count());
 	}
 }
 

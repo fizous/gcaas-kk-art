@@ -187,7 +187,7 @@ int VMProfiler::kGCMMPLogAllocWindow = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPAllocWindow = (1 << GCP_WINDOW_RANGE_LOG);
 int VMProfiler::kGCMMPLogAllocWindowDump = GCP_WINDOW_RANGE_LOG;
 int VMProfiler::kGCMMPAllocWindowDump = (1 << GCP_WINDOW_RANGE_LOG);
-size_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZE;
+uint64_t GCRefDistanceManager::kGCMMPMutationWindowSize = GCP_MUTATIONS_WINDOW_SIZE;
 VMProfiler* GCMMPThreadProf::vmProfiler = NULL;
 
 
@@ -2939,11 +2939,12 @@ void RefDistanceProfiler::gcpProfilerDistance(const mirror::Object* dst,
 	uint64_t currMutationCnt = 0;
 	uint64_t totalMutationCnt = 0;
 	Thread* self = Thread::Current();
-			GCHistogramDataManager::gcpTotalMutationsCount_.read_counts(self,&totalMutationCnt, &currMutationCnt);
+			GCHistogramDataManager::gcpTotalMutationsCount_.read_counts(self,&totalMutationCnt,
+			                                                            &currMutationCnt);
 	GCHistogramDataManager::GCPIncMutations(self);
 	_manager->profileDistance(dst, member_offset, new_value);
-	if(IsMutationsWindowsSet() && totalMutationCnt > 0 &&
-	    totalMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0) {
+	if(IsMutationsWindowsSet() && (totalMutationCnt > 0) &&
+	    (totalMutationCnt % GCRefDistanceManager::kGCMMPMutationWindowSize == 0)) {
 
 		{
 			MutexLock mu(self, *prof_thread_mutex_);
