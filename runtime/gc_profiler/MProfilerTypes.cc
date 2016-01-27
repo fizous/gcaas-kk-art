@@ -565,7 +565,7 @@ inline void GCPThreadAllocManager::addObject(size_t allocatedMemory,
 //	extraHeader->histRecP = this;
 	size_t histIndex = (32 - CLZ(objSize)) - 1;
 	objSizesHistMgr_->gcpNoAggAddSingleDataToPairHist(objSize,
-	                                                  &objSizesHistMgr_->sizeHistograms_[histIndex]);
+	                  &objSizesHistMgr_->sizeHistograms_[histIndex]);
 }
 
 void GCPThreadAllocManager::addObjectForThread(size_t allocatedMemory,
@@ -1356,10 +1356,10 @@ void GCRefDistanceManager::profileDistance(const mirror::Object* sourceObj,
 	}
 	GCP_CALC_HIST_INDEX(_refDistanceIndex, _refDistance); //(32 - CLZ(_refDistance));
 	if(directionCase == -1) {
-		negRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
+		negRefDist_[_refDistanceIndex].inc_counts(_curr_thread, 1);
 //		negRefDist_[_refDistanceIndex].total_++;
 	} else {
-		posRefDist_[_refDistanceIndex].inc_counts(_curr_thread,1);
+		posRefDist_[_refDistanceIndex].inc_counts(_curr_thread, 1);
 //		posRefDist_[_refDistanceIndex].total_++;
 	}
 
