@@ -137,10 +137,10 @@ typedef struct GCMMPHeapStatus_S {
 	double			timeInNsec;
 	uint64_t 		allocatedBytes;
 	uint64_t 		currAllocBytes;
-	size_t			currFootPrint;
-	size_t 			heapIdealFree;
-	size_t 			concurrentStartBytes;
-	size_t			softLimit;
+	uint64_t			currFootPrint;
+	uint64_t 			heapIdealFree;
+	uint64_t 			concurrentStartBytes;
+	uint64_t			softLimit;
 	double			heapIntegral;
 	double			gcCounts;
 	double			gcCPULoad;

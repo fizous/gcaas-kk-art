@@ -451,9 +451,10 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
   heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
 #endif
   heapStatus.concurrentStartBytes =
-      static_cast<uint32_t>(heapStatus.currAllocBytes + GCPGetCalculateStartBytes());//heap_->GetConcStartBytes();
+      heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
   heapStatus.currFootPrint =
-      static_cast<uint32_t>(heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint());
+      //static_cast<uint32_t>(
+          heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();//);
   heapStatus.softLimit = 0;//heap_->GetMaxMemory();
   heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
   heapIntegral_.gcpUpdateHeapStatus(&heapStatus);
