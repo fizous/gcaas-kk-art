@@ -458,9 +458,9 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
   heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
   heapIntegral_.gcpUpdateHeapStatus(&heapStatus);
 	//uint32_t _allocBytes = static_cast<uint32_t>(allocatedBytesData.cntTotal.load());
-//	LOG(ERROR) << "index: " << heapStatus.index
-//	    << "; alloc_bytes:" <<  _allocBytes
-//	    << "; currc_bytes:" <<  _curr_alloc_bytes;
+	LOG(ERROR) << "index: " << heapStatus.index
+	    << "; alloc_bytes:" <<  _allocBytes
+	    << "; currc_bytes:" <<  _curr_alloc_bytes;
 	//heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 }
 
