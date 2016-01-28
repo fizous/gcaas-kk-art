@@ -42,7 +42,7 @@
 #define GCMMP_ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
 
 
-#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+
 
 #define GCP_CALC_HIST_INDEX(_coh_index, value)  \
     uint32_t _leadZeros = 0;                    \
@@ -53,7 +53,7 @@
       _leadZeros += CLZ(_lowBits);              \
     }                                           \
     _coh_index = (64 - _leadZeros);
-
+#if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
 
 
   #define GCP_DISABLE_CONC_COLLECT					1 /* turn off ConcurrentGC */
