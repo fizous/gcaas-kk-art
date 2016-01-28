@@ -461,7 +461,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	//uint32_t _allocBytes = static_cast<uint32_t>(allocatedBytesData.cntTotal.load());
 	LOG(ERROR) << "index: " << heapStatus.index
 	    << "; alloc_bytes:" <<  _allocBytes
-	    << "; currc_bytes:" <<  _curr_alloc_bytes;
+	    << "; currc_bytes:" <<  _curr_alloc_bytes
+	    << "; bytes allocated: " << heap_->GetBytesAllocated();
 	//heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 }
 
