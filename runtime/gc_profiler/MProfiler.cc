@@ -19,6 +19,7 @@
 #include "cutils/process_name.h"
 #include "cutils/system_clock.h"
 #include "gc/heap.h"
+#include "gc/space/dlmalloc_space.h"
 #include "gc_profiler/MPPerfCounters.h"
 #include "gc_profiler/MProfilerTypes.h"
 #include "gc_profiler/MProfiler.h"
