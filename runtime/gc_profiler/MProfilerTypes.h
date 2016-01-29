@@ -31,8 +31,8 @@
 /* number of buckets to create the histogram */
 //#define GCP_MAX_COHORT_ARRAYLET_CAP				128
 #define GCP_MAX_COHORT_ROW_CAP						64
-#define GCP_DEFAULT_COHORT_LOG						18
-#define GCP_DEAFULT_COHORT_SIZE						262144 // 256k
+#define GCP_DEFAULT_COHORT_LOG						19
+#define GCP_DEAFULT_COHORT_SIZE						524288 // 512k
 
 #define GCP_MAX_HISTOGRAM_SIZE						64
 #define GCMMP_GCPAUSE_ARRAY_SIZE					32

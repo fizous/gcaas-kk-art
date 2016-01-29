@@ -41,12 +41,14 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
   return obj;
 }
 
-inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
+inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
+                                                               size_t* bytes_allocated) {
 	size_t extendedSize = num_bytes;
 	size_t calculatedSize  = 0;
 	size_t checkingSize = 0;
 	GCP_ADD_EXTRA_BYTES(num_bytes, extendedSize);
-  mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), extendedSize));
+  mirror::Object* result =
+      reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), extendedSize));
   if (result != NULL) {
     if (kDebugSpaces) {
       CHECK(Contains(result)) << "Allocation (" << reinterpret_cast<void*>(result)
@@ -71,7 +73,8 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
 			<< " != calculatedSize: " << calculatedSize << "; diff=" <<
 			checkingSize - calculatedSize;
     //Fizo: should tune this
-    GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result), /*num_bytes*/calculatedSize, result);
+    GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result),
+                            /*num_bytes*/calculatedSize, result);
     UpdateObjectsAllocated(1);
     UpdateTotalObjectsAllocated(1);
 //    ++total_objects_allocated_;
