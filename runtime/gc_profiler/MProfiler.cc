@@ -462,7 +462,8 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	LOG(ERROR) << "index: " << heapStatus.index
 	    << "; alloc_bytes:" <<  _allocBytes
 	    << "; currc_bytes:" <<  _curr_alloc_bytes
-	    << "; bytes allocated: " << heap_->GetBytesAllocated();
+	    << "; bytes allocated: " << heap_->GetBytesAllocated()
+	    << "; space bytes allocated: " << heap_->GetAllocSpace()->GetBytesAllocated();
 	//heapStatus.gcCounts = 1.0 * getGCEventsCounts();
 }
 
