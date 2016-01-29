@@ -71,7 +71,7 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
 			<< " != calculatedSize: " << calculatedSize << "; diff=" <<
 			checkingSize - calculatedSize;
     //Fizo: should tune this
-    GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result), num_bytes, result);
+    GCMMP_NOTIFY_ALLOCATION(AllocationNoOverhead(result), /*num_bytes*/calculatedSize, result);
     UpdateObjectsAllocated(1);
     UpdateTotalObjectsAllocated(1);
 //    ++total_objects_allocated_;

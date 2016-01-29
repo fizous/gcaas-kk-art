@@ -88,6 +88,8 @@
 		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize, isZygote)
     #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
 	    art::mprofiler::VMProfiler::MProfNotifyAlloc(allocatedSpace, objSize, obj)
+   #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) \
+      modifiedSize = actualSize
   #else // NOT (ART_USE_GC_DEFAULT_PROFILER)
     #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
 		  ((void) 0)
