@@ -202,8 +202,9 @@ class SafeGCPHistogramRec {
   void inc_counts(Thread* th, size_t val, uint64_t* before_val, uint64_t* after_val) {
     MutexLock mu(th, *safe_lock_);
     *before_val = dataRec_.cntTotal_;
-    dataRec_.cntLive_ += val;
-    dataRec_.cntTotal_ += val;
+    uint64_t cast_val = static_cast<uint64_t>(val);
+    dataRec_.cntLive_ += cast_val;
+    dataRec_.cntTotal_ += cast_val;
     *after_val = dataRec_.cntTotal_;
   }
 
@@ -213,7 +214,7 @@ class SafeGCPHistogramRec {
       dataRec_.cntLive_ = 0;
       return;
     }
-    dataRec_.cntLive_ -= val;
+    dataRec_.cntLive_ -= static_cast<uint64_t>(val);
   }
 
   void read_counts(Thread* th, uint64_t* total_cnt, uint64_t* live_cnt) {
