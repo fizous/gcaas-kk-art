@@ -80,7 +80,6 @@
   #define GCMMP_HANDLE_FINE_PRECISE_ALLOC(x,y,z)           ((void) 0)
   #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)           \
 	  (extendedSize = actualSize)
-  #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) ((void) 0)
   #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)							 ((void) 0)
   #define GCP_PROFILE_OBJ_CLASS(klass, obj)                ((void) 0)
   #if (ART_USE_GC_DEFAULT_PROFILER)
@@ -91,6 +90,7 @@
    #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) \
       modifiedSize = actualSize
   #else // NOT (ART_USE_GC_DEFAULT_PROFILER)
+    #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) ((void) 0)
     #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
 		  ((void) 0)
     #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
