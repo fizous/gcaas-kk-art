@@ -56,7 +56,7 @@ inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	if(!result_dump) {
     std::string detail(StringPrintf("Trace data write failed: %s", strerror(errno)));
     PLOG(ERROR) << detail;
-    ThrowRuntimeException("%s", detail.c_str());
+    //ThrowRuntimeException("%s", detail.c_str());
 	}
 
 	return result_dump;
