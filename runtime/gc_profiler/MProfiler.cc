@@ -64,7 +64,7 @@ const char * VMProfiler::benchmarks[] = {
 
 
 const char * VMProfiler::gcMMPRootPath[] = {
-		"/sdcard/gcperf/", "/data/anr/"
+		"/storage/sdcard1/Android/gcperf/", "/sdcard/gcperf/", "/data/anr/"
 };
 
 const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
