@@ -52,7 +52,14 @@ inline bool GCPHistRecData::gcpDumpHistRec(art::File* file) {
 inline bool GCPHistRecData::gcpDumpAtomicHistRec(art::File* file) {
 	GCPHistogramRec _dummyRec;
 	GCPCopyRecordsData(&_dummyRec, &atomicDataRec_);
-	return file->WriteFully(&_dummyRec, static_cast<int64_t>(sizeof(GCPHistogramRec)));
+	bool result_dump = file->WriteFully(&_dummyRec, static_cast<int64_t>(sizeof(GCPHistogramRec)));
+	if(!result_dump) {
+    std::string detail(StringPrintf("Trace data write failed: %s", strerror(errno)));
+    PLOG(ERROR) << detail;
+    ThrowRuntimeException("%s", detail.c_str());
+	}
+
+	return result_dump;
 }
 
 inline void GCPPairHistogramRecords::setRefreneceNameFromThread(
