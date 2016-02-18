@@ -1118,10 +1118,10 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
         }
       }
 #else
-      GCP_MARK_START_ALLOC_GC_HW_EVENT();
+      GCP_MARK_START_ALLOC_GC_HW_EVENT;
       // If we actually ran a different type of Gc than requested, we can skip the index forwards.
       collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
-      GCP_MARK_END_ALLOC_GC_HW_EVENT();
+      GCP_MARK_END_ALLOC_GC_HW_EVENT;
       DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
       i = static_cast<size_t>(gc_type_ran);
 
@@ -2618,13 +2618,13 @@ void Heap::ConcurrentGC(Thread* self) {
     }
   }
   //LOG(ERROR) << "<<<<vmprofiler: concurrent: "<< self->GetTid();
-  GCP_MARK_START_CONC_GC_HW_EVENT();
+  GCP_MARK_START_CONC_GC_HW_EVENT;
   //mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
   if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageInternal(GetNextGCType(), kGcCauseBackground, false);
   }
-  GCP_MARK_END_CONC_GC_HW_EVENT();
+  GCP_MARK_END_CONC_GC_HW_EVENT;
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   //mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
 }
