@@ -972,12 +972,12 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
 
   // This is safe to do since the GC will never free objects which are neither in the allocation
   // stack or the live bitmap.
-  Thread* self = Thread::Current();
+//  Thread* self = Thread::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
     GCP_MARK_START_ALLOC_GC_HW_EVENT;
-    GCP_MARK_START_GC_HAT_TIME_EVENT(self);
+    GCP_MARK_START_GC_HAT_TIME_EVENT(Thread::Current());
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
-    GCP_MARK_END_GC_HAT_TIME_EVENT(self);
+    GCP_MARK_END_GC_HAT_TIME_EVENT(Thread::Current());
     GCP_MARK_END_ALLOC_GC_HW_EVENT;
   }
 }
