@@ -1361,7 +1361,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
 #endif
 
   if(doRequest) {
-    GCP_MARK_START_EXPL_GC_HW_EVENT();
+    GCP_MARK_START_EXPL_GC_HW_EVENT;
     Thread* self = Thread::Current();
     //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
     GCP_MARK_START_EXPL_GC_TIME_EVENT(self);
@@ -2687,11 +2687,11 @@ void Heap::RequestHeapTrim() {
 
 size_t Heap::Trim() {
 //	LOG(ERROR) << "--------- Heap::Trim() -------------";
-  GCP_MARK_START_TRIM_HW_EVENT();
+  GCP_MARK_START_TRIM_HW_EVENT;
   // Handle a requested heap trim on a thread outside of the main GC thread.
   size_t _trimmed = alloc_space_->Trim();
 
-  GCP_MARK_END_TRIM_HW_EVENT();
+  GCP_MARK_END_TRIM_HW_EVENT;
   return _trimmed;
 }
 
