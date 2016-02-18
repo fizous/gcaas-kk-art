@@ -667,14 +667,14 @@ size_t DlMallocSpace::GCPGetAllocationSize(const mirror::Object* obj){
 //}
 
 size_t DlMallocSpace::Trim() {
-	mprofiler::VMProfiler::MProfMarkStartTrimHWEvent();
+  GCP_MARK_START_TRIM_HW_EVENT;
 	DLMALLOC_SPACE_LOCK_MACRO;
   // Trim to release memory at the end of the space.
   mspace_trim(GetMspace(), 0);
   // Visit space looking for page-sized holes to advise the kernel we don't need.
   size_t reclaimed = 0;
   mspace_inspect_all(GetMspace(), DlmallocMadviseCallback, &reclaimed);
-  mprofiler::VMProfiler::MProfMarkEndTrimHWEvent();
+  GCP_MARK_END_TRIM_HW_EVENT;
   return reclaimed;
 }
 

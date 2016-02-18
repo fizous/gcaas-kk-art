@@ -53,7 +53,13 @@
       _leadZeros += CLZ(_lowBits);              \
     }                                           \
     _coh_index = (64 - _leadZeros);
+
+
+
+
+
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST)
+  #define GCP_ART_MARK_WAIT_EVENTS          1 /* turn on Pause time Events ConcurrentGC */
   #define GCP_DISABLE_CONC_COLLECT					1 /* turn off ConcurrentGC */
   #define GCP_DISABLE_EXPL_COLLECT					1 /* turn off explicit GC */
   #define GCP_COLLECT_FOR_PROFILE					  1 /* collect on each allocation window */
@@ -79,6 +85,7 @@
   #define GCP_RESET_OBJ_PROFILER_HEADER(x,y)							 ((void) 0)
   #define GCP_PROFILE_OBJ_CLASS(klass, obj)                ((void) 0)
   #if (ART_USE_GC_DEFAULT_PROFILER)
+    #define GCP_ART_MARK_WAIT_EVENTS          1 /* turn on Pause time Events ConcurrentGC */
     #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
 		  art::mprofiler::VMProfiler::MProfNotifyFree(allocSpace, objSize, isZygote)
     #define GCMMP_NOTIFY_ALLOCATION(allocatedSpace, objSize, obj) \
@@ -88,6 +95,7 @@
   #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize)           \
     (extendedSize = actualSize)
   #else // NOT (ART_USE_GC_DEFAULT_PROFILER)
+    #define GCP_ART_MARK_WAIT_EVENTS          0 /* turn off Pause time Events ConcurrentGC */
     #define GCP_ADD_EXTRA_BYTES(actualSize, extendedSize) ((void) 0)
     #define GCP_REMOVE_EXTRA_BYTES(actualSize, modifiedSize) ((void) 0)
     #define GCMMP_HANDLE_FINE_PRECISE_FREE(allocSpace, objSize, isZygote)   \
@@ -96,6 +104,59 @@
 		  ((void) 0)
   #endif//ART_USE_GC_DEFAULT_PROFILER
 #endif//ART_USE_GC_PROFILER
+
+
+
+
+
+#if (GCP_ART_MARK_WAIT_EVENTS)
+ #define GCP_MARK_START_CONC_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkStartConcGCHWEvent()
+ #define GCP_MARK_END_CONC_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent()
+ #define GCP_MARK_START_ALLOC_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkStartAllocGCHWEvent()
+ #define GCP_MARK_END_ALLOC_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkEndAllocGCHWEvent()
+ #define GCP_MARK_START_EXPL_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkStartExplGCHWEvent()
+ #define GCP_MARK_END_EXPL_GC_HW_EVENT mprofiler::VMProfiler::MProfMarkEndExplGCHWEvent()
+ #define GCP_MARK_START_TRIM_HW_EVENT mprofiler::VMProfiler::MProfMarkStartTrimHWEvent()
+ #define GCP_MARK_END_TRIM_HW_EVENT mprofiler::VMProfiler::MProfMarkEndTrimHWEvent()
+
+
+ #define GCP_MARK_START_WAIT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkWaitTimeEvent(TH)
+ #define GCP_MARK_END_WAIT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkEndWaitTimeEvent(TH)
+ #define GCP_MARK_START_EXPL_GC_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(TH)
+ #define GCP_MARK_END_EXPL_GC_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkEndGCExplTimeEvent(TH)
+ #define GCP_MARK_START_GC_HAT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(TH)
+ #define GCP_MARK_END_GC_HAT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(TH)
+ #define GCP_MARK_START_SAFE_POINT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkStartSafePointEvent(TH)
+ #define GCP_MARK_END_SAFE_POINT_TIME_EVENT(TH) mprofiler::VMProfiler::MProfMarkEndSafePointEvent(TH)
+ #define GCP_MARK_START_SUSPEND_TIME_EVENT(TH, ST) mprofiler::VMProfiler::MProfMarkSuspendTimeEvent(TH, ST)
+ #define GCP_MARK_END_SUSPEND_TIME_EVENT(TH, ST) mprofiler::VMProfiler::MProfMarkEndSuspendTimeEvent(TH, ST)
+
+ #define GCP_MARK_PRE_COLLECTION  mprofiler::VMProfiler::MProfMarkPreCollection()
+ #define GCP_MARK_POST_COLLECTION  mprofiler::VMProfiler::MProfMarkPostCollection()
+#else//GCP_ART_MARK_WAIT_EVENTS
+ #define GCP_MARK_START_CONC_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_END_CONC_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_START_ALLOC_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_END_ALLOC_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_START_EXPL_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_END_EXPL_GC_HW_EVENT ((void) 0)
+ #define GCP_MARK_START_TRIM_HW_EVENT ((void) 0)
+ #define GCP_MARK_END_TRIM_HW_EVENT ((void) 0)
+ #define GCP_MARK_START_WAIT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_END_WAIT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_START_GC_HAT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_END_GC_HAT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_START_EXPL_GC_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_END_EXPL_GC_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_START_SAFE_POINT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_END_SAFE_POINT_TIME_EVENT(TH) ((void) 0)
+ #define GCP_MARK_START_SUSPEND_TIME_EVENT(TH, ST) ((void) 0)
+ #define GCP_MARK_END_SUSPEND_TIME_EVENT(TH, ST) ((void) 0)
+
+ #define GCP_MARK_PRE_COLLECTION ((void) 0)
+ #define GCP_MARK_POST_COLLECTION ((void) 0)
+#endif//GCP_ART_MARK_WAIT_EVENTS
+
 
 #define GCP_OFF_CONCURRENT_GC()			(GCP_DISABLE_CONC_COLLECT)
 #define GCP_OFF_EXPLICIT_GC()			  (GCP_DISABLE_EXPL_COLLECT)

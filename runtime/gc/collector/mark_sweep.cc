@@ -423,11 +423,11 @@ void MarkSweep::MarkingPhase() {
 }
 
 void MarkSweep::MarkThreadRoots(Thread* self) {
-	mprofiler::VMProfiler::MProfMarkStartSafePointEvent(self);
+  GCP_MARK_START_SAFE_POINT_TIME_EVENT(self);
 	//  LOG(ERROR) << ">>>>vmprofiler: MarkThreadRoots "<< self->GetTid();
   MarkRootsCheckpoint(self);
  // LOG(ERROR) << "<<<<vmprofiler: MarkThreadRoots "<< self->GetTid();
-  mprofiler::VMProfiler::MProfMarkEndSafePointEvent(self);
+  GCP_MARK_END_SAFE_POINT_TIME_EVENT(self);
 }
 
 void MarkSweep::MarkReachableObjects() {
@@ -1443,12 +1443,12 @@ class CheckpointMarkThreadRoots : public Closure {
     ATRACE_BEGIN("Marking thread roots");
     // Note: self is not necessarily equal to thread since thread may be suspended.
     Thread* self = Thread::Current();
-    mprofiler::VMProfiler::MProfMarkStartSafePointEvent(self);
+    GCP_MARK_START_SAFE_POINT_TIME_EVENT(self);
     CHECK(thread == self || thread->IsSuspended() || thread->GetState() == kWaitingPerformingGc)
         << thread->GetState() << " thread " << thread << " self " << self;
     thread->VisitRoots(MarkSweep::MarkRootParallelCallback, mark_sweep_);
     ATRACE_END();
-    mprofiler::VMProfiler::MProfMarkEndSafePointEvent(self);
+    GCP_MARK_END_SAFE_POINT_TIME_EVENT(self);
     mark_sweep_->GetBarrier().Pass(self);
   }
 

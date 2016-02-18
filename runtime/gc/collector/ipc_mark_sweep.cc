@@ -244,11 +244,11 @@ void IPCHeap::ConcurrentGC(Thread* self) {
       return;
     }
   }
-  mprofiler::VMProfiler::MProfMarkStartConcGCHWEvent();
+  GCP_MARK_START_CONC_GC_HW_EVENT();
   if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageIPC(local_heap_->GetNextGCType(), kGcCauseBackground, false);
   }
-  mprofiler::VMProfiler::MProfMarkEndConcGCHWEvent();
+  GCP_MARK_END_CONC_GC_HW_EVENT();
 //  local_heap_->ConcurrentGC(self);
 //  {
 //    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
@@ -333,7 +333,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
   collector::GcType last_gc_type = collector::kGcTypeNone;
   bool do_wait = false;
   if(meta_->concurrent_gc_) { // the heap is concurrent
-    mprofiler::VMProfiler::MProfMarkWaitTimeEvent(self);
+    GCP_MARK_START_WAIT_TIME_EVENT(self);
     uint64_t wait_start = NanoTime();
     {
       IPMutexLock interProcMu(self, *gc_complete_mu_);
@@ -356,7 +356,7 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
         LOG(INFO) << "WaitForConcurrentIPCGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
-    mprofiler::VMProfiler::MProfMarkEndWaitTimeEvent(self);
+    GCP_MARK_END_WAIT_TIME_EVENT(self);
   }
   return last_gc_type;
 }
@@ -399,7 +399,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     }
   }
 
-  mprofiler::VMProfiler::MProfMarkPreCollection();
+  GCP_MARK_PRE_COLLECTION;
   if (gc_cause == kGcCauseForAlloc && Runtime::Current()->HasStatsEnabled()) {
     ++Runtime::Current()->GetStats()->gc_for_alloc_count;
     ++Thread::Current()->GetStats()->gc_for_alloc_count;
@@ -463,7 +463,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       IPMutexLock interProcMu(self, *gc_complete_mu_);
       local_heap_->SetLastGCType(gc_type);
       ResetServerFlag();
-      mprofiler::VMProfiler::MProfMarkPostCollection();
+      GCP_MARK_POST_COLLECTION;
       // Wake anyone who may have been waiting for the GC to complete.
       meta_->is_gc_running_ = 0;
       gc_complete_cond_->Broadcast(self);
