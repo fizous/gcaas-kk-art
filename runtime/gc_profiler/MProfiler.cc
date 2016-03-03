@@ -1342,7 +1342,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void) {
 
 
 
-bool MMUProfiler::periodicDaemonExec(void){
+bool MMUProfiler::periodicDaemonExec(void) {
 	Thread* self = Thread::Current();
 	// Check if GC is running holding gc_complete_lock_.
 	MutexLock mu(self, *prof_thread_mutex_);

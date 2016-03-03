@@ -1247,7 +1247,6 @@ public:
 
 }; // Class GCPauseThreadManager
 
-
 /*
  * Holds the profiling data per thread . We do not keep a pointer to the thread
  * because threads may terminate before we collect the information

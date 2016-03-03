@@ -263,7 +263,7 @@ public:
   static const int kGCMMPDisableMProfile = 999;
   static const int kGCMMPDefaultGrowMethod = 0;
 	static const int kGCMMPDumpEndMarker;
-
+  static const int kGCMMPMaxEventsCounts = 1024;
 	// List of profiled benchmarks in our system
 	static const char * benchmarks[];
   // combines markAllocWindows, createProfDaemon, hasProfThread,
@@ -277,7 +277,7 @@ public:
 	 */
 	static const GCMMPProfilingEntry profilTypes[];
 
-	static const int kGCMMPMaxEventsCounts = 1024;
+
 
 	//static AtomicInteger GCPTotalAllocBytes;
 
