@@ -157,9 +157,14 @@ class DebugInstrumentationListener : public instrumentation::InstrumentationList
   }
 } gDebugInstrumentationListener;
 
-// JDWP is allowed unless the Zygote forbids it.
-static bool gJdwpAllowed = true;
 
+#if ANDROID_VM_DISABLE_JDWP
+ // JDWP is allowed unless the Zygote forbids it.
+ static bool gJdwpAllowed = false;
+#else
+ // JDWP is allowed unless the Zygote forbids it.
+ static bool gJdwpAllowed = true;
+#endif
 // Was there a -Xrunjdwp or -agentlib:jdwp= argument on the command line?
 static bool gJdwpConfigured = false;
 
