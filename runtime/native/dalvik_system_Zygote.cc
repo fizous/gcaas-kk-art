@@ -302,6 +302,11 @@ static void EnableDebugFeatures(uint32_t debug_flags) {
     debug_flags &= ~DEBUG_ENABLE_JNI_LOGGING;
   }
 
+#if ANDROID_VM_DISABLE_JDWP
+  debug_flags &= ~DEBUG_ENABLE_DEBUGGER;
+#endif
+
+
   Dbg::SetJdwpAllowed((debug_flags & DEBUG_ENABLE_DEBUGGER) != 0);
   if ((debug_flags & DEBUG_ENABLE_DEBUGGER) != 0) {
     EnableDebugger();
