@@ -182,6 +182,15 @@ else
 	art_cflags += -DART_SMALL_MODE=0
 endif
 
+
+
+
+ifeq ($(ANDROID_VM_DISABLE_JDWP),true)
+  art_cflags += -DANDROID_VM_DISABLE_JDWP=1
+else
+	art_cflags += -DANDROID_VM_DISABLE_JDWP=0
+endif
+
 ifeq ($(ART_USE_GC_PROFILER),true)
   art_cflags += -DART_USE_GC_PROFILER=1
 else
