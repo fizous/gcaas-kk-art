@@ -297,6 +297,10 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	//	pauseManager = new GCPauseThreadManager();
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
+	if(perf_record_ == NULL) {
+	  std::string thread_name;
+	  LOG(ERROR) << "performance record was NULL for thread..." << thread->GetThreadName(thread_name);
+	}
 	vmProfiler->setPauseManager(this);
 	vmProfiler->setThHistogramManager(this, thread);
 	state = GCMMP_TH_RUNNING;
@@ -369,7 +373,14 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << hwEvent_;
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
 
-	_perfCounter->OpenPerfLib(thread->GetTid());
+	bool _result = _perfCounter->OpenPerfLib(thread->GetTid());
+
+	if(!_result) {
+	  LOG(ERROR) << "Coud not open PerfLib: " << thread->GetTid();
+    std::string thread_name;
+    LOG(ERROR) << "performance record was NULL for thread..." << thread->GetThreadName(thread_name);
+	}
+
 
 	return _perfCounter;
 }
