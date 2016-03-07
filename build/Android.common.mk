@@ -57,10 +57,10 @@ ANDROID_VM_DISABLE_JDWP := false
 
 ifneq ($(wildcard art/ANDROID_VM_DISABLE_JDWP),)
 $(info Disable ANDROID_VM_DISABLE_JDWP because of existence of art/ANDROID_VM_DISABLE_JDWP)
-ANDROID_VM_DISABLE_JDWP := true
+ANDROID_VM_DISABLE_JDWP := false
 endif
 ifeq ($(WITH_ANDROID_VM_DISABLE_JDWP), true)
-ANDROID_VM_DISABLE_JDWP := true
+ANDROID_VM_DISABLE_JDWP := false
 endif
 
 ifneq ($(wildcard art/ART_GC_SERVICE),)
