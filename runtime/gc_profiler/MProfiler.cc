@@ -373,6 +373,9 @@ MPPerfCounter* MMUProfiler::createHWCounter(Thread* thread) {
 MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << hwEvent_;
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
+  std::string thread_name;
+  thread->GetThreadName(thread_name);
+  LOG(ERROR) << "performance record creating for thread..." << thread_name;
 
 	bool _result = _perfCounter->OpenPerfLib(thread->GetTid());
 
