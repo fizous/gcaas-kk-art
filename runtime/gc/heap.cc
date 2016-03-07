@@ -441,7 +441,7 @@ void Heap::ListenForProcessStateChange() {
       int process_state = 0;
       if (ReadStaticInt(env, activity_manager.get(), care_about_pauses[i], &process_state)) {
         process_state_cares_about_pause_time_.insert(process_state);
-        /*VLOG(heap)*/LOG(ERROR) << "Adding process state " << process_state
+        VLOG(heap)<< "Adding process state " << process_state
                    << " to set of states which care about pause time";
       }
     }

@@ -684,7 +684,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       if (java_se_info != NULL) {
           se_info.reset(new ScopedUtfChars(env, java_se_info));
           se_info_c_str = se_info->c_str();
-          LOG(ERROR) << "java_se_info: " << se_info_c_str;
+          GCMMP_VLOG(INFO)  << "java_se_info: " << se_info_c_str;
           CHECK(se_info_c_str != NULL);
       }
       const char* se_name_c_str = NULL;
@@ -722,7 +722,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST || ART_USE_GC_DEFAULT_PROFILER)
     if(mprofiler::VMProfiler::system_server_created_ && se_profile_name_c_str != NULL) {
-      LOG(ERROR) << "java_se_name: " << se_profile_name_c_str;
+      GCMMP_VLOG(INFO)  << "java_se_name: " << se_profile_name_c_str;
       mprofiler::VMProfiler::dvmGCMMProfPerfCountersVative(se_profile_name_c_str);
     }
 #endif
