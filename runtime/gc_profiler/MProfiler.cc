@@ -377,7 +377,8 @@ MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
 //  thread->GetThreadName(thread_name);
 //  LOG(ERROR) << "performance record creating for thread..." << thread_name;
 
-	bool _result = _perfCounter->OpenPerfLib(thread->GetTid());
+	//bool _result =
+	    _perfCounter->OpenPerfLib(thread->GetTid());
 
 //	if(!_result) {
 //	  LOG(ERROR) << "Coud not open PerfLib: " << thread->GetTid();
