@@ -215,36 +215,7 @@ class MarkSweep : public GarbageCollector {
 
 
 
-  size_t GetFreedBytes() const {
-    return freed_bytes_;
-  }
-  void IncFreedBytes(size_t val) {
-    freed_bytes_.fetch_add(val);
-  }
 
-  size_t GetFreedLargeObjectBytes() const {
-    return freed_large_object_bytes_;
-  }
-
-  void IncFreedLargeObjectBytes(size_t val) {
-    freed_large_object_bytes_.fetch_add(val);
-  }
-
-  void IncFreedObjects(size_t val) {
-    freed_objects_.fetch_add(val);
-  }
-
-  size_t GetFreedObjects() const {
-    return freed_objects_;
-  }
-
-  size_t GetFreedLargeObjects() const {
-    return freed_large_objects_;
-  }
-
-  void IncFreedLargeObjects(size_t val) {
-    freed_large_objects_.fetch_add(val);
-  }
 
 #if (ART_GC_SERVICE)
   size_t GetFreedBytes() const {
@@ -375,6 +346,40 @@ class MarkSweep : public GarbageCollector {
     cashed_references_record_->java_lang_Class_ = address;
   }
 #else
+  size_t GetFreedBytes() const {
+    return freed_bytes_;
+  }
+  void IncFreedBytes(size_t val) {
+    freed_bytes_.fetch_add(val);
+  }
+
+  size_t GetFreedLargeObjectBytes() const {
+    return freed_large_object_bytes_;
+  }
+
+  void IncFreedLargeObjectBytes(size_t val) {
+    freed_large_object_bytes_.fetch_add(val);
+  }
+
+  void IncFreedObjects(size_t val) {
+    freed_objects_.fetch_add(val);
+  }
+
+  size_t GetFreedObjects() const {
+    return freed_objects_;
+  }
+
+  size_t GetFreedLargeObjects() const {
+    return freed_large_objects_;
+  }
+
+  void IncFreedLargeObjects(size_t val) {
+    freed_large_objects_.fetch_add(val);
+  }
+
+
+
+
   void IncTotalTimeNs(uint64_t param) {
     total_time_ns_ += param;
   }
