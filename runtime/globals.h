@@ -78,6 +78,9 @@ const bool kIsTargetBuild = false;
   #define ART_GC_SERVICE 1
 #endif
 
+#ifndef ART_GC_SERVICE_VERBOSE
+  #define ART_GC_SERVICE_VERBOSE 1
+#endif
 
 #if ART_GC_SERVICE
   #define IPC_MARKSWEEP_VLOG_ON                 (ART_GC_SERVICE_VERBOSE || 1)

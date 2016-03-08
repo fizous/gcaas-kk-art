@@ -73,7 +73,7 @@ ART_GC_SERVICE := true
 endif
 
 ifneq ($(wildcard art/ART_GC_SERVICE_VERBOSE),)
-$(info Enabling ART_GC_SERVICE because of existence of art/ART_GC_SERVICE_VERBOSE)
+$(info Enabling ART_GC_SERVICE_VERBOSE because of existence of art/ART_GC_SERVICE_VERBOSE)
 ART_GC_SERVICE_VERBOSE := true
 endif
 ifeq ($(WITH_ART_GC_SERVICE_VERBOSE), true)
@@ -231,6 +231,14 @@ ifeq ($(ART_GC_SERVICE),true)
 else
 	art_cflags += -DART_GC_SERVICE=0
 endif
+
+ifeq ($(ART_GC_SERVICE_VERBOSE),true)
+  art_cflags += -DART_GC_SERVICE_VERBOSE=1
+else
+	art_cflags += -DART_GC_SERVICE_VERBOSE=0
+endif
+
+
 
 ifeq ($(ART_SEA_IR_MODE),true)
   art_cflags += -DART_SEA_IR_MODE=1
