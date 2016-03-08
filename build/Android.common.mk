@@ -53,6 +53,7 @@ ART_USE_GC_PROFILER := false
 ART_USE_GC_PROFILER_REF_DIST := false
 ART_GC_PROFILER_VERBOSE := false
 ART_GC_SERVICE := false
+ART_GC_SERVICE_VERBOSE := false
 ANDROID_VM_DISABLE_JDWP := false
 
 ifneq ($(wildcard art/ANDROID_VM_DISABLE_JDWP),)
@@ -70,6 +71,16 @@ endif
 ifeq ($(WITH_ART_GC_SERVICE), true)
 ART_GC_SERVICE := true
 endif
+
+ifneq ($(wildcard art/ART_GC_SERVICE_VERBOSE),)
+$(info Enabling ART_GC_SERVICE because of existence of art/ART_GC_SERVICE_VERBOSE)
+ART_GC_SERVICE_VERBOSE := true
+endif
+ifeq ($(WITH_ART_GC_SERVICE_VERBOSE), true)
+ART_GC_SERVICE_VERBOSE := true
+endif
+
+
 
 
 ifneq ($(wildcard art/ART_USE_GC_DEFAULT_PROFILER),)

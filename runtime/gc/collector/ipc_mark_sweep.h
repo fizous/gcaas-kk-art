@@ -25,13 +25,13 @@
 //#define IPC_MARKSWEEP_VLOG_ON (ART_GC_SERVICE_VERBOSE || 1)
 
 
-#ifndef ART_GC_SERVICE_VERBOSE
-  #define IPC_MARKSWEEP_VLOG_ON                 (ART_GC_SERVICE_VERBOSE || 1)
-  #define IPC_MS_VLOG(severity)                 if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
-#else
-  #define IPC_MARKSWEEP_VLOG_ON                 true
-#define IPC_MS_VLOG(severity)                   ((void) 0)
-#endif
+//#ifndef ART_GC_SERVICE_VERBOSE
+//  #define IPC_MARKSWEEP_VLOG_ON                 (ART_GC_SERVICE_VERBOSE || 1)
+//  #define IPC_MS_VLOG(severity)                 if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+//#else
+//  #define IPC_MARKSWEEP_VLOG_ON                 true
+//#define IPC_MS_VLOG(severity)                   ((void) 0)
+//#endif
 
 
 
