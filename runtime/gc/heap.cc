@@ -1107,7 +1107,7 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
         GCP_MARK_START_ALLOC_GC_HW_EVENT;
         // If we actually ran a different type of Gc than requested, we can skip the index forwards.
         collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
-        GCP_MARK_END_ALLOC_GC_HW_EVENT();
+        GCP_MARK_END_ALLOC_GC_HW_EVENT;
         DCHECK_GE(static_cast<size_t>(gc_type_ran), i);
         i = static_cast<size_t>(gc_type_ran);
 
