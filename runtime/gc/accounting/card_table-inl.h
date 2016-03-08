@@ -204,12 +204,12 @@ inline void* CardBaseTable::AddrFromCard(const byte *card_addr) const {
     << " card_addr: " << reinterpret_cast<const void*>(card_addr)
     << " begin: " << reinterpret_cast<void*>(MemMapBegin() + Offset())
     << " end: " << reinterpret_cast<void*>(MemMapEnd());
-  uintptr_t offset = card_addr - BiasedBegin();
+  uintptr_t offset = card_addr - GetBiasedBegin();
   return reinterpret_cast<void*>(offset << kCardShift);
 }
 
 inline byte* CardBaseTable::CardFromAddr(const void *addr) const {
-  byte *card_addr = BiasedBegin() +
+  byte *card_addr = GetBiasedBegin() +
       (reinterpret_cast<uintptr_t>(addr) >> kCardShift);
   // Sanity check the caller was asking for address covered by the card table
   DCHECK(IsValidCard(card_addr)) << "addr: " << addr
