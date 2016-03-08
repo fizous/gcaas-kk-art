@@ -281,7 +281,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   virtual void SetHeapMeta(DlMallocSpace*, GCSrvceContinuousSpace*){}
 
-  mirror::Object* GetObjectRecentFreeObject(int pos){
+  const mirror::Object* GetObjectRecentFreeObject(int pos){
     return dlmalloc_space_data_->recent_freed_objects_[pos].first;
   }
 
