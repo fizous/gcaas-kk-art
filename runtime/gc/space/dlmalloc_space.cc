@@ -844,7 +844,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
   //TODO: fizo: check what's wrong here?
   const size_t growth_limit = Capacity() - size;
   const size_t capacity = Capacity() - size;
-  LOG(ERROR) << "A] Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
+  IPC_MS_VLOG(INFO) << "A] Begin " << reinterpret_cast<const void*>(Begin()) << "\n"
              << "End " << reinterpret_cast<const void*>(End()) << "\n"
              << "Size " << size << "\n"
              << "GrowthLimit " << Capacity() << "\n"
@@ -1131,7 +1131,7 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 //  } else {
 //
 //  }
-  LOG(ERROR) << " ------ Ignoring Process with Global Collector ------- (" <<
+  IPC_MS_VLOG(INFO) << " ------ Ignoring Process with Global Collector ------- (" <<
       se_name_c_str << ")";
   return false;
 }

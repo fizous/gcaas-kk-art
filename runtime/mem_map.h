@@ -373,7 +373,7 @@ class StructuredMemMap: public MemBaseMap {
   }
   AShmemMap* GetAshmemMapAddress(void) {return ashmem_;}
   void SetSize(size_t new_size);
-  void SetAshmemAddress(AShmemMap* new_val) {LOG(ERROR) << "SetAshmemAddress"; ashmem_ = new_val;}
+  void SetAshmemAddress(AShmemMap* new_val) {IPC_MS_VLOG(INFO) << "SetAshmemAddress"; ashmem_ = new_val;}
   AShmemMap* ashmem_;
 };
 
