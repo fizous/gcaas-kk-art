@@ -117,7 +117,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
 
   // Allocate num_bytes allowing the underlying mspace to grow.
   virtual mirror::Object* Alloc(Thread* self, size_t num_bytes, size_t* bytes_allocated);
-
+  virtual accounting::SPACE_BITMAP* UnBindBitmaps(void);
   // Return the storage space required by obj.
   virtual size_t AllocationSize(const mirror::Object* obj);
   virtual size_t Free(Thread* self, mirror::Object* ptr);
