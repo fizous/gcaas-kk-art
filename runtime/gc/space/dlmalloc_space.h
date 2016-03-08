@@ -285,7 +285,7 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
     return dlmalloc_space_data_->recent_freed_objects_[pos].first;
   }
 
-  mirror::Object* GetClassRecentFreeObject(int pos){
+  mirror::Class* GetClassRecentFreeObject(int pos){
     return dlmalloc_space_data_->recent_freed_objects_[pos].second;
   }
 
