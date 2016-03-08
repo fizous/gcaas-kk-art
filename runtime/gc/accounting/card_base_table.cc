@@ -40,7 +40,7 @@ bool CardBaseTable::IsValidCard(const byte* card_addr) const {
 }
 
 bool CardBaseTable::AddrIsInCardTable(const void* addr) const {
-  return IsValidCard(BiasedBegin() + ((uintptr_t)addr >> kCardShift));
+  return IsValidCard(GetBiasedBegin() + ((uintptr_t)addr >> kCardShift));
 }
 
 
@@ -53,7 +53,7 @@ void CardBaseTable::ClearSpaceCards(space::ContinuousSpace* space) {
 
 
 void CardBaseTable::CheckAddrIsInCardTable(const byte* addr) const {
-  byte* card_addr = BiasedBegin() + ((uintptr_t)addr >> kCardShift);
+  byte* card_addr = GetBiasedBegin() + ((uintptr_t)addr >> kCardShift);
   byte* begin = MemMapBegin() + Offset();
   byte* end = MemMapEnd();
   CHECK(AddrIsInCardTable(addr))
