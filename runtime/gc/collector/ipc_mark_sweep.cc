@@ -244,11 +244,11 @@ void IPCHeap::ConcurrentGC(Thread* self) {
       return;
     }
   }
-  GCP_MARK_START_CONC_GC_HW_EVENT();
+  GCP_MARK_START_CONC_GC_HW_EVENT;
   if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
     CollectGarbageIPC(local_heap_->GetNextGCType(), kGcCauseBackground, false);
   }
-  GCP_MARK_END_CONC_GC_HW_EVENT();
+  GCP_MARK_END_CONC_GC_HW_EVENT;
 //  local_heap_->ConcurrentGC(self);
 //  {
 //    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
