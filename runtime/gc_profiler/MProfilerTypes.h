@@ -1219,6 +1219,7 @@ public:
 		} //InitPausesEntry
 
 	 void IncrementIndices(void) {
+	    UpdateCurrentEntry();
 			ev_count_++;
 			busy_--;
 		//	GCMMP_VLOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
