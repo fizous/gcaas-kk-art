@@ -1867,7 +1867,7 @@ void IPCMarkSweep::InitializePhase(void) {
 void IPCMarkSweep::FinishPhase(void) {
  Thread* currThread = Thread::Current();
  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
- IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
+ IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
  MarkSweep::FinishPhase();
  ipc_heap_->ResetCurrentCollector(this);
