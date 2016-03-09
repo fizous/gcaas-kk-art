@@ -83,8 +83,7 @@ const bool kIsTargetBuild = false;
 #endif
 
 #if ART_GC_SERVICE
-  #define IPC_MARKSWEEP_VLOG_ON                 (ART_GC_SERVICE_VERBOSE || 1)
-  #define IPC_MS_VLOG(severity)                 if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
+  #define IPC_MS_VLOG(severity)                 if (ART_GC_SERVICE_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 //  #ifndef ART_GC_SERVICE_VERBOSE
 //    #define IPC_MARKSWEEP_VLOG_ON                 (ART_GC_SERVICE_VERBOSE || 1)
 //    #define IPC_MS_VLOG(severity)                 if (IPC_MARKSWEEP_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()

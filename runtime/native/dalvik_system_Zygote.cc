@@ -462,12 +462,12 @@ static pid_t GCSrvcForkGCService(void) {
     set_process_name("gc_service");
     UnsetSigChldHandler();
     runtime->DidForkFromZygote(false);
-    LOG(ERROR) << "------- GC Service Is initialized  ----------";
+    IPC_MS_VLOG(ERROR) << "------- GC Service Is initialized  ----------";
     gc::gcservice::GCServiceProcess::LaunchGCServiceProcess();
 
   } else {
     gc::gcservice::GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid);
-    LOG(ERROR) << "------- Zygote Forked the GC Service ---------- " << pid;
+    IPC_MS_VLOG(ERROR) << "------- Zygote Forked the GC Service ---------- " << pid;
   }
 
   return pid;
@@ -779,7 +779,7 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
 #endif
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
-      LOG(INFO) << "System server process " << pid << " has been created";
+      IPC_MS_VLOG(INFO) << "System server process " << pid << " has been created";
       gSystemServerPid = pid;
       // There is a slight window that the system server process has crashed
       // but it went unnoticed because we haven't published its pid yet. So

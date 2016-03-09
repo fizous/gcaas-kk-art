@@ -1995,10 +1995,10 @@ void IPCMarkSweep::MarkingPhase(void) {
   if (Locks::mutator_lock_->IsExclusiveHeld(currThread)) {
     // If we exclusively hold the mutator lock, all threads must be suspended.
     MarkRoots();
-    IPC_MS_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
+    IPC_MS_VLOG(INFO) << " ##### IPCMarkSweep::MarkingPhase. non concurrent marking: _______ " <<
         currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   } else { //concurrent
-    IPC_MS_VLOG(ERROR) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
+    IPC_MS_VLOG(INFO) << " ##### IPCMarkSweep::MarkingPhase.  concurrent marking: _______ " <<
         currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
     MarkThreadRoots(currThread);
     // At this point the live stack should no longer have any mutators which push into it.
@@ -2025,7 +2025,7 @@ void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap
   //IPC_MS_VLOG(ERROR) << "SSS Suspended app threads to handshake with service process SS ";
   //mark_stack_->OperateOnStack(IPCSweepExternalScanObjectVisit, this);
   //thread_list->ResumeAll();
-  IPC_MS_VLOG(ERROR) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
+  IPC_MS_VLOG(INFO) << "IPCMarkSweep client changes phase from: " << meta_data_->gc_phase_ <<
       ", stack_size = " << mark_stack_->Size();
   if(false) {
     _temp_heap_beetmap = heap_beetmap;//ipc_heap_->local_heap_->GetMarkBitmap();
@@ -2037,7 +2037,7 @@ void IPCMarkSweep::RequestAppSuspension(accounting::BaseHeapBitmap* heap_beetmap
 
 void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* heap_beetmap) {
   Thread* currThread = Thread::Current();
-  IPC_MS_VLOG(ERROR) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << " #### IPCMarkSweep::HandshakeMarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   //ipc_heap_->local_heap_->DumpSpaces();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
@@ -2057,7 +2057,7 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
     UpdateGCPhase(currThread, space::IPC_GC_PHASE_CONC_MARK);
   }
 
-  IPC_MS_VLOG(ERROR) << "      to : " << meta_data_->gc_phase_;
+  IPC_MS_VLOG(INFO) << "      to : " << meta_data_->gc_phase_;
 }
 
 //void IPCMarkSweep::ProcessMarkStack(bool paused) {
@@ -2112,7 +2112,7 @@ void IPCMarkSweep::ProcessMarkStack(bool paused) {
 
 void IPCMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
-  IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ <<
       "... MarkStackSize=" << mark_stack_->Size();
 //  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
@@ -2138,7 +2138,7 @@ void IPCMarkSweep::MarkReachableObjects() {
  //
   //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
-  IPC_MS_VLOG(ERROR) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
+  IPC_MS_VLOG(INFO) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
       currThread->GetTid() ;
 }
 
@@ -2154,7 +2154,7 @@ void IPCMarkSweep::RecursiveMark() {
 
 void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
   Thread* self = Thread::Current();
-  IPC_MS_VLOG(ERROR) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
+  IPC_MS_VLOG(INFO) << "IPCMarkSweep::ProcessMarkStackParallel: " << thread_count
       << "; tid:" << self->GetTid();
   MarkSweep::ProcessMarkStackParallel(thread_count);
 }
@@ -2285,7 +2285,7 @@ IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
 }
 
 void IPCPartialMarkSweep::BindBitmaps() {
-  IPC_MS_VLOG(ERROR) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "IPCPartialMarkSweep::BindBitmaps. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   IPCMarkSweep::BindBitmaps();
 
@@ -2335,7 +2335,7 @@ void IPCStickyMarkSweep::BindBitmaps() {
 void IPCStickyMarkSweep::MarkReachableObjects() {
   Thread* currThread = Thread::Current();
   mark_stack_->Reset();
-  IPC_MS_VLOG(ERROR) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "IPCStickyMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   // All reachable objects must be referenced by a root or a dirty card, so we can clear the mark
   // stack here since all objects in the mark stack will get scanned by the card scanning anyways.
@@ -2356,7 +2356,7 @@ void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
 }
 
 void IPCStickyMarkSweep::MarkThreadRoots(Thread* self) {
-  IPC_MS_VLOG(ERROR) << "IPCStickyMarkSweep::MarkThreadRoots. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "IPCStickyMarkSweep::MarkThreadRoots. starting: _______ " <<
       "; phase:" << meta_data_->gc_phase_;
   MarkRootsCheckpoint(self);
 }

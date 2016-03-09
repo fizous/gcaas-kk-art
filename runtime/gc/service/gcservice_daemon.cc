@@ -37,7 +37,7 @@ GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
   GCServiceProcess* _processObj = GCServiceProcess::process_;
-  LOG(ERROR) << "-------- Inside GCServiceDaemon::RunDaemon ---------";
+  IPC_MS_VLOG(INFO) << "-------- Inside GCServiceDaemon::RunDaemon ---------";
   Runtime* runtime = Runtime::Current();
   bool _createThread =  runtime->AttachCurrentThread("GCSvcDaemon", true,
       runtime->GetSystemThreadGroup(),
@@ -58,14 +58,14 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
     _processObj->service_meta_->cond_->Broadcast(self);
   }
 
-  LOG(ERROR) << "GCServiceDaemon is entering the main loop: " <<
+  IPC_MS_VLOG(INFO) << "GCServiceDaemon is entering the main loop: " <<
       _daemonObj->thread_->GetTid();
 
   while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
     _daemonObj->mainLoop();
   }
 
-  LOG(ERROR) << "GCServiceDaemon left the main loop: " <<
+  IPC_MS_VLOG(INFO) << "GCServiceDaemon left the main loop: " <<
       _daemonObj->thread_->GetTid();
 
   return NULL;
@@ -81,7 +81,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
 //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
 //        64, false));
     initShutDownSignals();
-    LOG(ERROR) << "Thread_POOL----" << "resetting thread pool for gcservice daemon";
+    IPC_MS_VLOG(INFO) << "Thread_POOL----" << "resetting thread pool for gcservice daemon";
     thread_pool_.reset(new ThreadPool(4));
     process->service_meta_->cond_->Broadcast(self);
   }
@@ -181,7 +181,7 @@ void GCServiceProcess::LaunchGCServiceProcess(void) {
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
     GCSrvcClientHandShake* handshake) {
   if(GCServiceProcess::process_ == NULL) {
-    LOG(ERROR) << "initializing process";
+    IPC_MS_VLOG(INFO) << "initializing process";
     GCServiceProcess::process_ = new GCServiceProcess(meta, handshake);
     GCServiceProcess::process_->SetGCDaemon();
 
@@ -193,20 +193,20 @@ bool GCServiceProcess::initSvcFD(void) {
   bool returnRes = false;
   IPMutexLock interProcMu(thread_, *service_meta_->mu_);
   if(fileMapperSvc_ == NULL) {
-    LOG(ERROR) << " creating fileMapperSvc_ for first time ";
+    IPC_MS_VLOG(INFO) << " creating fileMapperSvc_ for first time ";
     fileMapperSvc_ =
         android::FileMapperService::CreateFileMapperSvc();
     returnRes = android::FileMapperService::IsServiceReady();
   } else {
-    LOG(ERROR) << " reconnecting ";
+    IPC_MS_VLOG(INFO) << " reconnecting ";
     returnRes = android::FileMapperService::Reconnect();
   }
 
   if(returnRes) {
-    LOG(ERROR) << " the proc found the service initialized ";
+    IPC_MS_VLOG(INFO) << " the proc found the service initialized ";
     service_meta_->status_ = GCSERVICE_STATUS_SERVER_INITIALIZED;
   } else {
-    LOG(ERROR) << " the proc found the service not initialized ";
+    IPC_MS_VLOG(INFO) << " the proc found the service not initialized ";
   }
   service_meta_->cond_->Broadcast(thread_);
   return returnRes;
@@ -220,7 +220,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 
   thread_ = Thread::Current();
   {
-    LOG(ERROR) << " changing status of service to waiting for server ";
+    IPC_MS_VLOG(INFO) << " changing status of service to waiting for server ";
     IPMutexLock interProcMu(thread_, *service_meta_->mu_);
     service_meta_->status_ = GCSERVICE_STATUS_WAITINGSERVER;
     service_meta_->cond_->Broadcast(thread_);
@@ -233,15 +233,15 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-  LOG(ERROR) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
+  IPC_MS_VLOG(INFO) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
-  LOG(ERROR) << "going to wait for the shutdown signals";
+  IPC_MS_VLOG(INFO) << "going to wait for the shutdown signals";
   while(true) {
     if(daemon_->waitShutDownSignals())
       break;
   }
-  LOG(ERROR) << "GCService process shutdown";
+  IPC_MS_VLOG(INFO) << "GCService process shutdown";
 }
 
 
