@@ -96,6 +96,11 @@ const bool kIsTargetBuild = false;
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))
 
 
+#if ART_GC_SERVICE
+#else
+#define IPC_MS_VLOG(severity)                   ((void) 0)
+#endif
+
 }  // namespace art
 
 #endif  // ART_RUNTIME_GLOBALS_H_
