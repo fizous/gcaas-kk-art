@@ -98,7 +98,8 @@ const bool kIsTargetBuild = false;
 
 #if ART_GC_SERVICE
 #else
-#define IPC_MS_VLOG(severity)                   ((void) 0)
+#define ART_GC_SERVICE_VERBOSE 0
+#define IPC_MS_VLOG(severity)            if (UNLIKELY(ART_GC_SERVICE_VERBOSE))       ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 #endif
 
 }  // namespace art
