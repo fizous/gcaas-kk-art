@@ -64,7 +64,7 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
   recP->prot_ = shmem_map->prot_;
   recP->size_ = shmem_map->size_;
 
-  LOG(ERROR) << "FillAshMemMapData: " <<
+  IPC_MS_VLOG(INFO) << "FillAshMemMapData: " <<
       StringPrintf("fd: %d, flags:%d, prot:%d, size:%d",
       recP->fd_, recP->flags_, recP->prot_, recP->size_);
 }
@@ -123,7 +123,7 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
     result = _sharable_space->RegisterGlobalCollector(se_name_c_str);
 
     if(result) {
-      LOG(ERROR) << " {InitClient} ";
+      IPC_MS_VLOG(INFO) << " {InitClient} ";
       service_client_ = new GCServiceClient(_sharable_space,
           _sharable_space->GetSpaceIndex());
     }
@@ -208,10 +208,10 @@ bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCau
   if(service_client_ == NULL) {
     return false;
   }
-  LOG(ERROR) << " <<<<<<<<<<< GCServiceClient::RequestInternalGC >>>>>>>>>> type: " << gc_type << ", gCause: " << gc_cause;
+  IPC_MS_VLOG(INFO) << " <<<<<<<<<<< GCServiceClient::RequestInternalGC >>>>>>>>>> type: " << gc_type << ", gCause: " << gc_cause;
   *gctype = service_client_->ipcHeap_->CollectGarbageIPC(gc_type, gc_cause,
       clear_soft_references);
-  LOG(ERROR) << " >>>>>>>>>> GCServiceClient::RequestInternalGC -- returned <<<<<<<<<< " << *gctype;
+  IPC_MS_VLOG(INFO) << " >>>>>>>>>> GCServiceClient::RequestInternalGC -- returned <<<<<<<<<< " << *gctype;
   return true;
 }
 
@@ -220,10 +220,10 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
     return false;
   }
   Thread* self = Thread::Current();
-  LOG(ERROR) << " <<<<< GCServiceClient::RequestWaitForConcurrentGC >>>> " << self->GetTid();
+  IPC_MS_VLOG(INFO) << " <<<<< GCServiceClient::RequestWaitForConcurrentGC >>>> " << self->GetTid();
 
   *type  = service_client_->ipcHeap_->WaitForConcurrentIPCGcToComplete(self);
-  LOG(ERROR) << " >>>>> GCServiceClient::RequestWaitForConcurrentGC <<<<< " << *type;
+  IPC_MS_VLOG(INFO) << " >>>>> GCServiceClient::RequestWaitForConcurrentGC <<<<< " << *type;
   return true;
 
 //  gc::gcservice::GCServiceGlobalAllocator* _alloc =
@@ -252,7 +252,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 void GCServiceClient::RequestHeapTrim(void) {
   if(service_client_ == NULL)
     return;
-  LOG(ERROR) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
+  IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqHeapTrim();

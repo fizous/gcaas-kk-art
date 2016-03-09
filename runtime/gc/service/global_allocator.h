@@ -330,6 +330,8 @@ private:
   Thread*   thread_;
   bool srvcReady_;
 };//class GCServiceProcess
+
+
 }//namespace gcservice
 }//namespace gc
 }//namespace art

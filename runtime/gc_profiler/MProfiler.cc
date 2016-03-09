@@ -464,7 +464,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 #if ART_GC_SERVICE
-  heapStatus.currAllocBytes = (size_t) heap_->GetBytesAllocated();
+  heapStatus.currAllocBytes = _curr_alloc_bytes;//;(size_t) heap_->GetBytesAllocated();
 #else
   heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
 #endif

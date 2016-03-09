@@ -91,7 +91,7 @@ void ServerCollector::SignalCollector(bool is_explicit) {
      // LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
-      LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
+      IPC_MS_VLOG(INFO) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
     }
 //    if(status_ == 0) {
 //      status_ = 1;
@@ -233,7 +233,7 @@ class ServerMarkReachableTask : public WorkStealingTask {
   // Scans all of the objects
   virtual void Run(Thread* self) {
     if(performed_cycle_index_ == server_instant_->cycles_count_) {
-      LOG(ERROR) << " XXXX No need to rerun the Phase reachable XXXX";
+      IPC_MS_VLOG(INFO) << " XXXX No need to rerun the Phase reachable XXXX";
       return;
     }
     WaitForPhaseAddress(self);
