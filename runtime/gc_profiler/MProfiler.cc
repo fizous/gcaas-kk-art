@@ -221,7 +221,7 @@ inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType)
 	if(busy_ > 0) {
 		if(curr_marker_->type != evType) {
 		  LOG(ERROR) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
-		      << curr_marker_->type << ", paramType = evType";
+		      << curr_marker_->type << ", paramType = " << evType;
 			return;
 		}
 		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
