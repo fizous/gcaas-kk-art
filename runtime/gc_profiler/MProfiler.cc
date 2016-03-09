@@ -209,18 +209,21 @@ inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 }
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	if(!busy_) {
+	if(busy_) {
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
-		busy_ = true;
+		busy_++;
 		count_opens_++;
 	}
 }
 
 inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	if(busy_) {
-		if(curr_marker_->type != evType)
+	if(busy_ > 0) {
+		if(curr_marker_->type != evType) {
+		  LOG(ERROR) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
+		      << curr_marker_->type << ", paramType = evType";
 			return;
+		}
 		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 		IncrementIndices();
 		count_opens_--;

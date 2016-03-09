@@ -159,7 +159,7 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   meta_->conc_flag_       = 0;
 //  meta_->is_gc_complete_  = 0;
   meta_->is_gc_running_   = 0;
-  meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;;
+  meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;
   meta_->collect_index_ = -1;
 
   /* heap members */
@@ -1892,7 +1892,7 @@ void IPCMarkSweep::MarkConcurrentRoots() {
   // Visit all runtime roots and clear dirty flags.
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_CONC_MARK);
-  IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::MarkConcurrentRoots. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
   Runtime::Current()->VisitConcurrentRoots(MarkObjectCallback, this, false, true);
   timings_.EndSplit();
@@ -1976,7 +1976,7 @@ void IPCMarkSweep::MarkingPhase(void) {
   base::TimingLogger::ScopedSplit split("MarkingPhase", &timings_);
   Thread* currThread = Thread::Current();
   UpdateGCPhase(currThread, space::IPC_GC_PHASE_ROOT_MARK);
-  IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
+  IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::MarkingPhase. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
 
   BindBitmaps();

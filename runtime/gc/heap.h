@@ -248,7 +248,8 @@ class Heap {
 
   // Blocks the caller until the garbage collector becomes idle and returns
   // true if we waited for the GC to complete.
-  collector::GcType WaitForConcurrentGcToComplete(Thread* self) LOCKS_EXCLUDED(gc_complete_lock_);
+  collector::GcType WaitForConcurrentGcToComplete(Thread* self,
+                                                  bool profWaitTime) LOCKS_EXCLUDED(gc_complete_lock_);
 
   const std::vector<space::ABSTRACT_CONTINUOUS_SPACE_T*>& GetContinuousSpaces() const {
     return continuous_spaces_;

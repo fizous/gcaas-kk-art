@@ -1063,7 +1063,7 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
 
   // The allocation failed. If the GC is running, block until it completes, and then retry the
   // allocation.
-  collector::GcType last_gc = WaitForConcurrentGcToComplete(self);
+  collector::GcType last_gc = WaitForConcurrentGcToComplete(self, false);
   if (last_gc != collector::kGcTypeNone) {
     // A GC was in progress and we blocked, retry allocation now that memory has been freed.
     ptr = TryToAllocate(self, space, alloc_size, false, bytes_allocated);
@@ -1346,7 +1346,7 @@ void Heap::CollectGarbageForProfile(bool clear_soft_references) {
 	 Thread* self = Thread::Current();
 	  //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
 //	  mprofiler::VMProfiler::MProfMarkGCExplTimeEvent(self);
-	  WaitForConcurrentGcToComplete(self);
+	  WaitForConcurrentGcToComplete(self, false);
 	  CollectGarbageInternal(collector::kGcTypeFull, kGcCauseProfile, clear_soft_references);
 }
 
@@ -1365,7 +1365,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
     Thread* self = Thread::Current();
     //LOG(ERROR) << "vmprofiler: explicit call.." << self->GetTid();
     GCP_MARK_START_EXPL_GC_TIME_EVENT(self);
-    WaitForConcurrentGcToComplete(self);
+    WaitForConcurrentGcToComplete(self, false);
     CollectGarbageInternal(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
     GCP_MARK_END_EXPL_GC_TIME_EVENT(self);
     GCP_MARK_END_EXPL_GC_HW_EVENT;
@@ -1622,7 +1622,7 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
     }
     if (!start_collect) {
       // TODO: timinglog this.
-      WaitForConcurrentGcToComplete(self);
+      WaitForConcurrentGcToComplete(self, false);
 
       // TODO: if another thread beat this one to do the GC, perhaps we should just return here?
       //       Not doing at the moment to ensure soft references are cleared.
@@ -2202,7 +2202,7 @@ void Heap::PostGcVerification(collector::GarbageCollector* gc) {
   }
 }
 
-collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
+collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self, bool profWaitTime) {
 #if GC_ART_SERVICE
   collector::GcType returned_gc_type = collector::kGcTypeNone;
   if(art::gcservice::GCServiceClient::RequestWaitForConcurrentGC(&returned_gc_type)) {
@@ -2213,7 +2213,8 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
   if (concurrent_gc_) {
     ATRACE_BEGIN("GC: Wait For Concurrent");
     bool do_wait;
-    GCP_MARK_START_WAIT_TIME_EVENT(self);
+    if(profWaitTime)
+      GCP_MARK_START_WAIT_TIME_EVENT(self);
     uint64_t wait_start = NanoTime();
     {
       // Check if GC is running holding gc_complete_lock_.
@@ -2237,7 +2238,8 @@ collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self) {
         LOG(INFO) << "WaitForConcurrentGcToComplete blocked for " << PrettyDuration(wait_time);
       }
     }
-    GCP_MARK_END_WAIT_TIME_EVENT(self);
+    if(profWaitTime)
+      GCP_MARK_END_WAIT_TIME_EVENT(self);
     ATRACE_END();
   }
   return last_gc_type;
@@ -2621,7 +2623,7 @@ void Heap::ConcurrentGC(Thread* self) {
   GCP_MARK_START_CONC_GC_HW_EVENT;
   //mprofiler::VMProfiler::MProfMarkGCHatTimeEvent(self);
   // Wait for any GCs currently running to finish.
-  if (WaitForConcurrentGcToComplete(self) == collector::kGcTypeNone) {
+  if (WaitForConcurrentGcToComplete(self, false) == collector::kGcTypeNone) {
     CollectGarbageInternal(GetNextGCType(), kGcCauseBackground, false);
   }
   GCP_MARK_END_CONC_GC_HW_EVENT;
@@ -2720,7 +2722,7 @@ void Heap::RegisterNativeAllocation(int bytes) {
               CacheMethod(env, WellKnownClasses::java_lang_System, true, "runFinalization", "()V");
           assert(WellKnownClasses::java_lang_System_runFinalization != NULL);
         }
-        if (WaitForConcurrentGcToComplete(self) != collector::kGcTypeNone) {
+        if (WaitForConcurrentGcToComplete(self, true) != collector::kGcTypeNone) {
           // Just finished a GC, attempt to run finalizers.
           env->CallStaticVoidMethod(WellKnownClasses::java_lang_System,
                                     WellKnownClasses::java_lang_System_runFinalization);

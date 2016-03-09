@@ -1193,7 +1193,7 @@ class PACKED(4) GCPauseThreadManager {
 	 int curr_bucket_ind_;
 	 int curr_entry_;
 	 int ev_count_;
-	 bool busy_;
+	 int busy_;
 	 int count_opens_;
 public:
 	 static constexpr int kGCMMPMaxEventEntries = 32;
@@ -1206,7 +1206,7 @@ public:
 	 static uint64_t GetRelevantRealTime(void);
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(false), count_opens_(0) {
+		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(-1), busy_(0), count_opens_(0) {
 		 IncrementIndices();
 	 }
 
