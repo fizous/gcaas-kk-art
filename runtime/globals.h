@@ -75,11 +75,11 @@ const bool kIsTargetBuild = false;
 
 
 #ifndef ART_GC_SERVICE
-  #define ART_GC_SERVICE 1
+  #define ART_GC_SERVICE true
 #endif
 
 #ifndef ART_GC_SERVICE_VERBOSE
-  #define ART_GC_SERVICE_VERBOSE 1
+  #define ART_GC_SERVICE_VERBOSE true
 #endif
 
 #if ART_GC_SERVICE
