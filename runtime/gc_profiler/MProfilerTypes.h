@@ -1293,7 +1293,7 @@ public:
 	GCPauseThreadManager* pauseManager;
 	GCHistogramDataManager* histogramManager_;
 	/* markers used to set the temporary information to start an event */
-	GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
+	//GCMMP_ProfileActivity timeBrks[GCMMP_GC_BRK_MAXIMUM];
 	static VMProfiler* vmProfiler;
 	volatile GCMMPThreadProfState state;
 	GCMMPThProfileTag tag_;

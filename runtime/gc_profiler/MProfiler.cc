@@ -256,10 +256,10 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(args);
 
 	art::File* file = mProfiler->GetDumpFile();
-	int totalC = 0;
+	//int totalC = 0;
 	if(!HasData())
 		return;
-	LOG(ERROR) << "parenthesis: " << count_opens_;
+//	LOG(ERROR) << "parenthesis: " << count_opens_;
 	uint64_t lastFinalTime = 0;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_ : kGCMMPMaxEventEntries - 1;
@@ -273,9 +273,9 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			  }
 			  lastFinalTime = _evt_marker->finalMarker;
 				file->WriteFully(_evt_marker, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
-				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
-				    << ", " << _evt_marker->startMarker << ", "
-				    << _evt_marker->finalMarker;
+//				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
+//				    << ", " << _evt_marker->startMarker << ", "
+//				    << _evt_marker->finalMarker;
 			}
 		}
 	}
@@ -323,19 +323,19 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	pauseManager(NULL),
 	state(GCMMP_TH_STARTING) {
 
-	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
+//	GCMMP_VLOG(INFO) << "VMProfiler: Initializing arrayBreaks for " << thread->GetTid();
 	//	for(int _iter = GCMMP_GC_BRK_SUSPENSION; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 	//		memset((void*) &timeBrks[_iter], 0, sizeof(GCMMP_ProfileActivity));
 	//	}
-	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
+//	GCMMP_VLOG(INFO) << "VMProfiler: Done Initializing arrayBreaks for " << thread->GetTid();
 	//	pauseManager = new GCPauseThreadManager();
 	setThreadTag(GCMMP_THREAD_DEFAULT);
 	perf_record_ = vmProfiler->createHWCounter(thread);
-	if(perf_record_ == NULL) {
-	  std::string thread_name;
-	  thread->GetThreadName(thread_name);
-	  LOG(ERROR) << "performance record was NULL for thread..." << thread_name;
-	}
+//	if(perf_record_ == NULL) {
+//	  std::string thread_name;
+//	  thread->GetThreadName(thread_name);
+//	  LOG(ERROR) << "performance record was NULL for thread..." << thread_name;
+//	}
 	vmProfiler->setPauseManager(this);
 	vmProfiler->setThHistogramManager(this, thread);
 
@@ -348,10 +348,10 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 }
 
 void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
-  GCMMP_VLOG(INFO) << "setPauseManager: Sizeof GCPauseThreadMarker is " << sizeof(GCPauseThreadMarker);
-	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
-		memset((void*) &thProf->timeBrks[_iter], 0, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
-	}
+//  GCMMP_VLOG(INFO) << "setPauseManager: Sizeof GCPauseThreadMarker is " << sizeof(GCPauseThreadMarker);
+//	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
+//		memset((void*) &thProf->timeBrks[_iter], 0, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
+//	}
 	GCPauseThreadManager::startCPUTime = start_cpu_time_ns_;
 	GCPauseThreadManager::startRealTime = start_time_ns_;
 	thProf->pauseManager = new GCPauseThreadManager();
@@ -403,12 +403,12 @@ void GCMMPThreadProf::Destroy(VMProfiler* mProfiler) {
 
 
 MPPerfCounter* MMUProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "MMUProfiling: creating hwCount";
+	//GCMMP_VLOG(INFO) << "MMUProfiling: creating hwCount";
 	return NULL;
 }
 
 MPPerfCounter* PerfCounterProfiler::createHWCounter(Thread* thread) {
-	GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << hwEvent_;
+	//GCMMP_VLOG(INFO) << "PerfCounterProfiler: creating hwCount: " << hwEvent_;
 	MPPerfCounter* _perfCounter = MPPerfCounter::Create(hwEvent_);
 //  std::string thread_name;
 //  thread->GetThreadName(thread_name);
@@ -552,8 +552,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 	//double _newIndex =  1.0 * ((initValue + allocSpace) >> kGCMMPLogAllocWindow);
 	if(_newWindow && IsAllocWindowsSet()) {
 
-		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
-		    updatedValue;
+//		GCMMP_VLOG(INFO) << "VMProfiler: allocation Window: " <<
+//		    updatedValue;
 
 		{
 			Thread* self = Thread::Current();
@@ -565,8 +565,8 @@ void VMProfiler::notifyAllocation(size_t allocSpace, size_t objSize,
 				prof_thread_cond_->Broadcast(self);
 			}
 			// Wake anyone who may have been waiting for the GC to complete.
-			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" <<
-					self->GetTid() ;
+//			GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal for allocation:" <<
+//					self->GetTid() ;
 		}
 	} else {
 		Thread* self = Thread::Current();
@@ -701,7 +701,7 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 
 bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "MMUProfiler -- dettaching thread pid: " << thProf->GetTid();
+		//GCMMP_VLOG(INFO) << "MMUProfiler -- dettaching thread pid: " << thProf->GetTid();
 		thProf->StopTimeProfiling();
 	}
 	return true;
@@ -709,7 +709,7 @@ bool MMUProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
+		//GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
 		  uint64_t _currBytes = allocatedBytesData_.get_total_count();
 			thProf->readPerfCounter(_currBytes);
@@ -724,7 +724,7 @@ bool PerfCounterProfiler::dettachThread(GCMMPThreadProf* thProf) {
 
 bool GCDaemonCPIProfiler::dettachThread(GCMMPThreadProf* thProf) {
 	if(thProf != NULL && thProf->state == GCMMP_TH_RUNNING) { //still running
-		GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
+		//GCMMP_VLOG(INFO) << "VMProfiler -- dettaching thread pid: " << thProf->GetTid();
 		if(thProf->GetPerfRecord() != NULL) {
 			pid_t _id = thProf->GetTid();
 			uint64_t _currBytes = allocatedBytesData_.get_total_count();
@@ -864,7 +864,7 @@ void VMProfiler::InitCommonData() {
 		initMarkerManager(true);
 	} else {
 		markerManager = NULL;
-		LOG(ERROR) <<  "no need to initialize event manager ";
+//		LOG(ERROR) <<  "no need to initialize event manager ";
 	}
 	attachThreads();
 
@@ -1377,7 +1377,7 @@ bool PerfCounterProfiler::periodicDaemonExec(void) {
 		prof_thread_cond_->Wait(self);
 	}
 	if(receivedSignal_) { //we recived Signal to Shutdown
-		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+//		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
 		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
 		updateHeapAllocStatus();
 		getPerfData();
@@ -1405,7 +1405,7 @@ bool MMUProfiler::periodicDaemonExec(void) {
 		prof_thread_cond_->Wait(self);
 	}
 	if(receivedSignal_) { //we recived Signal to Shutdown
-		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
+//		GCMMP_VLOG(INFO) << "VMProfiler: signal Received " << self->GetTid() ;
 		//LOG(ERROR) << "periodic daemon recieved signals tid: " <<  self->GetTid();
 		//updateHeapAllocStatus();
 		//getPerfData();
