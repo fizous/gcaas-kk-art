@@ -1241,7 +1241,6 @@ public:
 	 GCPauseThreadMarker* RetrieveLastOpened(GCMMP_BREAK_DOWN_ENUM evtType) {
 	   int _currentBucketIn = curr_bucket_ind_;
 	   int _currentEntry = curr_entry_;
-	   bool _found = false;
 	   while(_currentBucketIn >= 0) {
 	     while(_currentEntry >= 0) {
 	       GCPauseThreadMarker* _marker = &pauseEvents[_currentBucketIn][_currentEntry];
