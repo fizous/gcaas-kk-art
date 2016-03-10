@@ -210,13 +210,13 @@ inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	//if(busy_) {
-
+    UpdateCurrentEntry();
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
 		busy_++;
 		count_opens_++;
 
-		GCMMP_VLOG(INFO) << curr_marker_->type << ", paramType = " << evType
+		GCMMP_VLOG(INFO) << "openning: [" << curr_bucket_ind_<<","curr_entry_ << "] " << curr_marker_->type << ", paramType = " << evType
         << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
         ", threadId = " << Thread::Current()->GetTid();
 
@@ -230,15 +230,20 @@ inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType)
     GCMMP_VLOG(INFO) << "closing: " << curr_marker_->type << ", paramType = " << evType
         << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
         ", threadId = " << Thread::Current()->GetTid();
-
-	  if(curr_marker_->type != evType) {
+    GCPauseThreadMarker* markerTemp = curr_marker_;
+	  if(markerTemp->type != evType) {
 		  GCMMP_VLOG(INFO) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
 		      << curr_marker_->type << ", paramType = " << evType
 		      << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
 		      ", threadId = " << Thread::Current()->GetTid();
-			return;
+
+		  markerTemp = RetrieveLastOpened(evType);
+		  if(markerTemp == NULL) {
+		    GCMMP_VLOG(INFO) << "YYYY Did not work";
+		    return;
+		  }
 		}
-		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
+	  markerTemp->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 		IncrementIndices();
 		count_opens_--;
 
@@ -335,6 +340,7 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 }
 
 void MMUProfiler::setPauseManager(GCMMPThreadProf* thProf){
+  GCMMP_VLOG(INFO) << "setPauseManager: Sizeof GCPauseThreadMarker is " << sizeof(GCPauseThreadMarker);
 	for(int _iter = GCMMP_GC_BRK_NONE; _iter < GCMMP_GC_BRK_MAXIMUM; _iter++) {
 		memset((void*) &thProf->timeBrks[_iter], 0, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
 	}

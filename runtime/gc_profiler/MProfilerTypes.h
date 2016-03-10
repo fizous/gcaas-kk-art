@@ -1207,19 +1207,19 @@ public:
 
 	 GCPauseThreadManager(void) :
 		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(0), busy_(0), count_opens_(0) {
-	   UpdateCurrentEntry();
+	   //UpdateCurrentEntry();
 	 }
 
 	 ~GCPauseThreadManager(void);
 
 	 void InitPausesEntry(GCPauseThreadMarker** entryPointer) {
+
 			*entryPointer =
 					reinterpret_cast<GCPauseThreadMarker*>(calloc(kGCMMPMaxEventEntries,
 					                                              static_cast<int64_t>(sizeof(GCPauseThreadMarker))));
 		} //InitPausesEntry
 
 	 void IncrementIndices(void) {
-	    UpdateCurrentEntry();
 			ev_count_++;
 			busy_--;
 		//	GCMMP_VLOG(INFO) << "MPRofiler: Incremented Indices " << ev_count_ << ", " << curr_entry_ << ", " << curr_bucket_ind_;
@@ -1236,6 +1236,24 @@ public:
         InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
       }
       curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
+	 }
+
+	 GCPauseThreadMarker* RetrieveLastOpened(GCMMP_BREAK_DOWN_ENUM evtType) {
+	   int _currentBucketIn = curr_bucket_ind_;
+	   int _currentEntry = curr_entry_;
+	   bool _found = false;
+	   while(_currentBucketIn >= 0) {
+	     while(_currentEntry >= 0) {
+	       GCPauseThreadMarker* _marker = &pauseEvents[_currentBucketIn][_currentEntry];
+	       if(_marker->finalMarker == 0 && _marker->type == evtType) {
+	         return _marker;
+	       }
+	       _currentEntry--;
+	     }
+	     _currentEntry = kGCMMPMaxEventEntries - 1;
+	     _currentBucketIn--;
+	   }
+	   return NULL;
 	 }
 
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
