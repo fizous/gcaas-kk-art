@@ -1265,7 +1265,7 @@ public:
 	 void MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 void MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM);
 	 bool HasData(void) const {
-		 return (ev_count_ > 0);
+		 return (ev_count_ > 0 || count_opens_ > 0);
 	 }
 	 void DumpProfData(void* args);
 

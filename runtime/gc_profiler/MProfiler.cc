@@ -1049,7 +1049,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 			_tag = GCMMP_THREAD_GCTRIM;
 		} else if(thread_name.compare("main") == 0 || thread == main_thread_) { //that's the main thread
-		  LOG(ERROR) << " attachSingleThread:: ASSIGNING MAIN THREAD: " << thread->GetTid();
+		  LOG(ERROR) << " attachSingleThread:: ASSIGNING MAIN THREAD: " << thread->GetTid() << ", name:" << thread_name;
 			setMainThread(thread);
 			_tag = GCMMP_THREAD_MAIN;
 			setThreadAffinity(thread, true);
@@ -1500,15 +1500,17 @@ void VMProfiler::attachThreads(){
 	{
     MutexLock mu(self, *Locks::thread_list_lock_);
     thread_list->ForEach(GCMMPVMAttachThread, this);
-    thread_list->ForEach(GCMMPVMGetMainThread, &_main_thread);
-    if(_main_thread != NULL) {
-      LOG(ERROR) << " ASSIGNING MAIN THREAD: " << _main_thread->GetTid();
-      setMainThread(_main_thread);
-      GCMMPThreadProf* _prof_main = _main_thread->GetProfRec();
-      if(_prof_main != NULL) {
-        _prof_main->setThreadTag(GCMMP_THREAD_MAIN);
-        LOG(ERROR) << " Setting ProfilerTag ..... ASSIGNING MAIN THREAD: " <<
-            GCMMP_THREAD_MAIN<< ", id = " <<_main_thread->GetTid();
+    if(main_thread_ == NULL) {
+      thread_list->ForEach(GCMMPVMGetMainThread, &_main_thread);
+      if(_main_thread != NULL) {
+        LOG(ERROR) << " ASSIGNING MAIN THREAD: " << _main_thread->GetTid();
+        setMainThread(_main_thread);
+        GCMMPThreadProf* _prof_main = _main_thread->GetProfRec();
+        if(_prof_main != NULL) {
+          _prof_main->setThreadTag(GCMMP_THREAD_MAIN);
+          LOG(ERROR) << " Setting ProfilerTag ..... ASSIGNING MAIN THREAD: " <<
+              GCMMP_THREAD_MAIN<< ", id = " <<_main_thread->GetTid();
+        }
       }
     }
 	}
