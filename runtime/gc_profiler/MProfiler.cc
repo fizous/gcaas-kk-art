@@ -256,10 +256,10 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(args);
 
 	art::File* file = mProfiler->GetDumpFile();
-	//int totalC = 0;
+	int totalC = 0;
 	if(!HasData())
 		return;
-//	LOG(ERROR) << "parenthesis: " << count_opens_;
+	LOG(ERROR) << "parenthesis: " << count_opens_;
 	uint64_t lastFinalTime = 0;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_ : kGCMMPMaxEventEntries - 1;
@@ -273,9 +273,9 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			  }
 			  lastFinalTime = _evt_marker->finalMarker;
 				file->WriteFully(_evt_marker, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
-//				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
-//				    << ", " << _evt_marker->startMarker << ", "
-//				    << _evt_marker->finalMarker;
+				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
+				    << ", " << _evt_marker->startMarker << ", "
+				    << _evt_marker->finalMarker;
 			}
 		}
 	}
@@ -1507,6 +1507,8 @@ void VMProfiler::attachThreads(){
       GCMMPThreadProf* _prof_main = _main_thread->GetProfRec();
       if(_prof_main != NULL) {
         _prof_main->setThreadTag(GCMMP_THREAD_MAIN);
+        LOG(ERROR) << " Setting ProfilerTag ..... ASSIGNING MAIN THREAD: " <<
+            GCMMP_THREAD_MAIN<< ", id = " <<_main_thread->GetTid();
       }
     }
 	}
@@ -1723,7 +1725,8 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 		GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 
 		mgr->DumpProfData(vmProfiler);
-		GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid() << "<<<<<<<<<<<<<<";
+		LOG(ERROR) << "id:" << _pid << ", type" << _type << ">>>>>>>>>>>>>>>";
+		GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid();
 
 
 	}
