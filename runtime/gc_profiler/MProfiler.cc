@@ -899,6 +899,18 @@ static void GCMMPVMAttachThread(Thread* t, void* arg) {
 	}
 }
 
+
+static void GCMMPVMGetMainThread(Thread* t, void* arg) {
+  Thread** threadParam = reinterpret_cast<Thread**>(arg);
+  if(*threadParam != NULL) {
+    if((*threadParam)->GetTid() > t->GetTid()) {
+      *threadParam = t;
+    }
+    return;
+  }
+  *threadParam = t;
+}
+
 void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 
@@ -1035,7 +1047,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 			}
 			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 			_tag = GCMMP_THREAD_GCTRIM;
-		} else if(thread_name.compare("main") == 0) { //that's the main thread
+		} else if(thread_name.compare("main") == 0 || thread == main_thread_) { //that's the main thread
 			setMainThread(thread);
 			_tag = GCMMP_THREAD_MAIN;
 			setThreadAffinity(thread, true);
@@ -1481,10 +1493,19 @@ void VMProfiler::attachThreads(){
 	Thread* self = Thread::Current();
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching All threads " << self->GetTid();
 	ThreadList* thread_list = Runtime::Current()->GetThreadList();
+	Thread* _main_thread = NULL;
 	thread_list->SuspendAll();
 	{
     MutexLock mu(self, *Locks::thread_list_lock_);
     thread_list->ForEach(GCMMPVMAttachThread, this);
+    thread_list->ForEach(GCMMPVMGetMainThread, &_main_thread);
+    if(_main_thread!= NULL) {
+      setMainThread(_main_thread);
+      GCMMPThreadProf* _prof_main = _main_thread->GetProfRec();
+      if(_prof_main != NULL) {
+        _prof_main->setThreadTag(GCMMP_THREAD_MAIN);
+      }
+    }
 	}
 	thread_list->ResumeAll();
 	GCMMP_VLOG(INFO) << "VMProfiler: Done Attaching All threads ";
