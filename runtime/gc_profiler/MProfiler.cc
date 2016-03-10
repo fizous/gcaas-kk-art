@@ -210,17 +210,23 @@ inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	//if(busy_) {
+
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
 		busy_++;
 		count_opens_++;
+
+		GCMMP_VLOG(INFO) << curr_marker_->type << ", paramType = " << evType
+        << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
+        ", threadId = " << Thread::Current()->GetTid();
+
 	//}
 }
 
 inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(busy_ > 0) {
 		if(curr_marker_->type != evType) {
-		  LOG(ERROR) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
+		  GCMMP_VLOG(INFO) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
 		      << curr_marker_->type << ", paramType = " << evType
 		      << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
 		      ", threadId = " << Thread::Current()->GetTid();
@@ -309,10 +315,12 @@ GCMMPThreadProf::GCMMPThreadProf(VMProfiler* vmProfiler, Thread* thread)
 	}
 	vmProfiler->setPauseManager(this);
 	vmProfiler->setThHistogramManager(this, thread);
-	state = GCMMP_TH_RUNNING;
+
 
 	lifeTime_.startMarker = GCMMPThreadProf::vmProfiler->GetRelevantRealTime();
 	lifeTime_.finalMarker = 0;
+
+	state = GCMMP_TH_RUNNING;
 	GCMMP_VLOG(INFO) << "VMProfiler : ThreadProf is initialized";
 }
 
