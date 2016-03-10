@@ -209,7 +209,7 @@ inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 }
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	//if(busy_) {
+	if(busy_ == 0) {
     UpdateCurrentEntry();
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
@@ -221,7 +221,7 @@ inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evTyp
 //		    << evType << ", busy = " << busy_ << ", count_opens_ = "
 //		    << count_opens_ << ", threadId = " << Thread::Current()->GetTid();
 
-	//}
+	}
 }
 
 inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
@@ -234,11 +234,11 @@ inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType)
     GCPauseThreadMarker* markerTemp = RetrieveLastOpened(evType);
 
 		if(markerTemp == NULL) {
-		    GCMMP_VLOG(INFO) << "YYYY Did not work";
-	      GCMMP_VLOG(INFO) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
-	          << curr_marker_->type << ", paramType = " << evType
-	          << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
-	          ", threadId = " << Thread::Current()->GetTid();
+//		    GCMMP_VLOG(INFO) << "YYYY Did not work";
+//	      GCMMP_VLOG(INFO) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
+//	          << curr_marker_->type << ", paramType = " << evType
+//	          << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
+//	          ", threadId = " << Thread::Current()->GetTid();
 		    return;
 		  }
 
