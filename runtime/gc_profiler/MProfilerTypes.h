@@ -1206,7 +1206,7 @@ public:
 	 static uint64_t GetRelevantRealTime(void);
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(0), busy_(0), count_opens_(0) {
+		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(0), busy_(0), count_opens_(0), curr_marker_(NULL) {
 	   //UpdateCurrentEntry();
 	 }
 
@@ -1226,15 +1226,22 @@ public:
 	 } //IncrementIndices
 
 	 void UpdateCurrentEntry() {
-     curr_entry_ = (curr_entry_ + 1) % kGCMMPMaxEventEntries;
-      if(curr_entry_ == 0) {
-        curr_bucket_ind_++;
-        if(curr_bucket_ind_ >= kGCMMPMaxBucketEntries) {
-          LOG(ERROR) << "MProfiler: Exceeded maximum count of entries ";
-        }
-    //    GCMMP_VLOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
-        InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
-      }
+
+	   if(curr_marker_ == NULL) {
+	     curr_entry_ = 0;
+	     curr_bucket_ind_ = 0;
+	     InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
+	   } else {
+	     curr_entry_ = (curr_entry_ + 1) % kGCMMPMaxEventEntries;
+	      if(curr_entry_ == 0) {
+	        curr_bucket_ind_++;
+	        if(curr_bucket_ind_ >= kGCMMPMaxBucketEntries) {
+	          LOG(ERROR) << "MProfiler: Exceeded maximum count of entries ";
+	        }
+	    //    GCMMP_VLOG(INFO) << "MPRofiler: Initializing entry for the manager " << curr_bucket_ind_ << ", " << curr_entry_;
+	        InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
+	      }
+	   }
       curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
 	 }
 
