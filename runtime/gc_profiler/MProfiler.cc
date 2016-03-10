@@ -225,7 +225,13 @@ inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evTyp
 
 inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
 	if(busy_ > 0) {
-		if(curr_marker_->type != evType) {
+
+
+    GCMMP_VLOG(INFO) << "closing: " << curr_marker_->type << ", paramType = " << evType
+        << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
+        ", threadId = " << Thread::Current()->GetTid();
+
+	  if(curr_marker_->type != evType) {
 		  GCMMP_VLOG(INFO) << "XXXXXXXXXXXXXXXXX ERROR TYPE IS NOT MATCHING XXXXX curr_marker_->type :"
 		      << curr_marker_->type << ", paramType = " << evType
 		      << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
@@ -235,7 +241,11 @@ inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType)
 		curr_marker_->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 		IncrementIndices();
 		count_opens_--;
+
+
 	}
+
+
 }
 
 void GCPauseThreadManager::DumpProfData(void* args) {
