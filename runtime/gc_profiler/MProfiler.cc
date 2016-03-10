@@ -256,10 +256,10 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 	VMProfiler* mProfiler = reinterpret_cast<VMProfiler*>(args);
 
 	art::File* file = mProfiler->GetDumpFile();
-	int totalC = 0;
+//	int totalC = 0;
 	if(!HasData())
 		return;
-	LOG(ERROR) << "parenthesis: " << count_opens_;
+	//LOG(ERROR) << "parenthesis: " << count_opens_;
 	uint64_t lastFinalTime = 0;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
 		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_ : kGCMMPMaxEventEntries - 1;
@@ -275,9 +275,9 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			    _evt_marker->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 			  lastFinalTime = _evt_marker->finalMarker;
 				file->WriteFully(_evt_marker, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
-				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
-				    << ", " << _evt_marker->startMarker << ", "
-				    << _evt_marker->finalMarker;
+//				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
+//				    << ", " << _evt_marker->startMarker << ", "
+//				    << _evt_marker->finalMarker;
 			}
 		}
 	}
@@ -1729,7 +1729,7 @@ static void GCMMPDumpMMUThreadProf(GCMMPThreadProf* profRec, void* arg) {
 		GCMMP_VLOG(INFO) << "MProfiler_out: " << profRec->GetTid() << ">>>>>>>>>>>";
 
 		mgr->DumpProfData(vmProfiler);
-		LOG(ERROR) << "id:" << _pid << ", type" << _type << ">>>>>>>>>>>>>>>";
+		//LOG(ERROR) << "id:" << _pid << ", type" << _type << ">>>>>>>>>>>>>>>";
 		GCMMP_VLOG(INFO) << "MPr_out: " << profRec->GetTid();
 
 
