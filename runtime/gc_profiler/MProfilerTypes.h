@@ -1206,7 +1206,7 @@ public:
 	 static uint64_t GetRelevantRealTime(void);
 
 	 GCPauseThreadManager(void) :
-		 curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(0), busy_(0), count_opens_(0), curr_marker_(NULL) {
+	   curr_marker_(NULL), curr_bucket_ind_(-1), curr_entry_(-1), ev_count_(0), busy_(0), count_opens_(0) {
 	   //UpdateCurrentEntry();
 	 }
 
@@ -1250,7 +1250,7 @@ public:
 	   int _currentEntry = curr_entry_;
 	   while(_currentBucketIn >= 0) {
 	     while(_currentEntry >= 0) {
-	       GCPauseThreadMarker* _marker = &pauseEvents[_currentBucketIn][_currentEntry];
+	       GCPauseThreadMarker* _marker = &(pauseEvents[_currentBucketIn][_currentEntry]);
 	       if(_marker->finalMarker == 0 && _marker->type == evtType) {
 	         return _marker;
 	       }
