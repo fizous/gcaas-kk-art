@@ -271,6 +271,8 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 			  if(lastFinalTime > _evt_marker->finalMarker) {
 			    continue;
 			  }
+			  if(_evt_marker->finalMarker == 0)
+			    _evt_marker->finalMarker = GCPauseThreadManager::GetRelevantRealTime();
 			  lastFinalTime = _evt_marker->finalMarker;
 				file->WriteFully(_evt_marker, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
 				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
