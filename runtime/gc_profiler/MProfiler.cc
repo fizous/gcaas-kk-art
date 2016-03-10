@@ -209,7 +209,7 @@ inline uint64_t GCPauseThreadManager::GetRelevantCPUTime(void)  {
 }
 
 inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
-	if(busy_ == 0) {
+	//if(busy_ == 0) {
     UpdateCurrentEntry();
 		curr_marker_->startMarker = GCPauseThreadManager::GetRelevantRealTime();
 		curr_marker_->type = evType;
@@ -221,7 +221,7 @@ inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evTyp
 //		    << evType << ", busy = " << busy_ << ", count_opens_ = "
 //		    << count_opens_ << ", threadId = " << Thread::Current()->GetTid();
 
-	}
+	//}
 }
 
 inline void GCPauseThreadManager::MarkEndTimeEvent(GCMMP_BREAK_DOWN_ENUM evType) {
@@ -257,16 +257,25 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 
 	art::File* file = mProfiler->GetDumpFile();
 	int totalC = 0;
-	if(curr_bucket_ind_ < 0)
+	if(ev_count_ == 0)
 		return;
-	GCMMP_VLOG(INFO) << "parenthesis: " << count_opens_;
+	LOG(ERROR) << "parenthesis: " << count_opens_;
+	uint64_t lastFinalTime = 0;
 	for(int bucketInd = 0; bucketInd <= curr_bucket_ind_; bucketInd++) {
-		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_:kGCMMPMaxEventEntries;
-		if(limit_ > 0) {
+		int limit_ = (bucketInd == curr_bucket_ind_) ? curr_entry_ : kGCMMPMaxEventEntries - 1;
+		if(limit_ >= 0) {
+		  GCPauseThreadMarker*  _evt_marker = NULL;
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
-			for(int entryInd = 0; entryInd < limit_; entryInd++) {
-				file->WriteFully(&pauseEvents[bucketInd][entryInd], static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
-				GCMMP_VLOG(INFO) << "pMgr " << totalC++ << ": " << pauseEvents[bucketInd][entryInd].type << ", " << pauseEvents[bucketInd][entryInd].startMarker << ", " << pauseEvents[bucketInd][entryInd].finalMarker;
+			for(int entryInd = 0; entryInd <= limit_; entryInd++) {
+			  GCPauseThreadMarker* _evt_marker = &pauseEvents[bucketInd][entryInd];
+			  if(lastFinalTime > _evt_marker->finalMarker) {
+			    continue;
+			  }
+			  lastFinalTime = _evt_marker->finalMarker;
+				file->WriteFully(_evt_marker, static_cast<int64_t>(sizeof(GCMMP_ProfileActivity)));
+				LOG(ERROR) << "pMgr " << totalC++ << ": " << _evt_marker->type
+				    << ", " << _evt_marker->startMarker << ", "
+				    << _evt_marker->finalMarker;
 			}
 		}
 	}
