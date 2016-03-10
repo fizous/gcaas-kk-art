@@ -216,9 +216,10 @@ inline void GCPauseThreadManager::MarkStartTimeEvent(GCMMP_BREAK_DOWN_ENUM evTyp
 		busy_++;
 		count_opens_++;
 
-		GCMMP_VLOG(INFO) << "openning: [" << curr_bucket_ind_<<","curr_entry_ << "] " << curr_marker_->type << ", paramType = " << evType
-        << ", busy = " << busy_ << ", count_opens_ = " << count_opens_ <<
-        ", threadId = " << Thread::Current()->GetTid();
+		GCMMP_VLOG(INFO) << "openning: [" << curr_bucket_ind_ << ","
+		    << curr_entry_ << "] " << curr_marker_->type << ", paramType = "
+		    << evType << ", busy = " << busy_ << ", count_opens_ = "
+		    << count_opens_ << ", threadId = " << Thread::Current()->GetTid();
 
 	//}
 }
