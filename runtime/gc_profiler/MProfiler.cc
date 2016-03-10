@@ -257,7 +257,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 
 	art::File* file = mProfiler->GetDumpFile();
 	int totalC = 0;
-	if(ev_count_ == 0)
+	if(!HasData())
 		return;
 	LOG(ERROR) << "parenthesis: " << count_opens_;
 	uint64_t lastFinalTime = 0;

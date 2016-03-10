@@ -1242,7 +1242,7 @@ public:
 	        InitPausesEntry(&pauseEvents[curr_bucket_ind_]);
 	      }
 	   }
-      curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
+     curr_marker_ = &(pauseEvents[curr_bucket_ind_][curr_entry_]);
 	 }
 
 	 GCPauseThreadMarker* RetrieveLastOpened(GCMMP_BREAK_DOWN_ENUM evtType) {
