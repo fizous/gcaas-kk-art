@@ -267,7 +267,7 @@ void GCPauseThreadManager::DumpProfData(void* args) {
 		  GCPauseThreadMarker*  _evt_marker = NULL;
 			//file->WriteFully(pauseEvents[bucketInd], limit_ * sizeof(GCPauseThreadMarker));
 			for(int entryInd = 0; entryInd <= limit_; entryInd++) {
-			  GCPauseThreadMarker* _evt_marker = &pauseEvents[bucketInd][entryInd];
+			  _evt_marker = &pauseEvents[bucketInd][entryInd];
 			  if(lastFinalTime > _evt_marker->finalMarker) {
 			    continue;
 			  }
