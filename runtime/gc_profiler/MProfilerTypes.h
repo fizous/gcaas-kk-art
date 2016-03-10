@@ -1196,7 +1196,7 @@ class PACKED(4) GCPauseThreadManager {
 	 int busy_;
 	 int count_opens_;
 public:
-	 static constexpr int kGCMMPMaxEventEntries = 32;
+	 static constexpr int kGCMMPMaxEventEntries = 64;
 	 static constexpr int kGCMMPMaxBucketEntries = GCMMP_GCPAUSE_ARRAY_SIZE;
 	 static uint64_t startRealTime;
 	 static uint64_t startCPUTime;
