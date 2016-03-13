@@ -1870,6 +1870,14 @@ void IPCMarkSweep::FinishPhase(void) {
  IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
  MarkSweep::FinishPhase();
+
+
+// IncTotalTimeNs(GetDurationNs());
+// IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+//                                          std::plus<uint64_t>()));
+// IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
+// IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+
  ipc_heap_->ResetCurrentCollector(this);
  //ipc_heap_->AssignNextGCType();
 }

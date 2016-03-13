@@ -2077,6 +2077,8 @@ void MarkSweep::FinishPhase() {
                                            std::plus<uint64_t>()));
   IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
   IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+  LOG(ERROR) << "currAllocatedBytesSpace:" << heap_->alloc_space_->GetBytesAllocated() << ", FreedFreedBytes:" << GetFreedBytes();
+
 #else
   IncTotalTimeNs(GetDurationNs());
   IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
