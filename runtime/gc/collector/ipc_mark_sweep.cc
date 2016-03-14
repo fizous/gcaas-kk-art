@@ -2169,7 +2169,7 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
 
 
 void IPCMarkSweep::Sweep(bool swap_bitmaps) {
-  LOG(ERROR) << "IPCMarkSweep::Sweep....";
+  //LOG(ERROR) << "IPCMarkSweep::Sweep....";
   Thread* self = Thread::Current();
   UpdateGCPhase(self, space::IPC_GC_PHASE_SWEEP);
   base::TimingLogger::ScopedSplit("Sweep", &timings_);
@@ -2206,7 +2206,7 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
           //LOG(ERROR) << "==== mark stack size for bulk free is ==== " << num_ptrs;
 
-          LOG(ERROR) << "CALLING IPCMarkSweep::Sweep...FreeListAgent, num_ptrs:" << num_ptrs << ", objects_array:" << reinterpret_cast<void*>(objects_array);
+          //LOG(ERROR) << "CALLING IPCMarkSweep::Sweep...FreeListAgent, num_ptrs:" << num_ptrs << ", objects_array:" << reinterpret_cast<void*>(objects_array);
           space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
 
 

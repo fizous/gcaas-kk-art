@@ -260,7 +260,7 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   _mark_sweeper->cashed_stats_client_.freed_bytes_ += freed_bytes;
 
 
-  LOG(ERROR) << "IPCServerMarkerSweep::ServerSweepCallback..freed_bytes:" << freed_bytes << ", freed_objects:" << freed_objects;
+  //LOG(ERROR) << "IPCServerMarkerSweep::ServerSweepCallback..freed_bytes:" << freed_bytes << ", freed_objects:" << freed_objects;
 
 //  android_atomic_add(static_cast<int32_t>(freed_objects),
 //      &(cashed_stats_client_.freed_objects_));
