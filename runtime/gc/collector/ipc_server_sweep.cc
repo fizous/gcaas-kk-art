@@ -178,6 +178,7 @@ struct ServerSweepCallbackContext {
   void* mspace_;
   space::GCSrvSharableDlMallocSpace* space_data_;
   Thread* self_;
+  size_t freed_bytes_no_overhead;
 };
 
 size_t ServerAllocationSizeNonvirtual(const mirror::Object* obj) {
@@ -185,13 +186,22 @@ size_t ServerAllocationSizeNonvirtual(const mirror::Object* obj) {
       kWordSize;
 }
 
+static void ServerAllocationSizeNonvirtual(const mirror::Object* obj,
+                                           size_t* nonVirtualNonOverhead,
+                                           size_t* nonVirtualOverhead) {
+  *nonVirtualNonOverhead = mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+  *nonVirtualOverhead = *nonVirtualNonOverhead + kWordSize;
+}
+
 
 size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
-    mirror::Object** ptrs) {
+    mirror::Object** ptrs, size_t* freedBytesNoOverhead) {
   DCHECK(ptrs != NULL);
 
   // Don't need the lock to calculate the size of the freed pointers.
   size_t bytes_freed = 0;
+  size_t bytes_freed_no_overhead = 0;
+  size_t _lastFreedBytesNoOverheads = 0;
   size_t _lastFreedBytes = 0;
   for (size_t i = 0; i < num_ptrs; i++) {
     mirror::Object* ptr = ptrs[i];
@@ -200,10 +210,13 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
       // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
       __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
     }
-    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
-    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
-
+    ServerAllocationSizeNonvirtual(ptr, &_lastFreedBytesNoOverheads, &_lastFreedBytes);
+    bytes_freed_no_overhead += _lastFreedBytesNoOverheads;
     bytes_freed += _lastFreedBytes;
+//    //GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr),ptr);
+//    _lastFreedBytes = ServerAllocationSizeNonvirtual(ptr);
+//
+//    bytes_freed += _lastFreedBytes;
   }
   space::GCSrvDlMallocSpace* _dlmalloc_space =
       &(client_rec_->sharable_space_->dlmalloc_space_data_);
@@ -225,6 +238,8 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
       reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
   android_atomic_add(-num_ptrs,
       reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
+
+  *freedBytesNoOverhead += bytes_freed_no_overhead;
  // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
   return bytes_freed;
 
@@ -246,7 +261,7 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
   size_t freed_objects = num_ptrs;
   // AllocSpace::FreeList clears the value in ptrs, so perform after clearing the live bit
   size_t freed_bytes = _mark_sweeper->ServerFreeSpaceList(context->self_,
-      num_ptrs, ptrs);
+      num_ptrs, ptrs, &context->freed_bytes_no_overhead);
 
 //  LOG(ERROR) << "ServerSweepCallback..objects: " << freed_objects <<
 //      ", freed_bytes = " << freed_bytes << "; space::kRecentFreeCount = " <<
@@ -303,6 +318,7 @@ void IPCServerMarkerSweep::SweepSpaces(space::GCSrvSharableCollectorData* collec
     ServerSweepCallbackContext _server_sweep_context;
 
     _server_sweep_context.server_mark_Sweep_ = this;
+    _server_sweep_context.freed_bytes_no_overhead = 0;
     _server_sweep_context.mspace_ = (void*)spaces_[KGCSpaceServerAllocInd_].base_;
     _server_sweep_context.self_ = _self;
     _server_sweep_context.space_data_ = client_rec_->sharable_space_;

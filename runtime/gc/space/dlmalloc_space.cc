@@ -568,12 +568,12 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
     size_t nonVirtualSizeNoOvehrad = 0;
     AllocationSizes(ptr, &nonVirtualSizeNoOvehrad, &nonVirtualSize);
     GCMMP_HANDLE_FINE_PRECISE_FREE(nonVirtualSizeNoOvehrad, ptr, IsZygoteSpace());
-    bytes_freed = nonVirtualSize;
+    bytes_freed += nonVirtualSize;
   }
 
   DLMALLOC_SPACE_LOCK_MACRO;
-  UpdateBytesAllocated(-bytes_freed);
-  UpdateObjectsAllocated(-num_ptrs);
+//  UpdateBytesAllocated(-bytes_freed);
+//  UpdateObjectsAllocated(-num_ptrs);
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
   return bytes_freed;
 }
