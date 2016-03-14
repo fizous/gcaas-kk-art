@@ -62,6 +62,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
       _daemonObj->thread_->GetTid();
 
   while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+    _daemonObj->UpdateGlobalState();
     _daemonObj->mainLoop();
   }
 
@@ -115,6 +116,28 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
   }
   shutdown_cond_->Broadcast(self);
   return false;
+}
+
+void GCServiceDaemon::UpdateGlobalState(void) {
+  FILE *f;
+
+  char line[256];
+  f = fopen("/proc/meminfo", "r");
+  if (!f) return;// errno;
+
+
+  GCSrvcPhysicalState* _physical_state =
+      &(GCServiceProcess::process_->service_meta_->global_state_);
+  while (fgets(line, MAX_LINE, f)) {
+      sscanf(line, "MemTotal: %ld kB", &_physical_state->mem_total);
+      sscanf(line, "MemFree: %ld kB", &_physical_state->mem_free);
+  }
+
+  fclose(f);
+
+  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
+      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
+
 }
 
 void GCServiceDaemon::mainLoop(void) {
@@ -243,6 +266,9 @@ void GCServiceProcess::SetGCDaemon(void) {
   }
   IPC_MS_VLOG(INFO) << "GCService process shutdown";
 }
+
+
+
 
 
 }

@@ -120,6 +120,7 @@ typedef struct GCServiceHeader_S {
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
   pid_t service_pid_;
+  GCSrvcPhysicalState global_state_;
   GC_SERVICE_STATUS service_status_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
@@ -134,7 +135,10 @@ typedef struct GCSrvcGlobalRegionHeader_S {
 }  __attribute__((aligned(8))) GCSrvcGlobalRegionHeader;
 
 
-
+typedef struct GCSrvcPhysicalState_S {
+  long mem_total;
+  long mem_free;
+}  __attribute__((aligned(4))) GCSrvcPhysicalState;
 
 
 class GCSrvcClientHandShake {
@@ -280,6 +284,8 @@ class GCSrvceAgent {
 };//class GCSrvceAgent
 
 
+
+
 class GCServiceDaemon {
   Thread*   thread_;
   pthread_t pthread_;
@@ -303,6 +309,7 @@ public:
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
+  void UpdateGlobalState(void);
 };//class GCServiceDaemon
 
 
@@ -322,6 +329,7 @@ private:
   bool initSvcFD(void);
   GCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
   void SetGCDaemon(void);
+
 
 
   android::FileMapperService* fileMapperSvc_;
