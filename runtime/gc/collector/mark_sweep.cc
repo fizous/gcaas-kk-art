@@ -1602,7 +1602,7 @@ void MarkSweep::SweepArray(accounting::ATOMIC_OBJ_STACK_T* allocations,
 }
 
 void MarkSweep::Sweep(bool swap_bitmaps) {
-  LOG(ERROR) << "MarkSweep::Sweep....";
+  //LOG(ERROR) << "MarkSweep::Sweep....";
 
 
   DCHECK(mark_stack_->IsEmpty());
