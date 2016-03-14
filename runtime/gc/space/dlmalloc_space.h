@@ -131,6 +131,12 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
         kChunkOverhead;
   }
 
+
+  void AllocationSizes(const mirror::Object* obj, size_t* nonVirtualNoOverhead, size_t* nonVirtual) {
+    *nonVirtualNoOverhead = mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+    *nonVirtual = *nonVirtualNoOverhead + kChunkOverhead;
+  }
+
 //  size_t AllocationNoOverhead(const mirror::Object* obj) {
 //    return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
 //  }
