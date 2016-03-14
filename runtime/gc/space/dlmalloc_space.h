@@ -447,6 +447,11 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     return mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
   }
 
+  void AllocationSizes(const mirror::Object* obj, size_t* nonVirtualNoOverhead, size_t* nonVirtual) {
+    *nonVirtualNoOverhead = mspace_usable_size(const_cast<void*>(reinterpret_cast<const void*>(obj)));
+    *nonVirtual = *nonVirtualNoOverhead + kChunkOverhead;
+  }
+
   size_t GCPGetAllocationSize(const mirror::Object*);
 
   void* MoreCore(intptr_t increment);

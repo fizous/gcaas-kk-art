@@ -554,9 +554,28 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 #if ART_GC_SERVICE
 
 size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){
+
+  // Don't need the lock to calculate the size of the freed pointers.
+  size_t bytes_freed = 0;
+  for (size_t i = 0; i < num_ptrs; i++) {
+    mirror::Object* ptr = ptrs[i];
+    const size_t look_ahead = 8;
+    if (kPrefetchDuringDlMallocFreeList && i + look_ahead < num_ptrs) {
+      // The head of chunk for the allocation is sizeof(size_t) behind the allocation.
+      __builtin_prefetch(reinterpret_cast<char*>(ptrs[i + look_ahead]) - sizeof(size_t));
+    }
+    size_t nonVirtualSize = 0;
+    size_t nonVirtualSizeNoOvehrad = 0;
+    AllocationSizes(ptr, &nonVirtualSizeNoOvehrad, &nonVirtualSize);
+    GCMMP_HANDLE_FINE_PRECISE_FREE(nonVirtualSizeNoOvehrad, ptr, IsZygoteSpace());
+    bytes_freed = nonVirtualSize;
+  }
+
   DLMALLOC_SPACE_LOCK_MACRO;
+  UpdateBytesAllocated(-bytes_freed);
+  UpdateObjectsAllocated(-num_ptrs);
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
-  return 0;
+  return bytes_freed;
 }
 #else
 
