@@ -128,7 +128,7 @@ void GCServiceDaemon::UpdateGlobalState(void) {
 
   GCSrvcPhysicalState* _physical_state =
       &(GCServiceProcess::process_->service_meta_->global_state_);
-  while (fgets(line, MAX_LINE, f)) {
+  while (fgets(line, 256, f)) {
       sscanf(line, "MemTotal: %ld kB", &_physical_state->mem_total);
       sscanf(line, "MemFree: %ld kB", &_physical_state->mem_free);
   }
