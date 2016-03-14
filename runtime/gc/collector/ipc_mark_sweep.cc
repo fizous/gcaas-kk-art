@@ -2169,6 +2169,7 @@ void IPCMarkSweep::ProcessMarkStackParallel(size_t thread_count) {
 
 
 void IPCMarkSweep::Sweep(bool swap_bitmaps) {
+  LOG(ERROR) << "IPCMarkSweep::Sweep....";
   Thread* self = Thread::Current();
   UpdateGCPhase(self, space::IPC_GC_PHASE_SWEEP);
   base::TimingLogger::ScopedSplit("Sweep", &timings_);
