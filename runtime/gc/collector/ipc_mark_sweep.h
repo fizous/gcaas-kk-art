@@ -450,7 +450,7 @@ class IPCStickyMarkSweep : public IPCPartialMarkSweep {
 }
 }
 #else
-#define IPC_MS_VLOG(severity)                   ((void) 0)
+
 
 #endif
 
