@@ -516,12 +516,12 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
   heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
   heapIntegral_.gcpUpdateHeapStatus(&heapStatus);
 	//uint32_t _allocBytes = static_cast<uint32_t>(allocatedBytesData.cntTotal.load());
-//	LOG(ERROR) << "index: " << heapStatus.index
-//	    << "; alloc_bytes:" <<  _allocBytes
-//	    << "; currc_bytes:" <<  _curr_alloc_bytes
-//	    << "; bytes allocated: " << heap_->GetBytesAllocated()
-//	    << "; space bytes allocated: " << heap_->GetAllocSpace()->GetBytesAllocated();
-	//heapStatus.gcCounts = 1.0 * getGCEventsCounts();
+	LOG(ERROR) << "index: " << heapStatus.index
+	    << "; alloc_bytes:" <<  _allocBytes
+	    << "; currc_bytes:" <<  _curr_alloc_bytes
+	    << "; bytes allocated: " << heap_->GetBytesAllocated()
+	    << "; space bytes allocated: " << heap_->GetAllocSpace()->GetBytesAllocated();
+
 }
 
 
