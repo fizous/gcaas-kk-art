@@ -164,7 +164,7 @@ class IPCHeap {
       GcCause gc_cause, bool clear_soft_references);
 
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
-  bool ApplyIPCTrimming(double adjusted_max_free);
+
 
   /* protected by gc_complete_mu_ */
   GcCause curr_gc_cause_;

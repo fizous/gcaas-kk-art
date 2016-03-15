@@ -626,17 +626,7 @@ bool IPCHeap::RunCollectorDaemon() {
   return true;
 }
 
-bool IPCHeap::ApplyIPCTrimming(double adjusted_max_free) {
-  uint64_t ms_time = MilliTime();
-  float utilization =
-      static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
-  if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - local_heap_->GetLastTimeTrim()) < 2 * 1000)) {
-    // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
-    // not enabled, or if a heap trim occurred in the last two seconds.
-    return false;
-  }
-  return true;
-}
+
 
 void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   size_t bytes_allocated = local_heap_->GetLastGCSize();
