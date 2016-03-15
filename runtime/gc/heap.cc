@@ -2757,21 +2757,26 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
     return false;
   }
 
+#if (ART_GC_SERVICE || true)
+  art::gcservice::GCServiceClient::RequestHeapTrim();
+#endif
+
+  return true;
 //  LOG(ERROR) << "RequestHeapTrimIfNeeded: passes care about pause times";
-   if(false){
-     #if (ART_GC_SERVICE || true)
-
-      art::gcservice::GCServiceClient::RequestHeapTrim();
-    #endif
-   }
-    JNIEnv* env = self->GetJniEnv();
-    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
-    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
-    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
-                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
-    CHECK(!env->ExceptionCheck());
-
-    return true;
+//   if(false){
+//
+//
+//
+//
+//   }
+//    JNIEnv* env = self->GetJniEnv();
+//    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+//    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
+//    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+//                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
+//    CHECK(!env->ExceptionCheck());
+//
+//    return true;
 }
 
 void Heap::RequestHeapTrim() {

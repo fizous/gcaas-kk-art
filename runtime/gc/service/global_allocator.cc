@@ -498,7 +498,8 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_TRIM;
-  GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqHeapTrim";
+  //GCSERVICE_ALLOC_VLOG(ERROR)
+  LOG(ERROR) << "GCSrvcClientHandShake::ReqHeapTrim";
   gcservice_data_->cond_->Broadcast(self);
 }
 
@@ -734,7 +735,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
 
   } else if (_req_type == GC_SERVICE_TASK_TRIM) {
-    GCSERVICE_ALLOC_VLOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
+   // GCSERVICE_ALLOC_VLOG(ERROR)
+    LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
   } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
     GCSERVICE_ALLOC_VLOG(ERROR) << " processing Allocation GC Request ~~~~ Request type: " <<

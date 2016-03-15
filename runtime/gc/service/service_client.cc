@@ -252,6 +252,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 void GCServiceClient::RequestHeapTrim(void) {
   if(service_client_ == NULL)
     return;
+  LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
   IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
       gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
