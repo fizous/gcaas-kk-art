@@ -307,7 +307,7 @@ bool IPCHeap::CheckTrimming() {
 
   // Trim only if we do not currently care about pause times.
   if (!local_heap_->care_about_pause_times_) {
-    #if (ART_GC_SERVICE)
+    #if (ART_GC_SERVICE || true)
       gcservice::GCServiceClient::RequestHeapTrim();
     #endif
 

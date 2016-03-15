@@ -25,7 +25,7 @@ namespace art {
 namespace gc {
 namespace collector {
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 
 PartialMarkSweep::PartialMarkSweep(Heap* heap, bool is_concurrent,
     space::GCSrvceCashedReferences* cashed_reference_record,

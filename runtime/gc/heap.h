@@ -37,7 +37,7 @@
 
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
  #define GC_HEAP_LARGE_OBJECT_THRESHOLD (std::numeric_limits<size_t>::max()) //prevent allocations from going to large space
  #define GC_HEAP_SRVCE_NO_LOS     true
  #define DL_MALLOC_SPACE DlMallocSpace
@@ -79,7 +79,7 @@ namespace mirror {
 
 namespace gc {
 namespace accounting {
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 class BaseHeapBitmap;
 #else
 class HeapBitmap;
@@ -275,7 +275,7 @@ class Heap {
   bool IsEnqueued(mirror::Object* ref) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   bool IsEnqueuedNoLock(mirror::Object* ref) ;
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
   void EnqueuePendingReferenceNoLock(mirror::Object* ref, mirror::Object** list);
 #endif
   void EnqueuePendingReference(mirror::Object* ref, mirror::Object** list)
@@ -373,7 +373,7 @@ class Heap {
 
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   // Target ideal heap utilization ratio, implements
   // dalvik.system.VMRuntime.getTargetHeapUtilization.
   double GetTargetHeapUtilization() const {
@@ -477,7 +477,7 @@ class Heap {
   // Returns the total number of bytes allocated since the heap was created.
   size_t GetBytesAllocatedEver() const;
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   // Returns the total number of objects freed since the heap was created.
   size_t GetObjectsFreedEver() const {
     return sub_record_meta_->total_objects_freed_ever_;
@@ -541,7 +541,7 @@ class Heap {
 
   size_t Trim();
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   accounting::BaseHeapBitmap* GetLiveBitmap() SHARED_LOCKS_REQUIRED(Locks::heap_bitmap_lock_) {
     return live_bitmap_.get();
   }
@@ -571,7 +571,7 @@ class Heap {
   // Mark and empty stack.
   void FlushAllocStack()
       EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   void PostZygoteForkWithSpaceFork(bool);
   void SetSubHeapMetaData(space::GCSrvcHeapSubRecord* new_address);
   // Mark all the objects in the allocation stack in the specified bitmap.
@@ -825,7 +825,7 @@ class Heap {
   volatile bool is_gc_running_ GUARDED_BY(gc_complete_lock_);
 
   // Last Gc type we ran. Used by WaitForConcurrentGc to know which Gc was waited on.
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 #else
   volatile collector::GcType last_gc_type_ GUARDED_BY(gc_complete_lock_);
   collector::GcType next_gc_type_;
@@ -834,7 +834,7 @@ class Heap {
   // Maximum size that the heap can reach.
   const size_t capacity_;
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
   // The size the heap is limited to. This is initially smaller than capacity, but for largeHeap
   // programs it is "cleared" making it the same as capacity.
@@ -863,7 +863,7 @@ class Heap {
 
   // Whether or not we currently care about pause times.
   bool care_about_pause_times_;
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
   // When num_bytes_allocated_ exceeds this amount then a concurrent GC should be requested so that
   // it completes ahead of an allocation failing.
@@ -880,7 +880,7 @@ class Heap {
   // Primitive objects larger than this size are put in the large object space.
   const size_t large_object_threshold_;
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
   // Number of bytes allocated.  Adjusted after each allocation and free.
   AtomicInteger num_bytes_allocated_;
@@ -914,7 +914,7 @@ class Heap {
 
 
   // For a GC cycle, a bitmap that is set corresponding to the
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   space::GCSrvcHeapSubRecord* sub_record_meta_;
 
   UniquePtr<accounting::BaseHeapBitmap> live_bitmap_ GUARDED_BY(Locks::heap_bitmap_lock_);
@@ -1234,7 +1234,7 @@ class Heap {
   // offset of java.lang.ref.FinalizerReference.zombie
   MemberOffset finalizer_reference_zombie_offset_;
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 
 #else

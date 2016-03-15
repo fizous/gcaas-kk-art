@@ -30,7 +30,7 @@ class StickyMarkSweep : public PartialMarkSweep {
   GcType GetGcType() const {
     return kGcTypeSticky;
   }
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
   explicit StickyMarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*)calloc(1, sizeof(space::GCSrvceCashedReferences)),

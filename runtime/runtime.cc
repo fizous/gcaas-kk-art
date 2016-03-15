@@ -37,7 +37,7 @@
 #include "gc/accounting/card_table-inl.h"
 #include "gc/heap.h"
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 
 #include "gc/service/global_allocator.h"
 #include "gc/service/service_client.h"
@@ -237,7 +237,7 @@ void Runtime::Abort() {
   // notreached
 }
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 bool Runtime::GCSrvcePreZygoteFork() {
 //  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   bool _should_fork_service = false;
@@ -938,7 +938,7 @@ bool Runtime::InitZygote() {
 
 
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 void Runtime::DidForkFromZygote(bool initialize) {
   is_zygote_ = false;
   //heap_->DumpSpaces();

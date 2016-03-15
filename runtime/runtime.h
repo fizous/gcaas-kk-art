@@ -399,7 +399,7 @@ class Runtime {
   void SetStatsEnabled(bool new_state);
 
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
   bool GCSrvcePreZygoteFork();
   void RegisterCollector(const char* se_name_c_str);
   void GCPServiceFinalizeInit() ;

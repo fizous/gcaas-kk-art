@@ -251,7 +251,7 @@ void ModUnionTableReferenceCache::Update() {
     uintptr_t end = start + ConstantsCardTable::kCardSize;
     auto* space = heap->FindContinuousSpaceFromObject(reinterpret_cast<Object*>(start), false);
     DCHECK(space != nullptr);
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
     BaseBitmap* live_bitmap = space->GetLiveBitmap();
 #else
     SpaceBitmap* live_bitmap = space->GetLiveBitmap();

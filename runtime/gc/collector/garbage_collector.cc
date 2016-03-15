@@ -33,7 +33,7 @@ namespace art {
 namespace gc {
 namespace collector {
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 GarbageCollector::GarbageCollector(Heap* heap, const std::string& name,
     space::GCSrvceCollectorTimeStats* time_records)
     : time_stats_(time_records),
@@ -75,7 +75,7 @@ void GarbageCollector::RegisterPause(uint64_t nano_length) {
 
 void GarbageCollector::ResetCumulativeStatistics() {
   cumulative_timings_.Reset();
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   time_stats_->total_time_ns_ = 0;
   time_stats_->total_paused_time_ns_ = 0;
   time_stats_->total_freed_objects_ = 0;

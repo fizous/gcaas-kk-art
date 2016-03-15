@@ -117,7 +117,7 @@ void MarkSweep::ArraysVerifierScan(const Object* object, void* _heap_beetmap) {
   }
 }
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 bool MarkSweep::IsMarkedNoLocks(const mirror::Object* object,
     void* _heap_beetmap) const {
   if (IsImmune(object)) {
@@ -163,7 +163,7 @@ inline bool MarkSweep::IsMarked(const Object* object) const
 
 void MarkSweep::ImmuneSpace(space::ABSTRACT_CONTINUOUS_SPACE_T* space) {
   // Bind live to mark bitmap if necessary.
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   if (!space->HasBitmapsBound()) {
     BindLiveToMarkBitmap(space);
   }
@@ -211,7 +211,7 @@ void MarkSweep::BindBitmaps() {
 }
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 MarkSweep::MarkSweep(Heap* heap, bool is_concurrent,
     space::GCSrvceCashedReferences* cashed_reference_record,
     space::GCSrvceCashedStatsCounters* stats_record,
@@ -508,7 +508,7 @@ void MarkSweep::ReclaimPhase() {
 }
 
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 void MarkSweep::SetImmuneRange(Object* begin, Object* end) {
   cashed_references_record_->immune_begin_ = begin;
   cashed_references_record_->immune_end_ = end;
@@ -564,7 +564,7 @@ inline void MarkSweep::MarkObjectNonNullParallel(const Object* obj) {
   }
 }
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 inline void MarkSweep::UnMarkObjectNonNull(const Object* obj) {
   DCHECK(!IsImmune(obj));
   // Try to take advantage of locality of references within a space, failing this find the space
@@ -1030,7 +1030,7 @@ class MarkStackTask : public Task {
   }
 };
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 class CardScanTask : public MarkStackTask<false> {
  public:
   CardScanTask(ThreadPool* thread_pool, MarkSweep* mark_sweep, accounting::BaseBitmap* bitmap,
@@ -1225,7 +1225,7 @@ void MarkSweep::VerifyImageRoots() {
 }
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 class RecursiveMarkTask : public MarkStackTask<false> {
  public:
   RecursiveMarkTask(ThreadPool* thread_pool, MarkSweep* mark_sweep,
@@ -1990,7 +1990,7 @@ void MarkSweep::ProcessReferences(Object** soft_references, bool clear_soft,
 }
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 void MarkSweep::UnBindBitmaps() {
   base::TimingLogger::ScopedSplit split("UnBindBitmaps", &timings_);
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
@@ -2071,7 +2071,7 @@ void MarkSweep::FinishPhase() {
 
 
   timings_.NewSplit("GrowForUtilization");
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   heap->GCSrvcGrowForUtilization(GetGcType(), GetDurationNs());
   //LOG(ERROR) << "currAllocatedBytesSpace:" << heap_->alloc_space_->GetBytesAllocated() << ", FreedFreedBytes:" << GetFreedBytes();
 

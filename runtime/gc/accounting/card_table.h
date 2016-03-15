@@ -24,7 +24,7 @@
 
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #define CARD_TABLE  CardBaseTable
 #define SPACE_BITMAP BaseBitmap
 #else
@@ -59,7 +59,7 @@ public:
  static const uint8_t kCardDirty = 0x70;
 };
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 // Maintain a card table from the the write barrier. All writes of
 // non-NULL values to heap addresses should go through an entry in

@@ -29,7 +29,7 @@
 
 
 #ifndef ATOMIC_STACK_KLASS
-  #if (ART_GC_SERVICE)
+  #if (ART_GC_SERVICE || true)
     #define ATOMIC_STACK_KLASS    StructuredAtomicStack
     #define ATOMIC_OBJ_STACK_T    StructuredObjectStack
   #else
@@ -64,7 +64,7 @@ namespace accounting {
   class ModUnionTableBitmap;
   class MarkStackChunk;
   typedef ATOMIC_STACK_KLASS<mirror::Object*> ATOMIC_OBJ_STACK_T;
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #define SPACE_BITMAP BaseBitmap
 #ifndef ABSTRACT_CONTINUOUS_SPACE_T
 #define ABSTRACT_CONTINUOUS_SPACE_T ContinuousSpace
@@ -91,7 +91,7 @@ namespace collector {
 
 class MarkSweep : public GarbageCollector {
  public:
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
 
   explicit MarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
@@ -217,7 +217,7 @@ class MarkSweep : public GarbageCollector {
 
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   size_t GetFreedBytes() const {
     return stats_counters_->freed_bytes_;
   }
@@ -528,7 +528,7 @@ class MarkSweep : public GarbageCollector {
   void ArraysVerifierScan(const mirror::Object* object,
       void* heap_beetmap = NULL);
 
-#if ART_GC_SERVICE
+#if (ART_GC_SERVICE || true)
   space::GCSrvceCashedStatsCounters* stats_counters_;
 
   size_t GetClassCount() const{
@@ -637,7 +637,7 @@ class MarkSweep : public GarbageCollector {
  protected:
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarked(const mirror::Object* object) const;
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   // Returns true if the object has its bit set in the mark bitmap.
   bool IsMarkedNoLocks(const mirror::Object* object,
       void* heap_beetmap = NULL) const;
@@ -803,7 +803,7 @@ class MarkSweep : public GarbageCollector {
   // Current space, we check this space first to avoid searching for the appropriate space for an
   // object.
   accounting::SPACE_BITMAP* current_mark_bitmap_;
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
   // Cache java.lang.Class for optimization.
   mirror::Class* java_lang_Class_;
@@ -815,7 +815,7 @@ class MarkSweep : public GarbageCollector {
   AtomicInteger atomic_finger_;
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
 
   // Immune range, every object inside the immune range is assumed to be marked.
@@ -865,7 +865,7 @@ class MarkSweep : public GarbageCollector {
   const bool is_concurrent_;
   bool clear_soft_references_;
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   space::GCSrvceCashedReferences* cashed_references_record_;
 #else
 #endif
