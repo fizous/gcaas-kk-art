@@ -279,8 +279,8 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
   local_heap_->ListenForProcessStateChange();
 
-  LOG(ERROR) << "isProcessCare about pause times: "
-      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
+//  LOG(ERROR) << "isProcessCare about pause times: "
+//      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
   double adjusted_max_free = 1.0;
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, &adjusted_max_free);
 
@@ -1875,7 +1875,7 @@ void IPCMarkSweep::InitializePhase(void) {
 void IPCMarkSweep::ApplyTrimming(void) {
 
 
-  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming..gcType:"<< GetGcType();
+//  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming..gcType:"<< GetGcType();
 
   ipc_heap_->CheckTrimming(GetGcType(), GetDurationNs());
 }

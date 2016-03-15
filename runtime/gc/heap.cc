@@ -2739,8 +2739,8 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
     return false;
   }
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization
-      << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
+//  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization
+//      << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
   Thread* self = Thread::Current();
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
@@ -2753,11 +2753,11 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
     }
   }
   SetLastTimeTrim(ms_time);
-  if (!care_about_pause_times_) {
+  if (care_about_pause_times_) {
     return false;
   }
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: passes care about pause times";
+//  LOG(ERROR) << "RequestHeapTrimIfNeeded: passes care about pause times";
    if(false){
      #if (ART_GC_SERVICE || true)
 
