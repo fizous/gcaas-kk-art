@@ -2739,7 +2739,8 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
     return false;
   }
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization << ", delta_time=" << ((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false";
+  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization
+      << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
   Thread* self = Thread::Current();
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
