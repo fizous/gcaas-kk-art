@@ -2318,12 +2318,12 @@ double Heap::HeapGrowthMultiplier() const {
 void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
-  const uint64_t bytes_allocated = GetBytesAllocated();
-  uint64_t target_size;
+  const size_t bytes_allocated = GetBytesAllocated();
+  size_t target_size;
   const double multiplier = HeapGrowthMultiplier();  // Use the multiplier to grow more for
   // foreground.
-  const uint64_t adjusted_min_free = static_cast<uint64_t>(GetMinFree() * multiplier);
-  const uint64_t adjusted_max_free = static_cast<uint64_t>(GetMaxFree() * multiplier);
+  const size_t adjusted_min_free = static_cast<size_t>(GetMinFree() * multiplier);
+  const size_t adjusted_max_free = static_cast<size_t>(GetMaxFree() * multiplier);
 
 
   SetLastGCSize(bytes_allocated);
