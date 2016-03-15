@@ -2290,6 +2290,103 @@ void Heap::UpdateMaxNativeFootprint() {
   SetNativeFootPrintLimit(2 * target_size - native_size);
 }
 
+void Heap::GCSrvcUpdateMaxNativeFootprint(size_t min_free, size_t max_free) {
+  size_t native_size = GetNativeBytesAllocated();
+  // TODO: Tune the native heap utilization to be a value other than the java heap utilization.
+  size_t target_size = native_size / GetTargetHeapUtilization();
+  if (target_size > native_size + max_free) {
+    target_size = native_size + max_free;
+  } else if (target_size < native_size + min_free) {
+    target_size = native_size + min_free;
+  }
+  SetNativeFootPrintGCWaterMark(target_size);
+  SetNativeFootPrintLimit(2 * target_size - native_size);
+}
+
+
+// How much more we grow the heap when we are a foreground app instead of background.
+static double foreground_heap_growth_multiplier_ = 1.25;
+
+double Heap::HeapGrowthMultiplier() const {
+  // If we don't care about pause times we are background, so return 1.0.
+  if (!CareAboutPauseTimes() || IsLowMemoryMode()) {
+    return 1.0;
+  }
+  return foreground_heap_growth_multiplier_;
+}
+
+void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
+  // We know what our utilization is at this moment.
+  // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
+  const uint64_t bytes_allocated = GetBytesAllocated();
+  uint64_t target_size;
+  const double multiplier = HeapGrowthMultiplier();  // Use the multiplier to grow more for
+  // foreground.
+  const uint64_t adjusted_min_free = static_cast<uint64_t>(GetMinFree() * multiplier);
+  const uint64_t adjusted_max_free = static_cast<uint64_t>(GetMaxFree() * multiplier);
+
+
+  SetLastGCSize(bytes_allocated);
+  SetLastGCTime(NanoTime());
+
+  if (gc_type != collector::kGcTypeSticky) {
+    // Grow the heap for non sticky GC.
+    target_size = bytes_allocated / GetTargetHeapUtilization();
+    if (target_size > bytes_allocated + adjusted_max_free) {
+      target_size = bytes_allocated + adjusted_max_free;
+    } else if (target_size < bytes_allocated + adjusted_min_free) {
+      target_size = bytes_allocated + adjusted_min_free;
+    }
+    SetNextGCType(collector::kGcTypeSticky);
+  } else {
+    // Based on how close the current heap size is to the target size, decide
+    // whether or not to do a partial or sticky GC next.
+    if (bytes_allocated + adjusted_min_free <= GetMaxAllowedFootPrint()) {
+      SetNextGCType(collector::kGcTypeSticky);
+    } else {
+      SetNextGCType(collector::kGcTypePartial);
+    }
+
+    // If we have freed enough memory, shrink the heap back down.
+    if (bytes_allocated + adjusted_max_free < GetMaxAllowedFootPrint()) {
+      target_size = bytes_allocated + adjusted_max_free;
+    } else {
+      target_size = std::max(bytes_allocated, GetMaxAllowedFootPrint());
+    }
+  }
+
+
+  if (!ignore_max_footprint_) {
+    SetIdealFootprint(target_size);
+
+    if (concurrent_gc_) {
+      // Calculate when to perform the next ConcurrentGC.
+
+      // Calculate the estimated GC duration.
+      double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
+      // Estimate how many remaining bytes we will have when we need to start the next GC.
+      size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
+      remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
+      if (UNLIKELY(remaining_bytes > GetMaxAllowedFootPrint())) {
+        // A never going to happen situation that from the estimated allocation rate we will exceed
+        // the applications entire footprint with the given estimated allocation rate. Schedule
+        // another GC straight away.
+        SetConcStartBytes(bytes_allocated);
+      } else {
+        // Start a concurrent GC when we get close to the estimated remaining bytes. When the
+        // allocation rate is very high, remaining_bytes could tell us that we should start a GC
+        // right away.
+        SetConcStartBytes(std::max(GetMaxAllowedFootPrint() - remaining_bytes, bytes_allocated));
+      }
+      DCHECK_LE(GetConcStartBytes(), GetMaxAllowedFootPrint());
+      DCHECK_LE(GetMaxAllowedFootPrint(), GetGrowthLimit());
+    }
+  }
+  GCSrvcUpdateMaxNativeFootprint(adjusted_min_free, adjusted_max_free);
+
+}
+
+
 void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.

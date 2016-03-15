@@ -2068,32 +2068,29 @@ void MarkSweep::FinishPhase() {
   timings_.NewSplit("PostGcVerification");
   heap->PostGcVerification(this);
 
-  timings_.NewSplit("GrowForUtilization");
-  heap->GrowForUtilization(GetGcType(), GetDurationNs());
 
-  timings_.NewSplit("RequestHeapTrim");
-  ApplyTrimming();
+
+  timings_.NewSplit("GrowForUtilization");
 #if (ART_GC_SERVICE)
-  // Update the cumulative statistics
-  IncTotalTimeNs(GetDurationNs());
-  IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
-                                           std::plus<uint64_t>()));
-  IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
-  IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+  heap->GCSrvcGrowForUtilization(GetGcType(), GetDurationNs());
   //LOG(ERROR) << "currAllocatedBytesSpace:" << heap_->alloc_space_->GetBytesAllocated() << ", FreedFreedBytes:" << GetFreedBytes();
 
 #else
-  IncTotalTimeNs(GetDurationNs());
-  IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
-                                           std::plus<uint64_t>()));
-  IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
-  IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+  heap->GrowForUtilization(GetGcType(), GetDurationNs());
   //  total_time_ns_ += GetDurationNs();
 //  total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
 //                                           std::plus<uint64_t>());
 //  total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
 //  total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
 #endif
+  timings_.NewSplit("RequestHeapTrim");
+  ApplyTrimming();
+  // Update the cumulative statistics
+  IncTotalTimeNs(GetDurationNs());
+  IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+                                           std::plus<uint64_t>()));
+  IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
+  IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
   // Ensure that the mark stack is empty.
   CHECK(mark_stack_->IsEmpty());
 

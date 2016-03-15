@@ -728,13 +728,20 @@ class Heap {
   // Update the watermark for the native allocated bytes based on the current number of native
   // bytes allocated and the target utilization ratio.
   void UpdateMaxNativeFootprint();
-
+  void GCSrvcUpdateMaxNativeFootprint(size_t min_free, size_t max_free);
   // Given the current contents of the alloc space, increase the allowed heap footprint to match
   // the target utilization ratio.  This should only be called immediately after a full garbage
   // collection.
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
 
+  // Returns the heap growth multiplier, this affects how much we grow the heap after a GC.
+  // Scales heap growth, min free, and max free.
+  double HeapGrowthMultiplier() const;
+  // Given the current contents of the alloc space, increase the allowed heap footprint to match
+  // the target utilization ratio.  This should only be called immediately after a full garbage
+  // collection.
+  void GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
 
   size_t GetPercentFree();
 
