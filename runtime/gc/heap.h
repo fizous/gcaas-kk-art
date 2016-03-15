@@ -703,6 +703,8 @@ class Heap {
   // Pushes a list of cleared references out to the managed heap.
   void EnqueueClearedReferences(mirror::Object** cleared_references);
 
+
+  bool RequestHeapTrimIfNeeded(double adjusted_max_free) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
   void RequestHeapTrim() LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
 
   void RequestConcurrentGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
@@ -741,7 +743,8 @@ class Heap {
   // Given the current contents of the alloc space, increase the allowed heap footprint to match
   // the target utilization ratio.  This should only be called immediately after a full garbage
   // collection.
-  void GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
+  void GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration,
+                                double* adjusted_max_free_p);
 
   size_t GetPercentFree();
 

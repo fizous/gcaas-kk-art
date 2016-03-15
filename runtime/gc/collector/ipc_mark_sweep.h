@@ -156,7 +156,7 @@ class IPCHeap {
   void ConcurrentGC(Thread* self);
   void ExplicitGC(bool clear_soft_references);
   void TrimHeap(void);
-  bool CheckTrimming();
+  bool CheckTrimming(collector::GcType gc_type, uint64_t gc_duration);
   void SetLastProcessID(void);
   collector::GcType WaitForConcurrentIPCGcToComplete(Thread* self);
 
@@ -164,7 +164,7 @@ class IPCHeap {
       GcCause gc_cause, bool clear_soft_references);
 
   void GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration);
-
+  bool ApplyIPCTrimming(double adjusted_max_free);
 
   /* protected by gc_complete_mu_ */
   GcCause curr_gc_cause_;
@@ -236,6 +236,9 @@ class IPCMarkSweep : public AbstractIPCMarkSweep, public MarkSweep {
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
  // virtual void ApplyTrimming(void);
+
+  void ApplyTrimming();
+
   void ClearMarkHolders(void);
 
   // Mark all reachable objects, done concurrently.

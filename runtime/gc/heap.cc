@@ -2315,7 +2315,7 @@ double Heap::HeapGrowthMultiplier() const {
   return foreground_heap_growth_multiplier_;
 }
 
-void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
+void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration, double* adjusted_max_free_p) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
@@ -2324,7 +2324,7 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_durat
   // foreground.
   const size_t adjusted_min_free = static_cast<size_t>(GetMinFree() * multiplier);
   const size_t adjusted_max_free = static_cast<size_t>(GetMaxFree() * multiplier);
-
+  *adjusted_max_free_p = adjusted_max_free;
 
   SetLastGCSize(bytes_allocated);
   SetLastGCTime(NanoTime());
@@ -2726,6 +2726,51 @@ void Heap::ConcurrentGC(Thread* self) {
   GCP_MARK_END_CONC_GC_HW_EVENT;
   //LOG(ERROR) << ">>>vmprofiler: concurrent: "<< self->GetTid();
   //mprofiler::VMProfiler::MProfMarkEndGCHatTimeEvent(self);
+}
+
+
+bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
+  uint64_t ms_time = MilliTime();
+  float utilization =
+      static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
+  if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - GetLastTimeTrim()) < 2 * 1000)) {
+    // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
+    // not enabled, or if a heap trim occurred in the last two seconds.
+    return false;
+  }
+
+  Thread* self = Thread::Current();
+  {
+    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+    Runtime* runtime = Runtime::Current();
+    if (runtime == NULL || !runtime->IsFinishedStarting() || runtime->IsShuttingDown()) {
+      // Heap trimming isn't supported without a Java runtime or Daemons (such as at dex2oat time)
+      // Also: we do not wish to start a heap trim if the runtime is shutting down (a racy check
+      // as we don't hold the lock while requesting the trim).
+      return false;
+    }
+  }
+  SetLastTimeTrim(ms_time);
+  if (!care_about_pause_times_) {
+    return false;
+  }
+  SetLastTimeTrim(ms_time);
+  ListenForProcessStateChange();
+
+   if(false){
+     #if (ART_GC_SERVICE || true)
+
+      art::gcservice::GCServiceClient::RequestHeapTrim();
+    #endif
+   }
+    JNIEnv* env = self->GetJniEnv();
+    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
+    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
+    CHECK(!env->ExceptionCheck());
+
+    return true;
 }
 
 void Heap::RequestHeapTrim() {

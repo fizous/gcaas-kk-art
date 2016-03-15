@@ -2039,6 +2039,9 @@ void MarkSweep::UnBindBitmaps() {
 
 
 void MarkSweep::ApplyTrimming() {
+  timings_.NewSplit("GrowForUtilization");
+  GetHeap()->GrowForUtilization(GetGcType(), GetDurationNs());
+  timings_.NewSplit("RequestHeapTrim");
   GetHeap()->RequestHeapTrim();
 }
 
@@ -2070,20 +2073,19 @@ void MarkSweep::FinishPhase() {
 
 
 
-  timings_.NewSplit("GrowForUtilization");
-#if (ART_GC_SERVICE || true)
-  heap->GCSrvcGrowForUtilization(GetGcType(), GetDurationNs());
-  //LOG(ERROR) << "currAllocatedBytesSpace:" << heap_->alloc_space_->GetBytesAllocated() << ", FreedFreedBytes:" << GetFreedBytes();
+//#if (ART_GC_SERVICE || true)
+//  heap->GCSrvcGrowForUtilization(GetGcType(), GetDurationNs());
+//  //LOG(ERROR) << "currAllocatedBytesSpace:" << heap_->alloc_space_->GetBytesAllocated() << ", FreedFreedBytes:" << GetFreedBytes();
+//
+//#else
+//  heap->GrowForUtilization(GetGcType(), GetDurationNs());
+//  //  total_time_ns_ += GetDurationNs();
+////  total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+////                                           std::plus<uint64_t>());
+////  total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
+////  total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
+//#endif
 
-#else
-  heap->GrowForUtilization(GetGcType(), GetDurationNs());
-  //  total_time_ns_ += GetDurationNs();
-//  total_paused_time_ns_ += std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
-//                                           std::plus<uint64_t>());
-//  total_freed_objects_ += GetFreedObjects() + GetFreedLargeObjects();
-//  total_freed_bytes_ += GetFreedBytes() + GetFreedLargeObjectBytes();
-#endif
-  timings_.NewSplit("RequestHeapTrim");
   ApplyTrimming();
   // Update the cumulative statistics
   IncTotalTimeNs(GetDurationNs());

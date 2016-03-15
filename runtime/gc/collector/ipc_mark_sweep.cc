@@ -274,8 +274,18 @@ void IPCHeap::SetLastProcessID(void) { //here we set the process of the app
 }
 
 
-bool IPCHeap::CheckTrimming() {
+bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   IPC_MS_VLOG(ERROR) << "bool IPCHeap::CheckTrimming()";
+
+  local_heap_->ListenForProcessStateChange();
+
+  double adjusted_max_free = 1.0;
+  local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, &adjusted_max_free);
+
+  return local_heap_->RequestHeapTrimIfNeeded(adjusted_max_free);
+
+#if 0
+
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(local_heap_->GetAllocSpace()->GetBytesAllocated()) / local_heap_->GetAllocSpace()->Size();
@@ -321,6 +331,7 @@ bool IPCHeap::CheckTrimming() {
     return true;
   }
   return false;
+#endif
 }
 
 
@@ -615,7 +626,17 @@ bool IPCHeap::RunCollectorDaemon() {
   return true;
 }
 
-
+bool IPCHeap::ApplyIPCTrimming(double adjusted_max_free) {
+  uint64_t ms_time = MilliTime();
+  float utilization =
+      static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
+  if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - local_heap_->GetLastTimeTrim()) < 2 * 1000)) {
+    // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
+    // not enabled, or if a heap trim occurred in the last two seconds.
+    return false;
+  }
+  return true;
+}
 
 void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
   size_t bytes_allocated = local_heap_->GetLastGCSize();
@@ -1859,10 +1880,12 @@ void IPCMarkSweep::InitializePhase(void) {
     ipc_heap_->local_heap_->PreGcVerification(this);
 }
 
-//void IPCMarkSweep::ApplyTrimming(void) {
-//  IPC_MS_VLOG(ERROR) << "IPCMarkSweep::ApplyTrimming";
-//  ipc_heap_->CheckTrimming();
-//}
+void IPCMarkSweep::ApplyTrimming(void) {
+
+
+
+  ipc_heap_->CheckTrimming(GetGcType(), GetDurationNs());
+}
 
 void IPCMarkSweep::FinishPhase(void) {
  Thread* currThread = Thread::Current();
