@@ -234,7 +234,7 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
   }
 
-  if(false) {
+  if(true) {
     android_atomic_add(-bytes_freed,
         reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
     android_atomic_add(-num_ptrs,
@@ -268,7 +268,7 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
 //      ", freed_bytes = " << freed_bytes << "; space::kRecentFreeCount = " <<
 //      space::kRecentFreeCount;
 
-  if(false) {
+  if(true) {
     android_atomic_add(-freed_bytes,
         &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
   }

@@ -2416,6 +2416,7 @@ void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
     BlockForGCPhase(self, space::IPC_GC_PHASE_FINALIZE_SWEEP);
   }
   accounting::ATOMIC_OBJ_STACK_T* live_stack = GetHeap()->GetLiveStack();
+  LOG(ERROR) << "~~~~~ IPCStickyMarkSweep::Sweep calling SweepArray";
   SweepArray(live_stack, false);
 }
 

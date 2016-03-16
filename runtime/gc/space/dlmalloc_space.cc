@@ -579,12 +579,12 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
     //
   //  LOG(ERROR) << "DlMallocSpace::FreeListAgent..after..bytesAllocated:" << GetBytesAllocated() <<
   //      ", bytes_freed=" << bytes_freed << ", conv_int = "<< _conv_bytes_freed;
-    UpdateBytesAllocated(_conv_bytes_freed);
-    UpdateObjectsAllocated(-num_ptrs);
+//    UpdateBytesAllocated(_conv_bytes_freed);
+//    UpdateObjectsAllocated(-num_ptrs);
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
 
-    Heap* heap = Runtime::Current()->GetHeap();
-    heap->IncAtomicBytesAllocated(_conv_bytes_freed);
+//    Heap* heap = Runtime::Current()->GetHeap();
+//    heap->IncAtomicBytesAllocated(_conv_bytes_freed);
     return bytes_freed;
   }
 }
