@@ -704,7 +704,7 @@ class Heap {
   void EnqueueClearedReferences(mirror::Object** cleared_references);
 
 
-  bool RequestHeapTrimIfNeeded(double adjusted_max_free) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
+  bool RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_req) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
   void RequestHeapTrim() LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);
 
   void RequestConcurrentGC(Thread* self) LOCKS_EXCLUDED(Locks::runtime_shutdown_lock_);

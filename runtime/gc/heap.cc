@@ -2729,7 +2729,7 @@ void Heap::ConcurrentGC(Thread* self) {
 }
 
 
-bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
+bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_req) {
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
@@ -2758,7 +2758,8 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free) {
   }
 
 #if (ART_GC_SERVICE || true)
-  art::gcservice::GCServiceClient::RequestHeapTrim();
+  if(send_remote_req)
+    art::gcservice::GCServiceClient::RequestHeapTrim();
 #endif
 
   return true;

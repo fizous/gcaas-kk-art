@@ -285,7 +285,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   double adjusted_max_free = 1.0;
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, &adjusted_max_free);
 
-  return local_heap_->RequestHeapTrimIfNeeded(adjusted_max_free);
+  return local_heap_->RequestHeapTrimIfNeeded(adjusted_max_free, true);
 
 #if 0
 
@@ -339,7 +339,16 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
 
 void IPCHeap::TrimHeap(void)  {
-  local_heap_->Trim();
+  LOG(ERROR) << "IPCHeap::TrimHeap";
+  local_heap_->ListenForProcessStateChange();
+  if(local_heap_->RequestHeapTrimIfNeeded(local_heap_->HeapGrowthMultiplier(), false)) {
+    LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
+    local_heap_->Trim();
+    LOG(ERROR) << "IPCHeap::TrimHeap....done trim()";
+  } else {
+    LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition DID NOT PASS";
+  }
+
 }
 
 collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
@@ -601,6 +610,10 @@ bool IPCHeap::RunCollectorDaemon() {
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
+  } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
+    TrimHeap();
+    LOG(ERROR) << ".....TrimHeap() Executed.......";
+    //meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }
 
   IPC_MS_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<

@@ -23,7 +23,8 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
     shake_hand_mu_("shake_hand"),
     shake_hand_cond_("ServerLock::cond_", shake_hand_mu_),
     curr_collector_addr_(NULL),
-    cycles_count_(0) {
+    cycles_count_(0),
+    trims_count_(0) {
 
 
   SharedFutexData* _futexAddress = &heap_data_->phase_lock_.futex_head_;
@@ -386,6 +387,34 @@ void ServerCollector::FinalizeGC(Thread* self) {
   }
 }
 
+
+void ServerCollector::ExecuteTrim() {
+  Thread* self = Thread::Current();
+  LOG(ERROR) << "-----------------ServerCollector::ExecuteTrim-------------------" << self->GetTid();
+  {
+    MutexLock mu(self, shake_hand_mu_);
+    curr_collector_addr_ = NULL;
+    trims_count_++;
+  }
+
+  ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
+  {
+    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    heap_data_->conc_flag_ = 1;
+    heap_data_->gc_type_ = GC_SERVICE_TASK_TRIM;
+    conc_req_cond_->Broadcast(self);
+
+    while(heap_data_->conc_flag_ < 5) {
+      conc_req_cond_->Wait(self);
+    }
+
+  }
+
+  FinalizeGC(self);
+
+  LOG(ERROR) << "-----------------ServerCollector:: Leaving ExecuteTrim-------------------" << self->GetTid();
+}
+
 void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
   Thread* self = Thread::Current();
   //LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
@@ -439,7 +468,12 @@ void ServerCollector::Run(void) {
   while(true) {
    // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
-    ExecuteGC(_gc_type);
+
+    if(_gc_type == GC_SERVICE_TASK_TRIM)
+      ExecuteTrim();
+    else
+      ExecuteGC(_gc_type);
+
 
    // LOG(ERROR) << "---------------workers are done ------";
     //WaitForGCTask();

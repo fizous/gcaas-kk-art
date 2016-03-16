@@ -247,6 +247,7 @@ class ServerCollector {
   void SignalCollector(GC_SERVICE_TASK req_type);
   int WaitForRequest(void);
   void WaitForGCTask(void);
+  void ExecuteTrim(void);
   void ExecuteGC(GC_SERVICE_TASK);
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
@@ -268,6 +269,7 @@ class ServerCollector {
 
 
   volatile int cycles_count_;
+  volatile int trims_count_;
 
   collector::IPCServerMarkerSweep* ipc_msweep_;
 
