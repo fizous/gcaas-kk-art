@@ -239,6 +239,7 @@ void IPCHeap::CreateCollectors(void) {
 
 
 void IPCHeap::ConcurrentGC(Thread* self) {
+  LOG(ERROR) << "------IPCHeap::ConcurrentGC-------";
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
     if (Runtime::Current()->IsShuttingDown()) {
@@ -263,6 +264,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
 }
 
 void IPCHeap::ExplicitGC(bool clear_soft_references)  {
+  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
   WaitForConcurrentIPCGcToComplete(self);
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
