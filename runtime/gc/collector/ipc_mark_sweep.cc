@@ -16,6 +16,7 @@
 #include "thread.h"
 #include "thread_list.h"
 #include "mirror/object-inl.h"
+#include "gc/service/global_allocator.h"
 #include "gc/service/service_client.h"
 #include "gc/space/dlmalloc_space-inl.h"
 #include "gc/space/space-inl.h"
