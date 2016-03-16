@@ -2319,6 +2319,8 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_durat
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
+  LOG(ERROR) << "Heap::GCSrvcGrowForUtilization..bytes_allocated=" << bytes_allocated <<
+      ", alloc_space_->GetBytesAllocated=" << alloc_space_->GetBytesAllocated();
   size_t target_size;
   const double multiplier = HeapGrowthMultiplier();  // Use the multiplier to grow more for
   // foreground.
