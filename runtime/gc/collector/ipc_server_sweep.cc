@@ -234,11 +234,12 @@ size_t IPCServerMarkerSweep::ServerFreeSpaceList(Thread* self, size_t num_ptrs,
     mark_stack_->PushBack(const_cast<mirror::Object*>(MapReferenceToClientChecks<mirror::Object>(ptrs[i])));
   }
 
-  android_atomic_add(-bytes_freed,
-      reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
-  android_atomic_add(-num_ptrs,
-      reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
-
+  if(false) {
+    android_atomic_add(-bytes_freed,
+        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_bytes_allocated_));// -= bytes_freed;
+    android_atomic_add(-num_ptrs,
+        reinterpret_cast<int32_t*>(&_dlmalloc_space->num_objects_allocated_));
+  }
   *freedBytesNoOverhead += bytes_freed_no_overhead;
  // mspace_bulk_free((void*)spaces_[KGCSpaceServerAllocInd_].base_, reinterpret_cast<void**>(ptrs), num_ptrs);
   return bytes_freed;
@@ -267,9 +268,10 @@ void IPCServerMarkerSweep::ServerSweepCallback(size_t num_ptrs, mirror::Object**
 //      ", freed_bytes = " << freed_bytes << "; space::kRecentFreeCount = " <<
 //      space::kRecentFreeCount;
 
-  android_atomic_add(-freed_bytes,
-      &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
-
+  if(false) {
+    android_atomic_add(-freed_bytes,
+        &(_mark_sweeper->client_rec_->sharable_space_->heap_meta_.sub_record_meta_.num_bytes_allocated_));
+  }
 
   _mark_sweeper->cashed_stats_client_.freed_objects_ +=  freed_objects;
   _mark_sweeper->cashed_stats_client_.freed_bytes_ += freed_bytes;
