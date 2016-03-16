@@ -438,8 +438,8 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
-  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size="<<gc_start_size<<
-      ", alloc_space->allocBytes="<<local_heap_->alloc_space_->GetBytesAllocated();
+  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
+      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
   // Approximate allocation rate in bytes / second.
   if (UNLIKELY(gc_start_time_ns == local_heap_->GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
@@ -482,7 +482,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   gc_start_size = local_heap_->GetBytesAllocated();
     LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_end_size="<<gc_start_size<<
-        ", end_size..alloc_space->allocBytes="<<local_heap_->alloc_space_->GetBytesAllocated();
+        ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
 
 //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
 //  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
