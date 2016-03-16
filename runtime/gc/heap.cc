@@ -2305,7 +2305,7 @@ void Heap::GCSrvcUpdateMaxNativeFootprint(size_t min_free, size_t max_free) {
 
 
 // How much more we grow the heap when we are a foreground app instead of background.
-static double foreground_heap_growth_multiplier_ = 1.5;
+static double foreground_heap_growth_multiplier_ = 1.0;//5;
 
 double Heap::HeapGrowthMultiplier() const {
   // If we don't care about pause times we are background, so return 1.0.
