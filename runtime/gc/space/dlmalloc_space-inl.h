@@ -57,9 +57,10 @@ inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
     size_t allocation_size = AllocationSizeNonvirtual(result);
 
     DCHECK(bytes_allocated != NULL);
+    int _addition_value = static_cast<int>(allocation_size);
     *bytes_allocated = allocation_size;
-    UpdateBytesAllocated(allocation_size);
-    UpdateTotalBytesAllocated(allocation_size);
+    UpdateBytesAllocated(_addition_value);
+    UpdateTotalBytesAllocated(_addition_value);
 //    num_bytes_allocated_ += allocation_size;
 //    total_bytes_allocated_ += allocation_size;
 

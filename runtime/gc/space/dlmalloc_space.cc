@@ -539,7 +539,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
   }
   const size_t bytes_freed = InternalAllocationSize(ptr);
   //num_bytes_allocated_ -= bytes_freed;
-  UpdateBytesAllocated(-bytes_freed);
+  UpdateBytesAllocated(-(static_cast<int>(bytes_freed)));
   UpdateObjectsAllocated(-1);//--num_objects_allocated_;
   //GCMMP_HANDLE_FINE_GRAINED_FREE(AllocationNoOverhead(ptr), bytes_freed);
   GCMMP_HANDLE_FINE_PRECISE_FREE(AllocationNoOverhead(ptr), ptr, IsZygoteSpace());
@@ -572,15 +572,15 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
   }
   {
     DLMALLOC_SPACE_LOCK_MACRO;
-   // int _conv_bytes_freed = -(static_cast<int>(bytes_freed));
+    int _conv_bytes_freed = -(static_cast<int>(bytes_freed));
 
   //  LOG(ERROR) << "DlMallocSpace::FreeListAgent..before..bytesAllocated:" << GetBytesAllocated() <<
   //      ", bytes_freed=" << bytes_freed << "conv_int = " << _conv_bytes_freed;
     //
   //  LOG(ERROR) << "DlMallocSpace::FreeListAgent..after..bytesAllocated:" << GetBytesAllocated() <<
   //      ", bytes_freed=" << bytes_freed << ", conv_int = "<< _conv_bytes_freed;
-//    UpdateBytesAllocated(_conv_bytes_freed);
-//    UpdateObjectsAllocated(-num_ptrs);
+     UpdateBytesAllocated(_conv_bytes_freed);
+    UpdateObjectsAllocated(-num_ptrs);
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
 
 //    Heap* heap = Runtime::Current()->GetHeap();
@@ -635,8 +635,9 @@ size_t DlMallocSpace::FreeList(Thread* self, size_t num_ptrs, mirror::Object** p
 
   {
     DLMALLOC_SPACE_LOCK_MACRO;
-    UpdateBytesAllocated(-bytes_freed);
-    UpdateObjectsAllocated(-num_ptrs);//num_objects_allocated_ -= num_ptrs;
+    int _conv_bytes_freed = -(static_cast<int>(bytes_freed));
+    UpdateBytesAllocated(_conv_bytes_freed);
+    UpdateObjectsAllocated(-(static_cast<int>(num_ptrs)));//num_objects_allocated_ -= num_ptrs;
     mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
     return bytes_freed;
   }
