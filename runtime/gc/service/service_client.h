@@ -24,7 +24,7 @@ class GCServiceClient {
 
  public:
   static GCServiceClient* service_client_;
-  static const int kEnableTrimming_ = 0;
+  static const int kEnableTrimming_ = 1;
   static void InitClient(const char* se_name_c_str);
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
