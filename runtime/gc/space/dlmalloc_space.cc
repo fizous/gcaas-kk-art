@@ -572,7 +572,7 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
   }
   {
     DLMALLOC_SPACE_LOCK_MACRO;
-    int _conv_bytes_freed = -(static_cast<int>(bytes_freed));
+   // int _conv_bytes_freed = -(static_cast<int>(bytes_freed));
 
   //  LOG(ERROR) << "DlMallocSpace::FreeListAgent..before..bytesAllocated:" << GetBytesAllocated() <<
   //      ", bytes_freed=" << bytes_freed << "conv_int = " << _conv_bytes_freed;
