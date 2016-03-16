@@ -2804,6 +2804,8 @@ void Heap::RequestHeapTrim() {
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
+  LOG(ERROR) << "Heap::RequestHeapTrim: utilization=" << utilization
+        << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
   if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - GetLastTimeTrim()) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
     // not enabled, or if a heap trim occurred in the last two seconds.
