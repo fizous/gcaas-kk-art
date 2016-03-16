@@ -80,10 +80,10 @@ class LargeObjectSpace : public DiscontinuousSpace, public AllocSpace {
   explicit LargeObjectSpace(const std::string& name);
 
   // Approximate number of bytes which have been allocated into the space.
-  size_t num_bytes_allocated_;
-  size_t num_objects_allocated_;
-  size_t total_bytes_allocated_;
-  size_t total_objects_allocated_;
+  uint64_t num_bytes_allocated_;
+  uint64_t num_objects_allocated_;
+  uint64_t total_bytes_allocated_;
+  uint64_t total_objects_allocated_;
 
   friend class Space;
 

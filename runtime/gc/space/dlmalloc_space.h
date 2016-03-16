@@ -607,10 +607,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   size_t recent_free_pos_;
 
   // Approximate number of bytes which have been allocated into the space.
-  size_t num_bytes_allocated_;
-  size_t num_objects_allocated_;
-  size_t total_bytes_allocated_;
-  size_t total_objects_allocated_;
+  uint64_t num_bytes_allocated_;
+  uint64_t num_objects_allocated_;
+  uint64_t total_bytes_allocated_;
+  uint64_t total_objects_allocated_;
 
   static size_t bitmap_index_;
 
