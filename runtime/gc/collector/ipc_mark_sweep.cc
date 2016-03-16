@@ -344,8 +344,14 @@ void IPCHeap::TrimHeap(void)  {
   if(local_heap_->RequestHeapTrimIfNeeded(local_heap_->HeapGrowthMultiplier(), false)) {
     LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
     local_heap_->SetLastTimeTrim(MilliTime());
-    local_heap_->Trim();
-    LOG(ERROR) << "IPCHeap::TrimHeap....done trim()";
+    size_t managed_advised = local_heap_->Trim();
+    // Trim the native heap.
+    dlmalloc_trim(0);
+    size_t native_reclaimed = 0;
+    dlmalloc_inspect_all(DlmallocMadviseCallback, &native_reclaimed);
+    LOG(ERROR) << "IPCHeap::TrimHeap....done trim()..advised=" <<
+        PrettySize(managed_advised) << ", native_advised="
+        << PrettySize(native_reclaimed);
   } else {
     LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition DID NOT PASS";
   }
