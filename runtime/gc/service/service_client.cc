@@ -252,6 +252,8 @@ bool GCServiceClient::RequestExplicitGC(void) {
 void GCServiceClient::RequestHeapTrim(void) {
   if(service_client_ == NULL)
     return;
+  if(kEnableTrimming_ == 0)
+    return;
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
   IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
