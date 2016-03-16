@@ -343,6 +343,7 @@ void IPCHeap::TrimHeap(void)  {
   local_heap_->ListenForProcessStateChange();
   if(local_heap_->RequestHeapTrimIfNeeded(local_heap_->HeapGrowthMultiplier(), false)) {
     LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
+    local_heap_->SetLastTimeTrim(MilliTime());
     local_heap_->Trim();
     LOG(ERROR) << "IPCHeap::TrimHeap....done trim()";
   } else {

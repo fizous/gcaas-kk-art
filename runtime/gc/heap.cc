@@ -2755,9 +2755,9 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_re
       return false;
     }
   }
-  SetLastTimeTrim(ms_time);
+//  SetLastTimeTrim(ms_time);
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: careaboutpauseTimes=" << ", delta_time=" << ((care_about_pause_times_) ? "true": "false");
+  LOG(ERROR) << "RequestHeapTrimIfNeeded: careaboutpauseTimes=" << ((care_about_pause_times_) ? "true": "false");
 
   if (care_about_pause_times_) {
     return false;
