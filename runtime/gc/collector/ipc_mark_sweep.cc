@@ -481,7 +481,9 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   local_heap_->IncTotalBytesFreedEver(collector->GetFreedBytes());
 
   gc_start_size = local_heap_->GetBytesAllocated();
-    LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_end_size="<<gc_start_size<<
+  LOG(ERROR) << "IPCHeap::CollectGarbageIPC..." <<
+        gc_cause_and_type_strings[gc_cause][gc_type] <<
+        ", gc_end_size=" << gc_start_size <<
         ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
 
 //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
