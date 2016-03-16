@@ -574,10 +574,10 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
   DLMALLOC_SPACE_LOCK_MACRO;
   LOG(ERROR) << "DlMallocSpace::FreeListAgent..before..bytesAllocated:" << GetBytesAllocated() <<
       ", bytes_freed=" << bytes_freed << "conv_int = " << _conv_bytes_freed;
-  UpdateBytesAllocated(_conv_bytes_freed);
+  //UpdateBytesAllocated(_conv_bytes_freed);
   LOG(ERROR) << "DlMallocSpace::FreeListAgent..after..bytesAllocated:" << GetBytesAllocated() <<
       ", bytes_freed=" << bytes_freed << ", conv_int = "<< _conv_bytes_freed;
-  UpdateObjectsAllocated(-num_ptrs);
+  //UpdateObjectsAllocated(-num_ptrs);
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
   return bytes_freed;
 }
