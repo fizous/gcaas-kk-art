@@ -438,7 +438,7 @@ void ServerCollector::Run(void) {
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
    // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
-    _gc_type = WaitForRequest();
+    _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
     ExecuteGC(_gc_type);
 
    // LOG(ERROR) << "---------------workers are done ------";
