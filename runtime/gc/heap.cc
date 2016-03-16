@@ -2736,8 +2736,8 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_re
   float utilization =
       static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization
-        << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
+//  LOG(ERROR) << "RequestHeapTrimIfNeeded: utilization=" << utilization
+//        << ", delta_time=" << (((ms_time - GetLastTimeTrim()) < 2 * 1000) ? "true": "false");
 
   if ((utilization > 0.75f && !IsLowMemoryMode()) || ((ms_time - GetLastTimeTrim()) < 2 * 1000)) {
     // Don't bother trimming the alloc space if it's more than 75% utilized and low memory mode is
@@ -2759,7 +2759,7 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_re
   }
 //  SetLastTimeTrim(ms_time);
 
-  LOG(ERROR) << "RequestHeapTrimIfNeeded: careaboutpauseTimes=" << ((care_about_pause_times_) ? "true": "false");
+//  LOG(ERROR) << "RequestHeapTrimIfNeeded: careaboutpauseTimes=" << ((care_about_pause_times_) ? "true": "false");
 
   if (care_about_pause_times_) {
     return false;

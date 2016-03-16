@@ -481,7 +481,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   gc_start_size = local_heap_->GetBytesAllocated();
     LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_end_size="<<gc_start_size<<
-        ", end_sizealloc_space->allocBytes="<<local_heap_->alloc_space_->GetBytesAllocated();
+        ", end_size..alloc_space->allocBytes="<<local_heap_->alloc_space_->GetBytesAllocated();
 
 //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
 //  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
@@ -2251,9 +2251,10 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
           //LOG(ERROR) << "==== mark stack size for bulk free is ==== " << num_ptrs;
 
           //LOG(ERROR) << "CALLING IPCMarkSweep::Sweep...FreeListAgent, num_ptrs:" << num_ptrs << ", objects_array:" << reinterpret_cast<void*>(objects_array);
-          size_t freed_bytes_sweep = space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
-          LOG(ERROR) << "IPCMarkSweep::Sweep freed_bytes_sweep..freedBytes = "
-              << freed_bytes_sweep << "; freedPointers = "<< num_ptrs;
+          space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
+//          size_t freed_bytes_sweep =
+//          LOG(ERROR) << "IPCMarkSweep::Sweep freed_bytes_sweep..freedBytes = "
+//              << freed_bytes_sweep << "; freedPointers = "<< num_ptrs;
           //space->AsDlMallocSpace()->
 
 
