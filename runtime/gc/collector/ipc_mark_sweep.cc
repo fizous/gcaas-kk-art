@@ -2247,6 +2247,8 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
           //LOG(ERROR) << "CALLING IPCMarkSweep::Sweep...FreeListAgent, num_ptrs:" << num_ptrs << ", objects_array:" << reinterpret_cast<void*>(objects_array);
           space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
+          //space->AsDlMallocSpace()->
+
 
 
 //          mspace_bulk_free(

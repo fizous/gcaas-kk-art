@@ -572,8 +572,8 @@ size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Objec
   }
 
   DLMALLOC_SPACE_LOCK_MACRO;
-//  UpdateBytesAllocated(-bytes_freed);
-//  UpdateObjectsAllocated(-num_ptrs);
+  UpdateBytesAllocated(-bytes_freed);
+  UpdateObjectsAllocated(-num_ptrs);
   mspace_bulk_free(GetMspace(), reinterpret_cast<void**>(ptrs), num_ptrs);
   return bytes_freed;
 }
