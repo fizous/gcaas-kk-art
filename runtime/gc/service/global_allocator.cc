@@ -728,7 +728,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       if(_agent == NULL) {
         GCSERVICE_ALLOC_VLOG(ERROR) << "_agent is null: " << _entry->pid_;
       } else {
-        _agent->collector_->SignalCollector();
+        _agent->collector_->SignalCollector(GC_SERVICE_TASK_CONC);
       }
     }
 
@@ -751,7 +751,7 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
     GCSrvceAgent* _agent =
         GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    _agent->collector_->SignalCollector(true);
+    _agent->collector_->SignalCollector(GC_SERVICE_TASK_EXPLICIT);
   }
 
 }

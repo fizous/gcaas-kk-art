@@ -594,10 +594,10 @@ bool IPCHeap::RunCollectorDaemon() {
 //    conc_req_cond_->Broadcast(self);
 //  }
   IPC_MS_VLOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
-  if(meta_->gc_type_ == 1) {
+  if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
-  } else if(meta_->gc_type_ == 2) {
+  } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }

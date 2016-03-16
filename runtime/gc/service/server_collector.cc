@@ -75,7 +75,7 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
 }
 
 
-void ServerCollector::SignalCollector(bool is_explicit) {
+void ServerCollector::SignalCollector(GC_SERVICE_TASK req_type) {
   Thread* self = Thread::Current();
  // LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
@@ -86,7 +86,7 @@ void ServerCollector::SignalCollector(bool is_explicit) {
       int32_t new_value = 0;
       do {
         old_status = status_;
-        new_value = old_status + (is_explicit? (1 << 16) : 1);
+        new_value = old_status | req_type;//+ (is_explicit? (1 << 16) : 1);
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
      // LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
@@ -103,7 +103,7 @@ void ServerCollector::SignalCollector(bool is_explicit) {
 }
 
 int ServerCollector::WaitForRequest(void) {
-  int _result = 1;
+  int32_t _result = 0;
     Thread* self = Thread::Current();
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
@@ -115,13 +115,14 @@ int ServerCollector::WaitForRequest(void) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
       MutexLock mu(self, run_mu_);
-      uint32_t _status_barrier = 0;
+      int32_t _status_barrier = 0;
       while((_status_barrier = android_atomic_release_load(&status_)) <= 0) {
         run_cond_.Wait(self);
       }
-      if(_status_barrier >= (1<<16)) {
-        _result = 2;
-      }
+      _result = _status_barrier;
+//      if(_status_barrier >= (1<<16)) {
+//        _result = 2;
+//      }
 
       while (android_atomic_cas(_status_barrier, 0U, &status_) != 0) {
         _status_barrier = android_atomic_release_load(&status_);
@@ -385,7 +386,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
   }
 }
 
-void ServerCollector::ExecuteGC(int gc_type) {
+void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
   Thread* self = Thread::Current();
   //LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
@@ -434,7 +435,7 @@ void ServerCollector::Run(void) {
  // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
 
-  int _gc_type = 0;
+  GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
    // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
     _gc_type = WaitForRequest();
