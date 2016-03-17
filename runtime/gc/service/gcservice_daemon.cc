@@ -135,8 +135,8 @@ void GCServiceDaemon::UpdateGlobalState(void) {
 
   fclose(f);
 
-  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
-      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
+//  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
+//      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
 
 }
 

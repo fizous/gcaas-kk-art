@@ -412,7 +412,7 @@ void ServerCollector::ExecuteTrim() {
 
   FinalizeGC(self);
 
-  LOG(ERROR) << "-----------------ServerCollector:: Leaving ExecuteTrim-------------------" << self->GetTid();
+  //LOG(ERROR) << "-----------------ServerCollector:: Leaving ExecuteTrim-------------------" << self->GetTid();
 }
 
 void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {

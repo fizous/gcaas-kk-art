@@ -736,8 +736,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
   } else if (_req_type == GC_SERVICE_TASK_TRIM) {
    // GCSERVICE_ALLOC_VLOG(ERROR)
-    LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
-        _req_type << " ~~~~~ " << _entry->req_type_;
+//    LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
+//        _req_type << " ~~~~~ " << _entry->req_type_;
     GCSrvceAgent* _agent =
         GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
     if(art::gcservice::GCServiceClient::kEnableTrimming_ > 0)
