@@ -239,7 +239,7 @@ void IPCHeap::CreateCollectors(void) {
 
 
 void IPCHeap::ConcurrentGC(Thread* self) {
-  LOG(ERROR) << "------IPCHeap::ConcurrentGC-------";
+//  LOG(ERROR) << "------IPCHeap::ConcurrentGC-------";
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
     if (Runtime::Current()->IsShuttingDown()) {
@@ -264,7 +264,7 @@ void IPCHeap::ConcurrentGC(Thread* self) {
 }
 
 void IPCHeap::ExplicitGC(bool clear_soft_references)  {
-  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
+//  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
   WaitForConcurrentIPCGcToComplete(self);
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
@@ -440,8 +440,8 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
-  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
-      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
+//  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
+//      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
   // Approximate allocation rate in bytes / second.
   if (UNLIKELY(gc_start_time_ns == local_heap_->GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
@@ -482,11 +482,11 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   local_heap_->IncTotalObjectsFreedEver(collector->GetFreedObjects());
   local_heap_->IncTotalBytesFreedEver(collector->GetFreedBytes());
 
-  gc_start_size = local_heap_->GetBytesAllocated();
-  LOG(ERROR) << "IPCHeap::CollectGarbageIPC..." <<
-        gc_cause_and_type_strings[gc_cause][gc_type] <<
-        ", gc_end_size=" << gc_start_size <<
-        ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
+//  gc_start_size = local_heap_->GetBytesAllocated();
+//  LOG(ERROR) << "IPCHeap::CollectGarbageIPC..." <<
+//        gc_cause_and_type_strings[gc_cause][gc_type] <<
+//        ", gc_end_size=" << gc_start_size <<
+//        ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
 
 //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
 //  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
@@ -2416,7 +2416,7 @@ void IPCStickyMarkSweep::Sweep(bool swap_bitmaps) {
     BlockForGCPhase(self, space::IPC_GC_PHASE_FINALIZE_SWEEP);
   }
   accounting::ATOMIC_OBJ_STACK_T* live_stack = GetHeap()->GetLiveStack();
-  LOG(ERROR) << "~~~~~ IPCStickyMarkSweep::Sweep calling SweepArray";
+  //LOG(ERROR) << "~~~~~ IPCStickyMarkSweep::Sweep calling SweepArray";
   SweepArray(live_stack, false);
 }
 
