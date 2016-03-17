@@ -347,7 +347,8 @@ void IPCHeap::TrimHeap(void)  {
   if(local_heap_->RequestHeapTrimIfNeeded(local_heap_->HeapGrowthMultiplier(), false)) {
     //LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
     local_heap_->SetLastTimeTrim(MilliTime());
-    size_t managed_advised = local_heap_->Trim();
+    size_t managed_advised =
+        local_heap_->Trim();
     // Trim the native heap.
     dlmalloc_trim(0);
     size_t native_reclaimed = 0;
