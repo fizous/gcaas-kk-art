@@ -15,6 +15,7 @@
 #include "ipcfs/ipcfs.h"
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/heap.h"
+#include "gc/service/global_allocator.h"
 namespace art {
 
 namespace gcservice {
