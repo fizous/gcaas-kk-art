@@ -117,6 +117,7 @@ Runtime::Runtime()
 }
 
 Runtime::~Runtime() {
+  LOG(ERROR) << "Shuting Down Application";
   Thread* self = Thread::Current();
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);

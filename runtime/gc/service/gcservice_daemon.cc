@@ -63,6 +63,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
     _daemonObj->UpdateGlobalState();
+    _daemonObj->UpdateGlobalProcessStates();
     _daemonObj->mainLoop();
   }
 
@@ -139,6 +140,46 @@ void GCServiceDaemon::UpdateGlobalState(void) {
 //      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
 
 }
+static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
+                                                              int* out_value) {
+  CHECK(out_value != NULL);
+  jfieldID field = env->GetStaticFieldID(clz, name, "I");
+  if (field == NULL) {
+    env->ExceptionClear();
+    return false;
+  }
+  *out_value = env->GetStaticIntField(clz, field);
+  return true;
+}
+void GCServiceDaemon::UpdateGlobalProcessStates(void) {
+  LOG(ERROR)<< "--------------------------------------";
+  Thread* self = Thread::Current();
+  JNIEnvExt* env = self->GetJniEnv();
+  // Just attempt to do this the first time.
+  jclass clz = env->FindClass("android/app/ActivityManager");
+  if (clz == NULL) {
+    LOG(WARNING) << "Activity manager class is null";
+    return;
+  }
+  ScopedLocalRef<jclass> activity_manager(env, clz);
+  std::vector<const char*> care_about_pauses;
+  care_about_pauses.push_back("PROCESS_STATE_TOP");
+  care_about_pauses.push_back("PROCESS_STATE_IMPORTANT_BACKGROUND");
+
+  // Process states which care about pause times.
+  std::set<int> process_state_cares_about_pause_time_;
+
+  // Attempt to read the constants and classify them as whether or not we care about pause times.
+  for (size_t i = 0; i < care_about_pauses.size(); ++i) {
+    int process_state = 0;
+    if (ReadStaticInt(env, activity_manager.get(), care_about_pauses[i], &process_state)) {
+      process_state_cares_about_pause_time_.insert(process_state);
+      LOG(ERROR)<< "XXXXXX Adding process state " << process_state
+                 << " to set of states which care about pause time";
+    }
+  }
+}
+
 
 void GCServiceDaemon::mainLoop(void) {
   GCServiceProcess::process_->handShake_->ListenToRequests(this);

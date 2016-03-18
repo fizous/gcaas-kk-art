@@ -313,6 +313,7 @@ public:
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
   void UpdateGlobalState(void);
+  void UpdateGlobalProcessStates(void);
 };//class GCServiceDaemon
 
 
