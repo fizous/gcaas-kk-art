@@ -8,6 +8,7 @@
 #include <cutils/ashmem.h>
 #include "gc/service/global_allocator.h"
 #include "gc/collector/ipc_server_sweep.h"
+#include "ScopedLocalRef.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
