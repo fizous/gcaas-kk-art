@@ -24,7 +24,7 @@ class GCServiceClient {
 
  public:
   static GCServiceClient* service_client_;
-  static const int kEnableTrimming_ = 1;
+
   static void InitClient(const char* se_name_c_str);
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
@@ -45,11 +45,15 @@ class GCServiceClient {
 
   void FillAshMemMapData(android::IPCAShmemMap* rec,
       AShmemMap* shmem_map);
- private:
-  GCServiceClient(gc::space::SharableDlMallocSpace*, int);
 
-  int index_;
+  bool isTrimRequestsEnabled() const {
+    return (enable_trimming_ == gc::gcservice::GC_SERVICE_HANDLE_TRIM_ALLOWED);
+  }
+ private:
+  GCServiceClient(gc::space::SharableDlMallocSpace*, int, int);
   gc::space::SharableDlMallocSpace* sharable_space_;
+  int index_;
+  int enable_trimming_;
   //gc::collector::IPCMarkSweep* collector_;
   gc::collector::IPCHeap* ipcHeap_;
 

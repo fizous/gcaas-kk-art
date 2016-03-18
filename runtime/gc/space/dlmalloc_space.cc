@@ -896,7 +896,11 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
   }
 
-  if((gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) && shareMem) { // share the zygote space
+  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+
+
+  if(_alloc->shareZygoteSpace() && shareMem) { // share the zygote space
     AShmemMap* _ptr = GetMemMap()->GetAshmemMapAddress();
 //    LOG(ERROR) << ".....GCservice .. Start Resharing Zygote......" <<
 //        ", begin:" << reinterpret_cast<const void*>(GetMemMap()->Begin()) <<
@@ -912,7 +916,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     free(_ptr);
 
 
-    if(gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+    //TODO:: Weird thing here I did..the check should be if we share bitmaps or not.
+    if(_alloc->shareZygoteSpace()/*gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1*/) {
       //share the bitmaps too
       //accounting::SPACE_BITMAP* _live_bitmap_ = GetLiveBitmap();
       accounting::SPACE_BITMAP* _mark_bitmap_ = GetMarkBitmap();

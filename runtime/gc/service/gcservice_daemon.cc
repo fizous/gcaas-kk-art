@@ -237,17 +237,21 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 //----------------------------- GCServiceProcess ------------------------------
 
 void GCServiceProcess::LaunchGCServiceProcess(void) {
+
+  int trim_param = GCServiceGlobalAllocator::allocator_instant_->GetTrimConfig();
+
   InitGCServiceProcess(
       GCServiceGlobalAllocator::GetServiceHeader(),
-      GCServiceGlobalAllocator::GetServiceHandShaker());
+      GCServiceGlobalAllocator::GetServiceHandShaker(),
+      trim_param);
 }
 
 
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
-    GCSrvcClientHandShake* handshake) {
+    GCSrvcClientHandShake* handshake, int enable_trim){
   if(GCServiceProcess::process_ == NULL) {
     IPC_MS_VLOG(INFO) << "initializing process";
-    GCServiceProcess::process_ = new GCServiceProcess(meta, handshake);
+    GCServiceProcess::process_ = new GCServiceProcess(meta, handshake, enable_trim);
     GCServiceProcess::process_->SetGCDaemon();
 
   }
@@ -279,9 +283,10 @@ bool GCServiceProcess::initSvcFD(void) {
 
 
 GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
-                                  GCSrvcClientHandShake* handShakeMemory) :
+                                  GCSrvcClientHandShake* handShakeMemory,
+                                  int enable_trim)  :
     service_meta_(meta), handShake_(handShakeMemory), fileMapperSvc_(NULL),
-    thread_(NULL), srvcReady_(false) {
+    thread_(NULL), srvcReady_(false), enable_trimming_(enable_trim) {
 
   thread_ = Thread::Current();
   {

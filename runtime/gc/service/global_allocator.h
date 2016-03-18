@@ -41,8 +41,9 @@ typedef enum {
   GCSERVICE_STATUS_SERVER_INITIALIZED = 2,
   GCSERVICE_STATUS_STARTING = 4,
   GCSERVICE_STATUS_RUNNING  = 8,
-  GCSERVICE_STATUS_SHUTTING_DOWN  = 16,
-  GCSERVICE_STATUS_STOPPED  = 32
+  GCSERVICE_STATUS_SYS_SERVER_CREATED = 16,
+  GCSERVICE_STATUS_SHUTTING_DOWN  = 32,
+  GCSERVICE_STATUS_STOPPED  = 64
 } GC_SERVICE_STATUS;
 
 
@@ -72,6 +73,22 @@ typedef enum {
   GC_SERVICE_HANDLE_ALLOC_DAEMON
 } GC_SERVICE_HANDLE_ALLOC_GC;
 
+
+typedef enum {
+  GC_SERVICE_SHARE_SPACES_ALLOC = 1,
+  GC_SERVICE_SHARE_SPACES_ZYGOTE = 2,
+  GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS = 4
+} GC_SERVICE_SHARE_SPACES;
+
+typedef enum {
+  GC_SERVICE_HANDLE_TRIM_DISALLOWED = 0,
+  GC_SERVICE_HANDLE_TRIM_ALLOWED = 1
+} GC_SERVICE_HANDLE_TRIM;
+
+typedef enum {
+  GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED = 0,
+  GC_SERVICE_HANDLE_SYS_SERVER_ALLOWED = 1
+} GC_SERVICE_HANDLE_SYS_SERVER;
 
 //typedef struct GCServiceClientHandShake_S {
 //  SynchronizedLockHead lock_;
@@ -125,7 +142,7 @@ typedef struct GCServiceHeader_S {
   InterProcessConditionVariable* cond_;
   GCSrvcPhysicalState global_state_;
   pid_t service_pid_;
-  GC_SERVICE_STATUS service_status_;
+//  GC_SERVICE_STATUS service_status_;
 } __attribute__((aligned(8))) GCServiceHeader;
 
 
@@ -165,12 +182,26 @@ class GCSrvcClientHandShake {
 
 }; //class GCSrvcClientHandShake
 
-
+typedef struct GCSrvc_Options_S {
+  std::string gcservc_conf_path_;
+  std::string gcservc_apps_list_path_;
+  double fgd_growth_mutiplier_;
+  /* control strategies regarding trimming */
+  int trim_conf_;
+  /* control strategies to share zygote space */
+  int share_zygote_space_;
+  /* control strategies to fwd GC allocatoion to GCDaemon */
+  int fwd_gc_alloc_;
+  /* page capacity of the global allocator*/
+  int page_capacity_;
+  /* should we handle system server by the GCService? */
+  int handle_system_server_;
+} GCSrvc_Options;
 
 class GCServiceGlobalAllocator {
  public:
-  static const int kGCServiceFWDAllocationGC = GC_SERVICE_HANDLE_ALLOC_DAEMON;
-  static const int KGCServiceShareZygoteSpace = 3;
+  //static const int kGCServiceFWDAllocationGC = GC_SERVICE_HANDLE_ALLOC_DAEMON;
+  //static const int KGCServiceShareZygoteSpace = 3;
   static GCServiceGlobalAllocator* CreateServiceAllocator(void);
   static space::GCSrvSharableDlMallocSpace* GCSrvcAllocateSharableSpace(int* index_p);
   static bool ShouldForkService(void);
@@ -179,20 +210,48 @@ class GCServiceGlobalAllocator {
   static bool ShouldNotifyForZygoteForkRelease(void);
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
+  static int GetTrimConfig(void);
+  bool isTrimHandlingEnabled(void) const {
+    return (srvc_options_.trim_conf_ == GC_SERVICE_HANDLE_TRIM_ALLOWED);
+  }
   static GCServiceHeader* GetServiceHeader(void);
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
-  static int GCPAllowSharedMemMaps;
+  static void GCSrvcNotifySystemServer();
+  static bool GCSrvcIsSharingSpacesEnabled();
+  static bool GCSrvcOption(const std::string&);
+
+  void InitGCSrvcOptions(void);
+
+  //static int GCPAllowSharedMemMaps;
+
+  GCSrvc_Options srvc_options_;
 
   GCSrvcClientHandShake* handShake_;
   static GCServiceGlobalAllocator* allocator_instant_;
+
+
+
+  bool fwdGCAllocation() const {
+    return (srvc_options_.fwd_gc_alloc_ == GC_SERVICE_HANDLE_ALLOC_DAEMON);
+  }
+
+  bool shareZygoteSpace() const {
+    return ((srvc_options_.share_zygote_space_ & GC_SERVICE_SHARE_SPACES_ZYGOTE) > 0);
+  }
+
+  bool shareHeapBitmapsSpace() const {
+    return ((srvc_options_.share_zygote_space_ & GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS) > 0);
+  }
+
  private:
-  static const int   kGCServicePageCapacity = 64;
+  //static const int   kGCServicePageCapacity = 64;
 
   GCSrvcGlobalRegionHeader* region_header_;
+  int sharing_stage;
 
 
   // constructor
-  GCServiceGlobalAllocator(int pages);
+  GCServiceGlobalAllocator(/*int pages*/);
   byte* AllocateSharableSpace(int* index_p);
   void initServiceHeader(void);
   void RaiseSemaphore();
@@ -317,21 +376,25 @@ public:
 };//class GCServiceDaemon
 
 
+
+
+
 class GCServiceProcess {
 public:
-  static GCServiceProcess* InitGCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
+  static GCServiceProcess* InitGCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*, int);
   static void LaunchGCServiceProcess(void);
   GCServiceHeader* service_meta_;
   GCSrvcClientHandShake* handShake_;
   GCServiceDaemon* daemon_;
   static GCServiceProcess* process_;
   byte* import_address_;
-
+  int enable_trimming_;
 private:
 
 
   bool initSvcFD(void);
-  GCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*);
+  GCServiceProcess(GCServiceHeader*, GCSrvcClientHandShake*,
+                   int enable_trim);
   void SetGCDaemon(void);
 
 

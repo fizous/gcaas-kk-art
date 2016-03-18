@@ -24,7 +24,10 @@ GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 
 GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
-    int index) : index_(index), sharable_space_(sharable_space) {
+    int index, int enable_trim) :
+        index_(index),
+        enable_trimming_(enable_trim),
+        sharable_space_(sharable_space) {
   if(true) {
 
     //Thread* self = Thread::Current();
@@ -71,7 +74,11 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
 
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   int _index = 0;
-  if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 0) {
+
+  gc::gcservice::GCServiceGlobalAllocator* _alloc =
+        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+
+  if(_alloc->shareZygoteSpace()) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
         &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.zygote_space_));
   }
@@ -83,7 +90,8 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
       &(sharable_space_->sharable_space_data_->mark_bitmap_.mem_map_));
   FillAshMemMapData(&rec->mem_maps_[_index++],
       &(sharable_space_->sharable_space_data_->live_bitmap_.mem_map_));
-  if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+
+  if(_alloc->shareHeapBitmapsSpace()) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
         &(sharable_space_->sharable_space_data_->heap_meta_.reshared_zygote_.mark_bitmap_.mem_map_));
     FillAshMemMapData(&rec->mem_maps_[_index++],
@@ -194,12 +202,12 @@ bool GCServiceClient::RequestAllocateGC(void) {
   gc::gcservice::GCServiceGlobalAllocator* _alloc =
         gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
 
-  if(gc::gcservice::GCServiceGlobalAllocator::kGCServiceFWDAllocationGC ==
-      gc::gcservice::GC_SERVICE_HANDLE_ALLOC_DAEMON) { // we need to fwd this to daemon
+  if(_alloc->fwdGCAllocation()) { // we need to fwd this to daemon
     _alloc->handShake_->ReqAllocationGC();
     return true;
   }
 
+  return false;
 }
 
 
@@ -252,7 +260,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 void GCServiceClient::RequestHeapTrim(void) {
   if(service_client_ == NULL)
     return;
-  if(kEnableTrimming_ == 0)
+  if(!service_client_->isTrimRequestsEnabled())
     return;
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
   IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";

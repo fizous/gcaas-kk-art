@@ -34,13 +34,103 @@ namespace gc {
 namespace gcservice{
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
-int GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
+//int GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
+
+void GCServiceGlobalAllocator::InitGCSrvcOptions() {
+
+  srvc_options_.fgd_growth_mutiplier_ = 1.5;
+  srvc_options_.trim_conf_ = GC_SERVICE_HANDLE_TRIM_ALLOWED;
+  // By default share the three spaces
+  srvc_options_.share_zygote_space_ =
+      GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS | GC_SERVICE_SHARE_SPACES_ZYGOTE |
+      GC_SERVICE_SHARE_SPACES_ALLOC;
+  srvc_options_.fwd_gc_alloc_ = GC_SERVICE_HANDLE_ALLOC_DAEMON;
+  srvc_options_.page_capacity_ = 64;
+  srvc_options_.handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
+  srvc_options_.gcservc_apps_list_path_("/data/anr/srvc_benchmarks");
+
+  const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
+  if(_conf_path == NULL) {
+    LOG(ERROR) << "Configuration Path is NULL";
+    return;
+  }
+  srvc_options_.gcservc_conf_path_ = _conf_path;
+  std::vector<std::string> _conf_list;
+  std::string _file_lines;
+  if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
+    LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_conf_path_ << ")\n";
+
+    return;
+  }
+  Split(_file_lines, '\n', _conf_list);
+  for(auto& option: _conf_list) {
+    GCServiceGlobalAllocator::GCSrvcOption(option);
+  }
+
+
+}
+
+
+bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option) {
+  if (StartsWith(option, "-Xgcsrvc.")) {
+    std::vector<std::string> gcsrvc_options;
+    Split(option.substr(strlen("-Xgcsrvc.")), '.', gcsrvc_options);
+    for (size_t i = 0; i < gcsrvc_options.size(); ++i) {
+      if (gcsrvc_options[i] == "fgd_growth_") {
+        srvc_options_.fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
+        return true;
+      } else if (gcsrvc_options[i] == "trim") {
+        srvc_options_.trim_conf_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "share_zygote") {
+        srvc_options_.share_zygote_space_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "fwd_gc_alloc") {
+        srvc_options_.fwd_gc_alloc_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "page_capacity") {
+        srvc_options_.page_capacity_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "handle_system_server") {
+        srvc_options_.handle_system_server_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
+  if(allocator_instant_ == NULL) {
+    return false;
+  }
+  int _gc_srvc_status =
+      android_atomic_release_load(&allocator_instant_->region_header_->service_header_.status_);
+  return ((GCSERVICE_STATUS_SYS_SERVER_CREATED & _gc_srvc_status) > 0);
+}
+
+void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
+  if(allocator_instant_ == NULL) {
+    return;
+  }
+  Thread* self = Thread::Current();
+  IPMutexLock interProcMu(self, *allocator_instant_->region_header_->service_header_.mu_);
+  GCServiceHeader* _header = &(allocator_instant_->region_header_->service_header_);
+  int _status = 0;
+  int _expected = GCSERVICE_STATUS_RUNNING;
+  int _new_status = 0;
+  do {
+    _status = _header->status_;
+    _new_status = (*_status) | GCSERVICE_STATUS_SYS_SERVER_CREATED;
+  } while(android_atomic_cas(_expected, _new_status, &_header->status_) != 0);
+}
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void) {
   if(allocator_instant_ != NULL) {
     return allocator_instant_;
   }
-  allocator_instant_ = new GCServiceGlobalAllocator(kGCServicePageCapacity);
+  allocator_instant_ = new GCServiceGlobalAllocator(/*kGCServicePageCapacity*/);
 
 
   return allocator_instant_;
@@ -144,7 +234,7 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   _header_addr->status_ = GCSERVICE_STATUS_NONE;
   _header_addr->counter_ = 0;
 
-  _header_addr->service_status_ = GCSERVICE_STATUS_NONE;
+  //_header_addr->service_status_ = GCSERVICE_STATUS_NONE;
   SharedFutexData* _futexAddress = &_header_addr->lock_.futex_head_;
   SharedConditionVarData* _condAddress = &_header_addr->lock_.cond_var_;
 
@@ -159,13 +249,18 @@ void GCServiceGlobalAllocator::initServiceHeader(void) {
   handShake_ = new GCSrvcClientHandShake(&(region_header_->gc_handshake_));
 }
 
-GCServiceGlobalAllocator::GCServiceGlobalAllocator(int pages) :
+GCServiceGlobalAllocator::GCServiceGlobalAllocator(/*int pages*/) :
     handShake_(NULL), region_header_(NULL) {
   int prot = PROT_READ | PROT_WRITE;
   int fileDescript = -1;
-  size_t memory_size = pages * kPageSize;
+  InitGCSrvcOptions();
+
+  size_t memory_size = srvc_options_.page_capacity_ * kPageSize;
+
   int flags = MAP_SHARED;
+
   fileDescript = ashmem_create_region("GlobalAllocator", memory_size);
+
   byte* begin =
       reinterpret_cast<byte*>(mmap(NULL, memory_size, prot, flags,
            fileDescript, 0));
@@ -200,6 +295,10 @@ GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
 
 GCSrvcClientHandShake* GCServiceGlobalAllocator::GetServiceHandShaker(void) {
   return (GCServiceGlobalAllocator::allocator_instant_->handShake_);
+}
+
+int GCServiceGlobalAllocator::GetTrimConfig(void) {
+  return GCServiceGlobalAllocator::allocator_instant_->srvc_options_.trim_conf_;
 }
 
 byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
@@ -740,8 +839,10 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 //        _req_type << " ~~~~~ " << _entry->req_type_;
     GCSrvceAgent* _agent =
         GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    if(art::gcservice::GCServiceClient::kEnableTrimming_ > 0)
+
+    if(GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
       _agent->collector_->SignalCollector(GC_SERVICE_TASK_TRIM);
+    }
   } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
     GCSERVICE_ALLOC_VLOG(ERROR) << " processing Allocation GC Request ~~~~ Request type: " <<
         _req_type << " ~~~~~ " << _entry->req_type_;
