@@ -177,19 +177,17 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
 
 
 bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
-  if(allocator_instant_ == NULL) {
-    return false;
-  }
-
-  for (size_t i = 0; i < allocator_instant_->app_list_.size(); i++) {
-    if (strcmp(se_name_c_str, allocator_instant_->app_list_[i].c_str()) == 0) {
-      LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
-      return true;
-      //android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
+  if(allocator_instant_ != NULL) {
+    for (size_t i = 0; i < allocator_instant_->app_list_.size(); i++) {
+      if (strcmp(se_name_c_str, allocator_instant_->app_list_[i].c_str()) == 0) {
+        LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
+        return true;
+        //android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
+      }
     }
   }
 
-  return true;
+  return false;
 }
 
 void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
