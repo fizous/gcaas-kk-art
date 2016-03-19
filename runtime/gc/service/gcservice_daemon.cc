@@ -193,6 +193,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     return;
   }
   GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
+  close(fd);
   LOG(ERROR)<< "--------------------------------------";
 
 
