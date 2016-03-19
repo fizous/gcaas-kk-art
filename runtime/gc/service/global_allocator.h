@@ -389,6 +389,7 @@ public:
   static GCServiceProcess* process_;
   byte* import_address_;
   int enable_trimming_;
+  android::FileMapperService* fileMapperSvc_;
 private:
 
 
@@ -399,7 +400,7 @@ private:
 
 
 
-  android::FileMapperService* fileMapperSvc_;
+
 
 
   Thread*   thread_;
