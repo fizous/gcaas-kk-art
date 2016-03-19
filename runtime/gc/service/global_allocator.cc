@@ -49,7 +49,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   opts_addr->fwd_gc_alloc_ = GC_SERVICE_HANDLE_ALLOC_DAEMON;
   opts_addr->page_capacity_ = 64;
   opts_addr->handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
-  opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/benchmarks/srvc_benchmarks");
+  opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/benchmarks/srvc_benchmarks.list");
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
   if(_conf_path != NULL) {
@@ -186,7 +186,6 @@ bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
       }
     }
   }
-
   return false;
 }
 
