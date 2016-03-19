@@ -52,22 +52,31 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/srvc_benchmarks");
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
-  if(_conf_path == NULL) {
-    LOG(ERROR) << "Configuration Path is NULL";
-    return;
-  }
-  opts_addr->gcservc_conf_path_ = _conf_path;
-  std::vector<std::string> _conf_list;
-  std::string _file_lines;
-  if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
-    LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_conf_path_ << ")\n";
+  if(_conf_path != NULL) {
+    LOG(ERROR) << "Configuration Path is no NULL.." <<  _conf_path;
 
-    return;
+    opts_addr->gcservc_conf_path_ = _conf_path;
+    std::vector<std::string> _conf_list;
+    std::string _file_lines;
+    if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
+      LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_conf_path_ << ")\n";
+    } else {
+      Split(_file_lines, '\n', _conf_list);
+      for(auto& option: _conf_list) {
+        GCServiceGlobalAllocator::GCSrvcOption(option, opts_addr);
+      }
+    }
   }
-  Split(_file_lines, '\n', _conf_list);
-  for(auto& option: _conf_list) {
-    GCServiceGlobalAllocator::GCSrvcOption(option, opts_addr);
+
+  std::string _apps_file_lines;
+  if (!ReadFileToString(srvc_options_.gcservc_apps_list_path_, &_apps_file_lines)) {
+    LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_apps_list_path_ << ")\n";
+  } else {
+    LOG(ERROR) << "applications List: " << _apps_file_lines;
+    Split(_apps_file_lines, '\n', app_list_);
   }
+
+
 
   LOG(ERROR) << ">>>>>>>>GCServiceGlobalAllocator::InitGCSrvcOptions<<<<<<<<";
 
@@ -171,6 +180,15 @@ bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
   if(allocator_instant_ == NULL) {
     return false;
   }
+
+  for (size_t i = 0; i < allocator_instant_->app_list_.size(); i++) {
+    if (strcmp(se_name_c_str, allocator_instant_->app_list_[i].c_str()) == 0) {
+      LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
+      return true;
+      //android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
+    }
+  }
+
   return true;
 }
 

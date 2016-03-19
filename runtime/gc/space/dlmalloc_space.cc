@@ -31,6 +31,11 @@
 #include "gc/accounting/space_bitmap.h"
 
 #include "gc_profiler/MProfiler.h"
+
+#if (ART_GC_SERVICE || true)
+using ::art::gc::gcservice::GCServiceGlobalAllocator;
+#endif
+
 namespace art {
 
 namespace mprofiler {
@@ -39,6 +44,9 @@ namespace mprofiler {
 
 
 namespace gc {
+
+
+
 namespace space {
 
 // TODO: Remove define macro
@@ -896,8 +904,8 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateSharableZygoteSpace(const char* alloc_spa
     _struct_alloc_space = SharableDlMallocSpace::AllocateDataMemory();
   }
 
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+        GCServiceGlobalAllocator::allocator_instant_;
 
 
   if(_alloc->shareZygoteSpace() && shareMem) { // share the zygote space
@@ -1139,13 +1147,19 @@ bool SharableDlMallocSpace::CreateSharableBitmaps(byte* heap_begin,
 
 
 bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
-  for (size_t i = 0; i < app_list_.size(); i++) {
-    if (strcmp(se_name_c_str, app_list_[i].c_str()) == 0) {
-      LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
-      android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
-      return true;
-    }
+  bool _result = GCServiceGlobalAllocator::ShouldRegisterApp(se_name_c_str);
+  if(_result) {
+    android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
   }
+  return _result;
+
+//  for (size_t i = 0; i < app_list_.size(); i++) {
+//    if (strcmp(se_name_c_str, app_list_[i].c_str()) == 0) {
+//      LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
+//
+//      return true;
+//    }
+//  }
 //  if(/*true ||*/ ((strcmp(se_name_c_str, "com.aurorasoftworks.quadrant.ui.professional") == 0) ||
 //      (strcmp(se_name_c_str, "purdue.dacapo") == 0)
 //      ||(strcmp(se_name_c_str, "com.pandora.android") == 0))) {
@@ -1167,9 +1181,9 @@ bool SharableDlMallocSpace::RegisterGlobalCollector(const char* se_name_c_str) {
 //  } else {
 //
 //  }
-  IPC_MS_VLOG(INFO) << " ------ Ignoring Process with Global Collector ------- (" <<
-      se_name_c_str << ")";
-  return false;
+//  IPC_MS_VLOG(INFO) << " ------ Ignoring Process with Global Collector ------- (" <<
+//      se_name_c_str << ")";
+//  return false;
 }
 
 #endif
