@@ -188,7 +188,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   }
 
 
-  GCServiceProcess::process_->fileMapperSvc_.UpdateMemInfo();
+  GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo();
   LOG(ERROR)<< "--------------------------------------";
 
 
