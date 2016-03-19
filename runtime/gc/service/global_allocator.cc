@@ -36,25 +36,25 @@ namespace gcservice{
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
 //int GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
 
-void GCServiceGlobalAllocator::InitGCSrvcOptions() {
+void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
-  srvc_options_.fgd_growth_mutiplier_ = 1.5;
-  srvc_options_.trim_conf_ = GC_SERVICE_HANDLE_TRIM_ALLOWED;
+  opts_addr->fgd_growth_mutiplier_ = 1.5;
+  opts_addr->trim_conf_ = GC_SERVICE_HANDLE_TRIM_ALLOWED;
   // By default share the three spaces
-  srvc_options_.share_zygote_space_ =
+  opts_addr->share_zygote_space_ =
       GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS | GC_SERVICE_SHARE_SPACES_ZYGOTE |
       GC_SERVICE_SHARE_SPACES_ALLOC;
-  srvc_options_.fwd_gc_alloc_ = GC_SERVICE_HANDLE_ALLOC_DAEMON;
-  srvc_options_.page_capacity_ = 64;
-  srvc_options_.handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
-  srvc_options_.gcservc_apps_list_path_("/data/anr/srvc_benchmarks");
+  opts_addr->fwd_gc_alloc_ = GC_SERVICE_HANDLE_ALLOC_DAEMON;
+  opts_addr->page_capacity_ = 64;
+  opts_addr->handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
+  opts_addr->gcservc_apps_list_path_("/data/anr/srvc_benchmarks");
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
   if(_conf_path == NULL) {
     LOG(ERROR) << "Configuration Path is NULL";
     return;
   }
-  srvc_options_.gcservc_conf_path_ = _conf_path;
+  opts_addr->gcservc_conf_path_ = _conf_path;
   std::vector<std::string> _conf_list;
   std::string _file_lines;
   if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
@@ -64,35 +64,35 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions() {
   }
   Split(_file_lines, '\n', _conf_list);
   for(auto& option: _conf_list) {
-    GCServiceGlobalAllocator::GCSrvcOption(option);
+    GCServiceGlobalAllocator::GCSrvcOption(option, opts_addr);
   }
 
 
 }
 
 
-bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option) {
+bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Options* opts_addr) {
   if (StartsWith(option, "-Xgcsrvc.")) {
     std::vector<std::string> gcsrvc_options;
     Split(option.substr(strlen("-Xgcsrvc.")), '.', gcsrvc_options);
     for (size_t i = 0; i < gcsrvc_options.size(); ++i) {
       if (gcsrvc_options[i] == "fgd_growth_") {
-        srvc_options_.fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
+        opts_addr->fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
         return true;
       } else if (gcsrvc_options[i] == "trim") {
-        srvc_options_.trim_conf_ = atoi(gcsrvc_options[++i].c_str());
+        opts_addr->trim_conf_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       } else if (gcsrvc_options[i] == "share_zygote") {
-        srvc_options_.share_zygote_space_ = atoi(gcsrvc_options[++i].c_str());
+        opts_addr->share_zygote_space_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       } else if (gcsrvc_options[i] == "fwd_gc_alloc") {
-        srvc_options_.fwd_gc_alloc_ = atoi(gcsrvc_options[++i].c_str());
+        opts_addr->fwd_gc_alloc_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       } else if (gcsrvc_options[i] == "page_capacity") {
-        srvc_options_.page_capacity_ = atoi(gcsrvc_options[++i].c_str());
+        opts_addr->page_capacity_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       } else if (gcsrvc_options[i] == "handle_system_server") {
-        srvc_options_.handle_system_server_ = atoi(gcsrvc_options[++i].c_str());
+        opts_addr->handle_system_server_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       }
     }
@@ -253,7 +253,7 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(/*int pages*/) :
     handShake_(NULL), region_header_(NULL) {
   int prot = PROT_READ | PROT_WRITE;
   int fileDescript = -1;
-  InitGCSrvcOptions();
+  InitGCSrvcOptions(&srvc_options_);
 
   size_t memory_size = srvc_options_.page_capacity_ * kPageSize;
 
