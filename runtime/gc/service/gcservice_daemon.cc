@@ -15,6 +15,8 @@
 #include "mem_map.h"
 
 
+
+using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
 namespace gc {
 namespace gcservice {
@@ -64,7 +66,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
     _daemonObj->UpdateGlobalState();
-    if(false) {
+    if(true) {
       _daemonObj->UpdateGlobalProcessStates();
     }
     _daemonObj->mainLoop();
@@ -155,6 +157,9 @@ static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
   return true;
 }
 void GCServiceDaemon::UpdateGlobalProcessStates(void) {
+
+
+
   LOG(ERROR)<< "--------------------------------------";
   Thread* self = Thread::Current();
   JNIEnvExt* env = self->GetJniEnv();
@@ -181,6 +186,12 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
                  << " to set of states which care about pause time";
     }
   }
+
+
+  GCServiceProcess::process_->fileMapperSvc_.UpdateMemInfo();
+  LOG(ERROR)<< "--------------------------------------";
+
+
 }
 
 
@@ -227,7 +238,7 @@ void GCServiceDaemon::mainLoop(void) {
 GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.pair_mapps_ = mappedPair;
   binding_.sharable_space_ =
-      reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(
+      reinterpret_cast<GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
 //  binding_.java_lang_Class_cached_ =
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
