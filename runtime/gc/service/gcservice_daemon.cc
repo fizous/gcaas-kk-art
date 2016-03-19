@@ -55,7 +55,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
-    _processObj->service_meta_->status_ |= GCSERVICE_STATUS_RUNNING;
+    _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
     _processObj->service_meta_->cond_->Broadcast(self);
   }
 
