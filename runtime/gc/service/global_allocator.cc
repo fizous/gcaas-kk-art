@@ -117,6 +117,7 @@ bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
 void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
   LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::GCSrvcNotifySystemServer>>>>>>>>";
   if(allocator_instant_ == NULL) {
+    LOG(ERROR) << ">>>>>GCServiceGlobalAllocator::GCSrvcNotifySystemServer<<<<<< allocator instant is null";
     return;
   }
   Thread* self = Thread::Current();
@@ -125,6 +126,8 @@ void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
   int _status = 0;
   int _expected = GCSERVICE_STATUS_RUNNING;
   int _new_status = 0;
+  LOG(ERROR) << "GCServiceGlobalAllocator::GCSrvcNotifySystemServer--->_expected:"
+      << _expected << ", _status:" << _header->status_;
   do {
     _status = _header->status_;
     _new_status = (_status | GCSERVICE_STATUS_SYS_SERVER_CREATED);
