@@ -253,7 +253,8 @@ bool Runtime::GCSrvcePreZygoteFork() {
 }
 
 void Runtime::RegisterCollector(const char* se_name_c_str) {
-  gcservice::GCServiceClient::InitClient(se_name_c_str);
+  gcservice::GCServiceClient::InitClient(se_name_c_str,
+                                         gc::gcservice::GCServiceGlobalAllocator::GetTrimConfig());
 }
 
 

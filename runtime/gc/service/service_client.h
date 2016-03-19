@@ -26,7 +26,7 @@ class GCServiceClient {
  public:
   static GCServiceClient* service_client_;
 
-  static void InitClient(const char* se_name_c_str);
+  static void InitClient(const char* se_name_c_str, int trim_config);
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
   static bool RequestExplicitGC(void);
@@ -52,9 +52,9 @@ class GCServiceClient {
   }
  private:
   GCServiceClient(gc::space::SharableDlMallocSpace*, int, int);
-  gc::space::SharableDlMallocSpace* sharable_space_;
   int index_;
   int enable_trimming_;
+  gc::space::SharableDlMallocSpace* sharable_space_;
   //gc::collector::IPCMarkSweep* collector_;
   gc::collector::IPCHeap* ipcHeap_;
 

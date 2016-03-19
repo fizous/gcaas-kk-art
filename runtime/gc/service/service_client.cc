@@ -27,7 +27,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index, int enable_trim) :
         index_(index),
         enable_trimming_(enable_trim),
-        sharable_space_(sharable_space) {
+        sharable_space_(sharable_space){
   if(true) {
 
     //Thread* self = Thread::Current();
@@ -107,7 +107,7 @@ void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
 }
 
 
-void GCServiceClient::InitClient(const char* se_name_c_str) {
+void GCServiceClient::InitClient(const char* se_name_c_str, int trim_config) {
   //Thread* self = Thread::Current();
 
   Runtime* runtime = Runtime::Current();
@@ -133,7 +133,7 @@ void GCServiceClient::InitClient(const char* se_name_c_str) {
     if(result) {
       IPC_MS_VLOG(INFO) << " {InitClient} ";
       service_client_ = new GCServiceClient(_sharable_space,
-          _sharable_space->GetSpaceIndex());
+          _sharable_space->GetSpaceIndex(), trim_config);
     }
   }
   thread_list->ResumeAll();
