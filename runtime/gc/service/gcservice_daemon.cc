@@ -287,8 +287,8 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
                                   int enable_trim)  :
     service_meta_(meta),
     handShake_(handShakeMemory),
-    fileMapperSvc_(NULL),
     enable_trimming_(enable_trim),
+    fileMapperSvc_(NULL),
     thread_(NULL), srvcReady_(false){
 
   thread_ = Thread::Current();
