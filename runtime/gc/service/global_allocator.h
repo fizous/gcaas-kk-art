@@ -219,7 +219,7 @@ class GCServiceGlobalAllocator {
   static void GCSrvcNotifySystemServer();
   static bool GCSrvcIsSharingSpacesEnabled();
   static bool GCSrvcOption(const std::string&, GCSrvc_Options*);
-
+  static bool ShouldRegisterApp(const char* se_name_c_str);
   void InitGCSrvcOptions(GCSrvc_Options* opts_addr);
 
   //static int GCPAllowSharedMemMaps;
@@ -247,7 +247,7 @@ class GCServiceGlobalAllocator {
   //static const int   kGCServicePageCapacity = 64;
 
   GCSrvcGlobalRegionHeader* region_header_;
-
+  std::vector<std::string> app_list_;
 
 
   // constructor

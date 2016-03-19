@@ -38,6 +38,8 @@ GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
 
 void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
+  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::InitGCSrvcOptions>>>>>>>>";
+
   opts_addr->fgd_growth_mutiplier_ = 1.5;
   opts_addr->trim_conf_ = GC_SERVICE_HANDLE_TRIM_ALLOWED;
   // By default share the three spaces
@@ -67,6 +69,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
     GCServiceGlobalAllocator::GCSrvcOption(option, opts_addr);
   }
 
+  LOG(ERROR) << ">>>>>>>>GCServiceGlobalAllocator::InitGCSrvcOptions<<<<<<<<";
 
 }
 
@@ -102,6 +105,7 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
 
 
 bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
+  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled>>>>>>>>";
   if(allocator_instant_ == NULL) {
     return false;
   }
@@ -111,6 +115,7 @@ bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
 }
 
 void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
+  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::GCSrvcNotifySystemServer>>>>>>>>";
   if(allocator_instant_ == NULL) {
     return;
   }
@@ -124,6 +129,8 @@ void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
     _status = _header->status_;
     _new_status = (_status | GCSERVICE_STATUS_SYS_SERVER_CREATED);
   } while(android_atomic_cas(_expected, _new_status, &_header->status_) != 0);
+
+  LOG(ERROR) << ">>>>>>>>GCServiceGlobalAllocator::GCSrvcNotifySystemServer<<<<<<<<";
 }
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void) {
@@ -156,6 +163,13 @@ bool GCServiceGlobalAllocator::ShouldForkService() {
   return false;
 }
 
+
+bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
+  if(allocator_instant_ == NULL) {
+    return false;
+  }
+  return true;
+}
 
 void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   Thread* self = Thread::Current();
