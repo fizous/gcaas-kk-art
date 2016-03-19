@@ -285,8 +285,11 @@ bool GCServiceProcess::initSvcFD(void) {
 GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
                                   GCSrvcClientHandShake* handShakeMemory,
                                   int enable_trim)  :
-    service_meta_(meta), handShake_(handShakeMemory), fileMapperSvc_(NULL),
-    thread_(NULL), enable_trimming_(enable_trim), srvcReady_(false){
+    service_meta_(meta),
+    handShake_(handShakeMemory),
+    fileMapperSvc_(NULL),
+    enable_trimming_(enable_trim),
+    thread_(NULL), srvcReady_(false){
 
   thread_ = Thread::Current();
   {
