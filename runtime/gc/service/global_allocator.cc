@@ -122,7 +122,7 @@ void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
   int _new_status = 0;
   do {
     _status = _header->status_;
-    _new_status = (*_status) | GCSERVICE_STATUS_SYS_SERVER_CREATED;
+    _new_status = (_status | GCSERVICE_STATUS_SYS_SERVER_CREATED);
   } while(android_atomic_cas(_expected, _new_status, &_header->status_) != 0);
 }
 

@@ -287,7 +287,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   double adjusted_max_free = 1.0;
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, &adjusted_max_free);
 
-  if(art::gcservice::GCServiceClient::kEnableTrimming_ > 0)
+  if(art::gcservice::GCServiceClient::service_client_->isTrimRequestsEnabled())
     return local_heap_->RequestHeapTrimIfNeeded(adjusted_max_free, true);
   return false;
 #if 0
