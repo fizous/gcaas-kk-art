@@ -187,8 +187,12 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     }
   }
 
-
-  GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo();
+  int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
+  if (fd == -1) {
+    PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
+    return;
+  }
+  GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
   LOG(ERROR)<< "--------------------------------------";
 
 
