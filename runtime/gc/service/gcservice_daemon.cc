@@ -55,14 +55,14 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
-    _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
+    _processObj->service_meta_->status_ |= GCSERVICE_STATUS_RUNNING;
     _processObj->service_meta_->cond_->Broadcast(self);
   }
 
   IPC_MS_VLOG(INFO) << "GCServiceDaemon is entering the main loop: " <<
       _daemonObj->thread_->GetTid();
 
-  while(_processObj->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
+  while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
     _daemonObj->UpdateGlobalState();
     _daemonObj->UpdateGlobalProcessStates();
     _daemonObj->mainLoop();
@@ -286,7 +286,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
                                   GCSrvcClientHandShake* handShakeMemory,
                                   int enable_trim)  :
     service_meta_(meta), handShake_(handShakeMemory), fileMapperSvc_(NULL),
-    thread_(NULL), srvcReady_(false), enable_trimming_(enable_trim) {
+    thread_(NULL), enable_trimming_(enable_trim), srvcReady_(false){
 
   thread_ = Thread::Current();
   {
