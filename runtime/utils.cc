@@ -119,6 +119,22 @@ bool ReadFileToString(const std::string& file_name, std::string* result) {
   }
 }
 
+
+
+bool ReadFileToString(int file_descr, std::string* result) {
+  std::vector<char> buf(8 * KB);
+  while (true) {
+    int64_t n = TEMP_FAILURE_RETRY(read(file_descr, &buf[0], buf.size()));
+    if (n == -1) {
+      return false;
+    }
+    if (n == 0) {
+      return true;
+    }
+    result->append(&buf[0], n);
+  }
+}
+
 std::string GetIsoDate() {
   time_t now = time(NULL);
   tm tmbuf;

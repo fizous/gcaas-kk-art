@@ -276,6 +276,7 @@ std::string JniLongName(const mirror::ArtMethod* m)
 
 bool ReadFileToString(const std::string& file_name, std::string* result);
 
+bool ReadFileToString(int file_descr, std::string* result);
 // Returns the current date in ISO yyyy-mm-dd hh:mm:ss format.
 std::string GetIsoDate();
 

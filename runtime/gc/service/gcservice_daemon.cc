@@ -192,7 +192,20 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
     return;
   }
+
+  std::string _meminfo_lines;
   GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
+  if (!ReadFileToString(fd, &_meminfo_lines)) {
+    LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+  } else {
+    LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+  }
+
+
+
+
+
+
   close(fd);
   LOG(ERROR)<< "--------------------------------------";
 
