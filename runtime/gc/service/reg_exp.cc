@@ -16,10 +16,10 @@
 #endif
 typedef unsigned char		MYBOOL, UCHAR;		// Feel free to change boolean to 'int' or C++ 'bool'. 
 #if defined(HAVE_ANDROID_OS) || defined(__APPLE__) || defined(__MACH__)
-	typedef __int32_t			INT32;			// Android and iOS specific INT32. Feel free to switch to 64bits integer
+	typedef int32_t			INT32;			// Android and iOS specific INT32. Feel free to switch to 64bits integer
 	#define strcpy_s(dst,size,src)			strcpy(dst,src)			// Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
 #else
-	typedef signed   __int32    INT32;			// Windows
+	typedef signed   int32    INT32;			// Windows
 #endif
 
 /****************************************************************************/
