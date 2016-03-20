@@ -198,16 +198,16 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
 
   if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
-    fsync(fd);
+    close(fd);
     LOG(ERROR) << " HHHHH synchronizing the fd HHHHH";
-    if (!ReadFileToString(fd, &_meminfo_lines)) {
+    if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
          LOG(ERROR) << "(couldn't read dump of mem_info  \n";
        } else {
          LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
          std::vector<std::string> mem_info_dump;
          Split(_meminfo_lines, '\n', mem_info_dump);
        }
-    close(fd);
+
   } else {
     if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
       LOG(ERROR) << "(couldn't read dump of mem_info  \n";
