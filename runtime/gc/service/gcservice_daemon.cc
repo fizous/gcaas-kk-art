@@ -262,13 +262,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   }
 
   int stage_parsing = 0;
+  char _label[256];
+  long _memory_size;
+  int _pid;
   while (fgets(line, 256, f)) {
     if(!GCSrvcMemInfoOOM_skip_file(line, &stage_parsing))
       continue;
-    char _label[128];
-    long _memory_size;
-    int _pid;
-    if(stage_parsing == 3) {
+
+    if(false && stage_parsing == 3) {
       if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
         LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
         continue;
@@ -287,14 +288,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         continue;
       }
     }
-    if(stage_parsing == 4) {
+    if(false && stage_parsing == 4) {
       if(readTotalMemory(line) == 100) {
         stage_parsing = 5;
         LOG(ERROR) << "***** " <<  line;
         continue;
       }
     }
-    if(stage_parsing == 5) {
+    if(false && stage_parsing == 5) {
       if(readFreeMemory(line) == 100) {
         stage_parsing = 6;
         LOG(ERROR) << "***** " <<  line;
