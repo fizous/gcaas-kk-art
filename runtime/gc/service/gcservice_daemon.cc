@@ -221,7 +221,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   }
 
 
-  int _curr_index = 0;
+  //int _curr_index = 0;
 
   for(int i =0; i < 13; i++) {
     GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[i]);
