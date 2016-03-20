@@ -148,8 +148,7 @@ LIBART_COMMON_SRC_FILES += \
 	gc/service/service_client.cc \
 	gc/collector/ipc_server_sweep.cc \
 	gc/collector/ipc_mark_sweep.cc \
-	gc/service/server_collector.cc \
-	gc/service/reg_exp.cc
+	gc/service/server_collector.cc 
 
 endif
 

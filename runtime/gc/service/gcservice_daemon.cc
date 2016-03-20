@@ -195,7 +195,8 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
   std::string _meminfo_lines;
   GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
-  if (!ReadFileToString(fd, &_meminfo_lines)) {
+
+  if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
     LOG(ERROR) << "(couldn't read dump of mem_info  \n";
   } else {
     LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
@@ -203,7 +204,18 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     Split(_meminfo_lines, '\n', mem_info_dump);
   }
 
-  close(fd);
+//  if (!ReadFileToString(fd, &_meminfo_lines)) {
+//    LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+//  } else {
+//    LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+//    std::vector<std::string> mem_info_dump;
+//    Split(_meminfo_lines, '\n', mem_info_dump);
+//  }
+//
+//  int close_result = close(fd);
+//  if(close_result < 0) {
+//    LOG(ERROR) << "Closing file......";
+//  }
   LOG(ERROR)<< "--------------------------------------";
 
 
