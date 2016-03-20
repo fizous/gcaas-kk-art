@@ -90,19 +90,19 @@ typedef int (*SuffixFunc)(const char* pat, const char* sam,const char* endp);	//
 // Define the table of command (regex rules). For each id, it's length, type of command and processing function
 // Rules of commands: TYPE_CLOSE follows TYPE_OPEN immediately in command table
 static const Cmd cmd_tbl[] = {
-    '(', TYPE_OPEN|TYPE_RECURSION,		(void*)c_group,
-    ')', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL,        
-    '|', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL,        
-    '[', TYPE_OPEN,						(void*)c_option,     
-    ']', TYPE_CLOSE,					(void*)NULL,        
-    '{', TYPE_SUFFIX|TYPE_OPEN,			(void*)c_multi,    
-    '}', TYPE_CLOSE,					(void*)NULL,       
-    '*', TYPE_SUFFIX,					(void*)c_multi,    
-    '+', TYPE_SUFFIX,					(void*)c_multi,    
-    '?', TYPE_SUFFIX,					(void*)c_multi,    
-   '\\', TYPE_PREFIX,					(void*)c_extended, 
-    '.', TYPE_CHAR,						(void*)c_any,         
-      0, TYPE_CHAR,						(void*)c_achar,    
+    {'(', TYPE_OPEN|TYPE_RECURSION,		(void*)c_group},
+    {')', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL},
+    {'|', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL},
+    {'[', TYPE_OPEN,						(void*)c_option},
+    {']', TYPE_CLOSE,					(void*)NULL},
+    {'{', TYPE_SUFFIX|TYPE_OPEN,			(void*)c_multi},
+    {'}', TYPE_CLOSE,					(void*)NULL},
+    {'*', TYPE_SUFFIX,					(void*)c_multi},
+    {'+', TYPE_SUFFIX,					(void*)c_multi},
+    {'?', TYPE_SUFFIX,					(void*)c_multi},
+    {'\\', TYPE_PREFIX,					(void*)c_extended},
+    {'.', TYPE_CHAR,						(void*)c_any},
+    {0, TYPE_CHAR,						(void*)c_achar},
 };
 
 #define cmdLength(  cmd)		(1 + ((cmd)->attr&TYPE_PREFIX))		// All commands take 1 character + optional prefix character
