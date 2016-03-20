@@ -13,7 +13,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-#include "gc/service/reg_exp.h"
+//#include "gc/service/reg_exp.h"
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
