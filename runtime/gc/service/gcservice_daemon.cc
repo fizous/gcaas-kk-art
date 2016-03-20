@@ -233,7 +233,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     char _label[128];
     long _memory_size;
     if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
-      LOG(ERROR) << "---- " << line;
+      LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
     }
 #if 0
     while(_curr_index < 13) {
