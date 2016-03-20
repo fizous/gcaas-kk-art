@@ -16,8 +16,6 @@
 #include "runtime.h"
 #include "thread_pool.h"
 #include "gc/space/space.h"
-#include "utils/String16.h"
-#include "utils/Vector.h"
 
 #if (ART_GC_SERVICE || true)
 
@@ -377,7 +375,8 @@ public:
 
 
   void SetMemInfoDumpFile();
-  android::Vector<android::String16> mem_info_args_;
+  //android::Vector<android::String16> mem_info_args_;
+  static const char *mem_info_args_[];
 };//class GCServiceDaemon
 
 

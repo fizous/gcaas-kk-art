@@ -13,8 +13,6 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-#include "utils/Vector.h"
-#include "utils/String16.h"
 
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
@@ -166,7 +164,7 @@ void GCServiceDaemon::SetMemInfoDumpFile(void) {
     return;
   }
   mem_info_fd_ = fd;
-  mem_info_args_.add(android::String16("oom"));
+
 
 }
 
@@ -211,8 +209,9 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   std::string _meminfo_lines;
   bool mem_info_result =
       GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
-                                                                android::String16("meminfo"),
-                                                                mem_info_args_);
+                                                                "meminfo",
+                                                                mem_info_args_,
+                                                                1);
 
   if(mem_info_result) {
     if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
