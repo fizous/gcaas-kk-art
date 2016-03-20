@@ -125,7 +125,7 @@ static inline void init_regex_mechanism_private(void){
 	for (int i=0; i<128; i++)
 		get_cmd_byChar[i]		= end;						// Set the whole look up table to point to the default command
 	for (; cmd<end; cmd++)
-		get_cmd_byChar[cmd->id] = cmd;						// For all the real commands set an entry in the look up table
+		get_cmd_byChar[static_cast<unsigned char>(cmd->id)] = cmd;						// For all the real commands set an entry in the look up table
 	isInitialized = TRUE;
 }
 
