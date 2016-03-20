@@ -13,7 +13,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-
+#include "gc/service/reg_exp.h"
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
@@ -171,6 +171,16 @@ void GCSrvcMemInfoOOM::resetMemInfo() {
 int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
                                            long* mem_size) {
 
+  int length= 0;
+  const char* res;
+  char  output[256];
+  res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
+  if(length > 0) {
+    memcpy(output,res, length);
+    output[length] = '\0';
+
+    LOG(ERROR) << "regex::::::" << output;
+  }
   int result = sscanf(line, " %ld kB: %s",  mem_size, label);
 
   if(result == 2)
