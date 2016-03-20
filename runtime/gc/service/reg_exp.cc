@@ -20,6 +20,7 @@ typedef unsigned char		MYBOOL, UCHAR;		// Feel free to change boolean to 'int' o
 	#define strcpy_s(dst,size,src)			strcpy(dst,src)			// Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
 #else
 	typedef signed   int32    INT32;			// Windows
+  #define strcpy_s(dst,size,src)      strcpy(dst,src)     // Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
 #endif
 
 /****************************************************************************/
