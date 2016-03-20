@@ -191,7 +191,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 
 //  LOG(ERROR) << "the runtime is a compiler ? " <<
 //      Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
-  if(Runtime::Current()->IsZygote()) {
+  if(Runtime::Current()->IsZygote() && !Runtime::Current()->IsCompiler()) {
     //LOG(ERROR) << "Zygote Process: We will initialize the Global Allocator now";
     gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
    // LOG(ERROR) << "Zygote: Done initializing with global allocator";
