@@ -36,7 +36,7 @@ namespace gcservice{
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
 
 
-const char *GCServiceDaemon::mem_info_args_[] = {"oom"};
+const char *GCServiceDaemon::mem_info_args_[] = {"--oom"};
 //int GCServiceGlobalAllocator::GCPAllowSharedMemMaps = 0;
 
 void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
