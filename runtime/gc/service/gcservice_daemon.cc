@@ -318,8 +318,8 @@ int GCSrvcMemInfoOOM::readTotalMemory(char* line) {
 int GCSrvcMemInfoOOM::readFreeMemory(char* line) {
   int _index = 0;
   int result = sscanf(line, "Free RAM: %ld kB (%ld cached pss + %ld cached + %ld free)",
-                      free_ram_[_index++],free_ram_[_index],free_ram_[_index],
-                      free_ram_[_index],free_ram_[_index]);
+                      &free_ram_[_index], &free_ram_[_index+1], &free_ram_[_index+2],
+                      &free_ram_[_index+3]);
   if(result == 4 ) {
     return 100;
   }
