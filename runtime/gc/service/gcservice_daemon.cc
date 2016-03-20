@@ -167,21 +167,34 @@ void GCSrvcMemInfoOOM::resetMemInfo() {
 }
 
 
-
-int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
-                                           long* mem_size) {
+int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
+                                           long* mem_size, int* pid) {
 
   int length= 0;
   const char* res;
   char  output[256];
-  res =  regex_search("([0-9]+)[ \t\r\n\v\f]kB:", line/*"((a[Q]"*/, &length);
-  //res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
-  if(length > 0) {
-    memcpy(output,res, length);
-    output[length] = '\0';
+  int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
 
-    LOG(ERROR) << "regex::::::" << output << " ----- " << line;
-  }
+  if(result == 2)
+    return 1;
+  return 0;
+}
+
+
+int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
+                                           long* mem_size) {
+
+//  int length= 0;
+//  const char* res;
+//  char  output[256];
+  //res =  regex_search("([0-9]+)[ \t\r\n\v\f]kB:", line/*"((a[Q]"*/, &length);
+  //res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
+//  if(length > 0) {
+//    memcpy(output,res, length);
+//    output[length] = '\0';
+//
+//    LOG(ERROR) << "regex::::::" << output << " ----- " << line;
+//  }
   int result = sscanf(line, " %ld kB: %s",  mem_size, label);
 
   if(result == 2)
@@ -243,8 +256,11 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     LOG(ERROR) << "+++ " << line;
     char _label[128];
     long _memory_size;
+    int _pid;
     if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
       LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+    } else if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
+      LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
     }
 #if 0
     while(_curr_index < 13) {
