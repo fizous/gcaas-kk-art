@@ -13,7 +13,8 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-
+#include "utils/Vector.h"
+#include "utils/String16.h"
 
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
@@ -57,6 +58,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
+    _daemonObj->SetMemInfoDumpFile();
     _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
     _processObj->service_meta_->cond_->Broadcast(self);
   }
@@ -80,7 +82,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), processed_index_(0) {
+     thread_(NULL), processed_index_(0), mem_info_fd_(-1) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);
@@ -156,6 +158,19 @@ static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
   *out_value = env->GetStaticIntField(clz, field);
   return true;
 }
+
+void GCServiceDaemon::SetMemInfoDumpFile(void) {
+  int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
+  if (fd == -1) {
+    PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
+    return;
+  }
+  mem_info_fd_ = fd;
+  mem_info_args_.add(android::String16("oom"));
+
+}
+
+
 void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
 
@@ -187,36 +202,51 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     }
   }
 
-  int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
-  if (fd == -1) {
-    PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
-    return;
-  }
+//  int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
+//  if (fd == -1) {
+//    PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
+//    return;
+//  }
 
   std::string _meminfo_lines;
-  GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
+  bool mem_info_result =
+      GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
+                                                                android::String16("meminfo"),
+                                                                mem_info_args_);
 
-
-  if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
-    close(fd);
-    LOG(ERROR) << " HHHHH synchronizing the fd HHHHH";
-    if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
-         LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-       } else {
-         LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-         std::vector<std::string> mem_info_dump;
-         Split(_meminfo_lines, '\n', mem_info_dump);
-       }
-
-  } else {
-    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
-      LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-    } else {
-      LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-      std::vector<std::string> mem_info_dump;
-      Split(_meminfo_lines, '\n', mem_info_dump);
+  if(mem_info_result) {
+    if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
+      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
+        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+      } else {
+        LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+        std::vector<std::string> mem_info_dump;
+        Split(_meminfo_lines, '\n', mem_info_dump);
+      }
     }
   }
+
+
+//  if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
+//    close(fd);
+//    LOG(ERROR) << " HHHHH synchronizing the fd HHHHH ";
+//    if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
+//         LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+//       } else {
+//         LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+//         std::vector<std::string> mem_info_dump;
+//         Split(_meminfo_lines, '\n', mem_info_dump);
+//       }
+//
+//  } else {
+//    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
+//      LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+//    } else {
+//      LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+//      std::vector<std::string> mem_info_dump;
+//      Split(_meminfo_lines, '\n', mem_info_dump);
+//    }
+//  }
 
 //  if (!ReadFileToString(fd, &_meminfo_lines)) {
 //    LOG(ERROR) << "(couldn't read dump of mem_info  \n";

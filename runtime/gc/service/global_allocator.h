@@ -16,7 +16,8 @@
 #include "runtime.h"
 #include "thread_pool.h"
 #include "gc/space/space.h"
-
+#include "utils/String16.h"
+#include "utils/Vector.h"
 
 #if (ART_GC_SERVICE || true)
 
@@ -355,7 +356,7 @@ class GCServiceDaemon {
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
-
+  int mem_info_fd_;
   //std::vector<android::MappedPairProcessFD*> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
@@ -373,6 +374,10 @@ public:
   GCSrvceAgent* GetAgentByPid(int pid);
   void UpdateGlobalState(void);
   void UpdateGlobalProcessStates(void);
+
+
+  void SetMemInfoDumpFile();
+  android::Vector<android::String16> mem_info_args_;
 };//class GCServiceDaemon
 
 
