@@ -170,8 +170,6 @@ void GCSrvcMemInfoOOM::resetMemInfo() {
 
 int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
                                            long* mem_size) {
-  char _label[128];
-  long _memory_size;
 
   int result = sscanf(line, " %ld kB: %s",  mem_size, label);
 
