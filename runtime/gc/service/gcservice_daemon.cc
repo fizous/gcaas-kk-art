@@ -66,7 +66,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
     _daemonObj->UpdateGlobalState();
-    if(true) {
+    if(false) {
       _daemonObj->UpdateGlobalProcessStates();
     }
     _daemonObj->mainLoop();
@@ -199,12 +199,9 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     LOG(ERROR) << "(couldn't read dump of mem_info  \n";
   } else {
     LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+    std::vector<std::string> mem_info_dump;
+    Split(_meminfo_lines, '\n', mem_info_dump);
   }
-
-
-
-
-
 
   close(fd);
   LOG(ERROR)<< "--------------------------------------";
