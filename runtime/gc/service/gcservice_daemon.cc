@@ -196,12 +196,26 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   std::string _meminfo_lines;
   GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(fd);
 
-  if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
-    LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+
+  if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
+    fsync(fd);
+    LOG(ERROR) << " HHHHH synchronizing the fd HHHHH";
+    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
+         LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+       } else {
+         LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+         std::vector<std::string> mem_info_dump;
+         Split(_meminfo_lines, '\n', mem_info_dump);
+       }
+    close(fd);
   } else {
-    LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-    std::vector<std::string> mem_info_dump;
-    Split(_meminfo_lines, '\n', mem_info_dump);
+    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
+      LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+    } else {
+      LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+      std::vector<std::string> mem_info_dump;
+      Split(_meminfo_lines, '\n', mem_info_dump);
+    }
   }
 
 //  if (!ReadFileToString(fd, &_meminfo_lines)) {
