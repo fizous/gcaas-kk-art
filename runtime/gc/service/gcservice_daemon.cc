@@ -183,7 +183,7 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
     char _label[128];
     long _memory_size;
 
-    int result = sscanf(line, " %ld kB: %s",  &_memory_size, &_label);
+    int result = sscanf(line, " %ld kB: %s",  &_memory_size, _label);
     if(result == 2) {
       if(strcmp(_label, oom_label_) == 0) {
         parse_status_ = 1;
@@ -210,7 +210,7 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
 }
 
 
-int GCSrvcMemInfoOOM::parseMemInfo(char* file_path) {
+int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   FILE *f;
 
   char line[256];
