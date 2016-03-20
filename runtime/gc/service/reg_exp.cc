@@ -19,7 +19,7 @@ typedef unsigned char		MYBOOL, UCHAR;		// Feel free to change boolean to 'int' o
 	typedef int32_t			INT32;			// Android and iOS specific INT32. Feel free to switch to 64bits integer
 	#define strcpy_s(dst,size,src)			strcpy(dst,src)			// Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
 #else
-	typedef signed   int32    INT32;			// Windows
+	typedef int32_t    INT32;			// Windows
   #define strcpy_s(dst,size,src)      strcpy(dst,src)     // Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
 #endif
 
