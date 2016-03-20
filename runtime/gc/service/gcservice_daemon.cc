@@ -215,7 +215,10 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
   char line[256];
   f = fopen(file_path, "r");
-  if (!f) return -1;// errno;
+  if (!f) {
+    LOG(ERROR) << "GCSrvcMemInfoOOM::parseMemInfo...could not open file";
+    return -1;// errno;
+  }
 
 
   int _curr_index = 0;
@@ -226,6 +229,9 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   }
 
   while (fgets(line, 256, f)) {
+    LOG(ERROR) << "+++ " << line;
+
+#if 0
     while(_curr_index < 13) {
       GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[_curr_index]);
       char _label[128];
@@ -260,7 +266,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       continue;
     if(readFreeMemory(line) == 100)
       break;
-
+#endif
   }
 
 
@@ -268,37 +274,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   fclose(f);
 
   return 1;
-//  while(_curr_index < 13) {
-//    GCSrvcMemInfoOOM* mem_info_rec = &GCServiceDaemon::mem_info_oom_list_[_curr_index];
-//
-//      int result_read = mem_info_rec->parseString(line);
-//      if(result_read == 1000) {//process_status = 2 and did not match
-//        _curr_index++;
-//        if(_curr_index == 13)
-//          break;
-//      } else if(result_read == 100) {//process_status = 1
-//
-//      } else if (result_read == 101) {//process_status = 1
-//
-//      }
-//    }
-//
-//
-//  }
 
-
-//  while (fgets(line, 256, f)) {
-//    while(_curr_index < 13) {
-//      GCSrvcMemInfoOOM* mem_info_rec = &GCServiceDaemon::mem_info_oom_list_[_curr_index];
-//      int _result = mem_info_rec->parseString(line);
-//
-//
-//
-//      if(mem_info_rec->parse_status_ == 0) {
-//
-//      }
-//    }
-//  }
 }
 
 
