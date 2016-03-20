@@ -221,7 +221,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   }
 
 
-  //int _curr_index = 0;
+  int _curr_index = 0;
 
   for(int i =0; i < 13; i++) {
     GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[i]);
@@ -230,7 +230,11 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
   while (fgets(line, 256, f)) {
     LOG(ERROR) << "+++ " << line;
-
+    char _label[128];
+    long _memory_size;
+    if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
+      LOG(ERROR) << "---- " << line;
+    }
 #if 0
     while(_curr_index < 13) {
       GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[_curr_index]);
