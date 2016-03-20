@@ -174,7 +174,7 @@ int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
   int length= 0;
   const char* res;
   char  output[256];
-  res =  regex_search("\s+((\d)+\s)kB:\sNative", line/*"((a[Q]"*/, &length);
+  res =  regex_search("^\s+((\d)+\s)kB:\sNative$", line/*"((a[Q]"*/, &length);
   //res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
   if(length > 0) {
     memcpy(output,res, length);
