@@ -372,7 +372,7 @@ class GCSrvcMemInfoOOM {
 
   static int readTotalMemory(char* line);
   static int readFreeMemory(char* line);
-  static int parseMemInfo(char* file_path);
+  static int parseMemInfo(const char* file_path);
 
   static int parseOOMHeaderString(char* line, char* label,
                                                     long* mem_size);
