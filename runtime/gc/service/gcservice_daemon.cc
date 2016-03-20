@@ -170,9 +170,9 @@ void GCSrvcMemInfoOOM::resetMemInfo() {
 int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
                                            long* mem_size, int* pid) {
 
-  int length= 0;
-  const char* res;
-  char  output[256];
+//  int length= 0;
+//  const char* res;
+//  char  output[256];
   int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
 
   if(result == 2)
