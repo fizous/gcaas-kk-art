@@ -198,7 +198,7 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
   }
   if(parse_status_ == 1) {
     int proc_id;
-    int proc_mem;
+    long proc_mem;
     int result = sscanf(line, " %ld kB: %*s (pid %d%*s",  &proc_mem, &proc_id);
     if(result == 2) {
       LOG(ERROR) << "\t\t proc line : " << line;
@@ -223,13 +223,13 @@ int GCSrvcMemInfoOOM::parseMemInfo(char* file_path) {
   int _curr_index = 0;
 
   for(int i =0; i < 13; i++) {
-    GCSrvcMemInfoOOM* mem_info_rec = &GCServiceDaemon::mem_info_oom_list_[i];
+    GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[i]);
     mem_info_rec->resetMemInfo();
   }
 
   while (fgets(line, 256, f)) {
     while(_curr_index < 13) {
-      GCSrvcMemInfoOOM* mem_info_rec = &GCServiceDaemon::mem_info_oom_list_[_curr_index];
+      GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[_curr_index]);
       char _label[128];
       long _memory_size;
       if(mem_info_rec->parse_status_ == 2) {
@@ -247,9 +247,9 @@ int GCSrvcMemInfoOOM::parseMemInfo(char* file_path) {
       if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
         //new OOMInfo header;
         while(_curr_index < 13) {
-          mem_info_rec = &GCServiceDaemon::mem_info_oom_list_[_curr_index];
-          if(mem_info_rec->parse_status_ == 0) {
-            int _res_header = mem_info_rec->parseString(line);
+          GCSrvcMemInfoOOM* mem_info_rec_r = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[_curr_index]);
+          if(mem_info_rec_r->parse_status_ == 0) {
+            int _res_header = mem_info_rec_r->parseString(line);
             if(_res_header == 100) {
               break;
             }
