@@ -233,6 +233,15 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
   return 0;
 }
 
+static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
+  if(*stage_parsing == 0) {
+    if(strcmp("Total PSS by OOM adjustment:", line) == 0) {
+      *stage_parsing = 1;
+    }
+    return false;
+  }
+  return true;
+}
 
 int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   FILE *f;
@@ -252,17 +261,55 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     mem_info_rec->resetMemInfo();
   }
 
+  int stage_parsing = 0;
   while (fgets(line, 256, f)) {
-    LOG(ERROR) << "+++ " << line;
+    if(!GCSrvcMemInfoOOM_skip_file(line, &stage_parsing))
+      continue;
     char _label[128];
     long _memory_size;
     int _pid;
-    if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
-      LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+    if(stage_parsing == 3) {
+      if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
+        LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
+        if(_curr_index == 13) {
+          stage_parsing = 4;
+        } else {
+          stage_parsing = 1;
+        }
+      }
     }
-    if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
-      LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
+    if(stage_parsing == 1) { // first time to get the header of OOM
+      if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
+        stage_parsing |= 2;
+        LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+        continue;
+      }
     }
+    if(stage_parsing == 4) {
+      if(readTotalMemory(line) == 100) {
+        stage_parsing = 5;
+        LOG(ERROR) << "***** " <<  line;
+        continue;
+      }
+    }
+    if(stage_parsing == 5) {
+      if(readFreeMemory(line) == 100) {
+        stage_parsing = 6;
+        LOG(ERROR) << "***** " <<  line;
+        break;
+      }
+    }
+
+//    LOG(ERROR) << "+++ " << line;
+//    char _label[128];
+//    long _memory_size;
+//    int _pid;
+//    if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
+//      LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+//    }
+//    if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
+//      LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
+//    }
 #if 0
     while(_curr_index < 13) {
       GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[_curr_index]);
