@@ -200,7 +200,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
     fsync(fd);
     LOG(ERROR) << " HHHHH synchronizing the fd HHHHH";
-    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
+    if (!ReadFileToString(fd, &_meminfo_lines)) {
          LOG(ERROR) << "(couldn't read dump of mem_info  \n";
        } else {
          LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
