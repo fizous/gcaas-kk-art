@@ -271,6 +271,8 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     if(stage_parsing == 3) {
       if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
         LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
+        continue;
+      } else {
         if(_curr_index == 13) {
           stage_parsing = 4;
         } else {
