@@ -1,9 +1,11 @@
 ﻿// Includes
-#include "gc/service/reg_exp.h"
-#include <stdio.h>								// printfs
-#include <string.h>								// memory operations like memcmp() memset()
 
+
+#include <string.h>
+#include <unistd.h>
+#include "gc/service/reg_exp.h"
 /****************************************************************************/
+
 // Basic definitions of types. Feel free to remove if you have them already defined.
 #ifndef FALSE
 	#define	FALSE		(0)
