@@ -66,7 +66,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
     _daemonObj->UpdateGlobalState();
-    if(false) {
+    if(true) {
       _daemonObj->UpdateGlobalProcessStates();
     }
     _daemonObj->mainLoop();
