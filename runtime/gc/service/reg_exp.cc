@@ -1,8 +1,14 @@
 ﻿// Includes
 
 
-#include <string.h>
+#include <string>
+#include <list>
+#include <stddef.h>
+#include <sys/mman.h>  // For the PROT_* and MAP_* constants.
+#include <sys/types.h>
+#include <stdint.h>
 #include <unistd.h>
+#include "utils.h"
 #include "gc/service/reg_exp.h"
 /****************************************************************************/
 
