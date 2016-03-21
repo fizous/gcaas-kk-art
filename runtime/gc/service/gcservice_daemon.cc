@@ -225,7 +225,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   close(mem_info_fd_);
 
   if(mem_info_result) {
-    if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
+    //if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
       if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
         LOG(ERROR) << "(couldn't read dump of mem_info  \n";
       } else {
@@ -233,7 +233,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
         std::vector<std::string> mem_info_dump;
         Split(_meminfo_lines, '\n', mem_info_dump);
       }
-    }
+    //}
   }
 
 
