@@ -80,7 +80,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), processed_index_(0), mem_info_fd_(-1) {
+     thread_(NULL), processed_index_(0), mem_info_fd_(-1), last_global_update_time_ns_(0) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);
@@ -206,12 +206,23 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //    return;
 //  }
 
+
+  uint64_t _curr_time = NanoTime();
+  uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
+  if(_difference_time < 2000000000)
+    return;
+
+  last_global_update_time_ns_ = _curr_time;
+
   std::string _meminfo_lines;
+
+  SetMemInfoDumpFile();
   bool mem_info_result =
       GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
                                                                 "meminfo",
                                                                 mem_info_args_,
                                                                 1);
+  close(mem_info_fd_);
 
   if(mem_info_result) {
     if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {

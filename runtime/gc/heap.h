@@ -948,7 +948,7 @@ class Heap {
     sub_record_meta_->last_gc_size_ = param;
   }
 
-  void SetLastGCTime(size_t param) {
+  void SetLastGCTime(uint64_t param) {
     sub_record_meta_->last_gc_time_ns_ = param;
   }
 
@@ -1174,7 +1174,7 @@ class Heap {
     last_gc_size_ = param;
   }
 
-  void SetLastGCTime(size_t param) {
+  void SetLastGCTime(uint64_t param) {
     last_gc_time_ns_ = param;
   }
 

@@ -355,6 +355,10 @@ class GCServiceDaemon {
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
   int mem_info_fd_;
+
+  // The last time a heap trim occurred.
+  uint64_t last_global_update_time_ns_;
+
   //std::vector<android::MappedPairProcessFD*> registered_apps_;
 
   GCServiceDaemon(GCServiceProcess*);
