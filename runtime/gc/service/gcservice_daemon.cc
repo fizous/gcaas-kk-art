@@ -236,8 +236,7 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
 static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
   if(*stage_parsing == 0) {
     int length = 0;
-    const char* res;
-    res =  regex_search("Total PSS by OOM adjustment:", line, &length);
+    regex_search("Total PSS by OOM adjustment:", line, &length);
     if(length > 0) {
       *stage_parsing = 1;
     }
