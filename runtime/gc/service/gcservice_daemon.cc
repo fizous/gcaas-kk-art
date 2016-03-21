@@ -56,7 +56,6 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
-    _daemonObj->SetMemInfoDumpFile();
     _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
     _processObj->service_meta_->cond_->Broadcast(self);
   }
@@ -65,7 +64,8 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
       _daemonObj->thread_->GetTid();
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
-    _daemonObj->UpdateGlobalState();
+    if(false)
+      _daemonObj->UpdateGlobalState();
     if(true) {
       _daemonObj->UpdateGlobalProcessStates();
     }
@@ -441,7 +441,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
 
 
-  LOG(ERROR)<< "--------------------------------------";
+  LOG(ERROR)<< "=============================================";
   Thread* self = Thread::Current();
   JNIEnvExt* env = self->GetJniEnv();
   // Just attempt to do this the first time.
@@ -475,6 +475,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //  }
 
   std::string _meminfo_lines;
+  SetMemInfoDumpFile();
   bool mem_info_result =
       GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
                                                                 "meminfo",
@@ -484,7 +485,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   if(mem_info_result) {
     if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
       GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data");
-
+      int close_result = close(mem_info_fd_);
 
 //      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
 //        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
