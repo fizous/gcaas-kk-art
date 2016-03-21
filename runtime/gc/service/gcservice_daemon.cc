@@ -450,7 +450,10 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     int _read_res = 0;
     while (fgets(line, 256, f)) {
 
-      _read_res = sscanf(line, "%ld kB: %s", &_memory_read, _label);
+      _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
+
+
+          sscanf(line, "%ld kB: %s", &_memory_read, _label);
         if(_read_res == 2) {
           LOG(ERROR) << "---" << line;
         }
