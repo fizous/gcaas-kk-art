@@ -22,7 +22,9 @@ namespace gcservice {
 
 GCServiceProcess* GCServiceProcess::process_ = NULL;
 
-const char *GCServiceDaemon::mem_info_args_[] = {"--oom"};
+const char * GCServiceDaemon::mem_info_args_[] = {
+    "--oom"
+};
 
 long GCSrvcMemInfoOOM::total_ram_ = 0;
 long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};

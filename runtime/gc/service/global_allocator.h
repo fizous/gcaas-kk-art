@@ -406,8 +406,8 @@ public:
 
 
   void SetMemInfoDumpFile();
-  //android::Vector<android::String16> mem_info_args_;
-  static const char *mem_info_args_[];
+
+  static const char* mem_info_args_[];
 
 };//class GCServiceDaemon
 
