@@ -438,14 +438,36 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   close(mem_info_fd_);
 
   if(mem_info_result) {
+
+
+    FILE *f;
+
+    char line[256];
+    f = fopen("/data/anr/meminfo.data", "r");
+    if (!f) return;// errno;
+    long _memory_read = 0;
+    char _label[128];
+    int _read_res = 0;
+    while (fgets(line, 256, f)) {
+
+      _read_res = sscanf(line, "%ld kB: %s", _memory_read, _label);
+        if(_read_res == 2) {
+          LOG(ERROR) << "---" << line;
+        }
+    }
+
+    fclose(f);
+
+
+
     //if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
-      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
-        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-      } else {
-        LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-        std::vector<std::string> mem_info_dump;
-        Split(_meminfo_lines, '\n', mem_info_dump);
-      }
+//      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
+//        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
+//      } else {
+//        LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
+//        std::vector<std::string> mem_info_dump;
+//        Split(_meminfo_lines, '\n', mem_info_dump);
+//      }
     //}
   }
 
