@@ -485,7 +485,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   if(mem_info_result) {
     if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
       GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data");
-      int close_result = close(mem_info_fd_);
+
 
 //      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
 //        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
@@ -496,6 +496,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //      }
     }
   }
+  close(mem_info_fd_);
 
 
 //  if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
