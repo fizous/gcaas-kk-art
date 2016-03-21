@@ -53,6 +53,192 @@ const GCSrvcMemInfoOOM GCServiceDaemon::mem_info_oom_list_[] = {
 };
 
 
+GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label) :
+    oom_adj_(adj), oom_label_(label), parse_status_(0), aggregate_memory_(0) {
+
+}
+
+void GCSrvcMemInfoOOM::resetMemInfo() {
+  parse_status_ = 0;
+  aggregate_memory_ = 0;
+}
+
+
+int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
+                                           long* mem_size, int* pid) {
+
+//  int length= 0;
+//  const char* res;
+//  char  output[256];
+  int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
+
+  if(result == 2)
+    return 1;
+  return 0;
+}
+
+
+int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
+                                           long* mem_size) {
+
+//  int length= 0;
+//  const char* res;
+//  char  output[256];
+  //res =  regex_search("([0-9]+)[ \t\r\n\v\f]kB:", line/*"((a[Q]"*/, &length);
+  //res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
+//  if(length > 0) {
+//    memcpy(output,res, length);
+//    output[length] = '\0';
+//
+//    LOG(ERROR) << "regex::::::" << output << " ----- " << line;
+//  }
+  int result = sscanf(line, " %ld kB: %s",  mem_size, label);
+
+  if(result == 2)
+    return 1;
+  return 0;
+}
+
+int GCSrvcMemInfoOOM::parseString(char* line) {
+  if(parse_status_ == 0) {
+    char _label[128];
+    long _memory_size;
+
+    int result = sscanf(line, " %ld kB: %s",  &_memory_size, _label);
+    if(result == 2) {
+      if(strcmp(_label, oom_label_) == 0) {
+        parse_status_ = 1;
+        aggregate_memory_ = _memory_size;
+        LOG(ERROR) << "----- line header ----" << line;
+        return 100;
+      }
+      return 1000;
+    }
+  }
+  if(parse_status_ == 1) {
+    int proc_id;
+    long proc_mem;
+    int result = sscanf(line, " %ld kB: %*s (pid %d%*s",  &proc_mem, &proc_id);
+    if(result == 2) {
+      LOG(ERROR) << "\t\t proc line : " << line;
+      return 101;
+    }
+
+    parse_status_ = 2;
+    return 1000;
+  }
+  return 0;
+}
+
+static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
+  if(*stage_parsing == 0) {
+    char ooom[256];
+    int result = sscanf(line, "Total PSS by OOM %s:", ooom);
+    if(result > 0) {
+      *stage_parsing = 1;
+    }
+    return false;
+  }
+  return true;
+}
+
+int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
+  FILE *f;
+
+  char line[256];
+  f = fopen(file_path, "r");
+  if (!f) {
+    LOG(ERROR) << "GCSrvcMemInfoOOM::parseMemInfo...could not open file";
+    return -1;// errno;
+  }
+
+
+  int _curr_index = 0;
+
+  for(int i =0; i < 13; i++) {
+    GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[i]);
+    mem_info_rec->resetMemInfo();
+  }
+
+  int stage_parsing = 0;
+  char _label[256];
+  long _memory_size;
+  int _pid;
+  while (false && fgets(line, 256, f)) {
+    //LOG(ERROR) << line;
+
+    if(stage_parsing == 0){
+      GCSrvcMemInfoOOM_skip_file(line, &stage_parsing);
+      continue;
+    }
+    if(false && stage_parsing == 3) {
+      if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
+        LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
+        continue;
+      } else {
+        if(_curr_index == 13) {
+          stage_parsing = 4;
+        } else {
+          stage_parsing = 1;
+        }
+      }
+    }
+    if(stage_parsing == 1) { // first time to get the header of OOM
+      if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
+        stage_parsing |= 2;
+        LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+        continue;
+      }
+    }
+    if(false && stage_parsing == 4) {
+      if(readTotalMemory(line) == 100) {
+        stage_parsing = 5;
+        LOG(ERROR) << "***** " <<  line;
+        continue;
+      }
+    }
+    if(false && stage_parsing == 5) {
+      if(readFreeMemory(line) == 100) {
+        stage_parsing = 6;
+        LOG(ERROR) << "***** " <<  line;
+        break;
+      }
+    }
+  }
+
+
+
+  fclose(f);
+
+  return 1;
+
+}
+
+
+
+int GCSrvcMemInfoOOM::readTotalMemory(char* line) {
+  int result = sscanf(line, "Total RAM: %ld kB", &total_ram_);
+  if(result == 1) {
+    return 100;
+  }
+  if(result == EOF)
+    return EOF;
+  return 0;
+}
+
+int GCSrvcMemInfoOOM::readFreeMemory(char* line) {
+  int _index = 0;
+  int result = sscanf(line, "Free RAM: %ld kB (%ld cached pss + %ld cached + %ld free)",
+                      &free_ram_[_index], &free_ram_[_index+1], &free_ram_[_index+2],
+                      &free_ram_[_index+3]);
+  if(result == 4 ) {
+    return 100;
+  }
+  if(result == EOF)
+    return EOF;
+  return 0;
+}
+
 
 GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process) {
   return new GCServiceDaemon(process);
