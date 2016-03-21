@@ -22,6 +22,38 @@ namespace gcservice {
 
 GCServiceProcess* GCServiceProcess::process_ = NULL;
 
+const char *GCServiceDaemon::mem_info_args_[] = {"--oom"};
+//const char *GCServiceDaemon::mem_info_oom_labels_[] = {
+//    "Native",
+//    "System", "Persistent", "Foreground",
+//    "Visible", "Perceptible",
+//    "Heavy Weight", "Backup",
+//    "A Services", "Home",
+//    "Previous", "B Services", "Cached"
+//};
+
+
+long GCSrvcMemInfoOOM::total_ram_ = 0;
+long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};
+
+const GCSrvcMemInfoOOM GCServiceDaemon::mem_info_oom_list_[] = {
+    GCSrvcMemInfoOOM(-17, "Native"),
+    GCSrvcMemInfoOOM(-16, "System"),
+    GCSrvcMemInfoOOM(-12, "Persistent"),
+    GCSrvcMemInfoOOM(0, "Foreground"),
+    GCSrvcMemInfoOOM(1, "Visible"),
+    GCSrvcMemInfoOOM(2, "Perceptible"),
+    GCSrvcMemInfoOOM(3, "Backup"),
+    GCSrvcMemInfoOOM(4, "Heavy Weight"),
+    GCSrvcMemInfoOOM(5, "A Services"),
+    GCSrvcMemInfoOOM(6, "Home"),
+    GCSrvcMemInfoOOM(7, "Previous"),
+    GCSrvcMemInfoOOM(8, "B Services"),
+    GCSrvcMemInfoOOM(15, "Cached"),
+};
+
+
+
 GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process) {
   return new GCServiceDaemon(process);
 }
