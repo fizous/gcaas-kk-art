@@ -23,20 +23,11 @@ namespace gcservice {
 GCServiceProcess* GCServiceProcess::process_ = NULL;
 
 const char *GCServiceDaemon::mem_info_args_[] = {"--oom"};
-//const char *GCServiceDaemon::mem_info_oom_labels_[] = {
-//    "Native",
-//    "System", "Persistent", "Foreground",
-//    "Visible", "Perceptible",
-//    "Heavy Weight", "Backup",
-//    "A Services", "Home",
-//    "Previous", "B Services", "Cached"
-//};
-
 
 long GCSrvcMemInfoOOM::total_ram_ = 0;
 long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};
 
-const GCSrvcMemInfoOOM GCServiceDaemon::mem_info_oom_list_[] = {
+const GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
     GCSrvcMemInfoOOM(-17, "Native"),
     GCSrvcMemInfoOOM(-16, "System"),
     GCSrvcMemInfoOOM(-12, "Persistent"),
@@ -156,7 +147,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   int _curr_index = 0;
 
   for(int i =0; i < 13; i++) {
-    GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCServiceDaemon::mem_info_oom_list_[i]);
+    GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
     mem_info_rec->resetMemInfo();
   }
 
@@ -253,6 +244,7 @@ GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
   }
   return NULL;
 }
+
 
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);

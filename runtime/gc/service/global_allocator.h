@@ -347,6 +347,7 @@ class GCSrvceAgent {
 
 class GCSrvcMemInfoOOM {
  public:
+
   static long total_ram_;
   static long free_ram_[];
 
@@ -368,6 +369,9 @@ class GCSrvcMemInfoOOM {
                                                     long* mem_size);
   static int parseOOMRecString(char* line,
                                              long* mem_size, int* pid);
+
+
+  static const GCSrvcMemInfoOOM mem_info_oom_list_[];
 };//GCSrvcMemInfoOOM
 
 class GCServiceDaemon {
@@ -404,7 +408,7 @@ public:
   void SetMemInfoDumpFile();
   //android::Vector<android::String16> mem_info_args_;
   static const char *mem_info_args_[];
-  static const GCSrvcMemInfoOOM mem_info_oom_list_[];
+
 };//class GCServiceDaemon
 
 
