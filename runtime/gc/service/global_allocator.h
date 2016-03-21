@@ -407,7 +407,7 @@ public:
 
   void SetMemInfoDumpFile();
 
-  static const char* mem_info_args_[];
+  static const char * meminfo_args_[];
 
 };//class GCServiceDaemon
 
