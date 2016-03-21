@@ -347,39 +347,6 @@ class GCSrvceAgent {
 
 
 
-//typedef struct GCSrvcMemInfoOOM_S {
-//  const int oom_adj_;
-//  const char * oom_label_;
-//} GCSrvcMemInfoOOM;
-
-
-
-
-class GCSrvcMemInfoOOM {
- public:
-  static long total_ram_;
-  static long free_ram_[];
-
-  const int oom_adj_;
-  const char * oom_label_;
-
-  int parse_status_;
-  long aggregate_memory_;
-
-  GCSrvcMemInfoOOM(int, const char *);
-  int parseString(char* line);
-  void resetMemInfo(void);
-
-  static int readTotalMemory(char* line);
-  static int readFreeMemory(char* line);
-  static int parseMemInfo(const char* file_path);
-
-  static int parseOOMHeaderString(char* line, char* label,
-                                                    long* mem_size);
-  static int parseOOMRecString(char* line,
-                                             long* mem_size, int* pid);
-};//GCSrvcMemInfoOOM
-
 class GCServiceDaemon {
   Thread*   thread_;
   pthread_t pthread_;
@@ -410,8 +377,6 @@ public:
   void SetMemInfoDumpFile();
   //android::Vector<android::String16> mem_info_args_;
   static const char *mem_info_args_[];
-  static const GCSrvcMemInfoOOM mem_info_oom_list_[];
-  //static const char *mem_info_oom_labels_[];
 };//class GCServiceDaemon
 
 

@@ -1,17 +1,9 @@
 ﻿// Includes
-
-
-#include <string>
-#include <list>
-#include <stddef.h>
-#include <sys/mman.h>  // For the PROT_* and MAP_* constants.
-#include <sys/types.h>
-#include <stdint.h>
-#include <unistd.h>
-#include "utils.h"
 #include "gc/service/reg_exp.h"
-/****************************************************************************/
+#include <stdio.h>								// printfs
+#include <string.h>								// memory operations like memcmp() memset()
 
+/****************************************************************************/
 // Basic definitions of types. Feel free to remove if you have them already defined.
 #ifndef FALSE
 	#define	FALSE		(0)
@@ -23,17 +15,12 @@
 	#define MAX(a,b)	((a) > (b) ? (a) : (b))
 #endif
 typedef unsigned char		MYBOOL, UCHAR;		// Feel free to change boolean to 'int' or C++ 'bool'. 
-
-typedef int32_t     INT32;      // Android and iOS specific INT32. Feel free to switch to 64bits integer
-#define strcpy_s(dst,size,src)      strcpy(dst,src)     // Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
-
-//#if defined(HAVE_ANDROID_OS) || defined(__APPLE__) || defined(__MACH__)
-//	typedef int32_t			INT32;			// Android and iOS specific INT32. Feel free to switch to 64bits integer
-//	#define strcpy_s(dst,size,src)			strcpy(dst,src)			// Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
-//#else
-//	typedef int32_t    INT32;			// Windows
-//  #define strcpy_s(dst,size,src)      strcpy(dst,src)     // Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
-//#endif
+#if defined(HAVE_ANDROID_OS) || defined(__APPLE__) || defined(__MACH__)
+	typedef __int32_t			INT32;			// Android and iOS specific INT32. Feel free to switch to 64bits integer
+	#define strcpy_s(dst,size,src)			strcpy(dst,src)			// Forward compatibility to safe I/O methods. Activate only if needed (not needed for windows devices)
+#else
+	typedef signed   __int32    INT32;			// Windows
+#endif
 
 /****************************************************************************/
 // Fast Comparison of 8,16,32 bits int - without branching. Use in loops where speed is crucial. 
@@ -90,19 +77,19 @@ typedef int (*SuffixFunc)(const char* pat, const char* sam,const char* endp);	//
 // Define the table of command (regex rules). For each id, it's length, type of command and processing function
 // Rules of commands: TYPE_CLOSE follows TYPE_OPEN immediately in command table
 static const Cmd cmd_tbl[] = {
-    {'(', TYPE_OPEN|TYPE_RECURSION,		(void*)c_group},
-    {')', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL},
-    {'|', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL},
-    {'[', TYPE_OPEN,						(void*)c_option},
-    {']', TYPE_CLOSE,					(void*)NULL},
-    {'{', TYPE_SUFFIX|TYPE_OPEN,			(void*)c_multi},
-    {'}', TYPE_CLOSE,					(void*)NULL},
-    {'*', TYPE_SUFFIX,					(void*)c_multi},
-    {'+', TYPE_SUFFIX,					(void*)c_multi},
-    {'?', TYPE_SUFFIX,					(void*)c_multi},
-    {'\\', TYPE_PREFIX,					(void*)c_extended},
-    {'.', TYPE_CHAR,						(void*)c_any},
-    {0, TYPE_CHAR,						(void*)c_achar},
+    '(', TYPE_OPEN|TYPE_RECURSION,		(void*)c_group,
+    ')', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL,        
+    '|', TYPE_CLOSE|TYPE_RECURSION,		(void*)NULL,        
+    '[', TYPE_OPEN,						(void*)c_option,     
+    ']', TYPE_CLOSE,					(void*)NULL,        
+    '{', TYPE_SUFFIX|TYPE_OPEN,			(void*)c_multi,    
+    '}', TYPE_CLOSE,					(void*)NULL,       
+    '*', TYPE_SUFFIX,					(void*)c_multi,    
+    '+', TYPE_SUFFIX,					(void*)c_multi,    
+    '?', TYPE_SUFFIX,					(void*)c_multi,    
+   '\\', TYPE_PREFIX,					(void*)c_extended, 
+    '.', TYPE_CHAR,						(void*)c_any,         
+      0, TYPE_CHAR,						(void*)c_achar,    
 };
 
 #define cmdLength(  cmd)		(1 + ((cmd)->attr&TYPE_PREFIX))		// All commands take 1 character + optional prefix character
@@ -125,7 +112,7 @@ static inline void init_regex_mechanism_private(void){
 	for (int i=0; i<128; i++)
 		get_cmd_byChar[i]		= end;						// Set the whole look up table to point to the default command
 	for (; cmd<end; cmd++)
-		get_cmd_byChar[static_cast<unsigned char>(cmd->id)] = cmd;						// For all the real commands set an entry in the look up table
+		get_cmd_byChar[cmd->id] = cmd;						// For all the real commands set an entry in the look up table
 	isInitialized = TRUE;
 }
 
