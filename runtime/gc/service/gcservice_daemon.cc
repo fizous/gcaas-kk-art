@@ -268,7 +268,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size;
   int _pid;
   while (fgets(line, 256, f)) {
-    LOG(ERROR) << line;
+    //LOG(ERROR) << line;
 
     if(stage_parsing == 0){
       GCSrvcMemInfoOOM_skip_file(line, &stage_parsing);
