@@ -474,7 +474,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //    return;
 //  }
 
-  std::string _meminfo_lines;
+  //std::string _meminfo_lines;
   SetMemInfoDumpFile();
   bool mem_info_result =
       GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
