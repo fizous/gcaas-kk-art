@@ -235,7 +235,10 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
 
 static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
   if(*stage_parsing == 0) {
-    if(strcmp("Total PSS by OOM adjustment:", line) == 0) {
+    int length = 0;
+    const char* res;
+    res =  regex_search("Total PSS by OOM adjustment:", line, &length);
+    if(length > 0) {
       *stage_parsing = 1;
     }
     return false;
@@ -267,11 +270,11 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   int _pid;
   while (fgets(line, 256, f)) {
     LOG(ERROR) << line;
-    if(true)
-      continue;
-    if(!GCSrvcMemInfoOOM_skip_file(line, &stage_parsing))
-      continue;
 
+    if(stage_parsing == 0){
+      GCSrvcMemInfoOOM_skip_file(line, &stage_parsing);
+      continue;
+    }
     if(false && stage_parsing == 3) {
       if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
         LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
