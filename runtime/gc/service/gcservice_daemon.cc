@@ -433,7 +433,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   bool mem_info_result =
       GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
                                                                 "meminfo",
-                                                                GCServiceDaemon::mem_info_args_,
+                                                                GCServiceDaemon::meminfo_args_,
                                                                 1);
   close(mem_info_fd_);
 
