@@ -13,7 +13,7 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
-#include "gc/service/reg_exp.h"
+//#include "gc/service/reg_exp.h"
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
@@ -235,9 +235,9 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
 
 static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
   if(*stage_parsing == 0) {
-    int length = 0;
-    regex_search("Total PSS by OOM adjustment:", line, &length);
-    if(length > 0) {
+    char ooom[256];
+    int result = sscanf(line, "Total PSS by OOM %s:", ooom);
+    if(result > 0) {
       *stage_parsing = 1;
     }
     return false;
