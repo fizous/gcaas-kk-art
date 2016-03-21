@@ -484,7 +484,9 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
   if(mem_info_result) {
     if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
-      GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data");
+
+      if(false)
+        GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data");
 
 
 //      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
