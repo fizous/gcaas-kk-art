@@ -365,10 +365,8 @@ class GCSrvcMemInfoOOM {
   static int readFreeMemory(char* line);
   static int parseMemInfo(const char* file_path);
 
-  static int parseOOMHeaderString(char* line, char* label,
-                                                    long* mem_size);
-  static int parseOOMRecString(char* line,
-                                             long* mem_size, int* pid);
+  static int parseOOMHeaderString(char* line, char* label, long* mem_size);
+  static int parseOOMRecString(char* line, long* mem_size, int* pid);
 
 
   static const GCSrvcMemInfoOOM mem_info_oom_list_[];
