@@ -8,7 +8,9 @@
 #ifndef ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 #define ART_RUNTIME_GC_SERVICE_GLOBAL_ALLOCATOR_H_
 
-
+#include <set>
+#include <vector>
+#include "safe_map.h"
 #include "ipcfs/ipcfs.h"
 #include "mem_map.h"
 #include "globals.h"
@@ -335,11 +337,15 @@ class ServerCollector {
 };//class ServerCollector
 
 
+
+
+
 class GCSrvceAgent {
  public:
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
   GCServiceClientRecord binding_;
+  int process_id_;
  private:
 
 };//class GCSrvceAgent
@@ -372,6 +378,10 @@ class GCSrvcMemInfoOOM {
   static GCSrvcMemInfoOOM mem_info_oom_list_[];
 };//GCSrvcMemInfoOOM
 
+
+
+typedef SafeMap<int32_t, GCSrvceAgent*> ClientAgentsMap;
+
 class GCServiceDaemon {
   Thread*   thread_;
   pthread_t pthread_;
@@ -394,7 +404,10 @@ class GCServiceDaemon {
 public:
   static GCServiceDaemon* gcdaemon_inst_;
   //GCServiceProcess* process_;
-  std::vector<GCSrvceAgent*> client_agents_;
+  //std::vector<GCSrvceAgent*> client_agents_;
+  ClientAgentsMap agents_map_;
+
+
   UniquePtr<ThreadPool> thread_pool_;
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);

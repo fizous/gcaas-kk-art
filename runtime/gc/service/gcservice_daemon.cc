@@ -249,12 +249,20 @@ GCServiceDaemon* GCServiceDaemon::CreateServiceDaemon(GCServiceProcess* process)
 
 
 GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
-  for (auto& client : client_agents_) {
-     if(client->binding_.pair_mapps_->first->process_id_ == pid) {
-       return client;
-     }
+  auto result = agents_map_.find(pid);
+  if (result == agents_map_.end()) {
+    return NULL;
+  } else {
+    return result->second;
   }
-  return NULL;
+
+
+//  for (auto& client : client_agents_) {
+//     if(client->binding_.pair_mapps_->first->process_id_ == pid) {
+//       return client;
+//     }
+//  }
+//  return NULL;
 }
 
 
@@ -554,6 +562,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
+  process_id_ = mappedPair->first->process_id_;
 //  binding_.java_lang_Class_cached_ =
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
   collector_ = ServerCollector::CreateServerCollector(&binding_);

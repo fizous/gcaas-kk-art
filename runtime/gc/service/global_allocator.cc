@@ -841,7 +841,9 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         }
       }
-      _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
+     // _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
+      _daemon->agents_map_.Put(_newPairEntry->first->process_id_,
+                               new GCSrvceAgent(_newPairEntry));
 
     } else {
       LOG(FATAL) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";

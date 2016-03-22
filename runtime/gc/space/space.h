@@ -314,6 +314,17 @@ typedef struct GCSrvcHeapSubRecord_S {
 
 
 #if (ART_GC_SERVICE || true)
+
+
+typedef struct AgentMemInfo_S {
+  int process_id_; //id of the process in the system
+  int oom_label_;
+  long memory_size_; //memory size in Kb
+  double resize_factor_;
+  uint64_t last_time_ns_; //time stampe that process requested/...blaa
+} AgentMemInfo;
+
+
 typedef struct GCSrvSharableHeapData_S {
   /* gc barrier */
   SynchronizedLockHead gc_barrier_lock_;
@@ -404,7 +415,6 @@ typedef struct GCSrvSharableHeapData_S {
 
 
 
-
 } __attribute__((aligned(8))) GCSrvSharableHeapData;
 
 
@@ -435,6 +445,12 @@ typedef struct GCSrvSharableDlMallocSpace_S {
   /* allocated space memory */
 //  AShmemMap test_memory_;
 
+  /*
+   * represents the process state from the global memory point of view. This
+   * will be used for the resizing heuristics
+   */
+
+  AgentMemInfo meminfo_rec_;
 
 }__attribute__((aligned(8))) GCSrvSharableDlMallocSpace;
 
