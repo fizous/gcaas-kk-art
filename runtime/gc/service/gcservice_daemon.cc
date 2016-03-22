@@ -357,7 +357,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
 
 
-  LOG(ERROR)<< "--------------------------------------";
+
 //  Thread* self = Thread::Current();
 //  JNIEnvExt* env = self->GetJniEnv();
 //  // Just attempt to do this the first time.
@@ -395,7 +395,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
   if(_difference_time < 2000000000)
     return;
-
+  LOG(ERROR)<< "--------------------------------------";
   last_global_update_time_ns_ = _curr_time;
 
   //std::string _meminfo_lines;
