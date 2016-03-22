@@ -153,8 +153,13 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     if(_stage ==1) {
       _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
                                                &_memory_size, &pid);
+
       if(_read_res == 100) {
-        LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB";
+        GCSrvceAgent* _agent = GCServiceDaemon::gcdaemon_inst_->GetAgentByPid(pid);
+        if(_agent != NULL) {
+          LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB, " << line;
+        }
+
         continue;
       }
     }
