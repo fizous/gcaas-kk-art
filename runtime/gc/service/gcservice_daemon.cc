@@ -138,10 +138,12 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   char _label[256];
   long _memory_size = 0;
 
+  GCSrvcMemInfoOOM*  _meminfoP = NULL;
   for(int i = 0; i< 13; i++){
     GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
     _meminfoP->resetMemInfo();
   }
+  int _curr_index = 0;
 
   while (fgets(line, 256, f)) {
 
@@ -157,8 +159,11 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     if(_stage  <= 1) {
       _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
       if(_read_res == 100) {
-        LOG(ERROR) << "-0-" << _label << ", "<< _memory_size << " kB";
+        _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
+        _meminfoP->aggregate_memory_ = _memory_size;
+        //LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _memory_size << " kB";
         _stage |= 1;
+        _curr_index++;
         continue;
       }
 
@@ -183,6 +188,11 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         break;
       }
     }
+  }
+
+  for(int i = 0; i< 13; i++){
+    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
+    LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _meminfoP->aggregate_memory_ << " kB";
   }
 
   fclose(f);
