@@ -588,7 +588,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   collector_ = ServerCollector::CreateServerCollector(&binding_);
   meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
 
-  meminfo_rec_ = 0;
+  meminfo_rec_->histor_head_ = 0;
   meminfo_rec_->histor_tail_ = 0;
   meminfo_rec_->last_time_ns_ = 0;
   for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
