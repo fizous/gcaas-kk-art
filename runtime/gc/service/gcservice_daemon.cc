@@ -139,7 +139,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size = 0;
 
   for(int i = 0; i< 13; i++){
-    const GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
+    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
     _meminfoP->resetMemInfo();
   }
 
