@@ -581,16 +581,16 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-//  process_id_ = mappedPair->first->process_id_;
+  process_id_ = mappedPair->first->process_id_;
 //  binding_.java_lang_Class_cached_ =
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
 
   collector_ = ServerCollector::CreateServerCollector(&binding_);
-//  meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
-//
+  meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
+
 //  meminfo_rec_->histor_head_ = 0;
 //  meminfo_rec_->histor_tail_ = 0;
-//  meminfo_rec_->last_update_ns_ = 0;
+  meminfo_rec_->last_update_ns_ = 0;
 //  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
 //    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
 //    hist_rec->heap_size_ = 0;
@@ -604,15 +604,15 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   meminfo_rec_->memory_size_ = memory_size;
   meminfo_rec_->oom_label_ =  new_label;
-  AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
-  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
-
-
-  if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
-    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
-  }
-
-  hist_rec->oom_label_ = new_label;
+//  AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
+//  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
+//
+//
+//  if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
+//    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
+//  }
+//
+//  hist_rec->oom_label_ = new_label;
   meminfo_rec_->last_update_ns_ = NanoTime();
 }
 

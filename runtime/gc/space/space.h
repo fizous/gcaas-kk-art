@@ -328,9 +328,9 @@ typedef struct AgentMemInfo_S {
   double resize_factor_;
   uint64_t last_update_ns_; //time stampe that process requested/...blaa
 
-  int histor_tail_;
-  int histor_head_;
-  AgentMemInfoHistory history_wins_[MEM_INFO_WINDOW_SIZE];
+//  int histor_tail_;
+//  int histor_head_;
+//  AgentMemInfoHistory history_wins_[MEM_INFO_WINDOW_SIZE];
 } AgentMemInfo;
 
 
