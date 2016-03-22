@@ -139,31 +139,33 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size = 0;
   while (fgets(line, 256, f)) {
 
-    if(_stage == 0) {
+    if(_stage <= 3) {
         _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
                                                  &_memory_size, &pid);
         if(_read_res == 100) {
           LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB";
+          _stage |= 2;
           continue;
         }
         _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
         if(_read_res == 100) {
           LOG(ERROR) << "-0-" << _label << ", "<< _memory_size << " kB";
+          _stage |= 1;
           continue;
         }
-        if(strlen(line) == 0) {
-          _stage++;
-        }
+        LOG(ERROR) << "XXX " << line << ", " << strlen(line);
+        //  _stage++;
+
     }
-    if(_stage == 1) {
+    if(_stage < 4) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
       if(_read_res == 100) {
-        _stage++;
+        _stage |= 4;
         LOG(ERROR) << "---2-" << line;
         continue;
       }
     }
-    if(_stage == 2) {
+    if(_stage < 8) {
 
 
       _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
