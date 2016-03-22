@@ -581,7 +581,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   binding_.sharable_space_ =
       reinterpret_cast<GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
-  process_id_ = mappedPair->first->process_id_;
+//  process_id_ = mappedPair->first->process_id_;
 //  binding_.java_lang_Class_cached_ =
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
 
