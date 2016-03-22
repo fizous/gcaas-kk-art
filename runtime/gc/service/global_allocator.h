@@ -346,6 +346,9 @@ class GCSrvceAgent {
   ServerCollector* collector_;
   GCServiceClientRecord binding_;
   volatile int process_id_;
+  gc::space::AgentMemInfo* meminfo_rec_;
+
+  void updateOOMLabel(int new_label, long memory_size);
  private:
 
 };//class GCSrvceAgent
@@ -375,6 +378,11 @@ class GCSrvcMemInfoOOM {
   static int parseOOMHeaderString(char* line, char* label, long* mem_size);
   static int parseOOMRecString(char* line, long* mem_size, int* pid);
 
+
+  void updateOOMLabel(int new_label) {
+
+
+  }
 
   static GCSrvcMemInfoOOM mem_info_oom_list_[];
 };//GCSrvcMemInfoOOM

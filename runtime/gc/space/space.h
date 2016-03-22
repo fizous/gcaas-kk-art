@@ -314,14 +314,23 @@ typedef struct GCSrvcHeapSubRecord_S {
 
 
 #if (ART_GC_SERVICE || true)
+#define MEM_INFO_WINDOW_SIZE 10
 
+typedef struct AgentMemInfoHistory_S {
+  int oom_label_;
+  long memory_size_;
+  size_t heap_size_;
+} AgentMemInfoHistory;
 
 typedef struct AgentMemInfo_S {
-  int process_id_; //id of the process in the system
   int oom_label_;
   long memory_size_; //memory size in Kb
   double resize_factor_;
   uint64_t last_time_ns_; //time stampe that process requested/...blaa
+
+  int histor_tail_;
+  int histor_head_;
+  AgentMemInfoHistory history_wins_[MEM_INFO_WINDOW_SIZE];
 } AgentMemInfo;
 
 

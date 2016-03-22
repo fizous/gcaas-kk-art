@@ -15,6 +15,7 @@
 #include "thread.h"
 #include "mem_map.h"
 
+using ::art::gc::space::AgentMemInfoHistory;
 using ::art::gc::space::AgentMemInfo;
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
@@ -158,9 +159,12 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       if(_read_res == 100) {
         GCSrvceAgent* _agent = GCServiceProcess::process_->daemon_->GetAgentByPid(pid);
         if(_agent != NULL) {
+
+
+          _agent->updateOOMLabel(_meminfoP->oom_adj_, _memory_size);
+
           AgentMemInfo* _meminfo_app_rec = &(_agent->binding_.sharable_space_->meminfo_rec_);
-          _meminfo_app_rec->oom_label_ = _meminfoP->oom_adj_;
-          _meminfo_app_rec->memory_size_ = _memory_size;
+
           LOG(ERROR) << "---1-" << pid << ", "
               << _meminfo_app_rec->memory_size_ << " kB, "
               << _meminfo_app_rec->oom_label_ << "...." << line;
@@ -580,9 +584,36 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   process_id_ = mappedPair->first->process_id_;
 //  binding_.java_lang_Class_cached_ =
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
+
   collector_ = ServerCollector::CreateServerCollector(&binding_);
+  meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
+
+  meminfo_rec_ = 0;
+  meminfo_rec_->histor_tail_ = 0;
+  meminfo_rec_->last_time_ns_ = 0;
+  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
+    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
+    hist_rec->heap_size_ = 0;
+    hist_rec->memory_size_ = 0;
+    hist_rec->oom_label_ = 0;
+  }
+
 }
 
+
+void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
+  meminfo_rec_->memory_size_ = memory_size;
+  meminfo_rec_->oom_label_ =  new_label;
+  AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
+  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
+
+
+  if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
+    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
+  }
+
+  hist_rec->oom_label_ = new_label;
+}
 
 //----------
 //----------------------------- GCServiceProcess ------------------------------
