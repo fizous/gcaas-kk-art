@@ -163,7 +163,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
           _agent->updateOOMLabel(_meminfoP->oom_adj_, _memory_size);
 
-          AgentMemInfo* _meminfo_app_rec = &(_agent->binding_.sharable_space_->meminfo_rec_);
+          AgentMemInfo* _meminfo_app_rec = &(_agent->meminfo_rec_);
 
           LOG(ERROR) << "---1-" << pid << ", "
               << _meminfo_app_rec->memory_size_ << " kB, "
@@ -604,15 +604,15 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   meminfo_rec_->memory_size_ = memory_size;
   meminfo_rec_->oom_label_ =  new_label;
-//  AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
-//  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
-//
-//
-//  if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
-//    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
-//  }
-//
-//  hist_rec->oom_label_ = new_label;
+  AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
+  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
+
+
+  if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
+    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
+  }
+
+  hist_rec->oom_label_ = new_label;
   meminfo_rec_->last_update_ns_ = NanoTime();
 }
 
