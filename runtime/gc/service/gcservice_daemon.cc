@@ -447,25 +447,31 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     if (!f) return;// errno;
 //    long _memory_read = 0;
 //    char _label[128];
-    int _read_res = 0;
+    //int _read_res = 0;
     while (fgets(line, 256, f)) {
 
-      _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
-      if(_read_res == 100) {
-        LOG(ERROR) << "---" << line;
-        continue;
-      }
+      GCSrvcMemInfoOOM::readTotalMemory(line);
+//      if(_read_res == 100) {
+//        LOG(ERROR) << "---" << line;
+//        continue;
+//      }
 
-      _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
-      if(_read_res == 100) {
-        LOG(ERROR) << "---" << line;
-        break;;
-      }
+      GCSrvcMemInfoOOM::readFreeMemory(line);
+//      if(_read_res == 100) {
+//        LOG(ERROR) << "---" << line;
+//        break;;
+//      }
 //          sscanf(line, "%ld kB: %s", &_memory_read, _label);
 //        if(_read_res == 2) {
 //          LOG(ERROR) << "---" << line;
 //        }
     }
+
+    LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
+        "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
+        "," << GCSrvcMemInfoOOM::free_ram_[1] <<
+        "," << GCSrvcMemInfoOOM::free_ram_[2] <<
+        "," << GCSrvcMemInfoOOM::free_ram_[3];
 
     fclose(f);
 
