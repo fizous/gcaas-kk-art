@@ -137,6 +137,12 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   int pid = 0;
   char _label[256];
   long _memory_size = 0;
+
+  for(int i = 0; i< 13; i++){
+    const GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
+    _meminfoP->resetMemInfo();
+  }
+
   while (fgets(line, 256, f)) {
 
     if((_stage & 1) > 0) {
