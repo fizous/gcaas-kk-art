@@ -416,7 +416,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 
   last_global_update_time_ns_ = _curr_time;
 
-  std::string _meminfo_lines;
+  //std::string _meminfo_lines;
 
   SetMemInfoDumpFile();
   bool mem_info_result =
@@ -527,7 +527,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //  if(close_result < 0) {
 //    LOG(ERROR) << "Closing file......";
 //  }
-  LOG(ERROR)<< "--------------------------------------";
+  LOG(ERROR)<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
 
 }
