@@ -411,58 +411,14 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
   if(mem_info_result) {
 
 
-    FILE *f;
+    if(GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data")) {
 
-    char line[256];
-    f = fopen("/data/anr/meminfo.data", "r");
-    if (!f) return;// errno;
-//    long _memory_read = 0;
-//    char _label[128];
-    int _read_res = 0;
-    int _stage = 0;
-    //int pid = 0;
-    //char _label[256];
-    //long _memory_size = 0;
-    while (fgets(line, 256, f)) {
-
-      if(_stage == 0) {
-//        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
-//                                                 &_memory_size, &pid);
-//        if(_read_res == 100) {
-//          LOG(ERROR) << "---1-" << line;
-//          continue;
-//        }
-//        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
-//        if(_read_res == 100) {
-//          LOG(ERROR) << "-0-" << line;
-//          continue;
-//        }
-        _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
-        if(_read_res == 100) {
-          _stage++;
-          LOG(ERROR) << "---2-" << line;
-          continue;
-        }
-      }
-
-      _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
-      if(_read_res == 100) {
-        LOG(ERROR) << "---3-" << line;
-        break;
-      }
-//          sscanf(line, "%ld kB: %s", &_memory_read, _label);
-//        if(_read_res == 2) {
-//          LOG(ERROR) << "---" << line;
-//        }
+      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
+          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
+          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
+          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
+          "," << GCSrvcMemInfoOOM::free_ram_[3];
     }
-
-    fclose(f);
-
-    LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
-        "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
-        "," << GCSrvcMemInfoOOM::free_ram_[1] <<
-        "," << GCSrvcMemInfoOOM::free_ram_[2] <<
-        "," << GCSrvcMemInfoOOM::free_ram_[3];
 
     //if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
 //      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
