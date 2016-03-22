@@ -402,7 +402,7 @@ class GCServiceDaemon {
   void initShutDownSignals(void);
 
 public:
-  static GCServiceDaemon* gcdaemon_inst_;
+//  static GCServiceDaemon* gcdaemon_inst_;
   //GCServiceProcess* process_;
   //std::vector<GCSrvceAgent*> client_agents_;
   ClientAgentsMap agents_map_;
