@@ -124,72 +124,54 @@ static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
 }
 
 int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
+
   FILE *f;
+  f = fopen(file_path, "r");
+  if (!f)
+    return 0;// errno;
 
   char line[256];
-  f = fopen(file_path, "r");
-  if (!f) {
-    LOG(ERROR) << "GCSrvcMemInfoOOM::parseMemInfo...could not open file";
-    return -1;// errno;
-  }
+  //char _label[128];
+  int _read_res = 0;
+  int _stage = 0;
+  int pid = 0;
+  //char _label[256];
+  long _memory_size = 0;
+  while (fgets(line, 256, f)) {
 
-
-  int _curr_index = 0;
-
-  for(int i =0; i < 13; i++) {
-    GCSrvcMemInfoOOM* mem_info_rec = const_cast<GCSrvcMemInfoOOM*>(&GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
-    mem_info_rec->resetMemInfo();
-  }
-
-  int stage_parsing = 0;
-  char _label[256];
-  long _memory_size;
-  int _pid;
-  while (false && fgets(line, 256, f)) {
-    //LOG(ERROR) << line;
-
-    if(stage_parsing == 0){
-      GCSrvcMemInfoOOM_skip_file(line, &stage_parsing);
-      continue;
-    }
-    if(false && stage_parsing == 3) {
-      if (GCSrvcMemInfoOOM::parseOOMRecString(line, &_memory_size, &_pid) == 1) {
-        LOG(ERROR) << "___________ [" << _pid << " , " << _memory_size << "]" << " | " << line;
-        continue;
-      } else {
-        if(_curr_index == 13) {
-          stage_parsing = 4;
-        } else {
-          stage_parsing = 1;
+    if(_stage == 0) {
+        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
+                                                 &_memory_size, &pid);
+        if(_read_res == 100) {
+          LOG(ERROR) << "---1-" << line;
+          continue;
         }
-      }
-    }
-    if(stage_parsing == 1) { // first time to get the header of OOM
-      if(GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size) == 1) {
-        stage_parsing |= 2;
-        LOG(ERROR) << "---- " << _curr_index++ << ", "<< line;
+//        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
+//        if(_read_res == 100) {
+//          LOG(ERROR) << "-0-" << line;
+//          continue;
+//        }
+      _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
+      if(_read_res == 100) {
+        _stage++;
+        LOG(ERROR) << "---2-" << line;
         continue;
       }
     }
-    if(false && stage_parsing == 4) {
-      if(readTotalMemory(line) == 100) {
-        stage_parsing = 5;
-        LOG(ERROR) << "***** " <<  line;
-        continue;
-      }
+
+    _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
+    if(_read_res == 100) {
+      LOG(ERROR) << "---3-" << line;
+      break;
     }
-    if(false && stage_parsing == 5) {
-      if(readFreeMemory(line) == 100) {
-        stage_parsing = 6;
-        LOG(ERROR) << "***** " <<  line;
-        break;
-      }
-    }
+//          sscanf(line, "%ld kB: %s", &_memory_read, _label);
+//        if(_read_res == 2) {
+//          LOG(ERROR) << "---" << line;
+//        }
   }
-
-
 
   fclose(f);
+
 
   return 1;
 
