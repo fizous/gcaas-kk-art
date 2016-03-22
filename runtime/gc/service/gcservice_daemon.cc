@@ -168,11 +168,12 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
       _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
       if(_read_res == 100) {
-
+        LOG(ERROR) << "orig: " << line << ", .. label:" << _label;
         while(_curr_index < 13) {
           _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
           if(strcmp(_meminfoP->oom_label_, _label) == 0){
             _meminfoP->aggregate_memory_ = _memory_size;
+            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index;
             break;
           }
           _curr_index++;
