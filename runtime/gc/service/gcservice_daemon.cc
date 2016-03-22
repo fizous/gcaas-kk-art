@@ -347,17 +347,17 @@ void GCServiceDaemon::UpdateGlobalState(void) {
 //      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
 
 }
-static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
-                                                              int* out_value) {
-  CHECK(out_value != NULL);
-  jfieldID field = env->GetStaticFieldID(clz, name, "I");
-  if (field == NULL) {
-    env->ExceptionClear();
-    return false;
-  }
-  *out_value = env->GetStaticIntField(clz, field);
-  return true;
-}
+//static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
+//                                                              int* out_value) {
+//  CHECK(out_value != NULL);
+//  jfieldID field = env->GetStaticFieldID(clz, name, "I");
+//  if (field == NULL) {
+//    env->ExceptionClear();
+//    return false;
+//  }
+//  *out_value = env->GetStaticIntField(clz, field);
+//  return true;
+//}
 
 void GCServiceDaemon::SetMemInfoDumpFile(void) {
   int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
