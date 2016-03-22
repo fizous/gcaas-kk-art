@@ -73,7 +73,7 @@ int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
 
 
 int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label, long* mem_size) {
-  int result = sscanf(line, " %ld kB: %s",  mem_size, label);
+  int result = sscanf(line, " %ld kB: %[^\n]s",  mem_size, label);
 
   if(result == 2)
     return 100;
