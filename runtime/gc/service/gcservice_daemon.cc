@@ -164,13 +164,21 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         _stage |= 2;
         continue;
       }
-      _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
 
-      _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_meminfoP->aggregate_memory_);
+
+      _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
       if(_read_res == 100) {
+
+        while(_curr_index < 13) {
+          _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
+          if(strcmp(_meminfoP->oom_label_, _label) == 0){
+            _meminfoP->aggregate_memory_ = _memory_size;
+            break;
+          }
+          _curr_index++;
+        }
         //LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _memory_size << " kB";
         _stage |= 1;
-        _curr_index++;
         continue;
       }
 
