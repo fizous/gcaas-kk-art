@@ -445,18 +445,26 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     char line[256];
     f = fopen("/data/anr/meminfo.data", "r");
     if (!f) return;// errno;
-    long _memory_read = 0;
-    char _label[128];
+//    long _memory_read = 0;
+//    char _label[128];
     int _read_res = 0;
     while (fgets(line, 256, f)) {
 
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
+      if(_read_res == 100) {
+        LOG(ERROR) << "---" << line;
+        continue;
+      }
 
-
-          sscanf(line, "%ld kB: %s", &_memory_read, _label);
-        if(_read_res == 2) {
-          LOG(ERROR) << "---" << line;
-        }
+      _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
+      if(_read_res == 100) {
+        LOG(ERROR) << "---" << line;
+        break;;
+      }
+//          sscanf(line, "%ld kB: %s", &_memory_read, _label);
+//        if(_read_res == 2) {
+//          LOG(ERROR) << "---" << line;
+//        }
     }
 
     fclose(f);
