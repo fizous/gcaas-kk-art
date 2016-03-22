@@ -67,7 +67,7 @@ int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
   int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
 
   if(result == 2)
-    return 1;
+    return 100;
   return 0;
 }
 
@@ -207,6 +207,8 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   return 1;
 
 }
+
+
 
 
 
@@ -449,20 +451,28 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //    char _label[128];
     int _read_res = 0;
     int _stage = 0;
+    int pid = 0;
+    long _memory_size = 0;
     while (fgets(line, 256, f)) {
 
       if(_stage == 0) {
+        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
+                                                 &_memory_size, &pid);
+        if(_read_res == 100) {
+          LOG(ERROR) << "---0-" << line;
+          continue;
+        }
         _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
         if(_read_res == 100) {
           _stage++;
-          LOG(ERROR) << "---" << line;
+          LOG(ERROR) << "---1-" << line;
           continue;
         }
       }
 
       _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
       if(_read_res == 100) {
-        LOG(ERROR) << "---" << line;
+        LOG(ERROR) << "---2-" << line;
         break;
       }
 //          sscanf(line, "%ld kB: %s", &_memory_read, _label);
