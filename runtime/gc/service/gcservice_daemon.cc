@@ -8,13 +8,14 @@
 #include <cutils/ashmem.h>
 #include "gc/service/global_allocator.h"
 #include "gc/collector/ipc_server_sweep.h"
+#include "gc/space/space.h"
 #include "ScopedLocalRef.h"
 #include "scoped_thread_state_change.h"
 #include "thread_state.h"
 #include "thread.h"
 #include "mem_map.h"
 
-
+using ::art::gc::space::AgentMemInfo;
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
 namespace art {
 namespace gc {
@@ -139,10 +140,10 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size = 0;
 
   GCSrvcMemInfoOOM*  _meminfoP = NULL;
-  for(int i = 0; i< 13; i++){
-    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
-    _meminfoP->resetMemInfo();
-  }
+//  for(int i = 0; i< 13; i++){
+//    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
+//    _meminfoP->resetMemInfo();
+//  }
 
 
   int _curr_index = 0;
@@ -157,7 +158,13 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       if(_read_res == 100) {
         GCSrvceAgent* _agent = GCServiceProcess::process_->daemon_->GetAgentByPid(pid);
         if(_agent != NULL) {
-          LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB, " << line;
+          AgentMemInfo* _meminfo_app_rec = &(_agent->binding_.sharable_space_->meminfo_rec_);
+          _meminfo_app_rec->oom_label_ = _meminfoP->oom_adj_;
+          _meminfo_app_rec->memory_size_ = _memory_size;
+          LOG(ERROR) << "---1-" << pid << ", "
+              << _meminfo_app_rec->memory_size_ << " kB, "
+              << _meminfo_app_rec->oom_label_ << "...." << line;
+          _meminfoP->agents_list_.push_back(_agent);
         }
 
         continue;
@@ -176,12 +183,15 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         LOG(ERROR) << "orig: " << line << ", .. label:" << _label;
         while(_curr_index < 13) {
           _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
+          _meminfoP->resetMemInfo();
+          _meminfoP->agents_list_.clear();
+          _curr_index++;
           if(strcmp(_meminfoP->oom_label_, _label) == 0){
             _meminfoP->aggregate_memory_ = _memory_size;
-            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index;
+            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index-1;
             break;
           }
-          _curr_index++;
+
         }
         //LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _memory_size << " kB";
         _stage |= 1;

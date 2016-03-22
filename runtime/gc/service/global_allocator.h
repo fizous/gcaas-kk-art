@@ -362,6 +362,7 @@ class GCSrvcMemInfoOOM {
 
   int parse_status_;
   long aggregate_memory_;
+  std::vector<GCSrvceAgent*> agents_list_;
 
   GCSrvcMemInfoOOM(int, const char *);
   int parseString(char* line);
