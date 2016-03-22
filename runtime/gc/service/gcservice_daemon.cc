@@ -439,7 +439,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     int _read_res = 0;
     int _stage = 0;
     int pid = 0;
-    char _label[256];
+    //char _label[256];
     long _memory_size = 0;
     while (fgets(line, 256, f)) {
 
