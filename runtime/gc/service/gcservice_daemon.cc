@@ -438,18 +438,18 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //    char _label[128];
     int _read_res = 0;
     int _stage = 0;
-    int pid = 0;
+    //int pid = 0;
     //char _label[256];
     long _memory_size = 0;
     while (fgets(line, 256, f)) {
 
       if(_stage == 0) {
-        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
-                                                 &_memory_size, &pid);
-        if(_read_res == 100) {
-          LOG(ERROR) << "---1-" << line;
-          continue;
-        }
+//        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
+//                                                 &_memory_size, &pid);
+//        if(_read_res == 100) {
+//          LOG(ERROR) << "---1-" << line;
+//          continue;
+//        }
 //        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
 //        if(_read_res == 100) {
 //          LOG(ERROR) << "-0-" << line;
