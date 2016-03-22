@@ -143,11 +143,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
     _meminfoP->resetMemInfo();
   }
+
+
   int _curr_index = 0;
+  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
 
   while (fgets(line, 256, f)) {
 
-    if((_stage & 1) > 0) {
+    if(_stage ==1) {
       _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
                                                &_memory_size, &pid);
       if(_read_res == 100) {
@@ -157,20 +160,21 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     }
 
     if(_stage  <= 1) {
-      _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
+      if(strlen(line) == 1) {
+        _stage |= 2;
+        continue;
+      }
+      _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
+
+      _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_meminfoP->aggregate_memory_);
       if(_read_res == 100) {
-        _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
-        _meminfoP->aggregate_memory_ = _memory_size;
         //LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _memory_size << " kB";
         _stage |= 1;
         _curr_index++;
         continue;
       }
 
-      if(strlen(line) == 1) {
-        _stage |= 2;
-        continue;
-      }
+
     }
     if(_stage == 3) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
