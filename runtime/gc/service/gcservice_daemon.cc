@@ -111,17 +111,17 @@ int GCSrvcMemInfoOOM::parseString(char* line) {
   return 0;
 }
 
-static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
-  if(*stage_parsing == 0) {
-    char ooom[256];
-    int result = sscanf(line, "Total PSS by OOM %s:", ooom);
-    if(result > 0) {
-      *stage_parsing = 1;
-    }
-    return false;
-  }
-  return true;
-}
+//static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
+//  if(*stage_parsing == 0) {
+//    char ooom[256];
+//    int result = sscanf(line, "Total PSS by OOM %s:", ooom);
+//    if(result > 0) {
+//      *stage_parsing = 1;
+//    }
+//    return false;
+//  }
+//  return true;
+//}
 
 int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
