@@ -30,7 +30,7 @@ const char * GCServiceDaemon::meminfo_args_[] = {
 long GCSrvcMemInfoOOM::total_ram_ = 0;
 long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};
 
-const GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
+GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
     GCSrvcMemInfoOOM(-17, "Native"),
     GCSrvcMemInfoOOM(-16, "System"),
     GCSrvcMemInfoOOM(-12, "Persistent"),

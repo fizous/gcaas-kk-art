@@ -369,7 +369,7 @@ class GCSrvcMemInfoOOM {
   static int parseOOMRecString(char* line, long* mem_size, int* pid);
 
 
-  static const GCSrvcMemInfoOOM mem_info_oom_list_[];
+  static GCSrvcMemInfoOOM mem_info_oom_list_[];
 };//GCSrvcMemInfoOOM
 
 class GCServiceDaemon {
