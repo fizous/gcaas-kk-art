@@ -345,7 +345,7 @@ class GCSrvceAgent {
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
   GCServiceClientRecord binding_;
-  int process_id_;
+  volatile int process_id_;
  private:
 
 };//class GCSrvceAgent
@@ -380,7 +380,7 @@ class GCSrvcMemInfoOOM {
 
 
 
-typedef SafeMap<int32_t, GCSrvceAgent*> ClientAgentsMap;
+typedef SafeMap<volatile int32_t, GCSrvceAgent*> ClientAgentsMap;
 
 class GCServiceDaemon {
   Thread*   thread_;
