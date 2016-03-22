@@ -135,7 +135,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   int _read_res = 0;
   int _stage = 0;
   int pid = 0;
-  //char _label[256];
+  char _label[256];
   long _memory_size = 0;
   while (fgets(line, 256, f)) {
 
@@ -143,14 +143,19 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
                                                  &_memory_size, &pid);
         if(_read_res == 100) {
-          LOG(ERROR) << "---1-" << line;
+          LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB";
           continue;
         }
-//        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
-//        if(_read_res == 100) {
-//          LOG(ERROR) << "-0-" << line;
-//          continue;
-//        }
+        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
+        if(_read_res == 100) {
+          LOG(ERROR) << "-0-" << _label << ", "<< _memory_size << " kB";
+          continue;
+        }
+        if(strlen(line) == 0) {
+          _stage++;
+        }
+    }
+    if(_stage == 1) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
       if(_read_res == 100) {
         _stage++;
@@ -158,11 +163,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         continue;
       }
     }
+    if(_stage == 2) {
 
-    _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
-    if(_read_res == 100) {
-      LOG(ERROR) << "---3-" << line;
-      break;
+
+      _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
+      if(_read_res == 100) {
+        LOG(ERROR) << "---3-" << line;
+        break;
+      }
     }
 //          sscanf(line, "%ld kB: %s", &_memory_read, _label);
 //        if(_read_res == 2) {
