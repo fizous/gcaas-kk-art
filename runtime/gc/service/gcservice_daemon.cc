@@ -588,15 +588,15 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   collector_ = ServerCollector::CreateServerCollector(&binding_);
   meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
 
-//  meminfo_rec_->histor_head_ = 0;
-//  meminfo_rec_->histor_tail_ = 0;
+  meminfo_rec_->histor_head_ = 0;
+  meminfo_rec_->histor_tail_ = 0;
   meminfo_rec_->last_update_ns_ = 0;
-//  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
-//    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
-//    hist_rec->heap_size_ = 0;
-//    hist_rec->memory_size_ = 0;
-//    hist_rec->oom_label_ = 0;
-//  }
+  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
+    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
+    hist_rec->heap_size_ = 0;
+    hist_rec->memory_size_ = 0;
+    hist_rec->oom_label_ = 0;
+  }
 
 }
 
