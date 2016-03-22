@@ -474,15 +474,13 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //        }
     }
 
+    fclose(f);
+
     LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
         "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
         "," << GCSrvcMemInfoOOM::free_ram_[1] <<
         "," << GCSrvcMemInfoOOM::free_ram_[2] <<
         "," << GCSrvcMemInfoOOM::free_ram_[3];
-
-    fclose(f);
-
-
 
     //if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
 //      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
