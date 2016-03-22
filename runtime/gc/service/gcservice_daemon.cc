@@ -161,7 +161,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         if(_agent != NULL) {
 
 
-          _agent->updateOOMLabel(_meminfoP->oom_adj_, _memory_size);
+          //_agent->updateOOMLabel(_meminfoP->oom_adj_, _memory_size);
 
           AgentMemInfo* _meminfo_app_rec = &(_agent->binding_.sharable_space_->meminfo_rec_);
 
@@ -586,17 +586,17 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
 
   collector_ = ServerCollector::CreateServerCollector(&binding_);
-  meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
-
-  meminfo_rec_->histor_head_ = 0;
-  meminfo_rec_->histor_tail_ = 0;
-  meminfo_rec_->last_time_ns_ = 0;
-  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
-    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
-    hist_rec->heap_size_ = 0;
-    hist_rec->memory_size_ = 0;
-    hist_rec->oom_label_ = 0;
-  }
+//  meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
+//
+//  meminfo_rec_->histor_head_ = 0;
+//  meminfo_rec_->histor_tail_ = 0;
+//  meminfo_rec_->last_update_ns_ = 0;
+//  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
+//    AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
+//    hist_rec->heap_size_ = 0;
+//    hist_rec->memory_size_ = 0;
+//    hist_rec->oom_label_ = 0;
+//  }
 
 }
 
@@ -613,6 +613,7 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   }
 
   hist_rec->oom_label_ = new_label;
+  meminfo_rec_->last_update_ns_ = NanoTime();
 }
 
 //----------

@@ -326,7 +326,7 @@ typedef struct AgentMemInfo_S {
   int oom_label_;
   long memory_size_; //memory size in Kb
   double resize_factor_;
-  uint64_t last_time_ns_; //time stampe that process requested/...blaa
+  uint64_t last_update_ns_; //time stampe that process requested/...blaa
 
   int histor_tail_;
   int histor_head_;
