@@ -450,11 +450,11 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
           LOG(ERROR) << "---1-" << line;
           continue;
         }
-        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
-        if(_read_res == 100) {
-          LOG(ERROR) << "-0-" << line;
-          continue;
-        }
+//        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
+//        if(_read_res == 100) {
+//          LOG(ERROR) << "-0-" << line;
+//          continue;
+//        }
         _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
         if(_read_res == 100) {
           _stage++;
