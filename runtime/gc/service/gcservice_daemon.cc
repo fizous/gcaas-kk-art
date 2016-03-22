@@ -74,22 +74,10 @@ int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
 
 int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label,
                                            long* mem_size) {
-
-//  int length= 0;
-//  const char* res;
-//  char  output[256];
-  //res =  regex_search("([0-9]+)[ \t\r\n\v\f]kB:", line/*"((a[Q]"*/, &length);
-  //res =  regex_search("\\s+\\d+\\skB:\\s\\S+", line, &length);
-//  if(length > 0) {
-//    memcpy(output,res, length);
-//    output[length] = '\0';
-//
-//    LOG(ERROR) << "regex::::::" << output << " ----- " << line;
-//  }
   int result = sscanf(line, " %ld kB: %s",  mem_size, label);
 
   if(result == 2)
-    return 1;
+    return 100;
   return 0;
 }
 
@@ -456,6 +444,9 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     while (fgets(line, 256, f)) {
 
       if(_stage == 0) {
+        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
+                                                 &_memory_size, &pid);
+
         _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
                                                  &_memory_size, &pid);
         if(_read_res == 100) {
