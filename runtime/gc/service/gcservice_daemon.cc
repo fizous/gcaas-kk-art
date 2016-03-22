@@ -139,25 +139,29 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size = 0;
   while (fgets(line, 256, f)) {
 
-    if(_stage <= 3) {
-        _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
-                                                 &_memory_size, &pid);
-        if(_read_res == 100) {
-          LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB";
-          _stage |= 2;
-          continue;
-        }
-        _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
-        if(_read_res == 100) {
-          LOG(ERROR) << "-0-" << _label << ", "<< _memory_size << " kB";
-          _stage |= 1;
-          continue;
-        }
-        LOG(ERROR) << "XXX " << line << ", " << strlen(line);
-        //  _stage++;
-
+    if((_stage & 1) > 0) {
+      _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
+                                               &_memory_size, &pid);
+      if(_read_res == 100) {
+        LOG(ERROR) << "---1-" << pid << ", " << _memory_size << " kB";
+        continue;
+      }
     }
-    if(_stage < 4) {
+
+    if(_stage  <= 1) {
+      _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
+      if(_read_res == 100) {
+        LOG(ERROR) << "-0-" << _label << ", "<< _memory_size << " kB";
+        _stage |= 1;
+        continue;
+      }
+
+      if(strlen(line) == 1) {
+        _stage |= 2;
+        continue;
+      }
+    }
+    if(_stage == 3) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
       if(_read_res == 100) {
         _stage |= 4;
@@ -165,19 +169,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         continue;
       }
     }
-    if(_stage < 8) {
-
-
+    if(_stage == 7) {
       _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
       if(_read_res == 100) {
-        LOG(ERROR) << "---3-" << line;
+        _stage |= 8;
+        LOG(ERROR) << "---2-" << line;
         break;
       }
     }
-//          sscanf(line, "%ld kB: %s", &_memory_read, _label);
-//        if(_read_res == 2) {
-//          LOG(ERROR) << "---" << line;
-//        }
   }
 
   fclose(f);
