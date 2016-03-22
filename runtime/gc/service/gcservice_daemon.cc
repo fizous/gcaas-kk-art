@@ -211,7 +211,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
 
 int GCSrvcMemInfoOOM::readTotalMemory(char* line) {
-  int result = sscanf(line, "Total RAM: %ld kB", &total_ram_);
+  int result = sscanf(line, " Total RAM: %ld kB", &total_ram_);
   if(result == 1) {
     return 100;
   }
@@ -447,20 +447,24 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
     if (!f) return;// errno;
 //    long _memory_read = 0;
 //    char _label[128];
-    //int _read_res = 0;
+    int _read_res = 0;
+    int _stage = 0;
     while (fgets(line, 256, f)) {
 
-      GCSrvcMemInfoOOM::readTotalMemory(line);
-//      if(_read_res == 100) {
-//        LOG(ERROR) << "---" << line;
-//        continue;
-//      }
+      if(_stage == 0) {
+        _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
+        if(_read_res == 100) {
+          _stage++;
+          LOG(ERROR) << "---" << line;
+          continue;
+        }
+      }
 
-      GCSrvcMemInfoOOM::readFreeMemory(line);
-//      if(_read_res == 100) {
-//        LOG(ERROR) << "---" << line;
-//        break;;
-//      }
+      _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
+      if(_read_res == 100) {
+        LOG(ERROR) << "---" << line;
+        break;
+      }
 //          sscanf(line, "%ld kB: %s", &_memory_read, _label);
 //        if(_read_res == 2) {
 //          LOG(ERROR) << "---" << line;
