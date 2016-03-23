@@ -82,48 +82,8 @@ int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label, long* mem_si
   return 0;
 }
 
-int GCSrvcMemInfoOOM::parseString(char* line) {
-  if(parse_status_ == 0) {
-    char _label[128];
-    long _memory_size;
 
-    int result = sscanf(line, " %ld kB: %s",  &_memory_size, _label);
-    if(result == 2) {
-      if(strcmp(_label, oom_label_) == 0) {
-        parse_status_ = 1;
-        aggregate_memory_ = _memory_size;
-        LOG(ERROR) << "----- line header ----" << line;
-        return 100;
-      }
-      return 1000;
-    }
-  }
-  if(parse_status_ == 1) {
-    int proc_id;
-    long proc_mem;
-    int result = sscanf(line, " %ld kB: %*s (pid %d%*s",  &proc_mem, &proc_id);
-    if(result == 2) {
-      LOG(ERROR) << "\t\t proc line : " << line;
-      return 101;
-    }
 
-    parse_status_ = 2;
-    return 1000;
-  }
-  return 0;
-}
-
-//static bool GCSrvcMemInfoOOM_skip_file(char* line, int* stage_parsing) {
-//  if(*stage_parsing == 0) {
-//    char ooom[256];
-//    int result = sscanf(line, "Total PSS by OOM %s:", ooom);
-//    if(result > 0) {
-//      *stage_parsing = 1;
-//    }
-//    return false;
-//  }
-//  return true;
-//}
 
 int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
@@ -329,7 +289,8 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), processed_index_(0), mem_info_fd_(-1), last_global_update_time_ns_(0) {
+     thread_(NULL), processed_index_(0), mem_info_fd_(-1),
+     last_global_update_time_ns_(0) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);

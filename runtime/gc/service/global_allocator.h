@@ -370,7 +370,6 @@ class GCSrvcMemInfoOOM {
   std::vector<GCSrvceAgent*> agents_list_;
 
   GCSrvcMemInfoOOM(int, const char *, double);
-  int parseString(char* line);
   void resetMemInfo(void);
 
   static int readTotalMemory(char* line);
