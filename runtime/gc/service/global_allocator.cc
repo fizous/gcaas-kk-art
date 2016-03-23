@@ -850,50 +850,26 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     } else {
       LOG(FATAL) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
     }
-  } else if (_req_type == GC_SERVICE_TASK_CONC) {
-    GCSERVICE_ALLOC_VLOG(ERROR) << " processing concurrent Request ~~~~ Request type: " <<
-        _req_type << " ~~~~~ " << _entry->req_type_ <<
-        (GCServiceProcess::process_ == NULL ? "process is null" : "process is not null");
-    GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
-    if(_dmon == NULL) {
-      GCSERVICE_ALLOC_VLOG(ERROR) << "_dmon is null: " << _entry->pid_;
-    } else {
-      GCSERVICE_ALLOC_VLOG(ERROR) << "_dmon is not null: " << _entry->pid_;
-      GCSrvceAgent* _agent =
-          GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-      if(_agent == NULL) {
-        GCSERVICE_ALLOC_VLOG(ERROR) << "_agent is null: " << _entry->pid_;
-      } else {
-        _agent->collector_->SignalCollector(GC_SERVICE_TASK_CONC);
-      }
-    }
+  } else {
+     GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
+     if(_dmon != NULL) {
+       GCSrvceAgent* _agent = _dmon->GetAgentByPid(_entry->pid_);
+       if(_agent != NULL) {
+         bool _fwd_request = true;
 
-
-
-  } else if (_req_type == GC_SERVICE_TASK_TRIM) {
-   // GCSERVICE_ALLOC_VLOG(ERROR)
-//    LOG(ERROR) << " processing Trim Request ~~~~ Request type: " <<
-//        _req_type << " ~~~~~ " << _entry->req_type_;
-    GCSrvceAgent* _agent =
-        GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-
-    if(GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
-      _agent->collector_->SignalCollector(GC_SERVICE_TASK_TRIM);
-    }
-  } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
-    GCSERVICE_ALLOC_VLOG(ERROR) << " processing Allocation GC Request ~~~~ Request type: " <<
-        _req_type << " ~~~~~ " << _entry->req_type_;
-    //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
-    //GCSrvceAgent* _agent =
-    //    GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    //_agent->collector_->SignalCollector();
-  } else if (_req_type == GC_SERVICE_TASK_EXPLICIT) {
-    GCSERVICE_ALLOC_VLOG(ERROR) << " processing EXplicit GC Request ~~~~ Request type: " <<
-        _req_type << " ~~~~~ " << _entry->req_type_;
-    //GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
-    GCSrvceAgent* _agent =
-        GCServiceProcess::process_->daemon_->GetAgentByPid(_entry->pid_);
-    _agent->collector_->SignalCollector(GC_SERVICE_TASK_EXPLICIT);
+         if (_req_type == GC_SERVICE_TASK_TRIM) {
+           if(!GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
+             _fwd_request = false;
+           }
+         } else if (_req_type == GC_SERVICE_TASK_TRIM) {
+           LOG(ERROR) << "GC_SERVICE_TASK_GC_ALLOC is not handled";
+           _fwd_request = false;
+         }
+         if(_fwd_request) {
+           _agent->signalMyCollectorDaemon(_req_type);
+         }
+       }
+     }
   }
 
   return _req_type;

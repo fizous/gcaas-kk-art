@@ -344,13 +344,22 @@ class ServerCollector {
 
 class GCSrvceAgent {
  public:
+  /* consider an agent is still growing up as long as the requests are still below or equal 5*/
+  static const int kcOOMInfoNurserySize = 5;
+
+
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
   GCServiceClientRecord binding_;
   volatile int process_id_;
+  int srvc_requests_;
   gc::space::AgentMemInfo* meminfo_rec_;
 
   void updateOOMLabel(int new_label, long memory_size);
+
+  void signalMyCollectorDaemon(GC_SERVICE_TASK req);
+
+
  private:
 
 };//class GCSrvceAgent
@@ -381,22 +390,39 @@ class GCSrvcMemInfoOOM {
 
   static GCSrvcMemInfoOOM mem_info_oom_list_[];
 
-  static double GetResizeFactor(int oom_adj) {
-    if(oom_adj == 0)
+  static double GetResizeFactor(gc::space::AgentMemInfo* mem_info_rec) {
+    double _fact = mem_info_rec->resize_factor_;
+    if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
+      _fact = 2.0;
+      LOG(ERROR) << "resize factor is 2.0 because we are in nursery policy";
+    } else {
+        _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
+        LOG(ERROR) << "resize factor is " << _fact  << " because we are in default policy and we are background";
+    }
+    return _fact;
+  }
+
+  static double GetOOMResizeFactor(int oom_label) {
+    if(oom_label == 0)
       return 1.5;
     return 1.0;
   }
 
 //  static int GetMemInfoOOMAdj(gc::space::AgentMemInfo* mem_info_rec) {
-//    if(oom_adj == 0)
-//      return 1.5;
-//    return 1.0;
+
 //  }
 
   static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {
-    if(mem_info_rec->oom_label_ == 0)
-     return true;
-    return false;
+    bool do_care = false;
+    if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
+      LOG(ERROR) << "care about pause time is true because we are still starting..NURSERY";
+      do_care = true;
+    } else {
+      if(mem_info_rec->oom_label_ == 0)
+        do_care = true;
+      LOG(ERROR) << "care  is " <<  do_care <<  "default strategy";
+    }
+    return do_care;
   }
 };//GCSrvcMemInfoOOM
 
