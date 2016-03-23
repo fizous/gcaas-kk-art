@@ -422,7 +422,6 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
 //    return;
 //  }
 
-  srvc_task++;
   uint64_t _curr_time = NanoTime();
   uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
   if(_difference_time < 2000000000)
