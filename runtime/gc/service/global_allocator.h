@@ -420,7 +420,7 @@ class GCSrvcMemInfoOOM {
     } else {
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
-      LOG(ERROR) << "care  is " <<  do_care <<  "default strategy";
+      LOG(ERROR) << "care  is " <<  do_care <<  " default strategy with label: " << mem_info_rec->oom_label_;
     }
     return do_care;
   }

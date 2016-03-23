@@ -145,7 +145,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
       _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
       if(_read_res == 100) {
-        LOG(ERROR) << "orig: " << line << ", .. label:" << _label;
+//        LOG(ERROR) << "orig: " << line << ", .. label:" << _label;
         while(_curr_index < 13) {
           _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
           _meminfoP->resetMemInfo();
@@ -153,7 +153,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
           _curr_index++;
           if(strcmp(_meminfoP->oom_label_, _label) == 0){
             _meminfoP->aggregate_memory_ = _memory_size;
-            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index-1;
+//            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index-1;
             break;
           }
 
@@ -169,7 +169,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
       if(_read_res == 100) {
         _stage |= 4;
-        LOG(ERROR) << "---2-" << line;
+//        LOG(ERROR) << "---2-" << line;
         continue;
       }
     }
@@ -177,16 +177,16 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
       if(_read_res == 100) {
         _stage |= 8;
-        LOG(ERROR) << "---2-" << line;
+//        LOG(ERROR) << "---2-" << line;
         break;
       }
     }
   }
 
-  for(int i = 0; i< 13; i++){
-    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
-    LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _meminfoP->aggregate_memory_ << " kB";
-  }
+//  for(int i = 0; i< 13; i++){
+//    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
+//    LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _meminfoP->aggregate_memory_ << " kB";
+//  }
 
   fclose(f);
 
