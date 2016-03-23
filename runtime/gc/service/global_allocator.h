@@ -387,6 +387,12 @@ class GCSrvcMemInfoOOM {
     return 1.0;
   }
 
+//  static int GetMemInfoOOMAdj(gc::space::AgentMemInfo* mem_info_rec) {
+//    if(oom_adj == 0)
+//      return 1.5;
+//    return 1.0;
+//  }
+
   static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {
     if(mem_info_rec->oom_label_ == 0)
      return true;
@@ -399,6 +405,10 @@ class GCSrvcMemInfoOOM {
 typedef SafeMap<volatile int32_t, GCSrvceAgent*> ClientAgentsMap;
 
 class GCServiceDaemon {
+  /* each five request we will read the global update */
+  static const int kcGCSrvcBulkRequestsThreshold = 5;
+
+
   Thread*   thread_;
   pthread_t pthread_;
 
@@ -406,7 +416,7 @@ class GCServiceDaemon {
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
   int mem_info_fd_;
-
+  int req_counts_;
   // The last time a heap trim occurred.
   uint64_t last_global_update_time_ns_;
 
@@ -429,12 +439,13 @@ public:
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
   //void UpdateGlobalState(void);
-  void UpdateGlobalProcessStates(void);
+  void UpdateGlobalProcessStates(GC_SERVICE_TASK);
 
 
   void SetMemInfoDumpFile();
 
   static const char * meminfo_args_[];
+
 
 };//class GCServiceDaemon
 

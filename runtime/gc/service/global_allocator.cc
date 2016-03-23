@@ -917,9 +917,7 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
     GCSERVICE_ALLOC_VLOG(ERROR) << "before calling processGCRequest";
     GC_SERVICE_TASK _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
-    if(_srvc_task == GC_SERVICE_TASK_REG) {
-      GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates();
-    }
+    GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
   }
 }
 

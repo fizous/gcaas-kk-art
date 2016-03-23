@@ -290,7 +290,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
      thread_(NULL), processed_index_(0), mem_info_fd_(-1),
-     last_global_update_time_ns_(0) {
+     req_counts_(0), last_global_update_time_ns_(0) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);
@@ -379,9 +379,15 @@ void GCServiceDaemon::SetMemInfoDumpFile(void) {
 }
 
 
-void GCServiceDaemon::UpdateGlobalProcessStates(void) {
+void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
 
+  req_counts_++;
 
+  if(srvc_task != GC_SERVICE_TASK_REG) {
+    if(req_counts_ % kcGCSrvcBulkRequestsThreshold != 0) {
+      return;
+    }
+  }
 
 
 //  Thread* self = Thread::Current();
@@ -416,7 +422,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(void) {
 //    return;
 //  }
 
-
+  srvc_task++;
   uint64_t _curr_time = NanoTime();
   uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
   if(_difference_time < 2000000000)
@@ -553,6 +559,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   meminfo_rec_->histor_head_ = 0;
   meminfo_rec_->histor_tail_ = 0;
   meminfo_rec_->last_update_ns_ = 0;
+
   for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
     AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
     hist_rec->heap_size_ = 0;
