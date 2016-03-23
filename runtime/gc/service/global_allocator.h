@@ -397,7 +397,7 @@ class GCSrvcMemInfoOOM {
       LOG(ERROR) << "resize factor is 2.0 because we are in nursery policy";
     } else {
         _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
-        LOG(ERROR) << "resize factor is " << _fact  << " because we are in default policy and we are background";
+        LOG(ERROR) << "resize factor is " << _fact  << " because we are in default policy and OOM_label =" << mem_info_rec->oom_label_;
     }
     return _fact;
   }
