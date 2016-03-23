@@ -32,30 +32,30 @@ const char * GCServiceDaemon::meminfo_args_[] = {
 long GCSrvcMemInfoOOM::total_ram_ = 0;
 long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};
 
+static double kcForegroundResizeFactor = 1.5;
 GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
-    GCSrvcMemInfoOOM(-17, "Native"),
-    GCSrvcMemInfoOOM(-16, "System"),
-    GCSrvcMemInfoOOM(-12, "Persistent"),
-    GCSrvcMemInfoOOM(0, "Foreground"),
-    GCSrvcMemInfoOOM(1, "Visible"),
-    GCSrvcMemInfoOOM(2, "Perceptible"),
-    GCSrvcMemInfoOOM(3, "Backup"),
-    GCSrvcMemInfoOOM(4, "Heavy Weight"),
-    GCSrvcMemInfoOOM(5, "A Services"),
-    GCSrvcMemInfoOOM(6, "Home"),
-    GCSrvcMemInfoOOM(7, "Previous"),
-    GCSrvcMemInfoOOM(8, "B Services"),
-    GCSrvcMemInfoOOM(15, "Cached"),
+    GCSrvcMemInfoOOM(-17, "Native", 1.0),
+    GCSrvcMemInfoOOM(-16, "System", 1.0),
+    GCSrvcMemInfoOOM(-12, "Persistent", 1.0),
+    GCSrvcMemInfoOOM(0, "Foreground", kcForegroundResizeFactor),
+    GCSrvcMemInfoOOM(1, "Visible", 1.0),
+    GCSrvcMemInfoOOM(2, "Perceptible", 1.0),
+    GCSrvcMemInfoOOM(3, "Backup", 1.0),
+    GCSrvcMemInfoOOM(4, "Heavy Weight", 1.0),
+    GCSrvcMemInfoOOM(5, "A Services", 1.0),
+    GCSrvcMemInfoOOM(6, "Home", 1.0),
+    GCSrvcMemInfoOOM(7, "Previous", 1.0),
+    GCSrvcMemInfoOOM(8, "B Services", 1.0),
+    GCSrvcMemInfoOOM(15, "Cached", 1.0),
 };
 
 
-GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label) :
-    oom_adj_(adj), oom_label_(label), parse_status_(0), aggregate_memory_(0) {
+GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label, double resize_factor) :
+    oom_adj_(adj), oom_label_(label), resize_factor_(resize_factor), aggregate_memory_(0) {
 
 }
 
 void GCSrvcMemInfoOOM::resetMemInfo() {
-  parse_status_ = 0;
   aggregate_memory_ = 0;
 }
 
@@ -314,10 +314,10 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
       _daemonObj->thread_->GetTid();
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
-    _daemonObj->UpdateGlobalState();
-    if(true) {
-      _daemonObj->UpdateGlobalProcessStates();
-    }
+//    _daemonObj->UpdateGlobalState();
+//    if(true) {
+//      _daemonObj->UpdateGlobalProcessStates();
+//    }
     _daemonObj->mainLoop();
   }
 
@@ -360,40 +360,40 @@ void GCServiceDaemon::initShutDownSignals(void) {
 
 bool GCServiceDaemon::waitShutDownSignals(void) {
   Thread* self = Thread::Current();
+  bool _await_res = false;
   MutexLock mu(self, *shutdown_mu_);
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     shutdown_cond_->Wait(self);
   }
   if(GCServiceProcess::process_->service_meta_->status_ == GCSERVICE_STATUS_STOPPED) {
-    shutdown_cond_->Broadcast(self);
-    return true;
+    _await_res = true;
   }
   shutdown_cond_->Broadcast(self);
-  return false;
+  return _await_res;
 }
-
-void GCServiceDaemon::UpdateGlobalState(void) {
-  FILE *f;
-
-  char line[256];
-  f = fopen("/proc/meminfo", "r");
-  if (!f) return;// errno;
-
-
-  GCSrvcPhysicalState* _physical_state =
-      &(GCServiceProcess::process_->service_meta_->global_state_);
-  while (fgets(line, 256, f)) {
-      sscanf(line, "MemTotal: %ld kB", &_physical_state->mem_total);
-      sscanf(line, "MemFree: %ld kB", &_physical_state->mem_free);
-  }
-
-  fclose(f);
-
-//  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
-//      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
-
-}
+//
+//void GCServiceDaemon::UpdateGlobalState(void) {
+//  FILE *f;
+//
+//  char line[256];
+//  f = fopen("/proc/meminfo", "r");
+//  if (!f) return;// errno;
+//
+//
+//  GCSrvcPhysicalState* _physical_state =
+//      &(GCServiceProcess::process_->service_meta_->global_state_);
+//  while (fgets(line, 256, f)) {
+//      sscanf(line, "MemTotal: %ld kB", &_physical_state->mem_total);
+//      sscanf(line, "MemFree: %ld kB", &_physical_state->mem_free);
+//  }
+//
+//  fclose(f);
+//
+////  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
+////      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
+//
+//}
 //static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
 //                                                              int* out_value) {
 //  CHECK(out_value != NULL);
@@ -587,7 +587,8 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 
   collector_ = ServerCollector::CreateServerCollector(&binding_);
   meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
-
+  /* for the very first time an app registers we increase its priority*/
+  meminfo_rec_->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(0);
   meminfo_rec_->histor_head_ = 0;
   meminfo_rec_->histor_tail_ = 0;
   meminfo_rec_->last_update_ns_ = 0;
@@ -606,7 +607,7 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   meminfo_rec_->oom_label_ =  new_label;
   AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
   meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
-
+  meminfo_rec_->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(new_label);
 
   if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
     meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;

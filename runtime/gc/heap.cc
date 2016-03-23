@@ -2315,17 +2315,20 @@ double Heap::HeapGrowthMultiplier() const {
   return foreground_heap_growth_multiplier_;
 }
 
-void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type, uint64_t gc_duration, double* adjusted_max_free_p) {
+void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
+                                    uint64_t gc_duration,
+                                    double adjusted_resize_factor,
+                                    size_t* adjusted_max_free_p) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
 //  LOG(ERROR) << "Heap::GCSrvcGrowForUtilization..bytes_allocated=" << bytes_allocated <<
 //      ", alloc_space_->GetBytesAllocated=" << alloc_space_->GetBytesAllocated();
   size_t target_size;
-  const double multiplier = HeapGrowthMultiplier();  // Use the multiplier to grow more for
+  //const double multiplier = HeapGrowthMultiplier();  // Use the multiplier to grow more for
   // foreground.
-  const size_t adjusted_min_free = static_cast<size_t>(GetMinFree() * multiplier);
-  const size_t adjusted_max_free = static_cast<size_t>(GetMaxFree() * multiplier);
+  const size_t adjusted_min_free = static_cast<size_t>(GetMinFree() * adjusted_resize_factor);
+  const size_t adjusted_max_free = static_cast<size_t>(GetMaxFree() * adjusted_resize_factor);
   *adjusted_max_free_p = adjusted_max_free;
 
   SetLastGCSize(bytes_allocated);
@@ -2731,7 +2734,9 @@ void Heap::ConcurrentGC(Thread* self) {
 }
 
 
-bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_req) {
+bool Heap::RequestHeapTrimIfNeeded(size_t adjusted_max_free,
+                                   bool care_about_pauses,
+                                   bool send_remote_req) {
   uint64_t ms_time = MilliTime();
   float utilization =
       static_cast<float>(alloc_space_->GetBytesAllocated()) / alloc_space_->Size();
@@ -2761,7 +2766,7 @@ bool Heap::RequestHeapTrimIfNeeded(double adjusted_max_free, bool send_remote_re
 
 //  LOG(ERROR) << "RequestHeapTrimIfNeeded: careaboutpauseTimes=" << ((care_about_pause_times_) ? "true": "false");
 
-  if (care_about_pause_times_) {
+  if (care_about_pauses) {
     return false;
   }
 

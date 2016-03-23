@@ -50,6 +50,10 @@ class GCServiceClient {
   bool isTrimRequestsEnabled() const {
     return (enable_trimming_ == gc::gcservice::GC_SERVICE_HANDLE_TRIM_ALLOWED);
   }
+
+  gc::space::AgentMemInfo* GetMemInfoRec(void) {
+    return &sharable_space_->sharable_space_data_->meminfo_rec_;
+  }
  private:
   GCServiceClient(gc::space::SharableDlMallocSpace*, int, int);
   int index_;

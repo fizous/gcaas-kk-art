@@ -37,6 +37,7 @@
 using ::art::mirror::Class;
 using ::art::mirror::Object;
 using ::art::gcservice::GCServiceClient;
+using ::art::gc::gcservice::GCSrvcMemInfoOOM;
 namespace art {
 
 namespace gc {
@@ -281,15 +282,22 @@ void IPCHeap::SetLastProcessID(void) { //here we set the process of the app
 bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   IPC_MS_VLOG(ERROR) << "bool IPCHeap::CheckTrimming()";
 
-  local_heap_->ListenForProcessStateChange();
+  //local_heap_->ListenForProcessStateChange();
 
 //  LOG(ERROR) << "isProcessCare about pause times: "
 //      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
-  double adjusted_max_free = 1.0;
-  local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, &adjusted_max_free);
+//  double adjusted_max_free = 1.0;
+  gc::space::AgentMemInfo* _mem_info_rec =
+      GCServiceClient::service_client_->GetMemInfoRec();
+  double _resize_factor = _mem_info_rec->resize_factor_;
+  size_t _adjusted_max_free = 0;
+  bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
+  local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, _resize_factor,
+                                        &_adjusted_max_free);
 
   if(GCServiceClient::service_client_->isTrimRequestsEnabled())
-    return local_heap_->RequestHeapTrimIfNeeded(adjusted_max_free, true);
+    return local_heap_->RequestHeapTrimIfNeeded(_adjusted_max_free,
+                                                _pause_care, true);
   return false;
 #if 0
 
@@ -344,8 +352,16 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
 void IPCHeap::TrimHeap(void)  {
   //LOG(ERROR) << "IPCHeap::TrimHeap";
-  local_heap_->ListenForProcessStateChange();
-  if(local_heap_->RequestHeapTrimIfNeeded(local_heap_->HeapGrowthMultiplier(), false)) {
+//  local_heap_->ListenForProcessStateChange();
+  gc::space::AgentMemInfo* _mem_info_rec =
+      GCServiceClient::service_client_->GetMemInfoRec();
+  double _resize_factor = _mem_info_rec->resize_factor_;
+  size_t _adjusted_max_free = 0;
+  bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
+
+
+  if(local_heap_->RequestHeapTrimIfNeeded(_adjusted_max_free,
+                                          _pause_care, false)) {
     //LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
     local_heap_->SetLastTimeTrim(MilliTime());
     //size_t managed_advised =

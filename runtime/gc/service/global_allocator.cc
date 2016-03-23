@@ -28,6 +28,7 @@
 
 using ::art::mirror::Class;
 using ::art::mirror::Object;
+using ::art::gcservice::GCServiceClient;
 
 namespace art {
 namespace gc {
@@ -595,7 +596,7 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 
   _entry->data_addr_ = reinterpret_cast<uintptr_t>(_rec);
 
-  art::gcservice::GCServiceClient::service_client_->FillMemMapData(_rec);
+  GCServiceClient::service_client_->FillMemMapData(_rec);
   bool _svcRes =
     android::FileMapperService::MapFds(_rec);
   if(_svcRes) {
@@ -645,7 +646,7 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
     } \
   } while (false)
 
-void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
+GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   GCServiceReq* _entry = NULL;
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
   GCSERVICE_ALLOC_VLOG(ERROR) << "ProcessGCRequest: tail=" <<
@@ -895,6 +896,8 @@ void GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     _agent->collector_->SignalCollector(GC_SERVICE_TASK_EXPLICIT);
   }
 
+  return _req_type;
+
 }
 
 
@@ -912,8 +915,11 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
           gcservice_data_->queued_;
     }
     GCSERVICE_ALLOC_VLOG(ERROR) << "before calling processGCRequest";
-    ProcessGCRequest(args);
+    GC_SERVICE_TASK _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
+    if(_srvc_task == GC_SERVICE_TASK_REG) {
+      GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates();
+    }
   }
 }
 

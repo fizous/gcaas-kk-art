@@ -27,6 +27,8 @@
 #define GCSERVICE_ALLOC_VLOG_ON 0
 #define GCSERVICE_ALLOC_VLOG(severity)  if (GCSERVICE_ALLOC_VLOG_ON) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 
+
+
 namespace art {
 namespace gc {
 
@@ -173,7 +175,7 @@ class GCSrvcClientHandShake {
   void ReqHeapTrim(void);
   void ReqAllocationGC(void);
   void ListenToRequests(void*);
-  void ProcessGCRequest(void* args);
+  GC_SERVICE_TASK ProcessGCRequest(void* args);
   //GCServiceClientHandShake* mem_data_;
   GCServiceRequestsBuffer* gcservice_data_;
  private:
@@ -362,12 +364,12 @@ class GCSrvcMemInfoOOM {
 
   const int oom_adj_;
   const char * oom_label_;
+  const double resize_factor_;
 
-  int parse_status_;
   long aggregate_memory_;
   std::vector<GCSrvceAgent*> agents_list_;
 
-  GCSrvcMemInfoOOM(int, const char *);
+  GCSrvcMemInfoOOM(int, const char *, double);
   int parseString(char* line);
   void resetMemInfo(void);
 
@@ -378,13 +380,19 @@ class GCSrvcMemInfoOOM {
   static int parseOOMHeaderString(char* line, char* label, long* mem_size);
   static int parseOOMRecString(char* line, long* mem_size, int* pid);
 
+  static GCSrvcMemInfoOOM mem_info_oom_list_[];
 
-  void updateOOMLabel(int new_label) {
-
-
+  static double GetResizeFactor(int oom_adj) {
+    if(oom_adj == 0)
+      return 1.5;
+    return 1.0;
   }
 
-  static GCSrvcMemInfoOOM mem_info_oom_list_[];
+  static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {
+    if(mem_info_rec->oom_label_ == 0)
+     return true;
+    return false;
+  }
 };//GCSrvcMemInfoOOM
 
 
@@ -421,7 +429,7 @@ public:
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
-  void UpdateGlobalState(void);
+  //void UpdateGlobalState(void);
   void UpdateGlobalProcessStates(void);
 
 
