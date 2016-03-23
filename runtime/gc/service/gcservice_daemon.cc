@@ -163,7 +163,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
           _agent->updateOOMLabel(_meminfoP->oom_adj_, _memory_size);
 
-          AgentMemInfo* _meminfo_app_rec = &(_agent->meminfo_rec_);
+          AgentMemInfo* _meminfo_app_rec = _agent->meminfo_rec_;
 
           LOG(ERROR) << "---1-" << pid << ", "
               << _meminfo_app_rec->memory_size_ << " kB, "
