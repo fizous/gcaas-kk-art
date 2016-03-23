@@ -355,7 +355,7 @@ void IPCHeap::TrimHeap(void)  {
 //  local_heap_->ListenForProcessStateChange();
   gc::space::AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
-  double _resize_factor = _mem_info_rec->resize_factor_;
+//  double _resize_factor = _mem_info_rec->resize_factor_;
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
 
