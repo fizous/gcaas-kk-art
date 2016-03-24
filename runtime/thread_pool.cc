@@ -58,7 +58,7 @@ void* ThreadPoolWorker::Callback(void* arg) {
   Runtime* runtime = Runtime::Current();
   CHECK(runtime->AttachCurrentThread(worker->name_.c_str(), true, NULL, false));
   // Do work until its time to shut down.
-  thread_sys_id_ = ::art::GetTid();
+  worker->thread_sys_id_ = ::art::GetTid();
   worker->Run();
   runtime->DetachCurrentThread();
   return NULL;
