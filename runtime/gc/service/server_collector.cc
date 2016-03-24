@@ -464,6 +464,18 @@ void ServerCollector::Run(void) {
  // Thread* self = Thread::Current();
   gc_workers_pool_ = new WorkStealingThreadPool(3);
 
+  bool propagate = false;
+  int cpu_id = 0;
+  bool _setAffin =
+      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
+                                                                      &propagate,
+                                                                      false);
+
+  if(_setAffin) {
+    gc_workers_pool_->setThreadsAffinity(cpu_id);
+  }
+
+
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
    // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;

@@ -36,6 +36,9 @@ ThreadPoolWorker::ThreadPoolWorker(ThreadPool* thread_pool, const std::string& n
   CHECK_PTHREAD_CALL(pthread_attr_setstacksize, (&attr, stack_size), reason);
   CHECK_PTHREAD_CALL(pthread_create, (&pthread_, &attr, &Callback, this), reason);
   CHECK_PTHREAD_CALL(pthread_attr_destroy, (&attr), reason);
+
+
+  thread_sys_id_ = ::art::GetTid();
 }
 
 ThreadPoolWorker::~ThreadPoolWorker() {
@@ -111,6 +114,31 @@ ThreadPool::~ThreadPool() {
   }
   // Wait for the threads to finish.
   STLDeleteElements(&threads_);
+}
+
+
+static void SetThreadPoolAffinity(pid_t thread_id, int cpu_id) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+
+    uint32_t _cpu_id =  (uint32_t) cpu_id;
+    CPU_SET(_cpu_id, &mask);
+
+    if(sched_setaffinity(thread_id,
+        sizeof(mask), &mask) != 0) {
+      LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+          thread_id << ", cpuid: " <<  _cpu_id;
+    }
+}
+
+
+void ThreadPool::setThreadsAffinity(int cpu) {
+
+
+  for (const auto& thread : threads_) {
+    SetThreadPoolAffinity(thread->GetSysThreadId(), cpu);
+  }
+
 }
 
 void ThreadPool::StartWorkers(Thread* self) {

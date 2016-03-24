@@ -200,13 +200,37 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 //}
 
 
-static void DaemonSetThreadAffinity(Thread* th, bool complementary, int CPU) {
-  uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
-  uint32_t _cpu_id =  (uint32_t) CPU;
-  cpu_set_t mask;
-  CPU_ZERO(&mask);
-  CPU_SET(_cpu_id, &mask);
+static void ClientDaemonSetThreadAffinity(Thread* th, bool complementary, int cpu_id) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+    uint32_t _cpu_id =  (uint32_t) cpu_id;
+    if(complementary) {
+      for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+        if(_ind != _cpu_id)
+          CPU_SET(_ind, &mask);
+      }
+    } else {
+      CPU_SET(_cpu_id, &mask);
+    }
+    if(sched_setaffinity(th->GetTid(),
+        sizeof(mask), &mask) != 0) {
+      if(complementary) {
+        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+      }
+      LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+          th->GetTid() << ", cpuid: " <<  _cpu_id;
+    } else {
+      if(complementary) {
+        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+      }
+      GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
+          th->GetTid() << ", cpuid: " <<  _cpu_id;
+    }
+
 }
+
+
 
 void* IPCHeap::RunDaemon(void* arg) {
   IPC_MS_VLOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
@@ -225,7 +249,7 @@ void* IPCHeap::RunDaemon(void* arg) {
       gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,&propagate);
 
   if(_setAffin) {
-    DaemonSetThreadAffinity(self, propagate, cpu_id);
+    ClientDaemonSetThreadAffinity(self, propagate, cpu_id);
   }
 
 

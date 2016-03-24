@@ -45,6 +45,9 @@ class ThreadPoolWorker {
 
   virtual ~ThreadPoolWorker();
 
+  pid_t GetSysThreadId(void) {
+    return thread_sys_id_;
+  }
  protected:
   ThreadPoolWorker(ThreadPool* thread_pool, const std::string& name, size_t stack_size);
   static void* Callback(void* arg) LOCKS_EXCLUDED(Locks::mutator_lock_);
@@ -54,7 +57,7 @@ class ThreadPoolWorker {
   const std::string name_;
   const size_t stack_size_;
   pthread_t pthread_;
-
+  pid_t thread_sys_id_;
  private:
   friend class ThreadPool;
   DISALLOW_COPY_AND_ASSIGN(ThreadPoolWorker);
@@ -93,6 +96,8 @@ class ThreadPool {
   // Provides a way to bound the maximum number of worker threads, threads must be less the the
   // thread count of the thread pool.
   void SetMaxActiveWorkers(size_t threads);
+
+  void setThreadsAffinity(int);
 
  protected:
   // Get a task to run, blocks if there are no tasks left
