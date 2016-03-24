@@ -16,6 +16,9 @@
 #include "thread.h"
 #include "thread_list.h"
 
+
+using ::art::gc::gcservice::GCServiceGlobalAllocator;
+
 namespace art {
 
 namespace gcservice {
@@ -27,7 +30,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index, int enable_trim) :
         index_(index),
         enable_trimming_(enable_trim),
-        sharable_space_(sharable_space){
+        sharable_space_(sharable_space) {
   if(true) {
 
     //Thread* self = Thread::Current();
@@ -75,8 +78,8 @@ void GCServiceClient::FillAshMemMapData(android::IPCAShmemMap* recP,
 void GCServiceClient::FillMemMapData(android::FileMapperParameters* rec) {
   int _index = 0;
 
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+        GCServiceGlobalAllocator::allocator_instant_;
 
   if(_alloc->shareZygoteSpace()) {
     FillAshMemMapData(&rec->mem_maps_[_index++],
@@ -144,7 +147,7 @@ void GCServiceClient::FinalizeInitClient() {
   if(service_client_ != NULL) {
     service_client_->FinalizeHeapAfterInit();
   }
-  gc::gcservice::GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
+  GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease();
   //Runtime::Current()->GetHeap()->DumpSpaces();
 
 }
@@ -188,8 +191,8 @@ void GCServiceClient::FinalizeInitClient() {
 bool GCServiceClient::RequestConcGC(void) {
   if(service_client_ == NULL)
     return false;
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+      GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
   return true;
 }
@@ -199,8 +202,8 @@ bool GCServiceClient::RequestAllocateGC(void) {
   if(service_client_ == NULL) {
     return false;
   }
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-        gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+        GCServiceGlobalAllocator::allocator_instant_;
 
   if(_alloc->fwdGCAllocation()) { // we need to fwd this to daemon
     _alloc->handShake_->ReqAllocationGC();
@@ -250,8 +253,8 @@ bool GCServiceClient::RequestExplicitGC(void) {
     return false;
 //  LOG(ERROR) << "    skipping the explicit GC operation......";
 //  return true;
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+      GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
   return true;
 }
@@ -264,8 +267,8 @@ void GCServiceClient::RequestHeapTrim(void) {
     return;
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
   IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc =
+      GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqHeapTrim();
 }
 
@@ -276,8 +279,7 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 //  LOG(ERROR) << "GCServiceClient::FinalizeHeapAfterInit ... testing: client sends FD:" <<
 //      *_test_fd;
 //}
-  gc::gcservice::GCServiceGlobalAllocator* _alloc =
-      gc::gcservice::GCServiceGlobalAllocator::allocator_instant_;
+  GCServiceGlobalAllocator* _alloc = GCServiceGlobalAllocator::allocator_instant_;
   ipcHeap_->StartCollectorDaemon();
   _alloc->handShake_->ReqRegistration(sharable_space_->sharable_space_data_);
   ipcHeap_->BlockForServerInitialization(&sharable_space_->sharable_space_data_->register_gc_);

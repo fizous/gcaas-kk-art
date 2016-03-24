@@ -93,6 +93,14 @@ typedef enum {
   GC_SERVICE_HANDLE_SYS_SERVER_ALLOWED = 1
 } GC_SERVICE_HANDLE_SYS_SERVER;
 
+typedef enum {
+  GC_SRVC_DAEMON_AFFINITY_DISALLOWED = 0x00000000,
+  GC_SRVC_DAEMON_AFFINITY_ALLOWED = 0x00000010,
+  GC_SRVC_DAEMON_AFFINITY_PROPAGATE = 0x00000020,
+  GC_SRVC_DAEMON_AFFINITY_COMPLEMENTARY = 0x00000040,
+  GC_SRVC_DAEMON_AFFINITY_CORE_MASK = 0x0000000F
+} GC_SRVC_DAEMON_AFFINITY;
+
 //typedef struct GCServiceClientHandShake_S {
 //  SynchronizedLockHead lock_;
 //  InterProcessMutex* mu_;
@@ -185,6 +193,8 @@ class GCSrvcClientHandShake {
 
 }; //class GCSrvcClientHandShake
 
+
+
 typedef struct GCSrvc_Options_S {
   std::string gcservc_conf_path_;
   std::string gcservc_apps_list_path_;
@@ -199,6 +209,12 @@ typedef struct GCSrvc_Options_S {
   int page_capacity_;
   /* should we handle system server by the GCService? */
   int handle_system_server_;
+  /*
+   * the daemon affinity: least significant 4 bits are the core number.
+   * next four bits are parameters about propagating the pinning
+   */
+  int daemon_affinity_;
+
 } GCSrvc_Options;
 
 class GCServiceGlobalAllocator {
@@ -221,6 +237,7 @@ class GCServiceGlobalAllocator {
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
   static void GCSrvcNotifySystemServer();
   static bool GCSrvcIsSharingSpacesEnabled();
+  static bool GCSrvcIsClientDaemonPinned(int* cpu, bool* complementary, bool checkPropagation = true);
   static bool GCSrvcOption(const std::string&, GCSrvc_Options*);
   static bool ShouldRegisterApp(const char* se_name_c_str);
   void InitGCSrvcOptions(GCSrvc_Options* opts_addr);
@@ -452,6 +469,7 @@ class GCServiceDaemon {
   static void* RunDaemon(void*);
   void mainLoop(void);
   void initShutDownSignals(void);
+  void setThreadAffinity(Thread* th, int cpu_id, bool complementary);
 
 public:
 //  static GCServiceDaemon* gcdaemon_inst_;

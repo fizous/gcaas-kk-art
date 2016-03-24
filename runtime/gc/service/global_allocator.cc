@@ -51,6 +51,9 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   opts_addr->fwd_gc_alloc_ = GC_SERVICE_HANDLE_ALLOC_DAEMON;
   opts_addr->page_capacity_ = 64;
   opts_addr->handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
+  opts_addr->daemon_affinity_ = GC_SRVC_DAEMON_AFFINITY_DISALLOWED;
+
+
   opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/benchmarks/srvc_benchmarks.list");
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
@@ -123,6 +126,29 @@ bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
   int _gc_srvc_status =
       android_atomic_release_load(&allocator_instant_->region_header_->service_header_.status_);
   return ((GCSERVICE_STATUS_SYS_SERVER_CREATED & _gc_srvc_status) > 0);
+}
+
+
+
+bool GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(int* cpu,
+                                                          bool* complementary,
+                                                          bool checkPropagation) {
+  if(allocator_instant_ == NULL) {
+    return false;
+  }
+  int affin =  allocator_instant_->srvc_options_.daemon_affinity_;
+  if((affin & GC_SRVC_DAEMON_AFFINITY_ALLOWED ) == 0) {
+    return false;
+  }
+  if(checkPropagation) {
+    if((GC_SRVC_DAEMON_AFFINITY_PROPAGATE & affin) == 0) {
+      return false;
+    }
+  }
+
+  *complementary = ((affin & GC_SRVC_DAEMON_AFFINITY_COMPLEMENTARY) > 0);
+  *cpu = (affin & GC_SRVC_DAEMON_AFFINITY_CORE_MASK) ;
+  return true;
 }
 
 void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {

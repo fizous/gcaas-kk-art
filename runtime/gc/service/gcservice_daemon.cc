@@ -262,6 +262,17 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   Thread* self = Thread::Current();
 
 
+  bool propagate = false;
+  int cpu_id = 0;
+  bool _setAffin =
+      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
+                                                                      &propagate,
+                                                                      false);
+
+  if(_setAffin) {
+    setThreadAffinity(self, cpu_id, propagate);
+  }
+
   DCHECK_NE(self->GetState(), kRunnable);
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
@@ -288,6 +299,36 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   return NULL;
 }
 
+
+void GCServiceDaemon::setThreadAffinity(Thread* th, int cpu_id, bool complementary) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+    uint32_t _cpu_id =  (uint32_t) cpu_id;
+    if(complementary) {
+      for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+        if(_ind != _cpu_id)
+          CPU_SET(_ind, &mask);
+      }
+    } else {
+      CPU_SET(_cpu_id, &mask);
+    }
+    if(sched_setaffinity(th->GetTid(),
+        sizeof(mask), &mask) != 0) {
+      if(complementary) {
+        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+      }
+      LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+          th->GetTid() << ", cpuid: " <<  _cpu_id;
+    } else {
+      if(complementary) {
+        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
+      }
+      GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
+          th->GetTid() << ", cpuid: " <<  _cpu_id;
+    }
+
+}
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
      thread_(NULL), processed_index_(0), mem_info_fd_(-1),

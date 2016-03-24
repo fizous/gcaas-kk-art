@@ -199,6 +199,15 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 //  meta_->next_gc_type_ = local_heap_->next_gc_type_;
 //}
 
+
+static void DaemonSetThreadAffinity(Thread* th, bool complementary, int CPU) {
+  uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+  uint32_t _cpu_id =  (uint32_t) CPU;
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
+  CPU_SET(_cpu_id, &mask);
+}
+
 void* IPCHeap::RunDaemon(void* arg) {
   IPC_MS_VLOG(ERROR) << "AbstractIPCMarkSweep::RunDaemon: begin" ;
   IPCHeap* _ipc_heap = reinterpret_cast<IPCHeap*>(arg);
@@ -208,6 +217,18 @@ void* IPCHeap::RunDaemon(void* arg) {
   CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
 
   Thread* self = Thread::Current();
+
+
+  bool propagate = false;
+  int cpu_id = 0;
+  bool _setAffin =
+      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,&propagate);
+
+  if(_setAffin) {
+    DaemonSetThreadAffinity(self, propagate, cpu_id);
+  }
+
+
   DCHECK_NE(self->GetState(), kRunnable);
   {
     _ipc_heap->SetCollectorDaemon(self);
