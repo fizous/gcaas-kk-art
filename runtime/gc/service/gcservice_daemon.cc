@@ -270,7 +270,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
                                                                       false);
 
   if(_setAffin) {
-    setThreadAffinity(self, cpu_id, propagate);
+    _daemonObj->setThreadAffinity(self, cpu_id, propagate);
   }
 
   DCHECK_NE(self->GetState(), kRunnable);
