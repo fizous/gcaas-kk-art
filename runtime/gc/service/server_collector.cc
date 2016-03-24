@@ -471,12 +471,9 @@ void ServerCollector::Run(void) {
                                                                       &propagate,
                                                                       false);
 
+  gc_workers_pool_->dumpThreadsID();
   if(_setAffin) {
     gc_workers_pool_->setThreadsAffinity(cpu_id);
-
-    for (const auto& thread : gc_workers_pool_->threads_) {
-      LOG(ERROR) << "ThreadId of the thread pool is " << thread->GetSysThreadId();
-    }
   }
 
 

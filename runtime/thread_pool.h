@@ -98,7 +98,7 @@ class ThreadPool {
   void SetMaxActiveWorkers(size_t threads);
 
   void setThreadsAffinity(int);
-
+  void dumpThreadsID(void);
  protected:
   // Get a task to run, blocks if there are no tasks left
   virtual Task* GetTask(Thread* self);

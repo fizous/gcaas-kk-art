@@ -132,6 +132,15 @@ static void SetThreadPoolAffinity(pid_t thread_id, int cpu_id) {
 }
 
 
+void ThreadPool::dumpThreadsID(void) {
+
+
+  for (const auto& thread : threads_) {
+    LOG(ERROR)<< "thread->GetSysThreadId() = " << thread->GetSysThreadId();
+  }
+
+}
+
 void ThreadPool::setThreadsAffinity(int cpu) {
 
 
