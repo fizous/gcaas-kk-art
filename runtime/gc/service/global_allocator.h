@@ -362,7 +362,7 @@ class ServerCollector {
 class GCSrvceAgent {
  public:
   /* consider an agent is still growing up as long as the requests are still below or equal 5*/
-  static const int kcOOMInfoNurserySize = 5;
+  static const int kcOOMInfoNurserySize = 8;
 
 
   GCSrvceAgent(android::MappedPairProcessFD*);
@@ -449,7 +449,7 @@ typedef SafeMap<volatile int32_t, GCSrvceAgent*> ClientAgentsMap;
 
 class GCServiceDaemon {
   /* each five request we will read the global update */
-  static const int kcGCSrvcBulkRequestsThreshold = 4;
+  static const int kcGCSrvcBulkRequestsThreshold = 5;
 
 
   Thread*   thread_;
