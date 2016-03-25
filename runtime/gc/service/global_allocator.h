@@ -139,10 +139,10 @@ typedef struct GCServiceRequestsBuffer_S {
 
 } __attribute__((aligned(8))) GCServiceRequestsBuffer;
 
-typedef struct GCSrvcPhysicalState_S {
-  long mem_total;
-  long mem_free;
-}  __attribute__((aligned(4))) GCSrvcPhysicalState;
+//typedef struct GCSrvcPhysicalState_S {
+//  long mem_total;
+//  long mem_free;
+//}  __attribute__((aligned(4))) GCSrvcPhysicalState;
 
 typedef struct GCServiceHeader_S {
   SynchronizedLockHead lock_;
@@ -151,7 +151,7 @@ typedef struct GCServiceHeader_S {
   volatile int zygote_creation_busy_;
   InterProcessMutex* mu_;
   InterProcessConditionVariable* cond_;
-  GCSrvcPhysicalState global_state_;
+//  GCSrvcPhysicalState global_state_;
   pid_t service_pid_;
 //  GC_SERVICE_STATUS service_status_;
 } __attribute__((aligned(8))) GCServiceHeader;

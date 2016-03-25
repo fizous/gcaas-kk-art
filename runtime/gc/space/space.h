@@ -334,6 +334,12 @@ typedef struct AgentMemInfo_S {
   double resize_factor_;
   uint64_t last_update_ns_; //time stampe that process requested/...blaa
 
+
+  /* time of the concurrent request submitted by mutator */
+  uint64_t conc_req_time_ns_;
+  /* heapsize when conc request was sent */
+  uint64_t conc_req_heap_size_;
+
   IPC_OOM_LABEL_POLICY policy_method_;
   int histor_tail_;
   int histor_head_;
