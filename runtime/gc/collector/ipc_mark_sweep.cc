@@ -713,7 +713,7 @@ bool IPCHeap::RunCollectorDaemon() {
   IPC_MS_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
       <<"; explicit_count:" << meta_->explicit_count_;
-  NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK_CONC);
+  NotifyCompleteConcurrentTask(meta_->gc_type_);
 //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
