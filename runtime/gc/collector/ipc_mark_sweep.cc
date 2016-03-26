@@ -504,7 +504,11 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
 
-  GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns, gc_start_size);
+  if(gc_cause == kGcCauseBackground) {
+    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns, gc_start_size);
+  } else if (gc_cause == kGcCauseExplicit) {
+    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns, gc_start_size);
+  }
 
 //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
 //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();

@@ -261,6 +261,10 @@ bool GCServiceClient::RequestExplicitGC(void) {
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+
+  service_client_->setExplRequestTime(NanoTime(),
+                                      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+
   return true;
 }
 

@@ -55,7 +55,13 @@ class GCServiceClient {
     sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_ = timestamp;
     sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_ = heapsize;
 
-    LOG(ERROR) << "TimeStamp conc_req: " << timestamp << ", " <<heapsize;
+    LOG(ERROR) << "**TimeStamp conc_req: " << timestamp << ", " <<heapsize;
+  }
+  void setExplRequestTime(uint64_t timestamp, uint64_t heapsize) {
+    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_ = timestamp;
+    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_ = heapsize;
+
+    LOG(ERROR) << "++TimeStamp explicit: " << timestamp << ", " <<heapsize;
   }
 
   void updateDeltaConcReq(uint64_t timestamp, uint64_t heapsize) {
@@ -64,7 +70,18 @@ class GCServiceClient {
     uint64_t _delta_heapsize = heapsize -
         sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_;
 
-    LOG(ERROR) << "End TimeStamp conc_req: " << timestamp << ", " << heapsize <<
+    LOG(ERROR) << "===End conc_req: " << timestamp << ", " << heapsize <<
+       ", ration = " <<  ((_delta_heapsize * 100.0) / _delta_ts) ;
+  }
+
+
+  void updateDeltaExplReq(uint64_t timestamp, uint64_t heapsize) {
+    uint64_t _delta_ts = (timestamp -
+        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_) / 1000;
+    uint64_t _delta_heapsize = heapsize -
+        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
+
+    LOG(ERROR) << "===End expl_req: " << timestamp << ", " << heapsize <<
        ", ration = " <<  ((_delta_heapsize * 100.0) / _delta_ts) ;
   }
 
