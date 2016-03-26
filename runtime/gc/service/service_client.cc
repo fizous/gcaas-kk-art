@@ -198,7 +198,7 @@ bool GCServiceClient::RequestConcGC(void) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
       LOG(ERROR) << "----GCServiceClient::RequestConcGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_CONC;
-      return true;
+     // return true;
     }
   }
   gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
@@ -293,7 +293,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
       LOG(ERROR) << "----GCServiceClient::RequestExplicitGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
-      return true;
+      //return true;
     }
   }
 
