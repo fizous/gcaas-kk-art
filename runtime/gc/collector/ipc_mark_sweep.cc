@@ -698,12 +698,15 @@ bool IPCHeap::RunCollectorDaemon() {
 //    conc_req_cond_->Broadcast(self);
 //  }
   IPC_MS_VLOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
+  gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
   if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
+    _task_type = gc::gcservice::GC_SERVICE_TASK_CONC;
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
+    _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
     TrimHeap();
     //LOG(ERROR) << ".....TrimHeap() Executed.......";
@@ -713,7 +716,7 @@ bool IPCHeap::RunCollectorDaemon() {
   IPC_MS_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
       <<"; explicit_count:" << meta_->explicit_count_;
-  NotifyCompleteConcurrentTask(meta_->gc_type_);
+  NotifyCompleteConcurrentTask(_task_type);
 //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
