@@ -194,7 +194,7 @@ bool GCServiceClient::RequestConcGC(void) {
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
-  for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
       LOG(ERROR) << "----GCServiceClient::RequestConcGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_CONC;
@@ -226,6 +226,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(void) {
       break;
     }
   }
+  return true;
 }
 
 
