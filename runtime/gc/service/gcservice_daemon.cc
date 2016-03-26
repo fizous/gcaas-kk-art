@@ -650,7 +650,7 @@ bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_
   std::vector<GCServiceReq*>::iterator it;
   for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gcsrvc_req->req_type_) {
-      LOG(ERROR) << "----A previous Request was already active: " << gcsrvc_req->req_type_;
+      LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
       return false;
     }
   }

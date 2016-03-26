@@ -657,13 +657,13 @@ void IPCHeap::ResetServerFlag(void) {
 
 }
 
-void IPCHeap::NotifyCompleteConcurrentTask(void) {
+void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->conc_flag_ = 5;
-    GCServiceClient::RemoveGCSrvcActiveRequest();
+    GCServiceClient::RemoveGCSrvcActiveRequest(task);
     conc_req_cond_->Broadcast(self);
 
   }
@@ -710,7 +710,7 @@ bool IPCHeap::RunCollectorDaemon() {
   IPC_MS_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
       <<"; explicit_count:" << meta_->explicit_count_;
-  NotifyCompleteConcurrentTask();
+  NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK_CONC);
 //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
 //  {
 //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);

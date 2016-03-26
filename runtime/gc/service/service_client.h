@@ -29,8 +29,9 @@ class GCServiceClient {
   static void InitClient(const char* se_name_c_str, int trim_config);
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
-  static bool RemoveGCSrvcActiveRequest(void);
+  static bool RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task);
   static bool RequestExplicitGC(void);
+  bool ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task);
   static bool RequestAllocateGC(void) ;
   static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
   static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
@@ -97,8 +98,10 @@ class GCServiceClient {
   int index_;
   int enable_trimming_;
   gc::space::SharableDlMallocSpace* sharable_space_;
+  Mutex* gcservice_client_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   //gc::collector::IPCMarkSweep* collector_;
   gc::collector::IPCHeap* ipcHeap_;
+
   std::vector<gc::gcservice::GCServiceReq*> active_requests_;
 
 

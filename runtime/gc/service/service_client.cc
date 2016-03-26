@@ -30,7 +30,9 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index, int enable_trim) :
         index_(index),
         enable_trimming_(enable_trim),
-        sharable_space_(sharable_space) {
+        sharable_space_(sharable_space),
+        gcservice_client_lock_ (new Mutex("GCServiceClient lock")) {
+
   if(true) {
 
     //Thread* self = Thread::Current();
@@ -193,20 +195,22 @@ bool GCServiceClient::RequestConcGC(void) {
     return false;
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
-  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
-        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
-      LOG(ERROR) << "----GCServiceClient::RequestConcGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_CONC;
-      return true;
-    }
+
+  Thread* self = Thread::Current();
+  MutexLock mu(self, *service_client_->gcservice_client_lock_);
+
+  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_CONC)) {
+    return true;
   }
-  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+
+  gc::gcservice::GCServiceReq* _req_entry =
+      _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
 
   if(_req_entry != NULL) {
     service_client_->setConcRequestTime(NanoTime(),
                      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+    service_client_->active_requests_.push_back(_req_entry);
     return true;
   }
 
@@ -216,11 +220,12 @@ bool GCServiceClient::RequestConcGC(void) {
 
 }
 
-bool GCServiceClient::RemoveGCSrvcActiveRequest(void) {
+bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task) {
+  Thread* self = Thread::Current();
+  MutexLock mu(self, *service_client_->gcservice_client_lock_);
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
-        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+    if((*it)->req_type_ == task) {
       LOG(ERROR) << "GCServiceClient::RemoveGCSrvcActiveRequest " << (*it)->req_type_;
       service_client_->active_requests_.erase(it);
       break;
@@ -234,6 +239,7 @@ bool GCServiceClient::RequestAllocateGC(void) {
   if(service_client_ == NULL) {
     return false;
   }
+  LOG(ERROR) << "XXXXXXXXXXXXXX REQUEST ALLOC GCCCCCCCCCCCCCCCCCCCCC";
   GCServiceGlobalAllocator* _alloc =
         GCServiceGlobalAllocator::allocator_instant_;
 
@@ -280,6 +286,18 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 
 }
 
+
+bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
+  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
+        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+      LOG(ERROR) << "----GCServiceClient::ShouldPushNewRequest previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
+      return false;
+    }
+  }
+  return true;
+}
 bool GCServiceClient::RequestExplicitGC(void) {
   if(service_client_ == NULL)
     return false;
@@ -288,20 +306,21 @@ bool GCServiceClient::RequestExplicitGC(void) {
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
 
-  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
-  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
-        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
-      LOG(ERROR) << "----GCServiceClient::RequestExplicitGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
-      return true;
-    }
+  Thread* self = Thread::Current();
+  MutexLock mu(self, *service_client_->gcservice_client_lock_);
+
+  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
+    return true;
   }
 
-  _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+  gc::gcservice::GCServiceReq* _req_entry =
+      _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
-  service_client_->setExplRequestTime(NanoTime(),
-                                      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
-
+  if(_req_entry != NULL) {
+    service_client_->setExplRequestTime(NanoTime(),
+                                        static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+    service_client_->active_requests_.push_back(_req_entry);
+  }
   return true;
 }
 

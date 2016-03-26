@@ -141,7 +141,7 @@ class IPCHeap {
   static void* RunDaemon(void* arg);
   bool StartCollectorDaemon(void);
   bool RunCollectorDaemon(void);
-  void NotifyCompleteConcurrentTask(void);
+  void NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK);
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
 
