@@ -59,8 +59,8 @@ class GCServiceClient {
   }
 
   void updateDeltaConcReq(uint64_t timestamp, uint64_t heapsize) {
-    uint64_t _delta_ts = 1000 * (timestamp -
-        sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_);
+    uint64_t _delta_ts = (timestamp -
+        sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_) / 1000;
     uint64_t _delta_heapsize = heapsize -
         sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_;
 
