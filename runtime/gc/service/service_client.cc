@@ -214,7 +214,7 @@ bool GCServiceClient::RequestConcGC(void) {
   if(_req_entry != NULL) {
     service_client_->setConcRequestTime(NanoTime(),
                      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
-    //service_client_->active_requests_.push_back(_req_entry);
+    service_client_->active_requests_.push_back(_req_entry);
     return true;
   }
 
@@ -293,8 +293,6 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 
 
 bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
-  if(true)
-    return true;
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
@@ -331,7 +329,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
   if(_req_entry != NULL) {
     service_client_->setExplRequestTime(NanoTime(),
                                         static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
-    //service_client_->active_requests_.push_back(_req_entry);
+    service_client_->active_requests_.push_back(_req_entry);
   }
   return true;
 }
