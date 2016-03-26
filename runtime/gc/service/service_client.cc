@@ -297,7 +297,8 @@ bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task) 
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
-      LOG(ERROR) << "----GCServiceClient::ShouldPushNewRequest previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
+      LOG(ERROR) << "----GCServiceClient::ShouldPushNewRequest previous Request was already active: " << (*it)->req_type_ <<
+          ", status = " << (*it)->status_;
       return false;
     }
   }
