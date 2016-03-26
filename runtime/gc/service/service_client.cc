@@ -193,13 +193,39 @@ bool GCServiceClient::RequestConcGC(void) {
     return false;
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
+        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+      LOG(ERROR) << "----GCServiceClient::RequestConcGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_CONC;
+      return true;
+    }
+  }
+  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
-  service_client_->setConcRequestTime(NanoTime(),
-                   static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
 
+  if(_req_entry != NULL) {
+    service_client_->setConcRequestTime(NanoTime(),
+                     static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+    return true;
+  }
 
   return true;
+
+
+
+}
+
+bool GCServiceClient::RemoveGCSrvcActiveRequest(void) {
+  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
+        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+      LOG(ERROR) << "GCServiceClient::RemoveGCSrvcActiveRequest " << (*it)->req_type_;
+      active_requests_.erase(it);
+      break;
+    }
+  }
 }
 
 
@@ -260,6 +286,16 @@ bool GCServiceClient::RequestExplicitGC(void) {
 //  return true;
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
+
+  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
+        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+      LOG(ERROR) << "----GCServiceClient::RequestExplicitGC previous Request was already active: " << gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
+      return true;
+    }
+  }
+
   _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
   service_client_->setExplRequestTime(NanoTime(),

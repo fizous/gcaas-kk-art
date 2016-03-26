@@ -614,6 +614,21 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 
 }
 
+void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
+  if(request_addr->status_ == GC_SERVICE_REQ_STARTED) {
+    request_addr->status_ = GC_SERVICE_REQ_COMPLETE;
+    std::vector<GCServiceReq*>::iterator it;
+    for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+      if((*it)->req_type_ == request_addr->req_type_) {
+        android_atomic_acquire_store(GC_SERVICE_REQ_NONE, &((*it)->status_));
+        active_requests_.erase(it);
+        LOG(ERROR) << "Removing Request " << request_addr->req_type_;
+        break;
+      }
+    }
+  }
+}
+
 
 void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   meminfo_rec_->memory_size_ = memory_size;
@@ -631,7 +646,16 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
 }
 
 
-void GCSrvceAgent::signalMyCollectorDaemon(GC_SERVICE_TASK req) {
+bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_TASK req*/) {
+  std::vector<GCServiceReq*>::iterator it;
+  for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == gcsrvc_req->req_type_) {
+      LOG(ERROR) << "----A previous Request was already active: " << gcsrvc_req->req_type_;
+      return false;
+    }
+  }
+
+
   srvc_requests_++;
 
   if(srvc_requests_ == kcOOMInfoNurserySize) { // upgrade the policy
@@ -639,7 +663,9 @@ void GCSrvceAgent::signalMyCollectorDaemon(GC_SERVICE_TASK req) {
     LOG(ERROR) << ".....Switching to Default Policy... Default";
   }
 
-  collector_->SignalCollector(req);
+  active_requests_.push_back(gcsrvc_req);
+  collector_->SignalCollector(this, gcsrvc_req);
+  return true;
 }
 
 //----------

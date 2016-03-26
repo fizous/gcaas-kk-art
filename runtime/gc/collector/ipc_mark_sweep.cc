@@ -663,7 +663,9 @@ void IPCHeap::NotifyCompleteConcurrentTask(void) {
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->conc_flag_ = 5;
+    GCServiceClient::RemoveGCSrvcActiveRequest();
     conc_req_cond_->Broadcast(self);
+
   }
 }
 

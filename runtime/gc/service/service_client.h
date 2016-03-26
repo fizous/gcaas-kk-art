@@ -29,6 +29,7 @@ class GCServiceClient {
   static void InitClient(const char* se_name_c_str, int trim_config);
   static void FinalizeInitClient();
   static bool RequestConcGC(void);
+  static bool RemoveGCSrvcActiveRequest(void);
   static bool RequestExplicitGC(void);
   static bool RequestAllocateGC(void) ;
   static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
@@ -98,7 +99,7 @@ class GCServiceClient {
   gc::space::SharableDlMallocSpace* sharable_space_;
   //gc::collector::IPCMarkSweep* collector_;
   gc::collector::IPCHeap* ipcHeap_;
-
+  std::vector<gc::gcservice::GCServiceReq*> active_requests_;
 
 
 

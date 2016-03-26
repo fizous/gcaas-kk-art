@@ -76,12 +76,14 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
 }
 
 
-void ServerCollector::SignalCollector(GC_SERVICE_TASK req_type) {
+void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceReq* gcsrvc_req) {
   Thread* self = Thread::Current();
+  GC_SERVICE_TASK req_type =  static_cast<GC_SERVICE_TASK>(gcsrvc_req->req_type_);
  // LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
+    curr_srvc_agent_ = curr_srvc_agent;
     if(thread_ != NULL) {
       int32_t old_status = 0;
       int32_t new_value = 0;
@@ -89,6 +91,7 @@ void ServerCollector::SignalCollector(GC_SERVICE_TASK req_type) {
         old_status = status_;
         new_value = old_status | req_type;//+ (is_explicit? (1 << 16) : 1);
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
+      curr_srvc_req_ = gcsrvc_req;
      // LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
@@ -382,6 +385,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
+    curr_srvc_agent_->UpdateRequestStatus(curr_srvc_req_);
     heap_data_->conc_flag_ = 0;
     conc_req_cond_->Broadcast(self);
   }

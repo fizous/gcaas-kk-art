@@ -177,8 +177,8 @@ class GCSrvcClientHandShake {
   GCSrvcClientHandShake(GCServiceRequestsBuffer*);
   android::FileMapperParameters* GetMapperRecord(void* params);
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
-  void ReqConcCollection(void*);
-  void ReqExplicitCollection(void*);
+  GCServiceReq* ReqConcCollection(void*);
+  GCServiceReq* ReqExplicitCollection(void*);
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
   void ReqAllocationGC(void);
@@ -323,7 +323,7 @@ class ServerCollector {
   InterProcessMutex* gc_complete_mu_;
   InterProcessConditionVariable* gc_complete_cond_;
 
-  void SignalCollector(GC_SERVICE_TASK req_type);
+  void SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceReq* gcsrvc_req);
   int WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteTrim(void);
@@ -351,7 +351,8 @@ class ServerCollector {
   volatile int trims_count_;
 
   collector::IPCServerMarkerSweep* ipc_msweep_;
-
+  GCSrvceAgent* curr_srvc_agent_;
+  GCServiceReq* curr_srvc_req_;
 
 };//class ServerCollector
 
@@ -374,7 +375,10 @@ class GCSrvceAgent {
 
   void updateOOMLabel(int new_label, long memory_size);
 
-  void signalMyCollectorDaemon(GC_SERVICE_TASK req);
+  bool signalMyCollectorDaemon(GCServiceReq* gcsrvc_req);
+
+  std::vector<GCServiceReq*> active_requests_;
+  void UpdateRequestStatus(GCServiceReq*);
 
 
  private:

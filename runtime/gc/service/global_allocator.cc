@@ -567,7 +567,7 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
     ENTRY->status_ = GC_SERVICE_REQ_NEW;
 
 
-void GCSrvcClientHandShake::ReqConcCollection(void* args) {
+GCServiceReq* GCSrvcClientHandShake::ReqConcCollection(void* args) {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
 
@@ -579,9 +579,10 @@ void GCSrvcClientHandShake::ReqConcCollection(void* args) {
   GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqConcCollection";
 
   gcservice_data_->cond_->Broadcast(self);
+  return _entry;
 }
 
-void GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
+GCServiceReq* GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
 
@@ -593,6 +594,7 @@ void GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqExplicitCollection";
 
   gcservice_data_->cond_->Broadcast(self);
+  return _entry;
 }
 
 
@@ -674,7 +676,16 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
 
 GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   GCServiceReq* _entry = NULL;
+  GC_SERVICE_TASK _process_result = GC_SERVICE_TASK_NOP;
   _entry = &(gcservice_data_->entries_[gcservice_data_->tail_]);
+
+  if(_entry->status_ == GC_SERVICE_REQ_NEW) {
+    _entry->status_ = GC_SERVICE_REQ_STARTED;
+  } else {
+    if(_entry->status_ == GC_SERVICE_REQ_NONE) {
+      LOG(ERROR) << "Request status is not correct..." << _entry->status_;
+    }
+  }
   GCSERVICE_ALLOC_VLOG(ERROR) << "ProcessGCRequest: tail=" <<
       gcservice_data_->tail_ << ", " << "address: " <<
       reinterpret_cast<void*>(_entry);
@@ -872,13 +883,16 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
      // _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
       _daemon->agents_map_.Put(_newPairEntry->first->process_id_,
                                new GCSrvceAgent(_newPairEntry));
-
+      _entry->status_ = GC_SERVICE_REQ_COMPLETE;
+      _process_result = GC_SERVICE_TASK_REG;
     } else {
       LOG(FATAL) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
     }
   } else {
+
      GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
      if(_dmon != NULL) {
+       _entry->status_ = GC_SERVICE_REQ_STARTED;
        GCSrvceAgent* _agent = _dmon->GetAgentByPid(_entry->pid_);
        if(_agent != NULL) {
          bool _fwd_request = true;
@@ -892,13 +906,15 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
            _fwd_request = false;
          }
          if(_fwd_request) {
-           _agent->signalMyCollectorDaemon(_req_type);
+           if(_agent->signalMyCollectorDaemon(_entry)) {
+             _process_result = _req_type;
+           }
          }
        }
      }
   }
 
-  return _req_type;
+  return _process_result;
 
 }
 
@@ -919,7 +935,9 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
     GCSERVICE_ALLOC_VLOG(ERROR) << "before calling processGCRequest";
     GC_SERVICE_TASK _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
-    GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
+    if(_srvc_task != GC_SERVICE_TASK_NOP) {
+      GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
+    }
   }
 }
 
