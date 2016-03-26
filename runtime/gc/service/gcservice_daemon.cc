@@ -617,15 +617,23 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
   if(request_addr->status_ == GC_SERVICE_REQ_STARTED) {
     request_addr->status_ = GC_SERVICE_REQ_COMPLETE;
+    bool found = false;
     std::vector<GCServiceReq*>::iterator it;
     for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
       if((*it)->req_type_ == request_addr->req_type_) {
         android_atomic_acquire_store(GC_SERVICE_REQ_NONE, &((*it)->status_));
-        active_requests_.erase(it);
         LOG(ERROR) << "Removing Request " << request_addr->req_type_;
+        active_requests_.erase(it);
+        found = true;
         break;
       }
     }
+    if(!found) {
+      LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus failed to remove request.." << request_addr->req_type_;
+    }
+  } else {
+    LOG(ERROR) << "GCSrvceAgent::UpdateRequestStatus status was not started"
+        << request_addr->status_;
   }
 }
 
@@ -647,11 +655,15 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
 
 
 bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_TASK req*/) {
-  std::vector<GCServiceReq*>::iterator it;
-  for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == gcsrvc_req->req_type_) {
-      LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
-      return false;
+
+  if(false) {
+    std::vector<GCServiceReq*>::iterator it;
+
+    for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
+      if((*it)->req_type_ == gcsrvc_req->req_type_) {
+        LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
+        return false;
+      }
     }
   }
 
@@ -741,7 +753,8 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-  IPC_MS_VLOG(INFO) << "Import Address ------ " << reinterpret_cast<void*>(import_address_);
+  IPC_MS_VLOG(INFO) << "Import Address ------ "
+      << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   IPC_MS_VLOG(INFO) << "going to wait for the shutdown signals";
