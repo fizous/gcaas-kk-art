@@ -17,7 +17,7 @@
 #include "mark_sweep.h"
 #include "sticky_mark_sweep.h"
 #include "partial_mark_sweep.h"
-
+#include "gc/service/global_allocator.h"
 
 
 #if (ART_GC_SERVICE || true)
