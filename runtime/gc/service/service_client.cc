@@ -222,7 +222,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(void) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
       LOG(ERROR) << "GCServiceClient::RemoveGCSrvcActiveRequest " << (*it)->req_type_;
-      active_requests_.erase(it);
+      service_client_->active_requests_.erase(it);
       break;
     }
   }
