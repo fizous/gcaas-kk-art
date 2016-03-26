@@ -226,6 +226,7 @@ bool GCServiceClient::RequestConcGC(void) {
 
 bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
+  LOG(ERROR) << "GCServiceClient::RemoveGCSrvcActiveRequest.." << task;
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
