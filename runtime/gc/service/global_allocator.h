@@ -287,7 +287,7 @@ class GCServiceGlobalAllocator {
 
 
 class GCServiceProcess;
-
+class GCSrvceAgent;
 
 
 typedef struct GCServiceClientRecord_S {
