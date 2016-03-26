@@ -197,6 +197,10 @@ bool GCServiceClient::RequestConcGC(void) {
       GCServiceGlobalAllocator::allocator_instant_;
 
   Thread* self = Thread::Current();
+
+  LOG(ERROR) << "XXXXXXXXXXXXXX GCServiceClient::RequestConcGC XXXXXXXXXX"
+      << self->GetTid();
+
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
   if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_CONC)) {
@@ -269,6 +273,7 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
     return false;
   }
   Thread* self = Thread::Current();
+
   IPC_MS_VLOG(INFO) << " <<<<< GCServiceClient::RequestWaitForConcurrentGC >>>> " << self->GetTid();
 
   *type  = service_client_->ipcHeap_->WaitForConcurrentIPCGcToComplete(self);
@@ -307,6 +312,10 @@ bool GCServiceClient::RequestExplicitGC(void) {
       GCServiceGlobalAllocator::allocator_instant_;
 
   Thread* self = Thread::Current();
+
+  LOG(ERROR) << "XXXXXXXXXXXXXX GCServiceClient::RequestExplicitGC XXXXXXXXXX"
+      << self->GetTid();
+
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
   if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
