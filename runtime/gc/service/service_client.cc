@@ -293,6 +293,8 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 
 
 bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
+  if(true)
+    return true;
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
