@@ -661,10 +661,12 @@ void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) 
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
+    if(true)
+      GCServiceClient::RemoveGCSrvcActiveRequest(task);
+
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->conc_flag_ = 5;
-    if(false)
-      GCServiceClient::RemoveGCSrvcActiveRequest(task);
+
     conc_req_cond_->Broadcast(self);
 
   }
