@@ -235,6 +235,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK t
       service_client_->active_requests_.erase(it);
       break;
     }
+    ++it;
   }
   return true;
 }
@@ -302,6 +303,7 @@ bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task) 
           ", status = " << (*it)->status_;
       return false;
     }
+    ++it;
   }
   return true;
 }

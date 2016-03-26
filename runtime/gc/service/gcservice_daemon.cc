@@ -627,6 +627,7 @@ void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
         found = true;
         break;
       }
+      ++it;
     }
     if(!found) {
       LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus failed to remove request.." << request_addr->req_type_;
@@ -665,6 +666,7 @@ bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_
         return false;
       }
     }
+    ++it;
   }
 
 
