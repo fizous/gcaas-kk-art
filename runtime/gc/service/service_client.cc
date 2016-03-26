@@ -214,7 +214,7 @@ bool GCServiceClient::RequestConcGC(void) {
   if(_req_entry != NULL) {
     service_client_->setConcRequestTime(NanoTime(),
                      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
-    service_client_->active_requests_.push_back(_req_entry);
+    //service_client_->active_requests_.push_back(_req_entry);
     return true;
   }
 
@@ -331,7 +331,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
   if(_req_entry != NULL) {
     service_client_->setExplRequestTime(NanoTime(),
                                         static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
-    service_client_->active_requests_.push_back(_req_entry);
+    //service_client_->active_requests_.push_back(_req_entry);
   }
   return true;
 }
