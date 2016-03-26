@@ -43,7 +43,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::InitGCSrvcOptions>>>>>>>>";
 
   opts_addr->fgd_growth_mutiplier_ = 1.5;
-  opts_addr->trim_conf_ = GC_SERVICE_HANDLE_TRIM_ALLOWED;
+  opts_addr->trim_conf_ = GC_SERVICE_HANDLE_TRIM_DISALLOWED/*GC_SERVICE_HANDLE_TRIM_ALLOWED*/;
   // By default share the three spaces
   opts_addr->share_zygote_space_ =
       GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS | GC_SERVICE_SHARE_SPACES_ZYGOTE |
