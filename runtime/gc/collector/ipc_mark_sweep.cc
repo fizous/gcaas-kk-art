@@ -74,13 +74,13 @@ constexpr bool kCheckLocks = kDebugLocking;
 accounting::BaseHeapBitmap* IPCMarkSweep::_temp_heap_beetmap = NULL;
 
 IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
-    ms_lock_("heap-ipc lock"),
-    ms_cond_("heap-ipcs::cond_", ms_lock_),
-    meta_(heap_meta),
-    local_heap_(heap),
-    collector_daemon_(NULL),
-    ipc_flag_raised_(0),
-    collector_entry_(0) {
+        ms_lock_("heap-ipc lock"),
+        ms_cond_("heap-ipcs::cond_", ms_lock_),
+        meta_(heap_meta),
+        local_heap_(heap),
+        collector_daemon_(NULL),
+        ipc_flag_raised_(0),
+        collector_entry_(0) {
 
 
   heap->SetSubHeapMetaData(&(meta_->sub_record_meta_));
@@ -90,19 +90,19 @@ IPCHeap::IPCHeap(space::GCSrvSharableHeapData* heap_meta, Heap* heap) :
   SharedConditionVarData* _conc_condAddress = &meta_->conc_lock_.cond_var_;
   conc_req_cond_mu_ = new InterProcessMutex("GCConc Mutex", _conc_futexAddress);
   conc_req_cond_ = new InterProcessConditionVariable("GCConc CondVar",
-      *conc_req_cond_mu_, _conc_condAddress);
+                                                     *conc_req_cond_mu_, _conc_condAddress);
 
   /* initialize gc complete locks */
   SharedFutexData* _complete_futexAddress = &meta_->gc_complete_lock_.futex_head_;
   SharedConditionVarData* _complete_condAddress = &meta_->gc_complete_lock_.cond_var_;
   gc_complete_mu_ = new InterProcessMutex("GCComplete Mutex", _complete_futexAddress);
   gc_complete_cond_ = new InterProcessConditionVariable("GCcomplete CondVar",
-      *gc_complete_mu_, _complete_condAddress);
+                                                        *gc_complete_mu_, _complete_condAddress);
 
-//  if(!StartCollectorDaemon()) {
-//    IPC_MS_VLOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
-//        << " daemon .. XXXXXXXXX";
-//  }
+  //  if(!StartCollectorDaemon()) {
+  //    IPC_MS_VLOG(ERROR) << "XXXXXXXXX IPCHeap::IPCHeap .. could not initialize collector"
+  //        << " daemon .. XXXXXXXXX";
+  //  }
 
   ResetHeapMetaDataUnlocked();
 
@@ -134,9 +134,9 @@ bool IPCHeap::StartCollectorDaemon(void) {
   IPC_MS_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
 
   CHECK_PTHREAD_CALL(pthread_create,
-      (&collector_pthread_, NULL,
-      &IPCHeap::RunDaemon, this),
-      "IPCHeap Daemon thread");
+                     (&collector_pthread_, NULL,
+                         &IPCHeap::RunDaemon, this),
+                         "IPCHeap Daemon thread");
 
   Thread* self = Thread::Current();
   MutexLock mu(self, ms_lock_);
@@ -156,28 +156,28 @@ bool IPCHeap::StartCollectorDaemon(void) {
 
 void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
   //meta_data_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-//  meta_->freed_objects_   = 0;
-//  meta_->freed_bytes_     = 0;
+  //  meta_->freed_objects_   = 0;
+  //  meta_->freed_bytes_     = 0;
   meta_->barrier_count_   = 0;
   meta_->conc_flag_       = 0;
-//  meta_->is_gc_complete_  = 0;
+  //  meta_->is_gc_complete_  = 0;
   meta_->is_gc_running_   = 0;
   meta_->concurrent_gc_ = (local_heap_->concurrent_gc_) ? 1 : 0;
   meta_->collect_index_ = -1;
 
   /* heap members */
-//  meta_->last_gc_type_ = collector::kGcTypeNone;
-//  meta_->next_gc_type_ = collector::kGcTypePartial;
-//  meta_->total_wait_time_ = 0;
-//  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
-//  meta_->last_gc_size_ = local_heap_->GetLastGCSize();
-//  meta_->last_gc_time_ns_ = local_heap_->GetLastGCTime();
+  //  meta_->last_gc_type_ = collector::kGcTypeNone;
+  //  meta_->next_gc_type_ = collector::kGcTypePartial;
+  //  meta_->total_wait_time_ = 0;
+  //  meta_->concurrent_start_bytes_ = local_heap_->GetConcStartBytes();
+  //  meta_->last_gc_size_ = local_heap_->GetLastGCSize();
+  //  meta_->last_gc_time_ns_ = local_heap_->GetLastGCTime();
 
 
 
   /* heap statistics */
-//  meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
-//  meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
+  //  meta_->total_objects_freed_ever_  = local_heap_->GetObjectsFreedEver();
+  //  meta_->total_bytes_freed_ever_    = local_heap_->GetBytesFreedEver();
   meta_->conc_count_ = 0;
   meta_->explicit_count_ = 0;
 
@@ -201,32 +201,32 @@ void IPCHeap::ResetHeapMetaDataUnlocked() { // reset data without locking
 
 
 static void ClientDaemonSetThreadAffinity(Thread* th, bool complementary, int cpu_id) {
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
-    uint32_t _cpu_id =  (uint32_t) cpu_id;
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
+  uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+  uint32_t _cpu_id =  (uint32_t) cpu_id;
+  if(complementary) {
+    for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+      if(_ind != _cpu_id)
+        CPU_SET(_ind, &mask);
+    }
+  } else {
+    CPU_SET(_cpu_id, &mask);
+  }
+  if(sched_setaffinity(th->GetTid(),
+                       sizeof(mask), &mask) != 0) {
     if(complementary) {
-      for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
-        if(_ind != _cpu_id)
-          CPU_SET(_ind, &mask);
-      }
-    } else {
-      CPU_SET(_cpu_id, &mask);
+      GCMMP_VLOG(INFO) << "GCMMP: Complementary";
     }
-    if(sched_setaffinity(th->GetTid(),
-        sizeof(mask), &mask) != 0) {
-      if(complementary) {
-        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
-      }
-      LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
-          th->GetTid() << ", cpuid: " <<  _cpu_id;
-    } else {
-      if(complementary) {
-        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
-      }
-      GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
-          th->GetTid() << ", cpuid: " <<  _cpu_id;
+    LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+        th->GetTid() << ", cpuid: " <<  _cpu_id;
+  } else {
+    if(complementary) {
+      GCMMP_VLOG(INFO) << "GCMMP: Complementary";
     }
+    GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
+        th->GetTid() << ", cpuid: " <<  _cpu_id;
+  }
 
 }
 
@@ -246,7 +246,7 @@ void* IPCHeap::RunDaemon(void* arg) {
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
-      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,&propagate);
+      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id, &propagate);
 
   if(_setAffin) {
     ClientDaemonSetThreadAffinity(self, propagate, cpu_id);
@@ -274,11 +274,11 @@ void IPCHeap::CreateCollectors(void) {
   for(int i = 0 ; i < 2 ; i ++) {
     _conc_flag = (i != 0);
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCMarkSweep(this, _conc_flag,
-        "ipcMS")));
+                                                                                                 "ipcMS")));
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCPartialMarkSweep(this, _conc_flag,
-        "partialIPC")));
+                                                                                                        "partialIPC")));
     local_heap_->GCPSrvcReinitMarkSweep(reinterpret_cast<collector::MarkSweep*>(new IPCStickyMarkSweep(this, _conc_flag,
-        "stickyIPC")));
+                                                                                                       "stickyIPC")));
 
   }
 }
@@ -286,7 +286,7 @@ void IPCHeap::CreateCollectors(void) {
 
 
 void IPCHeap::ConcurrentGC(Thread* self) {
-//  LOG(ERROR) << "------IPCHeap::ConcurrentGC-------";
+  //  LOG(ERROR) << "------IPCHeap::ConcurrentGC-------";
   {
     MutexLock mu(self, *Locks::runtime_shutdown_lock_);
     if (Runtime::Current()->IsShuttingDown()) {
@@ -298,20 +298,20 @@ void IPCHeap::ConcurrentGC(Thread* self) {
     CollectGarbageIPC(local_heap_->GetNextGCType(), kGcCauseBackground, false);
   }
   GCP_MARK_END_CONC_GC_HW_EVENT;
-//  local_heap_->ConcurrentGC(self);
-//  {
-//    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
-//    if (Runtime::Current()->IsShuttingDown()) {
-//      return;
-//    }
-//  }
-//  if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
-//    CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
-//  }
+  //  local_heap_->ConcurrentGC(self);
+  //  {
+  //    MutexLock mu(self, *Locks::runtime_shutdown_lock_);
+  //    if (Runtime::Current()->IsShuttingDown()) {
+  //      return;
+  //    }
+  //  }
+  //  if (WaitForConcurrentIPCGcToComplete(self) == collector::kGcTypeNone) {
+  //    CollectGarbageIPC(next_gc_type_, kGcCauseBackground, false);
+  //  }
 }
 
 void IPCHeap::ExplicitGC(bool clear_soft_references)  {
-//  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
+  //  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
   WaitForConcurrentIPCGcToComplete(self);
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
@@ -329,9 +329,9 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
   //local_heap_->ListenForProcessStateChange();
 
-//  LOG(ERROR) << "isProcessCare about pause times: "
-//      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
-//  double adjusted_max_free = 1.0;
+  //  LOG(ERROR) << "isProcessCare about pause times: "
+  //      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
+  //  double adjusted_max_free = 1.0;
   gc::space::AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
   double _resize_factor = _mem_info_rec->resize_factor_;
@@ -377,16 +377,16 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
   // Trim only if we do not currently care about pause times.
   if (!local_heap_->care_about_pause_times_) {
-    #if (ART_GC_SERVICE || true)
-      gcservice::GCServiceClient::RequestHeapTrim();
-    #endif
+#if (ART_GC_SERVICE || true)
+    gcservice::GCServiceClient::RequestHeapTrim();
+#endif
 
-//    JNIEnv* env = self->GetJniEnv();
-//    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
-//    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
-//    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
-//                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
-//    CHECK(!env->ExceptionCheck());
+    //    JNIEnv* env = self->GetJniEnv();
+    //    DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
+    //    DCHECK(WellKnownClasses::java_lang_Daemons_requestHeapTrim != NULL);
+    //    env->CallStaticVoidMethod(WellKnownClasses::java_lang_Daemons,
+    //                              WellKnownClasses::java_lang_Daemons_requestHeapTrim);
+    //    CHECK(!env->ExceptionCheck());
     IPC_MS_VLOG(ERROR) << "bool IPCHeap::Posted a Request()";
     return true;
   }
@@ -397,10 +397,10 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
 void IPCHeap::TrimHeap(void)  {
   //LOG(ERROR) << "IPCHeap::TrimHeap";
-//  local_heap_->ListenForProcessStateChange();
+  //  local_heap_->ListenForProcessStateChange();
   gc::space::AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
-//  double _resize_factor = _mem_info_rec->resize_factor_;
+  //  double _resize_factor = _mem_info_rec->resize_factor_;
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
 
@@ -415,9 +415,9 @@ void IPCHeap::TrimHeap(void)  {
     dlmalloc_trim(0);
     size_t native_reclaimed = 0;
     dlmalloc_inspect_all(DlmallocMadviseCallback, &native_reclaimed);
-//    LOG(ERROR) << "IPCHeap::TrimHeap....done trim()..advised=" <<
-//        PrettySize(managed_advised) << ", native_advised="
-//        << PrettySize(native_reclaimed);
+    //    LOG(ERROR) << "IPCHeap::TrimHeap....done trim()..advised=" <<
+    //        PrettySize(managed_advised) << ", native_advised="
+    //        << PrettySize(native_reclaimed);
   } else {
     LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition DID NOT PASS";
   }
@@ -463,7 +463,7 @@ const char* gc_cause_and_type_strings[4][4] = {
     {"", "GC Explicit Sticky", "GC Explicit Partial", "GC Explicit Full"},
     {"", "GC Profile Sticky", "GC Profile Partial", "GC Profile Full"}};
 collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
-    GcCause gc_cause, bool clear_soft_references) {
+                                             GcCause gc_cause, bool clear_soft_references) {
   Thread* self = Thread::Current();
 
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc/*kWaitingForGCProcess*/);
@@ -510,8 +510,8 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns, gc_start_size);
   }
 
-//  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
-//      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
+  //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
+  //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
   // Approximate allocation rate in bytes / second.
   if (UNLIKELY(gc_start_time_ns == local_heap_->GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
@@ -538,47 +538,47 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   }
 
   CHECK(collector != NULL)
-      << "Could not find garbage collector with concurrent=" << meta_->concurrent_gc_
-      << " and type=" << gc_type;
+  << "Could not find garbage collector with concurrent=" << meta_->concurrent_gc_
+  << " and type=" << gc_type;
 
   collector->SetClearSoftReferences(clear_soft_references);
-//  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type]
-//      << " from thread ID:" << self->GetTid() <<
-//      "\n freed: " << collector->GetFreedObjects() << " objects"
-//      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
+  //  LOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type]
+  //      << " from thread ID:" << self->GetTid() <<
+  //      "\n freed: " << collector->GetFreedObjects() << " objects"
+  //      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
   // IPC_MS_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
   collector->Run();
 
   local_heap_->IncTotalObjectsFreedEver(collector->GetFreedObjects());
   local_heap_->IncTotalBytesFreedEver(collector->GetFreedBytes());
 
-//  gc_start_size = local_heap_->GetBytesAllocated();
-//  LOG(ERROR) << "IPCHeap::CollectGarbageIPC..." <<
-//        gc_cause_and_type_strings[gc_cause][gc_type] <<
-//        ", gc_end_size=" << gc_start_size <<
-//        ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
+  //  gc_start_size = local_heap_->GetBytesAllocated();
+  //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC..." <<
+  //        gc_cause_and_type_strings[gc_cause][gc_type] <<
+  //        ", gc_end_size=" << gc_start_size <<
+  //        ", end_size..alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
 
-//  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
-//  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
-//  LOG(ERROR) << "@@@@@@@@@@ YYYY @@@@@@" << gc_cause << " " << collector->GetName()
-//            << " GC freed "  <<  collector->GetFreedObjects() << "("
-//            << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
-//            << collector->GetFreedLargeObjects() << "("
-//            << PrettySize(collector->GetFreedLargeObjectBytes()) << ") LOS objects, "
-//            //<< percent_free << "% free, "
-//            << PrettySize(local_heap_->GetBytesAllocated()) << "/"
-//            << PrettySize(local_heap_->GetTotalMemory());
-            //<< ", " << "paused " << pause_string.str()
-            //<< " total " << PrettyDuration((duration / 1000) * 1000);
+  //  meta_->total_objects_freed_ever_  += collector->GetFreedObjects();
+  //  meta_->total_bytes_freed_ever_    += collector->GetFreedBytes();
+  //  LOG(ERROR) << "@@@@@@@@@@ YYYY @@@@@@" << gc_cause << " " << collector->GetName()
+  //            << " GC freed "  <<  collector->GetFreedObjects() << "("
+  //            << PrettySize(collector->GetFreedBytes()) << ") AllocSpace objects, "
+  //            << collector->GetFreedLargeObjects() << "("
+  //            << PrettySize(collector->GetFreedLargeObjectBytes()) << ") LOS objects, "
+  //            //<< percent_free << "% free, "
+  //            << PrettySize(local_heap_->GetBytesAllocated()) << "/"
+  //            << PrettySize(local_heap_->GetTotalMemory());
+  //<< ", " << "paused " << pause_string.str()
+  //<< " total " << PrettyDuration((duration / 1000) * 1000);
 
   {
-      IPMutexLock interProcMu(self, *gc_complete_mu_);
-      local_heap_->SetLastGCType(gc_type);
-      ResetServerFlag();
-      GCP_MARK_POST_COLLECTION;
-      // Wake anyone who may have been waiting for the GC to complete.
-      meta_->is_gc_running_ = 0;
-      gc_complete_cond_->Broadcast(self);
+    IPMutexLock interProcMu(self, *gc_complete_mu_);
+    local_heap_->SetLastGCType(gc_type);
+    ResetServerFlag();
+    GCP_MARK_POST_COLLECTION;
+    // Wake anyone who may have been waiting for the GC to complete.
+    meta_->is_gc_running_ = 0;
+    gc_complete_cond_->Broadcast(self);
   }
 
   return gc_type;
@@ -689,14 +689,14 @@ bool IPCHeap::RunCollectorDaemon() {
   }
   //Runtime* runtime = Runtime::Current();
 
-//  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
-//  {
-//    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-//    meta_->is_gc_running_ = 1;
-//    //meta_->conc_flag_ = 0;
-//   // meta_->is_gc_complete_ = 0;
-//    conc_req_cond_->Broadcast(self);
-//  }
+  //  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
+  //  {
+  //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+  //    meta_->is_gc_running_ = 1;
+  //    //meta_->conc_flag_ = 0;
+  //   // meta_->is_gc_complete_ = 0;
+  //    conc_req_cond_->Broadcast(self);
+  //  }
   IPC_MS_VLOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
   if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
@@ -709,6 +709,7 @@ bool IPCHeap::RunCollectorDaemon() {
     _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
     TrimHeap();
+    _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
     //LOG(ERROR) << ".....TrimHeap() Executed.......";
     //meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }
@@ -717,25 +718,25 @@ bool IPCHeap::RunCollectorDaemon() {
       " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
       <<"; explicit_count:" << meta_->explicit_count_;
   NotifyCompleteConcurrentTask(_task_type);
-//  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
-//  {
-//    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-////    meta_->is_gc_complete_ = 1;
-//    meta_->conc_flag_ = 2;
-//    conc_req_cond_->Broadcast(self);
-//  }
-//  {
-//    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
-//    {
-//      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-//      while(meta_->is_gc_complete_ == 1) {
-//        IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
-//        conc_req_cond_->Wait(self);
-//      }
-//      conc_req_cond_->Broadcast(self);
-//      IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
-//    }
-//  }
+  //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+  //  {
+  //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+  ////    meta_->is_gc_complete_ = 1;
+  //    meta_->conc_flag_ = 2;
+  //    conc_req_cond_->Broadcast(self);
+  //  }
+  //  {
+  //    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
+  //    {
+  //      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+  //      while(meta_->is_gc_complete_ == 1) {
+  //        IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
+  //        conc_req_cond_->Wait(self);
+  //      }
+  //      conc_req_cond_->Broadcast(self);
+  //      IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
+  //    }
+  //  }
   return true;
 }
 
@@ -792,8 +793,8 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
         // right away.
         local_heap_->SetConcStartBytes(std::max(local_heap_->GetMaxAllowedFootPrint() - remaining_bytes, bytes_allocated));
       }
-//      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
-//      DCHECK_LE(max_allowed_footprint_, growth_limit_);
+      //      DCHECK_LE(meta_->concurrent_start_bytes_, max_allowed_footprint_);
+      //      DCHECK_LE(max_allowed_footprint_, growth_limit_);
     }
   }
 
@@ -803,11 +804,11 @@ void IPCHeap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration
 
 
 AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
-    ipc_heap_(ipcHeap),
-    collector_index_(ipcHeap->collector_entry_++),
-    server_synchronize_(0),
-    heap_meta_(ipcHeap->meta_),
-    meta_data_(&(heap_meta_->collectors_[collector_index_])) {
+        ipc_heap_(ipcHeap),
+        collector_index_(ipcHeap->collector_entry_++),
+        server_synchronize_(0),
+        heap_meta_(ipcHeap->meta_),
+        meta_data_(&(heap_meta_->collectors_[collector_index_])) {
 
   /* initialize locks */
   SharedFutexData* _futexAddress = &heap_meta_->phase_lock_.futex_head_;
@@ -815,7 +816,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
   phase_mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
   phase_cond_ = new InterProcessConditionVariable("HandShake CondVar",
-      *phase_mu_, _condAddress);
+                                                  *phase_mu_, _condAddress);
 
   SharedFutexData* _futexBarrierAdd =
       &heap_meta_->gc_barrier_lock_.futex_head_;
@@ -825,7 +826,7 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
   barrier_mu_   = new InterProcessMutex("HandShake Mutex", _futexBarrierAdd);
   barrier_cond_ = new InterProcessConditionVariable("HandShake CondVar",
-      *barrier_mu_, _condBarrierAdd);
+                                                    *barrier_mu_, _condBarrierAdd);
 
 
   meta_data_->is_concurrent_ = concurrent ? 1 : 0;
@@ -839,12 +840,12 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 
 void AbstractIPCMarkSweep::ResetMetaDataUnlocked() { // reset data without locking
- // heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
-//  heap_meta_->freed_objects_ = 0;
-//  heap_meta_->freed_bytes_ = 0;
+  // heap_meta_->gc_phase_ = space::IPC_GC_PHASE_NONE;
+  //  heap_meta_->freed_objects_ = 0;
+  //  heap_meta_->freed_bytes_ = 0;
   heap_meta_->barrier_count_ = 0;
   heap_meta_->conc_flag_ = 0;
-//  heap_meta_->is_gc_complete_ = 0;
+  //  heap_meta_->is_gc_complete_ = 0;
   heap_meta_->is_gc_running_ = 0;
 
 
@@ -863,10 +864,10 @@ void AbstractIPCMarkSweep::DumpValues(void){
       << "\n     zygote_end: " << reinterpret_cast<void*>(heap_meta_->zygote_end_)
       << "\n     image_begin: " << reinterpret_cast<void*>(heap_meta_->image_space_begin_)
       << "\n     image_end: " << reinterpret_cast<void*>(heap_meta_->image_space_end_)
-  << "\n     alloc_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->Begin())
-  << "\n     alloc_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->End())
-  << "\n     image_heap_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->Begin())
-  << "\n     image_heap_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->End());
+      << "\n     alloc_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->Begin())
+      << "\n     alloc_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetAllocSpace()->End())
+      << "\n     image_heap_begin: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->Begin())
+      << "\n     image_heap_end: " << reinterpret_cast<void*>(ipc_heap_->local_heap_->GetImageSpace()->End());
 }
 
 
@@ -902,7 +903,7 @@ accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
 
 
 void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
-    space::IPC_GC_PHASE_ENUM phase) {
+                                         space::IPC_GC_PHASE_ENUM phase) {
   ScopedThreadStateChange tsc(thread, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
@@ -914,7 +915,7 @@ void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
 
 
 void AbstractIPCMarkSweep::BlockForGCPhase(Thread* thread,
-    space::IPC_GC_PHASE_ENUM phase) {
+                                           space::IPC_GC_PHASE_ENUM phase) {
   ScopedThreadStateChange tsc(thread, /*kWaitingPerformingGc*/kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(thread, *phase_mu_);
@@ -944,8 +945,8 @@ byte* IPCMarkSweep::GetClientSpaceBegin(int index) const {
 
 template <class referenceKlass>
 const referenceKlass* IPCMarkSweep::MapValueToServer(
-                                      uint32_t raw_address_value,
-                                      int32_t offset_) const {
+    uint32_t raw_address_value,
+    int32_t offset_) const {
   const byte* _raw_address = reinterpret_cast<const byte*>(raw_address_value);
   if(_raw_address == nullptr)
     return nullptr;
@@ -964,93 +965,93 @@ const referenceKlass* IPCMarkSweep::MapValueToServer(
   return nullptr;
 }
 inline uint32_t IPCMarkSweep::GetClassAccessFlags(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   // Check class is loaded or this is java.lang.String that has a
   // circularity issue during loading the names of its members
   uint32_t raw_access_flag_value =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-      mirror::Class::AcessFlagsOffset());
+                                            mirror::Class::AcessFlagsOffset());
   return raw_access_flag_value;
 }
 
 // Returns true if the class is an interface.
 bool IPCMarkSweep::IsInterfaceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccInterface) != 0;
 }
 
 // Returns true if the class is declared final.
 bool IPCMarkSweep::IsFinalMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccFinal) != 0;
 }
 
 bool IPCMarkSweep::IsFinalizableMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsFinalizable) != 0;
 }
 
 // Returns true if the class is abstract.
 bool IPCMarkSweep::IsAbstractMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccAbstract) != 0;
 }
 
 // Returns true if the class is an annotation.
 bool IPCMarkSweep::IsAnnotationMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccAnnotation) != 0;
 }
 
 // Returns true if the class is synthetic.
 bool IPCMarkSweep::IsSyntheticMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccSynthetic) != 0;
 }
 
 bool IPCMarkSweep::IsReferenceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   uint32_t _access_flags =  GetClassAccessFlags(klass);
   return (_access_flags & kAccClassIsReference) != 0;
 }
 
 
 bool IPCMarkSweep::IsWeakReferenceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsWeakReference) != 0;
 }
 
 
 bool IPCMarkSweep::IsSoftReferenceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccReferenceFlagsMask) == kAccClassIsReference;
 }
 
 bool IPCMarkSweep::IsFinalizerReferenceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsFinalizerReference) != 0;
 }
 
 bool IPCMarkSweep::IsPhantomReferenceMappedClass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   return (GetClassAccessFlags(klass) & kAccClassIsPhantomReference) != 0;
 }
 
 bool IPCMarkSweep::IsPrimitiveMappedKlass(
-                                            const mirror::Class* klass) const {
+    const mirror::Class* klass) const {
   int32_t type_raw_value =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-          mirror::Class::PrimitiveTypeOffset());
+                                            mirror::Class::PrimitiveTypeOffset());
   Primitive::Type primitive_type =
       static_cast<Primitive::Type>(type_raw_value);
   return (primitive_type != Primitive::kPrimNot);
 }
 
 const mirror::Class* IPCMarkSweep::GetComponentTypeMappedClass(
-                                      const mirror::Class* mapped_klass) const {
+    const mirror::Class* mapped_klass) const {
   uint32_t component_raw_value =
-        mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
-            mirror::Class::ComponentTypeOffset());
+      mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
+                                            mirror::Class::ComponentTypeOffset());
   const mirror::Class* c = MapValueToServer<mirror::Class>(component_raw_value);
   return c;
 }
@@ -1060,7 +1061,7 @@ bool IPCMarkSweep::IsMappedArrayClass(mirror::Class* klass) const {
 }
 
 bool IPCMarkSweep::IsObjectArrayMappedKlass(
-                                            mirror::Class* klass) const {
+    mirror::Class* klass) const {
   const mirror::Class* component_type = GetComponentTypeMappedClass(klass);
   if(component_type != NULL) {
     return (!IsPrimitiveMappedKlass(component_type));
@@ -1084,11 +1085,11 @@ int IPCMarkSweep::GetMappedClassType(const mirror::Class* klass) const {
 }
 
 inline const mirror::Class* IPCMarkSweep::GetMappedObjectKlass(
-                                      const mirror::Object* mapped_obj_parm,
-                                      const int32_t offset_) {
+    const mirror::Object* mapped_obj_parm,
+    const int32_t offset_) {
   uint32_t _raw_class_value =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_obj_parm),
-          mirror::Object::ClassOffset());
+                                            mirror::Object::ClassOffset());
   const mirror::Class* c = MapValueToServer<mirror::Class>(_raw_class_value, offset_);
 
   return c;
@@ -1097,67 +1098,67 @@ inline const mirror::Class* IPCMarkSweep::GetMappedObjectKlass(
 
 
 size_t IPCMarkSweep::GetNumReferenceStaticFields(
-                                        const mirror::Class* klass_ref) const {
+    const mirror::Class* klass_ref) const {
   uint32_t raw_static_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
-      mirror::Class::ReferenceStaticFieldsOffset());
+                                            mirror::Class::ReferenceStaticFieldsOffset());
   size_t mapped_value = static_cast<size_t>(raw_static_fields_number);
   return mapped_value;
 }
 
 size_t IPCMarkSweep::GetNumReferenceInstanceFields(
-                                        const mirror::Class* klass_ref) const {
+    const mirror::Class* klass_ref) const {
   uint32_t raw_instance_fields_number =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass_ref),
-      mirror::Class::ReferenceInstanceFieldsOffset());
+                                            mirror::Class::ReferenceInstanceFieldsOffset());
   size_t mapped_value = static_cast<size_t>(raw_instance_fields_number);
   return mapped_value;
 }
 
 const mirror::Class* IPCMarkSweep::GetSuperMappedClass(
-                                            const mirror::Class* mapped_klass) {
+    const mirror::Class* mapped_klass) {
   int32_t raw_super_klass =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_klass),
-                                              mirror::Class::SuperClassOffset());
+                                            mirror::Class::SuperClassOffset());
   const mirror::Class* c = MapValueToServer<mirror::Class>(raw_super_klass);
   return c;
 }
 
 const mirror::ArtField* IPCMarkSweep::RawClassGetInstanceField(
-                                      const mirror::Class* klass, uint32_t i) {
+    const mirror::Class* klass, uint32_t i) {
   uint32_t instance_fields_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-      mirror::Class::GetInstanceFieldsOffset());
+                                            mirror::Class::GetInstanceFieldsOffset());
   const mirror::ObjectArray<mirror::ArtField>* instance_fields =
       MapValueToServer<mirror::ObjectArray<mirror::ArtField>>(instance_fields_raw);
   MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
-                                  + i * sizeof(mirror::Object*));
+                           + i * sizeof(mirror::Object*));
   uint32_t instance_field_raw =
       mirror::Object::GetRawValueFromObject(
-                      reinterpret_cast<const mirror::Object*>(instance_fields),
-                                                                  data_offset);
+          reinterpret_cast<const mirror::Object*>(instance_fields),
+          data_offset);
   const mirror::ArtField* mapped_art_field =
-                        MapValueToServer<mirror::ArtField>(instance_field_raw);
+      MapValueToServer<mirror::ArtField>(instance_field_raw);
 
   return mapped_art_field;
 }
 
 
 inline const mirror::ArtField* IPCMarkSweep::RawClassGetStaticField(
-                                      const mirror::Class* klass, uint32_t i) {
+    const mirror::Class* klass, uint32_t i) {
   uint32_t static_fields_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-      mirror::Class::GetStaticFieldsOffset());
+                                            mirror::Class::GetStaticFieldsOffset());
   const mirror::ObjectArray<mirror::ArtField>* static_fields =
       MapValueToServer<mirror::ObjectArray<mirror::ArtField>>(static_fields_raw);
 
   MemberOffset data_offset(mirror::Array::DataOffset(sizeof(mirror::Object*)).Int32Value()
-      + i * sizeof(mirror::Object*));
+                           + i * sizeof(mirror::Object*));
 
 
   uint32_t static_field_raw =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(static_fields),
-          data_offset);
+                                            data_offset);
   const mirror::ArtField* mapped_art_field =
       MapValueToServer<mirror::ArtField>(static_field_raw);
 
@@ -1167,45 +1168,45 @@ inline const mirror::ArtField* IPCMarkSweep::RawClassGetStaticField(
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitFieldsReferences(
-                                                      const mirror::Object* obj,
-                                                      uint32_t ref_offsets,
-                                                      bool is_static,
-                                                      const Visitor& visitor) {
-//  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
-//    // Found a reference offset bitmap.  Mark the specified offsets.
-//#ifndef MOVING_COLLECTOR
-//    // Clear the class bit since we mark the class as part of marking the classlinker roots.
-//    DCHECK_EQ(mirror::Object::ClassOffset().Uint32Value(), 0U);
-//    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
-//#endif
-//    while (ref_offsets != 0) {
-//      size_t right_shift = CLZ(ref_offsets);
-//      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
-//      const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-//      visitor(obj, ref, field_offset, is_static);
-//      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
-//    }
-//  } else {
-//    // There is no reference offset bitmap.  In the non-static case,
-//    // walk up the class inheritance hierarchy and find reference
-//    // offsets the hard way. In the static case, just consider this
-//    // class.
-//    for (const mirror::Class* klass = is_static ? obj->AsClass() : obj->GetClass();
-//         klass != NULL;
-//         klass = is_static ? NULL : klass->GetSuperClassNoLock()) {
-//      size_t num_reference_fields = (is_static
-//                                     ? klass->NumReferenceStaticFields()
-//                                     : klass->NumReferenceInstanceFields());
-//      for (size_t i = 0; i < num_reference_fields; ++i) {
-//        mirror::ArtField* field = (is_static ? klass->GetStaticFieldNoLock(i)
-//                                   : klass->GetInstanceFieldNoLock(i));
-//        MemberOffset field_offset = field->GetOffset();
-//        const mirror::Object* ref =
-//            obj->GetFieldObject<const mirror::Object*>(field_offset, false);
-//        visitor(obj, ref, field_offset, is_static);
-//      }
-//    }
-//  }
+    const mirror::Object* obj,
+    uint32_t ref_offsets,
+    bool is_static,
+    const Visitor& visitor) {
+  //  if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
+    //    // Found a reference offset bitmap.  Mark the specified offsets.
+    //#ifndef MOVING_COLLECTOR
+    //    // Clear the class bit since we mark the class as part of marking the classlinker roots.
+    //    DCHECK_EQ(mirror::Object::ClassOffset().Uint32Value(), 0U);
+    //    ref_offsets &= (1U << (sizeof(ref_offsets) * 8 - 1)) - 1;
+    //#endif
+    //    while (ref_offsets != 0) {
+      //      size_t right_shift = CLZ(ref_offsets);
+      //      MemberOffset field_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
+  //      const mirror::Object* ref = obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+  //      visitor(obj, ref, field_offset, is_static);
+  //      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
+  //    }
+  //  } else {
+  //    // There is no reference offset bitmap.  In the non-static case,
+  //    // walk up the class inheritance hierarchy and find reference
+  //    // offsets the hard way. In the static case, just consider this
+  //    // class.
+  //    for (const mirror::Class* klass = is_static ? obj->AsClass() : obj->GetClass();
+  //         klass != NULL;
+  //         klass = is_static ? NULL : klass->GetSuperClassNoLock()) {
+  //      size_t num_reference_fields = (is_static
+  //                                     ? klass->NumReferenceStaticFields()
+  //                                     : klass->NumReferenceInstanceFields());
+  //      for (size_t i = 0; i < num_reference_fields; ++i) {
+  //        mirror::ArtField* field = (is_static ? klass->GetStaticFieldNoLock(i)
+  //                                   : klass->GetInstanceFieldNoLock(i));
+  //        MemberOffset field_offset = field->GetOffset();
+  //        const mirror::Object* ref =
+  //            obj->GetFieldObject<const mirror::Object*>(field_offset, false);
+  //        visitor(obj, ref, field_offset, is_static);
+  //      }
+  //    }
+  //  }
   if (LIKELY(ref_offsets != CLASS_WALK_SUPER)) {
     // Found a reference offset bitmap.  Mark the specified offsets.
 #ifndef MOVING_COLLECTOR
@@ -1228,17 +1229,17 @@ inline void IPCMarkSweep::RawVisitFieldsReferences(
     // offsets the hard way. In the static case, just consider this
     // class.
     for (const mirror::Class* klass = is_static ? down_cast<const mirror::Class*>(obj) : GetMappedObjectKlass(obj);
-         klass != nullptr;
-         klass = is_static ? nullptr : GetSuperMappedClass(klass)) {
+        klass != nullptr;
+        klass = is_static ? nullptr : GetSuperMappedClass(klass)) {
       size_t num_reference_fields = (is_static
-                                     ? GetNumReferenceStaticFields(klass)
-                                     : GetNumReferenceInstanceFields(klass));
+          ? GetNumReferenceStaticFields(klass)
+              : GetNumReferenceInstanceFields(klass));
       for (size_t i = 0; i < num_reference_fields; ++i) {
         const mirror::ArtField* field = (is_static ? RawClassGetStaticField(klass, i)
-                                   : RawClassGetInstanceField(klass, i));
+            : RawClassGetInstanceField(klass, i));
         uint32_t field_word_value =
             mirror::Object::GetRawValueFromObject(field,
-                                              mirror::ArtField::OffsetOffset());
+                                                  mirror::ArtField::OffsetOffset());
         MemberOffset field_offset(field_word_value);
         uint32_t raw_field_value =
             mirror::Object::GetRawValueFromObject(obj, field_offset);
@@ -1252,10 +1253,10 @@ inline void IPCMarkSweep::RawVisitFieldsReferences(
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitInstanceFieldsReferences(
-                                                    const mirror::Class* klass,
-                                                     const mirror::Object* obj,
-                                                     const Visitor& visitor) {
-//  RawVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
+    const mirror::Class* klass,
+    const mirror::Object* obj,
+    const Visitor& visitor) {
+  //  RawVisitFieldsReferences(obj, klass->GetReferenceInstanceOffsets(), false, visitor);
   const int32_t reference_offsets =
       mirror::Class::GetReferenceInstanceOffsetsOffset().Int32Value();
   const byte* raw_addr = reinterpret_cast<const byte*>(klass) + reference_offsets;
@@ -1266,50 +1267,50 @@ inline void IPCMarkSweep::RawVisitInstanceFieldsReferences(
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitClassReferences(
-                        const mirror::Class* klass, const mirror::Object* obj,
-                                            const Visitor& visitor)  {
+    const mirror::Class* klass, const mirror::Object* obj,
+    const Visitor& visitor)  {
   RawVisitInstanceFieldsReferences(klass, obj, visitor);
   RawVisitStaticFieldsReferences(down_cast<const mirror::Class*>(obj), visitor);
 
 }
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitStaticFieldsReferences(
-                                                      const mirror::Class* klass,
-                                                      const Visitor& visitor) {
-//  RawVisitFieldsReferences(klass, klass->GetReferenceStaticOffsets(), true, visitor);
+    const mirror::Class* klass,
+    const Visitor& visitor) {
+  //  RawVisitFieldsReferences(klass, klass->GetReferenceStaticOffsets(), true, visitor);
   MemberOffset reference_static_offset = mirror::Class::ReferenceStaticOffset();
   uint32_t _raw_value_offsets =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(klass),
-          reference_static_offset);
+                                            reference_static_offset);
   RawVisitFieldsReferences(klass, _raw_value_offsets, true, visitor);
 }
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitObjectArrayReferences(
-                          const mirror::ObjectArray<mirror::Object>* mapped_arr,
-                                                  const Visitor& visitor) {
+    const mirror::ObjectArray<mirror::Object>* mapped_arr,
+    const Visitor& visitor) {
 
-//  const size_t length = static_cast<size_t>(mapped_arr->GetLength());
-//  for (size_t i = 0; i < length; ++i) {
-//    const mirror::Object* element = mapped_arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
-//    const size_t width = sizeof(mirror::Object*);
-//    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
-//    visitor(mapped_arr, element, offset, false);
-//  }
+  //  const size_t length = static_cast<size_t>(mapped_arr->GetLength());
+  //  for (size_t i = 0; i < length; ++i) {
+  //    const mirror::Object* element = mapped_arr->GetWithoutChecksNoLocks(static_cast<int32_t>(i));
+  //    const size_t width = sizeof(mirror::Object*);
+  //    MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
+  //    visitor(mapped_arr, element, offset, false);
+  //  }
 
   uint32_t _length_read =
       mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
-          mirror::Array::LengthOffset());
+                                            mirror::Array::LengthOffset());
 
   const size_t length =
-        static_cast<size_t>(_length_read);
+      static_cast<size_t>(_length_read);
 
   for (size_t i = 0; i < length; ++i) {//we do not need to map the element from an array
     const size_t width = sizeof(mirror::Object*);
     MemberOffset offset(i * width + mirror::Array::DataOffset(width).Int32Value());
     uint32_t _data_read =
         mirror::Object::GetRawValueFromObject(reinterpret_cast<const mirror::Object*>(mapped_arr),
-                                                                        offset);
+                                              offset);
     const mirror::Object* element_content =
         MapValueToServer<mirror::Object>(_data_read);
 
@@ -1333,51 +1334,51 @@ inline bool IPCMarkSweep::RawIsMarked(const Object* object)  {
 
 
 inline bool IPCMarkSweep::IsMappedObjectMarked(
-                                           const mirror::Object* object)  {
+    const mirror::Object* object)  {
 
   return RawIsMarked(object);
-//  if (IsMappedObjectImmuned(object)) {
-//    return true;
-//  }
-//  const byte* casted_param = reinterpret_cast<const byte*>(object);
-//  int matching_index = -1;
-//  for(int i = 0; i <= 2; i++) {
-//    if((casted_param <  GetServerSpaceEnd(i)) &&
-//        (casted_param >= GetServerSpaceBegin(i))) {
-//      matching_index = i;
-//    }
-//  }
-//
-//  if(matching_index == -1) {
-//    LOG(FATAL) << "TestMappedBitmap..." << object;
-//    return false;
-//  }
-//
-// // marked_spaces_count_prof_[matching_index] += 1;
-//  accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
-//  bool _resultTestFlag = false;
-//  bool _resultHasAddress = obj_beetmap->HasAddress(object);
-//  if(!_resultHasAddress) {
-//    for (const auto& beetmap : mark_bitmaps_) {
-//      _resultHasAddress = beetmap->HasAddress(object);
-//      if(_resultHasAddress) {
-//        obj_beetmap = beetmap;
-//        break;
-//      }
-//    }
-//  }
-//
-//
-//
-//  if(_resultHasAddress) {
-//    _resultTestFlag = obj_beetmap->Test(object);
-//  }
-//
-//  return (_resultHasAddress && _resultTestFlag);
+  //  if (IsMappedObjectImmuned(object)) {
+  //    return true;
+  //  }
+  //  const byte* casted_param = reinterpret_cast<const byte*>(object);
+  //  int matching_index = -1;
+  //  for(int i = 0; i <= 2; i++) {
+  //    if((casted_param <  GetServerSpaceEnd(i)) &&
+  //        (casted_param >= GetServerSpaceBegin(i))) {
+  //      matching_index = i;
+  //    }
+  //  }
+  //
+  //  if(matching_index == -1) {
+  //    LOG(FATAL) << "TestMappedBitmap..." << object;
+  //    return false;
+  //  }
+  //
+  // // marked_spaces_count_prof_[matching_index] += 1;
+  //  accounting::SharedServerSpaceBitmap* obj_beetmap = current_mark_bitmap_;
+  //  bool _resultTestFlag = false;
+  //  bool _resultHasAddress = obj_beetmap->HasAddress(object);
+  //  if(!_resultHasAddress) {
+  //    for (const auto& beetmap : mark_bitmaps_) {
+  //      _resultHasAddress = beetmap->HasAddress(object);
+  //      if(_resultHasAddress) {
+  //        obj_beetmap = beetmap;
+  //        break;
+  //      }
+  //    }
+  //  }
+  //
+  //
+  //
+  //  if(_resultHasAddress) {
+  //    _resultTestFlag = obj_beetmap->Test(object);
+  //  }
+  //
+  //  return (_resultHasAddress && _resultTestFlag);
 }
 
 bool IPCMarkSweep::IsMappedReferentEnqueued(
-                                      const mirror::Object* mapped_ref) const {
+    const mirror::Object* mapped_ref) const {
   const int32_t pending_next_raw_value =
       mirror::Object::GetRawValueFromObject(
           reinterpret_cast<const mirror::Object*>(mapped_ref),
@@ -1413,7 +1414,7 @@ bool IPCMarkSweep::IsMappedReferentEnqueued(
 
 template <class referenceKlass>
 uint32_t IPCMarkSweep::MapReferenceToValueClient(
-                                const referenceKlass* mapped_reference) const {
+    const referenceKlass* mapped_reference) const {
   if(mapped_reference == nullptr)
     return 0U;
   const byte* _raw_address = reinterpret_cast<const byte*>(mapped_reference);
@@ -1432,19 +1433,19 @@ uint32_t IPCMarkSweep::MapReferenceToValueClient(
 }
 
 void IPCMarkSweep::SetClientFieldValue(const mirror::Object* mapped_object,
-          MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
-//  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
+                                       MemberOffset field_offset, const mirror::Object* mapped_ref_value) {
+  //  uint32_t raw_field_value = reinterpret_cast<uint32_t>(mapped_ref_value);
   byte* raw_addr =
       const_cast<byte*>(reinterpret_cast<const byte*>(mapped_object)) +
       field_offset.Int32Value();
   uint32_t* word_addr = reinterpret_cast<uint32_t*>(raw_addr);
   uint32_t eq_client_value =
-                    MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
+      MapReferenceToValueClient<mirror::Object>(mapped_ref_value);
   *word_addr = eq_client_value;
 }
 
 void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
-    mirror::Object** list) {
+                                          mirror::Object** list) {
   mirror::Object* list_content = *list;
   if(list_content == NULL) {
     SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
@@ -1453,36 +1454,36 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
     MemberOffset off(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_);
 
     int32_t head_int_value = mirror::Object::GetRawValueFromObject(
-                reinterpret_cast<const mirror::Object*>(list_content), off);
+        reinterpret_cast<const mirror::Object*>(list_content), off);
     mirror::Object* mapped_head =
-            const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
+        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(head_int_value));
     SetClientFieldValue(ref, off, mapped_head);
     SetClientFieldValue(list_content, off, ref);
 
-//    mirror::Object* head =
-//        (*list)->GetFieldObject<mirror::Object*>(off, false);
-//    ref->SetFieldObject(off, head, false);
-//    (*list)->SetFieldObject(off, ref, false);
+    //    mirror::Object* head =
+    //        (*list)->GetFieldObject<mirror::Object*>(off, false);
+    //    ref->SetFieldObject(off, head, false);
+    //    (*list)->SetFieldObject(off, ref, false);
   }
 
 
-//  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
-//  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
-//  if(mapped_head == NULL) {
-//    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
-//    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-//    *head_pp = MapReferenceToValueClient(ref);
-//  } else {
-//    int32_t pending_next_raw_value =
-//        mirror::Object::GetRawValueFromObject(
-//            reinterpret_cast<const mirror::Object*>(mapped_head),
-//            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
-//    mirror::Object* mapped_pending_next =
-//        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
-//    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
-//    SetClientFieldValue(mapped_pending_next,
-//        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
-//  }
+  //  uint32_t* head_pp = reinterpret_cast<uint32_t*>(list);
+  //  const mirror::Object* mapped_head = MapValueToServer<mirror::Object>(*head_pp);
+  //  if(mapped_head == NULL) {
+  //    // 1 element cyclic queue, ie: Reference ref = ..; ref.pendingNext = ref;
+  //    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+  //    *head_pp = MapReferenceToValueClient(ref);
+  //  } else {
+  //    int32_t pending_next_raw_value =
+  //        mirror::Object::GetRawValueFromObject(
+  //            reinterpret_cast<const mirror::Object*>(mapped_head),
+  //            MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_));
+  //    mirror::Object* mapped_pending_next =
+  //        const_cast<mirror::Object*>(MapValueToServer<mirror::Object>(pending_next_raw_value));
+  //    SetClientFieldValue(ref, MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), mapped_head);
+  //    SetClientFieldValue(mapped_pending_next,
+  //        MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_pendingNext_offset_), ref);
+  //  }
 }
 
 
@@ -1490,14 +1491,14 @@ void IPCMarkSweep::RawEnqPendingReference(mirror::Object* ref,
 // referent has not yet been marked, put it on the appropriate list in
 // the heap for later processing.
 inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
-                                              mirror::Object* obj) {
+                                                    mirror::Object* obj) {
 
   //Object* mapped_referent = ipc_heap_->local_heap_->GetReferenceReferent(obj);
 
   uint32_t referent_raw_value =
       mirror::Object::GetVolatileRawValueFromObject(
-                                  reinterpret_cast<const mirror::Object*>(obj),
-                                  MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_referent_offset_));
+          reinterpret_cast<const mirror::Object*>(obj),
+          MemberOffset(ipc_heap_->meta_->reference_offsets_.reference_referent_offset_));
   const mirror::Object* mapped_referent =
       MapValueToServer<mirror::Object>(referent_raw_value);
   if (mapped_referent != NULL && !RawIsMarked(mapped_referent)) {//TODO: Implement ismarked /*IsMappedObjectMarked*/
@@ -1527,61 +1528,61 @@ inline void IPCMarkSweep::RawDelayReferenceReferent(const mirror::Class* klass,
       }
     } else {
       LOG(FATAL) << "Invalid reference type " //<< PrettyClass(klass)
-                 << " " << std::hex << klass->GetAccessFlags();
+          << " " << std::hex << klass->GetAccessFlags();
     }
 
-//   // cashed_stats_client_.reference_count_ += 1;
-//    //Thread* self = Thread::Current();
-//    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
-//    if(IsSoftReferenceMappedClass(klass)) {
-//      if(!is_enqueued_object) {
-//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-//            &(cashed_references_record_->soft_reference_list_));
-//      }
-//    } else if(IsWeakReferenceMappedClass(klass)) {
-//      if(!is_enqueued_object) {
-//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-//            &(cashed_references_record_->weak_reference_list_));
-//      }
-//    } else if(IsFinalizerReferenceMappedClass(klass)) {
-//      if(!is_enqueued_object) {
-//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-//            &(cashed_references_record_->finalizer_reference_list_));
-//      }
-//    } else if(IsPhantomReferenceMappedClass(klass)) {
-//      if(!is_enqueued_object) {
-//        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
-//            &(cashed_references_record_->phantom_reference_list_));
-//      }
-//    } else {
-//      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
-//                  << ", klass: " << klass
-//                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
-//    }
+    //   // cashed_stats_client_.reference_count_ += 1;
+    //    //Thread* self = Thread::Current();
+    //    bool is_enqueued_object = IsMappedReferentEnqueued(obj);
+    //    if(IsSoftReferenceMappedClass(klass)) {
+    //      if(!is_enqueued_object) {
+    //        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+    //            &(cashed_references_record_->soft_reference_list_));
+    //      }
+    //    } else if(IsWeakReferenceMappedClass(klass)) {
+    //      if(!is_enqueued_object) {
+    //        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+    //            &(cashed_references_record_->weak_reference_list_));
+    //      }
+    //    } else if(IsFinalizerReferenceMappedClass(klass)) {
+    //      if(!is_enqueued_object) {
+    //        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+    //            &(cashed_references_record_->finalizer_reference_list_));
+    //      }
+    //    } else if(IsPhantomReferenceMappedClass(klass)) {
+    //      if(!is_enqueued_object) {
+    //        RawEnqPendingReference(const_cast<mirror::Object*>(obj),
+    //            &(cashed_references_record_->phantom_reference_list_));
+    //      }
+    //    } else {
+    //      LOG(FATAL) << "Invalid reference IPCServerMarkerSweep::ServerDelayReferenceReferent "
+    //                  << ", klass: " << klass
+    //                  << ", hex..."  << std::hex << GetClassAccessFlags(klass);
+    //    }
   }
 }
 
 
 template <typename Visitor>
 inline void IPCMarkSweep::RawVisitOtherReferences(const mirror::Class* klass,
-                                                      const mirror::Object* obj,
-                                                      const Visitor& visitor) {
+                                                  const mirror::Object* obj,
+                                                  const Visitor& visitor) {
   RawVisitInstanceFieldsReferences(klass, obj, visitor);
 }
 
 class RawMarkObjectVisitor {
  public:
   explicit RawMarkObjectVisitor(IPCMarkSweep* const raw_mark_sweep)
-          ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
+  ALWAYS_INLINE : mark_sweep_(raw_mark_sweep) {}
 
   // TODO: Fixme when anotatalysis works with visitors.
   void operator()(const Object* /* obj */, const Object* ref,
                   MemberOffset& /* offset */, bool /* is_static */) const ALWAYS_INLINE
-      NO_THREAD_SAFETY_ANALYSIS {
-//    if (kCheckLocks) {
-//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
-//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
-//    }
+                  NO_THREAD_SAFETY_ANALYSIS {
+    //    if (kCheckLocks) {
+    //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+    //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+    //    }
     //mark_sweep_->RawMarkObject(ref);
     if(ref != NULL)
       mark_sweep_->RawMarkObject(ref);
@@ -1611,49 +1612,49 @@ inline void IPCMarkSweep::RawScanObjectVisit(const mirror::Object* obj) {
     }
   }
 
-//  RawMarkObjectVisitor visitor(this);
-//  mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
-//
-//  if (UNLIKELY(mapped_klass->IsArrayClass())) {
-//    if (mapped_klass->IsObjectArrayClass()) {
-//      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
-//    }
-//  } else if (UNLIKELY(mapped_klass == GetCachedJavaLangClass())) {
-//    RawVisitClassReferences(mapped_klass, obj, visitor);
-//  } else {
-//    RawVisitOtherReferences(mapped_klass, obj, visitor);
-//    if (UNLIKELY(mapped_klass->IsReferenceClass())) {
-//      RawDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
-//    }
-//  }
+  //  RawMarkObjectVisitor visitor(this);
+  //  mirror::Class* mapped_klass = obj->GetClass();//GetMappedObjectKlass(obj, 0);
+  //
+  //  if (UNLIKELY(mapped_klass->IsArrayClass())) {
+  //    if (mapped_klass->IsObjectArrayClass()) {
+  //      RawVisitObjectArrayReferences(obj->AsObjectArray<mirror::Object>(), visitor);
+  //    }
+  //  } else if (UNLIKELY(mapped_klass == GetCachedJavaLangClass())) {
+  //    RawVisitClassReferences(mapped_klass, obj, visitor);
+  //  } else {
+  //    RawVisitOtherReferences(mapped_klass, obj, visitor);
+  //    if (UNLIKELY(mapped_klass->IsReferenceClass())) {
+  //      RawDelayReferenceReferent(mapped_klass, const_cast<mirror::Object*>(obj));
+  //    }
+  //  }
 
-//  int mapped_class_type = GetMappedClassType(mapped_klass);
-//  if (UNLIKELY(mapped_class_type < 2)) {
-//    //cashed_stats_client_.array_count_ += 1;
-//    //android_atomic_add(1, &(array_count_));
-//    if(mapped_class_type == 0) {
-//      RawVisitObjectArrayReferences(
-//        down_cast<const mirror::ObjectArray<mirror::Object>*>(obj),
-//                                                                    visitor);
-//    }
-//  } else if (UNLIKELY(mapped_class_type == 2)) {
-//    //cashed_stats_client_.class_count_ += 1;
-//    RawVisitClassReferences(mapped_klass, obj, visitor);
-//  } else if (UNLIKELY(mapped_class_type == 3)) {
-//    //cashed_stats_client_.other_count_ += 1;
-//    RawVisitOtherReferences(mapped_klass, obj, visitor);
-//    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
-//      //is_reference_class_cnt_++;
-//      RawDelayReferenceReferent(mapped_klass,
-//                                  const_cast<mirror::Object*>(obj));
-//    }
-//  }
+  //  int mapped_class_type = GetMappedClassType(mapped_klass);
+  //  if (UNLIKELY(mapped_class_type < 2)) {
+  //    //cashed_stats_client_.array_count_ += 1;
+  //    //android_atomic_add(1, &(array_count_));
+  //    if(mapped_class_type == 0) {
+  //      RawVisitObjectArrayReferences(
+  //        down_cast<const mirror::ObjectArray<mirror::Object>*>(obj),
+  //                                                                    visitor);
+  //    }
+  //  } else if (UNLIKELY(mapped_class_type == 2)) {
+  //    //cashed_stats_client_.class_count_ += 1;
+  //    RawVisitClassReferences(mapped_klass, obj, visitor);
+  //  } else if (UNLIKELY(mapped_class_type == 3)) {
+  //    //cashed_stats_client_.other_count_ += 1;
+  //    RawVisitOtherReferences(mapped_klass, obj, visitor);
+  //    if(UNLIKELY(IsReferenceMappedClass(mapped_klass))) {
+  //      //is_reference_class_cnt_++;
+  //      RawDelayReferenceReferent(mapped_klass,
+  //                                  const_cast<mirror::Object*>(obj));
+  //    }
+  //  }
 }
 
 
 template <class referenceKlass>
 inline const referenceKlass* IPCMarkSweep::MapReferenceToClientChecks(
-                                      const referenceKlass* const ref_parm) {
+    const referenceKlass* const ref_parm) {
   if(ref_parm == nullptr)
     return nullptr;
   const byte* casted_param = reinterpret_cast<const byte*>(ref_parm);
@@ -1672,9 +1673,9 @@ inline const referenceKlass* IPCMarkSweep::MapReferenceToClientChecks(
 inline void IPCMarkSweep::RawMarkObjectNonNull(const mirror::Object* obj) {
   DCHECK(obj != nullptr);
 
-//  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
-//    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
-//  }
+  //  if(!IsMappedObjectToServer<mirror::Object>(obj)) {
+  //    LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull.." << obj;
+  //  }
   if (IsMappedObjectImmuned(obj)) {
     return;
   }
@@ -1701,14 +1702,14 @@ inline void IPCMarkSweep::RawMarkObjectNonNull(const mirror::Object* obj) {
       object_bitmap->Set(obj);
       //TODO:: check the need to resize the mark stack here
       //const mirror::Object* oject_pushed = MapReferenceToClientChecks(obj);
-//      if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
-//        LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
-//      }
+      //      if(!BelongsToOldHeap<mirror::Object>(oject_pushed)) {
+      //        LOG(FATAL) << "MAPPINGERROR: XXXXXXX does not belong to Heap XXXXXXXXX " << oject_pushed ;
+      //      }
       //pushed_back_to_stack_++;
-//      LOG(ERROR) << "MarkObjectNonNull..object stack: " << oject_pushed;
+      //      LOG(ERROR) << "MarkObjectNonNull..object stack: " << oject_pushed;
       mark_stack_->PushBack(const_cast<mirror::Object*>(obj));
     } else {
-     // LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull..object test failed.." << obj;
+      // LOG(FATAL) << "IPCServerMarkerSweep::MarkObjectNonNull..object test failed.." << obj;
     }
   }
 }
@@ -1724,19 +1725,19 @@ inline void IPCMarkSweep::RawMarkObject(const mirror::Object* obj) {
 class ClientMarkObjectVisitor {
  public:
   explicit ClientMarkObjectVisitor(IPCMarkSweep* const client_mark_sweep)
-          ALWAYS_INLINE : mark_sweep_(client_mark_sweep) {}
+  ALWAYS_INLINE : mark_sweep_(client_mark_sweep) {}
 
   // TODO: Fixme when anotatalysis works with visitors.
   void operator()(const Object* /* obj */, const Object* ref, MemberOffset& /* offset */,
                   bool /* is_static */) const ALWAYS_INLINE
-      NO_THREAD_SAFETY_ANALYSIS {
-//    if (kCheckLocks) {
-//      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
-//      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
-//    }
+                  NO_THREAD_SAFETY_ANALYSIS {
+    //    if (kCheckLocks) {
+    //      Locks::mutator_lock_->AssertSharedHeld(Thread::Current());
+    //      Locks::heap_bitmap_lock_->AssertExclusiveHeld(Thread::Current());
+    //    }
     if(ref != NULL)
       MarkSweep::MarkObjectCallbackNoLock(ref, mark_sweep_);
-      //mark_sweep_->MarkObject(ref);
+    //mark_sweep_->MarkObject(ref);
   }
 
  private:
@@ -1776,11 +1777,11 @@ void IPCMarkSweep::RawObjectScanner(void) {
     first_timer_runner_ = true;
     for(int i = 0; i <= 2; i++) {
       LOG(ERROR) << StringPrintf("X...space[%d]  --> client-start=%p, client-end=%p", i,
-          spaces_[i].client_base_, spaces_[i].client_end_);
+                                 spaces_[i].client_base_, spaces_[i].client_end_);
     }
     for(int i = 0; i <= 2; i++) {
       LOG(ERROR) << StringPrintf("X...space[%d]  --> server-start=%p, server-end=%p", i,
-          spaces_[i].base_, spaces_[i].base_end_);
+                                 spaces_[i].base_, spaces_[i].base_end_);
     }
   }
 
@@ -1814,7 +1815,7 @@ void IPCMarkSweep::RawObjectScanner(void) {
 
 template <typename MarkVisitor>
 inline void IPCMarkSweep::ClientScanObjectVisit(const mirror::Object* obj,
-    const MarkVisitor& visitor) {
+                                                const MarkVisitor& visitor) {
 
   ipc_heap_->local_heap_->VerifyObjectImpl(obj);
 
@@ -1877,14 +1878,14 @@ void IPCMarkSweep::ClientVerifyObject(const mirror::Object* obj) {
 
   ClientMarkObjectVisitor visitor(this);
   ClientScanObjectVisit(obj, visitor);
- // mirror::Object* mapped_obj = MapClientReference(obj);
+  // mirror::Object* mapped_obj = MapClientReference(obj);
 
 }
 
 
 
 inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj,
-    accounting::BaseHeapBitmap* heap_beetmap) {
+                                                     accounting::BaseHeapBitmap* heap_beetmap) {
   DCHECK(obj != NULL);
   if (kIsDebugBuild && !IsMarked(obj)) {
     heap_->DumpSpaces();
@@ -1896,11 +1897,11 @@ inline void IPCMarkSweep::ScanObjectVisitVerifyArray(const mirror::Object* obj,
 
 
 static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
-    void* args) {
+                                            void* args) {
   IPCMarkSweep* param =
       reinterpret_cast<IPCMarkSweep*>(args);
   //uint32_t calc_offset = (param->offset_ / sizeof(Object*));
-//  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
+  //  uint32_t* calc_offset = reinterpret_cast<uint32_t*>(calculated_offset);
 
 
   param->ScanObjectVisitVerifyArray(obj, IPCMarkSweep::_temp_heap_beetmap);
@@ -1908,14 +1909,14 @@ static void IPCSweepExternalScanObjectVisit(mirror::Object* obj,
 }
 
 IPCMarkSweep::IPCMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
-    const std::string& name_prefix) :
-    AbstractIPCMarkSweep(ipcHeap, is_concurrent),
-    MarkSweep(ipcHeap->local_heap_, is_concurrent,
-        &meta_data_->cashed_references_,
-        &meta_data_->cashed_stats_,
-        name_prefix) {
+                           const std::string& name_prefix) :
+        AbstractIPCMarkSweep(ipcHeap, is_concurrent),
+        MarkSweep(ipcHeap->local_heap_, is_concurrent,
+                  &meta_data_->cashed_references_,
+                  &meta_data_->cashed_stats_,
+                  name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypeFull;
-//  time_stats_ = &meta_data_->time_stats_;
+  //  time_stats_ = &meta_data_->time_stats_;
   IPC_MS_VLOG(ERROR) << "############ Initializing IPC: " << GetName() <<
       "; gcType: " << GetGcType() << "; conc:" << IsConcurrent() << " ###########";
 }
@@ -1986,27 +1987,27 @@ void IPCMarkSweep::InitializePhase(void) {
 void IPCMarkSweep::ApplyTrimming(void) {
 
 
-//  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming..gcType:"<< GetGcType();
+  //  LOG(ERROR) << "IPCMarkSweep::ApplyTrimming..gcType:"<< GetGcType();
 
   ipc_heap_->CheckTrimming(GetGcType(), GetDurationNs());
 }
 
 void IPCMarkSweep::FinishPhase(void) {
- Thread* currThread = Thread::Current();
- UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
- IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
-     currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
- MarkSweep::FinishPhase();
+  Thread* currThread = Thread::Current();
+  UpdateGCPhase(currThread, space::IPC_GC_PHASE_FINISH);
+  IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::FinishPhase. starting: _______ " <<
+      currThread->GetTid() << "; phase:" << meta_data_->gc_phase_;
+  MarkSweep::FinishPhase();
 
 
-// IncTotalTimeNs(GetDurationNs());
-// IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
-//                                          std::plus<uint64_t>()));
-// IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
-// IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
+  // IncTotalTimeNs(GetDurationNs());
+  // IncTotalPausedTimeNs(std::accumulate(GetPauseTimes().begin(), GetPauseTimes().end(), 0,
+  //                                          std::plus<uint64_t>()));
+  // IncTotalFreedObjects(GetFreedObjects() + GetFreedLargeObjects());
+  // IncTotalFreedBytes(GetFreedBytes() + GetFreedLargeObjectBytes());
 
- ipc_heap_->ResetCurrentCollector(this);
- //ipc_heap_->AssignNextGCType();
+  ipc_heap_->ResetCurrentCollector(this);
+  //ipc_heap_->AssignNextGCType();
 }
 
 void IPCMarkSweep::FindDefaultMarkBitmap(void) {
@@ -2205,10 +2206,10 @@ void IPCMarkSweep::HandshakeIPCSweepMarkingPhase(accounting::BaseHeapBitmap* hea
 // Scan anything that's on the mark stack.
 void IPCMarkSweep::ProcessMarkStack(bool paused) {
   timings_.StartSplit("ProcessMarkStack");
-//  Thread* currThread = Thread::Current();
-//  IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
-//      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
-//  timings_.StartSplit("ProcessMarkStack");
+  //  Thread* currThread = Thread::Current();
+  //  IPC_MS_VLOG(ERROR) << "_______IPCMarkSweep::ProcessMarkStack. starting: _______ " <<
+  //      currThread->GetTid() << "... MarkStackSize=" << mark_stack_->Size();
+  //  timings_.StartSplit("ProcessMarkStack");
   size_t thread_count = GetThreadCount(paused);
   if (kParallelProcessMarkStack && thread_count > 1 &&
       mark_stack_->Size() >= kMinimumParallelMarkStackSize) {
@@ -2250,7 +2251,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   IPC_MS_VLOG(INFO) << "_______IPCMarkSweep::MarkReachableObjects. starting: _______ " <<
       currThread->GetTid() << "; phase:" << meta_data_->gc_phase_ <<
       "... MarkStackSize=" << mark_stack_->Size();
-//  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
+  //  UpdateGCPhase(currThread, space::IPC_GC_PHASE_MARK_REACHABLES);
 
 
   // Mark everything allocated since the last as GC live so that we can sweep concurrently,
@@ -2259,7 +2260,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   accounting::ATOMIC_OBJ_STACK_T* live_stack = heap_->GetLiveStack();
   space::LargeObjectSpace* _LOS = heap_->GetLargeObjectsSpace();
   heap_->MarkAllocStack(heap_->GetAllocSpace()->GetLiveBitmap(),
-      _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
+                        _LOS == NULL? NULL : _LOS->GetLiveObjects(), live_stack);
   live_stack->Reset();
   timings_.EndSplit();
   if(false)
@@ -2270,7 +2271,7 @@ void IPCMarkSweep::MarkReachableObjects() {
   //if(false)
 
   //_temp_heap_beetmap = ipc_heap_->local_heap_->GetMarkBitmap();
- //
+  //
   //MarkSweep::RecursiveMark();
   //MarkSweep::MarkReachableObjects();
   IPC_MS_VLOG(INFO) << " >>IPCMarkSweep::MarkReachableObjects. ending: " <<
@@ -2335,22 +2336,22 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
           //LOG(ERROR) << "CALLING IPCMarkSweep::Sweep...FreeListAgent, num_ptrs:" << num_ptrs << ", objects_array:" << reinterpret_cast<void*>(objects_array);
           space->AsDlMallocSpace()->FreeListAgent(self, num_ptrs, objects_array);
-//          size_t freed_bytes_sweep =
-//          LOG(ERROR) << "IPCMarkSweep::Sweep freed_bytes_sweep..freedBytes = "
-//              << freed_bytes_sweep << "; freedPointers = "<< num_ptrs;
+          //          size_t freed_bytes_sweep =
+          //          LOG(ERROR) << "IPCMarkSweep::Sweep freed_bytes_sweep..freedBytes = "
+          //              << freed_bytes_sweep << "; freedPointers = "<< num_ptrs;
           //space->AsDlMallocSpace()->
 
 
 
-//          mspace_bulk_free(
-//              (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
-//              reinterpret_cast<void**>(objects_array), num_ptrs);
+          //          mspace_bulk_free(
+          //              (reinterpret_cast<space::SharableDlMallocSpace*>(space->AsDlMallocSpace()))->GetMspace(),
+          //              reinterpret_cast<void**>(objects_array), num_ptrs);
 
 
           mark_stack_->Reset();
 
-//          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-//                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+          //          accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
+          //                                               &SweepCallback, reinterpret_cast<void*>(&scc));
 
         } else {
           base::TimingLogger::ScopedSplit split("SweepZygote", &timings_);
@@ -2394,7 +2395,7 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
 
           accounting::SPACE_BITMAP::SweepWalk(*live_bitmap, *mark_bitmap, begin, end,
-                                               &SweepCallback, reinterpret_cast<void*>(&scc));
+                                              &SweepCallback, reinterpret_cast<void*>(&scc));
 
 
         } else {
@@ -2420,8 +2421,8 @@ void IPCMarkSweep::Sweep(bool swap_bitmaps) {
 
 
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
-    const std::string& name_prefix)
-    : IPCMarkSweep(ipcHeap, is_concurrent, name_prefix) {
+                                         const std::string& name_prefix)
+: IPCMarkSweep(ipcHeap, is_concurrent, name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypePartial;
   cumulative_timings_.SetName(GetName());
 }
@@ -2445,9 +2446,9 @@ void IPCPartialMarkSweep::BindBitmaps() {
 
 
 IPCStickyMarkSweep::IPCStickyMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
-    const std::string& name_prefix)
-    : IPCPartialMarkSweep(ipcHeap, is_concurrent,
-                       name_prefix) {
+                                       const std::string& name_prefix)
+: IPCPartialMarkSweep(ipcHeap, is_concurrent,
+                      name_prefix) {
   meta_data_->gc_type_ = collector::kGcTypeSticky;
   cumulative_timings_.SetName(GetName());
 }
@@ -2518,14 +2519,14 @@ bool IPCMarkSweep::IsConcurrent() const {
 
 
 
-*/
+ */
 
 
 
 
 /*
 
-*/
+ */
 
 //void IPCMarkSweep::SwapBitmaps() {
 //  IPC_MS_VLOG(ERROR) << "###### IPCMarkSweep::SwapBitmaps() #### ";
@@ -2578,7 +2579,7 @@ void IPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T* spac
   _space->BindLiveToMarkBitmap();
 }
 
-*/
+ */
 /*
 IPCPartialMarkSweep::IPCPartialMarkSweep(IPCHeap* ipcHeap, bool is_concurrent,
     const std::string& name_prefix) :
@@ -2769,7 +2770,7 @@ void StickyIPCMarkSweep::MarkReachableObjects() {
       currThread->GetTid() ;
 }
 
-*/
+ */
 //void StickyIPCMarkSweep::SwapBitmaps() {
 //  IPC_MS_VLOG(ERROR) << "StickyIPCMarkSweep::SwapBitmaps()";
 //  // Swap the live and mark bitmaps for each alloc space. This is needed since sweep re-swaps
@@ -2852,21 +2853,21 @@ void StickyIPCMarkSweep::BindLiveToMarkBitmap(space::ABSTRACT_CONTINUOUS_SPACE_T
 //      reinterpret_cast<space::SharableDlMallocSpace*>(alloc_space);
   _space->BindLiveToMarkBitmap();
 }
-*/
+ */
 #if 0
 
 class ClientIpcCollectorTask : public Task {
  public:
   ClientIpcCollectorTask(InterProcessMutex* ipcMutex,
-      InterProcessConditionVariable* ipcCond) : ipcMutex_(ipcMutex),
-      ipcCond_(ipcCond) {
+                         InterProcessConditionVariable* ipcCond) : ipcMutex_(ipcMutex),
+                         ipcCond_(ipcCond) {
     Thread* currThread = Thread::Current();
     LOG(ERROR) << "ClientIpcCollectorTask: create new task " << currThread->GetTid();
   }
-//      : barrier_(barrier),
-//        count1_(count1),
-//        count2_(count2),
-//        count3_(count3) {}
+  //      : barrier_(barrier),
+  //        count1_(count1),
+  //        count2_(count2),
+  //        count3_(count3) {}
 
   void Run(Thread* self) {
     LOG(ERROR) << "Running collector task: " << self->GetTid();
@@ -2874,27 +2875,27 @@ class ClientIpcCollectorTask : public Task {
     runtime->GetHeap()->GCServiceSignalConcGC(self);
 
     LOG(ERROR) << "leaving collector task: " << self->GetTid();
-//    LOG(INFO) << "Before barrier 1 " << *self;
-//    ++*count1_;
-//    barrier_->Wait(self);
-//    ++*count2_;
-//    LOG(INFO) << "Before barrier 2 " << *self;
-//    barrier_->Wait(self);
-//    ++*count3_;
-//    LOG(INFO) << "After barrier 2 " << *self;
+    //    LOG(INFO) << "Before barrier 1 " << *self;
+    //    ++*count1_;
+    //    barrier_->Wait(self);
+    //    ++*count2_;
+    //    LOG(INFO) << "Before barrier 2 " << *self;
+    //    barrier_->Wait(self);
+    //    ++*count3_;
+    //    LOG(INFO) << "After barrier 2 " << *self;
   }
 
   virtual void Finalize() {
     delete this;
   }
 
-  private:
-   InterProcessMutex* ipcMutex_;
-   InterProcessConditionVariable* ipcCond_;
-//  Barrier* const barrier_;
-//  AtomicInteger* const count1_;
-//  AtomicInteger* const count2_;
-//  AtomicInteger* const count3_;
+ private:
+  InterProcessMutex* ipcMutex_;
+  InterProcessConditionVariable* ipcCond_;
+  //  Barrier* const barrier_;
+  //  AtomicInteger* const count1_;
+  //  AtomicInteger* const count2_;
+  //  AtomicInteger* const count3_;
 };
 
 
@@ -2992,7 +2993,7 @@ void IPCMarkSweep::PreInitCollector(void) {
     GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_INIT, currThread);
     phase_cond_->Broadcast(currThread);
   }
-//  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
+  //  //GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_INIT, currThread);
   LOG(ERROR) << "     IPCMarkSweep::PreInitCollector. leaving: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
@@ -3006,7 +3007,7 @@ void IPCMarkSweep::ReclaimClientPhase(void) {
     phase_cond_->Broadcast(currThread);
   }
   LOG(ERROR) << "     IPCMarkSweep::ReclaimClientPhase. ending: " <<
-        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
 }
 
 void IPCMarkSweep::ConcMarkPhase(void) {
@@ -3075,7 +3076,7 @@ bool IPCMarkSweep::RunCollectorDaemon() {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     meta_->is_gc_running_ = 1;
     //meta_->conc_flag_ = 0;
-   // meta_->is_gc_complete_ = 0;
+    // meta_->is_gc_complete_ = 0;
     conc_req_cond_->Broadcast(self);
   }
   LOG(ERROR) << ">>>>>>>>>Heap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
@@ -3126,14 +3127,14 @@ void IPCMarkSweep::PreConcMarkingPhase(void) {
 void IPCMarkSweep::FinishPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "IPCMarkSweep::FinishPhase...begin:" << currThread->GetTid();
-//  {
-//    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. starting: " <<
-//        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
-//    phase_cond_->Broadcast(currThread);
-//    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
-//        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-//  }
+  //  {
+  //    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. starting: " <<
+  //        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  //    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_FINISH, currThread);
+  //    phase_cond_->Broadcast(currThread);
+  //    LOG(ERROR) << "     IPCMarkSweep::FinishPhase. ending: " <<
+  //        currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  //  }
   MarkSweep::FinishPhase();
   //FinalizePhase();
   //ResetPhase();
@@ -3142,18 +3143,18 @@ void IPCMarkSweep::FinishPhase(void) {
 
 void IPCMarkSweep::InitializePhase(void) {
   Thread* currThread = Thread::Current();
- // PreInitCollector();
+  // PreInitCollector();
 
   {
     LOG(ERROR) << "     IPCMarkSweep::InitializePhase. startingB: " <<
         currThread->GetTid() << "; phase:" << meta_->gc_phase_;
     //GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_INIT, currThread);
-   // phase_cond_->Broadcast(currThread);
+    // phase_cond_->Broadcast(currThread);
     StickyMarkSweep::InitializePhase();
     //LOG(ERROR) << "     IPCMarkSweep::InitializePhase. endingB: " <<
     //    currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   }
- // LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
+  // LOG(ERROR) << "IPCMarkSweep::InitializePhase...end:" << currThread->GetTid();
 }
 
 
@@ -3161,16 +3162,16 @@ void IPCMarkSweep::MarkingPhase(void) {
   Thread* currThread = Thread::Current();
   LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. startingA: " <<
       currThread->GetTid() << "; phase:" << meta_->gc_phase_;
-//  {
-//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
-//    phase_cond_->Broadcast(currThread);
-//  }
-//  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
-//      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
+  //  {
+  //    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_ROOT_MARK, currThread);
+  //    phase_cond_->Broadcast(currThread);
+  //  }
+  //  LOG(ERROR) << "     IPCMarkSweep::MarkingPhase. endingA: " <<
+  //      currThread->GetTid() << "; phase:" << meta_->gc_phase_;
   MarkSweep::MarkingPhase();
-//  PreConcMarkingPhase();
-//  ConcMarkPhase();
-//  ReclaimClientPhase();
+  //  PreConcMarkingPhase();
+  //  ConcMarkPhase();
+  //  ReclaimClientPhase();
 }
 
 

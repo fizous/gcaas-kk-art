@@ -31,7 +31,8 @@ class GCServiceClient {
   static bool RequestConcGC(void);
   static bool RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task);
   static bool RequestExplicitGC(void);
-  bool ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task);
+  bool ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK task);
+  bool ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task);
   static bool RequestAllocateGC(void) ;
   static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
   static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,

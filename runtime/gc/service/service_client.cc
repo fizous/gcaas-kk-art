@@ -203,7 +203,7 @@ bool GCServiceClient::RequestConcGC(void) {
 
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
-  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_CONC)) {
+  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_CONC)) {
     return true;
   }
 
@@ -294,12 +294,12 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 }
 
 
-bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
+bool GCServiceClient::ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task)    {
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
         (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
-      LOG(ERROR) << "----GCServiceClient::ShouldPushNewRequest previous Request was already active: " << (*it)->req_type_ <<
+      LOG(ERROR) << "----GCServiceClient::ShouldPushNewGCRequest previous Request was already active: " << (*it)->req_type_ <<
           ", status = " << (*it)->status_;
       return false;
     }
@@ -307,6 +307,21 @@ bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task) 
   }
   return true;
 }
+
+
+bool GCServiceClient::ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK task)    {
+  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
+    if((*it)->req_type_ == task) {
+      LOG(ERROR) << "----GCServiceClient::ShouldPushNewTrimRequest previous Request was already active: " << (*it)->req_type_ <<
+          ", status = " << (*it)->status_;
+      return false;
+    }
+    ++it;
+  }
+  return true;
+}
+
 bool GCServiceClient::RequestExplicitGC(void) {
   if(service_client_ == NULL)
     return false;
@@ -322,7 +337,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
-  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
+  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
     return true;
   }
 
@@ -331,7 +346,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
 
   if(_req_entry != NULL) {
     service_client_->setExplRequestTime(NanoTime(),
-                                        static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+                                          static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
     service_client_->active_requests_.push_back(_req_entry);
   }
   return true;
@@ -344,6 +359,10 @@ void GCServiceClient::RequestHeapTrim(void) {
   if(!service_client_->isTrimRequestsEnabled())
     return;
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
+  MutexLock mu(self, *service_client_->gcservice_client_lock_);
+  if(!service_client_->ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
+    return;
+  }
   IPC_MS_VLOG(INFO) << "^^^^^^^^^ Going to request trim ^^^^^^^^^^^";
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
