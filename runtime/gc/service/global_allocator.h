@@ -519,11 +519,6 @@ private:
                    int enable_trim);
   void SetGCDaemon(void);
 
-
-
-
-
-
   Thread*   thread_;
   bool srvcReady_;
 };//class GCServiceProcess
