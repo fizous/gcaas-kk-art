@@ -1059,7 +1059,17 @@ inline mirror::Object* Heap::Allocate(Thread* self, T* space, size_t alloc_size,
     return ptr;
   }
   GCP_MARK_START_GC_HAT_TIME_EVENT(self);
+#if (ART_GC_SERVICE || true)
+  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+    LOG(ERROR) << "Heap::Allocate..going to call Allocate with Internal GC";
+  }
+#endif
   mirror::Object* ptrAfterGC = AllocateInternalWithGc(self, space, alloc_size, bytes_allocated);
+#if (ART_GC_SERVICE || true)
+  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+    LOG(ERROR) << "Heap::Allocate..------------------";
+  }
+#endif
   GCP_MARK_END_GC_HAT_TIME_EVENT(self);
   return ptrAfterGC;
 }
@@ -1163,7 +1173,17 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
 
   // We don't need a WaitForConcurrentGcToComplete here either.
   GCP_MARK_START_ALLOC_GC_HW_EVENT;
+#if (ART_GC_SERVICE || true)
+  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+    LOG(ERROR) << "Heap::AllocateInternalWithGc.. 01.. Start.. Going to call CollectwithInternalGC";
+  }
+#endif
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseForAlloc, true);
+#if (ART_GC_SERVICE || true)
+  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+    LOG(ERROR) << "Heap::AllocateInternalWithGc.. 02.. END.. Done call CollectwithInternalGC";
+  }
+#endif
   GCP_MARK_END_ALLOC_GC_HW_EVENT;
   return TryToAllocate(self, space, alloc_size, true, bytes_allocated);
 }
