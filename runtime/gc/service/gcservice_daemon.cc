@@ -183,10 +183,6 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
     }
   }
 
-//  for(int i = 0; i< 13; i++){
-//    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
-//    LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _meminfoP->aggregate_memory_ << " kB";
-//  }
 
   fclose(f);
 
@@ -236,13 +232,6 @@ GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
     return result->second;
   }
 
-
-//  for (auto& client : client_agents_) {
-//     if(client->binding_.pair_mapps_->first->process_id_ == pid) {
-//       return client;
-//     }
-//  }
-//  return NULL;
 }
 
 
@@ -286,10 +275,6 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
       _daemonObj->thread_->GetTid();
 
   while((_processObj->service_meta_->status_ & GCSERVICE_STATUS_RUNNING) > 0) {
-//    _daemonObj->UpdateGlobalState();
-//    if(true) {
-//      _daemonObj->UpdateGlobalProcessStates();
-//    }
     _daemonObj->mainLoop();
   }
 
@@ -324,8 +309,6 @@ void GCServiceDaemon::setThreadAffinity(Thread* th, int cpu_id, bool complementa
       if(complementary) {
         GCMMP_VLOG(INFO) << "GCMMP: Complementary";
       }
-      GCMMP_VLOG(INFO) << "GCMMP: Succeeded in setting assignments tid:" <<
-          th->GetTid() << ", cpuid: " <<  _cpu_id;
     }
 
 }
@@ -340,7 +323,7 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
 //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
 //        64, false));
     initShutDownSignals();
-    IPC_MS_VLOG(INFO) << "Thread_POOL----" << "resetting thread pool for gcservice daemon";
+
     thread_pool_.reset(new ThreadPool(4));
     process->service_meta_->cond_->Broadcast(self);
   }
@@ -375,39 +358,7 @@ bool GCServiceDaemon::waitShutDownSignals(void) {
   shutdown_cond_->Broadcast(self);
   return _await_res;
 }
-//
-//void GCServiceDaemon::UpdateGlobalState(void) {
-//  FILE *f;
-//
-//  char line[256];
-//  f = fopen("/proc/meminfo", "r");
-//  if (!f) return;// errno;
-//
-//
-//  GCSrvcPhysicalState* _physical_state =
-//      &(GCServiceProcess::process_->service_meta_->global_state_);
-//  while (fgets(line, 256, f)) {
-//      sscanf(line, "MemTotal: %ld kB", &_physical_state->mem_total);
-//      sscanf(line, "MemFree: %ld kB", &_physical_state->mem_free);
-//  }
-//
-//  fclose(f);
-//
-////  LOG(ERROR) << "--- GlobalPhysicalMemory..... totalMemory:"
-////      << _physical_state->mem_total << ", freeMemory:" << _physical_state->mem_free;
-//
-//}
-//static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
-//                                                              int* out_value) {
-//  CHECK(out_value != NULL);
-//  jfieldID field = env->GetStaticFieldID(clz, name, "I");
-//  if (field == NULL) {
-//    env->ExceptionClear();
-//    return false;
-//  }
-//  *out_value = env->GetStaticIntField(clz, field);
-//  return true;
-//}
+
 
 void GCServiceDaemon::SetMemInfoDumpFile(void) {
   int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
@@ -431,44 +382,10 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
     }
   }
 
-
-//  Thread* self = Thread::Current();
-//  JNIEnvExt* env = self->GetJniEnv();
-//  // Just attempt to do this the first time.
-//  jclass clz = env->FindClass("android/app/ActivityManager");
-//  if (clz == NULL) {
-//    LOG(WARNING) << "Activity manager class is null";
-//    return;
-//  }
-//  ScopedLocalRef<jclass> activity_manager(env, clz);
-//  std::vector<const char*> care_about_pauses;
-//  care_about_pauses.push_back("PROCESS_STATE_TOP");
-//  care_about_pauses.push_back("PROCESS_STATE_IMPORTANT_BACKGROUND");
-//
-//  // Process states which care about pause times.
-//  std::set<int> process_state_cares_about_pause_time_;
-//
-//  // Attempt to read the constants and classify them as whether or not we care about pause times.
-//  for (size_t i = 0; i < care_about_pauses.size(); ++i) {
-//    int process_state = 0;
-//    if (ReadStaticInt(env, activity_manager.get(), care_about_pauses[i], &process_state)) {
-//      process_state_cares_about_pause_time_.insert(process_state);
-//      LOG(ERROR)<< "XXXXXX Adding process state " << process_state
-//                 << " to set of states which care about pause time";
-//    }
-//  }
-
-//  int fd = open("/data/anr/meminfo.data", O_RDWR | O_CREAT, 0777);
-//  if (fd == -1) {
-//    PLOG(ERROR) << "Unable to open stack trace file '" << "/data/anr/meminfo.data" << "'";
-//    return;
-//  }
-
   uint64_t _curr_time = NanoTime();
   uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
   if(_difference_time < 2000000000)
     return;
-  LOG(ERROR)<< "--------------------------------------";
   last_global_update_time_ns_ = _curr_time;
 
   //std::string _meminfo_lines;
@@ -486,59 +403,14 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
 
     if(GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data")) {
 
-      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
-          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
-          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
-          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
-          "," << GCSrvcMemInfoOOM::free_ram_[3];
+//      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
+//          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
+//          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
+//          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
+//          "," << GCSrvcMemInfoOOM::free_ram_[3];
     }
-
-    //if(fcntl(mem_info_fd_, F_GETFD) != -1 || errno != EBADF) {
-//      if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
-//        LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-//      } else {
-//        LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-//        std::vector<std::string> mem_info_dump;
-//        Split(_meminfo_lines, '\n', mem_info_dump);
-//      }
-    //}
   }
 
-
-//  if(fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
-//    close(fd);
-//    LOG(ERROR) << " HHHHH synchronizing the fd HHHHH ";
-//    if (!ReadFileToString("/data/anr/meminfo.data", &_meminfo_lines)) {
-//         LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-//       } else {
-//         LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-//         std::vector<std::string> mem_info_dump;
-//         Split(_meminfo_lines, '\n', mem_info_dump);
-//       }
-//
-//  } else {
-//    if (!ReadFileToString("/data/anr/meminfo.data",&_meminfo_lines)) {
-//      LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-//    } else {
-//      LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-//      std::vector<std::string> mem_info_dump;
-//      Split(_meminfo_lines, '\n', mem_info_dump);
-//    }
-//  }
-
-//  if (!ReadFileToString(fd, &_meminfo_lines)) {
-//    LOG(ERROR) << "(couldn't read dump of mem_info  \n";
-//  } else {
-//    LOG(ERROR) << "meminfo_dump------------------------\n" << _meminfo_lines;
-//    std::vector<std::string> mem_info_dump;
-//    Split(_meminfo_lines, '\n', mem_info_dump);
-//  }
-//
-//  int close_result = close(fd);
-//  if(close_result < 0) {
-//    LOG(ERROR) << "Closing file......";
-//  }
-  LOG(ERROR)<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
 
 }
@@ -546,41 +418,6 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
 
 void GCServiceDaemon::mainLoop(void) {
   GCServiceProcess::process_->handShake_->ListenToRequests(this);
-//  IPMutexLock interProcMu(thread_, *process_->handShake_->mem_data_->mu_);
-//  ScopedThreadStateChange tsc(thread_, kWaitingForGCProcess);
-//  {
-//    LOG(ERROR) << "waiting for new Process ";
-//    process_->handShake_->mem_data_->cond_->Wait(thread_);
-//  }
-//  LOG(ERROR) << "GCServiceDaemon::mainLoop ====  received signal";
-//  if(process_->service_meta_->status_ == GCSERVICE_STATUS_RUNNING) {
-//    LOG(ERROR) << "before calling ====  ProcessQueuedMapper";
-//
-//
-//    android::FileMapperParameters* _f_mapper_params_a =
-//        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
-//            sizeof(android::FileMapperParameters)));
-//    android::FileMapperParameters* _f_mapper_params_b =
-//        reinterpret_cast<android::FileMapperParameters*>(calloc(1,
-//            sizeof(android::FileMapperParameters)));
-//
-//    android::MappedPairProcessFD* _newEntry =
-//        new std::pair<android::FileMapperParameters*,
-//        android::FileMapperParameters*>(_f_mapper_params_a, _f_mapper_params_b);
-    //registered_apps_.push_back(_newEntry);
-    //process_->handShake_->ProcessQueuedMapper(_newEntry);
-
-
-//
-//    client_agents_.push_back(GCSrvceAgent(_newEntry));
-//    while(processed_index_ < process_->service_meta_->counter_) {
-//      LOG(ERROR) << " processing index registration: " <<
-//          processed_index_;
-//      processed_index_++;
-//    }
-//  }
-
-//  process_->handShake_->mem_data_->cond_->Broadcast(thread_);
 }
 
 
@@ -622,7 +459,6 @@ void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
     for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
       if((*it)->req_type_ == request_addr->req_type_) {
         android_atomic_acquire_store(GC_SERVICE_REQ_NONE, &((*it)->status_));
-        LOG(ERROR) << "Removing Request " << request_addr->req_type_;
         active_requests_.erase(it);
         found = true;
         break;

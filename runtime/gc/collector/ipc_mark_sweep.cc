@@ -686,30 +686,15 @@ void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) 
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
-  IPC_MS_VLOG(ERROR) << "IPCHeap::WaitForRequest.." << self->GetTid();
-
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-    IPC_MS_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- before while: conc flag = " << meta_->conc_flag_;
     while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
-    IPC_MS_VLOG(ERROR) << "-------- IPCHeap::RunCollectorDaemon --------- leaving wait: conc flag = " << meta_->conc_flag_
-        << ", gctype = " << meta_->gc_type_;
 
   }
-  //Runtime* runtime = Runtime::Current();
 
-  //  ScopedThreadStateChange tscConcA(self, kWaitingForGCProcess);
-  //  {
-  //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-  //    meta_->is_gc_running_ = 1;
-  //    //meta_->conc_flag_ = 0;
-  //   // meta_->is_gc_complete_ = 0;
-  //    conc_req_cond_->Broadcast(self);
-  //  }
-  IPC_MS_VLOG(ERROR) << ">>>>>>>>>IPCHeap::ConcurrentGC...Starting: " << self->GetTid() << " <<<<<<<<<<<<<<<";
   gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
   if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
     ConcurrentGC(self);
@@ -722,33 +707,9 @@ bool IPCHeap::RunCollectorDaemon() {
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
     TrimHeap();
     _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
-    //LOG(ERROR) << ".....TrimHeap() Executed.......";
-    //meta_->explicit_count_ = meta_->explicit_count_ + 1;
   }
 
-  IPC_MS_VLOG(ERROR) << "<<<<<<<<<IPCHeap::ConcurrentGC...Done: " << self->GetTid() <<
-      " >>>>>>>>>>>>>>> conc_count=" << meta_->conc_count_
-      <<"; explicit_count:" << meta_->explicit_count_;
   NotifyCompleteConcurrentTask(_task_type);
-  //  ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
-  //  {
-  //    IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-  ////    meta_->is_gc_complete_ = 1;
-  //    meta_->conc_flag_ = 2;
-  //    conc_req_cond_->Broadcast(self);
-  //  }
-  //  {
-  //    ScopedThreadStateChange tscConcB(self, kWaitingForGCProcess);
-  //    {
-  //      IPMutexLock interProcMu(self, *conc_req_cond_mu_);
-  //      while(meta_->is_gc_complete_ == 1) {
-  //        IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: waiting for gc_complete reset";
-  //        conc_req_cond_->Wait(self);
-  //      }
-  //      conc_req_cond_->Broadcast(self);
-  //      IPC_MS_VLOG(ERROR) << "      IPCHeap::RunCollectorDaemon: leave waiting for gc_complete reset";
-  //    }
-  //  }
   return true;
 }
 
@@ -842,7 +803,6 @@ AbstractIPCMarkSweep::AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent):
 
 
   meta_data_->is_concurrent_ = concurrent ? 1 : 0;
-  IPC_MS_VLOG(ERROR) << "############ Initializing IPC: " << collector_index_;
   ResetMetaDataUnlocked();
 
   DumpValues();
@@ -890,28 +850,7 @@ accounting::SPACE_BITMAP* AbstractIPCMarkSweep::SetMarkBitmap(void) {
   return _bitmap;
 }
 
-//void AbstractIPCMarkSweep::HandshakeMarkingPhase(void) {
-//  if(true)
-//    return;
-//  Thread* currThread = Thread::Current();
-//  {
-//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_MARK_REACHABLES, currThread);
-//    phase_cond_->Broadcast(currThread);
-//  }
-//
-//  if(ipc_heap_->ipc_flag_raised_ == 1) {
-//    IPC_MS_VLOG(ERROR) << "the client changes phase from: : " << heap_meta_->gc_phase_;
-//    GC_IPC_BLOCK_ON_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
-//    heap_meta_->gc_phase_ = space::IPC_GC_PHASE_CONC_MARK;
-//    IPC_MS_VLOG(ERROR) << "      to : " << heap_meta_->gc_phase_;
-//    ipc_heap_->ipc_flag_raised_ = 0;
-//    phase_cond_->Broadcast(currThread);
-//  } else {
-//    IPC_MS_VLOG(ERROR) << "ipc_heap_->ipc_flag_raised_ was zero";
-//    GC_IPC_COLLECT_PHASE(space::IPC_GC_PHASE_PRE_CONC_ROOT_MARK, currThread);
-//    phase_cond_->Broadcast(currThread);
-//  }
-//}
+
 
 
 void AbstractIPCMarkSweep::UpdateGCPhase(Thread* thread,
@@ -1809,14 +1748,6 @@ void IPCMarkSweep::RawObjectScanner(void) {
     RawScanObjectVisit(popped_oject);
   }
 }
-
-
-
-
-
-
-
-
 
 /////////////////////
 /////

@@ -119,7 +119,7 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
 
 
 bool GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled() {
-  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled>>>>>>>>";
+
   if(allocator_instant_ == NULL) {
     return false;
   }
@@ -152,9 +152,8 @@ bool GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(int* cpu,
 }
 
 void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
-  LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::GCSrvcNotifySystemServer>>>>>>>>";
+
   if(allocator_instant_ == NULL) {
-    LOG(ERROR) << ">>>>>GCServiceGlobalAllocator::GCSrvcNotifySystemServer<<<<<< allocator instant is null";
     return;
   }
   Thread* self = Thread::Current();
@@ -163,14 +162,10 @@ void GCServiceGlobalAllocator::GCSrvcNotifySystemServer() {
   int _status = 0;
   int _expected = GCSERVICE_STATUS_RUNNING;
   int _new_status = 0;
-  LOG(ERROR) << "GCServiceGlobalAllocator::GCSrvcNotifySystemServer--->_expected:"
-      << _expected << ", _status:" << _header->status_;
   do {
     _status = _header->status_;
     _new_status = (_status | GCSERVICE_STATUS_SYS_SERVER_CREATED);
   } while(android_atomic_cas(_expected, _new_status, &_header->status_) != 0);
-
-  LOG(ERROR) << ">>>>>>>>GCServiceGlobalAllocator::GCSrvcNotifySystemServer<<<<<<<<";
 }
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void) {
@@ -208,7 +203,6 @@ bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
   if(allocator_instant_ != NULL) {
     for (size_t i = 0; i < allocator_instant_->app_list_.size(); i++) {
       if (strcmp(se_name_c_str, allocator_instant_->app_list_[i].c_str()) == 0) {
-        LOG(ERROR) << "++++++++++++" << se_name_c_str << "++++++++++++";
         return true;
         //android_atomic_acquire_store(1, &(sharable_space_data_->register_gc_));
       }
@@ -219,10 +213,8 @@ bool GCServiceGlobalAllocator::ShouldRegisterApp(const char* se_name_c_str) {
 
 void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   Thread* self = Thread::Current();
-  GCSERVICE_ALLOC_VLOG(ERROR) << ">>>> GCServiceGlobalAllocator::BlockOnGCProcessCreation";
   IPMutexLock interProcMu(self, *allocator_instant_->region_header_->service_header_.mu_);
   allocator_instant_->UpdateForkService(pid);
-  GCSERVICE_ALLOC_VLOG(ERROR) << ">>>> Going to Wait GCServiceGlobalAllocator::BlockOnGCProcessCreation";
   while(allocator_instant_->region_header_->service_header_.status_ < GCSERVICE_STATUS_RUNNING) {
     ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
     {
@@ -231,7 +223,6 @@ void GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid_t pid) {
   }
 
   allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-  GCSERVICE_ALLOC_VLOG(ERROR) << ">>>> Leaving blocked status GCServiceGlobalAllocator::BlockOnGCProcessCreation";
 
 }
 
@@ -240,15 +231,11 @@ bool GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease(void) {
   if(allocator_instant_ == NULL) {
     return false;
   }
-  GCSERVICE_ALLOC_VLOG(ERROR) <<
-      "XXXXXX GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self,
       *allocator_instant_->region_header_->service_header_.mu_);
   allocator_instant_->ResetSemaphore();
   allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-  GCSERVICE_ALLOC_VLOG(ERROR) <<
-      "XXXXXX LEaving GCServiceGlobalAllocator::ShouldNotifyForZygoteForkRelease XXXXXX";
   return true;
 }
 
@@ -268,7 +255,6 @@ void GCServiceGlobalAllocator::BlockOnGCZygoteCreation(void) {
   if(allocator_instant_ == NULL) {
     return;
   }
-  GCSERVICE_ALLOC_VLOG(ERROR) << "XXXXXX GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self,
       *allocator_instant_->region_header_->service_header_.mu_);
@@ -277,8 +263,6 @@ void GCServiceGlobalAllocator::BlockOnGCZygoteCreation(void) {
     allocator_instant_->region_header_->service_header_.cond_->Wait(self);
   }
   allocator_instant_->region_header_->service_header_.cond_->Broadcast(self);
-
-  GCSERVICE_ALLOC_VLOG(ERROR) << "XXXXXX LEaving GCServiceGlobalAllocator::BlockOnGCZygoteCreation XXXXXX";
 }
 
 void GCServiceGlobalAllocator::UpdateForkService(pid_t pid) {
@@ -344,8 +328,6 @@ GCServiceGlobalAllocator::GCServiceGlobalAllocator(/*int pages*/) :
 
   initServiceHeader();
 
-
-  GCSERVICE_ALLOC_VLOG(ERROR) << "<<<<<<GCServiceGlobalAllocator>>>>>>";
 }
 
 GCServiceHeader* GCServiceGlobalAllocator::GetServiceHeader(void) {
@@ -411,62 +393,9 @@ void GCSrvcClientHandShake::Init() {
     ResetRequestEntry(&(gcservice_data_->entries_[i]));
   }
 
-//  mem_data_->available_ = KProcessMapperCapacity;
-//  mem_data_->queued_ = 0;
-//  mem_data_->tail_ = 0;
-//  mem_data_->head_ = KProcessMapperCapacity - 1;
-
-//  SharedFutexData* _futexAddress = &mem_data_->lock_.futex_head_;
-//  SharedConditionVarData* _condAddress = &mem_data_->lock_.cond_var_;
-
-
-//  mem_data_->mu_   = new InterProcessMutex("HandShake Mutex", _futexAddress);
-//  mem_data_->cond_ = new InterProcessConditionVariable("HandShake CondVar",
-//      *mem_data_->mu_, _condAddress);
-
-//  for(int i = 0; i < KProcessMapperCapacity; i++) {
-//    ResetProcessMap(&(mem_data_->process_mappers_[i]));
-//  }
 }
 
-//android::FileMapperParameters* GCSrvcClientHandShake::GetMapperRecord(void* params) {
-//  gc::space::GCSrvSharableDlMallocSpace* _shared_space =
-//      reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
-//
-//  Thread* self = Thread::Current();
-//  IPMutexLock interProcMu(self, *mem_data_->mu_);
-//  mem_data_->head_ = (mem_data_->head_ + 1) % KProcessMapperCapacity;
-//  android::FileMapperParameters* _rec =
-//      &(mem_data_->process_mappers_[mem_data_->head_]);
-//  _rec->process_id_  = getpid();
-//  _rec->space_index_ = _shared_space->space_index_;
-//  _rec->fd_count_ = IPC_FILE_MAPPER_CAPACITY;
-//  _rec->shared_space_addr_ = _shared_space;
-//
-//  art::gcservice::GCServiceClient::service_client_->FillMemMapData(_rec);
-//
-//  //memcpy((void*)_rec->fds_, fdArr, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
-//  //memcpy((void*)_rec->byte_counts_, byte_counts, IPC_FILE_MAPPER_CAPACITY * sizeof(int));
-//
-//  bool _svcRes =
-//    android::FileMapperService::MapFds(_rec);
-//
-//  if(_svcRes) {
-//    GCSERVICE_ALLOC_VLOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  succeeded; " <<
-//        _rec->process_id_ << ", "<< _rec->space_index_ <<", "<< _rec->fd_count_
-//        <<", "<< _rec->mem_maps_[0].fd_;
-//
-//
-//  } else {
-//    GCSERVICE_ALLOC_VLOG(ERROR) << " __________ GCSrvcClientHandShake::GetMapperRecord:  Failed";
-//  }
-//
-//  mem_data_->available_ -= 1;
-//  mem_data_->queued_++;
-//
-//  mem_data_->cond_->Broadcast(self);
-//
-//  return _rec;
+c;
 //}
 
 
@@ -477,77 +406,6 @@ GCSrvcClientHandShake::GCSrvcClientHandShake(GCServiceRequestsBuffer* alloc_mem)
   Init();
 }
 
-//void GCSrvcClientHandShake::ProcessQueuedMapper(android::MappedPairProcessFD* entry){
-// // Thread* self = Thread::Current();
-//  //GCSERVICE_ALLOC_VLOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper Locking mem_data_->mu_";
-//  //IPMutexLock interProcMu(self, *mem_data_->mu_);
-//  GCSERVICE_ALLOC_VLOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper  " << mem_data_->queued_;
-//  while(mem_data_->queued_ > 0) {
-//    GCSERVICE_ALLOC_VLOG(ERROR) << " __________GCSrvcClientHandShake::ProcessQueuedMapper after mem_data_->queued_ " << mem_data_->queued_;
-//    android::FileMapperParameters* _rec =
-//       &(mem_data_->process_mappers_[mem_data_->tail_]);
-//    GCSERVICE_ALLOC_VLOG(ERROR) << "Process Indexing tail.. " << mem_data_->tail_ <<", head is " << mem_data_->head_;
-//    GCSERVICE_ALLOC_VLOG(ERROR) << "Process existing record:.. " << _rec->space_index_ <<
-//        ", " << _rec->process_id_;
-//
-//
-//    memcpy((void*)entry->first, _rec, sizeof(android::FileMapperParameters));
-//    android::FileMapperParameters* _recSecond = entry->second;
-//
-//
-//
-//    _recSecond->process_id_ = _rec->process_id_;
-//    _recSecond->space_index_ = _rec->space_index_;
-//    _recSecond->fd_count_ = _rec->fd_count_;
-//    for(int i = 0; i < _recSecond->fd_count_; i++) {
-//      memcpy((void*)&(_recSecond->mem_maps_[i]), &(_rec->mem_maps_[i]),
-//          sizeof(android::IPCAShmemMap));
-//    }
-//
-//
-//    bool _svcRes =
-//      android::FileMapperService::GetMapFds(_recSecond);
-//    if(_svcRes) {
-//      for(int i = 0; i < _recSecond->fd_count_; i++) {
-//        android::IPCAShmemMap* _result = &(_recSecond->mem_maps_[i]);
-//
-//        GCSERVICE_ALLOC_VLOG(ERROR) << "ProcessQueuedMapper: " << i << "-----" <<
-//            StringPrintf("fd: %d, flags:%d, prot:%d, size:%s",
-//                _result->fd_, _result->flags_, _result->prot_,
-//                PrettySize(_result->size_).c_str());
-//
-//        _result->flags_ &= MAP_SHARED;
-//        //_result->prot_ = PROT_READ | PROT_WRITE;
-//        GCSERVICE_ALLOC_VLOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper:  succeeded.." << _result->fd_;
-//
-//        byte* actual = reinterpret_cast<byte*>(mmap(NULL, _result->size_,
-//            _result->prot_, _result->flags_, _result->fd_, 0));
-//
-//        if(actual == MAP_FAILED) {
-//          GCSERVICE_ALLOC_VLOG(ERROR) << "MMap failed in creating file descriptor..." << _result->fd_
-//              << ", size: " << PrettySize(_result->size_) << ", flags: " << _result->flags_
-//              << ", prot: " << _result->prot_;
-//        } else {
-//          GCSERVICE_ALLOC_VLOG(ERROR) << "MMap succeeded in creating file descriptor..." <<
-//              _result->fd_ <<  StringPrintf(" fd:%d, address: %p; content: 0x%x",
-//                  _result->fd_, reinterpret_cast<void*>(actual),
-//                  *(reinterpret_cast<unsigned int*>(actual)))
-//                  << ", size: " << PrettySize(_result->size_) << ", flags: " <<
-//                  _result->flags_ << ", prot: " << _result->prot_;
-//
-//        }
-//      }
-//    } else {
-//      GCSERVICE_ALLOC_VLOG(ERROR) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
-//    }
-//    mem_data_->tail_ = (mem_data_->tail_ + 1) % KProcessMapperCapacity;
-//    mem_data_->available_ += 1;
-//    mem_data_->queued_--;
-//  }
-//  GCSERVICE_ALLOC_VLOG(ERROR) << " ______GCSrvcClientHandShake::ProcessQueuedMapper after while"
-//      << mem_data_->queued_;
-//  //mem_data_->cond_->Broadcast(self);
-//}
 
 
 #define GC_BUFFER_PUSH_REQUEST(ENTRY, THREAD) \
@@ -576,8 +434,6 @@ GCServiceReq* GCSrvcClientHandShake::ReqConcCollection(void* args) {
   _entry->req_type_ = GC_SERVICE_TASK_CONC;
   _entry->data_addr_ = (uintptr_t)args;
 
-  GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqConcCollection";
-
   gcservice_data_->cond_->Broadcast(self);
   return _entry;
 }
@@ -591,7 +447,6 @@ GCServiceReq* GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   _entry->req_type_ = GC_SERVICE_TASK_EXPLICIT;
   _entry->data_addr_ = (uintptr_t)args;
 
-  GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqExplicitCollection";
 
   gcservice_data_->cond_->Broadcast(self);
   return _entry;
@@ -606,7 +461,6 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 
   _entry->req_type_ = GC_SERVICE_TASK_REG;
 
-  GCSERVICE_ALLOC_VLOG(ERROR) << "ReqRegistration: entry address: " << reinterpret_cast<void*>(_entry);
 
   gc::space::GCSrvSharableDlMallocSpace* _shared_space =
       reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
@@ -660,7 +514,7 @@ void GCSrvcClientHandShake::ReqHeapTrim() {
 
   _entry->req_type_ = GC_SERVICE_TASK_TRIM;
   //GCSERVICE_ALLOC_VLOG(ERROR)
-  LOG(ERROR) << "GCSrvcClientHandShake::ReqHeapTrim";
+
   gcservice_data_->cond_->Broadcast(self);
 }
 
@@ -686,9 +540,7 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       LOG(ERROR) << "Request status is not correct..." << _entry->status_;
     }
   }
-  GCSERVICE_ALLOC_VLOG(ERROR) << "ProcessGCRequest: tail=" <<
-      gcservice_data_->tail_ << ", " << "address: " <<
-      reinterpret_cast<void*>(_entry);
+
   gcservice_data_->tail_ =
       ((gcservice_data_->tail_ + 1) % KGCRequestBufferCapacity);
   gcservice_data_->available_ = gcservice_data_->available_ + 1;
@@ -708,12 +560,8 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
     GCServiceDaemon* _daemon = reinterpret_cast<GCServiceDaemon*>(args);
     android::FileMapperParameters* _fMapsP =
         reinterpret_cast<android::FileMapperParameters*>(_entry->data_addr_);
-    GCSERVICE_ALLOC_VLOG(ERROR) << "Process Indexing tail.. " <<
-        gcservice_data_->tail_ <<
-        ", head is " << gcservice_data_->head_;
-    GCSERVICE_ALLOC_VLOG(ERROR) << "Process existing record:.. " <<
-        _fMapsP->space_index_ <<
-        ", " << _fMapsP->process_id_;
+
+
     gcservice_data_->mapper_tail_ =
         ((gcservice_data_->mapper_tail_ + 1) % KProcessMapperCapacity);
 
@@ -879,7 +727,6 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
         }
       }
-      LOG(ERROR) << "putting agent.." << _fMapsP->process_id_;
      // _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
       _daemon->agents_map_.Put(_newPairEntry->first->process_id_,
                                new GCSrvceAgent(_newPairEntry));
@@ -925,14 +772,10 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
   ScopedThreadStateChange tsc(self, kWaitingForGcToComplete);
   {
     IPMutexLock interProcMu(self, *gcservice_data_->mu_);
-    GCSERVICE_ALLOC_VLOG(ERROR) << "ListenToRequests: after locking the gcserviceData mutex";
     while(gcservice_data_->queued_ == 0) {
-      GCSERVICE_ALLOC_VLOG(ERROR) << "Pull: waiting for broadcast ";
       gcservice_data_->cond_->Wait(self);
-      GCSERVICE_ALLOC_VLOG(ERROR) << "ListenToRequests: Somehow we received signal: " <<
-          gcservice_data_->queued_;
+
     }
-    GCSERVICE_ALLOC_VLOG(ERROR) << "before calling processGCRequest";
     GC_SERVICE_TASK _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
     if(_srvc_task != GC_SERVICE_TASK_NOP) {

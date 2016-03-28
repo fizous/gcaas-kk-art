@@ -415,10 +415,9 @@ class GCSrvcMemInfoOOM {
     double _fact = mem_info_rec->resize_factor_;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
       _fact = 2.0;
-      LOG(ERROR) << "resize factor is 2.0 because we are in nursery policy";
     } else {
         _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
-        LOG(ERROR) << "resize factor is " << _fact  << " because we are in default policy and OOM_label =" << mem_info_rec->oom_label_;
+
     }
     return _fact;
   }
@@ -436,12 +435,12 @@ class GCSrvcMemInfoOOM {
   static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {
     bool do_care = false;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
-      LOG(ERROR) << "care about pause time is true because we are still starting..NURSERY";
+
       do_care = true;
     } else {
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
-      LOG(ERROR) << "care  is " <<  do_care <<  " default strategy with label: " << mem_info_rec->oom_label_;
+
     }
     return do_care;
   }
