@@ -85,6 +85,8 @@ class AbstractIPCMarkSweep {
   space::GCSrvSharableHeapData* heap_meta_;
   space::GCSrvSharableCollectorData* meta_data_;
 
+  uint64_t collection_latency_;
+  uint64_t allocation_latency_;
   // IPCMarkSweep(space::GCSrvSharableHeapData*);
   AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent);
 
@@ -99,6 +101,8 @@ class AbstractIPCMarkSweep {
   void UpdateGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   void BlockForGCPhase(Thread*, space::IPC_GC_PHASE_ENUM phase);
   accounting::SPACE_BITMAP* SetMarkBitmap(void);
+
+  void UpdateLatencies();
 
 
 

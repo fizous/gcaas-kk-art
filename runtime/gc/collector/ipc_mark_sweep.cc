@@ -457,6 +457,15 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
   return last_gc_type;
 }
 
+
+AbstractIPCMarkSweep::UpdateConcLatencies() {
+  collection_latency_;
+  allocation_latency_;
+  GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns, gc_start_size);
+}
+
+
+
 const char* gc_cause_and_type_strings[4][4] = {
     {"", "GC Alloc Sticky", "GC Alloc Partial", "GC Alloc Full"},
     {"", "GC Background Sticky", "GC Background Partial", "GC Background Full"},
@@ -504,11 +513,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
 
-  if(gc_cause == kGcCauseBackground) {
-    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns, gc_start_size);
-  } else if (gc_cause == kGcCauseExplicit) {
-    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns, gc_start_size);
-  }
+
 
   //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
   //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
@@ -547,6 +552,14 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   //      "\n freed: " << collector->GetFreedObjects() << " objects"
   //      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
   // IPC_MS_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
+
+  if(gc_cause == kGcCauseBackground) {
+    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns,
+               gc_start_size, &(static_cast<AbstractIPCMarkSweep*>(collector))->collection_latency_, &(static_cast<AbstractIPCMarkSweep*>(collector))->allocation_latency_);
+  } else if (gc_cause == kGcCauseExplicit) {
+    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns, gc_start_size, &(static_cast<AbstractIPCMarkSweep*>(collector))->collection_latency_, &(static_cast<AbstractIPCMarkSweep*>(collector))->allocation_latency_);
+  }
+
   collector->Run();
 
   local_heap_->IncTotalObjectsFreedEver(collector->GetFreedObjects());
