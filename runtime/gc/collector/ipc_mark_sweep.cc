@@ -459,11 +459,6 @@ collector::GcType IPCHeap::WaitForConcurrentIPCGcToComplete(Thread* self) {
 }
 
 
-AbstractIPCMarkSweep::UpdateConcLatencies() {
-  collection_latency_;
-  allocation_latency_;
-  GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns, gc_start_size);
-}
 
 
 
