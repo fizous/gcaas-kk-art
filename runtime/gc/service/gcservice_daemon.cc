@@ -126,9 +126,12 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
           AgentMemInfo* _meminfo_app_rec = _agent->meminfo_rec_;
 
-//          LOG(ERROR) << "---1-" << pid << ", "
-//              << _meminfo_app_rec->memory_size_ << " kB, "
-//              << _meminfo_app_rec->oom_label_ << "...." << line;
+          if(false) {
+
+          LOG(ERROR) << "---1-" << pid << ", "
+              << _meminfo_app_rec->memory_size_ << " kB, "
+              << _meminfo_app_rec->oom_label_ << "...." << line;
+          }
           _meminfoP->agents_list_.push_back(_agent);
         }
 
@@ -584,7 +587,7 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-      << reinterpret_cast<void*>(import_address_);
+
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
   while(true) {

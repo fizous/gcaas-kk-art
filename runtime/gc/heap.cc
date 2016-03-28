@@ -892,7 +892,7 @@ void Heap::DumpSpaces() {
     LOG(INFO) << space << " " << *space << "\n"
               << live_bitmap << " " << *live_bitmap << "\n"
               << mark_bitmap << " " << *mark_bitmap;
-#if GC_ART_SERVICE
+#if (ART_GC_SERVICE || true)
     if(mark_bitmap->IsStructuredBitmap()) {
       accounting::SharedSpaceBitmap* shared_spc_beets =
           (accounting::SharedSpaceBitmap*)mark_bitmap;
@@ -1593,7 +1593,7 @@ const char* gc_cause_and_type_strings[4][4] = {
 
 collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCause gc_cause,
                                                bool clear_soft_references) {
-#if GC_ART_SERVICE
+#if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
   if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
       clear_soft_references, &returned_gc_type)) {
@@ -2203,7 +2203,7 @@ void Heap::PostGcVerification(collector::GarbageCollector* gc) {
 }
 
 collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self, bool profWaitTime) {
-#if GC_ART_SERVICE
+#if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
   if(art::gcservice::GCServiceClient::RequestWaitForConcurrentGC(&returned_gc_type)) {
     return returned_gc_type;
