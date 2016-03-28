@@ -146,13 +146,16 @@ bool GCServiceClient::RequestConcGC(void) {
     return true;
   }
 
+
+  uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
+  uint64_t _curr_time_ns =  NanoTime();
+
   gc::gcservice::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
 
   if(_req_entry != NULL) {
-    service_client_->setConcRequestTime(NanoTime(),
-                     static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+    service_client_->setConcRequestTime(_curr_time_ns, _curr_bytes_Allocated);
     service_client_->active_requests_.push_back(_req_entry);
     return true;
   }
@@ -259,12 +262,15 @@ bool GCServiceClient::RequestExplicitGC(void) {
     return true;
   }
 
+  uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
+  uint64_t _curr_time_ns =  NanoTime();
+
   gc::gcservice::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
   if(_req_entry != NULL) {
-    service_client_->setExplRequestTime(NanoTime(),
-                                          static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated()));
+    service_client_->setExplRequestTime(_curr_time_ns,
+                                        _curr_bytes_Allocated);
     service_client_->active_requests_.push_back(_req_entry);
   }
   return true;
