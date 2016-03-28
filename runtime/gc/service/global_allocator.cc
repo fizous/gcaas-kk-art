@@ -770,7 +770,7 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
 
 void GCSrvcClientHandShake::ListenToRequests(void* args) {
   Thread* self = Thread::Current();
-
+  GC_SERVICE_TASK _srvc_task;
   ScopedThreadStateChange tsc(self, kWaitingForGcToComplete);
   {
     IPMutexLock interProcMu(self, *gcservice_data_->mu_);
@@ -778,11 +778,11 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
       gcservice_data_->cond_->Wait(self);
 
     }
-    GC_SERVICE_TASK _srvc_task = ProcessGCRequest(args);
+    _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
-    if(_srvc_task != GC_SERVICE_TASK_NOP) {
-      GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
-    }
+  }
+  if(_srvc_task != GC_SERVICE_TASK_NOP) {
+    GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
   }
 }
 
