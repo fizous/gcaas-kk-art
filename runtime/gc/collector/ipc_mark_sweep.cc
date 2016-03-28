@@ -510,6 +510,15 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
 
 
+  if(gc_cause == kGcCauseBackground) {
+    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns,
+               gc_start_size, &collection_latency_, &allocation_latency_);
+  } else if (gc_cause == kGcCauseExplicit) {
+    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns,
+                                                         gc_start_size,
+                                                         &collection_latency_,
+                                                         &allocation_latency_);
+  }
 
   //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
   //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
@@ -527,6 +536,9 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
       local_heap_->GetAllocSpace()->Size() < local_heap_->GetMinAllocSpaceSizeForSticky()) {
     gc_type = collector::kGcTypePartial;
   }
+
+
+
 
   collector::MarkSweep* collector = NULL;
 
@@ -549,15 +561,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   //      "\n bytes_freed: " << PrettySize(collector->GetFreedBytes()) << " bytes";
   // IPC_MS_VLOG(ERROR) << "GCMMP collect -> " << gc_cause_and_type_strings[gc_cause][gc_type] << " from thread ID:" << self->GetTid();
 
-  if(gc_cause == kGcCauseBackground) {
-    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns,
-               gc_start_size, &collection_latency_, &allocation_latency_);
-  } else if (gc_cause == kGcCauseExplicit) {
-    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns,
-                                                         gc_start_size,
-                                                         &collection_latency_,
-                                                         &allocation_latency_);
-  }
+
 
   collector->Run();
 

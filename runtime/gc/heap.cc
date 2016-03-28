@@ -2373,7 +2373,6 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
       // Estimate how many remaining bytes we will have when we need to start the next GC.
       size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
       size_t _conc_lead = std::max(conc_latency, kMinConcurrentRemainingBytes);
-      LOG(ERROR) << "concurrent_latency = " << _conc_lead;
       remaining_bytes = std::max(remaining_bytes, _conc_lead);
       if (UNLIKELY(remaining_bytes > GetMaxAllowedFootPrint())) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
