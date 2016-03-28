@@ -394,7 +394,7 @@ void ServerCollector::FinalizeGC(Thread* self) {
 
 void ServerCollector::ExecuteTrim() {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "-----------------ServerCollector::ExecuteTrim-------------------" << self->GetTid();
+
   {
     MutexLock mu(self, shake_hand_mu_);
     curr_collector_addr_ = NULL;

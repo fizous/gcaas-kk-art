@@ -126,9 +126,9 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
           AgentMemInfo* _meminfo_app_rec = _agent->meminfo_rec_;
 
-          LOG(ERROR) << "---1-" << pid << ", "
-              << _meminfo_app_rec->memory_size_ << " kB, "
-              << _meminfo_app_rec->oom_label_ << "...." << line;
+//          LOG(ERROR) << "---1-" << pid << ", "
+//              << _meminfo_app_rec->memory_size_ << " kB, "
+//              << _meminfo_app_rec->oom_label_ << "...." << line;
           _meminfoP->agents_list_.push_back(_agent);
         }
 
@@ -498,7 +498,7 @@ bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_
 
     for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
       if((*it)->req_type_ == gcsrvc_req->req_type_) {
-        LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
+        //LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
         return false;
       }
     }
@@ -510,7 +510,6 @@ bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_
 
   if(srvc_requests_ == kcOOMInfoNurserySize) { // upgrade the policy
     meminfo_rec_->policy_method_ = gc::space::IPC_OOM_LABEL_POLICY_DEFAULT;
-    LOG(ERROR) << ".....Switching to Default Policy... Default";
   }
 
   active_requests_.push_back(gcsrvc_req);
@@ -535,7 +534,6 @@ void GCServiceProcess::LaunchGCServiceProcess(void) {
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
     GCSrvcClientHandShake* handshake, int enable_trim){
   if(GCServiceProcess::process_ == NULL) {
-    IPC_MS_VLOG(INFO) << "initializing process";
     GCServiceProcess::process_ = new GCServiceProcess(meta, handshake, enable_trim);
     GCServiceProcess::process_->SetGCDaemon();
 
@@ -547,20 +545,16 @@ bool GCServiceProcess::initSvcFD(void) {
   bool returnRes = false;
   IPMutexLock interProcMu(thread_, *service_meta_->mu_);
   if(fileMapperSvc_ == NULL) {
-    IPC_MS_VLOG(INFO) << " creating fileMapperSvc_ for first time ";
     fileMapperSvc_ =
         android::FileMapperService::CreateFileMapperSvc();
     returnRes = android::FileMapperService::IsServiceReady();
   } else {
-    IPC_MS_VLOG(INFO) << " reconnecting ";
     returnRes = android::FileMapperService::Reconnect();
   }
 
   if(returnRes) {
-    IPC_MS_VLOG(INFO) << " the proc found the service initialized ";
     service_meta_->status_ = GCSERVICE_STATUS_SERVER_INITIALIZED;
   } else {
-    IPC_MS_VLOG(INFO) << " the proc found the service not initialized ";
   }
   service_meta_->cond_->Broadcast(thread_);
   return returnRes;
@@ -578,7 +572,6 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 
   thread_ = Thread::Current();
   {
-    IPC_MS_VLOG(INFO) << " changing status of service to waiting for server ";
     IPMutexLock interProcMu(thread_, *service_meta_->mu_);
     service_meta_->status_ = GCSERVICE_STATUS_WAITINGSERVER;
     service_meta_->cond_->Broadcast(thread_);
@@ -591,16 +584,13 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
 }
 
 void GCServiceProcess::SetGCDaemon(void) {
-  IPC_MS_VLOG(INFO) << "Import Address ------ "
       << reinterpret_cast<void*>(import_address_);
   daemon_ = GCServiceDaemon::CreateServiceDaemon(this);
 
-  IPC_MS_VLOG(INFO) << "going to wait for the shutdown signals";
   while(true) {
     if(daemon_->waitShutDownSignals())
       break;
   }
-  IPC_MS_VLOG(INFO) << "GCService process shutdown";
 }
 
 
