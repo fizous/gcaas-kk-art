@@ -327,7 +327,7 @@ class ServerCollector {
   int WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteTrim(void);
-  void ExecuteGC(GC_SERVICE_TASK);
+  void ExecuteGC(GC_SERVICE_TASK gc_type);
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
   void BlockOnCollectorAddress(Thread* self);

@@ -276,7 +276,6 @@ void GCServiceClient::RequestHeapTrim(void) {
   if(!service_client_->isTrimRequestsEnabled())
     return;
   Thread* self = Thread::Current();
-  LOG(ERROR) << "GCServiceClient::RequestHeapTrim " << self->GetTid();
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
   if(!service_client_->ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
