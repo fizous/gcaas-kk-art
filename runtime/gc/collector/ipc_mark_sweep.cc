@@ -483,7 +483,7 @@ const char* gc_cause_and_type_strings[4][4] = {
 collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
                                              GcCause gc_cause, bool clear_soft_references) {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "IPCHeap::CollectGarbageIPC....gc_cause=" << gc_cause;
+  //LOG(ERROR) << "IPCHeap::CollectGarbageIPC....gc_cause=" << gc_cause;
   ScopedThreadStateChange tsc(self, kWaitingPerformingGc/*kWaitingForGCProcess*/);
   Locks::mutator_lock_->AssertNotHeld(self);
 
