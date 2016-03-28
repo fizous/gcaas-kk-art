@@ -414,7 +414,7 @@ class GCSrvcMemInfoOOM {
   static double GetResizeFactor(gc::space::AgentMemInfo* mem_info_rec) {
     double _fact = mem_info_rec->resize_factor_;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
-      _fact = 2.0;
+      _fact = 1.5;
     } else {
         _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
 
@@ -424,7 +424,7 @@ class GCSrvcMemInfoOOM {
 
   static double GetOOMResizeFactor(int oom_label) {
     if(oom_label == 0)
-      return 1.5;
+      return 1.25;
     return 1.0;
   }
 
