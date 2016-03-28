@@ -338,6 +338,9 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
   double _latency_rate_s = (allocation_latency_ * 1000.0) / (collection_latency_ / 1000 / 1000.0 / 1000.0);
+
+  LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
+
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, _resize_factor,
                                         &_adjusted_max_free,
                                         _latency_rate_s);
