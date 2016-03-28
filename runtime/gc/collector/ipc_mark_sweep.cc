@@ -338,8 +338,10 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
 
-  LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate: " << allocation_latency_ << ", latency: " << collection_latency_;
-  double _latency_rate_s = ((allocation_latency_ * 1000.0) / (NsToMs(collection_latency_) / 1000.0));
+  uint64_t _delta_time_ms =  NsToMs(collection_latency_);
+  LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate: " << allocation_latency_
+      << ", latency: " << collection_latency_ << ", _delta_time_ms = " << _delta_time_ms;
+  double _latency_rate_s = ((allocation_latency_ * 1000) / _delta_time_ms);
 
   LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
 
