@@ -519,6 +519,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
                                                          &collection_latency_,
                                                          &allocation_latency_);
   }
+  allocation_latency_ = 0;
 
   //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
   //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
