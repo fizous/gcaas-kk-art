@@ -85,8 +85,7 @@ class AbstractIPCMarkSweep {
   space::GCSrvSharableHeapData* heap_meta_;
   space::GCSrvSharableCollectorData* meta_data_;
 
-  uint64_t collection_latency_;
-  uint64_t allocation_latency_;
+
   // IPCMarkSweep(space::GCSrvSharableHeapData*);
   AbstractIPCMarkSweep(IPCHeap* ipcHeap, bool concurrent);
 
@@ -184,6 +183,9 @@ class IPCHeap {
 
 
   int collector_entry_;
+
+  uint64_t collection_latency_;
+  uint64_t allocation_latency_;
 };
 
 

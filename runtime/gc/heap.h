@@ -747,7 +747,8 @@ class Heap {
   void GCSrvcGrowForUtilization(collector::GcType gc_type,
                                 uint64_t gc_duration,
                                 double adjusted_resize_factor,
-                                size_t* adjusted_max_free);
+                                size_t* adjusted_max_free,
+                                size_t conc_latency);
 
   size_t GetPercentFree();
 

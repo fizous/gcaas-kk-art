@@ -555,9 +555,12 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
   if(gc_cause == kGcCauseBackground) {
     GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns,
-               gc_start_size, &(static_cast<AbstractIPCMarkSweep*>(collector))->collection_latency_, &(static_cast<AbstractIPCMarkSweep*>(collector))->allocation_latency_);
+               gc_start_size, &collection_latency_, &allocation_latency_);
   } else if (gc_cause == kGcCauseExplicit) {
-    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns, gc_start_size, &(static_cast<AbstractIPCMarkSweep*>(collector))->collection_latency_, &(static_cast<AbstractIPCMarkSweep*>(collector))->allocation_latency_);
+    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns,
+                                                         gc_start_size,
+                                                         &collection_latency_,
+                                                         &allocation_latency_);
   }
 
   collector->Run();

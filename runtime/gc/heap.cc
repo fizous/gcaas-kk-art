@@ -2318,7 +2318,8 @@ double Heap::HeapGrowthMultiplier() const {
 void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
                                     uint64_t gc_duration,
                                     double adjusted_resize_factor,
-                                    size_t* adjusted_max_free_p) {
+                                    size_t* adjusted_max_free_p,
+                                    size_t conc_latency) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
@@ -2371,7 +2372,9 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
       double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
       // Estimate how many remaining bytes we will have when we need to start the next GC.
       size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
-      remaining_bytes = std::max(remaining_bytes, kMinConcurrentRemainingBytes);
+      size_t _conc_lead = std::max(conc_latency, kMinConcurrentRemainingBytes);
+      LOG(ERROR) << "concurrent_latency = " << _conc_lead;
+      remaining_bytes = std::max(remaining_bytes, _conc_lead);
       if (UNLIKELY(remaining_bytes > GetMaxAllowedFootPrint())) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule
