@@ -338,7 +338,8 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, _resize_factor,
-                                        &_adjusted_max_free);
+                                        &_adjusted_max_free,
+                                        static_cast<size_t>(allocation_latency_));
 
   if(GCServiceClient::service_client_->isTrimRequestsEnabled())
     return local_heap_->RequestHeapTrimIfNeeded(_adjusted_max_free,
