@@ -395,8 +395,8 @@ void GCSrvcClientHandShake::Init() {
 
 }
 
-c;
-//}
+
+
 
 
 
