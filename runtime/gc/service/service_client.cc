@@ -186,10 +186,11 @@ bool GCServiceClient::RequestAllocateGC(void) {
         GCServiceGlobalAllocator::allocator_instant_;
 
   if(_alloc->fwdGCAllocation()) { // we need to fwd this to daemon
+    LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Forwarding";
     _alloc->handShake_->ReqAllocationGC();
     return true;
   }
-
+  LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Not Forwarding";
   return false;
 }
 

@@ -1097,6 +1097,8 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
     if (run_gc) {
 #if (ART_GC_SERVICE || true)
       if(art::gcservice::GCServiceClient::RequestAllocateGC()) {
+        LOG(ERROR) << "Heap::AllocateInternalWithGc...00";
+
         // Allocations have failed after GCs;  this is an exceptional state.
         // Try harder, growing the heap if necessary.
         ptr = TryToAllocate(self, space, alloc_size, true, bytes_allocated);
@@ -1104,6 +1106,8 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
           return ptr;
         }
       } else {
+        LOG(ERROR) << "Heap::AllocateInternalWithGc...01";
+
         GCP_MARK_START_ALLOC_GC_HW_EVENT;
         // If we actually ran a different type of Gc than requested, we can skip the index forwards.
         collector::GcType gc_type_ran = CollectGarbageInternal(gc_type, kGcCauseForAlloc, false);
@@ -1595,6 +1599,7 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
                                                bool clear_soft_references) {
 #if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
+  LOG(ERROR) << "Heap::CollectGarbageInternal...00.. checking request internal";
   if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
       clear_soft_references, &returned_gc_type)) {
     return returned_gc_type;
