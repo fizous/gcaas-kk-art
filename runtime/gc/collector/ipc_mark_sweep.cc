@@ -341,7 +341,12 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   uint64_t _delta_time_ms =  NsToMs(collection_latency_);
   LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate: " << allocation_latency_
       << ", latency: " << collection_latency_ << ", _delta_time_ms = " << _delta_time_ms;
-  double _latency_rate_s = ((allocation_latency_ * 1000) / _delta_time_ms);
+  double _latency_rate_s = 0.0;
+
+  if(_delta_time_ms > 0) {
+    _latency_rate_s = ((allocation_latency_ * 1000) / _delta_time_ms);
+  }
+
 
   LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
 
