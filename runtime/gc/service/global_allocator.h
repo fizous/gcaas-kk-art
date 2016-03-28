@@ -304,6 +304,7 @@ class ServerCollector {
       space::GCSrvSharableHeapData* meta_alloc);
 
   void Run(void);
+  void InitPool(void);
   space::GCSrvSharableHeapData* heap_data_;
   Mutex run_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   ConditionVariable run_cond_ GUARDED_BY(run_mu_);

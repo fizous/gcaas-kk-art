@@ -456,18 +456,8 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
 
 
 
-
-
-
-
-
-void ServerCollector::Run(void) {
- // LOG(ERROR) << "ServerCollector::Run";
-
-  /* initialize gc_workers_pool_ */
- // Thread* self = Thread::Current();
+void ServerCollector::InitPool(void) {
   gc_workers_pool_ = new WorkStealingThreadPool(3);
-
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
@@ -479,6 +469,16 @@ void ServerCollector::Run(void) {
   if(_setAffin) {
     gc_workers_pool_->setThreadsAffinity(cpu_id);
   }
+}
+
+
+
+
+void ServerCollector::Run(void) {
+ // LOG(ERROR) << "ServerCollector::Run";
+
+  /* initialize gc_workers_pool_ */
+ // Thread* self = Thread::Current();
 
 
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
@@ -507,6 +507,7 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
   DCHECK_NE(self->GetState(), kRunnable);
   {
     MutexLock mu(self, _server->run_mu_);
+    _server->InitPool();
     _server->thread_ = self;
     _server->run_cond_.Broadcast(self);
   }
