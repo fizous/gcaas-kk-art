@@ -780,10 +780,11 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
     }
     _srvc_task = ProcessGCRequest(args);
     gcservice_data_->cond_->Broadcast(self);
+    if(_srvc_task != GC_SERVICE_TASK_NOP) {
+      GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
+    }
   }
-  if(_srvc_task != GC_SERVICE_TASK_NOP) {
-    GCServiceProcess::process_->daemon_->UpdateGlobalProcessStates(_srvc_task);
-  }
+
 }
 
 
