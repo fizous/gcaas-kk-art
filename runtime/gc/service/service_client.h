@@ -66,6 +66,9 @@ class GCServiceClient {
 
   void updateDeltaConcReq(uint64_t timestamp, uint64_t heapsize,
                           uint64_t* time_latency, uint64_t* heap_latency) {
+    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_) {
+      LOG(ERROR) << "DANGER:::: concurrent ..current=" << heapsize << ", marked=" << sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
+    }
     *time_latency = (timestamp -
         sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_) ;
     *heap_latency = heapsize -
@@ -75,6 +78,11 @@ class GCServiceClient {
 
   void updateDeltaExplReq(uint64_t timestamp, uint64_t heapsize,
                           uint64_t* time_latency, uint64_t* heap_latency) {
+
+    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_) {
+      LOG(ERROR) << "DANGER:::: explicit ..current=" << heapsize << ", marked=" << sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
+    }
+
     *time_latency = (timestamp -
         sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_);
     *heap_latency = heapsize -
