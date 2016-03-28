@@ -1626,7 +1626,8 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
                                                bool clear_soft_references) {
 #if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
-  LOG(ERROR) << "Heap::CollectGarbageInternal...00.. checking request internal";
+  if(art::gcservice::GCServiceClient::service_client_ != NULL)
+    LOG(ERROR) << "Heap::CollectGarbageInternal...00.. checking request internal";
   if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
       clear_soft_references, &returned_gc_type)) {
     return returned_gc_type;
@@ -2351,7 +2352,7 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
                                     uint64_t gc_duration,
                                     double adjusted_resize_factor,
                                     size_t* adjusted_max_free_p,
-                                    size_t conc_latency) {
+                                    double conc_latency) {
   // We know what our utilization is at this moment.
   // This doesn't actually resize any memory. It just lets the heap grow more when necessary.
   const size_t bytes_allocated = GetBytesAllocated();
@@ -2404,8 +2405,10 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
       double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
       // Estimate how many remaining bytes we will have when we need to start the next GC.
       size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
-      size_t _conc_lead = std::max(conc_latency, kMinConcurrentRemainingBytes);
-      remaining_bytes = std::max(remaining_bytes, _conc_lead);
+      size_t _conc_lead = conc_latency * gc_duration_seconds;
+      LOG(ERROR) << "---remaining_bytes=" << remaining_bytes<< ", conc_lead=" <<_conc_lead;
+      remaining_bytes = _conc_lead + std::max(remaining_bytes, _conc_lead);
+      LOG(ERROR) << "updated_remaining_bytes="<<remaining_bytes;
       if (UNLIKELY(remaining_bytes > GetMaxAllowedFootPrint())) {
         // A never going to happen situation that from the estimated allocation rate we will exceed
         // the applications entire footprint with the given estimated allocation rate. Schedule

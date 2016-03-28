@@ -76,7 +76,7 @@ class GCServiceClient {
   void updateDeltaExplReq(uint64_t timestamp, uint64_t heapsize,
                           uint64_t* time_latency, uint64_t* heap_latency) {
     *time_latency = (timestamp -
-        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_) / 1000;
+        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_);
     *heap_latency = heapsize -
         sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
   }

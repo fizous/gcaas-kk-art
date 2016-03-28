@@ -499,6 +499,8 @@ void GCSrvcClientHandShake::ReqAllocationGC() {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
 
+
+
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
