@@ -133,6 +133,23 @@ void GCServiceClient::FinalizeInitClient() {
 }
 
 
+bool GCServiceClient::RequestUpdateStats(void) {
+  if(service_client_ == NULL)
+    return false;
+  GCServiceGlobalAllocator* _alloc =
+      GCServiceGlobalAllocator::allocator_instant_;
+
+  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqUpdateStats();
+
+  if(_req_entry != NULL) {
+    return true;
+  }
+
+  return true;
+
+
+}
+
 bool GCServiceClient::RequestConcGC(void) {
   if(service_client_ == NULL)
     return false;
@@ -240,7 +257,7 @@ bool GCServiceClient::ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task
 }
 
 
-bool GCServiceClient::ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK task)    {
+bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
@@ -303,6 +320,8 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 }
 
 void GCServiceClient::updateProcessState(void) {
+  if(GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY)
+    return;
   int my_new_process_state = ipcHeap_->local_heap_->GetLastProcessStateID();
   if(last_process_state_ == -1) {//first time to do it
     last_process_state_ = my_new_process_state;
@@ -312,7 +331,7 @@ void GCServiceClient::updateProcessState(void) {
       _mem_info_rec->oom_label_ = last_process_state_;
       _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
     } else {
-      //TODO: We need to send a signal to the server to update all the status
+      RequestUpdateStats();
 
     }
   }

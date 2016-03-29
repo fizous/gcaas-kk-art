@@ -198,6 +198,7 @@ class GCSrvcClientHandShake {
   GCServiceReq* ReqExplicitCollection(void*);
   void ReqRegistration(void*);
   void ReqHeapTrim(void);
+  void ReqUpdateStats(void);
   void ReqAllocationGC(void);
   void ListenToRequests(void*);
   GC_SERVICE_TASK ProcessGCRequest(void* args);
@@ -511,7 +512,7 @@ typedef SafeMap<volatile int32_t, GCSrvceAgent*> ClientAgentsMap;
 
 class GCServiceDaemon {
   /* each five request we will read the global update */
-  static const int kcGCSrvcBulkRequestsThreshold = 100;
+  static const int kcGCSrvcBulkRequestsThreshold = 128;
 
 
   Thread*   thread_;

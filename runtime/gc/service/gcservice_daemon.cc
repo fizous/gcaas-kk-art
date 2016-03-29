@@ -376,11 +376,14 @@ void GCServiceDaemon::SetMemInfoDumpFile(void) {
 
 
 void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
+  bool _should_update = srvc_task == GC_SERVICE_TASK_STATS;
+  if(!_should_update)
+    req_counts_++;
 
-  req_counts_++;
+  _should_update = _should_update || (srvc_task == GC_SERVICE_TASK_REG);
 
-  if(srvc_task != GC_SERVICE_TASK_REG) {
-    if(true || req_counts_ % kcGCSrvcBulkRequestsThreshold != 0) {
+  if(!_should_update) {
+    if(req_counts_ % kcGCSrvcBulkRequestsThreshold != 0) {
       return;
     }
   }

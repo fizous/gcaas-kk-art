@@ -461,6 +461,19 @@ GCServiceReq* GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   return _entry;
 }
 
+void GCSrvcClientHandShake::ReqUpdateStats(void) {
+  Thread* self = Thread::Current();
+  GCServiceReq* _entry = NULL;
+
+  GC_BUFFER_PUSH_REQUEST(_entry, self);
+
+  _entry->req_type_ = GC_SERVICE_TASK_STATS;
+
+
+
+  gcservice_data_->cond_->Broadcast(self);
+  return;
+}
 
 void GCSrvcClientHandShake::ReqRegistration(void* params) {
   Thread* self = Thread::Current();
@@ -745,6 +758,12 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       _process_result = GC_SERVICE_TASK_REG;
     } else {
       LOG(FATAL) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
+    }
+  } else if (_req_type == GC_SERVICE_TASK_STATS) {
+    GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
+    if(_dmon != NULL) {
+      _entry->status_ = GC_SERVICE_REQ_COMPLETE;
+      _process_result = _req_type;
     }
   } else {
 
