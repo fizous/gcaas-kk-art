@@ -51,7 +51,7 @@ GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
 };
 
 
-GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label, double resize_factor) :
+GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label) :
     oom_adj_(adj), oom_label_(label),  aggregate_memory_(0) {
 
 }
