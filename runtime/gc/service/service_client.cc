@@ -139,11 +139,9 @@ bool GCServiceClient::RequestUpdateStats(void) {
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
 
-  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqUpdateStats();
+  _alloc->handShake_->ReqUpdateStats();
 
-  if(_req_entry != NULL) {
-    return true;
-  }
+
 
   return true;
 
@@ -304,7 +302,7 @@ void GCServiceClient::RequestHeapTrim(void) {
     return;
   Thread* self = Thread::Current();
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  if(!service_client_->ShouldPushNewTrimRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
+  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
   }
   GCServiceGlobalAllocator* _alloc =
