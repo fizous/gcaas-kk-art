@@ -495,6 +495,8 @@ class GCSrvcMemInfoOOM {
 
       do_care = true;
     } else {
+
+
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
 
