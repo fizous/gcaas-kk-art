@@ -509,7 +509,7 @@ typedef SafeMap<volatile int32_t, GCSrvceAgent*> ClientAgentsMap;
 
 class GCServiceDaemon {
   /* each five request we will read the global update */
-  static const int kcGCSrvcBulkRequestsThreshold = 5;
+  static const int kcGCSrvcBulkRequestsThreshold = 100;
 
 
   Thread*   thread_;

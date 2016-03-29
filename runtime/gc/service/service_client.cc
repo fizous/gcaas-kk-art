@@ -18,6 +18,7 @@
 
 
 using ::art::gc::gcservice::GCServiceGlobalAllocator;
+using ::art::gc::gcservice::GCSrvcMemInfoOOM;
 
 namespace art {
 
@@ -30,6 +31,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
     int index, int enable_trim) :
         index_(index),
         enable_trimming_(enable_trim),
+        last_process_state_(-1),
         sharable_space_(sharable_space),
         gcservice_client_lock_ (new Mutex("GCServiceClient lock")) {
 
@@ -146,7 +148,7 @@ bool GCServiceClient::RequestConcGC(void) {
     return true;
   }
 
-
+  service_client_->updateProcessState();
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
@@ -157,6 +159,7 @@ bool GCServiceClient::RequestConcGC(void) {
   if(_req_entry != NULL) {
     service_client_->setConcRequestTime(_curr_time_ns, _curr_bytes_Allocated);
     service_client_->active_requests_.push_back(_req_entry);
+
     return true;
   }
 
@@ -261,7 +264,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
   if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
     return true;
   }
-
+  service_client_->updateProcessState();
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
@@ -299,7 +302,21 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
   ipcHeap_->BlockForServerInitialization(&sharable_space_->sharable_space_data_->register_gc_);
 }
 
+void GCServiceClient::updateProcessState(void) {
+  int my_new_process_state = ipcHeap_->local_heap_->GetLastProcessStateID();
+  if(last_process_state_ == -1) {//first time to do it
+    last_process_state_ = my_new_process_state;
+  } else { //check if there is a change since last time we checked
+    if(last_process_state_ != my_new_process_state) {//there is a change in the status of the process
+      gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
+      _mem_info_rec->oom_label_ = last_process_state_;
+      _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
+    } else {
+      //TODO: We need to send a signal to the server to update all the status
 
+    }
+  }
+}
 
 }//namespace gcservice
 }//namespace art

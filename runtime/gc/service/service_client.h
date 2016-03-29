@@ -108,10 +108,12 @@ class GCServiceClient {
 
 
 
+  void updateProcessState(void);
  private:
   GCServiceClient(gc::space::SharableDlMallocSpace*, int, int);
   int index_;
   int enable_trimming_;
+  int last_process_state_;
   gc::space::SharableDlMallocSpace* sharable_space_;
   Mutex* gcservice_client_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   //gc::collector::IPCMarkSweep* collector_;

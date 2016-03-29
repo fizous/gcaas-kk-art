@@ -380,7 +380,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
   req_counts_++;
 
   if(srvc_task != GC_SERVICE_TASK_REG) {
-    if(req_counts_ % kcGCSrvcBulkRequestsThreshold != 0) {
+    if(true || req_counts_ % kcGCSrvcBulkRequestsThreshold != 0) {
       return;
     }
   }
