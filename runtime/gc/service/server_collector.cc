@@ -430,7 +430,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
 
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
   gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
-  gc_workers_pool_->SetMaxActiveWorkers(2);
+  gc_workers_pool_->SetMaxActiveWorkers(pool_size_-1);
   //gc_workers_pool_->AddTask(self, reachable_task);
   //LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
   gc_workers_pool_->StartWorkers(self);
@@ -457,7 +457,8 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
 
 
 void ServerCollector::InitPool(void) {
-  gc_workers_pool_ = new WorkStealingThreadPool(3);
+  pool_size_ = GCServiceGlobalAllocator::allocator_instant_->getWorkerPoolSize();
+  gc_workers_pool_ = new WorkStealingThreadPool(pool_size_);
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =

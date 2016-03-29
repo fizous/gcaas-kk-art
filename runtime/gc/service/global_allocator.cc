@@ -42,7 +42,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
   LOG(ERROR) << "<<<<<<GCServiceGlobalAllocator::InitGCSrvcOptions>>>>>>>>";
 
-  opts_addr->fgd_growth_mutiplier_ = 1.5;
+
   opts_addr->trim_conf_ = /*GC_SERVICE_HANDLE_TRIM_DISALLOWED*/GC_SERVICE_HANDLE_TRIM_ALLOWED;
   // By default share the three spaces
   opts_addr->share_zygote_space_ =
@@ -53,6 +53,15 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   opts_addr->handle_system_server_ = GC_SERVICE_HANDLE_SYS_SERVER_DISALLOWED;
   opts_addr->daemon_affinity_ = GC_SRVC_DAEMON_AFFINITY_DISALLOWED;
 
+
+
+  opts_addr->nursery_grow_adj_ = 1.6;
+  opts_addr->fgd_growth_mutiplier_ = 1.5;
+  opts_addr->nursery_slots_threshold_ = 10;
+  opts_addr->add_conc_remote_latency_ = GC_SERVICE_OPTS_LATENCY_ADD;
+  opts_addr->save_mem_profile_ = GC_SERVICE_OPTS_SAVE_PROF_DISABLE;
+  opts_addr->work_stealing_workers_ = 3;
+  opts_addr->power_strategies_ = GC_SERVICE_OPTS_POWER_POLICY_NONE;
 
   opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/benchmarks/srvc_benchmarks.list");
 

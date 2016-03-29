@@ -33,26 +33,26 @@ const char * GCServiceDaemon::meminfo_args_[] = {
 long GCSrvcMemInfoOOM::total_ram_ = 0;
 long GCSrvcMemInfoOOM::free_ram_[] = {0, 0, 0, 0};
 
-static double kcForegroundResizeFactor = 1.5;
+
 GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
-    GCSrvcMemInfoOOM(-17, "Native", 1.0),
-    GCSrvcMemInfoOOM(-16, "System", 1.0),
-    GCSrvcMemInfoOOM(-12, "Persistent", 1.0),
-    GCSrvcMemInfoOOM(0, "Foreground", kcForegroundResizeFactor),
-    GCSrvcMemInfoOOM(1, "Visible", 1.0),
-    GCSrvcMemInfoOOM(2, "Perceptible", 1.0),
-    GCSrvcMemInfoOOM(3, "Backup", 1.0),
-    GCSrvcMemInfoOOM(4, "Heavy Weight", 1.0),
-    GCSrvcMemInfoOOM(5, "A Services", 1.0),
-    GCSrvcMemInfoOOM(6, "Home", 1.0),
-    GCSrvcMemInfoOOM(7, "Previous", 1.0),
-    GCSrvcMemInfoOOM(8, "B Services", 1.0),
-    GCSrvcMemInfoOOM(15, "Cached", 1.0),
+    GCSrvcMemInfoOOM(-17, "Native"),
+    GCSrvcMemInfoOOM(-16, "System"),
+    GCSrvcMemInfoOOM(-12, "Persistent"),
+    GCSrvcMemInfoOOM(0, "Foreground"),
+    GCSrvcMemInfoOOM(1, "Visible"),
+    GCSrvcMemInfoOOM(2, "Perceptible"),
+    GCSrvcMemInfoOOM(3, "Backup"),
+    GCSrvcMemInfoOOM(4, "Heavy Weight"),
+    GCSrvcMemInfoOOM(5, "A Services"),
+    GCSrvcMemInfoOOM(6, "Home"),
+    GCSrvcMemInfoOOM(7, "Previous"),
+    GCSrvcMemInfoOOM(8, "B Services"),
+    GCSrvcMemInfoOOM(15, "Cached"),
 };
 
 
 GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label, double resize_factor) :
-    oom_adj_(adj), oom_label_(label), resize_factor_(resize_factor), aggregate_memory_(0) {
+    oom_adj_(adj), oom_label_(label),  aggregate_memory_(0) {
 
 }
 
@@ -511,7 +511,7 @@ bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_
 
   srvc_requests_++;
 
-  if(srvc_requests_ == kcOOMInfoNurserySize) { // upgrade the policy
+  if(srvc_requests_ == GCServiceGlobalAllocator::allocator_instant_->getNurserySize()) { // upgrade the policy
     meminfo_rec_->policy_method_ = gc::space::IPC_OOM_LABEL_POLICY_DEFAULT;
   }
 

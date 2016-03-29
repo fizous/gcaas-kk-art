@@ -93,6 +93,23 @@ typedef enum {
   GC_SERVICE_HANDLE_SYS_SERVER_ALLOWED = 1
 } GC_SERVICE_HANDLE_SYS_SERVER;
 
+
+typedef enum {
+  GC_SERVICE_OPTS_LATENCY_DISALLOW   = 0,
+  GC_SERVICE_OPTS_LATENCY_ADD = 1
+} GC_SERVICE_OPTS_CONC_LATENCY;
+
+typedef enum {
+  GC_SERVICE_OPTS_SAVE_PROF_DISABLE   = 0,
+  GC_SERVICE_OPTS_SAVE_PROF_ENABLE = 1
+} GC_SERVICE_OPTS_SAVE_PROF;
+
+
+typedef enum {
+  GC_SERVICE_OPTS_POWER_POLICY_NONE   = 0,
+  GC_SERVICE_OPTS_POWER_POLICY_CAP = 1
+} GC_SERVICE_OPTS_POWER_POLICY;
+
 typedef enum {
   GC_SRVC_DAEMON_AFFINITY_DISALLOWED = 0x00000000,
   GC_SRVC_DAEMON_AFFINITY_ALLOWED = 0x00000010,
@@ -198,7 +215,7 @@ class GCSrvcClientHandShake {
 typedef struct GCSrvc_Options_S {
   std::string gcservc_conf_path_;
   std::string gcservc_apps_list_path_;
-  double fgd_growth_mutiplier_;
+
   /* control strategies regarding trimming */
   int trim_conf_;
   /* control strategies to share zygote space */
@@ -215,6 +232,27 @@ typedef struct GCSrvc_Options_S {
    */
   int daemon_affinity_;
 
+  /*
+   * configuration of the data
+   */
+  double nursery_grow_adj_;
+  double fgd_growth_mutiplier_;
+  /* how many slots do we discard before we start collecting information for heuristics. starting is an outlier*/
+  int nursery_slots_threshold_;
+  /* configuration related to add extra room to compensate for the latency of the gcService */
+  int add_conc_remote_latency_;
+  /* configuration related to save memory profile of apps.. helps in predecting what are the apps allocating.*/
+  int save_mem_profile_;
+
+
+  /* number of threads in the work stealing pool to serve the GCDaemon */
+  int work_stealing_workers_;
+
+  /* configuration of the strategy used to manage for power profiling */
+  int power_strategies_;
+
+
+
 } GCSrvc_Options;
 
 class GCServiceGlobalAllocator {
@@ -230,8 +268,29 @@ class GCServiceGlobalAllocator {
   void UpdateForkService(pid_t);
   void BlockOnGCProcessCreation(void);
   static int GetTrimConfig(void);
+
+
   bool isTrimHandlingEnabled(void) const {
     return (srvc_options_.trim_conf_ == GC_SERVICE_HANDLE_TRIM_ALLOWED);
+  }
+
+  int getNurserySize(void) const {
+    return srvc_options_.nursery_slots_threshold_;
+  }
+
+  int getWorkerPoolSize(void) const {
+    return srvc_options_.work_stealing_workers_;
+  }
+
+  bool isAddRemoteConcLatency() const {
+    return (srvc_options_.add_conc_remote_latency_ == GC_SERVICE_OPTS_LATENCY_ADD);
+  }
+
+  double getNurseryGrowFactor() const {
+    return srvc_options_.nursery_grow_adj_;
+  }
+  double getFgdGrowFactor() const {
+    return srvc_options_.fgd_growth_mutiplier_;
   }
   static GCServiceHeader* GetServiceHeader(void);
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
@@ -355,6 +414,7 @@ class ServerCollector {
   GCSrvceAgent* curr_srvc_agent_;
   GCServiceReq* curr_srvc_req_;
 
+  int pool_size_;
 };//class ServerCollector
 
 
@@ -363,9 +423,6 @@ class ServerCollector {
 
 class GCSrvceAgent {
  public:
-  /* consider an agent is still growing up as long as the requests are still below or equal 5*/
-  static const int kcOOMInfoNurserySize = 8;
-
 
   GCSrvceAgent(android::MappedPairProcessFD*);
   ServerCollector* collector_;
@@ -395,12 +452,11 @@ class GCSrvcMemInfoOOM {
 
   const int oom_adj_;
   const char * oom_label_;
-  const double resize_factor_;
 
   long aggregate_memory_;
   std::vector<GCSrvceAgent*> agents_list_;
 
-  GCSrvcMemInfoOOM(int, const char *, double);
+  GCSrvcMemInfoOOM(int, const char *);
   void resetMemInfo(void);
 
   static int readTotalMemory(char* line);
@@ -415,7 +471,7 @@ class GCSrvcMemInfoOOM {
   static double GetResizeFactor(gc::space::AgentMemInfo* mem_info_rec) {
     double _fact = mem_info_rec->resize_factor_;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
-      _fact = 1.5;
+      _fact = GCServiceGlobalAllocator::allocator_instant_->getNurseryGrowFactor();
     } else {
         _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
 
@@ -425,7 +481,7 @@ class GCSrvcMemInfoOOM {
 
   static double GetOOMResizeFactor(int oom_label) {
     if(oom_label == 0)
-      return 1.25;
+      return GCServiceGlobalAllocator::allocator_instant_->getFgdGrowFactor();
     return 1.0;
   }
 

@@ -38,6 +38,7 @@ using ::art::mirror::Class;
 using ::art::mirror::Object;
 using ::art::gcservice::GCServiceClient;
 using ::art::gc::gcservice::GCSrvcMemInfoOOM;
+using ::art::gc::gcservice::GCServiceGlobalAllocator;
 namespace art {
 
 namespace gc {
@@ -246,7 +247,7 @@ void* IPCHeap::RunDaemon(void* arg) {
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
-      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id, &propagate);
+      GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id, &propagate);
 
   if(_setAffin) {
     ClientDaemonSetThreadAffinity(self, propagate, cpu_id);
@@ -343,7 +344,8 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 //      << ", collec_latency: " << collection_latency_ << ", _delta_time_ms = " << _delta_time_ms;
   double _latency_rate_s = 0.0;
 
-  if(_delta_time_ms > 0) {
+  if(GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()
+      && _delta_time_ms > 0) {
     _latency_rate_s = ((allocation_latency_ * 1.0/* * 1000*/) / _delta_time_ms);
   }
 
