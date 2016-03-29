@@ -475,8 +475,8 @@ void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
       LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus failed to remove request.." << request_addr->req_type_;
     }
   } else {
-    LOG(ERROR) << "GCSrvceAgent::UpdateRequestStatus status was not started"
-        << request_addr->status_;
+    LOG(ERROR) << "GCSrvceAgent::UpdateRequestStatus status was not started.."
+        << request_addr->status_ << "type is : " << request_addr->req_type_;
   }
 }
 
