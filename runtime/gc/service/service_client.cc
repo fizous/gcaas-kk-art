@@ -324,12 +324,15 @@ void GCServiceClient::updateProcessState(void) {
     last_process_state_ = my_new_process_state;
   } else { //check if there is a change since last time we checked
     if(last_process_state_ != my_new_process_state) {//there is a change in the status of the process
+      LOG(ERROR) << "GCServiceClient::updateProcessState: 00: " << last_process_state_;
       gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
       _mem_info_rec->oom_label_ = last_process_state_;
       _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
     } else {
+      LOG(ERROR) << "GCServiceClient::updateProcessState: 01: " << last_process_state_;
       if(GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY)
         return;
+      LOG(ERROR) << "GCServiceClient::updateProcessState: 02: " << last_process_state_;
       RequestUpdateStats();
 
     }
