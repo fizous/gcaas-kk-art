@@ -995,17 +995,19 @@ void GetTaskStats(pid_t tid, char& state, int& utime, int& stime, int& task_cpu)
 }
 
 
-void GetProcessOOMAdj(int* oom_adjective_addr) {
+bool GetProcessOOMAdj(int* oom_adjective_addr) {
   std::string _adjective;
   if (!ReadFileToString(StringPrintf("/proc/self/oom_adj"), &_adjective)) {
-    return;
+    return false;
   }
   _adjective.resize(_adjective.size() - 1);  // Lose the trailing '\n'.
   int _result = sscanf(_adjective.c_str(), "%d", oom_adjective_addr);
 
-  if(_result != -1) {
+  if(_result != 1) {
     LOG(ERROR) << "GetProcessOOMAdj..could not read adjective..return result = " << _result;
+    return false;
   }
+  return true;
 }
 
 

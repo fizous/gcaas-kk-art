@@ -304,6 +304,7 @@ void GCServiceClient::RequestHeapTrim(void) {
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim..label="
       << service_client_->GetMemInfoRec()->oom_label_
       << ", last_process_state=" << service_client_->last_process_state_
+      << ", info_rec->label=" << service_client_->GetMemInfoRec()->oom_label_
       << ", policy = " << service_client_->GetMemInfoRec()->policy_method_
       << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
@@ -325,23 +326,26 @@ void GCServiceClient::updateProcessState(void) {
   if(last_process_state_ != my_new_process_state) {//there is a change in the status of the process
 
     int _my_new_oom_adj = last_process_oom_;
-    GetProcessOOMAdj(&_my_new_oom_adj);
-    LOG(ERROR) << "GCServiceClient::updateProcessState: 00: last_proces_state="
-        << last_process_state_ << ", new_state = " << my_new_process_state
-        << ", last_oom = " << last_process_oom_ << ", my_new_oom="
-        << _my_new_oom_adj;
+    if(GetProcessOOMAdj(&_my_new_oom_adj)) {
+      LOG(ERROR) << "GCServiceClient::updateProcessState: 00: last_proces_state="
+          << last_process_state_ << ", new_state = " << my_new_process_state
+          << ", last_oom = " << last_process_oom_ << ", my_new_oom="
+          << _my_new_oom_adj;
 
-    if(_my_new_oom_adj != last_process_oom_) {
-      last_process_oom_ = _my_new_oom_adj;
-      gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
-      _mem_info_rec->oom_label_ = _my_new_oom_adj;
-      _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
-      _req_update = (GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
-    }
-    last_process_state_ = my_new_process_state;
-    if(_req_update) {
-      LOG(ERROR) << "GCServiceClient::updateProcessState..sending update stats request..";
-      RequestUpdateStats();
+      if(_my_new_oom_adj != last_process_oom_) {
+        gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
+        _mem_info_rec->oom_label_ = _my_new_oom_adj;
+        _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
+        _req_update = (GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
+      }
+
+      if(_req_update) {
+        last_process_state_ = my_new_process_state;
+        last_process_oom_ = _my_new_oom_adj;
+        LOG(ERROR) << "GCServiceClient::updateProcessState..sending update stats request.."
+            << ", label:" << _mem_info_rec->oom_label_ << ", resize:"<< _mem_info_rec->resize_factor_;
+        RequestUpdateStats();
+      }
     }
   }
 }
