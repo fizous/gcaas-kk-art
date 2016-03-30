@@ -334,7 +334,7 @@ void GetThreadStack(pthread_t thread, void*& stack_base, size_t& stack_size);
 
 // Reads data from "/proc/self/task/${tid}/stat".
 void GetTaskStats(pid_t tid, char& state, int& utime, int& stime, int& task_cpu);
-
+void GetProcessOOMAdj(int* oom_adjective_addr);
 // Returns the name of the scheduler group for the given thread the current process, or the empty string.
 std::string GetSchedulerGroupName(pid_t tid);
 

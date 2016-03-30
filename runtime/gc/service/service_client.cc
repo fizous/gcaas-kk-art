@@ -32,6 +32,7 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
         index_(index),
         enable_trimming_(enable_trim),
         last_process_state_(-1),
+        last_process_oom_(-1),
         sharable_space_(sharable_space),
         gcservice_client_lock_ (new Mutex("GCServiceClient lock")) {
 
@@ -318,20 +319,31 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 }
 
 void GCServiceClient::updateProcessState(void) {
+
   int my_new_process_state = ipcHeap_->local_heap_->GetLastProcessStateID();
+  bool _req_update = false;
   if(last_process_state_ != my_new_process_state) {//there is a change in the status of the process
-    LOG(ERROR) << "GCServiceClient::updateProcessState: 00: " << last_process_state_ << ", new_state=" << my_new_process_state;
-    gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
-    _mem_info_rec->oom_label_ = last_process_state_;
-    _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
-  } else {
-    LOG(ERROR) << "GCServiceClient::updateProcessState: 01: " << last_process_state_;
-    if(GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY)
-      return;
-    LOG(ERROR) << "GCServiceClient::updateProcessState: 02: " << last_process_state_;
-    RequestUpdateStats();
+
+    int _my_new_oom_adj = last_process_oom_;
+    GetProcessOOMAdj(&_my_new_oom_adj);
+    LOG(ERROR) << "GCServiceClient::updateProcessState: 00: last_proces_state="
+        << last_process_state_ << ", new_state = " << my_new_process_state
+        << ", last_oom = " << last_process_oom_ << ", my_new_oom="
+        << _my_new_oom_adj;
+
+    if(_my_new_oom_adj != last_process_oom_) {
+      last_process_oom_ = _my_new_oom_adj;
+      gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
+      _mem_info_rec->oom_label_ = _my_new_oom_adj;
+      _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
+      _req_update = (GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
+    }
+    last_process_state_ = my_new_process_state;
+    if(_req_update) {
+      LOG(ERROR) << "GCServiceClient::updateProcessState..sending update stats request..";
+      RequestUpdateStats();
+    }
   }
-  last_process_state_ = my_new_process_state;
 }
 
 
