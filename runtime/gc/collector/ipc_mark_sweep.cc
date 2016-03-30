@@ -416,7 +416,7 @@ void IPCHeap::TrimHeap(void)  {
   //  local_heap_->ListenForProcessStateChange();
   gc::space::AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
-  LOG(ERROR) << "IPCHeap::TrimHeap(void) " << _mem_info_rec;
+//  LOG(ERROR) << "IPCHeap::TrimHeap(void) " << _mem_info_rec;
   //  double _resize_factor = _mem_info_rec->resize_factor_;
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
@@ -424,7 +424,7 @@ void IPCHeap::TrimHeap(void)  {
 
   if(local_heap_->RequestHeapTrimIfNeeded(_adjusted_max_free,
                                           _pause_care, false)) {
-    LOG(ERROR) << "IPCHeap::TrimHeap(void)..passed condition";
+//    LOG(ERROR) << "IPCHeap::TrimHeap(void)..passed condition";
     //LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
     local_heap_->SetLastTimeTrim(MilliTime());
     //size_t managed_advised =

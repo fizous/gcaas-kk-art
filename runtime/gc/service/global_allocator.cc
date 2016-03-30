@@ -782,8 +782,8 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
            if(!GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
              _fwd_request = false;
            }
-           LOG(ERROR) << "Process_gc_request.." << _req_type << ", "
-               << _entry->status_ << ", entry_address=" <<_entry;
+//           LOG(ERROR) << "Process_gc_request.." << _req_type << ", "
+//               << _entry->status_ << ", entry_address=" <<_entry;
          } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
            LOG(ERROR) << "GC_SERVICE_TASK_GC_ALLOC is not handled";
            _fwd_request = false;
