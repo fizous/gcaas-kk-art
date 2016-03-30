@@ -388,12 +388,12 @@ class ServerCollector {
   void SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceReq* gcsrvc_req);
   int WaitForRequest(void);
   void WaitForGCTask(void);
-  void ExecuteTrim(void);
-  void ExecuteGC(GC_SERVICE_TASK);
+  void ExecuteTrim(GCServiceReq* srvcReq);
+  void ExecuteGC(GC_SERVICE_TASK, GCServiceReq* srvcReq);
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
   void BlockOnCollectorAddress(Thread* self);
-  void FinalizeGC(Thread* self);
+  void FinalizeGC(Thread* self, GCServiceReq* srvcReq);
   void ConcMarkPhaseGC(void);
   void WaitForConcMarkPhaseGC(void);
   void WaitForFinishPhaseGC(void);
@@ -414,9 +414,13 @@ class ServerCollector {
 
   collector::IPCServerMarkerSweep* ipc_msweep_;
   GCSrvceAgent* curr_srvc_agent_;
-  GCServiceReq* curr_srvc_req_;
+  GCServiceReq* curr_srvc_reqs_[8];
 
   int pool_size_;
+
+  int GetServiceIndex(GC_SERVICE_TASK req_type) {
+    return (32 - CLZ(req_type) - 1);
+  }
 };//class ServerCollector
 
 

@@ -93,9 +93,11 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent,
         old_status = status_;
         new_value = old_status | req_type;//+ (is_explicit? (1 << 16) : 1);
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
-      curr_srvc_req_ = gcsrvc_req;
-      LOG(ERROR) << "curr_srvc_req_:" << curr_srvc_req_ <<", status:"
-          << curr_srvc_req_->status_ << ", type=" << curr_srvc_req_->req_type_;
+      int _index = GetServiceIndex(req_type);
+      curr_srvc_reqs_[_index] = gcsrvc_req;
+      LOG(ERROR) << "index= " << _index;
+      LOG(ERROR) << "curr_srvc_req_:" << curr_srvc_reqs_[_index] <<", status:"
+          << curr_srvc_reqs_[_index]->status_ << ", type=" << curr_srvc_reqs_[_index]->req_type_;
       run_cond_.Broadcast(self);
     } else {
       IPC_MS_VLOG(INFO) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
@@ -378,18 +380,18 @@ void ServerCollector::BlockOnCollectorAddress(Thread* self) {
   }
 }
 
-void ServerCollector::FinalizeGC(Thread* self) {
+void ServerCollector::FinalizeGC(Thread* self, GCServiceReq* srvcReq) {
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *(conc_req_cond_mu_));
-    curr_srvc_agent_->UpdateRequestStatus(curr_srvc_req_);
+    curr_srvc_agent_->UpdateRequestStatus(srvcReq);
     heap_data_->conc_flag_ = 0;
     conc_req_cond_->Broadcast(self);
   }
 }
 
 
-void ServerCollector::ExecuteTrim() {
+void ServerCollector::ExecuteTrim(GCServiceReq* srvcReq) {
   Thread* self = Thread::Current();
 
   {
@@ -411,12 +413,12 @@ void ServerCollector::ExecuteTrim() {
 
   }
 
-  FinalizeGC(self);
+  FinalizeGC(self, srvcReq);
 
   //LOG(ERROR) << "-----------------ServerCollector:: Leaving ExecuteTrim-------------------" << self->GetTid();
 }
 
-void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
+void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type, GCServiceReq* srvcReq) {
   Thread* self = Thread::Current();
   {
     MutexLock mu(self, shake_hand_mu_);
@@ -440,7 +442,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
   gc_workers_pool_->Wait(self, true, true);
 
   gc_workers_pool_->StopWorkers(self);
-  FinalizeGC(self);
+  FinalizeGC(self, srvcReq);
 }
 
 
@@ -471,9 +473,11 @@ void ServerCollector::Run(void) {
 
     LOG(ERROR) << "ServerCollector::Run.start -->" << _gc_type;
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
-      ExecuteTrim();
+      int _index = GetServiceIndex(_gc_type);
+      ExecuteTrim(curr_srvc_reqs_[_index]);
     } else if((_gc_type & GC_SERVICE_TASK_GC_ANY) > 0) {
-      ExecuteGC(_gc_type);
+      int _index = GetServiceIndex(_gc_type);
+      ExecuteGC(_gc_type, curr_srvc_reqs_[_index]);
     }
     LOG(ERROR) << "ServerCollector::Run.end -->" << _gc_type;
   }
