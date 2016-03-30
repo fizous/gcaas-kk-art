@@ -469,11 +469,13 @@ void ServerCollector::Run(void) {
   while(true) {
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
 
+    LOG(ERROR) << "ServerCollector::Run.start -->" << _gc_type;
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
       ExecuteTrim();
     } else if((_gc_type & GC_SERVICE_TASK_GC_ANY) > 0) {
       ExecuteGC(_gc_type);
     }
+    LOG(ERROR) << "ServerCollector::Run.end -->" << _gc_type;
   }
 }
 

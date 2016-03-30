@@ -460,7 +460,7 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
   if(request_addr->status_ == GC_SERVICE_REQ_STARTED) {
     LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus A..addr="
-        << request_addr << ", status:" << request_addr->req_type_
+        << request_addr << ", status:" << request_addr->status_
         << ",type=" << request_addr->req_type_;
     request_addr->status_ = GC_SERVICE_REQ_COMPLETE;
     bool found = false;
