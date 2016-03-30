@@ -497,14 +497,13 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
 }
 
 
-bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req/*GC_SERVICE_TASK req*/) {
+bool GCSrvceAgent::signalMyCollectorDaemon(GCServiceReq* gcsrvc_req) {
 
   if(false) {
     std::vector<GCServiceReq*>::iterator it;
 
     for (it = active_requests_.begin(); it != active_requests_.end(); /* DONT increment here*/) {
       if((*it)->req_type_ == gcsrvc_req->req_type_) {
-        //LOG(ERROR) << "----GCSrvceAgent::signalMyCollectorDaemon A previous request active " << gcsrvc_req->req_type_;
         return false;
       }
     }

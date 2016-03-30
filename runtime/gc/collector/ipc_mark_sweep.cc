@@ -414,8 +414,10 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 void IPCHeap::TrimHeap(void)  {
   //LOG(ERROR) << "IPCHeap::TrimHeap";
   //  local_heap_->ListenForProcessStateChange();
+  LOG(ERROR) << "IPCHeap::TrimHeap(void)";
   gc::space::AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
+  LOG(ERROR) << "IPCHeap::TrimHeap(void) " << _mem_info_rec;
   //  double _resize_factor = _mem_info_rec->resize_factor_;
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
@@ -725,6 +727,7 @@ bool IPCHeap::RunCollectorDaemon() {
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
     _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
   } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
+    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << meta_->gc_type_;
     TrimHeap();
     _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
   }
