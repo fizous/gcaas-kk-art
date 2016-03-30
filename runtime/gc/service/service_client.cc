@@ -302,7 +302,7 @@ void GCServiceClient::RequestHeapTrim(void) {
   }
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim..label="
       << service_client_->GetMemInfoRec()->oom_label_
-      << ", last_process_state=" << last_process_state_
+      << ", last_process_state=" << service_client_->last_process_state_
       << ", policy = " << GetMemInfoRec()->policy_method_
       << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
