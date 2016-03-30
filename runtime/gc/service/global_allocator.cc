@@ -758,7 +758,7 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
      // _daemon->client_agents_.push_back(new GCSrvceAgent(_newPairEntry));
       _daemon->agents_map_.Put(_newPairEntry->first->process_id_,
                                new GCSrvceAgent(_newPairEntry));
-      _entry->status_ = GC_SERVICE_REQ_COMPLETE;
+      _entry->status_ = GC_SERVICE_REQ_NONE;
       _process_result = GC_SERVICE_TASK_REG;
     } else {
       LOG(FATAL) << " __________ GCSrvcClientHandShake::ProcessQueuedMapper: Failed";
@@ -766,7 +766,8 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
   } else if (_req_type == GC_SERVICE_TASK_STATS) {
     GCServiceDaemon* _dmon =  GCServiceProcess::process_->daemon_;
     if(_dmon != NULL) {
-      _entry->status_ = GC_SERVICE_REQ_COMPLETE;
+      //_entry->status_ = GC_SERVICE_REQ_COMPLETE;
+      _entry->status_ = GC_SERVICE_REQ_NONE;
       _process_result = _req_type;
     }
   } else {
