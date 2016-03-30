@@ -9,6 +9,7 @@
 #include "gc/service/global_allocator.h"
 #include "gc/collector/ipc_server_sweep.h"
 
+
 namespace art {
 namespace gc {
 namespace gcservice {
@@ -80,8 +81,6 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceRe
   Thread* self = Thread::Current();
   GC_SERVICE_TASK req_type =  static_cast<GC_SERVICE_TASK>(gcsrvc_req->req_type_);
 
-  LOG(ERROR) << "ServerCollector::SignalCollector..req=" << req_type << ", status=" << gcsrvc_req->status_;
- // LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
@@ -94,7 +93,6 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceRe
         new_value = old_status | req_type;//+ (is_explicit? (1 << 16) : 1);
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
       curr_srvc_req_ = gcsrvc_req;
-     // LOG(ERROR) << "ServerCollector::SignalCollector ---- Thread was not null:" << self->GetTid() << "; status=" << status_;
       run_cond_.Broadcast(self);
     } else {
       IPC_MS_VLOG(INFO) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
@@ -423,7 +421,6 @@ void ServerCollector::ExecuteTrim() {
 
 void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
   Thread* self = Thread::Current();
-  //LOG(ERROR) << "-----------------ServerCollector::ExecuteGC-------------------" << self->GetTid();
   {
     MutexLock mu(self, shake_hand_mu_);
     curr_collector_addr_ = NULL;
@@ -434,26 +431,19 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type) {
   gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(pool_size_-1);
   //gc_workers_pool_->AddTask(self, reachable_task);
-  //LOG(ERROR) << "@@@@@@@ Thread Pool starting the tasks " << self->GetTid();
   gc_workers_pool_->StartWorkers(self);
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
 
- //   LOG(ERROR) << "ServerCollector::ExecuteGC: set concurrent flag";
     heap_data_->conc_flag_ = 1;
     heap_data_->gc_type_ = gc_type;
     conc_req_cond_->Broadcast(self);
-  //  LOG(ERROR) << "ServerCollector::ExecuteGC.. " << self->GetTid() <<
-  //            ", setting conc flag to " << heap_data_->conc_flag_ <<
- //             "gctype=" << heap_data_->gc_type_;
   }
   gc_workers_pool_->Wait(self, true, true);
-  //LOG(ERROR) << "@@@@@@@ Thread Pool LEaving the Wait Call @@@@@";
 
   gc_workers_pool_->StopWorkers(self);
   FinalizeGC(self);
-  //LOG(ERROR) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 }
 
 
@@ -478,25 +468,15 @@ void ServerCollector::InitPool(void) {
 
 
 void ServerCollector::Run(void) {
- // LOG(ERROR) << "ServerCollector::Run";
-
-  /* initialize gc_workers_pool_ */
- // Thread* self = Thread::Current();
-
-
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
-   // LOG(ERROR) << "---------------run ServerCollector----------- " << cycles_count_;
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
 
-    if(_gc_type == GC_SERVICE_TASK_TRIM)
+    if(_gc_type == GC_SERVICE_TASK_TRIM) {
       ExecuteTrim();
-    else if(_gc_type != GC_SERVICE_TASK_NOP)
+    } else if((_gc_type & GC_SERVICE_TASK_GC_ANY > 0)) {
       ExecuteGC(_gc_type);
-
-
-   // LOG(ERROR) << "---------------workers are done ------";
-    //WaitForGCTask();
+    }
   }
 }
 
@@ -514,16 +494,6 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
     _server->thread_ = self;
     _server->run_cond_.Broadcast(self);
   }
-
-//  bool _createThread =  runtime->AttachCurrentThread("serverCollector", true,
-//      runtime->GetSystemThreadGroup(),
-//      !runtime->IsCompiler());
-//
-//  if(!_createThread) {
-//    LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
-//    return NULL;
-//  }
- // LOG(ERROR) << "ServerCollector::RunCollectorDaemon after broadcast" ;
 
   _server->Run();
 

@@ -389,7 +389,7 @@ class ServerCollector {
   int WaitForRequest(void);
   void WaitForGCTask(void);
   void ExecuteTrim(void);
-  void ExecuteGC(GC_SERVICE_TASK gc_type);
+  void ExecuteGC(GC_SERVICE_TASK);
   void UpdateCollectorAddress(Thread* self,
       space::GCSrvSharableCollectorData* address);
   void BlockOnCollectorAddress(Thread* self);
@@ -502,7 +502,7 @@ class GCSrvcMemInfoOOM {
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
 
-      LOG(ERROR) << "CareAboutPauseTimes..." << mem_info_rec->policy_method_ << ", " << mem_info_rec->oom_label_;
+     // LOG(ERROR) << "CareAboutPauseTimes..." << mem_info_rec->policy_method_ << ", " << mem_info_rec->oom_label_;
 
     }
     return do_care;
