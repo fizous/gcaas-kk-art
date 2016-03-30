@@ -336,13 +336,13 @@ void GCServiceClient::updateProcessState(void) {
         _mem_info_rec = GetMemInfoRec();
         _mem_info_rec->oom_label_ = _my_new_oom_adj;
         _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
-        _req_update = (GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
+        _req_update = (GetMemInfoRec()->policy_method_ != gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
       }
 
       if(_req_update) {
         last_process_state_ = my_new_process_state;
         last_process_oom_ = _my_new_oom_adj;
-        LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState..sending update stats request.."
+        LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState..01 sending update stats request.."
             << ", label:" << _mem_info_rec->oom_label_ << ", resize:"<< _mem_info_rec->resize_factor_;
         RequestUpdateStats();
       }
