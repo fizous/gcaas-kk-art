@@ -708,26 +708,31 @@ void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) 
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
+  gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
+  int _curr_type = 0;
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
     while(meta_->conc_flag_ != 1) {
       conc_req_cond_->Wait(self);
     }
+    _curr_type = android_atomic_release_load(&meta_->gc_type_);
 
   }
 
-  gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
-  if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
+
+  if((_curr_type & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
+    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
     _task_type = gc::gcservice::GC_SERVICE_TASK_CONC;
-  } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
+  } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
+    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
     _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
-  } else if((meta_->gc_type_ & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
-    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << meta_->gc_type_;
+  } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
+    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     TrimHeap();
     _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
   }
