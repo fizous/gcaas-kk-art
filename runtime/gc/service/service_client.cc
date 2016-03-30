@@ -187,14 +187,20 @@ bool GCServiceClient::RequestConcGC(void) {
 
 bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
+  bool _return_result = false;
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
       service_client_->active_requests_.erase(it);
+      LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
+      _return_result = true;
       break;
     }
     ++it;
+  }
+  if(!_return_result) {
+    LOG(ERROR) << "RemoveGCSrvcActiveRequest..NOT FOUND..task type= " << task;
   }
   return true;
 }
