@@ -474,7 +474,7 @@ void ServerCollector::Run(void) {
 
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
       ExecuteTrim();
-    } else if((_gc_type & GC_SERVICE_TASK_GC_ANY > 0)) {
+    } else if((_gc_type & GC_SERVICE_TASK_GC_ANY) > 0) {
       ExecuteGC(_gc_type);
     }
   }
