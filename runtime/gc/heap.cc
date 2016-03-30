@@ -447,7 +447,7 @@ int Heap::GetLastProcessStateID(void) {
   JNIEnvExt* env = self->GetJniEnv();
 
   if (!have_zygote_space_) {
-    return;
+    return -1;
   }
 
   if(activity_thread_class_ == NULL) {
