@@ -301,7 +301,7 @@ void GCServiceClient::RequestHeapTrim(void) {
   if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
   }
-  LOG(ERROR) << "GCServiceClient::RequestHeapTrim..label="
+  LOG(ERROR) << self->GetTid() << ".....GCServiceClient::RequestHeapTrim..label="
       << service_client_->GetMemInfoRec()->oom_label_
       << ", last_process_state=" << service_client_->last_process_state_
       << ", info_rec->label=" << service_client_->GetMemInfoRec()->oom_label_
@@ -327,7 +327,7 @@ void GCServiceClient::updateProcessState(void) {
 
     int _my_new_oom_adj = last_process_oom_;
     if(GetProcessOOMAdj(&_my_new_oom_adj)) {
-      LOG(ERROR) << "GCServiceClient::updateProcessState: 00: last_proces_state="
+      LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState: 00: last_proces_state="
           << last_process_state_ << ", new_state = " << my_new_process_state
           << ", last_oom = " << last_process_oom_ << ", my_new_oom="
           << _my_new_oom_adj;
@@ -342,7 +342,7 @@ void GCServiceClient::updateProcessState(void) {
       if(_req_update) {
         last_process_state_ = my_new_process_state;
         last_process_oom_ = _my_new_oom_adj;
-        LOG(ERROR) << "GCServiceClient::updateProcessState..sending update stats request.."
+        LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState..sending update stats request.."
             << ", label:" << _mem_info_rec->oom_label_ << ", resize:"<< _mem_info_rec->resize_factor_;
         RequestUpdateStats();
       }
