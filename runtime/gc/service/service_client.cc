@@ -305,6 +305,7 @@ void GCServiceClient::RequestHeapTrim(void) {
   if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
   }
+  LOG(ERROR) << "GCServiceClient::RequestHeapTrim";
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
   _alloc->handShake_->ReqHeapTrim();

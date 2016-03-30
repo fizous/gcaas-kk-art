@@ -376,7 +376,7 @@ void GCServiceDaemon::SetMemInfoDumpFile(void) {
 
 
 void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
-  bool _should_update = srvc_task == GC_SERVICE_TASK_STATS;
+  bool _should_update = (srvc_task == GC_SERVICE_TASK_STATS);
   if(!_should_update)
     req_counts_++;
 

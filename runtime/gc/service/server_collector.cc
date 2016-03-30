@@ -79,6 +79,8 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
 void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceReq* gcsrvc_req) {
   Thread* self = Thread::Current();
   GC_SERVICE_TASK req_type =  static_cast<GC_SERVICE_TASK>(gcsrvc_req->req_type_);
+
+  LOG(ERROR) << "ServerCollector::SignalCollector..req=" << req_type << ", status=" << gcsrvc_req->status_;
  // LOG(ERROR) << "ServerCollector::SignalCollector..." << self->GetTid();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {

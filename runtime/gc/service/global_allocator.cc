@@ -461,6 +461,19 @@ GCServiceReq* GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   return _entry;
 }
 
+GCServiceReq* GCSrvcClientHandShake::ReqHeapTrim() {
+  Thread* self = Thread::Current();
+  GCServiceReq* _entry = NULL;
+
+  GC_BUFFER_PUSH_REQUEST(_entry, self);
+
+  _entry->req_type_ = GC_SERVICE_TASK_TRIM;
+
+  gcservice_data_->cond_->Broadcast(self);
+
+  return _entry;
+}
+
 void GCSrvcClientHandShake::ReqUpdateStats(void) {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
@@ -474,6 +487,7 @@ void GCSrvcClientHandShake::ReqUpdateStats(void) {
   gcservice_data_->cond_->Broadcast(self);
   return;
 }
+
 
 void GCSrvcClientHandShake::ReqRegistration(void* params) {
   Thread* self = Thread::Current();
@@ -530,17 +544,7 @@ void GCSrvcClientHandShake::ReqAllocationGC() {
   gcservice_data_->cond_->Broadcast(self);
 }
 
-void GCSrvcClientHandShake::ReqHeapTrim() {
-  Thread* self = Thread::Current();
-  GCServiceReq* _entry = NULL;
 
-  GC_BUFFER_PUSH_REQUEST(_entry, self);
-
-  _entry->req_type_ = GC_SERVICE_TASK_TRIM;
-  //GCSERVICE_ALLOC_VLOG(ERROR)
-
-  gcservice_data_->cond_->Broadcast(self);
-}
 
 // TODO: Remove define macro
 #define CHECK_MEMORY_CALL_SRVC(call, args, what) \

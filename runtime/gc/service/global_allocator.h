@@ -197,7 +197,7 @@ class GCSrvcClientHandShake {
   GCServiceReq* ReqConcCollection(void*);
   GCServiceReq* ReqExplicitCollection(void*);
   void ReqRegistration(void*);
-  void ReqHeapTrim(void);
+  GCServiceReq* ReqHeapTrim(void);
   void ReqUpdateStats(void);
   void ReqAllocationGC(void);
   void ListenToRequests(void*);
