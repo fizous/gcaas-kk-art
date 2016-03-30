@@ -476,7 +476,7 @@ void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
     }
   } else {
     LOG(ERROR) << "GCSrvceAgent::UpdateRequestStatus status was not started.."
-        << request_addr->status_ << "type is : " << request_addr->req_type_;
+        << request_addr->status_ << ", type is : " << request_addr->req_type_;
   }
 }
 

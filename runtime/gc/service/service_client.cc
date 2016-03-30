@@ -309,7 +309,10 @@ void GCServiceClient::RequestHeapTrim(void) {
       << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  _alloc->handShake_->ReqHeapTrim();
+  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
+  if(_req_entry != NULL) {
+    service_client_->active_requests_.push_back(_req_entry);
+  }
 }
 
 void GCServiceClient::FinalizeHeapAfterInit(void) {
