@@ -77,7 +77,8 @@ ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
 }
 
 
-void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceReq* gcsrvc_req) {
+void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent,
+                                      GCServiceReq* gcsrvc_req) {
   Thread* self = Thread::Current();
   GC_SERVICE_TASK req_type =  static_cast<GC_SERVICE_TASK>(gcsrvc_req->req_type_);
 
@@ -93,17 +94,13 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent, GCServiceRe
         new_value = old_status | req_type;//+ (is_explicit? (1 << 16) : 1);
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
       curr_srvc_req_ = gcsrvc_req;
+      LOG(ERROR) << "curr_srvc_req_:" << curr_srvc_req_ <<", status:"
+          << curr_srvc_req_->status_ << ", type=" << curr_srvc_req_->req_type_;
       run_cond_.Broadcast(self);
     } else {
       IPC_MS_VLOG(INFO) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
     }
-//    if(status_ == 0) {
-//      status_ = 1;
-//    }
-//
   }
-
-  //LOG(ERROR) << "ServerCollector::SignalCollector...LEaving: " << self->GetTid();
 }
 
 int ServerCollector::WaitForRequest(void) {
