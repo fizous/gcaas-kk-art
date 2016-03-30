@@ -244,9 +244,13 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 
 bool GCServiceClient::ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task)    {
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  int _req_type = task;
+  if((task & gc::gcservice::GC_SERVICE_TASK_GC_ANY) > 0) {
+    _req_type = gc::gcservice::GC_SERVICE_TASK_GC_ANY;
+  }
+
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_EXPLICIT ||
-        (*it)->req_type_ == gc::gcservice::GC_SERVICE_TASK_CONC) {
+    if(((*it)->req_type_ & _req_type) > 0) {
       return false;
     }
     ++it;
@@ -255,16 +259,7 @@ bool GCServiceClient::ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task
 }
 
 
-bool GCServiceClient::ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK task)    {
-  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
-  for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
-    if((*it)->req_type_ == task) {
-      return false;
-    }
-    ++it;
-  }
-  return true;
-}
+
 
 bool GCServiceClient::RequestExplicitGC(void) {
   if(service_client_ == NULL)
@@ -302,7 +297,7 @@ void GCServiceClient::RequestHeapTrim(void) {
     return;
   Thread* self = Thread::Current();
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  if(!service_client_->ShouldPushNewRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
+  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
   }
   LOG(ERROR) << "GCServiceClient::RequestHeapTrim";

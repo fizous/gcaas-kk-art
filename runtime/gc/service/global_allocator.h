@@ -55,8 +55,9 @@ typedef enum {
   GC_SERVICE_TASK_REG = 1,
   GC_SERVICE_TASK_CONC = 2,
   GC_SERVICE_TASK_EXPLICIT = 4,
-  GC_SERVICE_TASK_TRIM = 8,
-  GC_SERVICE_TASK_GC_ALLOC = 16,
+  GC_SERVICE_TASK_GC_ALLOC = 8,
+  GC_SERVICE_TASK_GC_ANY = 14,
+  GC_SERVICE_TASK_TRIM = 16,
   GC_SERVICE_TASK_STATS = 32,
   GC_SERVICE_TASK_MAX_LIMIT = 64
 } GC_SERVICE_TASK;
@@ -500,6 +501,8 @@ class GCSrvcMemInfoOOM {
 
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
+
+      LOG(ERROR) << "CareAboutPauseTimes..." << mem_info_rec->policy_method_ << ", " << mem_info_rec->oom_label_;
 
     }
     return do_care;
