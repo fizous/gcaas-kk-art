@@ -722,17 +722,17 @@ bool IPCHeap::RunCollectorDaemon() {
 
 
   if((_curr_type & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
-    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
+//    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
     _task_type = gc::gcservice::GC_SERVICE_TASK_CONC;
   } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
-    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
+//    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
     _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
   } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
-    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
+//    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     TrimHeap();
     _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
   }

@@ -192,7 +192,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK t
   std::vector<gc::gcservice::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
-      LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
+      //LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
       service_client_->active_requests_.erase(it);
 
       _return_result = true;
@@ -215,7 +215,7 @@ bool GCServiceClient::RequestAllocateGC(void) {
         GCServiceGlobalAllocator::allocator_instant_;
 
   if(_alloc->fwdGCAllocation()) { // we need to fwd this to daemon
-    LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Forwarding";
+//    LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Forwarding";
     _alloc->handShake_->ReqAllocationGC();
     return true;
   }
@@ -308,12 +308,12 @@ void GCServiceClient::RequestHeapTrim(void) {
   if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
     return;
   }
-  LOG(ERROR) << self->GetTid() << ".....GCServiceClient::RequestHeapTrim..label="
-      << service_client_->GetMemInfoRec()->oom_label_
-      << ", last_process_state=" << service_client_->last_process_state_
-      << ", info_rec->label=" << service_client_->GetMemInfoRec()->oom_label_
-      << ", policy = " << service_client_->GetMemInfoRec()->policy_method_
-      << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
+//  LOG(ERROR) << self->GetTid() << ".....GCServiceClient::RequestHeapTrim..label="
+//      << service_client_->GetMemInfoRec()->oom_label_
+//      << ", last_process_state=" << service_client_->last_process_state_
+//      << ", info_rec->label=" << service_client_->GetMemInfoRec()->oom_label_
+//      << ", policy = " << service_client_->GetMemInfoRec()->policy_method_
+//      << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
   gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
@@ -337,10 +337,10 @@ void GCServiceClient::updateProcessState(void) {
 
     int _my_new_oom_adj = last_process_oom_;
     if(GetProcessOOMAdj(&_my_new_oom_adj)) {
-      LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState: 00: last_proces_state="
-          << last_process_state_ << ", new_state = " << my_new_process_state
-          << ", last_oom = " << last_process_oom_ << ", my_new_oom="
-          << _my_new_oom_adj;
+//      LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState: 00: last_proces_state="
+//          << last_process_state_ << ", new_state = " << my_new_process_state
+//          << ", last_oom = " << last_process_oom_ << ", my_new_oom="
+//          << _my_new_oom_adj;
       gc::space::AgentMemInfo* _mem_info_rec = NULL;
       if(_my_new_oom_adj != last_process_oom_) {
         _mem_info_rec = GetMemInfoRec();
@@ -352,8 +352,8 @@ void GCServiceClient::updateProcessState(void) {
       if(_req_update) {
         last_process_state_ = my_new_process_state;
         last_process_oom_ = _my_new_oom_adj;
-        LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState..01 sending update stats request.."
-            << ", label:" << _mem_info_rec->oom_label_ << ", resize:"<< _mem_info_rec->resize_factor_;
+//        LOG(ERROR)<< Thread::Current()->GetTid() << ".....GCServiceClient::updateProcessState..01 sending update stats request.."
+//            << ", label:" << _mem_info_rec->oom_label_ << ", resize:"<< _mem_info_rec->resize_factor_;
         RequestUpdateStats();
       }
     }

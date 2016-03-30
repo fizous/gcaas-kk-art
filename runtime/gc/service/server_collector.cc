@@ -95,9 +95,9 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent,
       } while (android_atomic_cas(old_status, new_value, &status_) != 0);
       int _index = GetServiceIndex(req_type);
       curr_srvc_reqs_[_index] = gcsrvc_req;
-      LOG(ERROR) << "ServerCollector::SignalCollector::index= " << _index;
-      LOG(ERROR) << "ServerCollector::SignalCollector::curr_srvc_req_:" << curr_srvc_reqs_[_index] <<", status:"
-          << curr_srvc_reqs_[_index]->status_ << ", type=" << curr_srvc_reqs_[_index]->req_type_;
+      //LOG(ERROR) << "ServerCollector::SignalCollector::index= " << _index;
+      //LOG(ERROR) << "ServerCollector::SignalCollector::curr_srvc_req_:" << curr_srvc_reqs_[_index] <<", status:"
+      //    << curr_srvc_reqs_[_index]->status_ << ", type=" << curr_srvc_reqs_[_index]->req_type_;
       run_cond_.Broadcast(self);
     } else {
       IPC_MS_VLOG(INFO) << "ServerCollector::SignalCollector ---- Thread was  null:" << self->GetTid();
@@ -443,7 +443,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type, GCServiceReq* srvcReq) 
 
   gc_workers_pool_->StopWorkers(self);
   FinalizeGC(self, srvcReq);
-  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING";
+//  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING";
 }
 
 
@@ -472,7 +472,7 @@ void ServerCollector::Run(void) {
   while(true) {
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
 
-    LOG(ERROR) << "ServerCollector::Run.start -->" << _gc_type;
+//    LOG(ERROR) << "ServerCollector::Run.start -->" << _gc_type;
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
       int _index = GetServiceIndex(_gc_type);
       ExecuteTrim(curr_srvc_reqs_[_index]);
@@ -480,7 +480,7 @@ void ServerCollector::Run(void) {
       int _index = GetServiceIndex(_gc_type);
       ExecuteGC(_gc_type, curr_srvc_reqs_[_index]);
     }
-    LOG(ERROR) << "ServerCollector::Run.end -->" << _gc_type;
+//    LOG(ERROR) << "ServerCollector::Run.end -->" << _gc_type;
   }
 }
 
