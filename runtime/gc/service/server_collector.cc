@@ -365,8 +365,6 @@ void ServerCollector::UpdateCollectorAddress(Thread* self,
     space::GCSrvSharableCollectorData* address) {
   MutexLock mu(self, shake_hand_mu_);
   curr_collector_addr_ = address;
-  //LOG(ERROR) << "ServerCollector::UpdateCollectorAddress " <<  self->GetTid()
-    //  << ", address: " << reinterpret_cast<void*>(address);
   shake_hand_cond_.Broadcast(self);
 }
 
@@ -458,7 +456,10 @@ void ServerCollector::InitPool(void) {
                                                                       &propagate,
                                                                       false);
 
-  gc_workers_pool_->dumpThreadsID();
+  if(false) {
+    gc_workers_pool_->dumpThreadsID();
+  }
+
   if(_setAffin) {
     gc_workers_pool_->setThreadsAffinity(cpu_id);
   }
@@ -471,8 +472,6 @@ void ServerCollector::Run(void) {
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
-
-//    LOG(ERROR) << "ServerCollector::Run.start -->" << _gc_type;
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
       int _index = GetServiceIndex(_gc_type);
       ExecuteTrim(curr_srvc_reqs_[_index]);
@@ -480,7 +479,6 @@ void ServerCollector::Run(void) {
       int _index = GetServiceIndex(_gc_type);
       ExecuteGC(_gc_type, curr_srvc_reqs_[_index]);
     }
-//    LOG(ERROR) << "ServerCollector::Run.end -->" << _gc_type;
   }
 }
 

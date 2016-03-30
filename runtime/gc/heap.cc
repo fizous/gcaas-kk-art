@@ -973,7 +973,9 @@ void Heap::GCPSrvcReinitMarkSweep(collector::MarkSweep* newCollector) {
 
 
 
-  DumpGcPerformanceInfo(LOG(ERROR));
+  if(false) {
+    DumpGcPerformanceInfo(LOG(ERROR));
+  }
 }
 
 void Heap::DumpSpaces() {

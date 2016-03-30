@@ -237,7 +237,7 @@ WorkStealingWorker::WorkStealingWorker(ThreadPool* thread_pool, const std::strin
 
 void WorkStealingWorker::Run() {
   Thread* self = Thread::Current();
-  LOG(ERROR) << "========= WorkStealingWorker thread pool === " << self->GetTid();
+  //LOG(ERROR) << "========= WorkStealingWorker thread pool === " << self->GetTid();
   Task* task = NULL;
   WorkStealingThreadPool* thread_pool = down_cast<WorkStealingThreadPool*>(thread_pool_);
   while ((task = thread_pool_->GetTask(self)) != NULL) {
@@ -312,7 +312,7 @@ WorkStealingThreadPool::WorkStealingThreadPool(size_t num_threads)
       work_steal_lock_("work stealing lock"),
       steal_index_(0) {
   while (GetThreadCount() < num_threads) {
-    LOG(ERROR) << "========= adding thread pool === " << GetThreadCount();
+   // LOG(ERROR) << "========= adding thread pool === " << GetThreadCount();
     const std::string name = StringPrintf("Work stealing worker %zu", GetThreadCount());
     threads_.push_back(new WorkStealingWorker(this, name, ThreadPoolWorker::kDefaultStackSize));
   }
