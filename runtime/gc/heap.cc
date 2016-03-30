@@ -356,9 +356,105 @@ static bool ReadStaticInt(JNIEnvExt* env, jclass clz, const char* name,
 }
 
 
+
+void Heap::initializeProcessStateObjects(void) {
+  Thread* self = Thread::Current();
+  JNIEnvExt* env = self->GetJniEnv();
+
+  jclass clz = env->FindClass("android/app/ActivityThread");
+  if (clz == NULL) {
+    env->ExceptionClear();
+    LOG(WARNING) << "Could not find activity thread class in process state change";
+    return;
+  }
+  activity_thread_class_ = reinterpret_cast<jclass>(env->NewGlobalRef(clz));
+
+  if (activity_thread_class_ != NULL && activity_thread_ == NULL) {
+    jmethodID current_activity_method = env->GetStaticMethodID(activity_thread_class_,
+                                                               "currentActivityThread",
+                                                               "()Landroid/app/ActivityThread;");
+    if (current_activity_method == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get method for currentActivityThread";
+      return;
+    }
+
+    jobject obj = env->CallStaticObjectMethod(activity_thread_class_, current_activity_method);
+    if (obj == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get current activity";
+      return;
+    }
+    activity_thread_ = env->NewGlobalRef(obj);
+  }
+
+  if (activity_thread_class_ != NULL && activity_thread_ == NULL) {
+    jmethodID current_activity_method = env->GetStaticMethodID(activity_thread_class_,
+                                                               "currentActivityThread",
+                                                               "()Landroid/app/ActivityThread;");
+    if (current_activity_method == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get method for currentActivityThread";
+      return;
+    }
+
+    jobject obj = env->CallStaticObjectMethod(activity_thread_class_, current_activity_method);
+    if (obj == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get current activity";
+      return;
+    }
+    activity_thread_ = env->NewGlobalRef(obj);
+  }
+
+  if (application_thread_class_ == NULL) {
+    jclass clz = env->FindClass("android/app/ActivityThread$ApplicationThread");
+    if (clz == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get application thread class";
+      return;
+    }
+    application_thread_class_ = reinterpret_cast<jclass>(env->NewGlobalRef(clz));
+    last_process_state_id_ = env->GetFieldID(application_thread_class_, "mLastProcessState", "I");
+    if (last_process_state_id_ == NULL) {
+      env->ExceptionClear();
+      LOG(WARNING) << "Could not get last process state member";
+      return;
+    }
+  }
+
+  if (application_thread_class_ != NULL && application_thread_ == NULL) {
+    jmethodID get_application_thread =
+        env->GetMethodID(activity_thread_class_, "getApplicationThread",
+                         "()Landroid/app/ActivityThread$ApplicationThread;");
+    if (get_application_thread == NULL) {
+      LOG(WARNING) << "Could not get method ID for get application thread";
+      return;
+    }
+
+    jobject obj = env->CallObjectMethod(activity_thread_, get_application_thread);
+    if (obj == NULL) {
+      LOG(WARNING) << "Could not get application thread";
+      return;
+    }
+
+    application_thread_ = env->NewGlobalRef(obj);
+  }
+}
+
 int Heap::GetLastProcessStateID(void) {
   Thread* self = Thread::Current();
   JNIEnvExt* env = self->GetJniEnv();
+
+  if (!have_zygote_space_) {
+    return;
+  }
+
+  if(activity_thread_class_ == NULL) {
+    initializeProcessStateObjects();
+  }
+
+
   if (application_thread_class_ != NULL && application_thread_ == NULL) {
     jmethodID get_application_thread =
         env->GetMethodID(activity_thread_class_, "getApplicationThread",
