@@ -331,9 +331,9 @@ void GCServiceClient::updateProcessState(void) {
           << last_process_state_ << ", new_state = " << my_new_process_state
           << ", last_oom = " << last_process_oom_ << ", my_new_oom="
           << _my_new_oom_adj;
-
+      gc::space::AgentMemInfo* _mem_info_rec = NULL;
       if(_my_new_oom_adj != last_process_oom_) {
-        gc::space::AgentMemInfo* _mem_info_rec = GetMemInfoRec();
+        _mem_info_rec = GetMemInfoRec();
         _mem_info_rec->oom_label_ = _my_new_oom_adj;
         _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
         _req_update = (GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
