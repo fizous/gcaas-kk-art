@@ -318,8 +318,6 @@ void GCServiceClient::FinalizeHeapAfterInit(void) {
 }
 
 void GCServiceClient::updateProcessState(void) {
-  if(GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY)
-    return;
   int my_new_process_state = ipcHeap_->local_heap_->GetLastProcessStateID();
   if(last_process_state_ == -1) {//first time to do it
     last_process_state_ = my_new_process_state;
@@ -329,6 +327,8 @@ void GCServiceClient::updateProcessState(void) {
       _mem_info_rec->oom_label_ = last_process_state_;
       _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
     } else {
+      if(GetMemInfoRec()->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY)
+        return;
       RequestUpdateStats();
 
     }
