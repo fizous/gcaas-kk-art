@@ -61,6 +61,9 @@
 #include "service/global_allocator.h"
 #include "service/service_space.h"
 #include "service/service_client.h"
+
+using ::art::gc::service::GCServiceGlobalAllocator;
+using ::art::gc::service::GCServiceClient;
 #endif
 
 namespace art {
@@ -193,7 +196,7 @@ Heap::Heap(size_t initial_size, size_t growth_limit, size_t min_free, size_t max
 //      Runtime::Current()->IsCompiler() << ", parentID: " << getppid();
   if(Runtime::Current()->IsZygote() && !Runtime::Current()->IsCompiler()) {
     //LOG(ERROR) << "Zygote Process: We will initialize the Global Allocator now";
-    gc::gcservice::GCServiceGlobalAllocator::CreateServiceAllocator();
+    GCServiceGlobalAllocator::CreateServiceAllocator();
    // LOG(ERROR) << "Zygote: Done initializing with global allocator";
   }
   if(Runtime::Current()->IsCompiler()) {
@@ -1158,13 +1161,13 @@ inline mirror::Object* Heap::Allocate(Thread* self, T* space, size_t alloc_size,
   }
   GCP_MARK_START_GC_HAT_TIME_EVENT(self);
 #if (ART_GC_SERVICE || true)
-  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+  if(GCServiceClient::service_client_ != NULL) {
     LOG(ERROR) << "Heap::Allocate..going to call Allocate with Internal GC";
   }
 #endif
   mirror::Object* ptrAfterGC = AllocateInternalWithGc(self, space, alloc_size, bytes_allocated);
 #if (ART_GC_SERVICE || true)
-  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+  if(GCServiceClient::service_client_ != NULL) {
     LOG(ERROR) << "Heap::Allocate..------------------";
   }
 #endif
@@ -1211,7 +1214,7 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
 
     if (run_gc) {
 #if (ART_GC_SERVICE || true)
-      if(art::gcservice::GCServiceClient::RequestAllocateGC()) {
+      if(GCServiceClient::RequestAllocateGC()) {
         LOG(ERROR) << "Heap::AllocateInternalWithGc...00";
 
         // Allocations have failed after GCs;  this is an exceptional state.
@@ -1272,13 +1275,13 @@ mirror::Object* Heap::AllocateInternalWithGc(Thread* self, space::AllocSpace* sp
   // We don't need a WaitForConcurrentGcToComplete here either.
   GCP_MARK_START_ALLOC_GC_HW_EVENT;
 #if (ART_GC_SERVICE || true)
-  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+  if(GCServiceClient::service_client_ != NULL) {
     LOG(ERROR) << "Heap::AllocateInternalWithGc.. 01.. Start.. Going to call CollectwithInternalGC";
   }
 #endif
   CollectGarbageInternal(collector::kGcTypeFull, kGcCauseForAlloc, true);
 #if (ART_GC_SERVICE || true)
-  if(art::gcservice::GCServiceClient::service_client_ != NULL) {
+  if(GCServiceClient::service_client_ != NULL) {
     LOG(ERROR) << "Heap::AllocateInternalWithGc.. 02.. END.. Done call CollectwithInternalGC";
   }
 #endif
@@ -1486,7 +1489,7 @@ void Heap::CollectGarbage(bool clear_soft_references) {
   bool doRequest = true;
 
 #if (ART_GC_SERVICE || true)
-  doRequest = !(art::gcservice::GCServiceClient::RequestExplicitGC());
+  doRequest = !(GCServiceClient::RequestExplicitGC());
 #endif
 
   if(doRequest) {
@@ -1550,11 +1553,11 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
 
     int _space_index = 0;
     space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
-        gc::gcservice::GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(&_space_index);
+        GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(&_space_index);
 
     _struct_alloc_space->space_index_ = _space_index;
 //    space::GCSrvSharableDlMallocSpace* _struct_alloc_space =
-//          space::SharableDlMallocSpace::AllocateDataMemory();
+//          space::SharableDlMallocSpace::AllocateDataMemory();service
 
     if(false  /*!GetCardTable()->shareCardTable(&_struct_alloc_space->card_table_data_)*/) {
       LOG(ERROR) << "Error in sharing the Card table";
@@ -1724,9 +1727,9 @@ collector::GcType Heap::CollectGarbageInternal(collector::GcType gc_type, GcCaus
                                                bool clear_soft_references) {
 #if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
-  if(art::gcservice::GCServiceClient::service_client_ != NULL)
+  if(GCServiceClient::service_client_ != NULL)
     LOG(ERROR) << "Heap::CollectGarbageInternal...00.. checking request internal";
-  if(art::gcservice::GCServiceClient::RequestInternalGC(gc_type, gc_cause,
+  if(GCServiceClient::RequestInternalGC(gc_type, gc_cause,
       clear_soft_references, &returned_gc_type)) {
     return returned_gc_type;
   }
@@ -2336,7 +2339,7 @@ void Heap::PostGcVerification(collector::GarbageCollector* gc) {
 collector::GcType Heap::WaitForConcurrentGcToComplete(Thread* self, bool profWaitTime) {
 #if (ART_GC_SERVICE || true)
   collector::GcType returned_gc_type = collector::kGcTypeNone;
-  if(art::gcservice::GCServiceClient::RequestWaitForConcurrentGC(&returned_gc_type)) {
+  if(GCServiceClient::RequestWaitForConcurrentGC(&returned_gc_type)) {
     return returned_gc_type;
   }
 #endif
@@ -2593,21 +2596,21 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
 
 
 //void Heap::SetNextGCType(collector::GcType gc_type) {
-//  if(!art::gcservice::GCServiceClient::SetNextGCType(gc_type)) {
+//  if(!art::gc::service::GCServiceClient::SetNextGCType(gc_type)) {
 //    next_gc_type_ = gc_type;
 //  }
 //
 //}
 
 //void Heap::SetConcurrentStartBytes(size_t new_value) {
-//  if(!art::gcservice::GCServiceClient::SetConcStartBytes(new_value)) {
+//  if(!art::gc::service::GCServiceClient::SetConcStartBytes(new_value)) {
 //    SetConcStartBytes(new_value);
 //  }
 //}
 
 //size_t Heap::GetConcurrentStartBytes(void) {
 //  size_t return_val = 0;
-//  if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+//  if(!art::gc::service::GCServiceClient::GetConcStartBytes(&return_val)) {
 //    return_val = GetConcStartBytes();
 //  }
 //  return return_val;
@@ -2616,7 +2619,7 @@ void Heap::GrowForUtilization(collector::GcType gc_type, uint64_t gc_duration) {
 //collector::GcType Heap::GetNextGCType(void) {
 //  collector::GcType gc_type;
 //
-//  if(!art::gcservice::GCServiceClient::GetNextGCType(&gc_type)) {
+//  if(!art::gc::service::GCServiceClient::GetNextGCType(&gc_type)) {
 //    return next_gc_type_;
 //  }
 //  return gc_type;
@@ -2820,7 +2823,7 @@ void Heap::RequestConcurrentGC(Thread* self) {
   SetConcStartBytes(std::numeric_limits<size_t>::max());
 
 #if (ART_GC_SERVICE || true)
-  if(!art::gcservice::GCServiceClient::RequestConcGC()) {
+  if(!GCServiceClient::RequestConcGC()) {
     JNIEnv* env = self->GetJniEnv();
     DCHECK(WellKnownClasses::java_lang_Daemons != NULL);
     DCHECK(WellKnownClasses::java_lang_Daemons_requestGC != NULL);
@@ -2905,7 +2908,7 @@ bool Heap::RequestHeapTrimIfNeeded(size_t adjusted_max_free,
 #if (ART_GC_SERVICE || true)
   if(send_remote_req) {
     //LOG(ERROR) << "Heap::RequestHeapTrimIfNeeded()";
-    art::gcservice::GCServiceClient::RequestHeapTrim();
+    GCServiceClient::RequestHeapTrim();
   }
 #endif
 
@@ -2973,7 +2976,7 @@ void Heap::RequestHeapTrim() {
    if(false){
      #if (ART_GC_SERVICE || true)
 
-      art::gcservice::GCServiceClient::RequestHeapTrim();
+      GCServiceClient::RequestHeapTrim();
     #endif
    }
     JNIEnv* env = self->GetJniEnv();
@@ -2997,7 +3000,7 @@ size_t Heap::Trim() {
 
 bool Heap::IsGCRequestPending() const {
  // size_t return_val = 0;
- // if(!art::gcservice::GCServiceClient::GetConcStartBytes(&return_val)) {
+ // if(!art::gc::service::GCServiceClient::GetConcStartBytes(&return_val)) {
 //  size_t return_val = GetConcStartBytes();
  // }
   return (std::numeric_limits<size_t>::max() != GetConcStartBytes());

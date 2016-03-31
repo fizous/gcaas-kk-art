@@ -17,8 +17,8 @@
 #include "gc/heap.h"
 #include "gc/service/global_allocator.h"
 namespace art {
-
-namespace gcservice {
+namespace gc {
+namespace service {
 
 
 class GCServiceClient {
@@ -30,9 +30,9 @@ class GCServiceClient {
   static void FinalizeInitClient();
   static bool RequestUpdateStats(void);
   static bool RequestConcGC(void);
-  static bool RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task);
+  static bool RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task);
   static bool RequestExplicitGC(void);
-  bool ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task);
+  bool ShouldPushNewGCRequest(GC_SERVICE_TASK task);
   static bool RequestAllocateGC(void) ;
   static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
   static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
@@ -51,7 +51,7 @@ class GCServiceClient {
       AShmemMap* shmem_map);
 
   bool isTrimRequestsEnabled() const {
-    return (enable_trimming_ == gc::gcservice::GC_SERVICE_HANDLE_TRIM_ALLOWED);
+    return (enable_trimming_ == gc::service::GC_SERVICE_HANDLE_TRIM_ALLOWED);
   }
 
   void setConcRequestTime(uint64_t timestamp, uint64_t heapsize) {
@@ -120,15 +120,15 @@ class GCServiceClient {
   //gc::collector::IPCMarkSweep* collector_;
   gc::collector::IPCHeap* ipcHeap_;
 
-  std::vector<gc::gcservice::GCServiceReq*> active_requests_;
+  std::vector<gc::service::GCServiceReq*> active_requests_;
 
 
 
 
 
 };//GCServiceClient
-
-}//namespace gcservice
+}//namespace service
+}//namespace gc
 }//namespace art
 
 

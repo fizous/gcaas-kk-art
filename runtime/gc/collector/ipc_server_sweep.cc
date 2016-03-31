@@ -99,7 +99,7 @@ void IPCServerMarkerSweep::ResetStats(void) {
 }
 
 IPCServerMarkerSweep::IPCServerMarkerSweep(
-    gc::gcservice::GCServiceClientRecord* client_record) :
+    gc::service::GCServiceClientRecord* client_record) :
         client_rec_(client_record),
         heap_meta_(&(client_rec_->sharable_space_->heap_meta_)),
         offset_(static_cast<int32_t>(SERVER_SWEEP_CALC_OFFSET(
@@ -802,7 +802,7 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 
 
 //  if(all_bitmaps_.empty()) {
-//    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+//    if(gc::service::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
 //      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
 //          GetMappedBitmap(client_rec_->pair_mapps_,
 //              KGCSpaceServerZygoteMarkBMInd_,
@@ -825,7 +825,7 @@ bool IPCServerMarkerSweep::InitMarkingPhase(space::GCSrvSharableCollectorData* c
 //            (curr_collector_ptr_->current_mark_bitmap_));
 //      mark_bitmaps_.push_back(current_mark_bitmap_);
 //    }
-//    if(gc::gcservice::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
+//    if(gc::service::GCServiceGlobalAllocator::KGCServiceShareZygoteSpace > 1) {
 //      accounting::SharedServerSpaceBitmap* _temp_mark_bitmap =
 //          GetMappedBitmap(client_rec_->pair_mapps_,
 //              KGCSpaceServerZygoteMarkBMInd_,

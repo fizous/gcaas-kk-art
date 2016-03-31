@@ -17,12 +17,12 @@
 #include "thread_list.h"
 
 
-using ::art::gc::gcservice::GCServiceGlobalAllocator;
-using ::art::gc::gcservice::GCSrvcMemInfoOOM;
+//using ::art::gc::service::GCServiceGlobalAllocator;
+//using ::art::gc::service::GCSrvcMemInfoOOM;
 
 namespace art {
-
-namespace gcservice {
+namespace gc {
+namespace service {
 
 GCServiceClient* GCServiceClient::service_client_ = NULL;
 
@@ -160,7 +160,7 @@ bool GCServiceClient::RequestConcGC(void) {
 
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
-  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_CONC)) {
+  if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_CONC)) {
     return true;
   }
 
@@ -168,7 +168,7 @@ bool GCServiceClient::RequestConcGC(void) {
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
-  gc::gcservice::GCServiceReq* _req_entry =
+  gc::service::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
 
@@ -185,11 +185,11 @@ bool GCServiceClient::RequestConcGC(void) {
 
 }
 
-bool GCServiceClient::RemoveGCSrvcActiveRequest(gc::gcservice::GC_SERVICE_TASK task) {
+bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   bool _return_result = false;
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+  std::vector<gc::service::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
       //LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
@@ -250,11 +250,11 @@ bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
 }
 
 
-bool GCServiceClient::ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK task)    {
-  std::vector<gc::gcservice::GCServiceReq*>::iterator it;
+bool GCServiceClient::ShouldPushNewGCRequest(GC_SERVICE_TASK task)    {
+  std::vector<GCServiceReq*>::iterator it;
   int _req_type = task;
-  if((task & gc::gcservice::GC_SERVICE_TASK_GC_ANY) > 0) {
-    _req_type = gc::gcservice::GC_SERVICE_TASK_GC_ANY;
+  if((task & GC_SERVICE_TASK_GC_ANY) > 0) {
+    _req_type = GC_SERVICE_TASK_GC_ANY;
   }
 
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
@@ -279,14 +279,14 @@ bool GCServiceClient::RequestExplicitGC(void) {
 
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
 
-  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_EXPLICIT)) {
+  if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_EXPLICIT)) {
     return true;
   }
   service_client_->updateProcessState();
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
-  gc::gcservice::GCServiceReq* _req_entry =
+  gc::service::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
   if(_req_entry != NULL) {
@@ -305,7 +305,7 @@ void GCServiceClient::RequestHeapTrim(void) {
     return;
   Thread* self = Thread::Current();
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  if(!service_client_->ShouldPushNewGCRequest(gc::gcservice::GC_SERVICE_TASK_TRIM)) {
+  if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_TRIM)) {
     return;
   }
 //  LOG(ERROR) << self->GetTid() << ".....GCServiceClient::RequestHeapTrim..label="
@@ -316,7 +316,7 @@ void GCServiceClient::RequestHeapTrim(void) {
 //      << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  gc::gcservice::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
+  gc::service::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
   if(_req_entry != NULL) {
     service_client_->active_requests_.push_back(_req_entry);
   }

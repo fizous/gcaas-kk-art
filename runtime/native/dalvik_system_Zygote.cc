@@ -463,10 +463,10 @@ static pid_t GCSrvcForkGCService(void) {
     UnsetSigChldHandler();
     runtime->DidForkFromZygote(false);
     IPC_MS_VLOG(ERROR) << "------- GC Service Is initialized  ----------";
-    gc::gcservice::GCServiceProcess::LaunchGCServiceProcess();
+    gc::service::GCServiceProcess::LaunchGCServiceProcess();
 
   } else {
-    gc::gcservice::GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid);
+    gc::service::GCServiceGlobalAllocator::BlockOnGCProcessCreation(pid);
     IPC_MS_VLOG(ERROR) << "------- Zygote Forked the GC Service ---------- " << pid;
   }
 
@@ -608,7 +608,7 @@ static pid_t GCSrvcForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, ji
 
   } else if (pid > 0) {
     // the parent process
-    gc::gcservice::GCServiceGlobalAllocator::BlockOnGCZygoteCreation();
+    gc::service::GCServiceGlobalAllocator::BlockOnGCZygoteCreation();
   }
   return pid;
 }
@@ -789,7 +789,7 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
           LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
       }
 #if (ART_GC_SERVICE || true)
-      gc::gcservice::GCServiceGlobalAllocator::GCSrvcNotifySystemServer();
+      gc::service::GCServiceGlobalAllocator::GCSrvcNotifySystemServer();
 #endif
 
 #if (ART_USE_GC_PROFILER || ART_USE_GC_PROFILER_REF_DIST || ART_USE_GC_DEFAULT_PROFILER)

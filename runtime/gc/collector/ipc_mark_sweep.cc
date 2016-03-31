@@ -36,9 +36,9 @@
 
 using ::art::mirror::Class;
 using ::art::mirror::Object;
-using ::art::gcservice::GCServiceClient;
-using ::art::gc::gcservice::GCSrvcMemInfoOOM;
-using ::art::gc::gcservice::GCServiceGlobalAllocator;
+using ::art::gc::service::GCServiceClient;
+using ::art::gc::service::GCSrvcMemInfoOOM;
+using ::art::gc::service::GCServiceGlobalAllocator;
 namespace art {
 
 namespace gc {
@@ -691,7 +691,7 @@ void IPCHeap::ResetServerFlag(void) {
 
 }
 
-void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) {
+void IPCHeap::NotifyCompleteConcurrentTask(gc::service::GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
@@ -708,7 +708,7 @@ void IPCHeap::NotifyCompleteConcurrentTask(gc::gcservice::GC_SERVICE_TASK task) 
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
-  gc::gcservice::GC_SERVICE_TASK _task_type = gc::gcservice::GC_SERVICE_TASK_NOP;
+  gc::service::GC_SERVICE_TASK _task_type = gc::service::GC_SERVICE_TASK_NOP;
   int _curr_type = 0;
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
@@ -721,20 +721,20 @@ bool IPCHeap::RunCollectorDaemon() {
   }
 
 
-  if((_curr_type & gc::gcservice::GC_SERVICE_TASK_CONC) > 0) {
+  if((_curr_type & gc::service::GC_SERVICE_TASK_CONC) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
-    _task_type = gc::gcservice::GC_SERVICE_TASK_CONC;
-  } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_EXPLICIT) > 0) {
+    _task_type = gc::service::GC_SERVICE_TASK_CONC;
+  } else if((_curr_type & gc::service::GC_SERVICE_TASK_EXPLICIT) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
-    _task_type = gc::gcservice::GC_SERVICE_TASK_EXPLICIT;
-  } else if((_curr_type & gc::gcservice::GC_SERVICE_TASK_TRIM) > 0) {
+    _task_type = gc::service::GC_SERVICE_TASK_EXPLICIT;
+  } else if((_curr_type & gc::service::GC_SERVICE_TASK_TRIM) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     TrimHeap();
-    _task_type = gc::gcservice::GC_SERVICE_TASK_TRIM;
+    _task_type = gc::service::GC_SERVICE_TASK_TRIM;
   }
 
   NotifyCompleteConcurrentTask(_task_type);

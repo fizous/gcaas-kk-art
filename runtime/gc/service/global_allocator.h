@@ -36,7 +36,7 @@ namespace collector {
  class IPCServerMarkerSweep;
 }
 
-namespace gcservice{
+namespace service{
 
 typedef enum {
   GCSERVICE_STATUS_NONE = 0,
@@ -596,7 +596,7 @@ private:
 };//class GCServiceProcess
 
 
-}//namespace gcservice
+}//namespace service
 }//namespace gc
 }//namespace art
 

@@ -28,11 +28,11 @@
 
 using ::art::mirror::Class;
 using ::art::mirror::Object;
-using ::art::gcservice::GCServiceClient;
+using ::art::gc::service::GCServiceClient;
 
 namespace art {
 namespace gc {
-namespace gcservice{
+namespace service{
 
 GCServiceGlobalAllocator* GCServiceGlobalAllocator::allocator_instant_ = NULL;
 

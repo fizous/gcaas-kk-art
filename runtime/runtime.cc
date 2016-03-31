@@ -242,7 +242,7 @@ void Runtime::Abort() {
 bool Runtime::GCSrvcePreZygoteFork() {
 //  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   bool _should_fork_service = false;
-  if(gc::gcservice::GCServiceGlobalAllocator::ShouldForkService()) {
+  if(gc::service::GCServiceGlobalAllocator::ShouldForkService()) {
     _should_fork_service = true;
     vmprofiler_->PreForkPreparation();
   }
@@ -254,7 +254,7 @@ bool Runtime::GCSrvcePreZygoteFork() {
 
 void Runtime::RegisterCollector(const char* se_name_c_str) {
   gcservice::GCServiceClient::InitClient(se_name_c_str,
-                                         gc::gcservice::GCServiceGlobalAllocator::GetTrimConfig());
+                                         gc::service::GCServiceGlobalAllocator::GetTrimConfig());
 }
 
 
@@ -264,7 +264,7 @@ void Runtime::GCPServiceFinalizeInit() {
 
 
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
-  bool should_share = (gc::gcservice::GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled());
+  bool should_share = (gc::service::GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled());
   heap_->PostZygoteForkWithSpaceFork(should_share && shared_space);
 //  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
   return true;

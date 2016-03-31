@@ -19,9 +19,10 @@ using ::art::gc::space::AgentMemInfoHistory;
 using ::art::gc::space::AgentMemInfo;
 
 using ::art::gc::space::GCSrvSharableDlMallocSpace;
+
 namespace art {
 namespace gc {
-namespace gcservice {
+namespace service {
 
 GCServiceProcess* GCServiceProcess::process_ = NULL;
 
@@ -548,9 +549,6 @@ void GCServiceProcess::SetGCDaemon(void) {
       break;
   }
 }
-
-
-
 
 
 }

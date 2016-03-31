@@ -33,7 +33,7 @@
 #include "gc_profiler/MProfiler.h"
 
 #if (ART_GC_SERVICE || true)
-using ::art::gc::gcservice::GCServiceGlobalAllocator;
+using ::art::gc::service::GCServiceGlobalAllocator;
 #endif
 
 namespace art {
