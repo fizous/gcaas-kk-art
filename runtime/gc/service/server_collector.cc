@@ -452,7 +452,7 @@ void ServerCollector::InitPool(void) {
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
-      gc::service::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
+      service::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
                                                                       &propagate,
                                                                       false);
 

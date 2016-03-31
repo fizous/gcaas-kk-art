@@ -544,6 +544,7 @@ class GCServiceDaemon {
   GCServiceDaemon(GCServiceProcess*);
   static void* RunDaemon(void*);
   void mainLoop(void);
+  void initWorkerPool();
   void initShutDownSignals(void);
   void setThreadAffinity(Thread* th, int cpu_id, bool complementary);
 
@@ -553,8 +554,11 @@ public:
   //std::vector<GCSrvceAgent*> client_agents_;
   ClientAgentsMap agents_map_;
 
+  int pool_size_;
+  ThreadPool* workers_pool_;
 
-  UniquePtr<ThreadPool> thread_pool_;
+  static const char * meminfo_args_[];
+
   static GCServiceDaemon* CreateServiceDaemon(GCServiceProcess*);
   bool waitShutDownSignals(void);
   GCSrvceAgent* GetAgentByPid(int pid);
@@ -564,7 +568,7 @@ public:
 
   void SetMemInfoDumpFile();
 
-  static const char * meminfo_args_[];
+
 
 
 };//class GCServiceDaemon

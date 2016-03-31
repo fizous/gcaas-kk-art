@@ -218,6 +218,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   {
     IPMutexLock interProcMu(self, *_processObj->service_meta_->mu_);
     _daemonObj->thread_ = self;
+    _daemonObj->initWorkerPool();
     _daemonObj->SetMemInfoDumpFile();
     _processObj->service_meta_->status_ = GCSERVICE_STATUS_RUNNING;
     _processObj->service_meta_->cond_->Broadcast(self);
@@ -272,11 +273,13 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);
     process->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
+    pool_size_ = GCServiceGlobalAllocator::allocator_instant_->getWorkerPoolSize();
+    workers_pool_ = new WorkStealingThreadPool(pool_size_);
     //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
     //        64, false));
     initShutDownSignals();
 
-    thread_pool_.reset(new ThreadPool(4));
+
     process->service_meta_->cond_->Broadcast(self);
   }
 
@@ -323,7 +326,66 @@ void GCServiceDaemon::SetMemInfoDumpFile(void) {
 
 }
 
+class GlobalStatusUpdaterTask : public WorkStealingTask {
+ public:
+  GCServiceDaemon* service_daemon_;
+  static volatile int performed_cycle_index_;
+  GlobalStatusUpdaterTask(GCServiceDaemon* service_daemon) :
+    WorkStealingTask(),
+    service_daemon_(service_daemon_) {
 
+  }
+  void StealFrom(Thread* self, WorkStealingTask* source) {
+    if(performed_cycle_index_ !=
+        service_daemon_->req_counts_)
+      source->Run(self);
+  }
+  virtual void Finalize() {
+    LOG(ERROR) << "GlobalStatusUpdaterTask deleteing";
+    delete this;
+  }
+
+  virtual void Run(Thread* self) {
+    if(performed_cycle_index_ == service_daemon_->req_counts_) {
+      return;
+    }
+    LOG(ERROR) << "GlobalStatusUpdaterTask " << self->GetTid() << ", index:" << performed_cycle_index_;
+    performed_cycle_index_ = service_daemon_->req_counts_;
+    uint64_t _curr_time = NanoTime();
+    uint64_t _difference_time = _curr_time - service_daemon_->last_global_update_time_ns_;
+    if(_difference_time < 2000000000)
+      return;
+    service_daemon_->last_global_update_time_ns_ = _curr_time;
+
+    //std::string _meminfo_lines;
+
+    service_daemon_->SetMemInfoDumpFile();
+    bool mem_info_result =
+        GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(service_daemon_->mem_info_fd_,
+                                                                  "meminfo",
+                                                                  GCServiceDaemon::meminfo_args_,
+                                                                  1);
+    close(mem_info_fd_);
+
+    if(mem_info_result) {
+
+
+      if(GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data")) {
+
+        //      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
+        //          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
+        //          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
+        //          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
+        //          "," << GCSrvcMemInfoOOM::free_ram_[3];
+      }
+    }
+  }
+
+
+
+};//ServerIPCListenerTask
+
+volatile int GlobalStatusUpdaterTask::performed_cycle_index_ = -1;
 void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
   bool _should_update = (srvc_task == GC_SERVICE_TASK_STATS);
   if(!_should_update)
@@ -336,43 +398,31 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
       return;
     }
   }
-
-  uint64_t _curr_time = NanoTime();
-  uint64_t _difference_time = _curr_time - last_global_update_time_ns_;
-  if(_difference_time < 2000000000)
-    return;
-  last_global_update_time_ns_ = _curr_time;
-
-  //std::string _meminfo_lines;
-
-  SetMemInfoDumpFile();
-  bool mem_info_result =
-      GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(mem_info_fd_,
-                                                                "meminfo",
-                                                                GCServiceDaemon::meminfo_args_,
-                                                                1);
-  close(mem_info_fd_);
-
-  if(mem_info_result) {
-
-
-    if(GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data")) {
-
-      //      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
-      //          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
-      //          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
-      //          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
-      //          "," << GCSrvcMemInfoOOM::free_ram_[3];
-    }
-  }
+  Thread* self = Thread::Current();
 
 
 
+  workers_pool_->AddTask(self, new GlobalStatusUpdaterTask(this));
+  workers_pool_->SetMaxActiveWorkers(pool_size_ - 1);
+  workers_pool_->StartWorkers(self);
+  LOG(ERROR) << "thread: "<< self <<"..started the workers and exited";
 }
 
 
 void GCServiceDaemon::mainLoop(void) {
   GCServiceProcess::process_->handShake_->ListenToRequests(this);
+}
+
+void GCServiceDaemon::initWorkerPool(void) {
+  bool propagate = false;
+  int cpu_id = 0;
+  bool _setAffin =
+      service::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
+                                                                      &propagate,
+                                                                      false);
+  if(_setAffin) {
+    workers_pool_->setThreadsAffinity(cpu_id);
+  }
 }
 
 
