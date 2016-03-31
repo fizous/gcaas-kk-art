@@ -361,6 +361,6 @@ void GCServiceClient::updateProcessState(void) {
 }
 
 
-
-}//namespace gcservice
+}//namespace service
+}//namespace gc
 }//namespace art

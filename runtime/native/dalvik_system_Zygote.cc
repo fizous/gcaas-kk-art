@@ -437,12 +437,12 @@ static pid_t GCSrvcForkGCService(void) {
     setpgid(0, 0);
     int rc = setresgid(_gid, _gid, _gid);
     if (rc == -1) {
-      PLOG(FATAL) << "gcservice: setresgid(" << _gid << ") failed";
+      PLOG(FATAL) << "gc::service: setresgid(" << _gid << ") failed";
     }
 
     rc = setresuid(_uid, _uid, _uid);
     if (rc == -1) {
-      PLOG(FATAL) << "gcservice: setresuid(" << _uid << ") failed";
+      PLOG(FATAL) << "gc::service: setresuid(" << _uid << ") failed";
     }
 
     SetSchedulerPolicy();

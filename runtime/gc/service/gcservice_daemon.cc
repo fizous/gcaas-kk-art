@@ -206,7 +206,7 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
-      gcservice::GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
+      GCServiceGlobalAllocator::GCSrvcIsClientDaemonPinned(&cpu_id,
                                                                       &propagate,
                                                                       false);
 

@@ -831,7 +831,7 @@ void GCSrvcClientHandShake::ListenToRequests(void* args) {
 }
 
 
-}//namespace gcservice
+}//namespace service
 }//namespace gc
 }//namespace art
 
