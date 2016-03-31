@@ -361,7 +361,7 @@ class GlobalStatusUpdaterTask : public WorkStealingTask {
 
     service_daemon_->SetMemInfoDumpFile();
     bool mem_info_result =
-        GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(service_daemon_->mem_info_fd_,
+        GCServiceProcess::process_->fileMapperSvc_->UpdateMemInfo(service_daemon_->GetMemInfoFd(),
                                                                   "meminfo",
                                                                   GCServiceDaemon::meminfo_args_,
                                                                   1);

@@ -536,8 +536,7 @@ class GCServiceDaemon {
   int processed_index_;
   int mem_info_fd_;
   int req_counts_;
-  // The last time a heap trim occurred.
-  uint64_t last_global_update_time_ns_;
+
 
   //std::vector<android::MappedPairProcessFD*> registered_apps_;
 
@@ -552,6 +551,8 @@ public:
 //  static GCServiceDaemon* gcdaemon_inst_;
   //GCServiceProcess* process_;
   //std::vector<GCSrvceAgent*> client_agents_;
+  // The last time a heap trim occurred.
+  uint64_t last_global_update_time_ns_;
   ClientAgentsMap agents_map_;
 
   int pool_size_;
@@ -568,7 +569,9 @@ public:
 
   void SetMemInfoDumpFile();
 
-
+  int GetMemInfoFd() const {
+    return mem_info_fd_;
+  }
 
 
 };//class GCServiceDaemon
