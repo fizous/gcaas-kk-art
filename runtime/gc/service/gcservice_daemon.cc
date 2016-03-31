@@ -332,7 +332,7 @@ class GlobalStatusUpdaterTask : public WorkStealingTask {
   static volatile int performed_cycle_index_;
   GlobalStatusUpdaterTask(GCServiceDaemon* service_daemon) :
     WorkStealingTask(),
-    service_daemon_(service_daemon_) {
+    service_daemon_(service_daemon) {
 
   }
   void StealFrom(Thread* self, WorkStealingTask* source) {
