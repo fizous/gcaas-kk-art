@@ -58,7 +58,7 @@ class GCServiceClient {
 
   void setMemInfoMarkStamp(uint64_t timestamp, uint64_t heapsize,
                            GC_SERVICE_TASK task) {
-    int _index = 32 - (CLZ(GC_SERVICE_TASK)) - 2;
+    int _index = 32 - (CLZ(task)) - 2;
     space::AgnetMemInfoTimeStamp* _stamp_rec =
         &(sharable_space_->sharable_space_data_->meminfo_rec_.time_stamps_[_index]);
     _stamp_rec->req_heap_size_ = heapsize;
