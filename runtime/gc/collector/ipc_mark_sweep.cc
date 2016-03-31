@@ -358,7 +358,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
     double _ration_latency = ((collection_latency_ - gc_duration) * 1.0)  / gc_duration;
     _latency_rate_s = local_heap_->GetAllocationRate() * (collection_latency_ / 1000.0 / 1000.0 / 1000);
 
-    LOG(ERROR) << "_ration_latency = " << _ration_latency << ", allocRate="  << local_heap_->GetAllocationRate();
+    LOG(ERROR) << "_latency_rate_s = " << _latency_rate_s << ", _ration_latency = " << _ration_latency << ", allocRate="  << local_heap_->GetAllocationRate();
   }
 
 //  if(gc_duration > 0 && collection_latency_ > gc_duration
