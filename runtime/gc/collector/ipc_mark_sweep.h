@@ -144,7 +144,7 @@ class IPCHeap {
   static void* RunDaemon(void* arg);
   bool StartCollectorDaemon(void);
   bool RunCollectorDaemon(void);
-  void NotifyCompleteConcurrentTask(gc::service::GC_SERVICE_TASK);
+  void NotifyCompleteConcurrentTask(service::GC_SERVICE_TASK);
   void ResetHeapMetaDataUnlocked(void);
   void CreateCollectors(void);
 
@@ -158,6 +158,7 @@ class IPCHeap {
   /* Collection methods */
   void ConcurrentGC(Thread* self);
   void ExplicitGC(bool clear_soft_references);
+  void AllocGC(bool clear_soft_references);
   void TrimHeap(void);
   bool CheckTrimming(collector::GcType gc_type, uint64_t gc_duration);
   void SetLastProcessID(void);

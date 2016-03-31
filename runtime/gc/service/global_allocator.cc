@@ -468,6 +468,19 @@ GCServiceReq* GCSrvcClientHandShake::ReqConcCollection(void* args) {
   return _entry;
 }
 
+
+GCServiceReq* GCSrvcClientHandShake::ReqAllocationGC(void* args) {
+  Thread* self = Thread::Current();
+  GCServiceReq* _entry = NULL;
+  GC_BUFFER_PUSH_REQUEST(_entry, self);
+
+  _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
+  _entry->data_addr_ = (uintptr_t)args;
+  gcservice_data_->cond_->Broadcast(self);
+  gcservice_data_->cond_->Broadcast(self);
+  return _entry;
+}
+
 GCServiceReq* GCSrvcClientHandShake::ReqExplicitCollection(void* args) {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
@@ -552,14 +565,7 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 }
 
 
-void GCSrvcClientHandShake::ReqAllocationGC() {
-  Thread* self = Thread::Current();
-  GCServiceReq* _entry = NULL;
-  GC_BUFFER_PUSH_REQUEST(_entry, self);
 
-  _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
-  gcservice_data_->cond_->Broadcast(self);
-}
 
 
 
@@ -793,10 +799,10 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
            if(!GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
              _fwd_request = false;
            }
-         } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
+         } /*else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
            LOG(ERROR) << "GC_SERVICE_TASK_GC_ALLOC is not handled";
            _fwd_request = false;
-         }
+         }*/
          if(_fwd_request) {
            if(_agent->signalMyCollectorDaemon(_entry)) {
              _process_result = _req_type;

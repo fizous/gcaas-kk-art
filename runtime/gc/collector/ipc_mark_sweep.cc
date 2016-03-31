@@ -319,6 +319,14 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
 }
 
+void IPCHeap::AllocGC(bool clear_soft_references)  {
+  //  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
+  Thread* self = Thread::Current();
+  WaitForConcurrentIPCGcToComplete(self);
+  CollectGarbageIPC(collector::kGcTypeSticky, kGcCauseForAlloc, clear_soft_references);
+}
+
+
 void IPCHeap::SetLastProcessID(void) { //here we set the process of the app
   int _lastProcessID = local_heap_->GetLastProcessStateID();
   meta_->process_state_ = _lastProcessID;
@@ -341,8 +349,9 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
 
   uint64_t _delta_time_ms =  NsToMs(collection_latency_);
-//  LOG(ERROR) << "IPCHeap::CheckTrimming alloc_latency: " << allocation_latency_
-//      << ", collec_latency: " << collection_latency_ << ", _delta_time_ms = " << _delta_time_ms;
+  LOG(ERROR) << "IPCHeap::CheckTrimming alloc_latency: " << allocation_latency_
+      << ", collec_latency: " << collection_latency_ << ", _delta_time_ms = "
+      << _delta_time_ms;
   double _latency_rate_s = 0.0;
 
   if(GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()
@@ -351,7 +360,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   }
 
 
- /// LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
+  LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
 
   local_heap_->GCSrvcGrowForUtilization(gc_type, gc_duration, _resize_factor,
                                         &_adjusted_max_free,
@@ -527,20 +536,27 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   uint64_t gc_start_time_ns = NanoTime();
   uint64_t gc_start_size = local_heap_->GetBytesAllocated();
 
-
+  service::GC_SERVICE_TASK _srvc_task = service::GC_SERVICE_TASK_NOP;
   if(gc_cause == kGcCauseBackground) {
-    GCServiceClient::service_client_->updateDeltaConcReq(gc_start_time_ns,
-               gc_start_size, &collection_latency_, &allocation_latency_);
+    _srvc_task = service::GC_SERVICE_TASK_CONC;
   } else if (gc_cause == kGcCauseExplicit) {
-    GCServiceClient::service_client_->updateDeltaExplReq(gc_start_time_ns,
-                                                         gc_start_size,
-                                                         &collection_latency_,
-                                                         &allocation_latency_);
+    _srvc_task = service::GC_SERVICE_TASK_EXPLICIT;
+  } else if (gc_cause == kGcCauseForAlloc) {
+    _srvc_task = service::GC_SERVICE_TASK_GC_ALLOC;
+  }
+
+  if((_srvc_task & service::GC_SERVICE_TASK_GC_ANY) > 1) {
+    GCServiceClient::service_client_->updateDeltaReqLatency(gc_start_time_ns,
+               gc_start_size, &collection_latency_, &allocation_latency_, _srvc_task);
+
+    LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size="
+        << gc_start_size << ", start_time_ns=" << gc_start_time_ns
+        << ", time_latency=" << collection_latency_
+        << ", alloc_latency=" << allocation_latency_;
   }
   //allocation_latency_ = 0;
 
-  //  LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size=" << gc_start_size<<
-  //      ", alloc_space->allocBytes="<< local_heap_->alloc_space_->GetBytesAllocated();
+
   // Approximate allocation rate in bytes / second.
   if (UNLIKELY(gc_start_time_ns == local_heap_->GetLastGCTime())) {
     LOG(WARNING) << "Timers are broken (gc_start_time == last_gc_time_).";
@@ -550,6 +566,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     local_heap_->SetAllocationRate(((gc_start_size - local_heap_->GetLastGCSize()) * 1000) / ms_delta);
     VLOG(heap) << "Allocation rate: " << PrettySize(local_heap_->GetAllocationRate()) << "/s";
   }
+
 
   if (gc_type == collector::kGcTypeSticky &&
       local_heap_->GetAllocSpace()->Size() < local_heap_->GetMinAllocSpaceSizeForSticky()) {
@@ -692,7 +709,7 @@ void IPCHeap::ResetServerFlag(void) {
 
 }
 
-void IPCHeap::NotifyCompleteConcurrentTask(gc::service::GC_SERVICE_TASK task) {
+void IPCHeap::NotifyCompleteConcurrentTask(service::GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
@@ -709,7 +726,7 @@ void IPCHeap::NotifyCompleteConcurrentTask(gc::service::GC_SERVICE_TASK task) {
 
 bool IPCHeap::RunCollectorDaemon() {
   Thread* self = Thread::Current();
-  gc::service::GC_SERVICE_TASK _task_type = gc::service::GC_SERVICE_TASK_NOP;
+  service::GC_SERVICE_TASK _task_type = service::GC_SERVICE_TASK_NOP;
   int _curr_type = 0;
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
@@ -722,20 +739,22 @@ bool IPCHeap::RunCollectorDaemon() {
   }
 
 
-  if((_curr_type & gc::service::GC_SERVICE_TASK_CONC) > 0) {
+  if((_curr_type & service::GC_SERVICE_TASK_CONC) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ConcurrentGC(self);
     meta_->conc_count_ = meta_->conc_count_ + 1;
-    _task_type = gc::service::GC_SERVICE_TASK_CONC;
-  } else if((_curr_type & gc::service::GC_SERVICE_TASK_EXPLICIT) > 0) {
+    _task_type = service::GC_SERVICE_TASK_CONC;
+  } else if((_curr_type & service::GC_SERVICE_TASK_EXPLICIT) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     ExplicitGC(false);
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
-    _task_type = gc::service::GC_SERVICE_TASK_EXPLICIT;
-  } else if((_curr_type & gc::service::GC_SERVICE_TASK_TRIM) > 0) {
+    _task_type = service::GC_SERVICE_TASK_EXPLICIT;
+  } else if((_curr_type & service::GC_SERVICE_TASK_GC_ALLOC) > 0) {
+
+  } else if((_curr_type & service::GC_SERVICE_TASK_TRIM) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     TrimHeap();
-    _task_type = gc::service::GC_SERVICE_TASK_TRIM;
+    _task_type = service::GC_SERVICE_TASK_TRIM;
   }
 
   NotifyCompleteConcurrentTask(_task_type);

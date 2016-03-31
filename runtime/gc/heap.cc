@@ -1075,15 +1075,16 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   // stack or the live bitmap.
 //  Thread* self = Thread::Current();
   while (!allocation_stack_->AtomicPushBack(obj)) {
-#if (ART_GC_SERVICE || true)
-    LOG(ERROR) << "Heap::RecordAllocation-START";
-#endif
+
 
     GCP_MARK_START_ALLOC_GC_HW_EVENT;
     GCP_MARK_START_GC_HAT_TIME_EVENT(Thread::Current());
-    CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
 #if (ART_GC_SERVICE || true)
+    LOG(ERROR) << "Heap::RecordAllocation-START";
+    service::GCServiceClient::RequestAllocateGC();
     LOG(ERROR) << "Heap::RecordAllocation-----";
+#else
+    CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
 #endif
     GCP_MARK_END_GC_HAT_TIME_EVENT(Thread::Current());
     GCP_MARK_END_ALLOC_GC_HW_EVENT;

@@ -328,6 +328,14 @@ typedef enum {
   IPC_OOM_LABEL_POLICY_MAX
 } IPC_OOM_LABEL_POLICY;
 
+
+typedef struct AgnetMemInfoTimeStamp_S {
+  /* time of the request submitted by mutator */
+  uint64_t req_time_ns_;
+  /* heapsize when  request was sent */
+  uint64_t req_heap_size_;
+} AgnetMemInfoTimeStamp;
+
 typedef struct AgentMemInfo_S {
   int oom_label_;
   long memory_size_; //memory size in Kb
@@ -335,14 +343,20 @@ typedef struct AgentMemInfo_S {
   uint64_t last_update_ns_; //time stampe that process requested/...blaa
 
 
-  /* time of the concurrent request submitted by mutator */
-  uint64_t conc_req_time_ns_;
-  /* heapsize when conc request was sent */
-  uint64_t conc_req_heap_size_;
-  /* time of the concurrent request submitted by mutator */
-  uint64_t expl_req_time_ns_;
-  /* heapsize when conc request was sent */
-  uint64_t expl_req_heap_size_;
+
+  AgnetMemInfoTimeStamp time_stamps_[3];
+//  /* time of the concurrent request submitted by mutator */
+//  uint64_t conc_req_time_ns_;
+//  /* heapsize when conc request was sent */
+//  uint64_t conc_req_heap_size_;
+//  /* time of the concurrent request submitted by mutator */
+//  uint64_t expl_req_time_ns_;
+//  /* heapsize when conc request was sent */
+//  uint64_t expl_req_heap_size_;
+//  /* time of the allocation request submitted by mutator */
+//  uint64_t alloc_req_time_ns_;
+//  /* heapsize when allocation request was sent */
+//  uint64_t alloc_req_heap_size_;
 
   IPC_OOM_LABEL_POLICY policy_method_;
   int histor_tail_;

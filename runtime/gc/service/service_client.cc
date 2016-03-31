@@ -173,16 +173,74 @@ bool GCServiceClient::RequestConcGC(void) {
 
 
   if(_req_entry != NULL) {
-    service_client_->setConcRequestTime(_curr_time_ns, _curr_bytes_Allocated);
+    service_client_->setMemInfoMarkStamp(_curr_time_ns, _curr_bytes_Allocated,
+                                         GC_SERVICE_TASK_CONC);
     service_client_->active_requests_.push_back(_req_entry);
-
     return true;
   }
-
   return true;
+}
 
 
+bool GCServiceClient::RequestExplicitGC(void) {
+  if(service_client_ == NULL)
+    return false;
+  GCServiceGlobalAllocator* _alloc =
+      GCServiceGlobalAllocator::allocator_instant_;
 
+  Thread* self = Thread::Current();
+
+  MutexLock mu(self, *service_client_->gcservice_client_lock_);
+
+  if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_EXPLICIT)) {
+    return true;
+  }
+  service_client_->updateProcessState();
+  uint64_t _curr_bytes_Allocated =
+      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
+  uint64_t _curr_time_ns =  NanoTime();
+
+  gc::service::GCServiceReq* _req_entry =
+      _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+
+  if(_req_entry != NULL) {
+    service_client_->setMemInfoMarkStamp(_curr_time_ns, _curr_bytes_Allocated,
+                                         GC_SERVICE_TASK_EXPLICIT);
+    service_client_->active_requests_.push_back(_req_entry);
+  }
+  return true;
+}
+
+bool GCServiceClient::RequestAllocateGC(void) {
+  if(service_client_ == NULL) {
+    return false;
+  }
+  GCServiceGlobalAllocator* _alloc =
+        GCServiceGlobalAllocator::allocator_instant_;
+  if(_alloc->fwdGCAllocation()) {
+    Thread* self = Thread::Current();
+    MutexLock mu(self, *service_client_->gcservice_client_lock_);
+    if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_GC_ALLOC)) {
+      return true;
+    }
+    service_client_->updateProcessState();
+    uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
+    uint64_t _curr_time_ns =  NanoTime();
+
+  // we need to fwd this to daemon
+    gc::service::GCServiceReq* _req_entry =
+        _alloc->handShake_->ReqAllocationGC(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
+    if(_req_entry != NULL) {
+      service_client_->setMemInfoMarkStamp(_curr_time_ns, _curr_bytes_Allocated,
+                                           GC_SERVICE_TASK_GC_ALLOC);
+      service_client_->active_requests_.push_back(_req_entry);
+
+      LOG(ERROR) << "Submitted the request to the AllocGC.." << self->GetTid();
+      return true;
+    }
+  }
+  LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Not Forwarding";
+  return false;
 }
 
 bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
@@ -207,21 +265,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
 }
 
 
-bool GCServiceClient::RequestAllocateGC(void) {
-  if(service_client_ == NULL) {
-    return false;
-  }
-  GCServiceGlobalAllocator* _alloc =
-        GCServiceGlobalAllocator::allocator_instant_;
 
-  if(_alloc->fwdGCAllocation()) { // we need to fwd this to daemon
-//    LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Forwarding";
-    _alloc->handShake_->ReqAllocationGC();
-    return true;
-  }
-  LOG(ERROR) << "GCServiceClient::RequestAllocateGC..Not Forwarding";
-  return false;
-}
 
 
 bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
@@ -269,33 +313,6 @@ bool GCServiceClient::ShouldPushNewGCRequest(GC_SERVICE_TASK task)    {
 
 
 
-bool GCServiceClient::RequestExplicitGC(void) {
-  if(service_client_ == NULL)
-    return false;
-  GCServiceGlobalAllocator* _alloc =
-      GCServiceGlobalAllocator::allocator_instant_;
-
-  Thread* self = Thread::Current();
-
-  MutexLock mu(self, *service_client_->gcservice_client_lock_);
-
-  if(!service_client_->ShouldPushNewGCRequest(GC_SERVICE_TASK_EXPLICIT)) {
-    return true;
-  }
-  service_client_->updateProcessState();
-  uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
-  uint64_t _curr_time_ns =  NanoTime();
-
-  gc::service::GCServiceReq* _req_entry =
-      _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
-
-  if(_req_entry != NULL) {
-    service_client_->setExplRequestTime(_curr_time_ns,
-                                        _curr_bytes_Allocated);
-    service_client_->active_requests_.push_back(_req_entry);
-  }
-  return true;
-}
 
 
 void GCServiceClient::RequestHeapTrim(void) {

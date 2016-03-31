@@ -51,56 +51,100 @@ class GCServiceClient {
       AShmemMap* shmem_map);
 
   bool isTrimRequestsEnabled() const {
-    return (enable_trimming_ == gc::service::GC_SERVICE_HANDLE_TRIM_ALLOWED);
+    return (enable_trimming_ == service::GC_SERVICE_HANDLE_TRIM_ALLOWED);
   }
 
-  void setConcRequestTime(uint64_t timestamp, uint64_t heapsize) {
-    sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_ = timestamp;
-    sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_ = heapsize;
-
+  void setMemInfoMarkStamp(uint64_t timestamp, uint64_t heapsize,
+                           GC_SERVICE_TASK task) {
+    int _index = 32 - CLZ(GC_SERVICE_TASK) - 2;
+    space::AgnetMemInfoTimeStamp* _stamp_rec =
+        &(sharable_space_->sharable_space_data_->meminfo_rec_.time_stamps_[_index]);
+    _stamp_rec->req_heap_size_ = heapsize;
+    _stamp_rec->req_time_ns_ = timestamp;
   }
-  void setExplRequestTime(uint64_t timestamp, uint64_t heapsize) {
-    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_ = timestamp;
-    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_ = heapsize;
-  }
 
-  void updateDeltaConcReq(uint64_t timestamp, uint64_t heapsize,
-                          uint64_t* time_latency, uint64_t* heap_latency) {
-    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_) {
-//      LOG(ERROR) << "DANGER:::: concurrent ..current=" << heapsize
-//          << ", marked="
-//          << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_
-//          << ", curr_time=" << timestamp << ", marked_time = " << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_;
+  void updateDeltaReqLatency(uint64_t timestamp, uint64_t heapsize,
+                          uint64_t* time_latency, uint64_t* heap_latency,
+                          GC_SERVICE_TASK task) {
+    int _index = 32 - CLZ(GC_SERVICE_TASK) - 2;
+    space::AgnetMemInfoTimeStamp* _stamp_rec =
+        &(sharable_space_->sharable_space_data_->meminfo_rec_.time_stamps_[_index]);
+    if(heapsize < _stamp_rec->req_heap_size_) {
       *heap_latency = 0;
     } else {
-      *heap_latency = heapsize -
-          sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_;
+      *heap_latency = heapsize - _stamp_rec->req_heap_size_;
     }
-    *time_latency = (timestamp -
-        sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_) ;
-
+    *time_latency = (timestamp - _stamp_rec->req_time_ns_) ;
   }
 
-
-  void updateDeltaExplReq(uint64_t timestamp, uint64_t heapsize,
-                          uint64_t* time_latency, uint64_t* heap_latency) {
-
-    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_) {
-//      LOG(ERROR) << "DANGER:::: explicit ..current=" << heapsize
-//          << ", marked="
-//          << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_
-//          << ", curr_time=" << timestamp
-//          << ", marked_time = "
-//          << sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
-      *heap_latency = 0;
-    } else {
-      *heap_latency = heapsize -
-          sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
-    }
-
-    *time_latency = (timestamp -
-        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_);
-  }
+//  void setConcRequestTime(uint64_t timestamp, uint64_t heapsize) {
+//    sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_ = timestamp;
+//    sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_ = heapsize;
+//
+//  }
+//  void setExplRequestTime(uint64_t timestamp, uint64_t heapsize) {
+//    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_ = timestamp;
+//    sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_ = heapsize;
+//  }
+//  void setAllocRequestTime(uint64_t timestamp, uint64_t heapsize) {
+//    sharable_space_->sharable_space_data_->meminfo_rec_.alloc_req_time_ns_ = timestamp;
+//    sharable_space_->sharable_space_data_->meminfo_rec_.alloc_req_heap_size_ = heapsize;
+//  }
+//
+//  void updateDeltaConcReq(uint64_t timestamp, uint64_t heapsize,
+//                          uint64_t* time_latency, uint64_t* heap_latency) {
+//    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_) {
+////      LOG(ERROR) << "DANGER:::: concurrent ..current=" << heapsize
+////          << ", marked="
+////          << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_
+////          << ", curr_time=" << timestamp << ", marked_time = " << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_;
+//      *heap_latency = 0;
+//    } else {
+//      *heap_latency = heapsize -
+//          sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_;
+//    }
+//    *time_latency = (timestamp -
+//        sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_) ;
+//
+//  }
+//
+//  void updateDeltaAllocReq(uint64_t timestamp, uint64_t heapsize,
+//                          uint64_t* time_latency, uint64_t* heap_latency) {
+//    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.alloc_req_heap_size_) {
+////      LOG(ERROR) << "DANGER:::: concurrent ..current=" << heapsize
+////          << ", marked="
+////          << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_
+////          << ", curr_time=" << timestamp << ", marked_time = " << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_;
+//      *heap_latency = 0;
+//    } else {
+//      *heap_latency = heapsize -
+//          sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_;
+//    }
+//    *time_latency = (timestamp -
+//        sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_time_ns_) ;
+//
+//  }
+//
+//
+//  void updateDeltaExplReq(uint64_t timestamp, uint64_t heapsize,
+//                          uint64_t* time_latency, uint64_t* heap_latency) {
+//
+//    if(heapsize < sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_) {
+////      LOG(ERROR) << "DANGER:::: explicit ..current=" << heapsize
+////          << ", marked="
+////          << sharable_space_->sharable_space_data_->meminfo_rec_.conc_req_heap_size_
+////          << ", curr_time=" << timestamp
+////          << ", marked_time = "
+////          << sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
+//      *heap_latency = 0;
+//    } else {
+//      *heap_latency = heapsize -
+//          sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_heap_size_;
+//    }
+//
+//    *time_latency = (timestamp -
+//        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_);
+//  }
 
   gc::space::AgentMemInfo* GetMemInfoRec(void) {
     return &sharable_space_->sharable_space_data_->meminfo_rec_;

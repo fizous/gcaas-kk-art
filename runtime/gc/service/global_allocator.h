@@ -197,10 +197,11 @@ class GCSrvcClientHandShake {
   void ProcessQueuedMapper(android::MappedPairProcessFD* entry);
   GCServiceReq* ReqConcCollection(void*);
   GCServiceReq* ReqExplicitCollection(void*);
+  GCServiceReq* ReqAllocationGC(void*);
   void ReqRegistration(void*);
   GCServiceReq* ReqHeapTrim(void);
   void ReqUpdateStats(void);
-  void ReqAllocationGC(void);
+
   void ListenToRequests(void*);
   GC_SERVICE_TASK ProcessGCRequest(void* args);
   //GCServiceClientHandShake* mem_data_;
