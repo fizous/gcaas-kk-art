@@ -365,7 +365,7 @@ class GlobalStatusUpdaterTask : public WorkStealingTask {
                                                                   "meminfo",
                                                                   GCServiceDaemon::meminfo_args_,
                                                                   1);
-    close(mem_info_fd_);
+    close(service_daemon_->mem_info_fd_);
 
     if(mem_info_result) {
 
