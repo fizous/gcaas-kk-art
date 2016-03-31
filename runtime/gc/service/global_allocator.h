@@ -455,6 +455,7 @@ class GCSrvcMemInfoOOM {
 
   static long total_ram_;
   static long free_ram_[];
+  static GCSrvcMemInfoOOM mem_info_oom_list_[];
 
   const int oom_adj_;
   const char * oom_label_;
@@ -463,24 +464,37 @@ class GCSrvcMemInfoOOM {
   std::vector<GCSrvceAgent*> agents_list_;
 
   GCSrvcMemInfoOOM(int, const char *);
-  void resetMemInfo(void);
+
+  void resetMemInfo(void) {
+    aggregate_memory_ = 0;
+  }
 
   static int readTotalMemory(char* line);
   static int readFreeMemory(char* line);
   static int parseMemInfo(const char* file_path);
 
-  static int parseOOMHeaderString(char* line, char* label, long* mem_size);
-  static int parseOOMRecString(char* line, long* mem_size, int* pid);
+  static int parseOOMRecString(char* line, long* mem_size, int* pid) {
+    int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
 
-  static GCSrvcMemInfoOOM mem_info_oom_list_[];
+    if(result == 2)
+      return 100;
+    return 0;
+  }
+
+  static int parseOOMHeaderString(char* line, char* label, long* mem_size) {
+    int result = sscanf(line, " %ld kB: %[^\n]s",  mem_size, label);
+
+    if(result == 2)
+      return 100;
+    return 0;
+  }
 
   static double GetResizeFactor(gc::space::AgentMemInfo* mem_info_rec) {
     double _fact = mem_info_rec->resize_factor_;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
       _fact = GCServiceGlobalAllocator::allocator_instant_->getNurseryGrowFactor();
     } else {
-        _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
-
+      _fact = GetOOMResizeFactor(mem_info_rec->oom_label_);
     }
     return _fact;
   }
@@ -491,26 +505,17 @@ class GCSrvcMemInfoOOM {
     return 1.0;
   }
 
-//  static int GetMemInfoOOMAdj(gc::space::AgentMemInfo* mem_info_rec) {
-
-//  }
-
   static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {
     bool do_care = false;
     if(mem_info_rec->policy_method_ == gc::space::IPC_OOM_LABEL_POLICY_NURSERY) {
-
       do_care = true;
     } else {
-
-
       if(mem_info_rec->oom_label_ == 0)
         do_care = true;
-
-     // LOG(ERROR) << "CareAboutPauseTimes..." << mem_info_rec->policy_method_ << ", " << mem_info_rec->oom_label_;
-
     }
     return do_care;
   }
+
 };//GCSrvcMemInfoOOM
 
 

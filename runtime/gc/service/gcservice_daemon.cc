@@ -52,49 +52,18 @@ GCSrvcMemInfoOOM GCSrvcMemInfoOOM::mem_info_oom_list_[] = {
 
 
 GCSrvcMemInfoOOM::GCSrvcMemInfoOOM(int adj, const char * label) :
-    oom_adj_(adj), oom_label_(label),  aggregate_memory_(0) {
+        oom_adj_(adj), oom_label_(label),  aggregate_memory_(0) {
 
 }
-
-void GCSrvcMemInfoOOM::resetMemInfo() {
-  aggregate_memory_ = 0;
-}
-
-
-int GCSrvcMemInfoOOM::parseOOMRecString(char* line,
-                                           long* mem_size, int* pid) {
-
-//  int length= 0;
-//  const char* res;
-//  char  output[256];
-  int result = sscanf(line, " %ld kB: %*s (pid %d",  mem_size, pid);
-
-  if(result == 2)
-    return 100;
-  return 0;
-}
-
-
-int GCSrvcMemInfoOOM::parseOOMHeaderString(char* line, char* label, long* mem_size) {
-  int result = sscanf(line, " %ld kB: %[^\n]s",  mem_size, label);
-
-  if(result == 2)
-    return 100;
-  return 0;
-}
-
-
-
 
 int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
   FILE *f;
   f = fopen(file_path, "r");
   if (!f)
-    return 0;// errno;
+    return 0;
 
   char line[256];
-  //char _label[128];
   int _read_res = 0;
   int _stage = 0;
   int pid = 0;
@@ -102,11 +71,6 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
   long _memory_size = 0;
 
   GCSrvcMemInfoOOM*  _meminfoP = NULL;
-//  for(int i = 0; i< 13; i++){
-//    GCSrvcMemInfoOOM*  _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[i]);
-//    _meminfoP->resetMemInfo();
-//  }
-
 
   int _curr_index = 0;
   _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
@@ -115,7 +79,7 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
     if(_stage ==1) {
       _read_res  = GCSrvcMemInfoOOM::parseOOMRecString(line,
-                                               &_memory_size, &pid);
+                                                       &_memory_size, &pid);
 
       if(_read_res == 100) {
         GCSrvceAgent* _agent = GCServiceProcess::process_->daemon_->GetAgentByPid(pid);
@@ -128,9 +92,9 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
 
           if(false) {
 
-          LOG(ERROR) << "---1-" << pid << ", "
-              << _meminfo_app_rec->memory_size_ << " kB, "
-              << _meminfo_app_rec->oom_label_ << "...." << line;
+            LOG(ERROR) << "---1-" << pid << ", "
+                << _meminfo_app_rec->memory_size_ << " kB, "
+                << _meminfo_app_rec->oom_label_ << "...." << line;
           }
           _meminfoP->agents_list_.push_back(_agent);
         }
@@ -144,24 +108,18 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
         _stage |= 2;
         continue;
       }
-
-
       _read_res  = GCSrvcMemInfoOOM::parseOOMHeaderString(line, _label, &_memory_size);
       if(_read_res == 100) {
-//        LOG(ERROR) << "orig: " << line << ", .. label:" << _label;
         while(_curr_index < 13) {
           _meminfoP = &(GCSrvcMemInfoOOM::mem_info_oom_list_[_curr_index]);
           _meminfoP->resetMemInfo();
           _meminfoP->agents_list_.clear();
           _curr_index++;
-          if(strcmp(_meminfoP->oom_label_, _label) == 0){
+          if(strcmp(_meminfoP->oom_label_, _label) == 0) {
             _meminfoP->aggregate_memory_ = _memory_size;
-//            LOG(ERROR) << "found label: " << _label << " at index " <<  _curr_index-1;
             break;
           }
-
         }
-        //LOG(ERROR) << "-0-" << _meminfoP->oom_label_ << ", "<< _memory_size << " kB";
         _stage |= 1;
         continue;
       }
@@ -172,7 +130,6 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       _read_res = GCSrvcMemInfoOOM::readTotalMemory(line);
       if(_read_res == 100) {
         _stage |= 4;
-//        LOG(ERROR) << "---2-" << line;
         continue;
       }
     }
@@ -180,22 +137,14 @@ int GCSrvcMemInfoOOM::parseMemInfo(const char* file_path) {
       _read_res = GCSrvcMemInfoOOM::readFreeMemory(line);
       if(_read_res == 100) {
         _stage |= 8;
-//        LOG(ERROR) << "---2-" << line;
         break;
       }
     }
   }
-
-
   fclose(f);
-
-
   return 1;
 
 }
-
-
-
 
 
 int GCSrvcMemInfoOOM::readTotalMemory(char* line) {
@@ -241,11 +190,10 @@ GCSrvceAgent* GCServiceDaemon::GetAgentByPid(int pid) {
 void* GCServiceDaemon::RunDaemon(void* arg) {
   GCServiceDaemon* _daemonObj = reinterpret_cast<GCServiceDaemon*>(arg);
   GCServiceProcess* _processObj = GCServiceProcess::process_;
-  IPC_MS_VLOG(INFO) << "-------- Inside GCServiceDaemon::RunDaemon ---------";
   Runtime* runtime = Runtime::Current();
   bool _createThread =  runtime->AttachCurrentThread("GCSvcDaemon", true,
-      runtime->GetSystemThreadGroup(),
-      !runtime->IsCompiler());
+                                                     runtime->GetSystemThreadGroup(),
+                                                     !runtime->IsCompiler());
 
   if(!_createThread) {
     LOG(ERROR) << "-------- could not attach internal GC service Daemon ---------";
@@ -289,42 +237,42 @@ void* GCServiceDaemon::RunDaemon(void* arg) {
 
 
 void GCServiceDaemon::setThreadAffinity(Thread* th, int cpu_id, bool complementary) {
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
-    uint32_t _cpu_id =  (uint32_t) cpu_id;
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
+  uint32_t _cpuCount = (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+  uint32_t _cpu_id =  (uint32_t) cpu_id;
+  if(complementary) {
+    for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
+      if(_ind != _cpu_id)
+        CPU_SET(_ind, &mask);
+    }
+  } else {
+    CPU_SET(_cpu_id, &mask);
+  }
+  if(sched_setaffinity(th->GetTid(),
+                       sizeof(mask), &mask) != 0) {
     if(complementary) {
-      for(uint32_t _ind = 0; _ind < _cpuCount; _ind++) {
-        if(_ind != _cpu_id)
-          CPU_SET(_ind, &mask);
-      }
-    } else {
-      CPU_SET(_cpu_id, &mask);
+      GCMMP_VLOG(INFO) << "GCMMP: Complementary";
     }
-    if(sched_setaffinity(th->GetTid(),
-        sizeof(mask), &mask) != 0) {
-      if(complementary) {
-        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
-      }
-      LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
-          th->GetTid() << ", cpuid: " <<  _cpu_id;
-    } else {
-      if(complementary) {
-        GCMMP_VLOG(INFO) << "GCMMP: Complementary";
-      }
+    LOG(ERROR) << "GCMMP: Error in setting thread affinity tid:" <<
+        th->GetTid() << ", cpuid: " <<  _cpu_id;
+  } else {
+    if(complementary) {
+      GCMMP_VLOG(INFO) << "GCMMP: Complementary";
     }
+  }
 
 }
 
 GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
-     thread_(NULL), processed_index_(0), mem_info_fd_(-1),
-     req_counts_(0), last_global_update_time_ns_(0) {
+         thread_(NULL), processed_index_(0), mem_info_fd_(-1),
+         req_counts_(0), last_global_update_time_ns_(0) {
   Thread* self = Thread::Current();
   {
     IPMutexLock interProcMu(self, *process->service_meta_->mu_);
     process->service_meta_->status_ = GCSERVICE_STATUS_STARTING;
-//    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
-//        64, false));
+    //    registered_apps_.reset(accounting::ATOMIC_MAPPED_STACK_T::Create("registered_apps",
+    //        64, false));
     initShutDownSignals();
 
     thread_pool_.reset(new ThreadPool(4));
@@ -332,9 +280,9 @@ GCServiceDaemon::GCServiceDaemon(GCServiceProcess* process) :
   }
 
   CHECK_PTHREAD_CALL(pthread_create,
-      (&pthread_, NULL,
-      &GCServiceDaemon::RunDaemon, this),
-      "GCService Daemon thread");
+                     (&pthread_, NULL,
+                         &GCServiceDaemon::RunDaemon, this),
+                         "GCService Daemon thread");
 
 }
 
@@ -343,7 +291,7 @@ void GCServiceDaemon::initShutDownSignals(void) {
   shutdown_mu_ = new Mutex("gcService Shutdown");
   MutexLock mu(self, *shutdown_mu_);
   shutdown_cond_.reset(new ConditionVariable("gcService Shutdown condition variable",
-      *shutdown_mu_));
+                                             *shutdown_mu_));
 }
 
 
@@ -409,11 +357,11 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
 
     if(GCSrvcMemInfoOOM::parseMemInfo("/data/anr/meminfo.data")) {
 
-//      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
-//          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
-//          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
-//          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
-//          "," << GCSrvcMemInfoOOM::free_ram_[3];
+      //      LOG(ERROR) << "total_ram=" << GCSrvcMemInfoOOM::total_ram_ << "\n" <<
+      //          "free_rams: " << GCSrvcMemInfoOOM::free_ram_[0] <<
+      //          "," << GCSrvcMemInfoOOM::free_ram_[1] <<
+      //          "," << GCSrvcMemInfoOOM::free_ram_[2] <<
+      //          "," << GCSrvcMemInfoOOM::free_ram_[3];
     }
   }
 
@@ -433,8 +381,8 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
       reinterpret_cast<GCSrvSharableDlMallocSpace*>(
           mappedPair->first->shared_space_addr_);
   process_id_ = mappedPair->first->process_id_;
-//  binding_.java_lang_Class_cached_ =
-//      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
+  //  binding_.java_lang_Class_cached_ =
+  //      reinterpret_cast<mirror::Class*>(mappedPair->first->java_lang_Class_cached_);
 
   collector_ = ServerCollector::CreateServerCollector(&binding_);
   meminfo_rec_ = &(binding_.sharable_space_->meminfo_rec_);
@@ -459,9 +407,9 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
 
 void GCSrvceAgent::UpdateRequestStatus(GCServiceReq* request_addr) {
   if(request_addr->status_ == GC_SERVICE_REQ_STARTED) {
-//    LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus A..addr="
-//        << request_addr << ", status:" << request_addr->status_
-//        << ",type=" << request_addr->req_type_;
+    //    LOG(ERROR) << " GCSrvceAgent::UpdateRequestStatus A..addr="
+    //        << request_addr << ", status:" << request_addr->status_
+    //        << ",type=" << request_addr->req_type_;
     request_addr->status_ = GC_SERVICE_REQ_COMPLETE;
     bool found = false;
     std::vector<GCServiceReq*>::iterator it;
@@ -540,7 +488,7 @@ void GCServiceProcess::LaunchGCServiceProcess(void) {
 
 
 GCServiceProcess* GCServiceProcess::InitGCServiceProcess(GCServiceHeader* meta,
-    GCSrvcClientHandShake* handshake, int enable_trim){
+                                                         GCSrvcClientHandShake* handshake, int enable_trim){
   if(GCServiceProcess::process_ == NULL) {
     GCServiceProcess::process_ = new GCServiceProcess(meta, handshake, enable_trim);
     GCServiceProcess::process_->SetGCDaemon();
@@ -570,13 +518,13 @@ bool GCServiceProcess::initSvcFD(void) {
 
 
 GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
-                                  GCSrvcClientHandShake* handShakeMemory,
-                                  int enable_trim)  :
-    service_meta_(meta),
-    handShake_(handShakeMemory),
-    enable_trimming_(enable_trim),
-    fileMapperSvc_(NULL),
-    thread_(NULL), srvcReady_(false){
+                                   GCSrvcClientHandShake* handShakeMemory,
+                                   int enable_trim)  :
+        service_meta_(meta),
+        handShake_(handShakeMemory),
+        enable_trimming_(enable_trim),
+        fileMapperSvc_(NULL),
+        thread_(NULL), srvcReady_(false){
 
   thread_ = Thread::Current();
   {
@@ -586,8 +534,8 @@ GCServiceProcess::GCServiceProcess(GCServiceHeader* meta,
   }
   srvcReady_ = initSvcFD();
 
-//  import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
-//      MemBaseMap::max_covered_address);
+  //  import_address_ = std::max(Runtime::Current()->GetHeap()->GetMaxAddress(),
+  //      MemBaseMap::max_covered_address);
 
 }
 

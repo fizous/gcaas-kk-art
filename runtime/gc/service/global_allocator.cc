@@ -102,7 +102,7 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
     std::vector<std::string> gcsrvc_options;
     Split(option.substr(strlen("-Xgcsrvc.")), '.', gcsrvc_options);
     for (size_t i = 0; i < gcsrvc_options.size(); ++i) {
-      if (gcsrvc_options[i] == "fgd_growth_") {
+      if (gcsrvc_options[i] == "fgd_growth") {
         opts_addr->fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
         return true;
       } else if (gcsrvc_options[i] == "trim") {
@@ -117,8 +117,29 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
       } else if (gcsrvc_options[i] == "page_capacity") {
         opts_addr->page_capacity_ = atoi(gcsrvc_options[++i].c_str());
         return true;
-      } else if (gcsrvc_options[i] == "handle_system_server") {
+      } else if (gcsrvc_options[i] == "hsyserver") {
         opts_addr->handle_system_server_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "affinity") {
+        opts_addr->daemon_affinity_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "nurserygrow") {
+        opts_addr->nursery_grow_adj_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
+        return true;
+      } else if (gcsrvc_options[i] == "nurserysize") {
+        opts_addr->nursery_slots_threshold_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "latency") {
+        opts_addr->add_conc_remote_latency_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "profile") {
+        opts_addr->save_mem_profile_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "workers") {
+        opts_addr->work_stealing_workers_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "power") {
+        opts_addr->power_strategies_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       }
     }
@@ -534,13 +555,9 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
 void GCSrvcClientHandShake::ReqAllocationGC() {
   Thread* self = Thread::Current();
   GCServiceReq* _entry = NULL;
-
-
-
   GC_BUFFER_PUSH_REQUEST(_entry, self);
 
   _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
-  GCSERVICE_ALLOC_VLOG(ERROR) << "GCSrvcClientHandShake::ReqGCAlloc";
   gcservice_data_->cond_->Broadcast(self);
 }
 
@@ -581,19 +598,13 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
       static_cast<GC_SERVICE_TASK>(_entry->req_type_);
 
 
-  GCSERVICE_ALLOC_VLOG(ERROR) << " ~~~~ Request type: " << _req_type <<
-      " ~~~~~ " << _entry->req_type_;
-
   if(_req_type == GC_SERVICE_TASK_REG) {
     GCServiceDaemon* _daemon = reinterpret_cast<GCServiceDaemon*>(args);
     android::FileMapperParameters* _fMapsP =
         reinterpret_cast<android::FileMapperParameters*>(_entry->data_addr_);
 
-
     gcservice_data_->mapper_tail_ =
         ((gcservice_data_->mapper_tail_ + 1) % KProcessMapperCapacity);
-
-
 
     android::FileMapperParameters* _f_map_params_a =
         reinterpret_cast<android::FileMapperParameters*>(calloc(1,
@@ -778,13 +789,10 @@ GC_SERVICE_TASK GCSrvcClientHandShake::ProcessGCRequest(void* args) {
        GCSrvceAgent* _agent = _dmon->GetAgentByPid(_entry->pid_);
        if(_agent != NULL) {
          bool _fwd_request = true;
-
          if (_req_type == GC_SERVICE_TASK_TRIM) {
            if(!GCServiceGlobalAllocator::allocator_instant_->isTrimHandlingEnabled()) {
              _fwd_request = false;
            }
-//           LOG(ERROR) << "Process_gc_request.." << _req_type << ", "
-//               << _entry->status_ << ", entry_address=" <<_entry;
          } else if (_req_type == GC_SERVICE_TASK_GC_ALLOC) {
            LOG(ERROR) << "GC_SERVICE_TASK_GC_ALLOC is not handled";
            _fwd_request = false;
