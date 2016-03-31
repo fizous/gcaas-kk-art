@@ -350,7 +350,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 
   uint64_t _delta_time_ms =  NsToMs(collection_latency_);
   LOG(ERROR) << "IPCHeap::CheckTrimming alloc_latency: " << allocation_latency_
-      << ", collec_latency: " << collection_latency_ << ", _delta_time_ms = "
+      << ", time_latency: " << collection_latency_ << ", _delta_time_ms = "
       << _delta_time_ms;
   double _latency_rate_s = 0.0;
 
@@ -534,7 +534,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
   }
 
   uint64_t gc_start_time_ns = NanoTime();
-  uint64_t gc_start_size = local_heap_->GetBytesAllocated();
+  uint64_t gc_start_size = local_heap_->GetAtomicBytesAllocated()/*GetBytesAllocated()*/;
 
   service::GC_SERVICE_TASK _srvc_task = service::GC_SERVICE_TASK_NOP;
   if(gc_cause == kGcCauseBackground) {

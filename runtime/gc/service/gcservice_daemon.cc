@@ -405,7 +405,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
   workers_pool_->AddTask(self, new GlobalStatusUpdaterTask(this));
   workers_pool_->SetMaxActiveWorkers(pool_size_ - 1);
   workers_pool_->StartWorkers(self);
-  LOG(ERROR) << "thread: "<< self <<"..started the workers and exited";
+  LOG(ERROR) << "thread: "<< self->GetTid() <<"..started the workers and exited";
 }
 
 

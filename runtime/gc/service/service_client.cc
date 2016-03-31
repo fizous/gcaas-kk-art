@@ -197,7 +197,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
   }
   service_client_->updateProcessState();
   uint64_t _curr_bytes_Allocated =
-      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
+      static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetAtomicBytesAllocated()/*GetBytesAllocated()*/);
   uint64_t _curr_time_ns =  NanoTime();
 
   service::GCServiceReq* _req_entry =
