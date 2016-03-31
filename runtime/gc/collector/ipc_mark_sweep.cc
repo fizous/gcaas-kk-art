@@ -348,16 +348,32 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   size_t _adjusted_max_free = 0;
   bool _pause_care = GCSrvcMemInfoOOM::CareAboutPauseTimes(_mem_info_rec);
 
-  uint64_t _delta_time_ms =  NsToMs(collection_latency_);
-  LOG(ERROR) << "IPCHeap::CheckTrimming alloc_latency: " << allocation_latency_
-      << ", time_latency: " << collection_latency_ << ", _delta_time_ms = "
-      << _delta_time_ms;
+
+
   double _latency_rate_s = 0.0;
 
-  if(GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()
-      && _delta_time_ms > 0) {
-    _latency_rate_s = ((allocation_latency_ * 1.0/* * 1000*/) / _delta_time_ms);
+  if(gc_duration > 0 && collection_latency_ > gc_duration
+      && GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()) {
+    double _ration_latency = ((collection_latency_ - gc_duration) * 1.0)  / gc_duration;
+    _latency_rate_s = _ration_latency * local_heap_->GetAllocationRate() * (gc_duration / 1000.0 / 1000);
+
+    LOG(ERROR) << "_ration_latency = " << _ration_latency << ", allocRate="  << local_heap_->GetAllocationRate();
   }
+
+
+  if(false) {
+    uint64_t _delta_time_ms =  NsToMs(collection_latency_);
+    LOG(ERROR) << "IPCHeap::CheckTrimming alloc_latency: " << allocation_latency_
+        << ", time_latency: " << collection_latency_ << ", _delta_time_ms = "
+        << _delta_time_ms;
+    if(GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()
+        && _delta_time_ms > 0) {
+      _latency_rate_s = ((allocation_latency_ * 1.0/* * 1000*/) / _delta_time_ms);
+    }
+  }
+
+
+
 
 
   LOG(ERROR) << "IPCHeap::CheckTrimming latency_rate " << _latency_rate_s;
