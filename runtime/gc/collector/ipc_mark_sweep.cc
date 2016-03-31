@@ -356,7 +356,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   if(collection_latency_ > 0
       && GCServiceGlobalAllocator::allocator_instant_->isAddRemoteConcLatency()) {
     double _ration_latency = ((collection_latency_ - gc_duration) * 1.0)  / gc_duration;
-    _latency_rate_s = local_heap_->GetAllocationRate() * (collection_latency_ / 1000.0 / 1000.0 / 1000);
+    _latency_rate_s = std::max(131072.0, local_heap_->GetAllocationRate() * (collection_latency_ / 1000.0 / 1000.0 / 1000));
 
     LOG(ERROR) << "_latency_rate_s = " << _latency_rate_s << ", _ration_latency = " << _ration_latency << ", allocRate="  << local_heap_->GetAllocationRate();
   }
@@ -586,10 +586,10 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
     GCServiceClient::service_client_->updateDeltaReqLatency(gc_start_time_ns,
                gc_start_size, &collection_latency_, &allocation_latency_, _srvc_task);
 
-    LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size="
-        << gc_start_size << ", start_time_ns=" << gc_start_time_ns
-        << ", time_latency=" << collection_latency_
-        << ", alloc_latency=" << allocation_latency_;
+//    LOG(ERROR) << "IPCHeap::CollectGarbageIPC...gc_start_size="
+//        << gc_start_size << ", start_time_ns=" << gc_start_time_ns
+//        << ", time_latency=" << collection_latency_
+//        << ", alloc_latency=" << allocation_latency_;
   }
   //allocation_latency_ = 0;
 
