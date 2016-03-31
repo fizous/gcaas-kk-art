@@ -27,7 +27,7 @@ namespace service {
 GCServiceClient* GCServiceClient::service_client_ = NULL;
 
 
-GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_space,
+GCServiceClient::GCServiceClient(space::SharableDlMallocSpace* sharable_space,
     int index, int enable_trim) :
         index_(index),
         enable_trimming_(enable_trim),
@@ -38,12 +38,12 @@ GCServiceClient::GCServiceClient(gc::space::SharableDlMallocSpace* sharable_spac
 
   if(true) {
       ipcHeap_ =
-          new gc::collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
+          new collector::IPCHeap(&(sharable_space_->sharable_space_data_->heap_meta_),
                                                     Runtime::Current()->GetHeap());
 
       ipcHeap_->CreateCollectors();
   } else {
-    Runtime::Current()->GetHeap()->GCPSrvcReinitMarkSweep(new gc::collector::MarkSweep(Runtime::Current()->GetHeap(),
+    Runtime::Current()->GetHeap()->GCPSrvcReinitMarkSweep(new collector::MarkSweep(Runtime::Current()->GetHeap(),
         true));
   }
 }
@@ -108,10 +108,10 @@ void GCServiceClient::InitClient(const char* se_name_c_str, int trim_config) {
   bool result = true;
   thread_list->SuspendAll();
   {
-    gc::Heap* heap = runtime->GetHeap();
+    Heap* heap = runtime->GetHeap();
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
-    gc::space::SharableDlMallocSpace* _sharable_space =
-          reinterpret_cast<gc::space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
+    space::SharableDlMallocSpace* _sharable_space =
+          reinterpret_cast<space::SharableDlMallocSpace*>(heap->GetAllocSpace());//PostZygoteForkGCService();
 
     result = _sharable_space->RegisterGlobalCollector(se_name_c_str);
 
@@ -168,7 +168,7 @@ bool GCServiceClient::RequestConcGC(void) {
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
-  gc::service::GCServiceReq* _req_entry =
+  service::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
 
@@ -200,7 +200,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
       static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
-  gc::service::GCServiceReq* _req_entry =
+  service::GCServiceReq* _req_entry =
       _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
   if(_req_entry != NULL) {
@@ -228,7 +228,7 @@ bool GCServiceClient::RequestAllocateGC(void) {
     uint64_t _curr_time_ns =  NanoTime();
 
   // we need to fwd this to daemon
-    gc::service::GCServiceReq* _req_entry =
+    service::GCServiceReq* _req_entry =
         _alloc->handShake_->ReqAllocationGC(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
     if(_req_entry != NULL) {
       service_client_->setMemInfoMarkStamp(_curr_time_ns, _curr_bytes_Allocated,
@@ -247,7 +247,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   bool _return_result = false;
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  std::vector<gc::service::GCServiceReq*>::iterator it;
+  std::vector<service::GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
       //LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
@@ -268,8 +268,8 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
 
 
 
-bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
-    bool clear_soft_references, gc::collector::GcType* gctype) {
+bool GCServiceClient::RequestInternalGC(collector::GcType gc_type, GcCause gc_cause,
+    bool clear_soft_references, collector::GcType* gctype) {
   if(service_client_ == NULL) {
     return false;
   }
@@ -279,7 +279,7 @@ bool GCServiceClient::RequestInternalGC(gc::collector::GcType gc_type, gc::GcCau
   return true;
 }
 
-bool GCServiceClient::RequestWaitForConcurrentGC(gc::collector::GcType* type) {
+bool GCServiceClient::RequestWaitForConcurrentGC(collector::GcType* type) {
   if(service_client_ == NULL) {
     return false;
   }
@@ -333,7 +333,7 @@ void GCServiceClient::RequestHeapTrim(void) {
 //      << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  gc::service::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
+  service::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
   if(_req_entry != NULL) {
     service_client_->active_requests_.push_back(_req_entry);
   }
@@ -358,12 +358,12 @@ void GCServiceClient::updateProcessState(void) {
 //          << last_process_state_ << ", new_state = " << my_new_process_state
 //          << ", last_oom = " << last_process_oom_ << ", my_new_oom="
 //          << _my_new_oom_adj;
-      gc::space::AgentMemInfo* _mem_info_rec = NULL;
+      space::AgentMemInfo* _mem_info_rec = NULL;
       if(_my_new_oom_adj != last_process_oom_) {
         _mem_info_rec = GetMemInfoRec();
         _mem_info_rec->oom_label_ = _my_new_oom_adj;
         _mem_info_rec->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(_mem_info_rec);
-        _req_update = (GetMemInfoRec()->policy_method_ != gc::space::IPC_OOM_LABEL_POLICY_NURSERY);
+        _req_update = (GetMemInfoRec()->policy_method_ != space::IPC_OOM_LABEL_POLICY_NURSERY);
       }
 
       if(_req_update) {

@@ -16,6 +16,8 @@
 #include "gc/collector/ipc_mark_sweep.h"
 #include "gc/heap.h"
 #include "gc/service/global_allocator.h"
+#include "utils.h"
+
 namespace art {
 namespace gc {
 namespace service {
@@ -34,9 +36,9 @@ class GCServiceClient {
   static bool RequestExplicitGC(void);
   bool ShouldPushNewGCRequest(GC_SERVICE_TASK task);
   static bool RequestAllocateGC(void) ;
-  static bool RequestWaitForConcurrentGC(gc::collector::GcType* type);
-  static bool RequestInternalGC(gc::collector::GcType gc_type, gc::GcCause gc_cause,
-      bool clear_soft_references, gc::collector::GcType* gctype);
+  static bool RequestWaitForConcurrentGC(collector::GcType* type);
+  static bool RequestInternalGC(collector::GcType gc_type, GcCause gc_cause,
+      bool clear_soft_references, collector::GcType* gctype);
 //  static bool SetNextGCType(gc::collector::GcType gc_type);
 //  static bool GetNextGCType(gc::collector::GcType* gc_type);
 //  static bool SetConcStartBytes(size_t conc_start);
@@ -146,7 +148,7 @@ class GCServiceClient {
 //        sharable_space_->sharable_space_data_->meminfo_rec_.expl_req_time_ns_);
 //  }
 
-  gc::space::AgentMemInfo* GetMemInfoRec(void) {
+  space::AgentMemInfo* GetMemInfoRec(void) {
     return &sharable_space_->sharable_space_data_->meminfo_rec_;
   }
 
@@ -154,17 +156,17 @@ class GCServiceClient {
 
   void updateProcessState(void);
  private:
-  GCServiceClient(gc::space::SharableDlMallocSpace*, int, int);
+  GCServiceClient(space::SharableDlMallocSpace*, int, int);
   int index_;
   int enable_trimming_;
   int last_process_state_;
   int last_process_oom_;
-  gc::space::SharableDlMallocSpace* sharable_space_;
+  space::SharableDlMallocSpace* sharable_space_;
   Mutex* gcservice_client_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   //gc::collector::IPCMarkSweep* collector_;
-  gc::collector::IPCHeap* ipcHeap_;
+  collector::IPCHeap* ipcHeap_;
 
-  std::vector<gc::service::GCServiceReq*> active_requests_;
+  std::vector<service::GCServiceReq*> active_requests_;
 
 
 
