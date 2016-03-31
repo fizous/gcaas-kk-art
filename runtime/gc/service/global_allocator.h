@@ -534,8 +534,7 @@ class GCServiceDaemon {
   Mutex* shutdown_mu_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   UniquePtr<ConditionVariable> shutdown_cond_ GUARDED_BY(shutdown_mu_);
   int processed_index_;
-  int mem_info_fd_;
-  int req_counts_;
+
 
 
   //std::vector<android::MappedPairProcessFD*> registered_apps_;
@@ -552,6 +551,8 @@ public:
   //GCServiceProcess* process_;
   //std::vector<GCSrvceAgent*> client_agents_;
   // The last time a heap trim occurred.
+  int mem_info_fd_;
+  int req_counts_;
   uint64_t last_global_update_time_ns_;
   ClientAgentsMap agents_map_;
 
@@ -568,10 +569,6 @@ public:
 
 
   void SetMemInfoDumpFile();
-
-  int GetMemInfoFd() const {
-    return mem_info_fd_;
-  }
 
 
 };//class GCServiceDaemon
