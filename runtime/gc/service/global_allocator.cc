@@ -477,7 +477,6 @@ GCServiceReq* GCSrvcClientHandShake::ReqAllocationGC(void* args) {
   _entry->req_type_ = GC_SERVICE_TASK_GC_ALLOC;
   _entry->data_addr_ = (uintptr_t)args;
   gcservice_data_->cond_->Broadcast(self);
-  gcservice_data_->cond_->Broadcast(self);
   return _entry;
 }
 

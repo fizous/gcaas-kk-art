@@ -750,7 +750,8 @@ bool IPCHeap::RunCollectorDaemon() {
     meta_->explicit_count_ = meta_->explicit_count_ + 1;
     _task_type = service::GC_SERVICE_TASK_EXPLICIT;
   } else if((_curr_type & service::GC_SERVICE_TASK_GC_ALLOC) > 0) {
-
+    _task_type = service::GC_SERVICE_TASK_GC_ALLOC;
+    AllocGC(false);
   } else if((_curr_type & service::GC_SERVICE_TASK_TRIM) > 0) {
 //    LOG(ERROR) << "RunCollectorDaemon..the meta type is .." << _curr_type;
     TrimHeap();
