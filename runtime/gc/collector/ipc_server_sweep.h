@@ -51,7 +51,7 @@ class IPCServerMarkerSweep {
   static int pushed_back_to_stack_;
   static int is_reference_class_cnt_;
 
-  gcservice::GCServiceClientRecord* const client_rec_;
+  gc::service::GCServiceClientRecord* const client_rec_;
   space::GCSrvSharableHeapData* const heap_meta_;
   const int32_t offset_;
 
@@ -91,7 +91,7 @@ class IPCServerMarkerSweep {
 
   //statistics
 
-  IPCServerMarkerSweep(gcservice::GCServiceClientRecord* client_record);
+  IPCServerMarkerSweep(gc::service::GCServiceClientRecord* client_record);
   void SetCachedReferencesPointers(space::GCSrvceCashedReferences* dest,
       space::GCSrvceCashedReferences* src);
   void UpdateClientCachedReferences(space::GCSrvceCashedReferences* dest,

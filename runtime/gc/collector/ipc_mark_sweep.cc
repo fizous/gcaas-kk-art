@@ -39,6 +39,7 @@ using ::art::mirror::Object;
 using ::art::gc::service::GCServiceClient;
 using ::art::gc::service::GCSrvcMemInfoOOM;
 using ::art::gc::service::GCServiceGlobalAllocator;
+
 namespace art {
 
 namespace gc {
@@ -394,7 +395,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   // Trim only if we do not currently care about pause times.
   if (!local_heap_->care_about_pause_times_) {
 #if (ART_GC_SERVICE || true)
-    gcservice::GCServiceClient::RequestHeapTrim();
+    gc::service::GCServiceClient::RequestHeapTrim();
 #endif
 
     //    JNIEnv* env = self->GetJniEnv();

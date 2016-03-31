@@ -12,7 +12,7 @@
 
 namespace art {
 namespace gc {
-namespace gcservice {
+namespace service {
 
 ServerCollector::ServerCollector(GCServiceClientRecord* client_rec,
                                 space::GCSrvSharableHeapData* meta_alloc) :
@@ -505,8 +505,8 @@ void* ServerCollector::RunCollectorDaemon(void* args) {
 
 
 ServerCollector* ServerCollector::CreateServerCollector(void* args) {
-  gcservice::GCServiceClientRecord* _client_rec =
-      (gcservice::GCServiceClientRecord*) args;
+  GCServiceClientRecord* _client_rec =
+      (GCServiceClientRecord*) args;
 
   return new ServerCollector(_client_rec,
       &(_client_rec->sharable_space_->heap_meta_));
