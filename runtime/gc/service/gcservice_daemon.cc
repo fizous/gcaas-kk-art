@@ -445,7 +445,9 @@ GCSrvceAgent::GCSrvceAgent(android::MappedPairProcessFD* mappedPair) {
   meminfo_rec_->histor_tail_ = 0;
   meminfo_rec_->last_update_ns_ = 0;
 
-  for(int i = 0; i < MEM_INFO_WINDOW_SIZE; i++) {
+  history_size_ = GCServiceGlobalAllocator::allocator_instant_->getMemInfoHistorySizeOpt();
+
+  for(int i = 0; i < history_size_; i++) {
     AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[i]);
     hist_rec->heap_size_ = 0;
     hist_rec->memory_size_ = 0;
@@ -487,11 +489,11 @@ void GCSrvceAgent::updateOOMLabel(int new_label, long memory_size) {
   meminfo_rec_->memory_size_ = memory_size;
   meminfo_rec_->oom_label_ =  new_label;
   AgentMemInfoHistory* hist_rec = &(meminfo_rec_->history_wins_[meminfo_rec_->histor_tail_]);
-  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % MEM_INFO_WINDOW_SIZE;
+  meminfo_rec_->histor_tail_ = (meminfo_rec_->histor_tail_ + 1) % history_size_;
   meminfo_rec_->resize_factor_ = GCSrvcMemInfoOOM::GetResizeFactor(meminfo_rec_);
 
   if(meminfo_rec_->histor_tail_ == meminfo_rec_->histor_head_) {
-    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % MEM_INFO_WINDOW_SIZE;
+    meminfo_rec_->histor_head_ = (meminfo_rec_->histor_head_ + 1) % history_size_;
   }
 
   hist_rec->oom_label_ = new_label;

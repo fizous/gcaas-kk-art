@@ -75,6 +75,14 @@
 #include "JniConstants.h"  // Last to avoid LOG redefinition in ics-mr1-plus-art.
 
 
+
+#if (ART_GC_SERVICE || true)
+using ::art::gc::service::GCServiceGlobalAllocator;
+using ::art::gc::service::GCServiceClient;
+#endif
+
+using ::art::mprofiler::VMProfiler;
+using ::art::mprofiler::GCMMP_Options;
 namespace art {
 
 Runtime* Runtime::instance_ = NULL;
@@ -242,7 +250,7 @@ void Runtime::Abort() {
 bool Runtime::GCSrvcePreZygoteFork() {
 //  LOG(ERROR) << "Runtime::GCSrvcePreZygoteFork()";
   bool _should_fork_service = false;
-  if(gc::service::GCServiceGlobalAllocator::ShouldForkService()) {
+  if(GCServiceGlobalAllocator::ShouldForkService()) {
     _should_fork_service = true;
     vmprofiler_->PreForkPreparation();
   }
@@ -253,18 +261,18 @@ bool Runtime::GCSrvcePreZygoteFork() {
 }
 
 void Runtime::RegisterCollector(const char* se_name_c_str) {
-  gc::service::GCServiceClient::InitClient(se_name_c_str,
-                                         gc::service::GCServiceGlobalAllocator::GetTrimConfig());
+  GCServiceClient::InitClient(se_name_c_str,
+                                         GCServiceGlobalAllocator::GetTrimConfig());
 }
 
 
 void Runtime::GCPServiceFinalizeInit() {
-  gc::service::GCServiceClient::FinalizeInitClient();
+  GCServiceClient::FinalizeInitClient();
 }
 
 
 bool Runtime::GCSrvcePostZygoteFork(bool shared_space){
-  bool should_share = (gc::service::GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled());
+  bool should_share = (GCServiceGlobalAllocator::GCSrvcIsSharingSpacesEnabled());
   heap_->PostZygoteForkWithSpaceFork(should_share && shared_space);
 //  LOG(ERROR) << "Leaving Runtime::GCSrvcePostZygoteFork()";
   return true;
@@ -374,7 +382,7 @@ size_t ParseIntegerOrDie(const std::string& s) {
   return result;
 }
 
-void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprofiler_opts){
+void Runtime::ParsedOptions::InitMProfilerParser(GCMMP_Options* mprofiler_opts){
 
 	const char* _bench_list_path = getenv("GC_PROFILE_BENCHMARK_LIST");
 	if(_bench_list_path != NULL) {
@@ -384,21 +392,21 @@ void Runtime::ParsedOptions::InitMProfilerParser(mprofiler::GCMMP_Options* mprof
 		LOG(ERROR) << "XXXXXXX Environment variable is set to NULL";
 	}
 	mprofiler_opts->mprofile_type_ =
-			art::mprofiler::VMProfiler::kGCMMPDisableMProfile;
+			VMProfiler::kGCMMPDisableMProfile;
 	mprofiler_opts->mprofile_grow_method_ =
-			art::mprofiler::VMProfiler::kGCMMPDefaultGrowMethod;
+			VMProfiler::kGCMMPDefaultGrowMethod;
 	mprofiler_opts->mprofile_gc_affinity_ =
-			art::mprofiler::VMProfiler::kGCMMPDefaultAffinity;
+			VMProfiler::kGCMMPDefaultAffinity;
 	mprofiler_opts->gcp_type_ =
-			art::mprofiler::VMProfiler::kGCMMPDisableMProfile;
+			VMProfiler::kGCMMPDisableMProfile;
 	mprofiler_opts->cohort_log_ =
-			art::mprofiler::VMProfiler::kGCMMPDefaultCohortLog;
+			VMProfiler::kGCMMPDefaultCohortLog;
 	mprofiler_opts->alloc_window_log_ = GCP_WINDOW_RANGE_LOG;
 }
 
 
 bool Runtime::ParsedOptions::ParseMProfileOption(const std::string& option,
-		mprofiler::GCMMP_Options* mprofiler_opts){
+		GCMMP_Options* mprofiler_opts){
 	if (StartsWith(option, "-Xgcmmp.")) {
 		LOG(INFO) << "XXXX Parsing -Xgcmmp option: " << option;
 	  std::vector<std::string> mprofile_options;
@@ -769,7 +777,7 @@ Runtime::ParsedOptions* Runtime::ParsedOptions::Create(const Options& options, b
   }
 
 	if(parsed->vmprofiler_options_.gcp_type_ !=
-			art::mprofiler::VMProfiler::kGCMMPDisableMProfile) {
+			VMProfiler::kGCMMPDisableMProfile) {
   	if(GCP_OFF_CONCURRENT_GC()) {
   		parsed->is_concurrent_gc_enabled_ = false;
   		LOG(INFO) << "XXXX Disable Concurrent gc for GC Prof";
@@ -1065,7 +1073,7 @@ bool Runtime::Init(const Options& raw_options, bool ignore_unrecognized) {
                        options->long_gc_log_threshold_,
                        options->ignore_max_footprint_);
 
-  vmprofiler_ = mprofiler::VMProfiler::CreateVMprofiler(&options->vmprofiler_options_);
+  vmprofiler_ = VMProfiler::CreateVMprofiler(&options->vmprofiler_options_);
 
   BlockSignals();
   InitPlatformSignalHandlers();

@@ -254,6 +254,9 @@ typedef struct GCSrvc_Options_S {
   /* configuration of the strategy used to manage for power profiling */
   int power_strategies_;
 
+  /* the window history used  */
+  int info_history_size_;
+
 
 
 } GCSrvc_Options;
@@ -323,6 +326,10 @@ class GCServiceGlobalAllocator {
 
   bool shareHeapBitmapsSpace() const {
     return ((srvc_options_.share_zygote_space_ & GC_SERVICE_SHARE_SPACES_HEAP_BITMAPS) > 0);
+  }
+
+  int getMemInfoHistorySizeOpt() const {
+    return srvc_options_.info_history_size_;
   }
 
  private:
@@ -437,6 +444,7 @@ class GCSrvceAgent {
   volatile int process_id_;
   int srvc_requests_;
   gc::space::AgentMemInfo* meminfo_rec_;
+  int history_size_;
 
   void updateOOMLabel(int new_label, long memory_size);
 

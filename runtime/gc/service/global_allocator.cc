@@ -63,7 +63,9 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   opts_addr->work_stealing_workers_ = 3;
   opts_addr->power_strategies_ = GC_SERVICE_OPTS_POWER_POLICY_NONE;
 
-  opts_addr->gcservc_apps_list_path_ = std::string("/data/anr/benchmarks/srvc_benchmarks.list");
+  opts_addr->info_history_size_ = MEM_INFO_WINDOW_SIZE;
+
+  opts_addr->gcservc_apps_list_path_ = std::string("GC_SERVICE_BENCHMARK_LIST");
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
   if(_conf_path != NULL) {
@@ -75,6 +77,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
     if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
       LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_conf_path_ << ")\n";
     } else {
+      LOG(ERROR) << "configurations are:\n" << _file_lines;
       Split(_file_lines, '\n', _conf_list);
       for(auto& option: _conf_list) {
         GCServiceGlobalAllocator::GCSrvcOption(option, opts_addr);
