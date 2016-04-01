@@ -508,7 +508,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	uint64_t _delta_heap_bytes = 0;
 	if(_curr_alloc_bytes < _loaded_heap) {
 	  _delta_heap_bytes = _loaded_heap - _curr_alloc_bytes;
-	  ration = ((_delta_heap_bytes * 1.0) / _curr_alloc_bytes);
+	  ration = 1 - ((_delta_heap_bytes * 1.0) / _curr_alloc_bytes);
 	}
 	heapStatus.currAllocBytes = _curr_alloc_bytes;//;(size_t) heap_->GetBytesAllocated();
 	//uint64_t _delta_conc_bytes = 0;
