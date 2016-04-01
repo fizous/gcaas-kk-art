@@ -65,7 +65,13 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
   opts_addr->info_history_size_ = MEM_INFO_WINDOW_SIZE;
 
-  opts_addr->gcservc_apps_list_path_ = std::string("GC_SERVICE_BENCHMARK_LIST");
+
+  const char* _bench_list_path = getenv("GC_SERVICE_BENCHMARK_LIST");
+
+  if(_bench_list_path == NULL) {
+    _bench_list_path = "/data/anr/benchmarks/srvc_benchmarks.list";
+  }
+  opts_addr->gcservc_apps_list_path_ = std::string(_bench_list_path);
 
   const char* _conf_path = getenv("GC_SERVICE_CONF_PATH");
   if(_conf_path != NULL) {
@@ -74,8 +80,8 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
     opts_addr->gcservc_conf_path_ = _conf_path;
     std::vector<std::string> _conf_list;
     std::string _file_lines;
-    if (!ReadFileToString(srvc_options_.gcservc_conf_path_, &_file_lines)) {
-      LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_conf_path_ << ")\n";
+    if (!ReadFileToString(opts_addr->gcservc_conf_path_, &_file_lines)) {
+      LOG(ERROR) << "(couldn't read " << opts_addr->gcservc_conf_path_ << ")\n";
     } else {
       LOG(ERROR) << "configurations are:\n" << _file_lines;
       Split(_file_lines, '\n', _conf_list);
@@ -86,12 +92,13 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   }
 
   std::string _apps_file_lines;
-  if (!ReadFileToString(srvc_options_.gcservc_apps_list_path_, &_apps_file_lines)) {
-    LOG(ERROR) << "(couldn't read " << srvc_options_.gcservc_apps_list_path_ << ")\n";
-  } else {
-    LOG(ERROR) << "applications List: " << _apps_file_lines;
-    Split(_apps_file_lines, '\n', app_list_);
+  if (!ReadFileToString(opts_addr->gcservc_apps_list_path_, &_apps_file_lines)) {
+    LOG(ERROR) << "(couldn't read " << opts_addr->gcservc_apps_list_path_ << ")\n";
   }
+  //else {
+//    LOG(ERROR) << "applications List: " << _apps_file_lines;
+//    Split(_apps_file_lines, '\n', app_list_);
+//  }
 
 
 
