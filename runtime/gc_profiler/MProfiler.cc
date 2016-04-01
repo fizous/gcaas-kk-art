@@ -477,6 +477,8 @@ void VMProfiler::startProfiling(void) {
 inline int VMProfiler::GCPGetCalculateStartBytes(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
 	int _diffLiveConc = heap_->GetBytesAllocated() - heap_->GetConcStartBytes(true);
+	if(_diffLiveConc < 0)
+	  return 0;
 	return _diffLiveConc;
 }
 
@@ -519,6 +521,13 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	  heapStatus.concurrentStartBytes = heapStatus.currAllocBytes;
 	}
 	heapStatus.currFootPrint = heapStatus.currAllocBytes + (GCPGetCalculateMAXFootPrint() * ration);
+
+  LOG(ERROR) << "totalAlloc: "<< _allocBytes << ", currHeapBytes: " <<
+      heap_->GetBytesAllocated() << ", currBytes: " << _curr_alloc_bytes <<
+      ", concHeapBytes: " << heap_->GetConcStartBytes() << ", concBytes: " <<
+      heapStatus.concurrentStartBytes << ", footHeapPrint: " <<
+      GCPGetCalculateMAXFootPrint() << ", footPrint: " << heapStatus.currFootPrint;
+
 #else
   heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
   heapStatus.concurrentStartBytes =
@@ -1347,12 +1356,23 @@ void VMProfiler::dumpEventMarks(void) {
 
 
 void PerfCounterProfiler::logPerfData() {
-	uint64_t _currBytes = allocatedBytesData_.get_total_count();
+	//uint64_t _currBytes = allocatedBytesData_.get_total_count();
+
+  uint64_t _allocBytes = 0;
+  uint64_t _curr_alloc_bytes = 0;
+
+
+  allocatedBytesData_.read_counts(Thread::Current(), &_allocBytes,
+                                  &_curr_alloc_bytes);
+
+
+
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
-			heap_->GetBytesAllocated() << ", concBytes: " <<
-			heap_->GetConcStartBytes(true) << ", footPrint: " <<
-			heap_->GetMaxAllowedFootPrint();
+	LOG(ERROR) << "totalAlloc: "<< _allocBytes << ", currHeapBytes: " <<
+			heap_->GetBytesAllocated() << ", currBytes: " << _curr_alloc_bytes <<
+			", concHeapBytes: " << heap_->GetConcStartBytes() << ", concBytes: " <<
+			(_curr_alloc_bytes - GCPGetCalculateStartBytes()) << ", footPrint: " <<
+			GCPGetCalculateMAXFootPrint();
 	uint64_t _sumData = 0;
 	uint64_t _sumGc = 0;
 	uint64_t _data = 0;
@@ -1369,7 +1389,7 @@ void PerfCounterProfiler::logPerfData() {
 		threadProf->GetPerfRecord()->getGCMarks(&_sumGc);
 		_sumData += _data;
 	}
-	LOG(ERROR) << "currBytes: " << _currBytes <<", sumData= "<< _sumData <<
+	LOG(ERROR) << "currBytes: " << _allocBytes <<", sumData= "<< _sumData <<
 			", sumGc=" << _sumGc <<", ration="<< ((_sumGc*100.0)/_sumData);
 }
 
@@ -2103,7 +2123,8 @@ inline void VMProfiler::accountAllocating(size_t objSize) {
   allocatedBytesData_.inc_counts(Thread::Current(),objSize);
 }
 
-inline void VMProfiler::accountAllocating(size_t objSize, uint64_t* before_val, uint64_t* after_val) {
+inline void VMProfiler::accountAllocating(size_t objSize, uint64_t* before_val,
+                                          uint64_t* after_val) {
   allocatedBytesData_.inc_counts(Thread::Current(),objSize, before_val, after_val);
 }
 
