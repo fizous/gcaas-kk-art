@@ -1019,6 +1019,8 @@ void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
   Thread* self = Thread::Current();
   GCMMP_VLOG(INFO) << "-----VMProfiler: Attaching attachSingleThreadPostRenaming "
       << self->GetTid();
+  LOG(ERROR) << "-----VMProfiler: Attaching attachSingleThreadPostRenaming "
+      << self->GetTid();
  // ThreadList* thread_list = Runtime::Current()->GetThreadList();
   MutexLock mu(self, *Locks::thread_list_lock_);
   std::vector<Thread*>::iterator iter = delayedProfThread_.begin();
@@ -1035,7 +1037,7 @@ void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
 
 void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
-	LOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
+	LOG(ERROR) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	if(thread->IsStillStarting()) {
 	  GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
 	      thread->GetTid();
