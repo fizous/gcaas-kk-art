@@ -944,7 +944,7 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
 	GCMMPThProfileTag _tag = GCMMP_THREAD_GCDAEMON;
-	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+	if(thread_name.compare("GCDaemon") == 0 || thread_name.compare("IPC-MS-Daem") == 0) { //that's the GCDaemon
 		setGcDaemon(thread);
 
 		setThreadAffinity(thread, false);
@@ -1028,7 +1028,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
 	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
-	if(thread_name.compare("GCDaemon") == 0) { //that's the GCDaemon
+	if(thread_name.compare("GCDaemon") == 0 || thread_name.compare("IPC-MS-Daem") == 0) { //that's the GCDaemon
 		setGcDaemon(thread);
 
 		setThreadAffinity(thread, false);
