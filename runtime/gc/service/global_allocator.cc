@@ -29,6 +29,7 @@
 using ::art::mirror::Class;
 using ::art::mirror::Object;
 using ::art::gc::service::GCServiceClient;
+using ::art::gc::space::GCSrvSharableDlMallocSpace;
 
 namespace art {
 namespace gc {
@@ -108,12 +109,15 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
 
 bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Options* opts_addr) {
+  LOG(ERROR) << "full_option=" << option;
   if (StartsWith(option, "-Xgcsrvc.")) {
     std::vector<std::string> gcsrvc_options;
     Split(option.substr(strlen("-Xgcsrvc.")), '.', gcsrvc_options);
     for (size_t i = 0; i < gcsrvc_options.size(); ++i) {
+      LOG(ERROR) << "option["<< i<< "]"<< gcsrvc_options[i];
       if (gcsrvc_options[i] == "fgd_growth") {
         opts_addr->fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
+        LOG(ERROR) << "option["<< i << "].value="<< opts_addr->fgd_growth_mutiplier_;
         return true;
       } else if (gcsrvc_options[i] == "trim") {
         opts_addr->trim_conf_ = atoi(gcsrvc_options[++i].c_str());
@@ -135,6 +139,7 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
         return true;
       } else if (gcsrvc_options[i] == "nurserygrow") {
         opts_addr->nursery_grow_adj_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
+        LOG(ERROR) << "option["<< i << "].value="<< opts_addr->nursery_grow_adj_;
         return true;
       } else if (gcsrvc_options[i] == "nurserysize") {
         opts_addr->nursery_slots_threshold_ = atoi(gcsrvc_options[++i].c_str());
@@ -218,9 +223,9 @@ GCServiceGlobalAllocator* GCServiceGlobalAllocator::CreateServiceAllocator(void)
   return allocator_instant_;
 }
 
-space::GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(int* index_p) {
+GCSrvSharableDlMallocSpace* GCServiceGlobalAllocator::GCSrvcAllocateSharableSpace(int* index_p) {
   GCServiceGlobalAllocator* _inst = CreateServiceAllocator();
-  return reinterpret_cast<space::GCSrvSharableDlMallocSpace*>(
+  return reinterpret_cast<GCSrvSharableDlMallocSpace*>(
       _inst->AllocateSharableSpace(index_p));
 }
 
@@ -385,7 +390,7 @@ int GCServiceGlobalAllocator::GetTrimConfig(void) {
 
 byte* GCServiceGlobalAllocator::AllocateSharableSpace(int* index_p) {
   size_t _allocation_size =
-      SERVICE_ALLOC_ALIGN_BYTE(space::GCSrvSharableDlMallocSpace);
+      SERVICE_ALLOC_ALIGN_BYTE(GCSrvSharableDlMallocSpace);
   Thread* self = Thread::Current();
   IPMutexLock interProcMu(self, *region_header_->service_header_.mu_);
 
@@ -541,8 +546,8 @@ void GCSrvcClientHandShake::ReqRegistration(void* params) {
   _entry->req_type_ = GC_SERVICE_TASK_REG;
 
 
-  gc::space::GCSrvSharableDlMallocSpace* _shared_space =
-      reinterpret_cast<gc::space::GCSrvSharableDlMallocSpace*>(params);
+  GCSrvSharableDlMallocSpace* _shared_space =
+      reinterpret_cast<GCSrvSharableDlMallocSpace*>(params);
 
 
   gcservice_data_->mapper_head_ =
