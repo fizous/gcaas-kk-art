@@ -476,7 +476,7 @@ void VMProfiler::startProfiling(void) {
 
 inline int VMProfiler::GCPGetCalculateStartBytes(void) {
 	gc::Heap* heap_ = Runtime::Current()->GetHeap();
-	int _diffLiveConc = heap_->GetConcStartBytes(true) - heap_->GetBytesAllocated();
+	int _diffLiveConc = heap_->GetBytesAllocated() - heap_->GetConcStartBytes(true);
 	return _diffLiveConc;
 }
 
@@ -503,15 +503,30 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 #if (ART_GC_SERVICE || true)
-  heapStatus.currAllocBytes = _curr_alloc_bytes;//;(size_t) heap_->GetBytesAllocated();
+	double ration = 1.0;
+	uint64_t _loaded_heap = static_cast<uint64_t>(heap_->GetBytesAllocated());
+	uint64_t _delta_heap_bytes = 0;
+	if(_curr_alloc_bytes < _loaded_heap) {
+	  ration = ((_curr_alloc_bytes * 1.0) / _loaded_heap);
+	  _delta_heap_bytes = _loaded_heap - _curr_alloc_bytes;
+	}
+	heapStatus.currAllocBytes = _curr_alloc_bytes;//;(size_t) heap_->GetBytesAllocated();
+	//uint64_t _delta_conc_bytes = 0;
+	int _loaded_conc_heap = GCPGetCalculateStartBytes();
+	if(_loaded_conc_heap > 0) {
+	  heapStatus.concurrentStartBytes = heapStatus.currAllocBytes - (_loaded_conc_heap * ration);
+	} else {
+	  heapStatus.concurrentStartBytes = heapStatus.currAllocBytes;
+	}
 #else
-  heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
-#endif
   heapStatus.concurrentStartBytes =
       heapStatus.currAllocBytes + GCPGetCalculateStartBytes();//heap_->GetConcStartBytes();
   heapStatus.currFootPrint =
       //static_cast<uint32_t>(
           heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();//);
+  heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
+#endif
+
   heapStatus.softLimit = 0;//heap_->GetMaxMemory();
   heapStatus.heapTargetUtilization = heap_->GetTargetHeapUtilization();
   heapIntegral_.gcpUpdateHeapStatus(&heapStatus);
