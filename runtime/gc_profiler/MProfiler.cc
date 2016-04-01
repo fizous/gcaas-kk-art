@@ -532,11 +532,11 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
       //static_cast<uint32_t>(
           heapStatus.currAllocBytes + GCPGetCalculateMAXFootPrint();//);
 
-  LOG(ERROR) << "totalAlloc: "<< _allocBytes << ", currHeapBytes: " <<
-      heap_->GetBytesAllocated() << ", currBytes: " << _curr_alloc_bytes <<
-      ", concHeapBytes: " << heap_->GetConcStartBytes() << ", concBytes: " <<
-      heapStatus.concurrentStartBytes << ", footHeapPrint: " <<
-      GCPGetCalculateMAXFootPrint() << ", footPrint: " << heapStatus.currFootPrint;
+//  LOG(ERROR) << "totalAlloc: "<< _allocBytes << ", currHeapBytes: " <<
+//      heap_->GetBytesAllocated() << ", currBytes: " << _curr_alloc_bytes <<
+//      ", concHeapBytes: " << heap_->GetConcStartBytes() << ", concBytes: " <<
+//      heapStatus.concurrentStartBytes << ", footHeapPrint: " <<
+//      GCPGetCalculateMAXFootPrint() << ", footPrint: " << heapStatus.currFootPrint;
 
 #else
   heapStatus.currAllocBytes = _curr_alloc_bytes;//heap_->GetBytesAllocated();
@@ -988,7 +988,7 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 					thread->GetTid() << thread_name;
 			return;
 		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
+		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name";
 	} else {
 		//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
 		//			setGcTrimmer(thread);
@@ -1072,7 +1072,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 					thread->GetTid() << ", name: " <<thread_name;
 			return;
 		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid();
+		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name";
 		_tag = GCMMP_THREAD_GCDAEMON;
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
@@ -1093,7 +1093,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 		}
 
 	}
-
+  LOG(ERROR) << "VMProfiler: Initializing threadProf for " <<
+      thread->GetTid() << ", name: " << thread_name;
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
 			thread->GetTid() << ", name: " << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);

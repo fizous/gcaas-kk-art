@@ -2507,7 +2507,7 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
       double gc_duration_seconds = NsToMs(gc_duration) / 1000.0;
       // Estimate how many remaining bytes we will have when we need to start the next GC.
       size_t remaining_bytes = GetAllocationRate() * gc_duration_seconds;
-      size_t _conc_lead = conc_latency * 1.0;//gc_duration_seconds;
+      size_t _conc_lead = static_cast<size_t>(conc_latency);//gc_duration_seconds;
       //LOG(ERROR) << "---remaining_bytes=" << remaining_bytes<< ", conc_lead=" <<_conc_lead;
       remaining_bytes = _conc_lead + std::max(remaining_bytes, kMinConcurrentRemainingBytes);
       //LOG(ERROR) << "updated_remaining_bytes="<<remaining_bytes;
