@@ -349,7 +349,7 @@ class GlobalStatusUpdaterTask : public WorkStealingTask {
     if(performed_cycle_index_ == service_daemon_->req_counts_) {
       return;
     }
-    LOG(ERROR) << "GlobalStatusUpdaterTask " << self->GetTid() << ", index:" << performed_cycle_index_;
+//    LOG(ERROR) << "GlobalStatusUpdaterTask " << self->GetTid() << ", index:" << performed_cycle_index_;
     performed_cycle_index_ = service_daemon_->req_counts_;
     uint64_t _curr_time = NanoTime();
     uint64_t _difference_time = _curr_time - service_daemon_->last_global_update_time_ns_;
@@ -405,7 +405,7 @@ void GCServiceDaemon::UpdateGlobalProcessStates(GC_SERVICE_TASK srvc_task) {
   workers_pool_->AddTask(self, new GlobalStatusUpdaterTask(this));
   workers_pool_->SetMaxActiveWorkers(pool_size_ - 1);
   workers_pool_->StartWorkers(self);
-  LOG(ERROR) << "thread: "<< self->GetTid() <<"..started the workers and exited";
+ // LOG(ERROR) << "thread: "<< self->GetTid() <<"..started the workers and exited";
 }
 
 
