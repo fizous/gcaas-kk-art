@@ -1035,10 +1035,11 @@ void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
 
 void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
-
+	LOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	if(thread->IsStillStarting()) {
 	  GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
 	      thread->GetTid();
+	  LOG(INFO) << "VMProfiler: delaying Attaching thread: " << thread->GetTid();
 	  delayedProfThread_.push_back(thread);
 	  return;
 	}
@@ -1062,6 +1063,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
+	LOG(ERROR) << "vmprofiler: .......... Attaching GCDaemon: " << thread->GetTid() << ", thread_name: " << thread_name;
 	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
 	if(thread_name.compare("GCDaemon") == 0 || thread_name.compare("IPC-MS-Daem") == 0) { //that's the GCDaemon
 		setGcDaemon(thread);
@@ -1072,7 +1074,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 					thread->GetTid() << ", name: " <<thread_name;
 			return;
 		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name";
+		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name: " << thread_name;
 		_tag = GCMMP_THREAD_GCDAEMON;
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {

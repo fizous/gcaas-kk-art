@@ -132,7 +132,7 @@ void IPCHeap::SetCollectorDaemon(Thread* thread) {
 bool IPCHeap::StartCollectorDaemon(void) {
 
 
-
+  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
   IPC_MS_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
 
   CHECK_PTHREAD_CALL(pthread_create,
@@ -244,7 +244,7 @@ void* IPCHeap::RunDaemon(void* arg) {
 
   Thread* self = Thread::Current();
 
-
+  LOG(ERROR) << "-----------IPCHeap::RunDaemon-----------" << self->GetTid();
   bool propagate = false;
   int cpu_id = 0;
   bool _setAffin =
