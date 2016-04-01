@@ -96,10 +96,10 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
   if (!ReadFileToString(opts_addr->gcservc_apps_list_path_, &_apps_file_lines)) {
     LOG(ERROR) << "(couldn't read " << opts_addr->gcservc_apps_list_path_ << ")\n";
   }
-  //else {
+  else {
 //    LOG(ERROR) << "applications List: " << _apps_file_lines;
-//    Split(_apps_file_lines, '\n', app_list_);
-//  }
+    Split(_apps_file_lines, '\n', app_list_);
+  }
 
 
 
