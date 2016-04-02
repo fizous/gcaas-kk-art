@@ -1045,7 +1045,7 @@ static bool isGCRelated(std::string& thread_name) {
 }
 void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
-	LOG(ERROR) << "VMProfiler: Attaching thread: " << thread->GetTid();
+	LOG(ERROR) << "VMProfiler: attachSingleThread thread: " << thread->GetTid();
 	if(thread->IsStillStarting()) {
     std::string thread_name;
     thread->GetThreadName(thread_name);
@@ -1078,7 +1078,7 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
-	LOG(ERROR) << "vmprofiler: .......... Attaching GCDaemon: " << thread->GetTid() << ", thread_name: " << thread_name;
+	LOG(ERROR) << "vmprofiler: .......... Attaching tid: " << thread->GetTid() << ", thread_name: " << thread_name;
 	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
 	if(isGCRelated(thread_name)) { //that's the GCDaemon
 		setGcDaemon(thread);
