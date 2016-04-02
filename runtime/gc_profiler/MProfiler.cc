@@ -955,7 +955,7 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
   if(thread->IsStillStarting()) {
     std::string thread_name;
     thread->GetThreadName(thread_name);
-    LOG(ERROR)/*GCMMP_VLOG(INFO)*/ << "VMProfiler: going to delay thread --> " <<
+    GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
         thread->GetTid() << " thread name is.. " << thread_name;
     delayedProfThread_.push_back(thread);
     return;
@@ -1041,9 +1041,12 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	LOG(ERROR) << "VMProfiler: Attaching thread: " << thread->GetTid();
 	if(thread->IsStillStarting()) {
+    std::string thread_name;
+    thread->GetThreadName(thread_name);
+    LOG(ERROR) << "VMProfiler: delaying Attaching thread: --> " <<
+        thread->GetTid() << " thread name is.. " << thread_name;
 	  GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
 	      thread->GetTid();
-	  LOG(INFO) << "VMProfiler: delaying Attaching thread: " << thread->GetTid();
 	  delayedProfThread_.push_back(thread);
 	  return;
 	}
