@@ -343,14 +343,14 @@ Thread* Thread::Attach(const char* thread_name, bool as_daemon, jobject thread_g
   if (create_peer) {
 
     self->CreatePeer(thread_name, as_daemon, thread_group);
-    LOG(ERROR) << "Thread::Attach...000: " << self->GetTid();
+    //LOG(ERROR) << "Thread::Attach...000: " << self->GetTid();
   } else {
     // These aren't necessary, but they improve diagnostics for unit tests & command-line tools.
-    LOG(ERROR) << "Thread::Attach...00: " << self->GetTid();
+    //LOG(ERROR) << "Thread::Attach...00: " << self->GetTid();
     if (thread_name != NULL) {
       self->name_->assign(thread_name);
       ::art::SetThreadName(thread_name);
-      LOG(ERROR) << "Thread::Attach...01: " << self->GetTid();
+      //LOG(ERROR) << "Thread::Attach...01: " << self->GetTid();
       mprofiler::VMProfiler::MProfAttachThreadPostRenaming(Thread::Current());
     }
   }

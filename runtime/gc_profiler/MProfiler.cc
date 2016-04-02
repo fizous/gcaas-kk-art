@@ -503,7 +503,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	allocatedBytesData_.read_counts(Thread::Current(), &_allocBytes, &_curr_alloc_bytes);
 
 
-	heapStatus.index = (_allocBytes / kGCMMPAllocWindowDump);
+	heapStatus.index = ((_allocBytes * 1.0) / kGCMMPAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 #if (ART_GC_SERVICE || true)
@@ -1021,8 +1021,8 @@ void VMProfiler::attachSingleThreadPostRenaming(Thread* thread) {
   Thread* self = Thread::Current();
   GCMMP_VLOG(INFO) << "-----VMProfiler: Attaching attachSingleThreadPostRenaming "
       << self->GetTid();
-  LOG(ERROR) << "-----VMProfiler: Attaching attachSingleThreadPostRenaming "
-      << self->GetTid();
+//  LOG(ERROR) << "-----VMProfiler: Attaching attachSingleThreadPostRenaming "
+//      << self->GetTid();
  // ThreadList* thread_list = Runtime::Current()->GetThreadList();
   MutexLock mu(self, *Locks::thread_list_lock_);
   std::vector<Thread*>::iterator iter = delayedProfThread_.begin();
@@ -1045,13 +1045,13 @@ static bool isGCRelated(std::string& thread_name) {
 }
 void VMProfiler::attachSingleThread(Thread* thread) {
 	GCMMP_VLOG(INFO) << "VMProfiler: Attaching thread: " << thread->GetTid();
-	LOG(ERROR) << "VMProfiler: attachSingleThread thread: " << thread->GetTid();
+	//LOG(ERROR) << "VMProfiler: attachSingleThread thread: " << thread->GetTid();
 	if(thread->IsStillStarting()) {
     std::string thread_name;
     thread->GetThreadName(thread_name);
     if(!isGCRelated(thread_name)) {
-      LOG(ERROR) << "VMProfiler: delaying Attaching thread: --> " <<
-          thread->GetTid() << " thread name is.. " << thread_name;
+//      LOG(ERROR) << "VMProfiler: delaying Attaching thread: --> " <<
+//          thread->GetTid() << " thread name is.. " << thread_name;
       GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
           thread->GetTid();
       delayedProfThread_.push_back(thread);
@@ -1078,7 +1078,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 
 	std::string thread_name;
 	thread->GetThreadName(thread_name);
-	LOG(ERROR) << "vmprofiler: .......... Attaching tid: " << thread->GetTid() << ", thread_name: " << thread_name;
+//	LOG(ERROR) << "vmprofiler: .......... Attaching tid: " << thread->GetTid()
+//	    << ", thread_name: " << thread_name;
 	GCMMPThProfileTag _tag = GCMMP_THREAD_DEFAULT;
 	if(isGCRelated(thread_name)) { //that's the GCDaemon
 		setGcDaemon(thread);
@@ -1089,7 +1090,8 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 					thread->GetTid() << ", name: " <<thread_name;
 			return;
 		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name: " << thread_name;
+//		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() <<
+//		    ", thread_name: " << thread_name;
 		_tag = GCMMP_THREAD_GCDAEMON;
 	} else {
 		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
@@ -1100,18 +1102,19 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 						thread->GetTid() << ", name: " << thread_name;
 				return;
 			}
-			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+//			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
 			_tag = GCMMP_THREAD_GCTRIM;
 		} else if(thread_name.compare("main") == 0 || thread == main_thread_) { //that's the main thread
-		  LOG(ERROR) << " attachSingleThread:: ASSIGNING MAIN THREAD: " << thread->GetTid() << ", name:" << thread_name;
+//		  LOG(ERROR) << " attachSingleThread:: ASSIGNING MAIN THREAD: " <<
+//		      thread->GetTid() << ", name:" << thread_name;
 			setMainThread(thread);
 			_tag = GCMMP_THREAD_MAIN;
 			setThreadAffinity(thread, true);
 		}
 
 	}
-  LOG(ERROR) << "VMProfiler: Initializing threadProf for " <<
-      thread->GetTid() << ", name: " << thread_name;
+//  LOG(ERROR) << "VMProfiler: Initializing threadProf for " <<
+//      thread->GetTid() << ", name: " << thread_name;
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
 			thread->GetTid() << ", name: " << thread_name;
 	threadProf = new GCMMPThreadProf(this, thread);
