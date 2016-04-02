@@ -240,7 +240,8 @@ void* IPCHeap::RunDaemon(void* arg) {
   CHECK(_ipc_heap != NULL);
 
   Runtime* runtime = Runtime::Current();
-  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true, NULL, false));
+  CHECK(runtime->AttachCurrentThread("IPC-MS-Daem", true,
+                                     runtime->GetSystemThreadGroup(), true));
 
   Thread* self = Thread::Current();
 
