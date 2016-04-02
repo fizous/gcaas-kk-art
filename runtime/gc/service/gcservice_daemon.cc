@@ -341,7 +341,7 @@ class GlobalStatusUpdaterTask : public WorkStealingTask {
       source->Run(self);
   }
   virtual void Finalize() {
-    LOG(ERROR) << "GlobalStatusUpdaterTask deleteing";
+//    LOG(ERROR) << "GlobalStatusUpdaterTask deleteing";
     delete this;
   }
 
