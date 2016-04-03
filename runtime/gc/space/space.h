@@ -32,7 +32,7 @@
 #define MARKSWEEP_COLLECTORS_ARRAY_CAPACITY   6
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 #define DL_MALLOC_SPACE  DlMallocSpace
 #ifndef DLMALLOC_SPACE_T
 #define DLMALLOC_SPACE_T DlMallocSpace
@@ -224,7 +224,7 @@ typedef struct GCSrvceCashedReferenceOffsets_S {
 }__attribute__((aligned(8))) GCSrvceCashedReferenceOffsets;
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 typedef struct GCSrvSharableCollectorData_S {
   GCSrvceCashedReferences cashed_references_;
   GCSrvceCashedStatsCounters cashed_stats_;
@@ -313,7 +313,7 @@ typedef struct GCSrvcHeapSubRecord_S {
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 #define MEM_INFO_WINDOW_SIZE 10
 
 typedef struct AgentMemInfoHistory_S {
@@ -1102,7 +1102,7 @@ class Space {
     return name_.c_str();
   }
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
   // The policy of when objects are collected associated with this space.
   GcRetentionPolicy GetGcRetentionPolicy() const {
     return gc_retention_policy_;
@@ -1225,7 +1225,7 @@ class ContinuousSpace : public Space {
  public:
   // Address at which the space begins
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
   virtual byte* Begin() const {
     return begin_;
   }

@@ -29,7 +29,7 @@ class PartialMarkSweep : public MarkSweep {
   virtual GcType GetGcType() const {
     return kGcTypePartial;
   }
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
   explicit PartialMarkSweep(Heap* heap, bool is_concurrent,
       space::GCSrvceCashedReferences* cashed_reference_record =
           (space::GCSrvceCashedReferences*) calloc(1, sizeof(space::GCSrvceCashedReferences)),

@@ -506,7 +506,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.index = ((_allocBytes * 1.0) / kGCMMPAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 //	double ration = 1.0;
 //	uint64_t _loaded_heap = static_cast<uint64_t>(heap_->GetBytesAllocated());
 //	uint64_t _delta_heap_bytes = 0;

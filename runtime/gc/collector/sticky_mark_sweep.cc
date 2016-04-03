@@ -25,7 +25,7 @@ namespace gc {
 namespace collector {
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 StickyMarkSweep::StickyMarkSweep(Heap* heap, bool is_concurrent,
         space::GCSrvceCashedReferences* cashed_reference_record,
         space::GCSrvceCashedStatsCounters* stats_record,
@@ -52,7 +52,7 @@ void StickyMarkSweep::BindBitmaps() {
   for (const auto& space : GetHeap()->GetContinuousSpaces()) {
     if (space->GetGcRetentionPolicy() == space::kGcRetentionPolicyAlwaysCollect) {
       bool shouldBind = false;
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
       shouldBind = space->HasBitmapsBound();
 #endif
       if(!shouldBind) {

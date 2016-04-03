@@ -71,7 +71,7 @@ static void CheckMapRequest(byte*, size_t) { }
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 //byte* MemBaseMap::max_covered_address = NULL;
 

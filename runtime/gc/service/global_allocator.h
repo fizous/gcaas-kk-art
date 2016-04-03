@@ -19,7 +19,7 @@
 #include "thread_pool.h"
 #include "gc/space/space.h"
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 #define GC_SERVICE_BUFFER_REQ_CAP   128
 

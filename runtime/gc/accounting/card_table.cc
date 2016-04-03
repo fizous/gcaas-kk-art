@@ -28,7 +28,7 @@
 namespace art {
 namespace gc {
 namespace accounting {
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 #else
 /*

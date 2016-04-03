@@ -29,7 +29,7 @@
 
 
 #ifndef ATOMIC_STACK_KLASS
-  #if (ART_GC_SERVICE || true)
+  #if (ART_GC_SERVICE)
     #define ATOMIC_STACK_KLASS    StructuredAtomicStack
     #define ATOMIC_OBJ_STACK_T    StructuredObjectStack
     #define ATOMIC_MAPPED_STACK_T StructuredMappedPairStack
@@ -46,7 +46,7 @@ namespace accounting {
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 //template <class T>
 //struct AtomicStackData {
