@@ -315,7 +315,7 @@ class GCServiceGlobalAllocator {
   static bool ShouldRegisterApp(const char* se_name_c_str);
   bool ShouldNotifyAllocationCapacity(size_t current_index, size_t capacity) {
     if(srvc_options_.monitor_alloc_stack_ == GC_SERVICE_OPTS_ALLOC_POLICY_ALLOC) {
-     if(current_index >= (capacity - srvc_options_.alloc_start_size_)) {
+     if(((current_index * 100) /capacity) >= (srvc_options_.alloc_start_size_)) {
        return true;
      }
     }
