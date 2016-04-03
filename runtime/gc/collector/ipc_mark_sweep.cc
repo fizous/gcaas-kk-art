@@ -321,10 +321,10 @@ void IPCHeap::ExplicitGC(bool clear_soft_references)  {
 }
 
 void IPCHeap::AllocGC(bool clear_soft_references)  {
-  //  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
+    LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
   WaitForConcurrentIPCGcToComplete(self);
-  CollectGarbageIPC(collector::kGcTypeFull/*collector::kGcTypeSticky*/, kGcCauseForAlloc, clear_soft_references);
+  CollectGarbageIPC(collector::kGcTypeFull/*collector::kGcTypeSticky*/, kGcCauseExplicit/*kGcCauseForAlloc*/, clear_soft_references);
 }
 
 
