@@ -131,9 +131,6 @@ void IPCHeap::SetCollectorDaemon(Thread* thread) {
 }
 
 bool IPCHeap::StartCollectorDaemon(void) {
-
-
-  LOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
   IPC_MS_VLOG(ERROR) << "-----------IPCHeap::StartCollectorDaemon-----------";
 
   CHECK_PTHREAD_CALL(pthread_create,

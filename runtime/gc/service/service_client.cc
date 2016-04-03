@@ -169,7 +169,7 @@ bool GCServiceClient::RequestConcGC(void) {
   uint64_t _curr_bytes_Allocated = static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetBytesAllocated());
   uint64_t _curr_time_ns =  NanoTime();
 
-  service::GCServiceReq* _req_entry =
+  GCServiceReq* _req_entry =
       _alloc->handShake_->ReqConcCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
 
@@ -201,7 +201,7 @@ bool GCServiceClient::RequestExplicitGC(void) {
       static_cast<uint64_t>(service_client_->ipcHeap_->local_heap_->GetAtomicBytesAllocated()/*GetBytesAllocated()*/);
   uint64_t _curr_time_ns =  NanoTime();
 
-  service::GCServiceReq* _req_entry =
+  GCServiceReq* _req_entry =
       _alloc->handShake_->ReqExplicitCollection(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
 
   if(_req_entry != NULL) {
@@ -229,7 +229,7 @@ bool GCServiceClient::RequestAllocateGC(void) {
     uint64_t _curr_time_ns =  NanoTime();
 
   // we need to fwd this to daemon
-    service::GCServiceReq* _req_entry =
+    GCServiceReq* _req_entry =
         _alloc->handShake_->ReqAllocationGC(&service_client_->sharable_space_->sharable_space_data_->heap_meta_);
     if(_req_entry != NULL) {
       service_client_->setMemInfoMarkStamp(_curr_time_ns, _curr_bytes_Allocated,
@@ -248,7 +248,7 @@ bool GCServiceClient::RemoveGCSrvcActiveRequest(GC_SERVICE_TASK task) {
   Thread* self = Thread::Current();
   bool _return_result = false;
   MutexLock mu(self, *service_client_->gcservice_client_lock_);
-  std::vector<service::GCServiceReq*>::iterator it;
+  std::vector<GCServiceReq*>::iterator it;
   for (it = service_client_->active_requests_.begin(); it != service_client_->active_requests_.end(); /* DONT increment here*/) {
     if((*it)->req_type_ == task) {
       //LOG(ERROR) << "RemoveGCSrvcActiveRequest....task type= " << task << ", addr = " << (*it) << ", status =" << (*it)->status_;
@@ -334,7 +334,7 @@ void GCServiceClient::RequestHeapTrim(void) {
 //      << ", care about pause = " << GCSrvcMemInfoOOM::CareAboutPauseTimes(service_client_->GetMemInfoRec());
   GCServiceGlobalAllocator* _alloc =
       GCServiceGlobalAllocator::allocator_instant_;
-  service::GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
+  GCServiceReq* _req_entry = _alloc->handShake_->ReqHeapTrim();
   if(_req_entry != NULL) {
     service_client_->active_requests_.push_back(_req_entry);
   }
