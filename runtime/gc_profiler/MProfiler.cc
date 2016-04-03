@@ -688,7 +688,6 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
     uint64_t _instr_data = 0;
 
     for (const auto& profRec : threadProfList_) {
-      uint64_t _data;
       profRec->perf_record_->readPerfData();
       if(profRec->isEvent("CYCLES")) {
         _cycles_data += profRec->perf_record_->data;
