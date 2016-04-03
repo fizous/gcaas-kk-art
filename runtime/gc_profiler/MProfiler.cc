@@ -706,16 +706,21 @@ inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 
     dataDumped.currCycles = _cycles_data - accData.cycles;
     dataDumped.currInstructions = _instr_data - accData.instructions;
+
+
+
     accData.cycles = _cycles_data;
     accData.instructions = _instr_data;
 
-    dataDumped.currCycles = accData.currCycles;
-    dataDumped.currInstructions = accData.currInstructions;
+//    dataDumped.currCycles = accData.currCycles;
+//    dataDumped.currInstructions = accData.currInstructions;
     dataDumped.currCPI = 0;
     if(dataDumped.currInstructions != 0) {
       dataDumped.currCPI =
           (dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
     }
+    accData.currCycles = dataDumped.currCPI;
+    accData.currInstructions = dataDumped.currInstructions;
     dataDumped.averageCPI =
         (accData.cycles * 1.0) / accData.instructions;
     dumpCPIStats(&dataDumped);
