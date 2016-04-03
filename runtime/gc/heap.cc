@@ -1080,7 +1080,7 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
     GCP_MARK_START_ALLOC_GC_HW_EVENT;
     GCP_MARK_START_GC_HAT_TIME_EVENT(Thread::Current());
 #if (ART_GC_SERVICE || true)
-    LOG(ERROR) << "Heap::RecordAllocation-START";
+    LOG(ERROR) << "Heap::RecordAllocation-START..allocation stack is " << allocation_stack_->Capacity();
     service::GCServiceClient::RequestAllocateGC();
     LOG(ERROR) << "Heap::RecordAllocation-----";
 #else
