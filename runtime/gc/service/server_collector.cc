@@ -81,7 +81,7 @@ void ServerCollector::SignalCollector(GCSrvceAgent* curr_srvc_agent,
                                       GCServiceReq* gcsrvc_req) {
   Thread* self = Thread::Current();
   GC_SERVICE_TASK req_type =  static_cast<GC_SERVICE_TASK>(gcsrvc_req->req_type_);
-  LOG(ERROR) << "ServerCollector::SignalCollector : " <<  req_type;
+//  LOG(ERROR) << "ServerCollector::SignalCollector : " <<  req_type;
   ScopedThreadStateChange tsc(self, kWaitingForGCProcess);
   {
     MutexLock mu(self, run_mu_);
@@ -423,7 +423,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type, GCServiceReq* srvcReq) 
     curr_collector_addr_ = NULL;
     cycles_count_++;
   }
-  LOG(ERROR) << "ServerCollector::ExecuteGC.." << gc_type;
+//  LOG(ERROR) << "ServerCollector::ExecuteGC.." << gc_type;
   gc_workers_pool_->AddTask(self, new ServerIPCListenerTask(this));
   gc_workers_pool_->AddTask(self, new ServerMarkReachableTask(this));
   gc_workers_pool_->SetMaxActiveWorkers(pool_size_-1);
@@ -441,7 +441,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type, GCServiceReq* srvcReq) 
 
   gc_workers_pool_->StopWorkers(self);
   FinalizeGC(self, srvcReq);
-  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING.." << gc_type;
+//  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING.." << gc_type;
 }
 
 

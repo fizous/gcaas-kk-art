@@ -155,18 +155,39 @@ class GCServiceClient {
 
 
   void updateProcessState(void);
+
+  static bool ShouldNotifyAllocationCapacity(int current_index,
+                                             int capacity) {
+    if(service_client_ != NULL) {
+      if(service_client_->alloc_stack_overflowed_ == 0) {
+        return GCServiceGlobalAllocator::allocator_instant_->ShouldNotifyAllocationCapacity(
+            &(service_client_->alloc_stack_overflowed_), current_index, capacity);
+      }
+    }
+    return false;
+  }
+
+  void ResetAllocationCapacity() {
+    if(alloc_stack_overflowed_ > 0) {
+      alloc_stack_overflowed_ = 0;
+    }
+  }
+
  private:
   GCServiceClient(space::SharableDlMallocSpace*, int, int);
   int index_;
   int enable_trimming_;
   int last_process_state_;
   int last_process_oom_;
+  int alloc_stack_overflowed_;
+
   space::SharableDlMallocSpace* sharable_space_;
   Mutex* gcservice_client_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
   //gc::collector::IPCMarkSweep* collector_;
   collector::IPCHeap* ipcHeap_;
 
   std::vector<service::GCServiceReq*> active_requests_;
+  /* used to know if we submitted a */
 
 
 

@@ -1092,11 +1092,12 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   }
 
 #if (ART_GC_SERVICE || true)
-  if(GCServiceGlobalAllocator::allocator_instant_->ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
-                                                           allocation_stack_->Capacity())) {
-    LOG(ERROR) << "Heap::RecordAllocation-..reached the limit. capacity= "
-        << allocation_stack_->Capacity() << ", size=" << allocation_stack_->Size();
-    GCServiceClient::RequestAllocateGC();/*RequestExplicitGC();*/
+  if(GCServiceClient::ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
+                                                  allocation_stack_->Capacity())) {
+
+    LOG(ERROR) << "Sending alloc_stack.." << allocation_stack_->Size()
+        << ", capacity:"<<allocation_stack_->Capacity();
+    GCServiceClient::RequestAllocateGC();
   }
 #endif
 
@@ -2480,7 +2481,7 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
 
   SetLastGCSize(bytes_allocated);
   SetLastGCTime(NanoTime());
-  LOG(ERROR) << "GCSrvcGrowForUtilization ....... GCtype is " << gc_type;
+//  LOG(ERROR) << "GCSrvcGrowForUtilization ....... GCtype is " << gc_type;
   if (gc_type != collector::kGcTypeSticky) {
     // Grow the heap for non sticky GC.
     target_size = bytes_allocated / GetTargetHeapUtilization();

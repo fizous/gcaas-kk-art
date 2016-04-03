@@ -33,6 +33,7 @@ GCServiceClient::GCServiceClient(space::SharableDlMallocSpace* sharable_space,
         enable_trimming_(enable_trim),
         last_process_state_(-1),
         last_process_oom_(-1),
+        alloc_stack_overflowed_(0),
         sharable_space_(sharable_space),
         gcservice_client_lock_ (new Mutex("GCServiceClient lock")) {
 

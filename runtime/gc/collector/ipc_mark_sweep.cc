@@ -761,7 +761,11 @@ void IPCHeap::NotifyCompleteConcurrentTask(service::GC_SERVICE_TASK task) {
     if(true)
       GCServiceClient::RemoveGCSrvcActiveRequest(task);
 
+
     IPMutexLock interProcMu(self, *conc_req_cond_mu_);
+    if(task == service::GC_SERVICE_TASK_GC_ALLOC) {
+      GCServiceClient::service_client_->ResetAllocationCapacity();
+    }
     meta_->conc_flag_ = 5;
 
     conc_req_cond_->Broadcast(self);
