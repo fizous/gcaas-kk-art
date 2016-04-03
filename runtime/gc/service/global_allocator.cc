@@ -66,6 +66,9 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
   opts_addr->info_history_size_ = MEM_INFO_WINDOW_SIZE;
 
+  opts_addr->monitor_alloc_stack_ = GC_SERVICE_OPTS_ALLOC_POLICY_NONE;
+  opts_addr->alloc_start_size_ = 0;
+
 
   const char* _bench_list_path = getenv("GC_SERVICE_BENCHMARK_LIST");
 
@@ -155,6 +158,12 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
         return true;
       } else if (gcsrvc_options[i] == "power") {
         opts_addr->power_strategies_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "monitor_alloc_capacity") {
+        opts_addr->monitor_alloc_stack_ = atoi(gcsrvc_options[++i].c_str());
+        return true;
+      } else if (gcsrvc_options[i] == "alloc_start_size") {
+        opts_addr->alloc_start_size_ = atoi(gcsrvc_options[++i].c_str());
         return true;
       }
     }

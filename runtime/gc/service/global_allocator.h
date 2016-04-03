@@ -111,6 +111,12 @@ typedef enum {
   GC_SERVICE_OPTS_POWER_POLICY_CAP = 1
 } GC_SERVICE_OPTS_POWER_POLICY;
 
+
+typedef enum {
+  GC_SERVICE_OPTS_ALLOC_POLICY_NONE   = 0,
+  GC_SERVICE_OPTS_ALLOC_POLICY_ALLOC = 1
+} GC_SERVICE_OPTS_ALLOC_POLICY;
+
 typedef enum {
   GC_SRVC_DAEMON_AFFINITY_DISALLOWED = 0x00000000,
   GC_SRVC_DAEMON_AFFINITY_ALLOWED = 0x00000010,
@@ -257,7 +263,9 @@ typedef struct GCSrvc_Options_S {
   /* the window history used  */
   int info_history_size_;
 
-
+  /* should we limit the maximum number of element in allocation stack?  */
+  int monitor_alloc_stack_;
+  int alloc_start_size_;
 
 } GCSrvc_Options;
 
@@ -305,6 +313,15 @@ class GCServiceGlobalAllocator {
   static bool GCSrvcIsClientDaemonPinned(int* cpu, bool* complementary, bool checkPropagation = true);
   static bool GCSrvcOption(const std::string&, GCSrvc_Options*);
   static bool ShouldRegisterApp(const char* se_name_c_str);
+  static bool ShouldNotifyAllocationCapacity(size_t current_index, size_t capacity) {
+    if(srvc_options_.monitor_alloc_stack_ == GC_SERVICE_OPTS_ALLOC_POLICY_ALLOC) {
+     if(current_index >= (capacity - srvc_options_.alloc_start_size_)) {
+       return true;
+     }
+    }
+    return false;
+
+  }
   void InitGCSrvcOptions(GCSrvc_Options* opts_addr);
 
   //static int GCPAllowSharedMemMaps;
@@ -331,6 +348,8 @@ class GCServiceGlobalAllocator {
   int getMemInfoHistorySizeOpt() const {
     return srvc_options_.info_history_size_;
   }
+
+
 
  private:
   //static const int   kGCServicePageCapacity = 64;

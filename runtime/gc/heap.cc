@@ -1074,21 +1074,32 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   // This is safe to do since the GC will never free objects which are neither in the allocation
   // stack or the live bitmap.
 //  Thread* self = Thread::Current();
+
   while (!allocation_stack_->AtomicPushBack(obj)) {
 
 
     GCP_MARK_START_ALLOC_GC_HW_EVENT;
     GCP_MARK_START_GC_HAT_TIME_EVENT(Thread::Current());
 #if (ART_GC_SERVICE || true)
-    LOG(ERROR) << "Heap::RecordAllocation-START..allocation stack is " << allocation_stack_->Capacity();
-    service::GCServiceClient::RequestAllocateGC();
-    LOG(ERROR) << "Heap::RecordAllocation-----";
+    LOG(FATAL) << "Heap::RecordAllocation-START..AtomicPushBack..allocation stack is " << allocation_stack_->Capacity();
+    //service::GCServiceClient::RequestAllocateGC();
+    LOG(ERROR) << "Heap::RecordAllocation-----AtomicPushBack";
 #else
     CollectGarbageInternal(collector::kGcTypeSticky, kGcCauseForAlloc, false);
 #endif
     GCP_MARK_END_GC_HAT_TIME_EVENT(Thread::Current());
     GCP_MARK_END_ALLOC_GC_HW_EVENT;
   }
+
+#if (ART_GC_SERVICE || true)
+  if(GCServiceGlobalAllocator::ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
+                                                           allocation_stack_->Capacity())) {
+    LOG(ERROR) << "Heap::RecordAllocation-..reached the limit. capacity= "
+        << allocation_stack_->Capacity() << ", size=" << allocation_stack_->Size();
+    GCServiceClient::RequestAllocateGC();
+  }
+#endif
+
 }
 
 void Heap::RecordFree(size_t freed_objects, size_t freed_bytes) {
@@ -2469,7 +2480,7 @@ void Heap::GCSrvcGrowForUtilization(collector::GcType gc_type,
 
   SetLastGCSize(bytes_allocated);
   SetLastGCTime(NanoTime());
-
+  LOG(ERROR) << "GCSrvcGrowForUtilization ....... GCtype is " << gc_type;
   if (gc_type != collector::kGcTypeSticky) {
     // Grow the heap for non sticky GC.
     target_size = bytes_allocated / GetTargetHeapUtilization();
