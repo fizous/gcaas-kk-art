@@ -39,6 +39,7 @@ using ::art::mirror::Object;
 using ::art::gc::service::GCServiceClient;
 using ::art::gc::service::GCSrvcMemInfoOOM;
 using ::art::gc::service::GCServiceGlobalAllocator;
+using ::art::gc::space::AgentMemInfo;
 
 namespace art {
 
@@ -324,7 +325,7 @@ void IPCHeap::AllocGC(bool clear_soft_references)  {
     LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
   WaitForConcurrentIPCGcToComplete(self);
-  CollectGarbageIPC(collector::kGcTypeFull/*collector::kGcTypeSticky*/, kGcCauseExplicit/*kGcCauseForAlloc*/, clear_soft_references);
+  CollectGarbageIPC(collector::kGcTypeFull/*collector::kGcTypeSticky*/, kGcCauseForAlloc, clear_soft_references);
 }
 
 
@@ -343,7 +344,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
   //  LOG(ERROR) << "isProcessCare about pause times: "
   //      << ((local_heap_->CareAboutPauseTimes()) ? "true" : "false");
   //  double adjusted_max_free = 1.0;
-  gc::space::AgentMemInfo* _mem_info_rec =
+  AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
   double _resize_factor = _mem_info_rec->resize_factor_;
   size_t _adjusted_max_free = 0;
@@ -462,7 +463,7 @@ bool IPCHeap::CheckTrimming(collector::GcType gc_type, uint64_t gc_duration) {
 void IPCHeap::TrimHeap(void)  {
   //LOG(ERROR) << "IPCHeap::TrimHeap";
   //  local_heap_->ListenForProcessStateChange();
-  gc::space::AgentMemInfo* _mem_info_rec =
+  AgentMemInfo* _mem_info_rec =
       GCServiceClient::service_client_->GetMemInfoRec();
 //  LOG(ERROR) << "IPCHeap::TrimHeap(void) " << _mem_info_rec;
   //  double _resize_factor = _mem_info_rec->resize_factor_;
@@ -678,7 +679,7 @@ collector::GcType IPCHeap::CollectGarbageIPC(collector::GcType gc_type,
 
 void IPCHeap::RaiseServerFlag(void) {
   if (!(curr_gc_cause_ == kGcCauseBackground || curr_gc_cause_ == kGcCauseExplicit
-      || kGcCauseForAlloc)) { //a mutator is performing an allocation. do not involve service to get things done faster
+      || curr_gc_cause_ == kGcCauseForAlloc)) { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
