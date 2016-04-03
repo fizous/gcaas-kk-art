@@ -471,7 +471,7 @@ void ServerCollector::InitPool(void) {
 void ServerCollector::Run(void) {
   GC_SERVICE_TASK _gc_type = GC_SERVICE_TASK_NOP;
   while(true) {
-    int old_priority = -999;
+    //int old_priority = -999;
 
     _gc_type = static_cast<GC_SERVICE_TASK>(WaitForRequest());
     if(_gc_type == GC_SERVICE_TASK_TRIM) {
@@ -479,19 +479,19 @@ void ServerCollector::Run(void) {
       ExecuteTrim(curr_srvc_reqs_[_index]);
     } else if((_gc_type & GC_SERVICE_TASK_GC_ANY) > 0) {
       int _index = GetServiceIndex(_gc_type);
-      if(_gc_type == GC_SERVICE_TASK_GC_ALLOC) {
-        //raise the priority
-        old_priority = Thread::GetNativePriority();
-        LOG(ERROR) << "saving old priority: " << old_priority;
-        Thread::Current()->SetNativePriority(10);
-      }
+//      if(_gc_type == GC_SERVICE_TASK_GC_ALLOC) {
+//        //raise the priority
+//        old_priority = Thread::GetNativePriority();
+//        LOG(ERROR) << "saving old priority: " << old_priority;
+//        Thread::Current()->SetNativePriority(10);
+//      }
       ExecuteGC(_gc_type, curr_srvc_reqs_[_index]);
     }
-    if(old_priority != -999) {
-      //restoring old priority;
-      LOG(ERROR) << "REstoring old priority: " << old_priority;
-      Thread::Current()->SetNativePriority(old_priority);
-    }
+//    if(old_priority != -999) {
+//      //restoring old priority;
+//      LOG(ERROR) << "REstoring old priority: " << old_priority;
+//      Thread::Current()->SetNativePriority(old_priority);
+//    }
   }
 }
 
