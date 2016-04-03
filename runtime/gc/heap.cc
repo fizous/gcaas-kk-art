@@ -1092,7 +1092,7 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   }
 
 #if (ART_GC_SERVICE || true)
-  if(GCServiceGlobalAllocator::ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
+  if(GCServiceGlobalAllocator::allocator_instant_->ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
                                                            allocation_stack_->Capacity())) {
     LOG(ERROR) << "Heap::RecordAllocation-..reached the limit. capacity= "
         << allocation_stack_->Capacity() << ", size=" << allocation_stack_->Size();

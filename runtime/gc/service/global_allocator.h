@@ -313,7 +313,7 @@ class GCServiceGlobalAllocator {
   static bool GCSrvcIsClientDaemonPinned(int* cpu, bool* complementary, bool checkPropagation = true);
   static bool GCSrvcOption(const std::string&, GCSrvc_Options*);
   static bool ShouldRegisterApp(const char* se_name_c_str);
-  static bool ShouldNotifyAllocationCapacity(size_t current_index, size_t capacity) {
+  bool ShouldNotifyAllocationCapacity(size_t current_index, size_t capacity) {
     if(srvc_options_.monitor_alloc_stack_ == GC_SERVICE_OPTS_ALLOC_POLICY_ALLOC) {
      if(current_index >= (capacity - srvc_options_.alloc_start_size_)) {
        return true;
