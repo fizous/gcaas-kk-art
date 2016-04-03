@@ -736,7 +736,7 @@ void IPCHeap::ResetCurrentCollector(IPCMarkSweep* collector) {
 
 void IPCHeap::ResetServerFlag(void) {
   if (!(curr_gc_cause_ == kGcCauseBackground ||
-      curr_gc_cause_ == kGcCauseExplicit))  { //a mutator is performing an allocation. do not involve service to get things done faster
+      curr_gc_cause_ == kGcCauseExplicit || curr_gc_cause_ == kGcCauseForAlloc))  { //a mutator is performing an allocation. do not involve service to get things done faster
     return;
   }
 
