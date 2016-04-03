@@ -441,7 +441,7 @@ void ServerCollector::ExecuteGC(GC_SERVICE_TASK gc_type, GCServiceReq* srvcReq) 
 
   gc_workers_pool_->StopWorkers(self);
   FinalizeGC(self, srvcReq);
-//  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING";
+  LOG(ERROR) << "ServerCollector::ExecuteGC..ENDING.." << gc_type;
 }
 
 
