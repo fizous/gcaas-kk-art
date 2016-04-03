@@ -1096,7 +1096,7 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
                                                            allocation_stack_->Capacity())) {
     LOG(ERROR) << "Heap::RecordAllocation-..reached the limit. capacity= "
         << allocation_stack_->Capacity() << ", size=" << allocation_stack_->Size();
-    GCServiceClient::RequestExplicitGC();/*RequestAllocateGC();*/
+    GCServiceClient::RequestAllocateGC();/*RequestExplicitGC();*/
   }
 #endif
 
