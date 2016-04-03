@@ -317,15 +317,19 @@ void IPCHeap::ConcurrentGC(Thread* self) {
 void IPCHeap::ExplicitGC(bool clear_soft_references)  {
   //  LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
+  GCP_MARK_START_EXPL_GC_HW_EVENT;
   WaitForConcurrentIPCGcToComplete(self);
   CollectGarbageIPC(collector::kGcTypeFull, kGcCauseExplicit, clear_soft_references);
+  GCP_MARK_END_EXPL_GC_HW_EVENT;
 }
 
 void IPCHeap::AllocGC(bool clear_soft_references)  {
-    LOG(ERROR) << "------IPCHeap::ExplicitGC-------";
   Thread* self = Thread::Current();
+  GCP_MARK_START_ALLOC_GC_HW_EVENT;
   WaitForConcurrentIPCGcToComplete(self);
-  CollectGarbageIPC(collector::kGcTypeFull/*collector::kGcTypeSticky*/, kGcCauseForAlloc, clear_soft_references);
+  CollectGarbageIPC(/*collector::kGcTypeFull*/collector::kGcTypeSticky,
+                    kGcCauseForAlloc, clear_soft_references);
+  GCP_MARK_END_ALLOC_GC_HW_EVENT;
 }
 
 
