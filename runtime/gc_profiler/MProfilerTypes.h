@@ -1355,6 +1355,10 @@ public:
   bool isGCThread() {
   	return (tag_ >= GCMMP_THREAD_GCDAEMON);
   }
+
+  bool isEvent(const char* source) const {
+    return (strcmp(source, perf_record_->event_name_) == 0);
+  }
 };
 
 

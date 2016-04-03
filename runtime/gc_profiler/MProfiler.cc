@@ -683,56 +683,95 @@ inline void PerfCounterProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
 }
 
 inline void GCDaemonCPIProfiler::addHWEndEvent(GCMMP_BREAK_DOWN_ENUM evt) {
-	Thread* self = Thread::Current();
-	GCMMPThreadProf* _profRec =  self->GetProfRec();
-	if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
-		if(evt == GCMMP_GC_BRK_NONE) {
-			pid_t _pid = _profRec->GetTid();
-			int _index = 0;
-			for (const auto& profRec : threadProfList_) {
-				if(profRec->GetTid() == _pid) {
-					_index++;
-					//LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
-					//		    	profRec->perf_record_->addEndEventNOSpecial(evt);
-					if(_index == 2) {
-						accData.currInstructions =
-								profRec->perf_record_->addEndEventNOSpecial(evt);
-						accData.instructions = profRec->perf_record_->data;
-					} else {
-						accData.currCycles =
-								profRec->perf_record_->addEndEventNOSpecial(evt);
-						accData.cycles = profRec->perf_record_->data;
+  if(evt == GCMMP_GC_BRK_NONE) {
+    uint64_t _cycles_data = 0;
+    uint64_t _instr_data = 0;
 
-					}
+    for (const auto& profRec : threadProfList_) {
+      uint64_t _data;
+      profRec->perf_record_->readPerfData();
+      if(profRec->isEvent("CYCLES")) {
+        _cycles_data += profRec->perf_record_->data;
+      } else {
+        _instr_data += profRec->perf_record_->data;
+      }
+    }
+
+    GCMMPCPIDataDumped dataDumped;
+    uint64_t _total_bytes = 0;
+    uint64_t _curr_bytes = 0;
+    Thread* self = Thread::Current();
+    allocatedBytesData_.read_counts(self, &_total_bytes, &_curr_bytes);
+    dataDumped.index = _total_bytes >> kGCMMPLogAllocWindowDump;
 
 
-					if(_index == 2) {
-						if(accData.currInstructions == 0) {
-							return;
-						}
-						GCMMPCPIDataDumped dataDumped;
+    dataDumped.currCycles = _cycles_data - accData.cycles;
+    dataDumped.currInstructions = _instr_data - accData.instructions;
+    accData.cycles = _cycles_data;
+    accData.instructions = _instr_data;
 
-						uint64_t _total_bytes = 0;
-						uint64_t _curr_bytes = 0;
+    dataDumped.currCycles = accData.currCycles;
+    dataDumped.currInstructions = accData.currInstructions;
+    dataDumped.currCPI =
+        (dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
+    dataDumped.averageCPI =
+        (accData.cycles * 1.0) / accData.instructions;
+    dumpCPIStats(&dataDumped);
+  }
 
-						allocatedBytesData_.read_counts(self, &_total_bytes, &_curr_bytes);
+  if(false) {
+    Thread* self = Thread::Current();
+    GCMMPThreadProf* _profRec =  self->GetProfRec();
+    if(_profRec != NULL && _profRec->state == GCMMP_TH_RUNNING) {
+      if(evt == GCMMP_GC_BRK_NONE) {
+        pid_t _pid = _profRec->GetTid();
+        int _index = 0;
+        for (const auto& profRec : threadProfList_) {
+          if(profRec->GetTid() == _pid) {
+            _index++;
+            //LOG(ERROR) << " getEventName:" << profRec->perf_record_->event_name_;
+            //          profRec->perf_record_->addEndEventNOSpecial(evt);
+            if(_index == 2) {
+              accData.currInstructions =
+                  profRec->perf_record_->addEndEventNOSpecial(evt);
+              accData.instructions = profRec->perf_record_->data;
+            } else {
+              accData.currCycles =
+                  profRec->perf_record_->addEndEventNOSpecial(evt);
+              accData.cycles = profRec->perf_record_->data;
 
-						dataDumped.index = _total_bytes >> kGCMMPLogAllocWindowDump;
-						dataDumped.currCycles = accData.currCycles;
-						dataDumped.currInstructions = accData.currInstructions;
-						dataDumped.currCPI =
-								(dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
-						dataDumped.averageCPI =
-								(accData.cycles * 1.0) / accData.instructions;
+            }
 
-						dumpCPIStats(&dataDumped);
-						break;
-					}
-				}
-			}
 
-		}
-	}
+            if(_index == 2) {
+              if(accData.currInstructions == 0) {
+                return;
+              }
+              GCMMPCPIDataDumped dataDumped;
+
+              uint64_t _total_bytes = 0;
+              uint64_t _curr_bytes = 0;
+
+              allocatedBytesData_.read_counts(self, &_total_bytes, &_curr_bytes);
+
+              dataDumped.index = _total_bytes >> kGCMMPLogAllocWindowDump;
+              dataDumped.currCycles = accData.currCycles;
+              dataDumped.currInstructions = accData.currInstructions;
+              dataDumped.currCPI =
+                  (dataDumped.currCycles * 1.0) / dataDumped.currInstructions;
+              dataDumped.averageCPI =
+                  (accData.cycles * 1.0) / accData.instructions;
+
+              dumpCPIStats(&dataDumped);
+              break;
+            }
+          }
+        }
+
+      }
+    }
+  }
+
 }
 
 
