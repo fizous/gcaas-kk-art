@@ -14,7 +14,7 @@
 #include "gc/accounting/space_bitmap.h"
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 namespace art {
 namespace gc {

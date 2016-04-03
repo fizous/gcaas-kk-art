@@ -414,7 +414,7 @@ static bool NeedsNoRandomizeWorkaround() {
 }
 #endif
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 
 static pid_t GCSrvcForkGCService(void) {
@@ -754,7 +754,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
                                            jint debug_flags, jobjectArray rlimits, jint mount_external,
                                            jstring se_info, jstring se_name) {
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   return GCSrvcForkAndSpecializeCommon(env, uid, gid, gids, debug_flags, rlimits,
       0, 0, mount_external, se_info, se_name, false);
 #else
@@ -766,7 +766,7 @@ static jint Zygote_nativeForkAndSpecialize(JNIEnv* env, jclass, jint uid, jint g
 static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
                                           jint debug_flags, jobjectArray rlimits,
                                           jlong permittedCapabilities, jlong effectiveCapabilities) {
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   pid_t pid = GCSrvcForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
@@ -788,7 +788,7 @@ static jint Zygote_nativeForkSystemServer(JNIEnv* env, jclass, uid_t uid, gid_t 
       if (waitpid(pid, &status, WNOHANG) == pid) {
           LOG(FATAL) << "System server process " << pid << " has died. Restarting Zygote!";
       }
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
       gc::service::GCServiceGlobalAllocator::GCSrvcNotifySystemServer();
 #endif
 

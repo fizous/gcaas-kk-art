@@ -20,7 +20,7 @@
 #include "gc/service/global_allocator.h"
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 //#define IPC_MS_VLOG(severity)                 if (ART_GC_SERVICE_VERBOSE) ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 //#define IPC_MARKSWEEP_VLOG_ON (ART_GC_SERVICE_VERBOSE || 1)
 

@@ -37,7 +37,7 @@ class GarbageCollector {
   virtual bool IsConcurrent() const = 0;
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   GarbageCollector(Heap* heap, const std::string& name,
       space::GCSrvceCollectorTimeStats* time_records);
 #else
@@ -85,7 +85,7 @@ class GarbageCollector {
   // this is the allocation space, for full GC then we swap the zygote bitmaps too.
   virtual void SwapBitmaps() EXCLUSIVE_LOCKS_REQUIRED(Locks::heap_bitmap_lock_);
   // Cumulative statistics.
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
   space::GCSrvceCollectorTimeStats* time_stats_;
 #endif
  protected:
@@ -117,7 +117,7 @@ class GarbageCollector {
   base::TimingLogger timings_;
 
   // Cumulative statistics.
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 #else
   uint64_t total_time_ns_;
   uint64_t total_paused_time_ns_;
