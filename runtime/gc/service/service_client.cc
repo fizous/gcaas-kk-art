@@ -236,7 +236,7 @@ bool GCServiceClient::RequestAllocateGC(void) {
                                            GC_SERVICE_TASK_GC_ALLOC);
       service_client_->active_requests_.push_back(_req_entry);
 
-      LOG(ERROR) << "Submitted the request to the AllocGC.." << self->GetTid();
+//      LOG(ERROR) << "Submitted the request to the AllocGC.." << self->GetTid();
       return true;
     }
   }

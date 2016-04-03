@@ -1095,8 +1095,8 @@ inline void Heap::RecordAllocation(size_t size, mirror::Object* obj) {
   if(GCServiceClient::ShouldNotifyAllocationCapacity(allocation_stack_->Size(),
                                                   allocation_stack_->Capacity())) {
 
-    LOG(ERROR) << "Sending alloc_stack.." << allocation_stack_->Size()
-        << ", capacity:"<<allocation_stack_->Capacity();
+//    LOG(ERROR) << "Sending alloc_stack.." << allocation_stack_->Size()
+//        << ", capacity:"<<allocation_stack_->Capacity();
     GCServiceClient::RequestAllocateGC();
   }
 #endif
