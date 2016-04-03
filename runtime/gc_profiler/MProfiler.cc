@@ -503,7 +503,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	allocatedBytesData_.read_counts(Thread::Current(), &_allocBytes, &_curr_alloc_bytes);
 
 
-	heapStatus.index = ((_allocBytes * 1.0) / kGCMMPAllocWindowDump);
+	heapStatus.index = (_allocBytes  / kGCMMPAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
 #if (ART_GC_SERVICE)
