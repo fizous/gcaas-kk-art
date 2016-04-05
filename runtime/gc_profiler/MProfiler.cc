@@ -2184,21 +2184,24 @@ inline void GCMMPHeapIntegral::gcpPreCollectionMark(SafeGCPHistogramRec* allocat
 }
 
 
-inline void GCMMPHeapIntegral::gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
-  allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
-}
 
-inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(GCMMPHeapStatus* heapStatus) {
+
+inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(uint64_t alloc_bytes) {
   size_t _maxContig_space = 0;
   Runtime::Current()->GetHeap()->GetMaxContigAlloc(&_maxContig_space);
-  LOG(ERROR) << "currBytes: " << heapStatus->currAllocBytes
+  LOG(ERROR) << "currBytes: " << alloc_bytes
       << ", max_contig: " << _maxContig_space;
+}
+
+inline void GCMMPHeapIntegral::gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
+  allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
+  gcpDumpMaxContigAlloc(allocationRec->get_total_count());
 }
 
 inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
   heapStatus->heapIntegral = accIntegral_;
   heapStatus->gcCounts = gcCounts_;
-  gcpDumpMaxContigAlloc(heapStatus);
+
 }
 
 

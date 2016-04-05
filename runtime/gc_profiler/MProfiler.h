@@ -219,7 +219,7 @@ public:
 
 	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus);
 
-	void gcpDumpMaxContigAlloc(GCMMPHeapStatus* heapStatus);
+	void gcpDumpMaxContigAlloc(uint64_t alloc_bytes);
 };//GCMMPHeapIntegral
 
 
