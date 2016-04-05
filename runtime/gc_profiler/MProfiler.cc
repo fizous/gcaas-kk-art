@@ -2264,7 +2264,7 @@ bool FragGCProfiler::periodicDaemonExec(void){
 
 void FragGCProfiler::initHistDataManager(void) {
   LOG(ERROR) << "ObjectSizesProfiler::initHistDataManager";
-  hitogramsData_ = new GCHistogramObjSizesManager();
+  hitogramsData_ = new GCHistogramFragmentsManager();
 }
 
 FragGCProfiler::FragGCProfiler(GCMMP_Options* argOptions, void* entry):
@@ -2278,8 +2278,8 @@ void FragGCProfiler::resetFragHandlers(void) {
   if(hitogramsData_ == NULL)
     return;
 
-  GCHistogramObjSizesManager* _manager =
-      reinterpret_cast<GCHistogramObjSizesManager*>(hitogramsData_);
+  GCHistogramFragmentsManager* _manager =
+      reinterpret_cast<GCHistogramFragmentsManager*>(hitogramsData_);
   _manager->gcpFinalizeProfileCycle();
 }
 

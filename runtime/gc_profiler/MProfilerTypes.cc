@@ -108,6 +108,8 @@ GCHistogramObjSizesManager::GCHistogramObjSizesManager(bool shouldInitHist,
 
 }
 
+
+
 void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords(void) {
 	((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistAtomicRecData();
 	for (int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
@@ -127,6 +129,13 @@ void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 	//getObjHistograms()->gcpCheckForResetHist();
 }
 
+void GCHistogramFragmentsManager::gcpFinalizeProfileCycle(void) {
+  gcpZeorfyAllAtomicRecords();
+}
+
+GCHistogramFragmentsManager::GCHistogramFragmentsManager(void)
+    : GCHistogramObjSizesManager() {
+}
 //inline bool GCHistogramObjSizesManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic* rec) {
 //	bool modified = false;
 //	if(rec->cntLive.load() > 0) {

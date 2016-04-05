@@ -1148,6 +1148,14 @@ public:
 
 //typedef std::list<GCMMPThreadProf*>& ThreadProfList_S;
 
+
+class GCHistogramFragmentsManager: public GCHistogramObjSizesManager {
+public :
+  GCHistogramObjSizesManager(void);
+  ~GCHistogramFragmentsManager(){};
+  void gcpFinalizeProfileCycle(void);
+};
+
 class GCPThreadAllocManager : public GCHistogramDataManager {
 protected:
 	bool gcpDumpThreadHistogramCSVData(std::ostringstream&);
