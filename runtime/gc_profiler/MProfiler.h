@@ -240,7 +240,7 @@ public:
 
 	void dumpFragHistogram(void) {
 	  LOG(ERROR) << "_________ dumping fragents______(max=" << maximim_frag_length_<<")";
-	  for(int _iter; _iter < 32; _iter++) {
+	  for(int _iter = 0; _iter < 32; _iter++) {
 	    if(frag_histogram_[_iter] > 0) {
 	      LOG(ERROR) << "frag["<<_iter<<"]: " << frag_histogram_[_iter];
 	    }
