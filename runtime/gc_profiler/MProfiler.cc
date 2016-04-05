@@ -2198,6 +2198,7 @@ inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(GCMMPHeapStatus* heapStatus
 inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
   heapStatus->heapIntegral = accIntegral_;
   heapStatus->gcCounts = gcCounts_;
+  gcpDumpMaxContigAlloc(heapStatus);
 }
 
 
