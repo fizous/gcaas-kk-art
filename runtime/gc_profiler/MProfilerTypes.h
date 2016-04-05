@@ -320,6 +320,10 @@ public:
 	  atomicDataRec_.cntTotal.store(0);
 	}
 
+  void gcpZerofyHistRecData(void) {
+    dataRec_.cntLive = 0;
+  }
+
 	void gcpDecRecData(size_t space){
 		dataRec_.cntLive -= space;
 	}
@@ -460,6 +464,11 @@ public:
 		countData_.gcpZerofyHistAtomicRecData();
 		sizeData_.gcpZerofyHistAtomicRecData();
 	}
+
+  void gcpZerofyPairHistRecData(void) {
+    countData_.gcpZerofyHistRecData();
+    sizeData_.gcpZerofyHistRecData();
+  }
 
 	mirror::Class* getClassP(){return klzz_;}
 	std::string& getRefrenecePrettyName(){return referenceName_;}
@@ -1154,6 +1163,7 @@ public :
   GCHistogramFragmentsManager(void);
   ~GCHistogramFragmentsManager(){}
   void gcpFinalizeProfileCycle(void);
+  void gcpZeorfyAllRecords(void);
 };
 
 class GCPThreadAllocManager : public GCHistogramDataManager {

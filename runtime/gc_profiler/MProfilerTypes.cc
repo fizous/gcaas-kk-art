@@ -129,8 +129,16 @@ void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 	//getObjHistograms()->gcpCheckForResetHist();
 }
 
+void GCHistogramFragmentsManager::gcpZeorfyAllRecords(void) {
+  ((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistRecData();
+  for (int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+    sizeHistograms_[i].gcpZerofyPairHistRecData();
+  }
+}
+
 void GCHistogramFragmentsManager::gcpFinalizeProfileCycle(void) {
   gcpZeorfyAllAtomicRecords();
+  gcpZeorfyAllRecords();
 }
 
 GCHistogramFragmentsManager::GCHistogramFragmentsManager(void)
