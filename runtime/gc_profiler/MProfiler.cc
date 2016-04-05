@@ -140,6 +140,14 @@ const GCMMPProfilingEntry VMProfiler::profilTypes[] = {
 				NULL,
 				&createVMProfiler<GCDaemonCPIProfiler>
 		},//GCCPI
+    {
+        0x13,
+        GCMMP_FLAGS_NONE,
+        "FRAG", "Measure Fragmentation mspace",
+        "GPC_FRAG.log",
+        NULL,
+        &createVMProfiler<FragGCProfiler>
+    },//GCCPI
 		{
 				0x02,
 				GCMMP_FLAGS_CREATE_DAEMON | GCMMP_FLAGS_ATTACH_GCDAEMON | GCMMP_FLAGS_MARK_ALLOC_WINDOWS,
@@ -2222,7 +2230,6 @@ inline void VMProfiler::accountAllocating(size_t objSize, uint64_t* before_val,
 
 
 
-
 void VMProfiler::MProfMarkPreCollection(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		VMProfiler* _vmProfiler = Runtime::Current()->GetVMProfiler();
@@ -2230,11 +2237,85 @@ void VMProfiler::MProfMarkPreCollection(void) {
 	}
 }
 
+void VMProfiler::gcpPostMarkCollection(void) {
+  heapIntegral_.gcpPostCollectionMark(&allocatedBytesData_);
+}
+
+void FragGCProfiler::attachSingleThread(Thread* thread) {}
+
+
+bool FragGCProfiler::periodicDaemonExec(void){
+  return true;
+}
+
+void FragGCProfiler::initHistDataManager(void) {
+  LOG(ERROR) << "ObjectSizesProfiler::initHistDataManager";
+  hitogramsData_ = new GCHistogramObjSizesManager();
+}
+
+FragGCProfiler::FragGCProfiler(GCMMP_Options* argOptions, void* entry):
+            VMProfiler(argOptions, entry) {
+  initHistDataManager();
+
+}
+
+inline void FragGCProfiler::dumpFragHeapStats(void) {
+  bool successWrite = dump_file_->WriteFully(&heapStatus,
+                                             static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
+}
+
+void FragGCProfiler::resetFragHandlers(void) {
+  if(hitogramsData_ == NULL)
+    return;
+
+  GCHistogramObjSizesManager* _manager = hitogramsData_;
+  _manager->gcpFinalizeProfileCycle();
+}
+
+void FragGCProfiler::dumpProfData(bool isLastDump) {
+  bool _success = true;
+  if(isLastDump) {
+    _success &= GCPDumpEndMarker(dump_file_);
+    _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
+    if(!_success) {
+      LOG(ERROR) << "Error dumping data: ObjectSizesProfiler::dumpProfData";
+    }
+    dump_file_->Close();
+    std::ostringstream outputStream;
+    hitogramsData_->gcpDumpCSVData(outputStream);
+    LOG(ERROR) << outputStream.str();
+//    gcpLogPerfData();
+    LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
+  } else {
+    dumpFragHeapStats();
+    _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
+    resetFragHandlers();
+  }
+
+}
+
+
+void FragGCProfiler::gcpPostMarkCollection(void) {
+  ScopedThreadStateChange tsc(Thread::Current(), kWaitingForGCMMPCatcherOutput);
+  updateHeapAllocStatus();
+  heapIntegral_.gcpPostCollectionMark(&allocatedBytesData_);
+
+  Runtime::Current()->GetHeap()->GetMaxContigAlloc(this);
+
+  //we do not need to aggregate since we have only one histogram
+  hitogramsData_->calculatePercentiles();
+  hitogramsData_->calculateAtomicPercentiles();
+
+  dumpProfData(false);
+}
+
+
+
 
 void VMProfiler::MProfMarkPostCollection(void) {
 	if(VMProfiler::IsMProfRunning()) {
 		VMProfiler* _vmProfiler = Runtime::Current()->GetVMProfiler();
-		_vmProfiler->heapIntegral_.gcpPostCollectionMark(&_vmProfiler->allocatedBytesData_);
+		_vmProfiler->gcpPostMarkCollection();
 	}
 }
 

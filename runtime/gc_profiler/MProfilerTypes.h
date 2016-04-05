@@ -561,6 +561,9 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
+  virtual void addObjectFast(size_t)=0;
+
+
   virtual uint64_t removeObject(size_t, mirror::Object*) {return 0;}
 
   virtual void logManagedData(void) {}
@@ -1083,6 +1086,7 @@ public:
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
+	void addObjectFast(size_t);
 
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);

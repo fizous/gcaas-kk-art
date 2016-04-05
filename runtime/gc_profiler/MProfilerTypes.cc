@@ -148,6 +148,15 @@ void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 //}
 
 
+void GCHistogramObjSizesManager::addObjectFast(size_t segLength) { //usually used only for simple data like fragmentation
+  if(segLength >= 8) {
+    int histIndex = 28 - CLZ(segLength);
+    gcpAggIncPairRecData(segLength, &sizeHistograms_[histIndex]);
+    gcpAggIncAtomicPairRecData(segLength, &sizeHistograms_[histIndex]);
+  }
+
+}
+
 inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
 	GCPExtraObjHeader* _extraHeader =

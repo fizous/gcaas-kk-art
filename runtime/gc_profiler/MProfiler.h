@@ -607,7 +607,11 @@ public:
 	virtual void resetHeapAllocStatus() {
 		memset((void*)&heapStatus, 0, static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
 	}
+
+	virtual void gcpPostMarkCollection();
 };
+
+
 
 
 class MMUProfiler : public VMProfiler {
@@ -722,6 +726,35 @@ public:
 //	GCPObjectExtraHeader headerReplica;
 //	int takeTest;
 //}GCPObjectHeaderTest;
+
+
+
+class FragGCProfiler : public VMProfiler {
+ public:
+  GCHistogramDataManager* hitogramsData_;
+
+   FragGCProfiler(GCMMP_Options* opts, void* entry);
+   ~FragGCProfiler(){};
+   void initHistDataManager(void);
+
+   bool isMarkHWEvents(void) {return false;}
+
+   bool periodicDaemonExec(void);
+
+   void resetFragHandlers();
+   void dumpFragHeapStats();
+   //overrides
+   void dumpProfData(bool isLastDump);
+   void gcpPostMarkCollection(void);
+
+   void gcpAddFragSegment(size_t seg) {
+     hitogramsData_->addObjectFast(seg);
+   }
+   void attachSingleThread(Thread*);
+   void initMarkerManager(bool) {
+      markerManager = NULL;
+   }
+};//FragGCProfiler
 
 class ObjectSizesProfiler : public VMProfiler {
 public:
