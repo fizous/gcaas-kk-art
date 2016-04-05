@@ -2244,6 +2244,20 @@ void VMProfiler::gcpPostMarkCollection(void) {
 void FragGCProfiler::attachSingleThread(Thread* thread) {}
 
 
+void FragGCProfiler::gcpLogPerfData() {
+
+  uint64_t _currBytes = allocatedBytesData_.get_total_count();
+  gc::Heap* heap_ = Runtime::Current()->GetHeap();
+  LOG(ERROR) << "Alloc: "<< _currBytes << ", currBytes: " <<
+      heap_->GetBytesAllocated() << ", concBytes: " <<
+      heap_->GetConcStartBytes(true) << ", footPrint: " <<
+      heap_->GetMaxAllowedFootPrint();
+
+  GCHistogramObjSizesManager* _histManager = getFragHistograms();
+  if(_histManager != NULL)
+    _histManager->logManagedData();
+}
+
 bool FragGCProfiler::periodicDaemonExec(void){
   return true;
 }
@@ -2269,6 +2283,8 @@ void FragGCProfiler::resetFragHandlers(void) {
   _manager->gcpFinalizeProfileCycle();
 }
 
+void FragGCProfiler::gcpLogPerfData(void);
+
 void FragGCProfiler::dumpProfData(bool isLastDump) {
   bool _success = true;
   if(isLastDump) {
@@ -2281,7 +2297,7 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
     std::ostringstream outputStream;
     hitogramsData_->gcpDumpCSVData(outputStream);
     LOG(ERROR) << outputStream.str();
-//    gcpLogPerfData();
+    gcpLogPerfData();
     LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
     _success = dump_file_->WriteFully(&heapStatus,

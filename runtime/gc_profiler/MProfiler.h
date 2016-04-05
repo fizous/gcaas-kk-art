@@ -740,7 +740,7 @@ class FragGCProfiler : public VMProfiler {
    bool isMarkHWEvents(void) {return false;}
 
    bool periodicDaemonExec(void);
-
+   void gcpLogPerfData(void);
    void resetFragHandlers();
    //overrides
    void dumpProfData(bool isLastDump);
@@ -753,6 +753,9 @@ class FragGCProfiler : public VMProfiler {
    void initMarkerManager(bool) {
       markerManager = NULL;
    }
+   GCHistogramObjSizesManager* getFragHistograms(void) {
+      return (GCHistogramObjSizesManager*) hitogramsData_;
+    }
 };//FragGCProfiler
 
 class ObjectSizesProfiler : public VMProfiler {
