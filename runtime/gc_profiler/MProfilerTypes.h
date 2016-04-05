@@ -322,6 +322,7 @@ public:
 
   void gcpZerofyHistRecData(void) {
     dataRec_.cntLive = 0;
+    dataRec_.pcntLive = 0;
   }
 
 	void gcpDecRecData(size_t space){
