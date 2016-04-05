@@ -209,9 +209,13 @@ class GCMMPHeapIntegral {
 	double gcCPULoad_;
 	double gcCPUIdleLoad_;
 
+	size_t frag_histogram_[32];
+	size_t maximim_frag_length_;
 public:
 	GCMMPHeapIntegral(void): lastHeapSize_(0), lastTime_(0),	accIntegral_(0),
-			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {}
+			gcCounts_(0), gcCPULoad_(0), gcCPUIdleLoad_(0) {
+	  resetFragHistogram();
+	}
 
 	void gcpPreCollectionMark(SafeGCPHistogramRec* allocationRec);
 
@@ -220,6 +224,28 @@ public:
 	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus);
 
 	void gcpDumpMaxContigAlloc(uint64_t alloc_bytes);
+
+	void gcpInsertFragSeg(size_t seg_length) {
+	  if(seg_length >= 8) {
+	    int index = 28 - CLZ(seg_length);
+	    frag_histogram_[index]++;
+	    maximim_frag_length_ = std::max(maximim_frag_length_, seg_length);
+	  }
+	}
+
+	void resetFragHistogram(void) {
+	  maximim_frag_length_ = 0;
+	  memset((void*)frag_histogram_, 0, 32 * sizeof(size_t));
+	}
+
+	void dumpFragHistogram(void) {
+	  LOG(ERROR) << "_________ dumping fragents______(max=" << maximim_frag_length_<<")";
+	  for(int _iter; _iter < 32; _iter++) {
+	    if(frag_histogram_[_iter] > 0) {
+	      LOG(ERROR) << "frag["<<_iter<<"]: " << frag_histogram_[_iter];
+	    }
+	  }
+	}
 };//GCMMPHeapIntegral
 
 

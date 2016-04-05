@@ -2187,15 +2187,16 @@ inline void GCMMPHeapIntegral::gcpPreCollectionMark(SafeGCPHistogramRec* allocat
 
 
 inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(uint64_t alloc_bytes) {
-  size_t _maxContig_space = 0;
-  Runtime::Current()->GetHeap()->GetMaxContigAlloc(&_maxContig_space);
+  Runtime::Current()->GetHeap()->GetMaxContigAlloc(this);
   LOG(ERROR) << "currBytes: " << alloc_bytes
-      << ", max_contig: " << _maxContig_space;
+      << ", max_contig: " << maximim_frag_length_;
 }
 
 inline void GCMMPHeapIntegral::gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
   allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
+  resetFragHistogram();
   gcpDumpMaxContigAlloc(allocationRec->get_total_count());
+  dumpFragHistogram();
 }
 
 inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {

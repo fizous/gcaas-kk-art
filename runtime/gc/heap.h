@@ -167,7 +167,7 @@ class Heap {
 
   ~Heap();
 
-  void GetMaxContigAlloc(size_t* max_contig_spce);
+  void GetMaxContigAlloc(void* args);
   // Allocates and initializes storage for an object instance.
   mirror::Object* AllocObject(Thread* self, mirror::Class* klass, size_t num_bytes)
       SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);

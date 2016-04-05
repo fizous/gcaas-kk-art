@@ -784,12 +784,20 @@ static void MSpaceChunkCallback(void* start, void* end, size_t used_bytes, void*
   }
 }
 
+static void MSpaceFragCallback(void* start, void* end, size_t used_bytes, void* arg) {
+  size_t chunk_size = reinterpret_cast<uint8_t*>(end) - reinterpret_cast<uint8_t*>(start);
+  if (used_bytes < chunk_size) {
+    size_t chunk_free_bytes = chunk_size - used_bytes;
+    mprofiler::GCMMPHeapIntegral* _h_integral = reinterpret_cast<mprofiler::GCMMPHeapIntegral*>(arg);
+    _h_integral->gcpInsertFragSeg(chunk_free_bytes);
+    size_t& max_contiguous_allocation = *reinterpret_cast<size_t*>(arg);
+    max_contiguous_allocation = std::max(max_contiguous_allocation, chunk_free_bytes);
+  }
+}
 
-void Heap::GetMaxContigAlloc(size_t* max_contig_spce) {
-  size_t max_contiguous_allocation = 0;
-  GetAllocSpace()->AsDlMallocSpace()->Walk(MSpaceChunkCallback,
-                                           &max_contiguous_allocation);
-  *max_contig_spce = max_contiguous_allocation;
+void Heap::GetMaxContigAlloc(void* args) {
+  GetAllocSpace()->AsDlMallocSpace()->Walk(MSpaceFragCallback,
+                                           args);
 }
 
 mirror::Object* Heap::AllocObject(Thread* self, mirror::Class* c, size_t byte_count) {
