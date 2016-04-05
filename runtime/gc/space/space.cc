@@ -23,7 +23,7 @@ namespace gc {
 namespace space {
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 Space::Space(const std::string& name, GcRetentionPolicy gc_retention_policy,
     GCSrvceSpace* memory_alloc) : space_data_(memory_alloc) {
   if(0)

@@ -78,7 +78,7 @@ const bool kIsTargetBuild = false;
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
  #define IPC_MS_VLOG(severity)            if (UNLIKELY(ART_GC_SERVICE_VERBOSE))       ::art::LogMessage(__FILE__, __LINE__, severity, -1).stream()
 #else
  #define ART_GC_SERVICE_VERBOSE 0

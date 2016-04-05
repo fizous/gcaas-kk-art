@@ -506,7 +506,7 @@ inline void VMProfiler::updateHeapAllocStatus(void) {
 	heapStatus.index = (_allocBytes  / kGCMMPAllocWindowDump);
 	heapStatus.timeInNsec = GetRelevantRealTime();
 	heapStatus.allocatedBytes = _allocBytes;
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 //	double ration = 1.0;
 //	uint64_t _loaded_heap = static_cast<uint64_t>(heap_->GetBytesAllocated());
 //	uint64_t _delta_heap_bytes = 0;
@@ -2188,6 +2188,12 @@ inline void GCMMPHeapIntegral::gcpPostCollectionMark(SafeGCPHistogramRec* alloca
   allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
 }
 
+inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(GCMMPHeapStatus* heapStatus) {
+  size_t _maxContig_space = 0;
+  Runtime::Current()->GetHeap()->GetMaxContigAlloc(&_maxContig_space);
+  LOG(ERROR) << "currBytes: " << heapStatus->currAllocBytes
+      << ", max_contig: " << _maxContig_space;
+}
 
 inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
   heapStatus->heapIntegral = accIntegral_;

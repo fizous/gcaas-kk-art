@@ -218,6 +218,8 @@ public:
 	void gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec);
 
 	void gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus);
+
+	void gcpDumpMaxContigAlloc(GCMMPHeapStatus* heapStatus);
 };//GCMMPHeapIntegral
 
 

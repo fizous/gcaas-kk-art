@@ -41,7 +41,7 @@ static inline bool byte_cas(byte old_value, byte new_value, byte* address) {
   return success;
 }
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 inline void CardBaseTable::CheckCardValid(byte* card) const {
   DCHECK(IsValidCard(card))
