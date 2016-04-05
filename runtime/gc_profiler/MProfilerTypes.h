@@ -1151,8 +1151,8 @@ public:
 
 class GCHistogramFragmentsManager: public GCHistogramObjSizesManager {
 public :
-  GCHistogramObjSizesManager(void);
-  ~GCHistogramFragmentsManager(){};
+  GCHistogramFragmentsManager(void);
+  ~GCHistogramFragmentsManager(){}
   void gcpFinalizeProfileCycle(void);
 };
 
