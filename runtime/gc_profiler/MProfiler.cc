@@ -2202,9 +2202,9 @@ inline void GCMMPHeapIntegral::gcpDumpMaxContigAlloc(uint64_t alloc_bytes) {
 
 inline void GCMMPHeapIntegral::gcpPostCollectionMark(SafeGCPHistogramRec* allocationRec) {
   allocationRec->read_counts(Thread::Current(), &lastTime_, &lastHeapSize_);
-  resetFragHistogram();
-  gcpDumpMaxContigAlloc(allocationRec->get_total_count());
-  dumpFragHistogram();
+//  resetFragHistogram();
+//  gcpDumpMaxContigAlloc(allocationRec->get_total_count());
+//  dumpFragHistogram();
 }
 
 inline void GCMMPHeapIntegral::gcpUpdateHeapStatus(GCMMPHeapStatus* heapStatus) {
@@ -2259,10 +2259,6 @@ FragGCProfiler::FragGCProfiler(GCMMP_Options* argOptions, void* entry):
 
 }
 
-inline void FragGCProfiler::dumpFragHeapStats(void) {
-  bool successWrite = dump_file_->WriteFully(&heapStatus,
-                                             static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
-}
 
 void FragGCProfiler::resetFragHandlers(void) {
   if(hitogramsData_ == NULL)
@@ -2287,7 +2283,8 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
 //    gcpLogPerfData();
     LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
-    dumpFragHeapStats();
+    _success = dump_file_->WriteFully(&heapStatus,
+                                                 static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
     _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
     resetFragHandlers();
   }

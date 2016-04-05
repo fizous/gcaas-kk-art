@@ -561,7 +561,7 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
-  virtual void addObjectFast(size_t)=0;
+  virtual void addObjectFast(size_t);
 
 
   virtual uint64_t removeObject(size_t, mirror::Object*) {return 0;}

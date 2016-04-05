@@ -1517,6 +1517,7 @@ void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
 //inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
 //	rec->cntLive--;
 //}
+void GCHistogramDataManager::addObjectFast(size_t){}
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 	return dump_file->WriteFully(gcpGetDataRecP(),

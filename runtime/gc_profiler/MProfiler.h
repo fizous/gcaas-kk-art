@@ -742,7 +742,6 @@ class FragGCProfiler : public VMProfiler {
    bool periodicDaemonExec(void);
 
    void resetFragHandlers();
-   void dumpFragHeapStats();
    //overrides
    void dumpProfData(bool isLastDump);
    void gcpPostMarkCollection(void);
