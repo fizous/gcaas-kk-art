@@ -2264,7 +2264,8 @@ void FragGCProfiler::resetFragHandlers(void) {
   if(hitogramsData_ == NULL)
     return;
 
-  GCHistogramObjSizesManager* _manager = hitogramsData_;
+  GCHistogramObjSizesManager* _manager =
+      reinterpret_cast<GCHistogramObjSizesManager*>(hitogramsData_);
   _manager->gcpFinalizeProfileCycle();
 }
 
