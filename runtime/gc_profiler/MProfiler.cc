@@ -2283,7 +2283,7 @@ void FragGCProfiler::resetFragHandlers(void) {
   _manager->gcpFinalizeProfileCycle();
 }
 
-void FragGCProfiler::gcpLogPerfData(void);
+
 
 void FragGCProfiler::dumpProfData(bool isLastDump) {
   bool _success = true;
