@@ -1168,6 +1168,7 @@ public :
   void gcpZeorfyAllRecords(void);
   void addObjectFast(size_t,size_t);
   bool gcpDumpHistTable(art::File*, bool);
+  bool gcpDumpHistSpaceTable(art::File*, bool);
 };
 
 class GCPThreadAllocManager : public GCHistogramDataManager {

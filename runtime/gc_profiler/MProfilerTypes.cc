@@ -139,7 +139,7 @@ bool GCHistogramFragmentsManager::gcpDumpHistTable(art::File* dump_file,
     GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
     _success = _record->countData_.gcpDumpHistRec(dump_file);
     //usedBytesData_->gcpPairUpdatePercentiles(_record);
-    _success &= usedBytesData_->gcpDumpHistRec(dump_file);
+    _success &= usedBytesData_->countData_.gcpDumpHistRec(dump_file);
     _success &=
            VMProfiler::GCPDumpEndMarker(dump_file);
   }
@@ -183,6 +183,32 @@ void GCHistogramFragmentsManager::gcpZeorfyAllRecords(void) {
 void GCHistogramFragmentsManager::gcpFinalizeProfileCycle(void) {
   gcpZeorfyAllAtomicRecords();
   gcpZeorfyAllRecords();
+}
+
+bool GCHistogramFragmentsManager::gcpDumpHistSpaceTable(art::File* dump_file,
+    bool dumpGlobalRec) {
+  bool _dataWritten = false;
+  if(dumpGlobalRec) {
+    GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+    _dataWritten = _record->sizeData_.gcpDumpHistRec(dump_file);
+    _dataWritten &= usedBytesData_->sizeData_.gcpDumpHistRec(dump_file);
+    _dataWritten &=
+           VMProfiler::GCPDumpEndMarker(dump_file);
+  }
+  for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
+    _dataWritten = sizeHistograms_[i].sizeData_.gcpDumpHistRec(dump_file);
+    if(!_dataWritten)
+      break;
+//    GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//     _success &=
+//        dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+  }
+//   bool _success =
+//      dump_file->WriteFully(histogramTable, totalHistogramSize);
+  if(_dataWritten)
+    _dataWritten &=
+       VMProfiler::GCPDumpEndMarker(dump_file);
+   return _dataWritten;
 }
 
 GCHistogramFragmentsManager::GCHistogramFragmentsManager(void)
