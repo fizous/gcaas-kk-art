@@ -143,8 +143,8 @@ bool GCHistogramFragmentsManager::gcpDumpHistTable(art::File* dump_file,
         << usedBytesData_->countData_.dataRec_.cntLive
         << ", live="<< usedBytesData_->countData_.dataRec_.cntLive;
     //_success &= usedBytesData_->countData_.gcpDumpHistRec(dump_file);
-    _success &=
-           VMProfiler::GCPDumpEndMarker(dump_file);
+//    _success &=
+//           VMProfiler::GCPDumpEndMarker(dump_file);
   }
   for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
     _success = sizeHistograms_[i].countData_.gcpDumpHistRec(dump_file);
@@ -198,8 +198,8 @@ bool GCHistogramFragmentsManager::gcpDumpHistSpaceTable(art::File* dump_file,
         << usedBytesData_->sizeData_.dataRec_.cntLive
         << ", live="<< usedBytesData_->sizeData_.dataRec_.cntLive;
     //_dataWritten &= usedBytesData_->sizeData_.gcpDumpHistRec(dump_file);
-    _dataWritten &=
-           VMProfiler::GCPDumpEndMarker(dump_file);
+//    _dataWritten &=
+//           VMProfiler::GCPDumpEndMarker(dump_file);
   }
   for(int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
     _dataWritten = sizeHistograms_[i].sizeData_.gcpDumpHistRec(dump_file);
