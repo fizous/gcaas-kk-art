@@ -524,7 +524,7 @@ public:
 	GCMMP_HISTOGRAM_MGR_TYPE type_;
 	GCPHistRecData*				histData_;
 
-	GCPHistogramRec				histRecord;
+	GCPHistogramRec				histRecord_;
 	GCPHistogramRecAtomic histAtomicRecord;
 	//secretNumber used to check if this manager is included;
 	int iSecret;
@@ -571,7 +571,7 @@ public:
 
   virtual void addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) = 0;
-  virtual void addObjectFast(size_t);
+  virtual void addObjectFast(size_t,size_t);
 
 
   virtual uint64_t removeObject(size_t, mirror::Object*) {return 0;}
@@ -1096,7 +1096,7 @@ public:
 
 	void initHistograms(void);
 	void addObject(size_t, size_t, mirror::Object*);
-	void addObjectFast(size_t);
+
 
 //  bool gcpRemoveDataFromHist(GCPHistogramRec*);
 //  bool gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic*);
@@ -1161,10 +1161,15 @@ public:
 
 class GCHistogramFragmentsManager: public GCHistogramObjSizesManager {
 public :
+  GCPPairHistogramRecords*       usedBytesData_;
   GCHistogramFragmentsManager(void);
   ~GCHistogramFragmentsManager(){}
   void gcpFinalizeProfileCycle(void);
   void gcpZeorfyAllRecords(void);
+  void addObjectFast(size_t,size_t);
+  void calculateAtomicPercentiles(void);
+  void calculatePercentiles(void);
+  bool gcpDumpHistTable(art::File*, bool);
 };
 
 class GCPThreadAllocManager : public GCHistogramDataManager {

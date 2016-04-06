@@ -117,6 +117,9 @@ void GCHistogramObjSizesManager::gcpZeorfyAllAtomicRecords(void) {
 	}
 }
 
+
+
+
 void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 
   uint64_t _newCohortIndex = VMProfiler::GCPCalcCohortIndex();
@@ -129,7 +132,48 @@ void GCHistogramObjSizesManager::gcpFinalizeProfileCycle(void) {
 	//getObjHistograms()->gcpCheckForResetHist();
 }
 
+bool GCHistogramFragmentsManager::gcpDumpHistTable(art::File* dump_file,
+    bool dumpGlobalRec) {
+  bool _success = false;
+  if(dumpGlobalRec) {
+    GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
+    _success = _record->countData_.gcpDumpHistRec(dump_file);
+    //usedBytesData_->gcpPairUpdatePercentiles(_record);
+    _success &= usedBytesData_->gcpDumpHistRec(dump_file);
+    _success &=
+           VMProfiler::GCPDumpEndMarker(dump_file);
+  }
+  for(int i = 0; i < kGCMMPMaxHistogramEntries; i++){
+    _success = sizeHistograms_[i].countData_.gcpDumpHistRec(dump_file);
+    if(!_success)
+      break;
+//    GCPCopyRecords(&dummyRec, &lastWindowHistTable[i]);
+//     _success &=
+//        dump_file->WriteFully(&dummyRec, sizeof(GCPHistogramRec));
+  }
+//   bool _success =
+//      dump_file->WriteFully(histogramTable, totalHistogramSize);
+  if(_success)
+    _success &=
+       VMProfiler::GCPDumpEndMarker(dump_file);
+   return _success;
+}
+
+
+void GCHistogramFragmentsManager::addObjectFast(size_t usedLength, size_t freeLength) { //usually used only for simple data like fragmentation
+  if(freeLength >= 8) {
+    int histIndex = 28 - CLZ(freeLength);
+    gcpAggIncPairRecData(freeLength, &sizeHistograms_[histIndex]);
+    gcpAggIncAtomicPairRecData(freeLength, &sizeHistograms_[histIndex]);
+  } else {
+    usedLength += freeLength;
+  }
+  usedBytesData_->gcpPairIncRecData(usedLength);
+
+}
+
 void GCHistogramFragmentsManager::gcpZeorfyAllRecords(void) {
+  usedBytesData_->gcpZerofyPairHistRecData();
   ((GCPPairHistogramRecords*)histData_)->gcpZerofyPairHistRecData();
   for (int i = 0; i < kGCMMPMaxHistogramEntries; i++) {
     sizeHistograms_[i].gcpZerofyPairHistRecData();
@@ -143,6 +187,8 @@ void GCHistogramFragmentsManager::gcpFinalizeProfileCycle(void) {
 
 GCHistogramFragmentsManager::GCHistogramFragmentsManager(void)
     : GCHistogramObjSizesManager() {
+  /* initialize the global of the used bytes */
+  usedBytesData_ =  new GCPPairHistogramRecords(1);
 }
 //inline bool GCHistogramObjSizesManager::gcpRemoveAtomicDataFromHist(GCPHistogramRecAtomic* rec) {
 //	bool modified = false;
@@ -165,14 +211,7 @@ GCHistogramFragmentsManager::GCHistogramFragmentsManager(void)
 //}
 
 
-void GCHistogramObjSizesManager::addObjectFast(size_t segLength) { //usually used only for simple data like fragmentation
-  if(segLength >= 8) {
-    int histIndex = 28 - CLZ(segLength);
-    gcpAggIncPairRecData(segLength, &sizeHistograms_[histIndex]);
-    gcpAggIncAtomicPairRecData(segLength, &sizeHistograms_[histIndex]);
-  }
 
-}
 
 inline void GCHistogramObjSizesManager::addObject(size_t allocatedMemory,
 		size_t objSize, mirror::Object* obj) {
@@ -1534,7 +1573,7 @@ void GCHistogramDataManager::initManager(GCHistogramDataManager* pManager,
 //inline void GCHistogramDataManager::gcpRemoveDataToHist(GCPHistogramRec* rec) {
 //	rec->cntLive--;
 //}
-void GCHistogramDataManager::addObjectFast(size_t){}
+void GCHistogramDataManager::addObjectFast(size_t, size_t){}
 
 inline bool GCHistogramDataManager::gcpDumpHistRec(art::File* dump_file) {
 	return dump_file->WriteFully(gcpGetDataRecP(),

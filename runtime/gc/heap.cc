@@ -786,12 +786,13 @@ static void MSpaceChunkCallback(void* start, void* end, size_t used_bytes, void*
 
 static void MSpaceFragCallback(void* start, void* end, size_t used_bytes, void* arg) {
   size_t chunk_size = reinterpret_cast<uint8_t*>(end) - reinterpret_cast<uint8_t*>(start);
+  mprofiler::FragGCProfiler* profiler = reinterpret_cast<mprofiler::FragGCProfiler*>(arg);
+  size_t chunk_free_bytes = 0;
   if (used_bytes < chunk_size) {
-    size_t chunk_free_bytes = chunk_size - used_bytes;
-    mprofiler::FragGCProfiler* profiler = reinterpret_cast<mprofiler::FragGCProfiler*>(arg);
-    profiler->gcpAddFragSegment(chunk_free_bytes);
+    chunk_free_bytes = chunk_size - used_bytes;
    // max_contiguous_allocation = std::max(max_contiguous_allocation, chunk_free_bytes);
   }
+  profiler->gcpAddFragSegment(used_bytes, chunk_free_bytes);
 }
 
 void Heap::GetMaxContigAlloc(void* args) {

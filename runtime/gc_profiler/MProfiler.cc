@@ -2287,18 +2287,22 @@ void FragGCProfiler::resetFragHandlers(void) {
 
 void FragGCProfiler::dumpProfData(bool isLastDump) {
   bool _success = true;
+  updateHeapAllocStatus();
+  heapIntegral_.gcpPostCollectionMark(&allocatedBytesData_);
+  Runtime::Current()->GetHeap()->GetMaxContigAlloc(this);
+  //we do not need to aggregate since we have only one histogram
+  hitogramsData_->calculatePercentiles();
+  hitogramsData_->calculateAtomicPercentiles();
+  _success = dump_file_->WriteFully(&heapStatus,
+                                static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
   if(isLastDump) {
-    updateHeapAllocStatus();
-    heapIntegral_.gcpPostCollectionMark(&allocatedBytesData_);
 
-    Runtime::Current()->GetHeap()->GetMaxContigAlloc(this);
 
-    //we do not need to aggregate since we have only one histogram
-    hitogramsData_->calculatePercentiles();
-    hitogramsData_->calculateAtomicPercentiles();
-    _success = dump_file_->WriteFully(&heapStatus,
-                                                 static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
-    _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
+
+
+
+
+
     _success &= GCPDumpEndMarker(dump_file_);
     _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
     if(!_success) {

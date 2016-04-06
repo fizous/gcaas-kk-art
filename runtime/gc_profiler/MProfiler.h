@@ -746,7 +746,7 @@ class FragGCProfiler : public VMProfiler {
    void dumpProfData(bool isLastDump);
    void gcpPostMarkCollection(void);
 
-   void gcpAddFragSegment(size_t seg) {
+   void gcpAddFragSegment(size_t used_bytes, size_t seg) {
      hitogramsData_->addObjectFast(seg);
    }
    void attachSingleThread(Thread*);
