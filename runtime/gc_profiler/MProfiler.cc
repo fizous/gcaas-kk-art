@@ -2295,14 +2295,8 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
   hitogramsData_->calculateAtomicPercentiles();
   _success = dump_file_->WriteFully(&heapStatus,
                                 static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
+  _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
   if(isLastDump) {
-
-
-
-
-
-
-
     _success &= GCPDumpEndMarker(dump_file_);
     _success &= hitogramsData_->gcpDumpSummaryManagedData(dump_file_);
     if(!_success) {
@@ -2315,9 +2309,6 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
     gcpLogPerfData();
     LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
   } else {
-    _success = dump_file_->WriteFully(&heapStatus,
-                                                 static_cast<int64_t>(sizeof(GCMMPHeapStatus)));
-    _success &= hitogramsData_->gcpDumpManagedData(dump_file_ ,true);
     resetFragHandlers();
   }
 

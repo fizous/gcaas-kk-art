@@ -1167,8 +1167,6 @@ public :
   void gcpFinalizeProfileCycle(void);
   void gcpZeorfyAllRecords(void);
   void addObjectFast(size_t,size_t);
-  void calculateAtomicPercentiles(void);
-  void calculatePercentiles(void);
   bool gcpDumpHistTable(art::File*, bool);
 };
 
