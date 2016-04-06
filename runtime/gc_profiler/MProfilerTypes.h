@@ -1122,10 +1122,10 @@ public:
 //  bool gcpCheckForResetHist(void);
 //  bool gcpCheckForCompleteResetHist(void);
 
-  bool gcpDumpHistTable(art::File*, bool);
+  virtual bool gcpDumpHistTable(art::File*, bool);
   bool gcpDumpHistAtomicTable(art::File*);
   bool gcpDumpHistAtomicSpaceTable(art::File*);
-	bool gcpDumpHistSpaceTable(art::File*, bool);
+	virtual bool gcpDumpHistSpaceTable(art::File*, bool);
 	void logManagedData(void);
 	bool gcpDumpCSVGlobalDataSummary(std::ostringstream&);
 	bool gcpDumpCSVCoreTables(std::ostringstream&);
