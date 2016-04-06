@@ -140,7 +140,7 @@ bool GCHistogramFragmentsManager::gcpDumpHistTable(art::File* dump_file,
     _success = _record->countData_.gcpDumpHistRec(dump_file);
     //usedBytesData_->gcpPairUpdatePercentiles(_record);
     LOG(ERROR) << "usedBytesData_->countData_.total="
-        << usedBytesData_->countData_.dataRec_.cntLive
+        << usedBytesData_->countData_.dataRec_.cntTotal
         << ", live="<< usedBytesData_->countData_.dataRec_.cntLive;
     //_success &= usedBytesData_->countData_.gcpDumpHistRec(dump_file);
 //    _success &=
@@ -195,7 +195,7 @@ bool GCHistogramFragmentsManager::gcpDumpHistSpaceTable(art::File* dump_file,
     GCPPairHistogramRecords* _record = (GCPPairHistogramRecords*) histData_;
     _dataWritten = _record->sizeData_.gcpDumpHistRec(dump_file);
     LOG(ERROR) << "usedBytesData_->sizeData_.total="
-        << usedBytesData_->sizeData_.dataRec_.cntLive
+        << usedBytesData_->sizeData_.dataRec_.cntTotal
         << ", live="<< usedBytesData_->sizeData_.dataRec_.cntLive;
     //_dataWritten &= usedBytesData_->sizeData_.gcpDumpHistRec(dump_file);
 //    _dataWritten &=
