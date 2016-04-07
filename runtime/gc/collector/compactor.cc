@@ -61,7 +61,6 @@ void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
 
   Runtime* runtime = Runtime::Current();
-  Thread* self = Thread::Current();
 
   // We only want reachable instances, so do a GC. This also ensures that the alloc stack
   // is empty, so the live bitmap is the only place we need to look.
@@ -76,8 +75,8 @@ void SpaceCompactor::startCompaction(void) {
   {
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     compact_space_ = original_space_->CreateZygoteSpace("compacted_space", false);
-    immune_begin_ = original_space_->Begin();
-    immune_end_ = original_space_->End();
+    immune_begin_ = reinterpret_cast<mirror::Object*>(original_space_->Begin());
+    immune_end_ = reinterpret_cast<mirror::Object*>(original_space_->End());
     accounting::SPACE_BITMAP* _live_bitmap =
         original_space_->GetLiveBitmap();
     CompactVisitor compact_visitor(this);
