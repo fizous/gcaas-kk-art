@@ -41,10 +41,7 @@ inline mirror::Object* DlMallocSpace::AllocNonvirtual(Thread* self, size_t num_b
   return obj;
 }
 
-inline mirror::Object* DlMallocSpace::publicAllocWithoutGrowthLocked(size_t num_bytes,
-                                                               size_t* bytes_allocated) {
-  return AllocWithoutGrowthLocked(num_bytes, bytes_allocated);
-}
+
 
 inline mirror::Object* DlMallocSpace::AllocWithoutGrowthLocked(size_t num_bytes,
                                                                size_t* bytes_allocated) {
