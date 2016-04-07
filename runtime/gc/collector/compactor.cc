@@ -65,6 +65,7 @@ void SpaceCompactor::startCompaction(void) {
   // We only want reachable instances, so do a GC. This also ensures that the alloc stack
   // is empty, so the live bitmap is the only place we need to look.
   Thread* self = Thread::Current();
+  ReaderMutexLock mu(self, *Locks::mutator_lock_);
   self->TransitionFromRunnableToSuspended(kNative);
   local_heap_->CollectGarbage(true);
   self->TransitionFromSuspendedToRunnable();
