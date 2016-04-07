@@ -1919,6 +1919,13 @@ void MMUProfiler::dumpProfData(bool isLastDump) {
 
 void VMProfiler::ProcessSignalCatcher(int signalVal) {
 	if(signalVal == kGCMMPDumpSignal) {
+	  LOG(ERROR) << "-------Calling executing compaction--------";
+    gc::collector::SpaceCompactor* compactor =
+        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
+    compactor->startCompaction();
+    compactor->FinalizeCompaction();
+    LOG(ERROR) << "-------Done executing compaction--------";
+
 		Thread* self = Thread::Current();
 		MutexLock mu(self, *prof_thread_mutex_);
 		receivedSignal_ = true;
@@ -2316,11 +2323,7 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
     LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
 
 
-    gc::collector::SpaceCompactor* compactor =
-        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
-    compactor->startCompaction();
-    compactor->FinalizeCompaction();
-    LOG(ERROR) << "-------Done executing compaction--------";
+
   } else {
     resetFragHandlers();
   }
