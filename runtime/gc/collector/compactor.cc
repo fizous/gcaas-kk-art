@@ -8,6 +8,8 @@
 #include "thread.h"
 #include "thread_list.h"
 #include "thread-inl.h"
+#include "gc/accounting/heap_bitmap.h"
+#include "gc/accounting/space_bitmap-inl.h"
 #include "gc/collector/compactor.h"
 #include "gc/space/dlmalloc_space.h"
 #include "mirror/object-inl.h"
