@@ -9,7 +9,7 @@
 #define ART_RUNTIME_GC_COLLECTOR_COMPACTOR_H_
 
 #include "gc/heap.h"
-#include "dlmalloc_space.h"
+#include "gc/space/dlmalloc_space.h"
 #include "mirror/object-inl.h"
 
 namespace art {

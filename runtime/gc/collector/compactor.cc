@@ -7,8 +7,8 @@
 
 #include "thread.h"
 #include "thread_list.h"
-#include "compactor.h"
-#include "dlmalloc_space.h"
+#include "gc/collector/compactor.h"
+#include "gc/space/dlmalloc_space.h"
 #include "mirror/object-inl.h"
 
 namespace art {
