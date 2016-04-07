@@ -586,8 +586,7 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
   }
 
 
-  mirror::Object* publicAllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
-      EXCLUSIVE_LOCKS_REQUIRED(lock_);
+  mirror::Object* publicAllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated);
 
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
