@@ -1832,12 +1832,7 @@ void VMProfiler::ShutdownProfiling(void) {
 			runtime->DetachCurrentThread();
 			setProfDaemon(false);
 		}
-    LOG(ERROR) << "-------Calling executing compaction--------";
-    gc::collector::SpaceCompactor* compactor =
-        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
-    compactor->startCompaction();
-    compactor->FinalizeCompaction();
-    LOG(ERROR) << "-------Done executing compaction--------";
+
 	}
 }
 
@@ -1942,6 +1937,13 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 		prof_thread_cond_->Broadcast(self);
 
 		GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
+
+    LOG(ERROR) << "-------Calling executing compaction--------";
+    gc::collector::SpaceCompactor* compactor =
+        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
+    compactor->startCompaction();
+    compactor->FinalizeCompaction();
+    LOG(ERROR) << "-------Done executing compaction--------";
 	}
 }
 
