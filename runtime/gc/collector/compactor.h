@@ -33,7 +33,7 @@ class SpaceCompactor {
 
 
 
-  SpaceCompactor::SpaceCompactor(Heap*);
+  SpaceCompactor(Heap*);
   void allocateSpaceObject(const mirror::Object* obj,
                            size_t obj_size);
   //initialize compaction which start by stopping the world
