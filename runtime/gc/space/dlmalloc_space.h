@@ -587,7 +587,14 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
 
 
   mirror::Object* publicAllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
-    return reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), num_bytes));
+
+    mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), num_bytes));
+    if(result != NULL) {
+      *bytes_allocated = AllocationSizeNonvirtual(result);
+      return result;
+    }
+    LOG(ERROR) << "publicAllocWithoutGrowthLocked..could not allocate object";
+    return NULL;
   }
 
  protected:
