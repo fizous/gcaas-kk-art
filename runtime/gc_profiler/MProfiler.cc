@@ -35,6 +35,8 @@
 #include "thread_state.h"
 #include "thread.h"
 #include "utils.h"
+
+#include "gc/collector/compactor.h"
 //#include "scoped_thread_state_change.h"
 
 
@@ -2312,6 +2314,13 @@ void FragGCProfiler::dumpProfData(bool isLastDump) {
     LOG(ERROR) << outputStream.str();
     gcpLogPerfData();
     LOG(ERROR) << "Done dumping data: ObjectSizesProfiler::dumpProfData";
+
+
+    gc::collector::SpaceCompactor* compactor =
+        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
+    compactor->startCompaction();
+    compactor->FinalizeCompaction();
+    LOG(ERROR) << "-------Done executing compaction--------";
   } else {
     resetFragHandlers();
   }

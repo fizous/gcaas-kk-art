@@ -585,6 +585,10 @@ class DlMallocSpace : public MemMapSpace, public AllocSpace
     recent_freed_objects_[GetRecentFreePos()].second = ptr->GetClass();
   }
 
+
+  mirror::Object* publicAllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated)
+      EXCLUSIVE_LOCKS_REQUIRED(lock_);
+
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false);

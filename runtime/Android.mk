@@ -53,6 +53,7 @@ LIBART_COMMON_SRC_FILES := \
 	gc/collector/mark_sweep.cc \
 	gc/collector/partial_mark_sweep.cc \
 	gc/collector/sticky_mark_sweep.cc \
+	gc/collector/compactor.cc \
 	gc/heap.cc \
 	gc/space/dlmalloc_space.cc \
 	gc/space/image_space.cc \
