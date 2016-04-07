@@ -12,6 +12,7 @@
 #include "gc/accounting/space_bitmap-inl.h"
 #include "gc/collector/compactor.h"
 #include "gc/space/dlmalloc_space.h"
+#include "gc/space/space.h"
 #include "mirror/object-inl.h"
 
 namespace art {
