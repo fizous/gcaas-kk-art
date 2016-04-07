@@ -13,6 +13,7 @@
 #include "gc/collector/compactor.h"
 #include "gc/space/dlmalloc_space.h"
 #include "gc/space/space.h"
+#include "gc/space/space-inl.h"
 #include "mirror/object-inl.h"
 
 namespace art {
