@@ -84,7 +84,7 @@ void SpaceCompactor::startCompaction(void) {
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     compact_space_ = original_space_->CreateZygoteSpace("compacted_space", false);
     LOG(ERROR) << "new dlmalloc space size is: being:"
-        << compact_space_->Begin() << ", end: " << compact_space_->End() <<
+        << reinterpret_cast<void*>(compact_space_->Begin()) << ", end: " << reinterpret_cast<void*>(compact_space_->End()) <<
         ", capacity is:" << compact_space_->Capacity();
 
     immune_begin_ = reinterpret_cast<mirror::Object*>(original_space_->Begin());
