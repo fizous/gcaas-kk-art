@@ -38,6 +38,7 @@ class SpaceCompactor {
                            size_t obj_size);
   //initialize compaction which start by stopping the world
   void startCompaction(void);
+  void FillNewObjects(void);
 
   void FinalizeCompaction(void);
 };

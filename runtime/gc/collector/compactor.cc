@@ -28,7 +28,10 @@ inline void SpaceCompactor::allocateSpaceObject(const mirror::Object* obj,
   mirror::Object* result = compact_space_->publicAllocWithoutGrowthLocked(obj_size,
                                                             &actual_space);
   forwarded_objects_.Put(obj, result);
+  const byte* src = reinterpret_cast<const byte*>(obj);
+  byte* dst = reinterpret_cast<byte*>(result);
 
+  memcpy(dst, src, obj_size);
 }
 
 SpaceCompactor::SpaceCompactor(Heap* vmHeap) : local_heap_(vmHeap),
@@ -62,6 +65,35 @@ class CompactVisitor {
   DISALLOW_COPY_AND_ASSIGN(CompactVisitor);
 };
 
+
+
+class CompactFixableVisitor {
+ public:
+  SpaceCompactor* compactor_;
+  CompactFixableVisitor(SpaceCompactor* space_compactor) :
+    compactor_(space_compactor) {
+
+  }
+
+  void operator()(const mirror::Object* o) const SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+    if(o != NULL) {
+      size_t n = o->SizeOf();
+      compactor_->allocateSpaceObject(o, n);
+      compactor_->compacted_cnt_++;
+    }
+  }
+  DISALLOW_COPY_AND_ASSIGN(CompactFixableVisitor);
+};
+
+void SpaceCompactor::FillNewObjects(void) {
+  for(const auto& ref : forwarded_objects_) {
+    const byte* src = reinterpret_cast<const byte*>(ref.first);
+    byte* dst = reinterpret_cast<byte*>(ref.second);
+    size_t n = ref.first->SizeOf();
+    memcpy(dst, src, n);
+  }
+}
+
 void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
 
@@ -91,21 +123,29 @@ void SpaceCompactor::startCompaction(void) {
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
         ", capacity is:" << capacity << ", size is : " << original_space_->Size();
 
-    compact_space_ = gc::space::DlMallocSpace::Create("compacted_space",
-                                                        original_space_->Size(),
-                                                        capacity, capacity,
-                                                        original_space_->End(), false);
-    LOG(ERROR) << "new dlmalloc space size is: being:"
-        << reinterpret_cast<void*>(compact_space_->Begin()) << ", end: " << reinterpret_cast<void*>(compact_space_->End()) <<
-        ", capacity is:" << compact_space_->Capacity();
 
-    immune_begin_ = reinterpret_cast<mirror::Object*>(original_space_->Begin());
-    immune_end_ = reinterpret_cast<mirror::Object*>(original_space_->End());
-    accounting::SPACE_BITMAP* _live_bitmap =
-        original_space_->GetLiveBitmap();
-    CompactVisitor compact_visitor(this);
-    _live_bitmap->VisitMarkedRange(_live_bitmap->HeapBegin(),
-                                   _live_bitmap->HeapLimit(), compact_visitor);
+    if(false) {
+      compact_space_ = gc::space::DlMallocSpace::Create("compacted_space",
+                                                          original_space_->Size(),
+                                                          capacity, capacity,
+                                                          original_space_->End(), false);
+      LOG(ERROR) << "new dlmalloc space size is: being:"
+          << reinterpret_cast<void*>(compact_space_->Begin()) << ", end: " << reinterpret_cast<void*>(compact_space_->End()) <<
+          ", capacity is:" << compact_space_->Capacity();
+
+      immune_begin_ = reinterpret_cast<mirror::Object*>(original_space_->Begin());
+      immune_end_ = reinterpret_cast<mirror::Object*>(original_space_->End());
+      accounting::SPACE_BITMAP* _live_bitmap =
+          original_space_->GetLiveBitmap();
+      CompactVisitor compact_visitor(this);
+      _live_bitmap->VisitMarkedRange(_live_bitmap->HeapBegin(),
+                                     _live_bitmap->HeapLimit(),
+                                     compact_visitor);
+    }
+    LOG(ERROR) << "Start copying and fixing Objects";
+
+    //here we should copy and fix all broken references;
+
   }
   thread_list->ResumeAll();
 }
