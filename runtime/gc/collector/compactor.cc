@@ -117,10 +117,9 @@ void SpaceCompactor::startCompaction(void) {
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     local_heap_->DisableObjectValidation();
     size_t capacity = original_space_->Capacity();
-    original_space_->Trim();
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
-    original_space_->GetMemMap()->UnMapAtEnd(original_space_->End());
     original_space_->Trim();
+    original_space_->GetMemMap()->UnMapAtEnd(original_space_->End());
     LOG(ERROR) << "original space size is: being:"
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
         ", capacity is:" << capacity << ", size is : " << original_space_->Size();
