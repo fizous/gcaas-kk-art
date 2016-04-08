@@ -109,11 +109,11 @@ void SpaceCompactor::startCompaction(void) {
     self->TransitionFromSuspendedToRunnable();
   }
   LOG(ERROR) << "Done Non-Concurrent Collection: " << self->GetTid();
-
+  if(false) {
   ThreadList* thread_list = runtime->GetThreadList();
   thread_list->SuspendAll();
   {
-    if(false) {
+
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     local_heap_->DisableObjectValidation();
     size_t capacity = original_space_->Capacity();
@@ -143,13 +143,14 @@ void SpaceCompactor::startCompaction(void) {
       _live_bitmap->VisitMarkedRange(_live_bitmap->HeapBegin(),
                                      _live_bitmap->HeapLimit(),
                                      compact_visitor);
-    }
+
     LOG(ERROR) << "Start copying and fixing Objects";
 
     //here we should copy and fix all broken references;
 
   }
   thread_list->ResumeAll();
+  }
 }
 
 void SpaceCompactor::FinalizeCompaction(void) {
