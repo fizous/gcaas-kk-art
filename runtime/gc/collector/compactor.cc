@@ -158,6 +158,9 @@ void SpaceCompactor::startCompaction(void) {
 void SpaceCompactor::FinalizeCompaction(void) {
   LOG(ERROR) << "compacted count = " << compacted_cnt_;
   for(const auto& ref : forwarded_objects_) {
+    const byte* src = reinterpret_cast<const byte*>(ref.first);
+    byte* dst = reinterpret_cast<byte*>(ref.second);
+    memcpy(dst, src, 8);
     LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second;
   }
 }
