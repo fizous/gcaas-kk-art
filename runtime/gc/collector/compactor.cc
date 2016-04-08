@@ -86,12 +86,12 @@ class CompactFixableVisitor {
 };
 
 void SpaceCompactor::FillNewObjects(void) {
-  for(const auto& ref : forwarded_objects_) {
-    const byte* src = reinterpret_cast<const byte*>(ref.first);
-    byte* dst = reinterpret_cast<byte*>(ref.second);
-    size_t n = ref.first->SizeOf();
-    memcpy(dst, src, n);
-  }
+//  for(const auto& ref : forwarded_objects_) {
+//    const byte* src = reinterpret_cast<const byte*>(ref.first);
+//    byte* dst = reinterpret_cast<byte*>(ref.second);
+////    size_t n = ref.first->SizeOf();
+////    memcpy(dst, src, n);
+//  }
 }
 
 void SpaceCompactor::startCompaction(void) {
@@ -114,6 +114,7 @@ void SpaceCompactor::startCompaction(void) {
   thread_list->SuspendAll();
   {
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
+    local_heap_->DisableObjectValidation();
     size_t capacity = original_space_->Capacity();
     original_space_->Trim();
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
