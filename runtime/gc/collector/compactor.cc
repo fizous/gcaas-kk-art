@@ -125,8 +125,8 @@ void SpaceCompactor::startCompaction(void) {
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
         ", capacity is:" << capacity << ", size is : " << original_space_->Size();
 
-
-
+    original_space_->GetLiveBitmap()->SetHeapLimit(reinterpret_cast<uintptr_t>(original_space_->End()));
+    original_space_->GetMarkBitmap()->SetHeapLimit(reinterpret_cast<uintptr_t>(original_space_->End()));
       compact_space_ = gc::space::DlMallocSpace::Create("compacted_space",
                                                           original_space_->Size(),
                                                           capacity, capacity,
