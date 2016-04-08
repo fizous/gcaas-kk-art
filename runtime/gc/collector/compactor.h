@@ -27,7 +27,7 @@ class SpaceCompactor {
   space::DLMALLOC_SPACE_T* original_space_;
   space::DLMALLOC_SPACE_T* compact_space_;
   // Map of Object to where it will be at runtime.
-  SafeMap<const mirror::Object*, mirror::Object*, std::less<mirror::Object*>,
+  SafeMap<const mirror::Object*, mirror::Object*, std::less<const mirror::Object*>,
     gc::accounting::GCAllocator<std::pair<const mirror::Object*, mirror::Object*> >> forwarded_objects_;
   // Immune range, every object inside the immune range is assumed to be marked.
   mirror::Object* immune_begin_;
