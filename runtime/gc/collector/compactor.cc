@@ -28,10 +28,10 @@ inline void SpaceCompactor::allocateSpaceObject(const mirror::Object* obj,
   mirror::Object* result = compact_space_->publicAllocWithoutGrowthLocked(obj_size,
                                                             &actual_space);
   forwarded_objects_.Put(obj, result);
-  const byte* src = reinterpret_cast<const byte*>(obj);
-  byte* dst = reinterpret_cast<byte*>(result);
-
-  memcpy(dst, src, obj_size);
+//  const byte* src = reinterpret_cast<const byte*>(obj);
+//  byte* dst = reinterpret_cast<byte*>(result);
+//
+//  memcpy(dst, src, obj_size);
 }
 
 SpaceCompactor::SpaceCompactor(Heap* vmHeap) : local_heap_(vmHeap),
