@@ -27,9 +27,9 @@ inline void SpaceCompactor::allocateSpaceObject(const mirror::Object* obj,
   size_t actual_space = 0;
   mirror::Object* result = compact_space_->publicAllocWithoutGrowthLocked(obj_size,
                                                             &actual_space);
-  const byte* src = reinterpret_cast<const byte*>(obj);
-  byte* dst = reinterpret_cast<byte*>(result);
-  memcpy(dst, src, obj_size);
+//  const byte* src = reinterpret_cast<const byte*>(obj);
+//  byte* dst = reinterpret_cast<byte*>(result);
+//  memcpy(dst, src, obj_size);
   forwarded_objects_.Put(obj, result);
 
 
