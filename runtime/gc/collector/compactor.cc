@@ -104,9 +104,9 @@ void SpaceCompactor::startCompaction(void) {
   Thread* self = Thread::Current();
   {
     ReaderMutexLock mu(self, *Locks::mutator_lock_);
-    self->TransitionFromRunnableToSuspended(kNative);
+    //self->TransitionFromRunnableToSuspended(kNative);
     local_heap_->CollectGarbage(true);
-    self->TransitionFromSuspendedToRunnable();
+    //self->TransitionFromSuspendedToRunnable();
   }
   LOG(ERROR) << "Done Non-Concurrent Collection: " << self->GetTid();
 
