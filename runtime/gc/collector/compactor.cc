@@ -145,7 +145,15 @@ void SpaceCompactor::startCompaction(void) {
       _live_bitmap->VisitMarkedRange(_live_bitmap->HeapBegin(),
                                      _live_bitmap->HeapLimit(),
                                      compact_visitor);
+      for(const auto& ref : forwarded_objects_) {
+        const byte* src = reinterpret_cast<const byte*>(ref.first);
+        byte* dst = reinterpret_cast<byte*>(ref.second);
+        size_t n = ref.first->SizeOf();
+        LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second <<
+            ", size=" << n;
+        memcpy(dst, src, n);
 
+      }
     LOG(ERROR) << "Start copying and fixing Objects";
 
     //here we should copy and fix all broken references;
@@ -158,9 +166,9 @@ void SpaceCompactor::startCompaction(void) {
 void SpaceCompactor::FinalizeCompaction(void) {
   LOG(ERROR) << "compacted count = " << compacted_cnt_;
   for(const auto& ref : forwarded_objects_) {
-    const byte* src = reinterpret_cast<const byte*>(ref.first);
-    byte* dst = reinterpret_cast<byte*>(ref.second);
-    memcpy(dst, src, 8);
+//    const byte* src = reinterpret_cast<const byte*>(ref.first);
+//    byte* dst = reinterpret_cast<byte*>(ref.second);
+//    memcpy(dst, src, 8);
     LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second;
   }
 }
