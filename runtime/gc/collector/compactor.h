@@ -11,7 +11,7 @@
 #include "gc/heap.h"
 #include "gc/space/dlmalloc_space.h"
 #include "mirror/object-inl.h"
-#include "gc_allocator.h"
+#include "gc/accounting/gc_allocator.h"
 
 namespace art {
 namespace gc {
