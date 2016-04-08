@@ -103,7 +103,7 @@ void SpaceCompactor::startCompaction(void) {
   // is empty, so the live bitmap is the only place we need to look.
   Thread* self = Thread::Current();
   {
-    ReaderMutexLock mu(self, *Locks::mutator_lock_);
+    //ReaderMutexLock mu(self, *Locks::mutator_lock_);
     //self->TransitionFromRunnableToSuspended(kNative);
     local_heap_->CollectGarbage(true);
     //self->TransitionFromSuspendedToRunnable();
