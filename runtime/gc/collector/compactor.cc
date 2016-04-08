@@ -113,6 +113,7 @@ void SpaceCompactor::startCompaction(void) {
   ThreadList* thread_list = runtime->GetThreadList();
   thread_list->SuspendAll();
   {
+    if(false) {
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     local_heap_->DisableObjectValidation();
     size_t capacity = original_space_->Capacity();
@@ -125,7 +126,7 @@ void SpaceCompactor::startCompaction(void) {
         ", capacity is:" << capacity << ", size is : " << original_space_->Size();
 
 
-    if(false) {
+
       compact_space_ = gc::space::DlMallocSpace::Create("compacted_space",
                                                           original_space_->Size(),
                                                           capacity, capacity,
