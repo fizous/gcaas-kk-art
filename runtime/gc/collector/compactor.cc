@@ -98,7 +98,7 @@ void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
 
   Runtime* runtime = Runtime::Current();
-  if(false) {
+  if(true) {
   // We only want reachable instances, so do a GC. This also ensures that the alloc stack
   // is empty, so the live bitmap is the only place we need to look.
   Thread* self = Thread::Current();
