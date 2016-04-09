@@ -37,13 +37,32 @@ inline void SpaceCompactor::allocateSpaceObject(const mirror::Object* obj,
 //
 }
 
+
+template <class referenceKlass>
+const referenceKlass* SpaceCompactor::MapValueToServer(
+    referenceKlass* original_obj, bool* ismoved) const {
+  const byte* _raw_address = reinterpret_cast<const byte*>(original_obj);
+  if((_raw_address < byte_end_) &&
+          (_raw_address >= byte_start_)) {
+    *ismoved = true;
+    FwdedOBJs::iterator found = forwarded_objects_.find(original_obj);
+    return found.second;
+  }
+
+  return original_obj;
+
+
+}
+
 SpaceCompactor::SpaceCompactor(Heap* vmHeap) : local_heap_(vmHeap),
     objects_cnt_(0),
     compacted_cnt_(0),
     original_space_(local_heap_->GetAllocSpace()->AsDlMallocSpace()),
     compact_space_(NULL),
     immune_begin_ (NULL),
-    immune_end_ (NULL){
+    immune_end_ (NULL),
+    byte_start_(NULL),
+    byte_end_(NULL) {
 
 
 
@@ -97,6 +116,18 @@ void SpaceCompactor::FillNewObjects(void) {
 //  }
 }
 
+
+static void MSpaceSumFragChunkCallback(void* start, void* end, size_t used_bytes, void* arg) {
+  size_t chunk_size = reinterpret_cast<uint8_t*>(end) - reinterpret_cast<uint8_t*>(start);
+  if (used_bytes < chunk_size) {
+    uint64_t chunk_free_bytes = chunk_size - used_bytes;
+    if (chunk_free_bytes >= 8) {
+      uint64_t& max_contiguous_allocation = *reinterpret_cast<size_t*>(arg);
+      max_contiguous_allocation = max_contiguous_allocation + chunk_free_bytes;
+    }
+  }
+}
+
 void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
 
@@ -119,6 +150,10 @@ void SpaceCompactor::startCompaction(void) {
 
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     local_heap_->DisableObjectValidation();
+    uint64_t currFragmentation = 0;
+    original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
+
+    LOG(ERROR) << "Fragmentation before Compaction = " << currFragmentation;
     size_t capacity = original_space_->Capacity();
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
     original_space_->Trim();
@@ -136,7 +171,8 @@ void SpaceCompactor::startCompaction(void) {
       LOG(ERROR) << "new dlmalloc space size is: being:"
           << reinterpret_cast<void*>(compact_space_->Begin()) << ", end: " << reinterpret_cast<void*>(compact_space_->End()) <<
           ", capacity is:" << compact_space_->Capacity();
-
+      byte_start_ = original_space_->Begin();
+      byte_end_ = original_space_->End();
       immune_begin_ = reinterpret_cast<mirror::Object*>(original_space_->Begin());
       immune_end_ = reinterpret_cast<mirror::Object*>(original_space_->End());
       accounting::SPACE_BITMAP* _live_bitmap =
@@ -145,17 +181,30 @@ void SpaceCompactor::startCompaction(void) {
       _live_bitmap->VisitMarkedRange(_live_bitmap->HeapBegin(),
                                      _live_bitmap->HeapLimit(),
                                      compact_visitor);
+
+      LOG(ERROR) << "Start copying and fixing Objects";
+
       for(const auto& ref : forwarded_objects_) {
         const byte* src = reinterpret_cast<const byte*>(ref.first);
         byte* dst = reinterpret_cast<byte*>(ref.second);
         size_t n = ref.first->SizeOf();
-        LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second <<
-            ", size=" << n;
+
+//        mirror::Class* _origin_class = ref.first->GetClass();
+//        bool ismapped = false;
+//        mirror::Object* new_addr = MapValueToServer(_origin_class, &ismapped);
+//        if(ismapped)
+//        const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class)
+//
+//
+//        LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second <<
+//            ", size=" << n;
         memcpy(dst, src, n);
 
       }
-    LOG(ERROR) << "Start copying and fixing Objects";
+      uint64_t postFragmentation = 0;
+      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
+      LOG(ERROR) << "Fragmentation post Compaction = " << postFragmentation;
     //here we should copy and fix all broken references;
 
   }
@@ -172,6 +221,10 @@ void SpaceCompactor::FinalizeCompaction(void) {
     LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second;
   }
 }
+
+
+
+
 
 }//collector
 }//gc

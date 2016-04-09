@@ -26,12 +26,18 @@ class SpaceCompactor {
 
   space::DLMALLOC_SPACE_T* original_space_;
   space::DLMALLOC_SPACE_T* compact_space_;
+
+  typedef   SafeMap<const mirror::Object*, mirror::Object*, std::less<const mirror::Object*>,
+      gc::accounting::GCAllocator<std::pair<const mirror::Object*, mirror::Object*> >> FwdedOBJs;
+
   // Map of Object to where it will be at runtime.
-  SafeMap<const mirror::Object*, mirror::Object*, std::less<const mirror::Object*>,
-    gc::accounting::GCAllocator<std::pair<const mirror::Object*, mirror::Object*> >> forwarded_objects_;
+  FwdedOBJs forwarded_objects_;
   // Immune range, every object inside the immune range is assumed to be marked.
   mirror::Object* immune_begin_;
   mirror::Object* immune_end_;
+
+  byte* byte_start_;
+  byte* byte_end_;
 
 
 
@@ -43,6 +49,10 @@ class SpaceCompactor {
   void FillNewObjects(void);
 
   void FinalizeCompaction(void);
+
+  template <class referenceKlass>
+  const referenceKlass* MapValueToServer(referenceKlass* original_obj,
+                                         bool* ismoved) const;
 };
 
 
