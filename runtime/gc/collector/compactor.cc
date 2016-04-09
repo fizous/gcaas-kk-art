@@ -153,7 +153,7 @@ void SpaceCompactor::startCompaction(void) {
     uint64_t currFragmentation = 0;
     original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
 
-    LOG(ERROR) << "Fragmentation before Compaction = " << currFragmentation;
+    LOG(ERROR) << "XXXX Fragmentation before Compaction = " << currFragmentation;
     size_t capacity = original_space_->Capacity();
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
     original_space_->Trim();
