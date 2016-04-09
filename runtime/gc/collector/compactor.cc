@@ -201,6 +201,7 @@ void SpaceCompactor::startCompaction(void) {
         memcpy(dst, src, n);
 
       }
+      LOG(ERROR) << "Done copying and fixing Objects";
       uint64_t postFragmentation = 0;
       mspace_inspect_all(compact_space_->GetMspace(), MSpaceSumFragChunkCallback,  &postFragmentation);
       MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
