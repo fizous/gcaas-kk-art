@@ -143,17 +143,17 @@ void SpaceCompactor::startCompaction(void) {
     //self->TransitionFromSuspendedToRunnable();
   }
   LOG(ERROR) << "Done Non-Concurrent Collection: " << self->GetTid();
+  uint64_t currFragmentation = 0;
+  original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
 
+  LOG(ERROR) << "XXXX Fragmentation before Compaction = " << currFragmentation;
   ThreadList* thread_list = runtime->GetThreadList();
   thread_list->SuspendAll();
   {
 
     ReaderMutexLock mu(self, *Locks::heap_bitmap_lock_);
     local_heap_->DisableObjectValidation();
-    uint64_t currFragmentation = 0;
-    original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
 
-    LOG(ERROR) << "XXXX Fragmentation before Compaction = " << currFragmentation;
     size_t capacity = original_space_->Capacity();
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
     original_space_->Trim();
