@@ -182,6 +182,16 @@ void SpaceCompactor::startCompaction(void) {
                                      _live_bitmap->HeapLimit(),
                                      compact_visitor);
 
+
+      LOG(ERROR) << "Start Check Frahmentation";
+      uint64_t postFragmentation = 0;
+      mspace_inspect_all(compact_space_->GetMspace(),
+                         MSpaceSumFragChunkCallback,  &postFragmentation);
+     // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
+//      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
+
+      LOG(ERROR) << "Fragmentation post Compaction = " << postFragmentation;
+
       LOG(ERROR) << "Start copying and fixing Objects";
 
       for(const auto& ref : forwarded_objects_) {
@@ -202,12 +212,6 @@ void SpaceCompactor::startCompaction(void) {
 
       }
       LOG(ERROR) << "Done copying and fixing Objects";
-      uint64_t postFragmentation = 0;
-      mspace_inspect_all(compact_space_->GetMspace(), MSpaceSumFragChunkCallback,  &postFragmentation);
-     // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
-//      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
-
-      LOG(ERROR) << "Fragmentation post Compaction = " << postFragmentation;
     //here we should copy and fix all broken references;
 
   }
