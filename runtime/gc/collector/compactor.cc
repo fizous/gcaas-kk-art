@@ -158,6 +158,12 @@ void SpaceCompactor::startCompaction(void) {
     original_space_->SetEnd(reinterpret_cast<byte*>(RoundUp(reinterpret_cast<uintptr_t>(original_space_->End()), kPageSize)));
     original_space_->Trim();
     original_space_->GetMemMap()->UnMapAtEnd(original_space_->End());
+
+    currFragmentation = 0;
+        original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
+
+        LOG(ERROR) << "XXXX Fragmentation after trimming = " << currFragmentation;
+
     LOG(ERROR) << "original space size is: being:"
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
         ", capacity is:" << capacity << ", size is : " << original_space_->Size();

@@ -717,8 +717,8 @@ size_t DlMallocSpace::Trim() {
   return reclaimed;
 }
 
-void DlMallocSpace::Walk(void(*callback)(void *start, void *end, size_t num_bytes, void* callback_arg),
-                      void* arg) {
+void DlMallocSpace::Walk(void(*callback)(void *start, void *end,
+    size_t num_bytes, void* callback_arg), void* arg) {
   DLMALLOC_SPACE_LOCK_MACRO;
   mspace_inspect_all(GetMspace(), callback, arg);
   callback(NULL, NULL, 0, arg);  // Indicate end of a space.
