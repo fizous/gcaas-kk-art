@@ -46,7 +46,7 @@ const referenceKlass* SpaceCompactor::MapValueToServer(
           (_raw_address >= byte_start_)) {
     *ismoved = true;
     FwdedOBJs::iterator found = forwarded_objects_.find(original_obj);
-    return found.second;
+    return found->second;
   }
 
   return original_obj;
