@@ -202,7 +202,9 @@ void SpaceCompactor::startCompaction(void) {
 
       }
       uint64_t postFragmentation = 0;
-      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
+      mspace_inspect_all(compact_space_->GetMspace(), MSpaceSumFragChunkCallback,  &postFragmentation);
+      MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
+//      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
       LOG(ERROR) << "Fragmentation post Compaction = " << postFragmentation;
     //here we should copy and fix all broken references;
