@@ -162,7 +162,7 @@ void SpaceCompactor::startCompaction(void) {
     currFragmentation = 0;
         original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
 
-        LOG(ERROR) << "XXXX Fragmentation after trimming = " << currFragmentation;
+    LOG(ERROR) << "XXXX Fragmentation after trimming = " << currFragmentation;
 
     LOG(ERROR) << "original space size is: being:"
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
@@ -189,7 +189,7 @@ void SpaceCompactor::startCompaction(void) {
                                      compact_visitor);
 
 
-      LOG(ERROR) << "Start Check Frahmentation";
+      LOG(ERROR) << "Start Check Fragmentation";
       uint64_t postFragmentation = 0;
       mspace_inspect_all(compact_space_->GetMspace(),
                          MSpaceSumFragChunkCallback,  &postFragmentation);
