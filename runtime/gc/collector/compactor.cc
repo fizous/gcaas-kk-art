@@ -122,7 +122,7 @@ static void MSpaceSumFragChunkCallback(void* start, void* end, size_t used_bytes
   if (used_bytes < chunk_size) {
     uint64_t chunk_free_bytes = chunk_size - used_bytes;
     if (chunk_free_bytes >= 8) {
-      uint64_t& max_contiguous_allocation = *reinterpret_cast<size_t*>(arg);
+      uint64_t& max_contiguous_allocation = *reinterpret_cast<uint64_t*>(arg);
       max_contiguous_allocation = max_contiguous_allocation + chunk_free_bytes;
     }
   }
