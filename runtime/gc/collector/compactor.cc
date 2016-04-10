@@ -207,10 +207,10 @@ void SpaceCompactor::startCompaction(void) {
 
         mirror::Class* _origin_class = ref.first->GetClass();
         bool ismapped = false;
-        mirror::Object* new_addr = MapValueToServer(_origin_class, &ismapped);
+        const mirror::Object* new_addr = MapValueToServer(_origin_class, &ismapped);
         if(ismapped) {
           const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
-          ref.first->setClass(new_addr);
+          ref.first->setClass(reinterpret_cast<const mirror::Class*>(new_addr));
           LOG(ERROR) << "correcting class of object.." <<
               reinterpret_cast<const void*>(ref.first) <<
               ", old_class=" << reinterpret_cast<const void*>(_origin_class) <<
