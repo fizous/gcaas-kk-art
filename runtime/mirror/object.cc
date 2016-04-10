@@ -82,7 +82,8 @@ Object* Object::Clone(Thread* self) {
   return copy.get();
 }
 
-void Object::CheckFieldAssignmentImpl(MemberOffset field_offset, const Object* new_value) {
+void Object::CheckFieldAssignmentImpl(MemberOffset field_offset,
+                                      const Object* new_value) {
   const Class* c = GetClass();
   if (Runtime::Current()->GetClassLinker() == NULL ||
       !Runtime::Current()->GetHeap()->IsObjectValidationEnabled() ||

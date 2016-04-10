@@ -205,11 +205,15 @@ void SpaceCompactor::startCompaction(void) {
         byte* dst = reinterpret_cast<byte*>(ref.second);
         size_t n = ref.first->SizeOf();
 
-//        mirror::Class* _origin_class = ref.first->GetClass();
-//        bool ismapped = false;
-//        mirror::Object* new_addr = MapValueToServer(_origin_class, &ismapped);
-//        if(ismapped)
-//        const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class)
+        mirror::Class* _origin_class = ref.first->GetClass();
+        bool ismapped = false;
+        mirror::Object* new_addr = MapValueToServer(_origin_class, &ismapped);
+        if(ismapped) {
+          const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
+          ref.first->setClass(new_addr);
+          LOG(ERROR) << "correcting class of object.." <<
+              reinterpret_cast<const void*>(ref.first);
+        }
 //
 //
 //        LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second <<

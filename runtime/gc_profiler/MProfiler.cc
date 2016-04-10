@@ -1938,12 +1938,14 @@ void VMProfiler::ProcessSignalCatcher(int signalVal) {
 
 		GCMMP_VLOG(INFO) << "VMProfiler: Sent the signal " << self->GetTid() ;
 
-    LOG(ERROR) << "-------Calling executing compaction--------";
-    gc::collector::SpaceCompactor* compactor =
-        new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
-    compactor->startCompaction();
-    compactor->FinalizeCompaction();
-    LOG(ERROR) << "-------Done executing compaction--------";
+		if(false) {
+      LOG(ERROR) << "-------Calling executing compaction--------";
+      gc::collector::SpaceCompactor* compactor =
+          new gc::collector::SpaceCompactor(Runtime::Current()->GetHeap());
+      compactor->startCompaction();
+      compactor->FinalizeCompaction();
+      LOG(ERROR) << "-------Done executing compaction--------";
+		}
 	}
 }
 
