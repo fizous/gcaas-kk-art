@@ -149,7 +149,7 @@ void SpaceCompactor::FixupFields(const mirror::Object* orig,
       // Use SetFieldPtr to avoid card marking since we are writing to the image.
       bool isMapped = false;
       const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(ref, &isMapped);
-      copy->SetFieldPtr(byte_offset, _new_ref, false);
+      copy->publicSetFieldPtr(byte_offset, _new_ref, false);
       ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
     }
   } else {
@@ -173,7 +173,7 @@ void SpaceCompactor::FixupFields(const mirror::Object* orig,
         bool isMapped = false;
         const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(ref, &isMapped);
         // Use SetFieldPtr to avoid card marking since we are writing to the image.
-        copy->SetFieldPtr(field_offset, _new_ref, false);
+        copy->publicSetFieldPtr(field_offset, _new_ref, false);
       }
     }
   }
