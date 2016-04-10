@@ -51,7 +51,7 @@ class SpaceCompactor {
   void FinalizeCompaction(void);
 
   template <class referenceKlass>
-  const referenceKlass* MapValueToServer(referenceKlass* original_obj,
+  const referenceKlass* MapValueToServer(const referenceKlass* original_obj,
                                          bool* ismoved) const;
 };
 

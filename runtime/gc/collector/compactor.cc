@@ -42,7 +42,7 @@ inline void SpaceCompactor::allocateSpaceObject(const mirror::Object* obj,
 
 template <class referenceKlass>
 const referenceKlass* SpaceCompactor::MapValueToServer(
-    referenceKlass* original_obj, bool* ismoved) const {
+    const referenceKlass* original_obj, bool* ismoved) const {
   const byte* _raw_address = reinterpret_cast<const byte*>(original_obj);
   if((_raw_address < byte_end_) &&
           (_raw_address >= byte_start_)) {
@@ -207,7 +207,7 @@ void SpaceCompactor::startCompaction(void) {
         byte* dst = reinterpret_cast<byte*>(ref.second);
         size_t n = ref.first->SizeOf();
 
-        mirror::Object* _origin_class = reinterpret_cast<mirror::Object*>(ref.first->GetClass());
+        const mirror::Object* _origin_class = reinterpret_cast<mirror::Object*>(ref.first->GetClass());
         bool ismapped = false;
         const mirror::Object* new_addr =
             MapValueToServer<mirror::Object>(_origin_class, &ismapped);
