@@ -213,7 +213,7 @@ void SpaceCompactor::startCompaction(void) {
             const_cast<mirror::Object*>(MapValueToServer(_origin_class, &ismapped));
         if(ismapped) {
 //          const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
-          (const_cast<mirror::Object*>(ref.first))->setClass(down_cast<mirror::Class*>(new_addr));
+//          (const_cast<mirror::Object*>(ref.first))->setClass(down_cast<mirror::Class*>(new_addr));
           LOG(ERROR) << "correcting class of object.." <<
               reinterpret_cast<const void*>(ref.first) <<
               ", old_class=" << reinterpret_cast<const void*>(_origin_class) <<
