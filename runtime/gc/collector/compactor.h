@@ -53,6 +53,22 @@ class SpaceCompactor {
   template <class referenceKlass>
   const referenceKlass* MapValueToServer(const referenceKlass* original_obj,
                                          bool* ismoved) const;
+
+
+  void FixupInstanceFields(const mirror::Object* orig, mirror::Object* copy);
+
+  void FixupStaticFields(const mirror::Class* orig, mirror::Class* copy);
+
+  void FixupClass(const mirror::Class* orig, mirror::Class* copy);
+
+  void FixupFields(const mirror::Object* orig,
+                   mirror::Object* copy,
+                                uint32_t ref_offsets,
+                                bool is_static);
+  void FixupObject(const mirror::Object* orig, mirror::Object* copy);
+  void FixupObjectArray(const mirror::ObjectArray<mirror::Object>* orig,
+                        mirror::ObjectArray<mirror::Object>* copy);
+  void FixupMethod(const mirror::ArtMethod* orig, mirror::ArtMethod* copy);
 };
 
 

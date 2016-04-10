@@ -16,6 +16,11 @@
 #include "gc/space/space-inl.h"
 #include "mirror/object.h"
 #include "mirror/object-inl.h"
+#include "mirror/object_array-inl.h"
+#include "mirror/art_field-inl.h"
+#include "mirror/art_method-inl.h"
+#include "mirror/array-inl.h"
+#include "mirror/class-inl.h"
 #include "mirror/class.h"
 
 namespace art {
@@ -130,6 +135,123 @@ static void MSpaceSumFragChunkCallback(void* start, void* end, size_t used_bytes
   }
 }
 
+
+void SpaceCompactor::FixupFields(const mirror::Object* orig,
+                                 mirror::Object* copy,
+                              uint32_t ref_offsets,
+                              bool is_static) {
+  if (ref_offsets != CLASS_WALK_SUPER) {
+    // Found a reference offset bitmap.  Fixup the specified offsets.
+    while (ref_offsets != 0) {
+      size_t right_shift = CLZ(ref_offsets);
+      MemberOffset byte_offset = CLASS_OFFSET_FROM_CLZ(right_shift);
+      const mirror::Object* ref = orig->GetFieldObject<const mirror::Object*>(byte_offset, false);
+      // Use SetFieldPtr to avoid card marking since we are writing to the image.
+      bool isMapped = false;
+      const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(ref, &isMapped);
+      copy->SetFieldPtr(byte_offset, _new_ref, false);
+      ref_offsets &= ~(CLASS_HIGH_BIT >> right_shift);
+    }
+  } else {
+    // There is no reference offset bitmap.  In the non-static case,
+    // walk up the class inheritance hierarchy and find reference
+    // offsets the hard way. In the static case, just consider this
+    // class.
+    for (const mirror::Class *klass = is_static ? orig->AsClass() : orig->GetClass();
+         klass != NULL;
+         klass = is_static ? NULL : klass->GetSuperClass()) {
+      size_t num_reference_fields = (is_static
+                                     ? klass->NumReferenceStaticFields()
+                                     : klass->NumReferenceInstanceFields());
+      for (size_t i = 0; i < num_reference_fields; ++i) {
+        mirror::ArtField* field = (is_static
+                           ? klass->GetStaticField(i)
+                           : klass->GetInstanceField(i));
+        MemberOffset field_offset = field->GetOffset();
+        const mirror::Object* ref =
+            orig->GetFieldObject<const mirror::Object*>(field_offset, false);
+        bool isMapped = false;
+        const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(ref, &isMapped);
+        // Use SetFieldPtr to avoid card marking since we are writing to the image.
+        copy->SetFieldPtr(field_offset, _new_ref, false);
+      }
+    }
+  }
+  if (!is_static && orig->IsReferenceInstance()) {
+    // Fix-up referent, that isn't marked as an object field, for References.
+    mirror::ArtField* field = orig->GetClass()->FindInstanceField("referent", "Ljava/lang/Object;");
+    MemberOffset field_offset = field->GetOffset();
+    const mirror::Object* ref = orig->GetFieldObject<const mirror::Object*>(field_offset, false);
+    // Use SetFieldPtr to avoid card marking since we are writing to the image.
+    bool isMapped = false;
+    const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(ref, &isMapped);
+    copy->SetFieldPtr(field_offset, _new_ref, false);
+  }
+}
+
+void SpaceCompactor::FixupInstanceFields(const mirror::Object* orig, mirror::Object* copy) {
+  DCHECK(orig != NULL);
+  DCHECK(copy != NULL);
+  mirror::Class* klass = orig->GetClass();
+  DCHECK(klass != NULL);
+  FixupFields(orig,
+              copy,
+              klass->GetReferenceInstanceOffsets(),
+              false);
+}
+
+void SpaceCompactor::FixupStaticFields(const mirror::Class* orig, mirror::Class* copy) {
+  DCHECK(orig != NULL);
+  DCHECK(copy != NULL);
+  FixupFields(orig,
+              copy,
+              orig->GetReferenceStaticOffsets(),
+              true);
+}
+
+void SpaceCompactor::FixupObjectArray(const mirror::ObjectArray<mirror::Object>* orig, mirror::ObjectArray<mirror::Object>* copy) {
+  for (int32_t i = 0; i < orig->GetLength(); ++i) {
+    const mirror::Object* element = orig->Get(i);
+    bool isMapped = false;
+    const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(element, &isMapped);
+    copy->SetPtrWithoutChecks(i, const_cast<mirror::Object*>(_new_ref));
+  }
+}
+
+
+void SpaceCompactor::FixupClass(const mirror::Class* orig, mirror::Class* copy) {
+  FixupInstanceFields(orig, copy);
+  FixupStaticFields(orig, copy);
+}
+
+
+void SpaceCompactor::FixupObject(const mirror::Object* orig,
+                                 mirror::Object* copy) {
+  const mirror::Object* _origin_class =
+      reinterpret_cast<mirror::Object*>(orig->GetClass());
+  bool ismapped = false;
+  const mirror::Object* _new_class =
+      MapValueToServer<mirror::Object>(_origin_class, &ismapped);
+  if(ismapped) {
+    copy->SetClass(down_cast<mirror::Class*>(const_cast<mirror::Object*>(_new_class)));
+  }
+
+  if (orig->IsClass()) {
+    FixupClass(orig->AsClass(), down_cast<mirror::Class*>(copy));
+  } else if (orig->IsObjectArray()) {
+    FixupObjectArray(orig->AsObjectArray<mirror::Object>(), down_cast<mirror::ObjectArray<mirror::Object>*>(copy));
+  } else if (orig->IsArtMethod()) {
+    FixupMethod(orig->AsArtMethod(), down_cast<mirror::ArtMethod*>(copy));
+  } else {
+    FixupInstanceFields(orig, copy);
+  }
+
+}
+
+void SpaceCompactor::FixupMethod(const mirror::ArtMethod* orig, mirror::ArtMethod* copy) {
+  FixupInstanceFields(orig, copy);
+
+}
 void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
 
@@ -202,28 +324,38 @@ void SpaceCompactor::startCompaction(void) {
 
       LOG(ERROR) << "Start copying and fixing Objects";
 
+      int _count = 0;
       for(const auto& ref : forwarded_objects_) {
         const byte* src = reinterpret_cast<const byte*>(ref.first);
         byte* dst = reinterpret_cast<byte*>(ref.second);
         size_t n = ref.first->SizeOf();
 
-        const mirror::Object* _origin_class = reinterpret_cast<mirror::Object*>(ref.first->GetClass());
-        bool ismapped = false;
-        const mirror::Object* new_addr =
-            MapValueToServer<mirror::Object>(_origin_class, &ismapped);
-        if(ismapped) {
-//          const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
-          (const_cast<mirror::Object*>(ref.second))->SetClass(down_cast<mirror::Class*>(const_cast<mirror::Object*>(new_addr)));
-          LOG(ERROR) << "correcting class of object.." <<
-              reinterpret_cast<const void*>(ref.first) <<
-              ", old_class=" << reinterpret_cast<const void*>(_origin_class) <<
-              ", new_class=" << reinterpret_cast<const void*>(new_addr);
-        }
+        memcpy(dst, src, n);
+
+        LOG(ERROR) << "++ fixing: "<<  _count << ", " << reinterpret_cast<const void*>(ref.first)
+            << ", to " << reinterpret_cast<const void*>(ref.second);
+        _count++;
+        FixupObject(ref.first,ref.second);
+//        if (ref.first->IsClass()) {
+//
+//        }
+//        const mirror::Object* _origin_class = reinterpret_cast<mirror::Object*>(ref.first->GetClass());
+//        bool ismapped = false;
+//        const mirror::Object* new_addr =
+//            MapValueToServer<mirror::Object>(_origin_class, &ismapped);
+//        if(ismapped) {
+////          const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
+//          (const_cast<mirror::Object*>(ref.second))->SetClass(down_cast<mirror::Class*>(const_cast<mirror::Object*>(new_addr)));
+//          LOG(ERROR) << "correcting class of object.." <<
+//              reinterpret_cast<const void*>(ref.first) <<
+//              ", old_class=" << reinterpret_cast<const void*>(_origin_class) <<
+//              ", new_class=" << reinterpret_cast<const void*>(new_addr);
+//        }
 //
 //
 //        LOG(ERROR) << "fwd.. Obj:" << ref.first << ", fwded:" << ref.second <<
 //            ", size=" << n;
-        memcpy(dst, src, n);
+
 
       }
       LOG(ERROR) << "Done copying and fixing Objects";
