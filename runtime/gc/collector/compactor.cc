@@ -15,6 +15,7 @@
 #include "gc/space/space.h"
 #include "gc/space/space-inl.h"
 #include "mirror/object-inl.h"
+#include "mirror/object.h"
 
 namespace art {
 namespace gc {
