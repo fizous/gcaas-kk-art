@@ -206,7 +206,7 @@ void SpaceCompactor::startCompaction(void) {
         byte* dst = reinterpret_cast<byte*>(ref.second);
         size_t n = ref.first->SizeOf();
 
-        mirror::Class* _origin_class = ref.first->GetClass();
+        mirror::Object* _origin_class = reinterpret_cast<mirror::Object*>(ref.first->GetClass());
         bool ismapped = false;
         mirror::Object* new_addr =
             const_cast<mirror::Object*>(MapValueToServer(_origin_class, &ismapped));
