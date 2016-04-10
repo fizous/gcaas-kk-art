@@ -212,7 +212,9 @@ void SpaceCompactor::startCompaction(void) {
           const byte* _raw_address = reinterpret_cast<const byte*>(_origin_class);
           ref.first->setClass(new_addr);
           LOG(ERROR) << "correcting class of object.." <<
-              reinterpret_cast<const void*>(ref.first);
+              reinterpret_cast<const void*>(ref.first) <<
+              ", old_class=" << reinterpret_cast<const void*>(_origin_class) <<
+              ", new_class=" << reinterpret_cast<const void*>(new_addr);
         }
 //
 //
