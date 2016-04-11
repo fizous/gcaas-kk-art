@@ -124,13 +124,21 @@ void SpaceCompactor::FillNewObjects(void) {
 }
 
 
+typedef struct FragmentationInfo_S {
+  uint64_t sum_;
+  uint64_t max_;
+}FragmentationInfo;
+
 static void MSpaceSumFragChunkCallback(void* start, void* end, size_t used_bytes, void* arg) {
   size_t chunk_size = reinterpret_cast<uint8_t*>(end) - reinterpret_cast<uint8_t*>(start);
   if (used_bytes < chunk_size) {
     uint64_t chunk_free_bytes = chunk_size - used_bytes;
     if (chunk_free_bytes >= 8) {
-      uint64_t& max_contiguous_allocation = *reinterpret_cast<uint64_t*>(arg);
-      max_contiguous_allocation = max_contiguous_allocation + chunk_free_bytes;
+      FragmentationInfo* _info = reinterpret_cast<FragmentationInfo*>(arg);
+      _info->max_ = std::max(_info->max_, chunk_free_bytes);
+      _info->sum_ = _info->sum_ +  chunk_free_bytes;
+//      uint64_t& max_contiguous_allocation = *reinterpret_cast<uint64_t*>(arg);
+//      max_contiguous_allocation = max_contiguous_allocation + chunk_free_bytes;
     }
   }
 }
@@ -267,10 +275,12 @@ void SpaceCompactor::startCompaction(void) {
     //self->TransitionFromSuspendedToRunnable();
   }
   LOG(ERROR) << "Done Non-Concurrent Collection: " << self->GetTid();
-  uint64_t currFragmentation = 0;
-  original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
+  FragmentationInfo _frag_info;
+  _frag_info.max_ = 0;
+  _frag_info.sum_ = 0;
+  original_space_->Walk(MSpaceSumFragChunkCallback, &_frag_info);
 
-  LOG(ERROR) << "XXXX Fragmentation before Compaction = " << currFragmentation;
+  LOG(ERROR) << "XXXX Fragmentation before Compaction = " << _frag_info.max_ << ", " << _frag_info.sum_;
   ThreadList* thread_list = runtime->GetThreadList();
   thread_list->SuspendAll();
   {
@@ -283,10 +293,11 @@ void SpaceCompactor::startCompaction(void) {
     original_space_->Trim();
     original_space_->GetMemMap()->UnMapAtEnd(original_space_->End());
 
-    currFragmentation = 0;
-        original_space_->Walk(MSpaceSumFragChunkCallback, &currFragmentation);
+    _frag_info.max_ = 0;
+    _frag_info.sum_ = 0;
+        original_space_->Walk(MSpaceSumFragChunkCallback, &_frag_info);
 
-    LOG(ERROR) << "XXXX Fragmentation after trimming = " << currFragmentation;
+    LOG(ERROR) << "XXXX Fragmentation after trimming = " << _frag_info.max_ << ", " << _frag_info.sum_;
 
     LOG(ERROR) << "original space size is: being:"
         << reinterpret_cast<void*>(original_space_->Begin()) << ", end: " << reinterpret_cast<void*>(original_space_->End()) <<
@@ -314,13 +325,14 @@ void SpaceCompactor::startCompaction(void) {
 
 
       LOG(ERROR) << "Start Check Fragmentation";
-      uint64_t postFragmentation = 0;
+      _frag_info.max_ = 0;
+      _frag_info.sum_ = 0;
       mspace_inspect_all(compact_space_->GetMspace(),
-                         MSpaceSumFragChunkCallback,  &postFragmentation);
+                         MSpaceSumFragChunkCallback,  &_frag_info);
      // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
 //      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
-      LOG(ERROR) << "Fragmentation post Compaction = " << postFragmentation;
+      LOG(ERROR) << "Fragmentation post Compaction = "  << _frag_info.max_ << ", " << _frag_info.sum_;
 
       LOG(ERROR) << "Start copying and fixing Objects";
 
