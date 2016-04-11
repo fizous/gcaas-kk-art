@@ -211,7 +211,7 @@ void SpaceCompactor::FixupStaticFields(const mirror::Class* orig, mirror::Class*
 
 void SpaceCompactor::FixupObjectArray(const mirror::ObjectArray<mirror::Object>* orig, mirror::ObjectArray<mirror::Object>* copy) {
   for (int32_t i = 0; i < orig->GetLength(); ++i) {
-    const mirror::Object* element = orig->Get(i);
+    const mirror::Object* element = orig->GetNoLock(i);
     bool isMapped = false;
     const mirror::Object* _new_ref = MapValueToServer<mirror::Object>(element, &isMapped);
     copy->SetPtrWithoutChecks(i, const_cast<mirror::Object*>(_new_ref));
