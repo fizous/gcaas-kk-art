@@ -55,20 +55,30 @@ class SpaceCompactor {
                                          bool* ismoved) const;
 
 
-  void FixupInstanceFields(const mirror::Object* orig, mirror::Object* copy);
+  void FixupInstanceFields(const mirror::Object* orig, mirror::Object* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  void FixupStaticFields(const mirror::Class* orig, mirror::Class* copy);
+  void FixupStaticFields(const mirror::Class* orig, mirror::Class* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
-  void FixupClass(const mirror::Class* orig, mirror::Class* copy);
+  void FixupClass(const mirror::Class* orig, mirror::Class* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   void FixupFields(const mirror::Object* orig,
                    mirror::Object* copy,
                                 uint32_t ref_offsets,
-                                bool is_static);
-  void FixupObject(const mirror::Object* orig, mirror::Object* copy);
+                                bool is_static)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
+  void FixupObject(const mirror::Object* orig, mirror::Object* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
   void FixupObjectArray(const mirror::ObjectArray<mirror::Object>* orig,
-                        mirror::ObjectArray<mirror::Object>* copy);
-  void FixupMethod(const mirror::ArtMethod* orig, mirror::ArtMethod* copy);
+                        mirror::ObjectArray<mirror::Object>* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+
+  void FixupMethod(const mirror::ArtMethod* orig, mirror::ArtMethod* copy)
+          SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 };
 
 
