@@ -329,6 +329,7 @@ void SpaceCompactor::startCompaction(void) {
       _frag_info.sum_ = 0;
       mspace_inspect_all(compact_space_->GetMspace(),
                          MSpaceSumFragChunkCallback,  &_frag_info);
+      MSpaceSumFragChunkCallback(NULL, NULL, 0, &_frag_info);
      // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
 //      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
