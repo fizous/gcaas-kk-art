@@ -281,7 +281,7 @@ void SpaceCompactor::startCompaction(void) {
 
   for (const auto& space : local_heap_->GetContinuousSpaces()) {
     if (space->IsZygoteSpace()) {
-      space->Walk(MSpaceSumFragChunkCallback, &_frag_info);
+      space->AsDlMallocSpace()->Walk(MSpaceSumFragChunkCallback, &_frag_info);
       LOG(ERROR) << "XXXX Fragmentation zygote space = " << _frag_info.max_ << ", " << _frag_info.sum_;
       break;
     }
