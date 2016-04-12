@@ -278,6 +278,17 @@ void SpaceCompactor::startCompaction(void) {
   FragmentationInfo _frag_info;
   _frag_info.max_ = 0;
   _frag_info.sum_ = 0;
+
+  for (const auto& space : local_heap_->GetContinuousSpaces()) {
+    if (space->IsZygoteSpace()) {
+      space->Walk(MSpaceSumFragChunkCallback, &_frag_info);
+      LOG(ERROR) << "XXXX Fragmentation zygote space = " << _frag_info.max_ << ", " << _frag_info.sum_;
+      break;
+    }
+  }
+
+  _frag_info.max_ = 0;
+  _frag_info.sum_ = 0;
   original_space_->Walk(MSpaceSumFragChunkCallback, &_frag_info);
 
   LOG(ERROR) << "XXXX Fragmentation before Compaction = " << _frag_info.max_ << ", " << _frag_info.sum_;
