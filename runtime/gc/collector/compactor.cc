@@ -348,13 +348,11 @@ void SpaceCompactor::startCompaction(void) {
 
         memcpy(dst, src, n);
 
-        if(false) {
         LOG(ERROR) << "++ fixing: "<<  _count << ", "
             << reinterpret_cast<const void*>(ref.first)
             << ", to " << reinterpret_cast<const void*>(ref.second)
             << ", size: " << n;
         _count++;
-        }
         FixupObject(ref.first,ref.second);
 //        if (ref.first->IsClass()) {
 //
