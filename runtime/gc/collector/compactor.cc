@@ -339,7 +339,7 @@ void SpaceCompactor::startCompaction(void) {
 
 
       LOG(ERROR) << "Start copying and fixing Objects";
-
+      LOG(ERROR) << "...compacted count = " << compacted_cnt_;
       int _count = 0;
       for(const auto& ref : forwarded_objects_) {
         const byte* src = reinterpret_cast<const byte*>(ref.first);
@@ -378,11 +378,13 @@ void SpaceCompactor::startCompaction(void) {
       }
 
       LOG(ERROR) << "Start Check Fragmentation";
+      if(false) {
       _frag_info.max_ = 0;
       _frag_info.sum_ = 0;
       mspace_inspect_all(compact_space_->GetMspace(),
                          MSpaceSumFragChunkCallback,  &_frag_info);
       MSpaceSumFragChunkCallback(NULL, NULL, 0, &_frag_info);
+      }
      // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
 //      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
