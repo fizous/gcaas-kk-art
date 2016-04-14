@@ -336,16 +336,7 @@ void SpaceCompactor::startCompaction(void) {
                                      compact_visitor);
 
 
-      LOG(ERROR) << "Start Check Fragmentation";
-      _frag_info.max_ = 0;
-      _frag_info.sum_ = 0;
-      mspace_inspect_all(compact_space_->GetMspace(),
-                         MSpaceSumFragChunkCallback,  &_frag_info);
-      MSpaceSumFragChunkCallback(NULL, NULL, 0, &_frag_info);
-     // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
-//      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
 
-      LOG(ERROR) << "Fragmentation post Compaction = "  << _frag_info.max_ << ", " << _frag_info.sum_;
 
       LOG(ERROR) << "Start copying and fixing Objects";
 
@@ -385,6 +376,17 @@ void SpaceCompactor::startCompaction(void) {
 
 
       }
+
+      LOG(ERROR) << "Start Check Fragmentation";
+      _frag_info.max_ = 0;
+      _frag_info.sum_ = 0;
+      mspace_inspect_all(compact_space_->GetMspace(),
+                         MSpaceSumFragChunkCallback,  &_frag_info);
+      MSpaceSumFragChunkCallback(NULL, NULL, 0, &_frag_info);
+     // MSpaceSumFragChunkCallback(NULL, NULL, 0, &postFragmentation);  // Indicate end of a space.
+//      compact_space_->Walk(MSpaceSumFragChunkCallback, &postFragmentation);
+
+      LOG(ERROR) << "Fragmentation post Compaction = "  << _frag_info.max_ << ", " << _frag_info.sum_;
       LOG(ERROR) << "Done copying and fixing Objects";
     //here we should copy and fix all broken references;
 
