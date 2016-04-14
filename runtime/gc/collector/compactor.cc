@@ -245,14 +245,14 @@ void SpaceCompactor::FixupObject(const mirror::Object* orig,
   }
 
   if (orig->IsClass()) {
-    FixupClass(orig->AsClass(), down_cast<mirror::Class*>(copy));
+   // FixupClass(orig->AsClass(), down_cast<mirror::Class*>(copy));
   } else if (orig->IsObjectArray()) {
-    FixupObjectArray(orig->AsObjectArray<mirror::Object>(), down_cast<mirror::ObjectArray<mirror::Object>*>(copy));
+  //  FixupObjectArray(orig->AsObjectArray<mirror::Object>(), down_cast<mirror::ObjectArray<mirror::Object>*>(copy));
   } else if (orig->IsArtMethod()) {
-    LOG(ERROR) << "Skipping method fixup";
+   // LOG(ERROR) << "Skipping method fixup";
     //FixupMethod(orig->AsArtMethod(), down_cast<mirror::ArtMethod*>(copy));
   } else {
-    FixupInstanceFields(orig, copy);
+  //  FixupInstanceFields(orig, copy);
   }
 
 }
