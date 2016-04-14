@@ -1673,6 +1673,25 @@ void Heap::PostZygoteForkWithSpaceFork(bool shared_space) {
 
 #endif
 
+typedef struct FragmentationInfoTEST_S {
+  uint64_t sum_;
+  uint64_t max_;
+}FragmentationInfoTEST;
+
+static void MSpaceSumFragChunkCallbackZygote(void* start, void* end, size_t used_bytes, void* arg) {
+  size_t chunk_size = reinterpret_cast<uint8_t*>(end) - reinterpret_cast<uint8_t*>(start);
+  if (used_bytes < chunk_size) {
+    uint64_t chunk_free_bytes = chunk_size - used_bytes;
+    if (chunk_free_bytes >= 8) {
+      FragmentationInfoTEST* _info = reinterpret_cast<FragmentationInfoTEST*>(arg);
+      _info->max_ = std::max(_info->max_, chunk_free_bytes);
+      _info->sum_ = _info->sum_ +  chunk_free_bytes;
+//      uint64_t& max_contiguous_allocation = *reinterpret_cast<uint64_t*>(arg);
+//      max_contiguous_allocation = max_contiguous_allocation + chunk_free_bytes;
+    }
+  }
+}
+
 void Heap::PreZygoteFork() {
   static Mutex zygote_creation_lock_("zygote creation lock", kZygoteCreationLock);
   // Do this before acquiring the zygote creation lock so that we don't get lock order violations.
@@ -1692,7 +1711,13 @@ void Heap::PreZygoteFork() {
     WriterMutexLock mu(self, *Locks::heap_bitmap_lock_);
     FlushAllocStack();
   }
-
+  //Fizo: remember to remove that..
+  LOG(ERROR) << "FFFFFFF check fragmentation in zygote space FFFFFFF";
+  FragmentationInfoTEST _frag_info;
+  _frag_info.max_ = 0;
+  _frag_info.sum_ = 0;
+  alloc_space_->Walk(MSpaceSumFragChunkCallbackZygote, &_frag_info);
+  LOG(ERROR) << "XXXX Fragmentation zygote space .. max= " << _frag_info.max_ << ", sum = " << _frag_info.sum_;
   // Turns the current alloc space into a Zygote space and obtain the new alloc space composed
   // of the remaining available heap memory.
   space::DLMALLOC_SPACE_T* zygote_space = alloc_space_;
@@ -1701,6 +1726,12 @@ void Heap::PreZygoteFork() {
 
   // Change the GC retention policy of the zygote space to only collect when full.
   zygote_space->SetGcRetentionPolicy(space::kGcRetentionPolicyFullCollect);
+
+  _frag_info.max_ = 0;
+  _frag_info.sum_ = 0;
+  zygote_space->Walk(MSpaceSumFragChunkCallbackZygote, &_frag_info);
+  LOG(ERROR) << "XXXX Fragmentation zygote space after creating alloc space..  max= " << _frag_info.max_ << ", sum=" << _frag_info.sum_;
+
   AddContinuousSpace(alloc_space_);
   have_zygote_space_ = true;
 
