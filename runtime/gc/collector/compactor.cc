@@ -258,7 +258,7 @@ void SpaceCompactor::FixupObject(const mirror::Object* orig,
 
 void SpaceCompactor::FixupMethod(const mirror::ArtMethod* orig, mirror::ArtMethod* copy) {
   FixupInstanceFields(orig, copy);
-
+  LOG(ERROR) << "FFFFFFF DANGEROUS FFFFFFFFFFF << fixing up methods";
 }
 void SpaceCompactor::startCompaction(void) {
   LOG(ERROR) << "Inside SpaceCompactor::startCompaction()";
