@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <stdint.h>
 #include "cutils/perflib.h"
 #include "os.h"
 #include "runtime.h"
