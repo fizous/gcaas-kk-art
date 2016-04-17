@@ -1008,7 +1008,7 @@ static void GCMMPVMGetMainThread(Thread* t, void* arg) {
 static bool isGCRelated(std::string& thread_name) {
   return (thread_name.compare("GCDaemon") == 0
       || thread_name.compare("IPC-MS-Daem") == 0
-      || thread_name.find("Thread pool worker") == 0);
+      /*|| thread_name.find("Thread pool worker") == 0*/);
 }
 
 void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
@@ -1017,12 +1017,12 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
   if(thread->IsStillStarting()) {
     std::string thread_name;
     thread->GetThreadName(thread_name);
-    if(!isGCRelated(thread_name)) {
+    //if(!isGCRelated(thread_name)) {
       GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
           thread->GetTid() << " thread name is.. " << thread_name;
       delayedProfThread_.push_back(thread);
       return;
-    }
+    //}
   }
 
 
@@ -1046,29 +1046,29 @@ void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
 	thread->GetThreadName(thread_name);
 	GCMMPThProfileTag _tag = GCMMP_THREAD_GCDAEMON;
 	if(isGCRelated(thread_name)) { //that's the GCDaemon
-		setGcDaemon(thread);
+	  setGcDaemon(thread);
 
-		setThreadAffinity(thread, false);
-		if(!IsAttachGCDaemon()) {
-			GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
-					thread->GetTid() << thread_name;
-			return;
-		}
-		LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name";
+	  setThreadAffinity(thread, false);
+	  if(!IsAttachGCDaemon()) {
+	    GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCDaemon threadProf for " <<
+	        thread->GetTid() << thread_name;
+	    return;
+	  }
+	  LOG(ERROR) << "vmprofiler: Attaching GCDaemon: " << thread->GetTid() << ", thread_name";
 	} else {
-		//		if(thread_name.compare("HeapTrimmerDaemon") == 0) {
-		//			setGcTrimmer(thread);
-		//			setThreadAffinity(thread, false);
-		//			if(!IsAttachGCDaemon()) {
-		//				GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
-		//				return;
-		//			}
-		//			LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
-		//			_tag = GCMMP_THREAD_GCTRIM;
-		//		} else {
-		return;
+	  if(thread_name.compare("HeapTrimmerDaemon") == 0) {
+	    setGcTrimmer(thread);
+	    setThreadAffinity(thread, false);
+	    if(!IsAttachGCDaemon()) {
+	      GCMMP_VLOG(INFO) << "VMProfiler: Skipping GCTrimmer threadProf for " << thread->GetTid() << thread_name;
+	      return;
+	    }
+	    LOG(ERROR) << "vmprofiler: Attaching TimerDaemon: " << thread->GetTid();
+	    _tag = GCMMP_THREAD_GCTRIM;
+	  } else {
+	    return;
+	  }
 	}
-	//}
 
 	GCMMP_VLOG(INFO) << "VMProfiler: Initializing threadProf for " <<
 			thread->GetTid() << thread_name;
@@ -1109,14 +1109,14 @@ void VMProfiler::attachSingleThread(Thread* thread) {
 	if(thread->IsStillStarting()) {
     std::string thread_name;
     thread->GetThreadName(thread_name);
-    if(!isGCRelated(thread_name)) {
+   // if(!isGCRelated(thread_name)) {
 //      LOG(ERROR) << "VMProfiler: delaying Attaching thread: --> " <<
 //          thread->GetTid() << " thread name is.. " << thread_name;
       GCMMP_VLOG(INFO) << "VMProfiler: going to delay thread --> " <<
           thread->GetTid();
       delayedProfThread_.push_back(thread);
       return;
-    }
+ //   }
 	}
 
 
