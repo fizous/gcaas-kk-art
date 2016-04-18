@@ -294,7 +294,16 @@ class DlMallocSpace : public MemMapSpace, public IDlMallocSpace//, public AllocS
   mirror::Class* GetClassRecentFreeObject(int pos){
     return dlmalloc_space_data_->recent_freed_objects_[pos].second;
   }
+  mirror::Object* publicAllocWithoutGrowthLocked(size_t num_bytes, size_t* bytes_allocated) {
 
+    mirror::Object* result = reinterpret_cast<mirror::Object*>(mspace_malloc(GetMspace(), num_bytes));
+    if(result != NULL) {
+      *bytes_allocated = AllocationSizeNonvirtual(result);
+      return result;
+    }
+    LOG(ERROR) << "publicAllocWithoutGrowthLocked..could not allocate object";
+    return NULL;
+  }
  protected:
   DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace,
       byte* begin, byte* end, size_t growth_limit, bool shareMem = false,
