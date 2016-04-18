@@ -1008,7 +1008,7 @@ static void GCMMPVMGetMainThread(Thread* t, void* arg) {
 static bool isGCRelated(std::string& thread_name) {
   return (thread_name.compare("GCDaemon") == 0
       || thread_name.compare("IPC-MS-Daem") == 0
-      /*|| thread_name.find("Thread pool worker") == 0*/);
+      || thread_name.find("Thread pool worker") == 0);
 }
 
 void GCDaemonCPIProfiler::attachSingleThread(Thread* thread) {
