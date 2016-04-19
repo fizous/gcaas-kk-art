@@ -792,6 +792,9 @@ static void MSpaceFragCallback(void* start, void* end, size_t used_bytes, void* 
     chunk_free_bytes = chunk_size - used_bytes;
    // max_contiguous_allocation = std::max(max_contiguous_allocation, chunk_free_bytes);
   }
+  if(chunk_free_bytes >= 8) {
+    LOG(ERROR) << "startFrag=" << start << ", used=" <<used_bytes<<", free=" << chunk_free_bytes;
+  }
   profiler->gcpAddFragSegment(used_bytes, chunk_free_bytes);
 }
 

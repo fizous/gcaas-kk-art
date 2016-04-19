@@ -2301,6 +2301,7 @@ void FragGCProfiler::resetFragHandlers(void) {
 void FragGCProfiler::dumpProfData(bool isLastDump) {
   bool _success = true;
 
+  LOG(ERROR) << "+++++FragGCProfiler::dumpProfData++++";
   if(!isLastDump) {
     updateHeapAllocStatus();
     heapIntegral_.gcpPostCollectionMark(&allocatedBytesData_);
