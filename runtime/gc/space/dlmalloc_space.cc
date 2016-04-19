@@ -32,7 +32,7 @@
 
 #include "gc_profiler/MProfiler.h"
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 using ::art::gc::service::GCServiceGlobalAllocator;
 #endif
 
@@ -139,7 +139,7 @@ class ValgrindDlMallocSpace : public DlMallocSpace {
 };
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 //size_t DlMallocSpace::bitmap_index_ = 0;
 size_t GCSrvDlMallocSpace::bitmap_index_ = 0;
 
@@ -178,7 +178,7 @@ bool DlMallocSpace::CreateBitmaps(byte* heap_begin, size_t heap_capacity,
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 DlMallocSpace::DlMallocSpace(const std::string& name, MEM_MAP* mem_map, void* mspace, byte* begin,
                        byte* end, size_t growth_limit, bool shareMem,
                        GCSrvDlMallocSpace* space_data_mem)
@@ -303,7 +303,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::Create(const std::string& name, size_t initial_
 //      << Runtime::Current()->IsZygote();
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
   UniquePtr<MEM_MAP> mem_map(
       (Runtime::Current()->IsZygote() ?
           MEM_MAP::CreateStructedMemMap(name.c_str(), requested_begin, capacity,
@@ -370,7 +370,7 @@ void* DlMallocSpace::CreateMallocSpace(void* begin, size_t morecore_start, size_
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 void DlMallocSpace::BindLiveToMarkBitmaps(void) {
   //LOG(ERROR) << " ~~~~~~ DlMallocSpace::BindLiveToMarkBitmaps ~~~~~~~";
   accounting::SPACE_BITMAP* _mark_bitmap_content = mark_bitmap_.release();
@@ -458,7 +458,7 @@ DLMALLOC_SPACE_T* DlMallocSpace::CreateZygoteSpace(const char* alloc_space_name,
   VLOG(heap) << "Capacity " << PrettySize(capacity);
   MEM_MAP* _space_mem_map = NULL;
   DL_MALLOC_SPACE* alloc_space = NULL;
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
   if(shareMem) {
     GCSrvSharableDlMallocSpace* _struct_alloc_space =
         SharableDlMallocSpace::AllocateDataMemory();
@@ -559,7 +559,7 @@ size_t DlMallocSpace::Free(Thread* self, mirror::Object* ptr) {
 }
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 size_t DlMallocSpace::FreeListAgent(Thread* self, size_t num_ptrs, mirror::Object** ptrs){
 
@@ -846,7 +846,7 @@ accounting::SPACE_BITMAP* DlMallocSpace::UnBindBitmaps(void) {
 
 
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 IDlMallocSpace* IDlMallocSpace::CreateDlMallocSpace(const std::string& name,
     size_t initial_size, size_t growth_limit,

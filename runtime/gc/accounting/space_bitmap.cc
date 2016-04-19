@@ -96,7 +96,7 @@ void SpaceBitmap::SetHeapLimit(uintptr_t new_end) {
   // should be marked.
 }
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 void SpaceBitmap::Clear() {
   if (Begin() != NULL) {
     // This returns the memory to the system.  Successive page faults will return zeroed memory.

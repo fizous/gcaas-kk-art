@@ -19,7 +19,7 @@
 #include "thread_pool.h"
 #include "gc/space/space.h"
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 
 #define GC_SERVICE_BUFFER_REQ_CAP   128
 
@@ -246,7 +246,6 @@ typedef struct GCSrvc_Options_S {
    */
   double nursery_grow_adj_;
   double fgd_growth_mutiplier_;
-  double bgd_growth_mutiplier_;
   /* how many slots do we discard before we start collecting information for heuristics. starting is an outlier*/
   int nursery_slots_threshold_;
   /* configuration related to add extra room to compensate for the latency of the gcService */
@@ -307,10 +306,6 @@ class GCServiceGlobalAllocator {
   double getFgdGrowFactor() const {
     return srvc_options_.fgd_growth_mutiplier_;
   }
-  double getBgdGrowFactor() const {
-    return srvc_options_.bgd_growth_mutiplier_;
-  }
-
   static GCServiceHeader* GetServiceHeader(void);
   static GCSrvcClientHandShake* GetServiceHandShaker(void);
   static void GCSrvcNotifySystemServer();
@@ -538,7 +533,7 @@ class GCSrvcMemInfoOOM {
   static double GetOOMResizeFactor(int oom_label) {
     if(oom_label == 0)
       return GCServiceGlobalAllocator::allocator_instant_->getFgdGrowFactor();
-    return GCServiceGlobalAllocator::allocator_instant_->getBgdGrowFactor();
+    return 1.0;
   }
 
   static bool CareAboutPauseTimes(gc::space::AgentMemInfo* mem_info_rec) {

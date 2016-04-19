@@ -25,7 +25,7 @@ namespace art {
 namespace gc {
 namespace accounting {
 
-#if (ART_GC_SERVICE || true)
+#if (ART_GC_SERVICE)
 inline bool BaseBitmap::Modify(const mirror::Object* obj, bool do_set) {
   uintptr_t addr = reinterpret_cast<uintptr_t>(obj);
   DCHECK_GE(addr, HeapBegin());
