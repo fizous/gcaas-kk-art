@@ -2971,7 +2971,7 @@ bool Heap::RequestHeapTrimIfNeeded(size_t adjusted_max_free,
 
 #if (ART_GC_SERVICE || true)
   if(send_remote_req) {
-    //LOG(ERROR) << "Heap::RequestHeapTrimIfNeeded()";
+    LOG(ERROR) << "Heap::RequestHeapTrimIfNeeded()";
     GCServiceClient::RequestHeapTrim();
   }
 #endif
