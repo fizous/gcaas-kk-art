@@ -474,7 +474,7 @@ void IPCHeap::TrimHeap(void)  {
 
   if(local_heap_->RequestHeapTrimIfNeeded(_adjusted_max_free,
                                           _pause_care, false)) {
-//    LOG(ERROR) << "IPCHeap::TrimHeap(void)..passed condition";
+    LOG(ERROR) << "IPCHeap::TrimHeap(void)..passed condition";
     //LOG(ERROR) << "IPCHeap::TrimHeap....heap trim condition passed";
     local_heap_->SetLastTimeTrim(MilliTime());
     //size_t managed_advised =
