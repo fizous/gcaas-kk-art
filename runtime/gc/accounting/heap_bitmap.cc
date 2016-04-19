@@ -23,7 +23,7 @@ namespace gc {
 namespace accounting {
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 int SharedHeapBitmap::MaxHeapBitmapIndex;
 

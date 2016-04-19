@@ -9,7 +9,7 @@
 #define ART_RUNTIME_GC_SERVICE_SERVICE_CLIENT_H_
 
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 #include "gc/space/dlmalloc_space.h"
 #include "ipcfs/ipcfs.h"

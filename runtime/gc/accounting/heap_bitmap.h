@@ -28,7 +28,7 @@
 
 
 #ifndef BASE_HEAP_BITMAP_T
-  #if (ART_GC_SERVICE)
+  #if (ART_GC_SERVICE || true)
     #define BASE_HEAP_BITMAP_T BaseHeapBitmap
   #else
     #define BASE_HEAP_BITMAP_T HeapBitmap
@@ -43,7 +43,7 @@ class Heap;
 
 namespace accounting {
 
-#if (ART_GC_SERVICE)
+#if (ART_GC_SERVICE || true)
 
 
 class SharedHeapBitmap;

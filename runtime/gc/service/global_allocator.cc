@@ -58,6 +58,7 @@ void GCServiceGlobalAllocator::InitGCSrvcOptions(GCSrvc_Options* opts_addr) {
 
   opts_addr->nursery_grow_adj_ = 1.6;
   opts_addr->fgd_growth_mutiplier_ = 1.5;
+  opts_addr->bgd_growth_mutiplier_ = 1.0;
   opts_addr->nursery_slots_threshold_ = 10;
   opts_addr->add_conc_remote_latency_ = GC_SERVICE_OPTS_LATENCY_ADD;
   opts_addr->save_mem_profile_ = GC_SERVICE_OPTS_SAVE_PROF_DISABLE;
@@ -121,6 +122,9 @@ bool GCServiceGlobalAllocator::GCSrvcOption(const std::string& option, GCSrvc_Op
       if (gcsrvc_options[i] == "fgd_growth") {
         opts_addr->fgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
         LOG(ERROR) << "option["<< i << "].value="<< opts_addr->fgd_growth_mutiplier_;
+        return true;
+      } else if (gcsrvc_options[i] == "bgd_growth") {
+        opts_addr->bgd_growth_mutiplier_ = (atoi(gcsrvc_options[++i].c_str())) / 100.0;
         return true;
       } else if (gcsrvc_options[i] == "trim") {
         opts_addr->trim_conf_ = atoi(gcsrvc_options[++i].c_str());
