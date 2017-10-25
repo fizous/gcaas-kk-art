@@ -6,15 +6,28 @@
    - [1.2.Proposed Solution](#12Proposed-Solution)   
       - [1.2.1.Conclusions](#121Conclusions)   
 - [2.Experimental Environment](#2Experimental-Environment)   
+   - [2.1.Components](#21Components)   
+   - [2.2.Build Guide](#22Build-Guide)   
 
 <!-- /MDTOC -->
 # Resources
 
 
+**Papers:**
 
-* **One Process to Reap Them All: Garbage Collection as-a-Service**. Hussein, A., Payer, M., Hosking, A. L., and Vick, C. A. (2015). *In proceedings of the 13th ACM SIGPLAN/SIGOPS International Conference on Virtual Execution Environments (VEE’17). Xi’an, China*. doi:[10.1145/3050748.3050754](https://doi.org/10.1145/3140607.3050754).
-* **Impact of GC Design on Power and Performance for Android**. Hussein, A., Payer, M., Hosking, A. L., and Vick, C. A. (2015).  *In ACM International Systems and Storage Conference*. doi:[10.1145/2757667.2757674](https://doi.org/10.1145/2757667.2757674).
-* **Don’t Race the Memory Bus: Taming the GC Leadfoot**. Hussein, A., Hosking, A. L., Payer, M., and Vick, C. A. (2015).  *In ACM SIGPLAN International Symposium on Memory Management*. doi:[10.1145/2754169.2754182](https://doi.org/10.1145/2887746.2754182)
+* **One Process to Reap Them All: Garbage Collection as-a-Service**. Ahmed Hussein, Mathias Payer, Antony L. Hosking, and Chris Vick. (2017). *In proceedings of the 13th ACM SIGPLAN/SIGOPS International Conference on Virtual Execution Environments (VEE’17). Xi’an, China*. doi:[10.1145/3050748.3050754](https://doi.org/10.1145/3140607.3050754).
+* **Impact of GC Design on Power and Performance for Android**. Ahmed Hussein, Mathias Payer, Antony Hosking, and Christopher A. Vick. (2015).  *In ACM International Systems and Storage Conference*. doi:[10.1145/2757667.2757674](https://doi.org/10.1145/2757667.2757674).
+* **Don’t Race the Memory Bus: Taming the GC Leadfoot**. Ahmed Hussein, Antony L. Hosking, Mathias Payer, and Christopher A. Vick. (2015).  *In ACM SIGPLAN International Symposium on Memory Management*. doi:[10.1145/2754169.2754182](https://doi.org/10.1145/2887746.2754182)
+
+**Repositories:**
+
+- [gcaas-kk-art](https://github.com/fizous/gcaas-kk-art)
+- [gcaas-kk-system](https://github.com/fizous/gcaas-kk-system)
+- [gcaas-kk-external](https://github.com/fizous/gcaas-kk-dalvik)
+- [gcaas-kk-frameworks-native-include-binder](https://github.com/fizous/gcaas-kk-external)
+- [gcaas-kk-frameworks-native-libs-binder](https://github.com/fizous/gcaas-kk-frameworks-native-libs-binder)
+- [gcaas-kk-kernel](https://github.com/fizous/gcaas-kk-kernel)
+- [gcaas-kk-dalvik](https://github.com/fizous/gcaas-kk-dalvik)
 
 
 # 1.Description
@@ -45,6 +58,7 @@ The Android system is running dozens of concurrent VMs, each running an app on a
 In our evaluation, we illustrate the impact of such a central memory management service in reducing total energy consumption (up to 18%) and increasing throughput (up to 12%), and improving memory utilization and adaptability to user activities.
 
 The GC service has the following benefits:
+
 1. it reduces the cost of GC by tuning GC scheduling decisions and coordinating with the power manager,
 1. apps run in their own processes, ensuring separation between processes,
 1. it eliminates sparse heaps, releasing more pages back to the system,
@@ -55,19 +69,24 @@ The GC service has the following benefits:
 
 # 2.Experimental Environment
 
+## 2.1.Components
+
 Our centralized framework cuts across multiple layers of the Android 4.4.2 “KitKat” software stack and touches both hardware and operating system aspects. The default configuration appears in table1. We use the Monkeyrunner tool to automate user inputs.
 We use the APQ8074 DragonBoard hardware Development Kit based on Qualcomm’s Snapdragon S4 SoC. The S4 uses the quad-core 2.3GHz Krait CPU. Caches are 4KiB + 4KiB direct mapped L0 cache, 16KiB + 16KiB 4-way set associative L1 cache, and 2MiB 8-way set associative L2 cache. The total memory available is 2GiB.
 
 
 **Table1:** _Build properties in our experimental environment_
-|                     |           |   |                        |           |
-|:--------------------|:----------|:-:|-----------------------:|----------:|
-| **VM parameter**    | **value** |   | **Governor parameter** | **value** |
-| heapstartsize       | 8 MiB     |   |           optimal_freq |  0.96 GHz |
-| heapgrowthlimit     | 96 MiB    |   |          sampling_rate |     50 ms |
-| heapsize            | 256 MiB   |   |       scaling_max_freq |   2.1 GHz |
-| heapmaxfree         | 8 MiB     |   |       scaling_min_freq |   0.3 GHz |
-| heapminfree         | 2 MiB     |   |              sync_freq |  0.96 GHz |
-| heaptargetutil      | 75 %      |   |     **lowmem_minfree** |    (page) |
-| large obj threshold | 12 KiB    |   |    { 12288 15360 18432 |           |
-| trim_threshold      | 75 %      |   |    21504 24576 30720 } |           |
+
+| VM parameter    | value |     | Governor parameter | value |
+|:------------------- |:--------- |:---:| ----------------------:| ---------:|
+| heapstartsize       | 8 MiB     |     |           optimal_freq |  0.96 GHz |
+| heapgrowthlimit     | 96 MiB    |     |          sampling_rate |     50 ms |
+| heapsize            | 256 MiB   |     |       scaling_max_freq |   2.1 GHz |
+| heapmaxfree         | 8 MiB     |     |       scaling_min_freq |   0.3 GHz |
+| heapminfree         | 2 MiB     |     |              sync_freq |  0.96 GHz |
+| heaptargetutil      | 75 %      |     |     **lowmem_minfree** |    (page) |
+| large obj threshold | 12 KiB    |     |    { 12288 15360 18432 |           |
+| trim_threshold      | 75 %      |     |    21504 24576 30720 } |           |
+
+
+## 2.2.Build Guide
