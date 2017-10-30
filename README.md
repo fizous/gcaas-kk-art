@@ -29,6 +29,8 @@
 - [gcaas-kk-kernel](https://github.com/fizous/gcaas-kk-kernel)
 - [gcaas-kk-dalvik](https://github.com/fizous/gcaas-kk-dalvik)
 
+**Hardware Kit:**
+- [Dragonboard/APQ8074](http://dragonboard8074.intrinsyc.com/)
 
 # 1.Description
 
@@ -90,3 +92,9 @@ We use the APQ8074 DragonBoard hardware Development Kit based on Qualcomm’s Sn
 
 
 ## 2.2.Build Guide
+
+The source code is an extension of the software releases from Intrinsyc. The latter uses a release
+version based on an underlying Qualcomm software baseline from CAF. Please follow the programmers
+guide on your board to get started.
+
+TODO: add more details on the build steps
